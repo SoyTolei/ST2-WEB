@@ -409,8 +409,16 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
 });
 
-function getDirectEmbedUrl(kind) {
-  if (kind === "thom") return appConfig?.thomTapUrl;
+function getEmbedFrameUrl(kind) {
+  if (kind === "thom") {
+    const tap = appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
+    try {
+      const u = new URL(tap);
+      return `/embed/thom${u.pathname}${u.search}`;
+    } catch {
+      return "/embed/thom/css-tap";
+    }
+  }
   if (kind === "ai") return appConfig?.aiPlatformUrl;
   return null;
 }
@@ -423,7 +431,6 @@ function isEmbedFrameEmpty(frame) {
 function needsEmbedReload(frame, url) {
   const current = frame?.getAttribute("src") ?? "";
   if (!current || current === "about:blank") return true;
-  if (current.includes("/embed/")) return true;
   return current !== url;
 }
 
@@ -441,7 +448,7 @@ function applyEmbedZoom(kind) {
 
 function loadEmbedFrame(kind, { force = false } = {}) {
   const frame = kind === "thom" ? thomFrame : aiFrame;
-  const url = getDirectEmbedUrl(kind);
+  const url = getEmbedFrameUrl(kind);
   if (!frame || !url) return;
   if (!force && !needsEmbedReload(frame, url)) return;
   applyEmbedZoom(kind);

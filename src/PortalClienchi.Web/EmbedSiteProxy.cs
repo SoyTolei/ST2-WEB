@@ -6,7 +6,6 @@ namespace PortalClienchi.Web;
 
 internal sealed class EmbedSiteProxy
 {
-    private static readonly CookieContainer CookieJar = new();
     private static readonly HttpClient Http = CreateClient();
 
     private static readonly Dictionary<string, string> SiteBases = new(StringComparer.OrdinalIgnoreCase)
@@ -79,7 +78,7 @@ internal sealed class EmbedSiteProxy
 
         context.Response.StatusCode = (int)response.StatusCode;
 
-        CopyResponseHeaders(response, context.Response, site);
+        CopyResponseHeaders(response, context.Response, site, context.Request.IsHttps);
 
         if (response.Headers.Location is not null)
         {
@@ -108,10 +107,9 @@ internal sealed class EmbedSiteProxy
     {
         var handler = new SocketsHttpHandler
         {
-            CookieContainer = CookieJar,
             AllowAutoRedirect = false,
             AutomaticDecompression = DecompressionMethods.All,
-            UseCookies = true,
+            UseCookies = false,
         };
         return new HttpClient(handler)
         {
@@ -131,6 +129,8 @@ internal sealed class EmbedSiteProxy
             message.Headers.TryAddWithoutValidation("Accept", accept.ToArray());
         if (request.Headers.TryGetValue("Accept-Language", out var lang))
             message.Headers.TryAddWithoutValidation("Accept-Language", lang.ToArray());
+        if (request.Headers.TryGetValue("Cookie", out var cookie))
+            message.Headers.TryAddWithoutValidation("Cookie", cookie.ToArray());
         if (request.ContentType is not null && message.Content is not null)
             message.Content.Headers.TryAddWithoutValidation("Content-Type", request.ContentType);
 
@@ -153,7 +153,7 @@ internal sealed class EmbedSiteProxy
                 ? url.TrimEnd('/') + "/"
                 : "https://css-latam.int.thomsonreuters.com/css-tap";
 
-    private static void CopyResponseHeaders(HttpResponseMessage upstream, HttpResponse response, string currentSite)
+    private static void CopyResponseHeaders(HttpResponseMessage upstream, HttpResponse response, string currentSite, bool isHttps)
     {
         foreach (var header in upstream.Headers)
         {
@@ -161,6 +161,12 @@ internal sealed class EmbedSiteProxy
                 continue;
             if (header.Key.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase))
                 continue;
+            if (header.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var cookie in header.Value)
+                    response.Headers.Append("Set-Cookie", RewriteSetCookie(cookie, currentSite, isHttps));
+                continue;
+            }
             response.Headers[header.Key] = header.Value.ToArray();
         }
 
@@ -168,11 +174,30 @@ internal sealed class EmbedSiteProxy
         {
             if (header.Key.Equals("Content-Length", StringComparison.OrdinalIgnoreCase))
                 continue;
+            if (header.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var cookie in header.Value)
+                    response.Headers.Append("Set-Cookie", RewriteSetCookie(cookie, currentSite, isHttps));
+                continue;
+            }
             response.Headers[header.Key] = header.Value.ToArray();
         }
 
         response.Headers.Remove("Content-Security-Policy");
         response.Headers.Remove("X-Frame-Options");
+    }
+
+    private static string RewriteSetCookie(string setCookie, string site, bool isHttps)
+    {
+        var value = Regex.Replace(setCookie, @";\s*Domain=[^;]*", "", RegexOptions.IgnoreCase);
+        value = Regex.Replace(value, @";\s*SameSite=[^;]*", "", RegexOptions.IgnoreCase);
+        value = Regex.Replace(value, @";\s*Secure", "", RegexOptions.IgnoreCase);
+        if (Regex.IsMatch(value, @";\s*Path=", RegexOptions.IgnoreCase))
+            value = Regex.Replace(value, @";\s*Path=[^;]*", $"; Path=/embed/{site}/", RegexOptions.IgnoreCase);
+        else
+            value += $"; Path=/embed/{site}/";
+        value += isHttps ? "; SameSite=None; Secure" : "; SameSite=Lax";
+        return value;
     }
 
     private static bool ShouldRewrite(string contentType) =>
