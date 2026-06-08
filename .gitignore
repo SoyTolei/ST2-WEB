@@ -1,0 +1,17 @@
+# Build
+bin/
+obj/
+publish/
+publish-win64/
+*.zip
+
+# Config local con credenciales
+appsettings.local.json
+**/appsettings.local.json
+# IDE
+.vs/
+*.user
+
+# OS
+Thumbs.db
+Desktop.ini

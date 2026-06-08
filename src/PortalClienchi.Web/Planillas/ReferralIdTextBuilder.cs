@@ -1,0 +1,228 @@
+namespace PortalClienchi.Web.Planillas;
+
+public static class ReferralIdTextBuilder
+{
+    public static string Build(ReferralIdCase c)
+    {
+        var partes = new List<string>();
+
+        partes.Add("==========================================");
+        partes.Add("DATOS DEL SISTEMA 🖥️");
+        partes.Add($"SISTEMA: {c.Sistema.ToDisplayName()}");
+
+        if (c.Sistema == PlanillasSistema.BejermanSql)
+        {
+            partes.Add($"VERSIÓN: {c.Version.Trim()}");
+            partes.Add($"MÓDULO: {c.Modulo}");
+            if (c.Collation != ReferralIdConstants.PlaceholderCollation && !string.IsNullOrWhiteSpace(c.Collation))
+                partes.Add($"COLLATION SQL: {c.Collation}");
+            if (c.SqlServer != ReferralIdConstants.PlaceholderSqlServer && !string.IsNullOrWhiteSpace(c.SqlServer))
+                partes.Add($"SQL SERVER: {c.SqlServer}");
+        }
+
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("DETALLES DEL CASO 📝");
+        partes.Add($"ASUNTO Y/O ERROR: {c.Asunto.Trim()}");
+
+        if (IsRealText(c.Descripcion, ReferralIdConstants.PlaceholderDescripcion))
+            partes.Add($"DESCRIPCIÓN DEL CASO: {c.Descripcion.Trim()}");
+
+        if (IsRealText(c.PasoAPaso, ReferralIdConstants.PlaceholderPasoAPaso))
+        {
+            partes.Add("");
+            partes.Add("────────────────────────");
+            partes.Add($"PASO A PASO REALIZADO: {c.PasoAPaso.Trim()}");
+        }
+
+        if (c.Sistema == PlanillasSistema.OnvioWeb)
+            AppendOnvioComprobaciones(partes, c);
+        else if (c.Sistema == PlanillasSistema.BejermanSql)
+            AppendBejermanComprobaciones(partes, c);
+
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("SE ADJUNTA EN COMENTARIOS 🗃️");
+        AppendAdjuntos(partes, c);
+        partes.Add("==========================================");
+
+        return string.Join(Environment.NewLine, partes);
+    }
+
+    private static void AppendOnvioComprobaciones(List<string> partes, ReferralIdCase c)
+    {
+        var o = c.Onvio;
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("COMPROBACIONES Y PROCESOS REALIZADOS ✅");
+        partes.Add($"- El proceso funcionaba correctamente: {(o.ProcesoFuncionaba ? "SÍ" : "NO")}");
+        partes.Add($"- El cliente lo reproduce sistemáticamente: {(o.ReproduceSistematicamente ? "SÍ" : "NO")}");
+        partes.Add($"- Hay ticket de servicio: {(o.HayTicket ? "SÍ" : "NO")}");
+
+        if (o.HayTicket)
+        {
+            partes.Add(string.IsNullOrWhiteSpace(o.NumeroTicket)
+                ? "  * N° de Ticket: NO"
+                : $"  * N° de Ticket: {o.NumeroTicket.Trim()}");
+            if (!string.IsNullOrWhiteSpace(o.Tecnico))
+                partes.Add($"  * Técnico que lo tomó: {o.Tecnico.Trim()}");
+            partes.Add($"  * Se pudo reproducir con el ticket de servicio: {(o.ReproduceConTicket ? "SÍ" : "NO")}");
+            partes.Add($"  * Se pudo reproducir con empresa de prueba: {(o.ReproduceEmpresaPrueba ? "SÍ" : "NO")}");
+        }
+
+        partes.Add($"- Se adjuntan capturas / imágenes: {(o.AdjuntaPantallas ? "SÍ" : "NO")}");
+
+        if (!string.IsNullOrWhiteSpace(o.UsuarioContador) || !string.IsNullOrWhiteSpace(o.Empresa))
+        {
+            partes.Add("");
+            partes.Add("INFORMACIÓN DEL USUARIO:");
+            if (!string.IsNullOrWhiteSpace(o.UsuarioContador))
+                partes.Add($"- Usuario/Contador: {o.UsuarioContador.Trim()}");
+            if (!string.IsNullOrWhiteSpace(o.Empresa))
+                partes.Add($"- Empresa: {o.Empresa.Trim()}");
+        }
+    }
+
+    private static void AppendBejermanComprobaciones(List<string> partes, ReferralIdCase c)
+    {
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("COMPROBACIONES Y PROCESOS REALIZADOS ✅");
+
+        if (c.MamConfigured)
+        {
+            partes.Add("");
+            partes.Add("────────────────────────");
+            partes.Add("- MAM:");
+            AppendMam(partes, c.Mam);
+        }
+
+        if (c.SdkConfigured)
+        {
+            partes.Add("");
+            partes.Add("────────────────────────");
+            partes.Add("- SDK:");
+            AppendSdk(partes, c.Sdk);
+        }
+
+        if (c.PlanillaConfigured)
+        {
+            partes.Add("");
+            partes.Add("────────────────────────");
+            partes.Add("- Planilla Técnica 🔧:");
+            var p = c.Planilla;
+            partes.Add($"  * ¿Se relevó planilla técnica?: {(p.Relevada ? "SÍ" : "NO")}");
+            partes.Add($"  * El proceso funcionaba correctamente: {(p.ProcesoFuncionaba ? "SÍ" : "NO")}");
+            partes.Add($"  * Se pudo reproducir el error: {(p.ReproduceError ? "SÍ" : "NO")}");
+            partes.Add($"  * Última actualización aplicada correctamente: {(p.UltimaActualizOk ? "SÍ" : "NO")}");
+            partes.Add($"  * Se actualizaron vínculos: {(p.OptVinculos ? "SÍ" : "NO")}");
+            partes.Add($"  * Se pudo reproducir en la base MODELO: {(p.OptBaseModelo ? "SÍ" : "NO")}");
+            partes.Add($"  * Solo ocurre en la base del cliente: {(p.OptSoloCliente ? "SÍ" : "NO")}");
+            partes.Add($"  * El cliente lo reproduce sistemáticamente: {(p.OptReproduceSistematicamente ? "SÍ" : "NO")}");
+        }
+    }
+
+    private static void AppendMam(List<string> partes, MamState mam)
+    {
+        if (mam.Selections["No utiliza MAM"])
+        {
+            partes.Add("  * No utiliza MAM");
+            return;
+        }
+
+        foreach (var (opcion, sel) in mam.Selections)
+        {
+            if (opcion == "No utiliza MAM")
+                continue;
+
+            if (opcion == "Nombre de la PERS/ACTU a medida.")
+            {
+                if (sel)
+                {
+                    var txt = mam.PersActuNombre.Trim();
+                    partes.Add(string.IsNullOrEmpty(txt)
+                        ? "  * Nombre de la PERS/ACTU a medida. (sin nombre indicado)"
+                        : $"  * {opcion} {txt}");
+                }
+                else
+                    partes.Add($"  * {opcion}: NO");
+            }
+            else if (opcion == "Tiene triggers")
+            {
+                if (sel)
+                {
+                    var tr = mam.TriggersDesactivados.Trim();
+                    partes.Add(string.IsNullOrEmpty(tr)
+                        ? "  * Tiene triggers: SÍ"
+                        : $"  * Tiene triggers: SÍ - Triggers desactivados: {tr}");
+                }
+                else
+                    partes.Add("  * Tiene triggers: NO");
+            }
+            else
+                partes.Add($"  * {opcion}: {(sel ? "SÍ" : "NO")}");
+        }
+    }
+
+    private static void AppendSdk(List<string> partes, SdkState sdk)
+    {
+        if (sdk.Selections["No utiliza SDK"])
+        {
+            partes.Add("  * No utiliza SDK");
+            return;
+        }
+
+        foreach (var (opcion, sel) in sdk.Selections)
+        {
+            if (opcion != "No utiliza SDK")
+                partes.Add($"  * {opcion}: {(sel ? "SÍ" : "NO")}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(sdk.AplicacionIntegracion))
+            partes.Add($"  * Aplicación de integración: {sdk.AplicacionIntegracion.Trim()}");
+    }
+
+    private static void AppendAdjuntos(List<string> partes, ReferralIdCase c)
+    {
+        var hay = false;
+        if (c.Sistema == PlanillasSistema.BejermanSql)
+        {
+            var a = c.Adjuntos;
+            hay = a.Pantallas || a.TrazaSql || a.BackupBases;
+            if (a.Pantallas)
+            {
+                partes.Add("- Captura / imágenes");
+                CapturasTextoHelper.AppendDetalleCapturasBajoLinea(partes, c.CapturasEnlaces);
+            }
+            if (a.TrazaSql)
+            {
+                partes.Add("- Traza SQL");
+                partes.Add("  La traza SQL se adjunta en comentarios.");
+            }
+            if (a.BackupBases)
+            {
+                partes.Add("- Backup Bases");
+                if (a.BackupManager) partes.Add("  * Manager");
+                if (a.BackupSbda) partes.Add("  * SBDA");
+                if (a.BackupCg) partes.Add("  * CG");
+                if (a.BackupSj) partes.Add("  * SJ");
+            }
+        }
+        else if (c.Sistema == PlanillasSistema.OnvioWeb)
+        {
+            hay = c.Onvio.AdjuntaPantallas;
+            if (c.Onvio.AdjuntaPantallas)
+            {
+                partes.Add("- Captura / imágenes");
+                CapturasTextoHelper.AppendDetalleCapturasBajoLinea(partes, c.CapturasEnlaces);
+            }
+        }
+
+        if (!hay)
+            partes.Add("- No se adjuntan capturas");
+    }
+
+    private static bool IsRealText(string? text, string placeholder) =>
+        !string.IsNullOrWhiteSpace(text) &&
+        !string.Equals(text.Trim(), placeholder, StringComparison.Ordinal);
+}

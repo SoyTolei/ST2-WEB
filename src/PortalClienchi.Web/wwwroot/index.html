@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ST2</title>
+  <link rel="icon" href="/st2.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <link rel="stylesheet" href="/css/planillas.css"/>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="/st2.ico" alt="ST2" class="brand-icon" width="46" height="46"/>
+      <span class="brand-logo"><span class="brand-st">ST</span><span class="brand-two">2</span></span>
+    </div>
+    <button type="button" id="aboutBtn" class="btn-ghost">Acerca de</button>
+  </header>
+
+  <div class="main-shell">
+    <nav class="tab-bar" role="tablist" aria-label="Módulos ST2">
+      <button type="button" class="tab-btn active" data-tab="planillas" role="tab" aria-selected="true">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        Sistema de Planillas
+      </button>
+      <button type="button" class="tab-btn" data-tab="portal" role="tab">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        Portal Cliente
+      </button>
+      <button type="button" class="tab-btn" data-tab="thom" role="tab">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 2v8l-2.5-1.5L6 12V4h5zm7 16H6v-6h12v6z"/></svg>
+        THOM
+      </button>
+      <button type="button" class="tab-btn" data-tab="ai" role="tab">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
+        AI Platform
+      </button>
+    </nav>
+
+    <section id="panel-planillas" class="tab-panel active" role="tabpanel">
+      <div id="planillas-root" class="planillas-app">
+        <div id="planillas-menu" class="planillas-view">
+          <div class="planillas-card">
+            <div class="planillas-hero">
+              <h2>Sistema de Planillas Automáticas</h2>
+              <p>Transferencias entre mesas, Referral a I+D y Oportunidades de Venta</p>
+              <div class="accent-bar"></div>
+            </div>
+
+            <p class="planillas-section-title">Elija el sistema</p>
+            <div class="plan-sistema-well">
+              <div class="plan-sistema-grid">
+                <div id="plan-sistema-indicator" class="plan-sistema-indicator" style="transform: translateX(0)"></div>
+                <button type="button" class="plan-pill-btn active" data-plan-sistema="BejermanSql">Bejerman SQL</button>
+                <button type="button" class="plan-pill-btn" data-plan-sistema="OnvioWeb">ONVIO/Bejerman WEB</button>
+                <button type="button" class="plan-pill-btn" data-plan-sistema="Legal">LEGAL</button>
+              </div>
+            </div>
+
+            <p class="planillas-section-title">Opciones</p>
+            <div class="plan-modulos-well">
+              <div class="plan-modulos-grid">
+                <button type="button" class="plan-modulo-btn transfer" data-plan-modulo="transferencia">
+                  <span class="plan-modulo-icon" data-plan-icon="transfer"></span>
+                  Transferencia de Casos
+                </button>
+                <button type="button" class="plan-modulo-btn referral" data-plan-modulo="referral">
+                  <span class="plan-modulo-icon" data-plan-icon="referral"></span>
+                  Referral I+D
+                </button>
+                <button type="button" class="plan-modulo-btn oportunidad" data-plan-modulo="oportunidad">
+                  <span class="plan-modulo-icon" data-plan-icon="oportunidad"></span>
+                  Oportunidad de Venta
+                </button>
+              </div>
+            </div>
+          </div>
+          <footer class="planillas-footer">ST2 🌱</footer>
+        </div>
+
+        <div id="planillas-transferencia" class="planillas-view hidden">
+          <div class="planillas-card">
+            <div class="plan-module-sticky-head">
+              <div class="plan-module-header-bar">
+                <button type="button" class="planillas-back" data-plan-back>← Volver al menú</button>
+                <div class="plan-module-title-row">
+                  <span class="plan-module-icon-badge transfer" data-plan-icon="transfer"></span>
+                  <h2 class="plan-module-title">Transferencia de Casos</h2>
+                </div>
+                <span id="plan-trans-sistema" class="plan-sistema-badge"></span>
+              </div>
+              <div class="plan-accent-bar transfer"></div>
+            </div>
+
+            <div class="plan-form-grid">
+              <div class="plan-field">
+                <label for="plan-numero-cliente">N° de Cliente</label>
+                <input id="plan-numero-cliente" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej: 123456"/>
+              </div>
+
+              <div class="plan-field">
+                <label>Deriva a mesa</label>
+                <div class="plan-mesas">
+                  <button type="button" class="plan-mesa-btn" data-mesa="TECNICO">TÉCNICO</button>
+                  <button type="button" class="plan-mesa-btn" data-mesa="FLEX">FLEX</button>
+                  <button type="button" class="plan-mesa-btn" data-mesa="SAAS">SaaS</button>
+                  <button type="button" class="plan-mesa-btn" data-mesa="SUELDOS">Sueldos</button>
+                </div>
+                <p id="plan-mesa-hint" class="plan-mesa-hint">Elegí la mesa de destino para continuar.</p>
+              </div>
+
+              <div class="plan-field">
+                <label for="plan-asunto">Asunto y/o Error</label>
+                <input id="plan-asunto" type="text" autocomplete="off" placeholder="Resumen del caso"/>
+              </div>
+
+              <div class="plan-field">
+                <label for="plan-descripcion">Descripción del caso</label>
+                <textarea id="plan-descripcion" class="placeholder-active" rows="4">Detalle y/o proceso realizado por el usuario</textarea>
+              </div>
+
+              <div class="plan-field">
+                <div id="plan-capturas-card" class="plan-capturas-card">
+                  <span class="plan-capturas-mark">○</span>
+                  <label>
+                    <input id="plan-capturas-check" type="checkbox" class="hidden"/>
+                    ¿Se tomaron capturas?
+                  </label>
+                </div>
+                <div id="plan-capturas-panel" class="plan-capturas-panel hidden">
+                  <div class="plan-capturas-actions">
+                    <button type="button" id="plan-capturas-agregar" class="btn btn-secondary">Agregar imágenes</button>
+                    <button type="button" id="plan-capturas-pegar" class="btn btn-secondary">Pegar captura</button>
+                    <button type="button" id="plan-capturas-quitar" class="btn btn-secondary">Quitar todas</button>
+                    <input id="plan-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
+                  </div>
+                  <div id="plan-capturas-chips" class="plan-capturas-chips"></div>
+                  <p id="plan-capturas-estado" class="plan-capturas-estado"></p>
+                </div>
+              </div>
+
+              <div id="plan-ticket-wrap" class="plan-field hidden">
+                <button type="button" id="plan-ticket-card" class="plan-adj-card plan-ticket-card">
+                  <span>¿Se solicitó ticket de servicio?</span>
+                  <span class="card-mark" id="plan-ticket-mark">○</span>
+                </button>
+                <input type="checkbox" id="plan-ticket-check" class="hidden"/>
+                <div id="plan-ticket-panel" class="plan-ticket-detail hidden">
+                  <label class="plan-opt-field-label" for="plan-ticket-numero">N° de Ticket</label>
+                  <input id="plan-ticket-numero" type="text" class="plan-opt-input" autocomplete="off" placeholder="Número de ticket"/>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-ref-actions">
+              <button type="button" id="plan-btn-copiar" class="plan-action-btn green">
+                <span class="plan-action-btn-main">📋 Copiar al portapapeles</span>
+                <span class="plan-action-btn-sub">Solo copiar y pegar</span>
+              </button>
+              <button type="button" id="plan-btn-txt" class="plan-action-btn blue">
+                <span class="plan-action-btn-main">💾 Guardar .txt</span>
+                <span class="plan-action-btn-sub">Descarga el archivo a tu PC</span>
+              </button>
+              <button type="button" id="plan-btn-limpiar" class="plan-action-btn ghost">
+                <span class="plan-action-btn-main">🗑 Limpiar</span>
+              </button>
+            </div>
+            <p id="plan-status" class="plan-status-bar"></p>
+          </div>
+        </div>
+
+        <div id="planillas-placeholder" class="planillas-view hidden">
+          <div class="planillas-card plan-placeholder-module">
+            <div class="plan-module-sticky-head">
+              <div class="planillas-toolbar" style="justify-content:flex-start">
+                <button type="button" class="planillas-back" data-plan-back>← Volver al menú</button>
+              </div>
+            </div>
+            <h3 id="plan-placeholder-title"></h3>
+            <p id="plan-placeholder-text"></p>
+          </div>
+        </div>
+
+        <div id="planillas-referral" class="planillas-view hidden">
+          <div class="planillas-card">
+            <div class="plan-module-sticky-head">
+              <div class="plan-module-header-bar">
+                <button type="button" class="planillas-back" data-plan-back-referral>← Volver al menú</button>
+                <div class="plan-module-title-row">
+                  <span class="plan-module-icon-badge referral" data-plan-icon="referral"></span>
+                  <h2 class="plan-module-title">Referral I+D</h2>
+                </div>
+                <span id="ref-sistema-badge" class="plan-sistema-badge"></span>
+              </div>
+              <div class="plan-accent-bar referral"></div>
+            </div>
+
+            <div id="ref-bejerman-panel" class="hidden">
+              <div class="plan-bej-config">
+                <div class="plan-bej-row">
+                  <span class="plan-bej-label">Versión</span>
+                  <div class="plan-segment-track" id="ref-version-pills"></div>
+                </div>
+                <div class="plan-bej-row">
+                  <span class="plan-bej-label">Módulo</span>
+                  <div class="plan-segment-track plan-segment-track-wide" id="ref-modulo-pills"></div>
+                </div>
+                <div id="ref-sql-panel" class="plan-bej-sql hidden">
+                  <div class="plan-form-2col plan-form-2col-tight">
+                    <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
+                    <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-form-grid">
+              <div class="plan-field"><label for="ref-asunto">Asunto y/o Error</label><input id="ref-asunto" type="text"/></div>
+              <div class="plan-field"><label for="ref-descripcion">Descripción del caso</label><textarea id="ref-descripcion" rows="4" class="placeholder-active"></textarea></div>
+              <div class="plan-field"><label for="ref-paso">Paso a paso realizado</label><textarea id="ref-paso" rows="4" class="placeholder-active"></textarea></div>
+            </div>
+
+            <button type="button" id="ref-btn-ia" class="btn btn-secondary plan-ia-btn hidden">✨ Mejorar redacción con IA</button>
+
+            <div id="ref-bejerman-post" class="plan-ref-block hidden">
+              <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
+              <p class="plan-ref-hint">Cada tarjeta abre su checklist. El indicador a la derecha marca si ya completaste la opción.</p>
+              <div class="plan-check-cards">
+                <div class="plan-check-wrap planilla">
+                  <span class="plan-check-mark" id="ref-planilla-status">○</span>
+                  <button type="button" class="plan-check-btn planilla" id="ref-btn-planilla">
+                    <span class="plan-check-btn-icon" data-plan-icon="planilla"></span>
+                    <strong>Planilla Técnica</strong>
+                    <small>Datos para el equipo técnico</small>
+                  </button>
+                </div>
+                <div class="plan-check-wrap mam">
+                  <span class="plan-check-mark" id="ref-mam-status">○</span>
+                  <button type="button" class="plan-check-btn mam" id="ref-btn-mam">
+                    <span class="plan-check-btn-icon" data-plan-icon="mam"></span>
+                    <strong>MAM</strong>
+                    <small>Modificaciones a Medida</small>
+                  </button>
+                </div>
+                <div class="plan-check-wrap sdk">
+                  <span class="plan-check-mark" id="ref-sdk-status">○</span>
+                  <button type="button" class="plan-check-btn sdk" id="ref-btn-sdk">
+                    <span class="plan-check-btn-icon" data-plan-icon="sdk"></span>
+                    <strong>SDK</strong>
+                    <small>Integraciones y desarrollo</small>
+                  </button>
+                </div>
+              </div>
+              <p class="plan-ref-title">Adjuntos</p>
+              <p class="plan-ref-hint">Marcá lo enviado; si pedís backup, elegí las bases abajo.</p>
+              <div class="plan-adj-grid">
+                <button type="button" class="plan-adj-card" id="ref-card-pantallas" data-adj="pantallas">
+                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Captura / imágenes</span>
+                  <span class="card-mark" id="ref-mark-pantallas">○</span>
+                </button>
+                <button type="button" class="plan-adj-card" id="ref-card-traza" data-adj="traza">
+                  <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>Traza SQL</span>
+                  <span class="card-mark" id="ref-mark-traza">○</span>
+                </button>
+              </div>
+              <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
+              <input type="checkbox" id="ref-adj-traza" class="hidden"/>
+              <input type="checkbox" id="ref-adj-backup" class="hidden"/>
+              <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
+                <p class="plan-capturas-title">Capturas / imágenes</p>
+                <p class="plan-capturas-hint">Si no cargás las capturas acá, recordá hacerlo en comentarios.</p>
+                <div id="ref-capturas-chips" class="plan-capturas-chips"></div>
+                <div class="plan-capturas-actions">
+                  <button type="button" id="ref-capturas-agregar" class="btn btn-secondary">Examinar…</button>
+                  <button type="button" id="ref-capturas-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
+                  <input id="ref-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
+                </div>
+              </div>
+              <button type="button" class="plan-adj-card plan-adj-backup" id="ref-card-backup" data-adj="backup">
+                <span class="plan-adj-label">
+                  <span class="plan-inline-icon blue" data-plan-icon="backup"></span>
+                  <span class="plan-adj-backup-text">
+                    <strong>Backup de bases</strong>
+                    <small>Tocá para elegir las bases</small>
+                  </span>
+                </span>
+                <span class="card-mark" id="ref-mark-backup">○</span>
+              </button>
+              <div id="ref-backup-panel" class="plan-backup-detail hidden">
+                <p class="plan-backup-detail-title">Bases incluidas en el backup</p>
+                <div class="plan-backup-bases-grid">
+                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-manager"><span>Manager</span><span class="card-mark" id="ref-mark-backup-manager">○</span></button>
+                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-sbda"><span>SBDA</span><span class="card-mark" id="ref-mark-backup-sbda">○</span></button>
+                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-cg"><span>CG</span><span class="card-mark" id="ref-mark-backup-cg">○</span></button>
+                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-sj"><span>SJ</span><span class="card-mark" id="ref-mark-backup-sj">○</span></button>
+                </div>
+                <input type="checkbox" id="ref-backup-manager" class="hidden"/>
+                <input type="checkbox" id="ref-backup-sbda" class="hidden"/>
+                <input type="checkbox" id="ref-backup-cg" class="hidden"/>
+                <input type="checkbox" id="ref-backup-sj" class="hidden"/>
+              </div>
+            </div>
+
+            <div id="ref-onvio-panel" class="plan-ref-block hidden">
+              <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
+              <p class="plan-ref-hint">Tocá para marcar cada ítem. Ticket y usuario se completan al activarlos.</p>
+              <div class="plan-onvio-grid">
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-proceso" data-onvio="proceso">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon green" data-plan-icon="checkOk"></span>
+                    <span>El proceso funcionaba correctamente</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-reproduce" data-onvio="reproduce">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon orange" data-plan-icon="repeat"></span>
+                    <span>El error se reproduce sistemáticamente</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-pantallas" data-onvio="pantallas">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon primary" data-plan-icon="camera"></span>
+                    <span>Captura / imágenes</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-ticket" data-onvio="ticket">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon blue" data-plan-icon="ticket"></span>
+                    <span>Ticket de servicio<small>N° y técnico</small></span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+              </div>
+              <input type="checkbox" id="ref-onvio-proceso" class="hidden"/>
+              <input type="checkbox" id="ref-onvio-reproduce" class="hidden"/>
+              <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
+              <input type="checkbox" id="ref-onvio-ticket" class="hidden"/>
+              <div id="ref-onvio-ticket-panel" class="plan-onvio-ticket-detail hidden">
+                <p class="plan-backup-detail-title">Datos del ticket</p>
+                <div class="plan-form-2col">
+                  <div class="plan-field"><label for="ref-onvio-ticket-num">N° de Ticket</label><input id="ref-onvio-ticket-num" type="text" maxlength="20"/></div>
+                  <div class="plan-field"><label for="ref-onvio-tecnico">Técnico</label><input id="ref-onvio-tecnico" type="text"/></div>
+                </div>
+                <div class="plan-onvio-ticket-options">
+                  <button type="button" class="plan-backup-base-card" id="ref-card-onvio-rep-ticket">
+                    <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="ticket"></span>Se reprodujo con el ticket</span>
+                    <span class="card-mark">○</span>
+                  </button>
+                  <button type="button" class="plan-backup-base-card" id="ref-card-onvio-rep-prueba">
+                    <span class="plan-adj-label"><span class="plan-inline-icon purple" data-plan-icon="building"></span>Se reproduce con la empresa de prueba</span>
+                    <span class="card-mark">○</span>
+                  </button>
+                </div>
+                <input type="checkbox" id="ref-onvio-rep-ticket" class="hidden"/>
+                <input type="checkbox" id="ref-onvio-rep-prueba" class="hidden"/>
+              </div>
+              <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
+                <p class="plan-capturas-title">Capturas / imágenes</p>
+                <p class="plan-capturas-hint">Si no cargás las capturas acá, recordá hacerlo en comentarios.</p>
+                <div id="ref-onvio-capt-chips" class="plan-capturas-chips"></div>
+                <div class="plan-capturas-actions">
+                  <button type="button" id="ref-onvio-capt-agregar" class="btn btn-secondary">Examinar…</button>
+                  <button type="button" id="ref-onvio-capt-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
+                  <input id="ref-onvio-capt-input" type="file" accept="image/*" multiple class="hidden"/>
+                </div>
+              </div>
+              <p class="plan-ref-title">Información del usuario</p>
+              <div class="plan-well-box">
+                <div class="plan-form-2col plan-form-2col-tight">
+                  <div class="plan-field"><label for="ref-onvio-usuario">Usuario / Contador</label><input id="ref-onvio-usuario" type="text"/></div>
+                  <div class="plan-field"><label for="ref-onvio-empresa">Empresa</label><input id="ref-onvio-empresa" type="text"/></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-ref-actions">
+              <button type="button" id="ref-btn-copiar" class="plan-action-btn green">
+                <span class="plan-action-btn-main">📋 Copiar al portapapeles</span>
+                <span class="plan-action-btn-sub">Solo copiar y pegar</span>
+              </button>
+              <button type="button" id="ref-btn-txt" class="plan-action-btn blue">
+                <span class="plan-action-btn-main">💾 Guardar .txt</span>
+                <span class="plan-action-btn-sub">Descarga el archivo a tu PC</span>
+              </button>
+              <button type="button" id="ref-btn-limpiar" class="plan-action-btn ghost">
+                <span class="plan-action-btn-main">🗑 Limpiar</span>
+              </button>
+            </div>
+            <p id="ref-status" class="plan-status-bar"></p>
+          </div>
+        </div>
+
+        <div id="planillas-oportunidad-menu" class="planillas-view hidden">
+          <div class="planillas-card">
+            <div class="plan-module-sticky-head">
+              <div class="plan-module-header-bar">
+                <button type="button" class="planillas-back" data-plan-back-op-menu>← Volver al menú</button>
+                <span id="op-menu-sistema" class="plan-sistema-badge"></span>
+              </div>
+            </div>
+            <p class="planillas-section-title" style="font-size:1.1rem">Elegí una opción</p>
+            <div class="plan-op-submenu">
+              <div class="plan-op-card" data-op-view="gestor">
+                <div class="op-accent purple"></div>
+                <span class="plan-op-icon purple" data-plan-icon="gestor"></span>
+                <strong>Gestor de Oportunidades</strong>
+                <span>Administra y gestiona tus oportunidades de venta</span>
+                <button type="button" class="plan-op-open-btn purple">Abrir Gestor</button>
+              </div>
+              <div class="plan-op-card" data-op-view="cargar">
+                <div class="op-accent orange"></div>
+                <span class="plan-op-icon orange" data-plan-icon="cargar"></span>
+                <strong>Cargar Oportunidad</strong>
+                <span>Completa el formulario y genera el PDF de la oportunidad</span>
+                <button type="button" class="plan-op-open-btn orange">Cargar Oportunidad</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="planillas-oportunidad-cargar" class="planillas-view hidden">
+          <div class="planillas-card">
+            <div class="plan-module-sticky-head">
+              <div class="plan-module-header-bar">
+                <button type="button" class="planillas-back" data-plan-back-op-cargar>← Volver a opciones</button>
+                <span id="op-cargar-sistema" class="plan-sistema-badge"></span>
+              </div>
+            </div>
+
+            <div class="plan-op-cargar-panel">
+              <div class="plan-gestor-panel-accent purple"></div>
+              <h3 class="plan-gestor-panel-title">Cargar Oportunidad</h3>
+
+              <div class="plan-field plan-op-metodo-field">
+                <label>¿Cómo ingresó el contacto?</label>
+                <div class="plan-op-metodo-well" id="op-metodo-radios">
+                  <label class="plan-op-radio"><input type="radio" name="op-metodo" value="Telefónicamente"/> Telefónicamente</label>
+                  <label class="plan-op-radio"><input type="radio" name="op-metodo" value="WhatsApp"/> WhatsApp</label>
+                  <label class="plan-op-radio"><input type="radio" name="op-metodo" value="Email"/> Email</label>
+                </div>
+              </div>
+
+              <div class="plan-form-2col plan-op-form-grid">
+                <div class="plan-field"><label for="op-numero">N° de Cliente</label><input id="op-numero" inputmode="numeric" type="text"/></div>
+                <div class="plan-field"><label for="op-razon">Razón Social</label><input id="op-razon" type="text"/></div>
+                <div class="plan-field"><label for="op-contacto">Nombre del Contacto</label><input id="op-contacto" type="text"/></div>
+                <div class="plan-field"><label for="op-telefono">Teléfono</label><input id="op-telefono" type="text"/></div>
+                <div class="plan-field"><label for="op-correo">Correo</label><input id="op-correo" type="email" placeholder="Opcional"/></div>
+                <div class="plan-field"><label for="op-horarios">Horarios de contacto</label><input id="op-horarios" type="text"/></div>
+              </div>
+
+              <div class="plan-field">
+                <label for="op-descripcion">Descripción de la oportunidad</label>
+                <textarea id="op-descripcion" class="plan-op-desc-area" rows="6"></textarea>
+              </div>
+
+              <div class="plan-op-cargar-actions">
+                <button type="button" id="op-btn-pdf" class="plan-op-btn-pdf">
+                  <span aria-hidden="true">📄</span> GENERAR PDF
+                </button>
+                <button type="button" id="op-btn-ia" class="plan-op-btn-ia hidden">✨ Mejorar redacción con IA</button>
+              </div>
+              <div class="plan-op-cargar-clear">
+                <button type="button" id="op-btn-limpiar" class="plan-op-btn-limpiar">🗑 Limpiar</button>
+              </div>
+            </div>
+            <p id="op-cargar-status" class="plan-status-bar"></p>
+          </div>
+        </div>
+
+        <div id="planillas-oportunidad-gestor" class="planillas-view hidden">
+          <div class="planillas-card">
+            <div class="plan-module-sticky-head">
+              <div class="plan-module-header-bar">
+                <button type="button" class="planillas-back" data-plan-back-op-gestor>← Volver a opciones</button>
+                <div class="plan-module-title-row">
+                  <span class="plan-module-icon-badge oportunidad" data-plan-icon="gestor"></span>
+                  <h2 class="plan-module-title plan-title-oportunidad">Gestor de Oportunidades</h2>
+                </div>
+                <span id="op-gestor-sistema" class="plan-sistema-badge"></span>
+              </div>
+              <div class="plan-accent-bar oportunidad"></div>
+              <div class="plan-gestor-user-bar">
+                <span id="op-gestor-user-badge" class="plan-gestor-user-badge hidden"></span>
+              </div>
+            </div>
+            <div class="plan-gestor-panel plan-gestor-panel-new">
+              <div class="plan-gestor-panel-accent purple"></div>
+              <h3 class="plan-gestor-panel-title">Nueva oportunidad</h3>
+              <div class="plan-gestor-form-grid">
+                <label class="plan-gestor-field-label" for="op-gestor-fecha">Fecha</label>
+                <div class="plan-gestor-date-wrap">
+                  <input id="op-gestor-fecha" type="date"/>
+                </div>
+                <label class="plan-gestor-field-label" for="op-gestor-desc">Descripción</label>
+                <textarea id="op-gestor-desc" rows="4"></textarea>
+                <span class="plan-gestor-field-label">Link</span>
+                <div class="plan-gestor-link-box">
+                  <span id="op-gestor-link-status" class="plan-gestor-link-icon" aria-hidden="true"></span>
+                  <input id="op-gestor-link" type="text" class="plan-gestor-link-input" autocomplete="off" spellcheck="false"/>
+                  <button type="button" id="op-gestor-agregar" class="plan-gestor-btn-add">Agregar</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-gestor-panel plan-gestor-panel-list">
+              <div class="plan-gestor-panel-accent orange"></div>
+              <h3 class="plan-gestor-panel-title">Listado de oportunidades cargadas</h3>
+              <div class="plan-gestor-filter-bar">
+                <label class="plan-gestor-check"><input type="checkbox" id="op-filter-solo-pend"/> Solo no confirmadas</label>
+                <label class="plan-gestor-filter-month">
+                  <span>Ver mes:</span>
+                  <select id="op-filter-month-combo" class="plan-gestor-month-select"></select>
+                </label>
+              </div>
+              <div class="plan-gestor-table-wrap">
+                <table class="plan-gestor-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Descripción</th>
+                      <th>Link</th>
+                      <th>Confirmada</th>
+                    </tr>
+                  </thead>
+                  <tbody id="op-gestor-table-body"></tbody>
+                </table>
+              </div>
+              <div class="plan-gestor-footer">
+                <div class="plan-gestor-footer-actions">
+                  <button type="button" id="op-gestor-editar" class="plan-gestor-btn-tool">Editar</button>
+                  <button type="button" id="op-gestor-eliminar" class="plan-gestor-btn-red">Eliminar</button>
+                  <button type="button" id="op-gestor-confirmar" class="plan-gestor-btn-green">Confirmar</button>
+                </div>
+                <div class="plan-gestor-pagination">
+                  <button type="button" id="op-gestor-prev" class="plan-gestor-page-btn" aria-label="Página anterior">◀</button>
+                  <span id="op-gestor-pagina-label"></span>
+                  <button type="button" id="op-gestor-next" class="plan-gestor-page-btn" aria-label="Página siguiente">▶</button>
+                </div>
+              </div>
+              <p class="plan-gestor-hint">Clic derecho en una fila: confirmar, abrir en el navegador, editar o eliminar. En Link, «Abrir» lleva a la oportunidad.</p>
+            </div>
+
+            <div id="op-gestor-ctx" class="plan-gestor-ctx hidden" role="menu">
+              <button type="button" data-ctx="confirmar">✅ Confirmar oportunidad</button>
+              <hr/>
+              <button type="button" data-ctx="abrir">🌐 Abrir en el navegador</button>
+              <button type="button" data-ctx="editar">✏️ Editar</button>
+              <button type="button" data-ctx="eliminar">🗑️ Eliminar</button>
+            </div>
+            <p id="op-gestor-status" class="plan-status-bar hidden"></p>
+          </div>
+        </div>
+
+        <div id="plan-modal-overlay" class="plan-modal-overlay hidden">
+          <div id="plan-ref-modal" class="plan-ref-modal" data-accent="mam">
+            <div class="plan-ref-modal-header">
+              <button type="button" id="plan-modal-back" class="plan-ref-modal-back hidden" aria-label="Volver">←</button>
+              <div class="plan-ref-modal-accent-bar"></div>
+              <div class="plan-ref-modal-titles">
+                <h3 id="plan-modal-title"></h3>
+                <p id="plan-modal-subtitle" class="plan-ref-modal-subtitle hidden"></p>
+              </div>
+              <button type="button" id="plan-modal-close" class="plan-modal-close" aria-label="Cerrar">×</button>
+            </div>
+            <div id="plan-modal-body" class="plan-ref-modal-body"></div>
+            <div class="plan-ref-modal-footer">
+              <button type="button" id="plan-modal-save" class="plan-ref-modal-save">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-portal" class="tab-panel hidden" role="tabpanel">
+      <div class="portal-layout">
+        <aside class="search-column">
+          <h2 class="panel-title">Buscar instructivos</h2>
+          <input id="searchInput" type="search" class="search-box" placeholder="Ej: factura electrónica, OnePass, Estados Contables…" autocomplete="off" spellcheck="false"/>
+          <select id="typeFilter" class="combo-box"></select>
+          <div id="yearFilterPanel" class="year-filter hidden">
+            <span class="field-label">Año</span>
+            <div id="yearFilterButtons" class="year-buttons" role="radiogroup"></div>
+          </div>
+          <ul id="resultsList" class="results-list" aria-live="polite"></ul>
+        </aside>
+
+        <section class="preview-column">
+          <h2 id="previewTitle" class="preview-title">Seleccioná un resultado</h2>
+          <div class="preview-badges">
+            <span id="previewTypeBadge" class="type-badge hidden"></span>
+            <span id="previewProduct" class="preview-product"></span>
+          </div>
+          <div class="preview-frame-wrap">
+            <iframe id="previewFrame" class="preview-frame" title="Vista previa del instructivo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"></iframe>
+          </div>
+          <div class="preview-actions">
+            <button id="openPortalBtn" type="button" class="btn btn-primary" disabled>Abrir en portal</button>
+            <button id="exportPdfBtn" type="button" class="btn btn-secondary" disabled title="Guarda este instructivo en PDF">Exportar PDF</button>
+            <button id="downloadContentBtn" type="button" class="btn btn-secondary hidden" disabled title="Descarga el PDF o video del instructivo">Descargar archivo</button>
+            <button id="openMediaBtn" type="button" class="btn btn-secondary hidden" disabled>Abrir archivo</button>
+            <button id="copyLinkBtn" type="button" class="btn btn-secondary" disabled>Copiar link</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="panel-thom" class="tab-panel hidden" role="tabpanel">
+      <div class="embed-toolbar">
+        <button type="button" id="thomReloadBtn" class="btn btn-secondary">Recargar</button>
+        <button type="button" id="thomOpenBtn" class="btn btn-secondary">Abrir en navegador</button>
+      </div>
+      <p class="embed-hint">VPN activa · si no carga, «Abrir en navegador»</p>
+      <div class="embed-frame-wrap">
+        <iframe id="thomFrame" class="embed-frame" title="THOM"
+          allow="clipboard-read; clipboard-write; fullscreen; autoplay"></iframe>
+      </div>
+    </section>
+
+    <section id="panel-ai" class="tab-panel hidden" role="tabpanel">
+      <div class="embed-toolbar">
+        <button type="button" id="aiReloadBtn" class="btn btn-secondary">Recargar</button>
+        <button type="button" id="aiOpenBtn" class="btn btn-secondary">Abrir en navegador</button>
+      </div>
+      <p class="embed-hint">Sesión corporativa · si no carga, «Abrir en navegador»</p>
+      <div class="embed-frame-wrap">
+        <iframe id="aiFrame" class="embed-frame" title="AI Platform"
+          allow="clipboard-read; clipboard-write; fullscreen; autoplay"></iframe>
+      </div>
+    </section>
+  </div>
+
+  <footer id="statusBar" class="status-bar hidden">
+    <span id="statusText">Escribí al menos 2 letras para buscar (ignora tildes).</span>
+  </footer>
+
+  <div id="plan-user-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="plan-user-title" aria-modal="true">
+    <div class="plan-user-dialog">
+      <h3 id="plan-user-title">Identificá tu usuario</h3>
+      <p class="plan-user-hint">Usá tu correo corporativo de Thomson Reuters. Solo vas a ver tus oportunidades.</p>
+      <label class="plan-user-label" for="plan-user-email">Correo</label>
+      <input id="plan-user-email" type="email" class="plan-user-input" placeholder="nombre.apellido@thomsonreuters.com" autocomplete="email"/>
+      <p id="plan-user-error" class="plan-user-error"></p>
+      <div class="plan-user-actions">
+        <button type="button" id="plan-user-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="plan-user-submit" class="plan-gestor-btn-add">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js" type="module"></script>
+</body>
+</html>

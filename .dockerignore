@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+publish/
+publish-win64/
+*.zip
+**/.vs/
+**/*.user
+appsettings.local.json
+Thumbs.db
+Desktop.ini
+.git/
+agent-tools/
