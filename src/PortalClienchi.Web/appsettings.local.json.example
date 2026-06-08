@@ -5,5 +5,12 @@
     "Enabled": true,
     "Provider": "Auto",
     "ImgBbApiKey": "opcional-clave-gratis-de-https://api.imgbb.com/"
+  },
+  "RedaccionIa": {
+    "Enabled": true,
+    "Endpoint": "https://api.groq.com/openai/v1/chat/completions",
+    "ApiKey": "gsk_TU_CLAVE_DE_CONSOLE_GROQ",
+    "Model": "llama-3.3-70b-versatile",
+    "TimeoutSeconds": 90
   }
 }
