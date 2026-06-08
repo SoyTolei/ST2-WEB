@@ -20,7 +20,6 @@ RUN apt-get update \
     && fc-cache -f -v
 
 RUN mkdir -p /data/st2
-VOLUME ["/data/st2"]
 
 COPY --from=build /app/publish .
 
