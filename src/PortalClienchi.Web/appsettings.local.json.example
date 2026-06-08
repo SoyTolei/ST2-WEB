@@ -1,4 +1,9 @@
 {
   "Email": "tu.usuario@thomsonreuters.com",
-  "Password": "tu-contraseña-del-portal"
+  "Password": "tu-contraseña-del-portal",
+  "CapturaHosting": {
+    "Enabled": true,
+    "Provider": "Auto",
+    "ImgBbApiKey": "opcional-clave-gratis-de-https://api.imgbb.com/"
+  }
 }
