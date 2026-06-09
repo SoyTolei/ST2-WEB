@@ -486,7 +486,8 @@
 
               <div class="plan-op-cargar-actions">
                 <button type="button" id="op-btn-pdf" class="plan-op-btn-pdf">
-                  <span aria-hidden="true">📄</span> GENERAR PDF
+                  <span class="plan-action-btn-icon" data-plan-icon="pdf" aria-hidden="true"></span>
+                  GENERAR PDF
                 </button>
                 <button type="button" id="op-btn-ia" class="plan-op-btn-ia hidden">✨ Mejorar redacción con IA</button>
               </div>
@@ -510,12 +511,12 @@
                   <span class="plan-module-icon-badge oportunidad" data-plan-icon="gestor"></span>
                   <h2 class="plan-module-title plan-title-oportunidad">Gestor de Oportunidades</h2>
                 </div>
-                <span id="op-gestor-sistema" class="plan-sistema-badge"></span>
+                <div class="plan-module-header-meta">
+                  <span id="op-gestor-sistema" class="plan-sistema-badge"></span>
+                  <span id="op-gestor-user-badge" class="plan-gestor-user-badge hidden"></span>
+                </div>
               </div>
               <div class="plan-accent-bar oportunidad"></div>
-              <div class="plan-gestor-user-bar">
-                <span id="op-gestor-user-badge" class="plan-gestor-user-badge hidden"></span>
-              </div>
             </div>
             <div class="plan-gestor-panel plan-gestor-panel-new">
               <div id="op-gestor-add-loading" class="plan-gestor-add-loading hidden" aria-live="polite" aria-busy="false">

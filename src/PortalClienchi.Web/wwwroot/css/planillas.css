@@ -341,6 +341,29 @@
   border-bottom: 1px solid var(--border);
 }
 
+.plan-module-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.plan-module-header-meta .plan-sistema-badge {
+  margin-left: 0;
+}
+
+.plan-module-sticky-head .plan-module-header-meta .plan-gestor-user-badge {
+  max-width: min(100%, 280px);
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .plan-module-title-row {
   display: flex;
   align-items: center;
@@ -1701,15 +1724,6 @@
   color: #6b7280;
   line-height: 1.45;
   text-align: left;
-}
-
-.plan-gestor-user-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding-top: 4px;
 }
 
 .plan-gestor-user-badge {
