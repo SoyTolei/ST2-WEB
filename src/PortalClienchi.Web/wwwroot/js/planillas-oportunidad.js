@@ -30,6 +30,7 @@ export function initOportunidadModule(context) {
   bindOportunidadEvents();
   initGestorUi();
   refreshPlanUserSession();
+  window.__st2ReloadGestor = (email) => cargarGestor(email);
 }
 
 export function openOportunidadMenu() {
@@ -357,6 +358,20 @@ function resetGestorFilters() {
   if (combo) combo.value = "Todas";
 }
 
+function parseGestorItems(data) {
+  const raw = data?.items ?? data?.Items ?? [];
+  if (!Array.isArray(raw)) return { items: [], dropped: 0, rawCount: 0 };
+
+  const items = [];
+  let dropped = 0;
+  for (const row of raw) {
+    const norm = normalizeGestorItem(row);
+    if (norm) items.push(norm);
+    else dropped += 1;
+  }
+  return { items, dropped, rawCount: raw.length };
+}
+
 function parseGestorId(item) {
   const raw = item.id ?? item.Id;
   if (raw == null || raw === "") return null;
@@ -378,7 +393,10 @@ function parseGestorConfirmada(item) {
 function normalizeGestorItem(item) {
   if (!item) return null;
   const id = parseGestorId(item);
-  if (id == null) return null;
+  if (id == null) {
+    console.warn("[Gestor] fila sin id válido:", item);
+    return null;
+  }
   return {
     id,
     fecha: item.fecha ?? item.Fecha ?? "",
@@ -407,12 +425,13 @@ async function cargarGestor(knownUser = null) {
       status.textContent = "Ingresá tu correo corporativo para ver tus oportunidades.";
       status.classList.remove("hidden");
     }
+    gestorAllItems = [];
     safeApplyGestorFilterAndPage();
     return;
   }
 
-  const previousItems = [...gestorAllItems];
-  let data = { items: [] };
+  resetGestorFilters();
+  let data = { items: [], total: 0, usuario: user };
 
   try {
     const response = await gestorApiFetch("/api/planillas/oportunidad/gestor");
@@ -422,50 +441,58 @@ async function cargarGestor(knownUser = null) {
         status.textContent = `Sesión no válida para ${user}. Volvé a ingresar tu correo (arriba a la derecha).`;
         status.classList.remove("hidden");
       }
-      gestorAllItems = previousItems;
+      gestorAllItems = [];
       safeApplyGestorFilterAndPage();
       return;
     }
 
     if (!response.ok) {
       if (status) {
-        status.textContent = previousItems.length > 0
-          ? "No se pudo refrescar el listado; mostrando lo último conocido."
-          : "No se pudo cargar el listado. Recargá con Ctrl+F5.";
+        status.textContent = "No se pudo cargar el listado. Recargá con Ctrl+F5.";
         status.classList.remove("hidden");
       }
-      gestorAllItems = previousItems;
+      gestorAllItems = [];
       safeApplyGestorFilterAndPage();
       return;
     }
 
-    data = await response.json().catch(() => ({ items: [] }));
-    const fetched = (data.items || []).map(normalizeGestorItem).filter(Boolean);
-    gestorAllItems = fetched.length > 0 ? fetched : previousItems;
+    data = await response.json().catch(() => ({ items: [], total: 0, usuario: user }));
+    const { items: fetched, dropped, rawCount } = parseGestorItems(data);
+    gestorAllItems = fetched;
+
+    if (dropped > 0) {
+      console.warn(`[Gestor] ${dropped} de ${rawCount} fila(s) descartadas por formato inválido`);
+    }
   } catch {
     if (status) {
       status.textContent = "Error de red al cargar oportunidades.";
       status.classList.remove("hidden");
     }
-    gestorAllItems = previousItems;
+    gestorAllItems = [];
   }
 
   gestorPagina = 1;
   safeApplyGestorFilterAndPage();
 
   const label = document.getElementById("op-gestor-pagina-label");
+  const serverTotal = typeof data.total === "number" ? data.total : gestorAllItems.length;
+  const sessionUser = data.usuario || user;
+
   if (status) {
     if (data.storage && data.storage.ready === false) {
       status.textContent = "Sin permiso de escritura en la base. En Railway: Volume en /data/st2 y variable RAILWAY_RUN_UID=0.";
       status.classList.remove("hidden");
+    } else if (serverTotal > 0 && gestorAllItems.length === 0) {
+      status.textContent = `El servidor devolvió ${serverTotal} registro(s) para ${sessionUser}, pero no se pudieron mostrar. Recargá con Ctrl+F5.`;
+      status.classList.remove("hidden");
     } else if (gestorFiltered.length === 0 && gestorAllItems.length > 0) {
-      status.textContent = "Hay oportunidades guardadas pero el filtro las oculta. Elegí «Todas» en el mes.";
+      status.textContent = "Hay oportunidades guardadas pero el filtro de mes las oculta. Elegí «Todas».";
       status.classList.remove("hidden");
     } else if (gestorAllItems.length === 0) {
-      status.textContent = `Sin oportunidades para ${user}. Agregá una arriba (descripción + link).`;
+      status.textContent = `Sin oportunidades para ${sessionUser}. Agregá una arriba (descripción + link).`;
       status.classList.remove("hidden");
     } else {
-      status.textContent = `${gestorAllItems.length} oportunidad(es) para ${user}.`;
+      status.textContent = `${gestorAllItems.length} oportunidad(es) para ${sessionUser}.`;
       status.classList.remove("hidden");
       setTimeout(() => status.classList.add("hidden"), 4000);
     }
@@ -679,6 +706,12 @@ function abrirLinkGestor(id = gestorSelectedId) {
 }
 
 async function agregarGestor() {
+  await syncPlanUserSession();
+  if (!getPlanUserEmail()) {
+    const user = await ensurePlanUser({ forcePrompt: true });
+    if (!user) return;
+  }
+
   const desc = document.getElementById("op-gestor-desc")?.value.trim() || "";
   const link = getGestorLinkValue();
   if (!desc || !link) {

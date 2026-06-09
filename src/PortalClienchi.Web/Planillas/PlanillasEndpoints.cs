@@ -352,9 +352,12 @@ public static class PlanillasEndpoints
             if (usuario is null)
                 return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
 
+            var items = svc.ListarGestor(usuario, year, month, soloNoConfirmadas);
             return Results.Ok(new
             {
-                items = svc.ListarGestor(usuario, year, month, soloNoConfirmadas),
+                items,
+                usuario,
+                total = items.Count,
                 storage = new { ready = repo.StorageReady, path = repo.DatabasePath },
             });
         });

@@ -16,6 +16,7 @@ public sealed class OportunidadRepository
         _dbPath = Path.Combine(st2Dir, "oportunidades.db");
         EnsureWritable(st2Dir);
         EnsureSchema();
+        NormalizeStoredUsuarios();
         _logger.LogInformation("Oportunidades SQLite en {DbPath}", _dbPath);
     }
 
@@ -48,7 +49,7 @@ public sealed class OportunidadRepository
         cmd.CommandText = """
             SELECT id, fecha, descripcion, link, confirmada, porcentaje
             FROM oportunidades
-            WHERE usuario = $usuario
+            WHERE LOWER(TRIM(usuario)) = LOWER(TRIM($usuario))
             ORDER BY fecha_creacion DESC
             """;
         cmd.Parameters.AddWithValue("$usuario", usuario);
@@ -92,7 +93,7 @@ public sealed class OportunidadRepository
         cmd.CommandText = """
             UPDATE oportunidades SET fecha=$fecha, descripcion=$desc, link=$link,
             confirmada=$conf, porcentaje=$pct
-            WHERE id=$id AND usuario=$usuario
+            WHERE id=$id AND LOWER(TRIM(usuario)) = LOWER(TRIM($usuario))
             """;
         cmd.Parameters.AddWithValue("$id", id);
         cmd.Parameters.AddWithValue("$usuario", usuario);
@@ -104,7 +105,7 @@ public sealed class OportunidadRepository
     {
         using var conn = Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM oportunidades WHERE id=$id AND usuario=$usuario";
+        cmd.CommandText = "DELETE FROM oportunidades WHERE id=$id AND LOWER(TRIM(usuario)) = LOWER(TRIM($usuario))";
         cmd.Parameters.AddWithValue("$id", id);
         cmd.Parameters.AddWithValue("$usuario", usuario);
         return cmd.ExecuteNonQuery() > 0;
@@ -137,6 +138,28 @@ public sealed class OportunidadRepository
             """;
         cmd.ExecuteNonQuery();
         EnsureUsuarioColumn(conn);
+    }
+
+    private void NormalizeStoredUsuarios()
+    {
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                UPDATE oportunidades
+                SET usuario = LOWER(TRIM(usuario))
+                WHERE usuario IS NOT NULL
+                  AND usuario != LOWER(TRIM(usuario))
+                """;
+            var updated = cmd.ExecuteNonQuery();
+            if (updated > 0)
+                _logger.LogInformation("Normalizados {Count} registros de usuario en oportunidades", updated);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No se pudo normalizar usuarios en oportunidades");
+        }
     }
 
     private static void EnsureUsuarioColumn(SqliteConnection conn)
