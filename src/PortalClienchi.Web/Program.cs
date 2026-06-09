@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
 using PortalClienchi.Core.Configuration;
 using PortalClienchi.Core.Models;
@@ -26,12 +27,31 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
+});
+
 var app = builder.Build();
 
 app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        var file = ctx.File.Name;
+        if (file.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+            || file.EndsWith(".js", StringComparison.OrdinalIgnoreCase)
+            || file.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
+        {
+            ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+            ctx.Context.Response.Headers.Pragma = "no-cache";
+            ctx.Context.Response.Headers.Expires = "0";
+        }
+    },
+});
 
 static IResult CredentialsMissing() =>
     Results.Problem(

@@ -2,6 +2,7 @@ import { initReferralModule, openReferral } from "./planillas-referral.js";
 import { initOportunidadModule, openOportunidadMenu } from "./planillas-oportunidad.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
+import { updatePlanBuildBadge } from "./plan-build.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -542,7 +543,7 @@ function bindEvents() {
 
 async function loadConfig() {
   try {
-    const response = await fetch("/api/planillas/config");
+    const response = await fetch("/api/planillas/config", { cache: "no-store" });
     if (response.ok) planillasConfig = await response.json();
   } catch {
     planillasConfig = null;
@@ -559,6 +560,7 @@ export async function initPlanillas() {
   if (!views.menu) return;
 
   await loadConfig();
+  updatePlanBuildBadge(planillasConfig?.webBuild);
   if (planillasConfig?.webBuild) {
     console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
   }

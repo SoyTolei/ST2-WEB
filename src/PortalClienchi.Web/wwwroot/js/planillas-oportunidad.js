@@ -5,6 +5,7 @@ import {
   refreshPlanUserSession,
   syncPlanUserSession,
 } from "./plan-user.js";
+import { updatePlanBuildBadge } from "./plan-build.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 
 let ctx = null;
@@ -123,6 +124,8 @@ async function openGestor() {
   if (fechaInput) fechaInput.valueAsDate = new Date();
   setLinkPlaceholder();
   updateLinkStatusUi();
+
+  updatePlanBuildBadge(ctx.getConfig()?.webBuild);
 
   try {
     await cargarGestor(user);
@@ -421,7 +424,7 @@ async function cargarGestor(knownUser = null) {
       status.textContent = "Hay oportunidades guardadas pero el filtro las oculta. Elegí «Todas» en el mes.";
       status.classList.remove("hidden");
     } else if (gestorAllItems.length === 0) {
-      status.textContent = `Sin oportunidades para ${user}. Agregá una arriba.`;
+      status.textContent = `Sin oportunidades para ${user} en el servidor web. Las de localhost no se comparten — agregá una arriba.`;
       status.classList.remove("hidden");
     } else {
       status.textContent = `${gestorAllItems.length} oportunidad(es) cargadas.`;

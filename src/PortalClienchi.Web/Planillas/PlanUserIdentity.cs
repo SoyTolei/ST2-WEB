@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace PortalClienchi.Web.Planillas;
 
 public static class PlanUserIdentity
@@ -62,5 +64,6 @@ public static class PlanUserIdentity
 
 public sealed class PlanUserSessionRequest
 {
+    [JsonPropertyName("email")]
     public string Email { get; set; } = "";
 }

@@ -1519,6 +1519,17 @@
   padding-top: 4px;
 }
 
+.plan-build-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.plan-gestor-user-bar .plan-build-badge {
+  margin-left: auto;
+}
+
 .plan-gestor-user-badge {
   font-size: 0.75rem;
   font-weight: 600;
