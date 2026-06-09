@@ -415,6 +415,10 @@ function setupCapturas(prefix, fileList) {
   });
 }
 
+function getReferralCapturaFiles() {
+  return isBejerman() ? capturaFiles : onvioCapturaFiles;
+}
+
 function refreshChips(id, files) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -477,7 +481,7 @@ function buildPayload() {
 }
 
 function pickReferralCapturaFiles(payload) {
-  const files = isBejerman() ? capturaFiles : onvioCapturaFiles;
+  const files = getReferralCapturaFiles();
   if (files.length > 0) {
     if (isBejerman()) {
       if (!payload.adjuntos) payload.adjuntos = {};
@@ -613,8 +617,8 @@ function resetReferralForm() {
   referralIaUndo?.clearSnapshot();
   versionSel = null;
   moduloSel = null;
-  capturaFiles = [];
-  onvioCapturaFiles = [];
+  capturaFiles.length = 0;
+  onvioCapturaFiles.length = 0;
   ticketAvisoOmitido = false;
   mamState = {};
   sdkState = {};
@@ -636,6 +640,8 @@ function resetReferralForm() {
   });
   document.getElementById("ref-capturas-chips").innerHTML = "";
   document.getElementById("ref-onvio-capt-chips").innerHTML = "";
+  document.getElementById("ref-capturas-estado").textContent = "";
+  document.getElementById("ref-onvio-capt-estado").textContent = "";
   document.getElementById("ref-status").textContent = "";
   updateReferralPanels();
 }
