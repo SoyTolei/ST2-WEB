@@ -1474,6 +1474,11 @@
 
 .plan-gestor-btn-add:hover { opacity: 0.92; }
 
+.plan-gestor-btn-add:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
 .plan-gestor-filter-bar {
   display: flex;
   flex-wrap: wrap;
