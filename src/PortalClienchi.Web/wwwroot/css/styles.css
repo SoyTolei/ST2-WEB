@@ -87,6 +87,7 @@ html, body {
 }
 
 .tab-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -99,6 +100,30 @@ html, body {
   margin: 2px;
   border-radius: 9px;
   cursor: pointer;
+}
+
+.tab-reminder-badge {
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  min-width: 18px;
+  min-height: 16px;
+  padding: 2px 6px;
+  border-radius: 11px;
+  background: #e53935;
+  border: 1px solid #b71c1c;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(102, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tab-reminder-badge.hidden {
+  display: none;
 }
 
 .tab-btn:hover:not(.active) {

@@ -13,6 +13,7 @@ public static class St2IndexHtml
         "planillas-oportunidad.js",
         "plan-user.js",
         "plan-build.js",
+        "daily-tab-reminder.js",
         "plan-ia-undo.js",
         "planillas-icons.js",
         "planillas-referral-dialogs.js",

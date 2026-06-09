@@ -1,4 +1,11 @@
 import { initPlanillas } from "./planillas.js";
+import {
+  initDailyTabReminders,
+  refreshBadges,
+  startEngagementTimer,
+  stopEngagementTimer,
+  bindEmbedEngagement,
+} from "./daily-tab-reminder.js";
 
 const searchInput = document.getElementById("searchInput");
 const typeFilter = document.getElementById("typeFilter");
@@ -480,8 +487,22 @@ function switchTab(tabId) {
   statusBar.classList.toggle("hidden", tabId !== "portal");
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
 
-  if (tabId === "thom") loadEmbedFrame("thom");
-  if (tabId === "ai") loadEmbedFrame("ai");
+  stopEngagementTimer();
+  if (tabId === "thom") {
+    loadEmbedFrame("thom");
+    startEngagementTimer("thom");
+  } else if (tabId === "ai") {
+    loadEmbedFrame("ai");
+    startEngagementTimer("ai");
+  }
+
+  refreshBadges();
+}
+
+function initEmbedReminders() {
+  bindEmbedEngagement(thomFrame, "thom");
+  bindEmbedEngagement(aiFrame, "ai");
+  initDailyTabReminders();
 }
 
 document.getElementById("thomReloadBtn").addEventListener("click", () => {
@@ -505,4 +526,5 @@ typeFilter.addEventListener("change", runSearch);
 await loadAppConfig();
 await loadTypes();
 await checkHealth();
+initEmbedReminders();
 await initPlanillas();
