@@ -66,6 +66,9 @@ function bindOportunidadEvents() {
   document.getElementById("op-btn-pdf")?.addEventListener("click", generarPdf);
   document.getElementById("op-btn-limpiar")?.addEventListener("click", limpiarCargar);
   document.getElementById("op-btn-ia")?.addEventListener("click", mejorarOportunidadIa);
+  document.getElementById("op-gestor-agregar")?.addEventListener("mousedown", () => {
+    clearLinkPlaceholder();
+  });
   document.getElementById("op-gestor-agregar")?.addEventListener("click", agregarGestor);
   bindGestorEvents();
 }
@@ -359,7 +362,14 @@ async function cargarGestor(knownUser = null) {
   gestorPagina = 1;
   applyGestorFilterAndPage();
   const status = document.getElementById("op-gestor-status");
-  if (status) status.classList.add("hidden");
+  if (status) {
+    if (data.storage && data.storage.ready === false) {
+      status.textContent = "Sin permiso de escritura en la base. En Railway: Volume en /data/st2 y variable RAILWAY_RUN_UID=0.";
+      status.classList.remove("hidden");
+    } else {
+      status.classList.add("hidden");
+    }
+  }
 }
 
 function applyGestorFilterAndPage() {
@@ -559,29 +569,44 @@ async function agregarGestor() {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    alert(data.error || "No se pudo agregar la oportunidad.");
+    const msg = data.detail || data.error || data.title || "No se pudo agregar la oportunidad.";
+    alert(msg);
+    if (status) {
+      status.textContent = msg;
+      status.classList.remove("hidden");
+    }
     return;
   }
 
   const created = normalizeGestorItem(data);
-  if (created?.id) {
-    gestorAllItems = [created, ...gestorAllItems.filter((x) => x.id !== created.id)];
-  }
+  const beforeCount = gestorAllItems.length;
 
   document.getElementById("op-gestor-desc").value = "";
   setLinkPlaceholder();
   document.getElementById("op-gestor-fecha").valueAsDate = new Date();
   resetGestorFilters();
   gestorPagina = 1;
-  applyGestorFilterAndPage();
-
-  if (status) {
-    status.textContent = "Oportunidad agregada.";
-    status.classList.remove("hidden");
-    setTimeout(() => status.classList.add("hidden"), 2500);
-  }
 
   await cargarGestor();
+
+  if (created?.id && !gestorAllItems.some((x) => x.id === created.id)) {
+    gestorAllItems = [created, ...gestorAllItems];
+    applyGestorFilterAndPage();
+    if (status) {
+      status.textContent = "Guardada, pero el listado no sincronizó. Revisá Volume /data/st2 en Railway.";
+      status.classList.remove("hidden");
+    }
+    return;
+  }
+
+  if (status) {
+    if (gestorAllItems.length > beforeCount) {
+      status.textContent = "Oportunidad agregada.";
+      status.classList.remove("hidden");
+      setTimeout(() => status.classList.add("hidden"), 2500);
+    }
+  }
+
   document.getElementById("op-gestor-desc")?.focus();
 }
 

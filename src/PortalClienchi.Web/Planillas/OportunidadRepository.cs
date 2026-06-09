@@ -6,16 +6,22 @@ namespace PortalClienchi.Web.Planillas;
 public sealed class OportunidadRepository
 {
     private readonly string _dbPath;
+    private readonly ILogger<OportunidadRepository> _logger;
 
-    public OportunidadRepository()
+    public OportunidadRepository(ILogger<OportunidadRepository> logger)
     {
+        _logger = logger;
         var st2Dir = St2Paths.GetDataDirectory();
         Directory.CreateDirectory(st2Dir);
         _dbPath = Path.Combine(st2Dir, "oportunidades.db");
+        EnsureWritable(st2Dir);
         EnsureSchema();
+        _logger.LogInformation("Oportunidades SQLite en {DbPath}", _dbPath);
     }
 
     public string DatabasePath => _dbPath;
+
+    public bool StorageReady { get; private set; }
 
     public IReadOnlyList<OportunidadRecordDto> LoadAll(string usuario)
     {
@@ -37,16 +43,29 @@ public sealed class OportunidadRepository
 
     public int Insert(OportunidadUpsertRequest req, string usuario)
     {
-        using var conn = Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            INSERT INTO oportunidades (fecha, descripcion, link, confirmada, porcentaje, usuario)
-            VALUES ($fecha, $desc, $link, $conf, $pct, $usuario)
-            """;
-        BindUpsert(cmd, req);
-        cmd.Parameters.AddWithValue("$usuario", usuario);
-        cmd.ExecuteNonQuery();
-        return (int)LastInsertRowId(conn);
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                INSERT INTO oportunidades (fecha, descripcion, link, confirmada, porcentaje, usuario)
+                VALUES ($fecha, $desc, $link, $conf, $pct, $usuario)
+                """;
+            BindUpsert(cmd, req);
+            cmd.Parameters.AddWithValue("$usuario", usuario);
+            cmd.ExecuteNonQuery();
+            var id = (int)LastInsertRowId(conn);
+            _logger.LogInformation("Oportunidad {Id} creada para {Usuario}", id, usuario);
+            return id;
+        }
+        catch (SqliteException ex)
+        {
+            _logger.LogError(ex, "Error SQLite al insertar oportunidad en {DbPath}", _dbPath);
+            throw new InvalidOperationException(
+                $"No se pudo guardar en la base de datos ({_dbPath}). " +
+                "En Railway verificá el Volume en /data/st2 y la variable RAILWAY_RUN_UID=0.",
+                ex);
+        }
     }
 
     public bool Update(int id, OportunidadUpsertRequest req, string usuario)
@@ -117,6 +136,22 @@ public sealed class OportunidadRepository
         using var alter = conn.CreateCommand();
         alter.CommandText = "ALTER TABLE oportunidades ADD COLUMN usuario TEXT NOT NULL DEFAULT ''";
         alter.ExecuteNonQuery();
+    }
+
+    private void EnsureWritable(string dir)
+    {
+        try
+        {
+            var probe = Path.Combine(dir, ".write-test");
+            File.WriteAllText(probe, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture));
+            File.Delete(probe);
+            StorageReady = true;
+        }
+        catch (Exception ex)
+        {
+            StorageReady = false;
+            _logger.LogError(ex, "Sin permiso de escritura en {Dir}", dir);
+        }
     }
 
     private static OportunidadRecordDto ReadRow(SqliteDataReader r) => new()

@@ -309,6 +309,7 @@ public static class PlanillasEndpoints
         app.MapGet("/api/planillas/oportunidad/gestor", (
             HttpContext ctx,
             OportunidadService svc,
+            OportunidadRepository repo,
             int? year,
             int? month,
             bool soloNoConfirmadas = false) =>
@@ -317,7 +318,11 @@ public static class PlanillasEndpoints
             if (usuario is null)
                 return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
 
-            return Results.Ok(new { items = svc.ListarGestor(usuario, year, month, soloNoConfirmadas) });
+            return Results.Ok(new
+            {
+                items = svc.ListarGestor(usuario, year, month, soloNoConfirmadas),
+                storage = new { ready = repo.StorageReady, path = repo.DatabasePath },
+            });
         });
 
         app.MapPost("/api/planillas/oportunidad/gestor", (HttpContext ctx, OportunidadUpsertRequest body, OportunidadService svc) =>
@@ -329,7 +334,15 @@ public static class PlanillasEndpoints
             var error = OportunidadValidator.ValidateGestorUpsert(body);
             if (error is not null)
                 return Results.BadRequest(new { error });
-            return Results.Ok(svc.Crear(body, usuario));
+
+            try
+            {
+                return Results.Ok(svc.Crear(body, usuario));
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "No se pudo guardar la oportunidad");
+            }
         });
 
         app.MapPut("/api/planillas/oportunidad/gestor/{id:int}", (HttpContext ctx, int id, OportunidadUpsertRequest body, OportunidadService svc) =>

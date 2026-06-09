@@ -19,7 +19,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && fc-cache -f -v
 
-RUN mkdir -p /data/st2
+RUN mkdir -p /data/st2 && chmod 777 /data/st2
 
 COPY --from=build /app/publish .
 
