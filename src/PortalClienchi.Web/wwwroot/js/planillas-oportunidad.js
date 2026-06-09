@@ -247,10 +247,6 @@ function initGestorUi() {
 }
 
 function bindGestorEvents() {
-  document.getElementById("op-filter-solo-pend")?.addEventListener("change", () => {
-    gestorPagina = 1;
-    safeApplyGestorFilterAndPage();
-  });
   document.getElementById("op-filter-month-combo")?.addEventListener("change", () => {
     gestorPagina = 1;
     safeApplyGestorFilterAndPage();
@@ -357,9 +353,7 @@ function updateLinkStatusUi() {
 }
 
 function resetGestorFilters() {
-  const solo = document.getElementById("op-filter-solo-pend");
   const combo = document.getElementById("op-filter-month-combo");
-  if (solo) solo.checked = false;
   if (combo) combo.value = "Todas";
 }
 
@@ -501,11 +495,9 @@ function applyGestorFilterAndPage() {
   const keep = combo?.value || "Todas";
   rebuildGestorMonthOptions(gestorAllItems, keep);
 
-  const solo = document.getElementById("op-filter-solo-pend")?.checked;
   const filtro = combo?.value || "Todas";
 
   let query = [...gestorAllItems];
-  if (solo) query = query.filter((o) => !isConfirmada(o));
   if (filtro !== "Todas") {
     const parsed = parseGestorFiltro(filtro);
     if (parsed) {
@@ -517,9 +509,7 @@ function applyGestorFilterAndPage() {
 
   if (gestorFiltered.length === 0 && gestorAllItems.length > 0 && filtro !== "Todas") {
     if (combo) combo.value = "Todas";
-    gestorFiltered = solo
-      ? gestorAllItems.filter((o) => !isConfirmada(o))
-      : [...gestorAllItems];
+    gestorFiltered = [...gestorAllItems];
   }
 
   const totalPaginas = Math.max(1, Math.ceil(gestorFiltered.length / GESTOR_POR_PAGINA));
@@ -610,7 +600,7 @@ function renderGestorPage() {
   const pageItems = gestorFiltered.slice((gestorPagina - 1) * GESTOR_PAGINA, gestorPagina * GESTOR_POR_PAGINA);
 
   if (pageItems.length === 0) {
-    tbody.innerHTML = `<tr class="plan-gestor-empty-row"><td colspan="4">No hay oportunidades con ese filtro.</td></tr>`;
+    tbody.innerHTML = `<tr class="plan-gestor-empty-row"><td colspan="4">No hay oportunidades cargadas.</td></tr>`;
   } else {
     tbody.innerHTML = pageItems.map((r) => {
       const hasLink = !!(r.link && r.link.trim());
