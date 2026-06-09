@@ -44,6 +44,8 @@ export async function syncPlanUserSession() {
 }
 
 export async function ensurePlanUser({ forcePrompt = false } = {}) {
+  const synced = await syncPlanUserSession();
+  if (!forcePrompt && synced) return synced;
   await refreshPlanUserSession();
   if (!forcePrompt && cachedEmail) return cachedEmail;
 

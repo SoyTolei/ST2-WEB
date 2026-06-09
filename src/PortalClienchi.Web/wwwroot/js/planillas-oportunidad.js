@@ -243,16 +243,17 @@ function initGestorUi() {
   }
   updateLinkStatusUi();
   setLinkPlaceholder();
+  safeApplyGestorFilterAndPage();
 }
 
 function bindGestorEvents() {
   document.getElementById("op-filter-solo-pend")?.addEventListener("change", () => {
     gestorPagina = 1;
-    applyGestorFilterAndPage();
+    safeApplyGestorFilterAndPage();
   });
   document.getElementById("op-filter-month-combo")?.addEventListener("change", () => {
     gestorPagina = 1;
-    applyGestorFilterAndPage();
+    safeApplyGestorFilterAndPage();
   });
   document.getElementById("op-gestor-prev")?.addEventListener("click", () => {
     if (gestorPagina > 1) {
@@ -362,14 +363,34 @@ function resetGestorFilters() {
   if (combo) combo.value = "Todas";
 }
 
+function parseGestorId(item) {
+  const raw = item.id ?? item.Id;
+  if (raw == null || raw === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+function parseGestorConfirmada(item) {
+  const raw = item.confirmada ?? item.Confirmada;
+  if (typeof raw === "boolean") return raw;
+  if (typeof raw === "string") {
+    const t = raw.trim().toLowerCase();
+    if (t === "sí" || t === "si" || t === "s" || t === "true" || t === "1") return true;
+    if (t === "no" || t === "false" || t === "0" || t === "") return false;
+  }
+  return !!raw;
+}
+
 function normalizeGestorItem(item) {
   if (!item) return null;
+  const id = parseGestorId(item);
+  if (id == null) return null;
   return {
-    id: item.id ?? item.Id,
+    id,
     fecha: item.fecha ?? item.Fecha ?? "",
     descripcion: item.descripcion ?? item.Descripcion ?? "",
     link: item.link ?? item.Link ?? "",
-    confirmada: !!(item.confirmada ?? item.Confirmada),
+    confirmada: parseGestorConfirmada(item),
     porcentaje: item.porcentaje ?? item.Porcentaje ?? "N/D",
   };
 }
@@ -385,36 +406,59 @@ async function gestorApiFetch(url, options = {}) {
 
 async function cargarGestor(knownUser = null) {
   await syncPlanUserSession();
-  const user = knownUser || getPlanUserEmail() || (await ensurePlanUser());
-  if (!user) return;
+  const user = knownUser || getPlanUserEmail() || (await ensurePlanUser({ forcePrompt: !knownUser }));
+  const status = document.getElementById("op-gestor-status");
+  if (!user) {
+    if (status) {
+      status.textContent = "Ingresá tu correo corporativo para ver tus oportunidades.";
+      status.classList.remove("hidden");
+    }
+    safeApplyGestorFilterAndPage();
+    return;
+  }
 
   const previousItems = [...gestorAllItems];
-  const response = await gestorApiFetch("/api/planillas/oportunidad/gestor");
+  let data = { items: [] };
 
-  if (response.status === 401) {
-    const status = document.getElementById("op-gestor-status");
+  try {
+    const response = await gestorApiFetch("/api/planillas/oportunidad/gestor");
+
+    if (response.status === 401) {
+      if (status) {
+        status.textContent = `Sesión no válida para ${user}. Volvé a ingresar tu correo (arriba a la derecha).`;
+        status.classList.remove("hidden");
+      }
+      gestorAllItems = previousItems;
+      safeApplyGestorFilterAndPage();
+      return;
+    }
+
+    if (!response.ok) {
+      if (status) {
+        status.textContent = previousItems.length > 0
+          ? "No se pudo refrescar el listado; mostrando lo último conocido."
+          : "No se pudo cargar el listado. Recargá con Ctrl+F5.";
+        status.classList.remove("hidden");
+      }
+      gestorAllItems = previousItems;
+      safeApplyGestorFilterAndPage();
+      return;
+    }
+
+    data = await response.json().catch(() => ({ items: [] }));
+    const fetched = (data.items || []).map(normalizeGestorItem).filter(Boolean);
+    gestorAllItems = fetched.length > 0 ? fetched : previousItems;
+  } catch {
     if (status) {
-      status.textContent = "No se pudo validar tu sesión. Recargá la página e ingresá tu correo de nuevo.";
+      status.textContent = "Error de red al cargar oportunidades.";
       status.classList.remove("hidden");
     }
-    return;
+    gestorAllItems = previousItems;
   }
 
-  if (!response.ok) {
-    const status = document.getElementById("op-gestor-status");
-    if (status && previousItems.length > 0) {
-      status.textContent = "No se pudo refrescar el listado; mostrando datos locales.";
-      status.classList.remove("hidden");
-    }
-    return;
-  }
-
-  const data = await response.json().catch(() => ({ items: [] }));
-  const fetched = (data.items || []).map(normalizeGestorItem).filter((x) => x && x.id != null);
-  gestorAllItems = fetched.length > 0 ? fetched : previousItems;
   gestorPagina = 1;
-  applyGestorFilterAndPage();
-  const status = document.getElementById("op-gestor-status");
+  safeApplyGestorFilterAndPage();
+
   const label = document.getElementById("op-gestor-pagina-label");
   if (status) {
     if (data.storage && data.storage.ready === false) {
@@ -424,16 +468,31 @@ async function cargarGestor(knownUser = null) {
       status.textContent = "Hay oportunidades guardadas pero el filtro las oculta. Elegí «Todas» en el mes.";
       status.classList.remove("hidden");
     } else if (gestorAllItems.length === 0) {
-      status.textContent = `Sin oportunidades para ${user} en el servidor web. Las de localhost no se comparten — agregá una arriba.`;
+      status.textContent = `Sin oportunidades para ${user}. Agregá una arriba (descripción + link).`;
       status.classList.remove("hidden");
     } else {
-      status.textContent = `${gestorAllItems.length} oportunidad(es) cargadas.`;
+      status.textContent = `${gestorAllItems.length} oportunidad(es) para ${user}.`;
       status.classList.remove("hidden");
-      setTimeout(() => status.classList.add("hidden"), 3000);
+      setTimeout(() => status.classList.add("hidden"), 4000);
     }
   }
   if (label && gestorAllItems.length > 0 && gestorFiltered.length === 0) {
     label.textContent = `Filtro activo: 0 de ${gestorAllItems.length} visibles — elegí «Todas»`;
+  }
+}
+
+function safeApplyGestorFilterAndPage() {
+  try {
+    applyGestorFilterAndPage();
+    return true;
+  } catch (err) {
+    console.error("Gestor UI error:", err);
+    const status = document.getElementById("op-gestor-status");
+    if (status) {
+      status.textContent = "Error al mostrar el listado. Recargá con Ctrl+F5.";
+      status.classList.remove("hidden");
+    }
+    return false;
   }
 }
 
@@ -504,25 +563,36 @@ function parseGestorFiltro(filtro) {
   return { year, month: mesIdx + 1 };
 }
 
+function parseGestorFechaParts(fecha) {
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fecha || "");
+  if (iso) return { year: parseInt(iso[1], 10), month: parseInt(iso[2], 10) };
+  const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(fecha || "");
+  if (dmy) return { year: parseInt(dmy[3], 10), month: parseInt(dmy[2], 10) };
+  return null;
+}
+
 function parseGestorYear(fecha) {
-  const m = /^(\d{4})-\d{2}-\d{2}$/.exec(fecha || "");
-  return m ? parseInt(m[1], 10) : 0;
+  return parseGestorFechaParts(fecha)?.year ?? 0;
 }
 
 function matchGestorMonth(fecha, anio, mesNum) {
-  const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(fecha || "");
-  if (!m) return false;
-  return parseInt(m[1], 10) === anio && parseInt(m[2], 10) === mesNum;
+  const parts = parseGestorFechaParts(fecha);
+  if (!parts) return false;
+  return parts.year === anio && parts.month === mesNum;
 }
 
 function formatGestorFecha(fechaIso) {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaIso || "");
-  if (!m) return fechaIso || "";
-  return `${m[3]}/${m[2]}/${m[1]}`;
+  const parts = parseGestorFechaParts(fechaIso);
+  if (!parts) return fechaIso || "";
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaIso || "");
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+  const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(fechaIso || "");
+  if (dmy) return `${dmy[1].padStart(2, "0")}/${dmy[2].padStart(2, "0")}/${dmy[3]}`;
+  return fechaIso || "";
 }
 
 function isConfirmada(item) {
-  return !!(item.confirmada ?? item.Confirmada);
+  return parseGestorConfirmada(item);
 }
 
 function formatGestorDescripcion(item) {
@@ -659,16 +729,25 @@ async function agregarGestor() {
   resetGestorFilters();
   gestorPagina = 1;
 
-  if (created?.id) {
-    gestorAllItems = [created, ...gestorAllItems.filter((x) => x.id !== created.id)];
-    applyGestorFilterAndPage();
+  if (!created?.id) {
     if (status) {
-      status.textContent = `Oportunidad agregada (${getPlanUserEmail() || "tu usuario"}).`;
+      status.textContent = "El servidor guardó la oportunidad pero no devolvió el ID. Recargá el gestor.";
       status.classList.remove("hidden");
     }
+    await cargarGestor();
+    return;
   }
 
-  await cargarGestor();
+  gestorAllItems = [created, ...gestorAllItems.filter((x) => x.id !== created.id)];
+  resetGestorFilters();
+  gestorPagina = 1;
+  safeApplyGestorFilterAndPage();
+  if (status) {
+    status.textContent = `Oportunidad agregada (${getPlanUserEmail() || "tu usuario"}).`;
+    status.classList.remove("hidden");
+  }
+
+  await cargarGestor(getPlanUserEmail());
 
   if (status && created?.id) {
     setTimeout(() => status.classList.add("hidden"), 3500);

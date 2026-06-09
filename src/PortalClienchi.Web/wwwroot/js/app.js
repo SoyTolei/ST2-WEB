@@ -395,15 +395,25 @@ function waitForPreviewImages(doc) {
   );
 }
 
-aboutBtn.addEventListener("click", () => {
+function showAbout() {
+  const build = appConfig?.webBuild;
+  const buildLine = build ? `\nVersión web: ${build.slice(0, 7)}` : "";
   alert(
-    "ST2 Web\n\nEntorno integrado con herramientas en un solo lugar:\n" +
-    "• Sistema de Planillas (próximamente)\n" +
-    "• Portal Cliente\n" +
-    "• THOM\n" +
-    "• AI Platform\n\nby LG 🚲",
+    "ST2 Web — entorno integrado para soporte Bejerman / ONVIO" +
+    buildLine +
+    "\n\nMódulos:\n" +
+    "• Sistema de Planillas\n" +
+    "  – Transferencia entre mesas (TXT + IA manual)\n" +
+    "  – Referral a I+D (capturas, MAM/SDK, IA manual)\n" +
+    "  – Oportunidad de Venta (PDF + gestor por usuario)\n" +
+    "• Portal Cliente (búsqueda de instructivos)\n" +
+    "• THOM (CSS-TAP) y AI Platform embebidos\n\n" +
+    "Web: https://st2.tolei.dev\n" +
+    "by LG 🚲",
   );
-});
+}
+
+aboutBtn.addEventListener("click", showAbout);
 
 document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));

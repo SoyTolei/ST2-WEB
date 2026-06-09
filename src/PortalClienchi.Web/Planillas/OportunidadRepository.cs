@@ -23,8 +23,25 @@ public sealed class OportunidadRepository
 
     public bool StorageReady { get; private set; }
 
+    public int ClaimOrphanRows(string usuario)
+    {
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE oportunidades SET usuario = $usuario
+            WHERE IFNULL(TRIM(usuario), '') = ''
+            """;
+        cmd.Parameters.AddWithValue("$usuario", usuario);
+        var claimed = cmd.ExecuteNonQuery();
+        if (claimed > 0)
+            _logger.LogInformation("Reasignadas {Count} oportunidades sin usuario a {Usuario}", claimed, usuario);
+        return claimed;
+    }
+
     public IReadOnlyList<OportunidadRecordDto> LoadAll(string usuario)
     {
+        ClaimOrphanRows(usuario);
+
         var list = new List<OportunidadRecordDto>();
         using var conn = Open();
         using var cmd = conn.CreateCommand();
