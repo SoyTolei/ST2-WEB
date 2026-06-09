@@ -565,6 +565,30 @@ const planillasContext = {
   getConfig: () => planillasConfig,
 };
 
+function initSecretRunnerTrigger() {
+  const trigger = document.getElementById("planillas-secret-trigger");
+  if (!trigger) return;
+
+  const secretUrl = "https://referralrunner.tolei.dev/";
+  const clicksNeeded = 5;
+  const resetMs = 2500;
+  let count = 0;
+  let resetTimer = null;
+
+  trigger.addEventListener("click", () => {
+    count += 1;
+    clearTimeout(resetTimer);
+    if (count >= clicksNeeded) {
+      count = 0;
+      window.location.href = secretUrl;
+      return;
+    }
+    resetTimer = setTimeout(() => {
+      count = 0;
+    }, resetMs);
+  });
+}
+
 export async function initPlanillas() {
   if (!views.menu) return;
 
@@ -579,5 +603,6 @@ export async function initPlanillas() {
   initReferralModule(planillasContext);
   initOportunidadModule(planillasContext);
   bindEvents();
+  initSecretRunnerTrigger();
   showView("menu");
 }
