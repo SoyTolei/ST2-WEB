@@ -29,7 +29,7 @@ public sealed class OportunidadService
     public OportunidadCargaForm FromRequest(OportunidadCargaRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal)
+        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal or PlanillasSistema.Chile)
             throw new ArgumentException("Sistema no válido para Oportunidad de Venta.");
 
         return new OportunidadCargaForm

@@ -6,6 +6,7 @@ public enum PlanillasSistema
     BejermanSql,
     OnvioWeb,
     Legal,
+    Chile,
 }
 
 public static class PlanillasSistemaExtensions
@@ -13,12 +14,14 @@ public static class PlanillasSistemaExtensions
     public const string BejermanSqlLabel = "Bejerman SQL";
     public const string OnvioWebLabel = "ONVIO/Bejerman WEB";
     public const string LegalLabel = "LEGAL";
+    public const string ChileLabel = "Chile";
 
     public static string ToDisplayName(this PlanillasSistema sistema) => sistema switch
     {
         PlanillasSistema.BejermanSql => BejermanSqlLabel,
         PlanillasSistema.OnvioWeb => OnvioWebLabel,
         PlanillasSistema.Legal => LegalLabel,
+        PlanillasSistema.Chile => ChileLabel,
         _ => string.Empty,
     };
 
@@ -27,8 +30,15 @@ public static class PlanillasSistemaExtensions
         "BejermanSql" or "bejermanSql" or BejermanSqlLabel => PlanillasSistema.BejermanSql,
         "OnvioWeb" or "onvioWeb" or OnvioWebLabel => PlanillasSistema.OnvioWeb,
         "Legal" or "legal" or LegalLabel => PlanillasSistema.Legal,
+        "Chile" or "chile" or ChileLabel => PlanillasSistema.Chile,
         _ => PlanillasSistema.None,
     };
+
+    public static bool IsPlaceholder(this PlanillasSistema sistema) =>
+        sistema is PlanillasSistema.Chile;
+
+    public static bool BlocksOportunidad(this PlanillasSistema sistema) =>
+        sistema is PlanillasSistema.Legal or PlanillasSistema.Chile;
 }
 
 public sealed class TransferenciaCase

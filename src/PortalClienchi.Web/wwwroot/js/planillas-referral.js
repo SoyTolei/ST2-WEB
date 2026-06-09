@@ -38,7 +38,13 @@ export function openReferral() {
 }
 
 function sistemaLabel() {
-  return ctx.getSistema() === "OnvioWeb" ? "ONVIO/Bejerman WEB" : "Bejerman SQL";
+  const id = ctx.getSistema();
+  return {
+    BejermanSql: "Bejerman SQL",
+    OnvioWeb: "ONVIO/Bejerman WEB",
+    Legal: "LEGAL",
+    Chile: "Chile",
+  }[id] || "Bejerman SQL";
 }
 
 function isBejerman() {

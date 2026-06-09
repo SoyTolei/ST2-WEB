@@ -17,10 +17,9 @@ export const PLAN_ICONS = {
   hourglass: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h10v2l-5 5 5 5v2H7v-2l5-5-5-5V5z"/></svg>`,
   clipboard: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="10" height="14" rx="2"/><path d="M7 7H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h10"/><path d="M12 11h2M12 15h2"/></svg>`,
   saveTxt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h5"/><path d="M12 16v4M10.5 18.5 12 20l1.5-1.5"/></svg>`,
+  ia: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.1 3.4L16.5 8l-3.4 1.1L12 12.5 10.9 9.1 7.5 8l3.4-1.1L12 3z"/><path d="M19 13l.9 2.8L22.7 17l-2.8.9L19 20.7l-.9-2.8-2.8-.9 2.8-.9L19 13z"/><path d="M5 15l.7 2.1L7.8 18l-2.1.7L5 21.4l-.7-2.1L2.2 18l2.1-.7L5 15z"/></svg>`,
   pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h6M8 17h4"/></svg>`,
 };
-
-export function injectModuleHeaders() {
   document.querySelectorAll("[data-plan-icon]").forEach((el) => {
     const key = el.dataset.planIcon;
     if (PLAN_ICONS[key]) el.innerHTML = PLAN_ICONS[key];

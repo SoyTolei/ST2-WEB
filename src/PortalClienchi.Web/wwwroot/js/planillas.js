@@ -11,6 +11,28 @@ const MESA_LABELS = {
   SUELDOS: "Sueldos y Jornales",
 };
 
+const SISTEMA_LABELS = {
+  BejermanSql: "Bejerman SQL",
+  OnvioWeb: "ONVIO/Bejerman WEB",
+  Legal: "LEGAL",
+  Chile: "Chile",
+};
+
+const SISTEMA_INDEX = {
+  BejermanSql: 0,
+  OnvioWeb: 1,
+  Legal: 2,
+  Chile: 3,
+};
+
+function sistemaDisplayLabel(id) {
+  return SISTEMA_LABELS[id] || "";
+}
+
+function isSistemaPlaceholder(id) {
+  return id === "Chile";
+}
+
 let planillasConfig = null;
 let sistemaActual = null;
 let mesaActual = null;
@@ -70,7 +92,7 @@ function setSistemaIndicator(index) {
 }
 
 function updateSistemaUi() {
-  const index = sistemaActual === "OnvioWeb" ? 1 : sistemaActual === "Legal" ? 2 : 0;
+  const index = SISTEMA_INDEX[sistemaActual] ?? 0;
   els.sistemaBtns().forEach((btn) => {
     const active = btn.dataset.planSistema === sistemaActual;
     btn.classList.toggle("active", active);
@@ -80,10 +102,10 @@ function updateSistemaUi() {
   const transferBtn = document.querySelector('[data-plan-modulo="transferencia"]');
   const referralBtn = document.querySelector('[data-plan-modulo="referral"]');
   const oportunidadBtn = document.querySelector('[data-plan-modulo="oportunidad"]');
-  const enabled = sistemaActual && sistemaActual !== "Legal";
-  [transferBtn, referralBtn, oportunidadBtn].forEach((b) => {
-    if (b) b.disabled = !enabled;
-  });
+  const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
+  if (transferBtn) transferBtn.disabled = placeholderBlocked;
+  if (referralBtn) referralBtn.disabled = placeholderBlocked;
+  if (oportunidadBtn) oportunidadBtn.disabled = !sistemaActual || isSistemaPlaceholder(sistemaActual);
 }
 
 function selectSistema(id) {
@@ -326,11 +348,7 @@ function limpiarTransferencia() {
 }
 
 function initTransferenciaForm() {
-  const labels = {
-    BejermanSql: "Bejerman SQL",
-    OnvioWeb: "ONVIO/Bejerman WEB",
-  };
-  els.sistemaBadge().textContent = labels[sistemaActual] || "";
+  els.sistemaBadge().textContent = sistemaDisplayLabel(sistemaActual);
   initTransferenciaIaUi();
   limpiarTransferencia();
 }
@@ -461,8 +479,8 @@ async function onGenerarTxt() {
 function openPlaceholder(moduleTitle) {
   els.placeholderTitle().textContent = moduleTitle;
   els.placeholderText().textContent =
-    sistemaActual === "Legal"
-      ? "El módulo LEGAL estará disponible en una próxima versión."
+    sistemaActual === "Chile"
+      ? "El módulo Chile estará disponible en una próxima versión."
       : `${moduleTitle} se migrará en una próxima fase. Por ahora usá Transferencia de Casos.`;
   showView("placeholder");
 }
@@ -473,19 +491,23 @@ function bindEvents() {
   });
 
   document.querySelector('[data-plan-modulo="transferencia"]')?.addEventListener("click", () => {
-    if (!sistemaActual || sistemaActual === "Legal") return;
+    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
     initTransferenciaForm();
     showView("transferencia");
   });
 
   document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("click", async () => {
-    if (!sistemaActual || sistemaActual === "Legal") return;
+    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
     const mod = await loadReferralModule();
     mod.openReferral();
   });
 
   document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", async () => {
-    if (!sistemaActual || sistemaActual === "Legal") return;
+    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
+    if (sistemaActual === "Legal") {
+      alert("Oportunidad de venta no corresponde a Legal.");
+      return;
+    }
     const mod = await loadOportunidadModule();
     mod.openOportunidadMenu();
   });

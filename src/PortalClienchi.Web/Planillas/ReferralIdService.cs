@@ -19,7 +19,7 @@ public sealed class ReferralIdService
     public ReferralIdCase FromRequest(ReferralGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal)
+        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
             throw new ArgumentException("Sistema no válido para Referral I+D.");
 
         var caso = new ReferralIdCase { Sistema = sistema };

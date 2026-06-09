@@ -19,7 +19,8 @@ public static class PlanillasEndpoints
             {
                 new { id = "BejermanSql", label = PlanillasSistemaExtensions.BejermanSqlLabel, placeholder = false },
                 new { id = "OnvioWeb", label = PlanillasSistemaExtensions.OnvioWebLabel, placeholder = false },
-                new { id = "Legal", label = PlanillasSistemaExtensions.LegalLabel, placeholder = true },
+                new { id = "Legal", label = PlanillasSistemaExtensions.LegalLabel, placeholder = false },
+                new { id = "Chile", label = PlanillasSistemaExtensions.ChileLabel, placeholder = true },
             },
             iaConfigured = svc.IaConfigured,
             capturaHosting = new
