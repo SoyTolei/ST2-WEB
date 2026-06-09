@@ -1114,6 +1114,20 @@
 .plan-backup-base-card .card-mark { font-size: 0.9rem; color: #94a3b8; }
 .plan-backup-base-card.selected .card-mark { color: #16a34a; }
 
+.plan-backup-sql {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #fdba74;
+}
+
+.plan-backup-sql label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
 .plan-onvio-checks { display: grid; gap: 8px; margin-bottom: 16px; }
 
 .plan-op-submenu { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0 10px; }

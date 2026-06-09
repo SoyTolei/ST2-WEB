@@ -82,7 +82,9 @@ function buildReferralPills() {
 
 function updateSqlPanel() {
   const backup = document.getElementById("ref-adj-backup")?.checked;
-  document.getElementById("ref-sql-panel")?.classList.toggle("hidden", !backup);
+  const anyBase = ["ref-backup-manager", "ref-backup-sbda", "ref-backup-cg", "ref-backup-sj"]
+    .some((id) => document.getElementById(id)?.checked);
+  document.getElementById("ref-sql-panel")?.classList.toggle("hidden", !(backup && anyBase));
 }
 
 function updateCheckStatuses() {
@@ -146,6 +148,7 @@ function clearBackupBases() {
     const mark = document.getElementById(markId);
     if (mark) { mark.textContent = "○"; mark.style.color = "#94a3b8"; }
   });
+  updateSqlPanel();
 }
 
 function syncReferralCards() {
@@ -241,10 +244,10 @@ function bindReferralEvents() {
     updateSqlPanel();
   });
 
-  bindAdjCard("ref-card-backup-manager", "ref-backup-manager", "ref-mark-backup-manager");
-  bindAdjCard("ref-card-backup-sbda", "ref-backup-sbda", "ref-mark-backup-sbda");
-  bindAdjCard("ref-card-backup-cg", "ref-backup-cg", "ref-mark-backup-cg");
-  bindAdjCard("ref-card-backup-sj", "ref-backup-sj", "ref-mark-backup-sj");
+  bindAdjCard("ref-card-backup-manager", "ref-backup-manager", "ref-mark-backup-manager", updateSqlPanel);
+  bindAdjCard("ref-card-backup-sbda", "ref-backup-sbda", "ref-mark-backup-sbda", updateSqlPanel);
+  bindAdjCard("ref-card-backup-cg", "ref-backup-cg", "ref-mark-backup-cg", updateSqlPanel);
+  bindAdjCard("ref-card-backup-sj", "ref-backup-sj", "ref-mark-backup-sj", updateSqlPanel);
 
   bindOnvioCard("ref-card-onvio-proceso", "ref-onvio-proceso");
   bindOnvioCard("ref-card-onvio-reproduce", "ref-onvio-reproduce");
@@ -349,11 +352,15 @@ function setReferralPantallasUi(checked) {
   document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !checked);
 }
 
+function isReferralCapturaFile(file) {
+  if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
+  return (file.type || "").startsWith("image/");
+}
+
 function addReferralCapturaFiles(fileList, targetList) {
-  const allowed = /\.(png|jpe?g|gif|bmp|webp)$/i;
   let added = 0;
   for (const file of fileList) {
-    if (!allowed.test(file.name)) continue;
+    if (!isReferralCapturaFile(file)) continue;
     if (!targetList.some((f) => f.name === file.name && f.size === file.size)) {
       targetList.push(file);
       added++;
@@ -363,13 +370,28 @@ function addReferralCapturaFiles(fileList, targetList) {
   return added;
 }
 
+function refreshCapturasEstadoReferral(prefix, fileList) {
+  const estadoId = prefix === "ref-capturas" ? "ref-capturas-estado" : "ref-onvio-capt-estado";
+  const estado = document.getElementById(estadoId);
+  if (!estado) return;
+  if (fileList.length === 0) {
+    estado.textContent = "";
+    return;
+  }
+  estado.textContent = `${fileList.length} imagen(es) lista(s) para subir al generar el .txt.`;
+}
+
 function setupCapturas(prefix, fileList) {
   document.getElementById(`${prefix}-agregar`)?.addEventListener("click", () => {
     document.getElementById(`${prefix}-input`)?.click();
   });
   document.getElementById(`${prefix}-input`)?.addEventListener("change", (e) => {
-    addReferralCapturaFiles(e.target.files, fileList);
+    const added = addReferralCapturaFiles(e.target.files, fileList);
+    if (added === 0 && e.target.files?.length > 0) {
+      alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP).");
+    }
     refreshChips(`${prefix}-chips`, fileList);
+    refreshCapturasEstadoReferral(prefix, fileList);
     e.target.value = "";
   });
   document.getElementById(`${prefix}-pegar`)?.addEventListener("click", async () => {
@@ -383,6 +405,7 @@ function setupCapturas(prefix, fileList) {
         const file = new File([blob], `captura_${Date.now()}.${ext}`, { type: t });
         addReferralCapturaFiles([file], fileList);
         refreshChips(`${prefix}-chips`, fileList);
+        refreshCapturasEstadoReferral(prefix, fileList);
         return;
       }
       alert("No hay imagen en el portapapeles.");
@@ -480,11 +503,15 @@ async function generarReferral(copiar) {
     ? !!payload.adjuntos?.pantallas
     : !!payload.onvio?.adjuntaPantallas;
 
+  if (quierePantallas && files.length === 0) {
+    alert("Marcaste capturas pero no hay imágenes cargadas. Usá «Examinar…» o «Pegar del portapapeles» en el panel de capturas.");
+    status.textContent = "Faltan imágenes para adjuntar.";
+    return;
+  }
+
   const form = new FormData();
   form.append("payload", JSON.stringify(payload));
-  if (files.length > 0) {
-    files.forEach((f) => form.append("capturas", f, f.name));
-  }
+  files.forEach((f) => form.append("capturas", f, f.name || "captura.png"));
 
   status.textContent = files.length > 0 ? "Generando y subiendo capturas…" : "Generando…";
   const response = await fetch("/api/planillas/referral/generar", { method: "POST", body: form });

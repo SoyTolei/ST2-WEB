@@ -104,33 +104,52 @@ public sealed class ReferralIdService
         IReadOnlyList<IFormFile> files,
         CancellationToken ct)
     {
-        if (files.Count == 0)
-            return caso;
-
-        var archivos = files
-            .Where(f => f.Length > 0)
-            .Select(f => (f.FileName, (Stream)f.OpenReadStream()))
-            .ToList();
-
-        if (archivos.Count == 0)
-            return caso;
-
-        if (caso.Sistema == PlanillasSistema.BejermanSql)
-            caso.Adjuntos.Pantallas = true;
-        else if (caso.Sistema == PlanillasSistema.OnvioWeb)
-            caso.Onvio.AdjuntaPantallas = true;
-
-        var subidos = await _capturas.SubirCapturasAsync(archivos, ct).ConfigureAwait(false);
         var enlaces = caso.CapturasEnlaces.ToList();
-        enlaces.AddRange(subidos);
-        caso.CapturasEnlaces = enlaces;
-
-        if (enlaces.Count == 0)
+        if (files.Count == 0)
         {
-            throw new InvalidOperationException(
-                "No se pudieron subir las capturas. Verificá el formato (PNG, JPG, etc.) y la configuración de hosting.");
+            caso.CapturasEnlaces = enlaces;
+            return caso;
         }
 
+        var buffers = new List<(string FileName, MemoryStream Content)>();
+        try
+        {
+            foreach (var file in files.Where(f => f.Length > 0))
+            {
+                var ms = new MemoryStream();
+                await file.CopyToAsync(ms, ct).ConfigureAwait(false);
+                ms.Position = 0;
+                buffers.Add((file.FileName, ms));
+            }
+
+            if (buffers.Count == 0)
+            {
+                caso.CapturasEnlaces = enlaces;
+                return caso;
+            }
+
+            var archivos = buffers.Select(b => (b.FileName, (Stream)b.Content)).ToList();
+            var subidos = await _capturas.SubirCapturasAsync(archivos, ct).ConfigureAwait(false);
+            enlaces.AddRange(subidos);
+
+            if (enlaces.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "No se pudieron subir las capturas. Verificá el formato (PNG, JPG, etc.) y la configuración de hosting.");
+            }
+
+            if (caso.Sistema == PlanillasSistema.BejermanSql)
+                caso.Adjuntos.Pantallas = true;
+            else if (caso.Sistema == PlanillasSistema.OnvioWeb)
+                caso.Onvio.AdjuntaPantallas = true;
+        }
+        finally
+        {
+            foreach (var (_, stream) in buffers)
+                await stream.DisposeAsync().ConfigureAwait(false);
+        }
+
+        caso.CapturasEnlaces = enlaces;
         return caso;
     }
 

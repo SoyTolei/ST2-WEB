@@ -211,12 +211,6 @@
                   <span class="plan-bej-label">Módulo</span>
                   <div class="plan-segment-track plan-segment-track-wide" id="ref-modulo-pills"></div>
                 </div>
-                <div id="ref-sql-panel" class="plan-bej-sql hidden">
-                  <div class="plan-form-2col plan-form-2col-tight">
-                    <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
-                    <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -277,13 +271,14 @@
               <input type="checkbox" id="ref-adj-backup" class="hidden"/>
               <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
                 <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Si no cargás las capturas acá, recordá hacerlo en comentarios.</p>
+                <p class="plan-capturas-hint">Cargá acá las imágenes para que el .txt incluya los links (como en Traspaso).</p>
                 <div id="ref-capturas-chips" class="plan-capturas-chips"></div>
                 <div class="plan-capturas-actions">
                   <button type="button" id="ref-capturas-agregar" class="btn btn-secondary">Examinar…</button>
                   <button type="button" id="ref-capturas-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
                   <input id="ref-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
                 </div>
+                <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
               </div>
               <button type="button" class="plan-adj-card plan-adj-backup" id="ref-card-backup" data-adj="backup">
                 <span class="plan-adj-label">
@@ -307,6 +302,13 @@
                 <input type="checkbox" id="ref-backup-sbda" class="hidden"/>
                 <input type="checkbox" id="ref-backup-cg" class="hidden"/>
                 <input type="checkbox" id="ref-backup-sj" class="hidden"/>
+                <div id="ref-sql-panel" class="plan-backup-sql hidden">
+                  <p class="plan-backup-detail-title">Collation y SQL Server</p>
+                  <div class="plan-form-2col plan-form-2col-tight">
+                    <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
+                    <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -368,13 +370,14 @@
               </div>
               <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
                 <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Si no cargás las capturas acá, recordá hacerlo en comentarios.</p>
+                <p class="plan-capturas-hint">Cargá acá las imágenes para que el .txt incluya los links (como en Traspaso).</p>
                 <div id="ref-onvio-capt-chips" class="plan-capturas-chips"></div>
                 <div class="plan-capturas-actions">
                   <button type="button" id="ref-onvio-capt-agregar" class="btn btn-secondary">Examinar…</button>
                   <button type="button" id="ref-onvio-capt-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
                   <input id="ref-onvio-capt-input" type="file" accept="image/*" multiple class="hidden"/>
                 </div>
+                <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
               </div>
               <p class="plan-ref-title">Información del usuario</p>
               <div class="plan-well-box">

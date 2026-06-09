@@ -192,7 +192,7 @@ public static class ReferralIdTextBuilder
             if (a.Pantallas)
             {
                 partes.Add("- Captura / imágenes");
-                CapturasTextoHelper.AppendDetalleCapturasBajoLinea(partes, c.CapturasEnlaces);
+                CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
             }
             if (a.TrazaSql)
             {
@@ -214,7 +214,7 @@ public static class ReferralIdTextBuilder
             if (c.Onvio.AdjuntaPantallas)
             {
                 partes.Add("- Captura / imágenes");
-                CapturasTextoHelper.AppendDetalleCapturasBajoLinea(partes, c.CapturasEnlaces);
+                CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
             }
         }
 
