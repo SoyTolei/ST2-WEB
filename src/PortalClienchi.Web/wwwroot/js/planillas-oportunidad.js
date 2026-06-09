@@ -22,6 +22,7 @@ let gestorAllItems = [];
 let gestorFiltered = [];
 let gestorPagina = 1;
 let gestorSelectedId = null;
+let gestorUpdatingMonthCombo = false;
 let linkPlaceholderActive = true;
 let oportunidadIaUndo = null;
 
@@ -239,16 +240,18 @@ function limpiarCargar() {
 function initGestorUi() {
   const combo = document.getElementById("op-filter-month-combo");
   if (combo && combo.options.length === 0) {
+    gestorUpdatingMonthCombo = true;
     combo.innerHTML = '<option value="Todas">Todas</option>';
     combo.value = "Todas";
+    gestorUpdatingMonthCombo = false;
   }
   updateLinkStatusUi();
   setLinkPlaceholder();
-  safeApplyGestorFilterAndPage();
 }
 
 function bindGestorEvents() {
   document.getElementById("op-filter-month-combo")?.addEventListener("change", () => {
+    if (gestorUpdatingMonthCombo) return;
     gestorPagina = 1;
     safeApplyGestorFilterAndPage();
   });
@@ -481,6 +484,7 @@ async function cargarGestor(knownUser = null) {
 
   gestorPagina = 1;
   safeApplyGestorFilterAndPage();
+  requestAnimationFrame(() => renderGestorPage());
 
   const label = document.getElementById("op-gestor-pagina-label");
   const serverTotal = typeof data.total === "number" ? data.total : gestorAllItems.length;
@@ -557,6 +561,11 @@ function applyGestorFilterAndPage() {
   }
 
   renderGestorPage();
+  console.info("[Gestor] filter", {
+    all: gestorAllItems.length,
+    filtered: gestorFiltered.length,
+    filtro: combo?.value || "Todas",
+  });
 }
 
 function rebuildGestorMonthOptions(all, keep) {
@@ -576,8 +585,10 @@ function rebuildGestorMonthOptions(all, keep) {
     }
   }
 
+  gestorUpdatingMonthCombo = true;
   combo.innerHTML = opciones.map((o) => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("");
   combo.value = opciones.includes(keep) ? keep : "Todas";
+  gestorUpdatingMonthCombo = false;
 }
 
 function parseGestorFiltro(filtro) {
@@ -630,53 +641,35 @@ function formatGestorDescripcion(item) {
 function renderGestorPage() {
   const tbody = document.getElementById("op-gestor-table-body");
   const label = document.getElementById("op-gestor-pagina-label");
-  if (!tbody) return;
+  if (!tbody) {
+    console.warn("[Gestor] tbody #op-gestor-table-body no encontrado");
+    return;
+  }
 
   const totalPaginas = Math.max(1, Math.ceil(gestorFiltered.length / GESTOR_POR_PAGINA));
   const pageItems = gestorFiltered.slice((gestorPagina - 1) * GESTOR_PAGINA, gestorPagina * GESTOR_POR_PAGINA);
 
+  tbody.replaceChildren();
+
   if (pageItems.length === 0) {
-    tbody.innerHTML = `<tr class="plan-gestor-empty-row"><td colspan="4">No hay oportunidades cargadas.</td></tr>`;
+    const row = document.createElement("tr");
+    row.className = "plan-gestor-empty-row";
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = "No hay oportunidades cargadas.";
+    row.appendChild(cell);
+    tbody.appendChild(row);
   } else {
-    tbody.innerHTML = pageItems.map((r) => {
-      const hasLink = !!(r.link && r.link.trim());
-      const confirmada = isConfirmada(r);
-      const icon = confirmada ? "✅" : "⏳";
-      const tip = confirmada ? "Confirmada" : "Pendiente de confirmación";
-      return `
-        <tr data-id="${r.id}" class="${gestorSelectedId === r.id ? "selected" : ""}">
-          <td class="col-fecha">${escapeHtml(formatGestorFecha(r.fecha))}</td>
-          <td>${escapeHtml(formatGestorDescripcion(r))}</td>
-          <td class="col-link">
-            <button type="button" class="plan-gestor-link-open" data-open-link="${r.id}" ${hasLink ? "" : "disabled"} title="${hasLink ? "Abrir oportunidad en el navegador" : "Sin link cargado"}">↗ Abrir</button>
-          </td>
-          <td class="col-confirm" title="${escapeHtml(tip)}">${icon}</td>
-        </tr>`;
-    }).join("");
-
-    tbody.querySelectorAll("tr[data-id]").forEach((row) => {
-      row.addEventListener("click", (e) => {
-        if (e.target.closest("[data-open-link]")) return;
-        gestorSelectedId = +row.dataset.id;
-        tbody.querySelectorAll("tr.selected").forEach((tr) => tr.classList.remove("selected"));
-        row.classList.add("selected");
-      });
-      row.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        gestorSelectedId = +row.dataset.id;
-        tbody.querySelectorAll("tr.selected").forEach((tr) => tr.classList.remove("selected"));
-        row.classList.add("selected");
-        showGestorContextMenu(e.clientX, e.clientY);
-      });
-    });
-
-    tbody.querySelectorAll("[data-open-link]").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        abrirLinkGestor(+btn.dataset.openLink);
-      });
-    });
+    for (const r of pageItems) {
+      tbody.appendChild(buildGestorRow(r, tbody));
+    }
   }
+
+  console.info("[Gestor] render", {
+    filtered: gestorFiltered.length,
+    page: gestorPagina,
+    rows: tbody.querySelectorAll("tr[data-id]").length,
+  });
 
   if (label) {
     label.textContent = `Página ${gestorPagina} de ${totalPaginas} (${gestorFiltered.length} registros)`;
@@ -691,6 +684,62 @@ function renderGestorPage() {
   const nextBtn = document.getElementById("op-gestor-next");
   if (prevBtn) prevBtn.disabled = gestorPagina <= 1;
   if (nextBtn) nextBtn.disabled = gestorPagina >= totalPaginas;
+}
+
+function buildGestorRow(r, tbody) {
+  const hasLink = !!(r.link && r.link.trim());
+  const confirmada = isConfirmada(r);
+  const icon = confirmada ? "✅" : "⏳";
+  const tip = confirmada ? "Confirmada" : "Pendiente de confirmación";
+
+  const row = document.createElement("tr");
+  row.dataset.id = String(r.id);
+  if (gestorSelectedId === r.id) row.classList.add("selected");
+
+  const tdFecha = document.createElement("td");
+  tdFecha.className = "col-fecha";
+  tdFecha.textContent = formatGestorFecha(r.fecha);
+
+  const tdDesc = document.createElement("td");
+  tdDesc.textContent = formatGestorDescripcion(r);
+
+  const tdLink = document.createElement("td");
+  tdLink.className = "col-link";
+  const linkBtn = document.createElement("button");
+  linkBtn.type = "button";
+  linkBtn.className = "plan-gestor-link-open";
+  linkBtn.dataset.openLink = String(r.id);
+  linkBtn.textContent = "↗ Abrir";
+  linkBtn.disabled = !hasLink;
+  linkBtn.title = hasLink ? "Abrir oportunidad en el navegador" : "Sin link cargado";
+  linkBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    abrirLinkGestor(r.id);
+  });
+  tdLink.appendChild(linkBtn);
+
+  const tdConfirm = document.createElement("td");
+  tdConfirm.className = "col-confirm";
+  tdConfirm.title = tip;
+  tdConfirm.textContent = icon;
+
+  row.append(tdFecha, tdDesc, tdLink, tdConfirm);
+
+  row.addEventListener("click", (e) => {
+    if (e.target.closest(".plan-gestor-link-open")) return;
+    gestorSelectedId = r.id;
+    tbody.querySelectorAll("tr.selected").forEach((tr) => tr.classList.remove("selected"));
+    row.classList.add("selected");
+  });
+  row.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    gestorSelectedId = r.id;
+    tbody.querySelectorAll("tr.selected").forEach((tr) => tr.classList.remove("selected"));
+    row.classList.add("selected");
+    showGestorContextMenu(e.clientX, e.clientY);
+  });
+
+  return row;
 }
 
 function getGestorItem(id = gestorSelectedId) {
