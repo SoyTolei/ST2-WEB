@@ -165,11 +165,25 @@ function refreshCapturasUi() {
   if (!chips) return;
 
   chips.innerHTML = "";
-  capturaFiles.forEach((f) => {
-    const span = document.createElement("span");
-    span.className = "plan-chip";
-    span.textContent = f.name;
-    chips.appendChild(span);
+  capturaFiles.forEach((f, index) => {
+    const chip = document.createElement("span");
+    chip.className = "plan-chip";
+    const name = document.createElement("span");
+    name.className = "plan-chip-name";
+    name.textContent = f.name;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "plan-chip-remove";
+    btn.setAttribute("aria-label", `Quitar ${f.name}`);
+    btn.textContent = "×";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      capturaFiles.splice(index, 1);
+      refreshCapturasUi();
+    });
+    chip.append(name, btn);
+    chips.appendChild(chip);
   });
 
   if (estado) {
@@ -503,11 +517,6 @@ function bindEvents() {
   });
 
   document.getElementById("plan-capturas-pegar")?.addEventListener("click", pegarCaptura);
-
-  document.getElementById("plan-capturas-quitar")?.addEventListener("click", () => {
-    capturaFiles = [];
-    refreshCapturasUi();
-  });
 
   document.getElementById("plan-ticket-card")?.addEventListener("click", () => {
     const c = els.ticketCheck();

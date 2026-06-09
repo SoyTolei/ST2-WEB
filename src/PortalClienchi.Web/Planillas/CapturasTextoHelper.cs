@@ -20,7 +20,7 @@ public static class CapturasTextoHelper
     {
         if (enlaces.Count > 0)
         {
-            partes.Add("SE ADJUNTAN LOS SIGUIENTES LINKS 🗃️");
+            partes.Add(BuildEnlacesIntro(enlaces.Count));
             foreach (var enlace in enlaces)
                 partes.Add(enlace.Url);
             return;
@@ -44,7 +44,7 @@ public static class CapturasTextoHelper
         var pad = indentar ? "  " : "";
         if (enlaces.Count > 0)
         {
-            partes.Add($"{pad}SE ADJUNTAN LOS SIGUIENTES LINKS 🗃️");
+            partes.Add($"{pad}{BuildEnlacesIntro(enlaces.Count)}");
             foreach (var enlace in enlaces)
                 partes.Add(indentar ? $"  {enlace.Url}" : enlace.Url);
             return;
@@ -52,4 +52,9 @@ public static class CapturasTextoHelper
 
         partes.Add($"{pad}La captura / imágenes se adjunta en comentarios.");
     }
+
+    private static string BuildEnlacesIntro(int count) =>
+        count == 1
+            ? "Se adjunta la imagen en el siguiente link:"
+            : "Se adjuntan las imágenes en los siguientes links:";
 }

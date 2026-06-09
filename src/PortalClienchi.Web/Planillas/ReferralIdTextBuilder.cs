@@ -202,6 +202,7 @@ public static class ReferralIdTextBuilder
             if (a.BackupBases)
             {
                 partes.Add("- Backup Bases");
+                partes.Add("  Se adjuntan en comentarios.");
                 if (a.BackupManager) partes.Add("  * Manager");
                 if (a.BackupSbda) partes.Add("  * SBDA");
                 if (a.BackupCg) partes.Add("  * CG");

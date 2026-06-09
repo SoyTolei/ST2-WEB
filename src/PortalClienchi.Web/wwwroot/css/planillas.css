@@ -483,11 +483,42 @@
 }
 
 .plan-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: #e8edf5;
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 4px 6px 4px 10px;
   font-size: 0.75rem;
   color: var(--dark);
+}
+
+.plan-chip-name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.plan-chip-remove:hover {
+  background: #cbd5e1;
+  color: #1e293b;
 }
 
 .plan-capturas-estado {

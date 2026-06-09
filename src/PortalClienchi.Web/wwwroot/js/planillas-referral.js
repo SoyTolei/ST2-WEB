@@ -390,7 +390,7 @@ function setupCapturas(prefix, fileList) {
     if (added === 0 && e.target.files?.length > 0) {
       alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP).");
     }
-    refreshChips(`${prefix}-chips`, fileList);
+    refreshChips(`${prefix}-chips`, fileList, prefix, fileList);
     refreshCapturasEstadoReferral(prefix, fileList);
     e.target.value = "";
   });
@@ -404,7 +404,7 @@ function setupCapturas(prefix, fileList) {
         const ext = t.split("/")[1]?.replace("jpeg", "jpg") || "png";
         const file = new File([blob], `captura_${Date.now()}.${ext}`, { type: t });
         addReferralCapturaFiles([file], fileList);
-        refreshChips(`${prefix}-chips`, fileList);
+        refreshChips(`${prefix}-chips`, fileList, prefix, fileList);
         refreshCapturasEstadoReferral(prefix, fileList);
         return;
       }
@@ -419,10 +419,31 @@ function getReferralCapturaFiles() {
   return isBejerman() ? capturaFiles : onvioCapturaFiles;
 }
 
-function refreshChips(id, files) {
+function refreshChips(id, files, prefix, fileList) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.innerHTML = files.map((f) => `<span class="plan-chip">${f.name}</span>`).join("");
+  el.innerHTML = "";
+  files.forEach((f, index) => {
+    const chip = document.createElement("span");
+    chip.className = "plan-chip";
+    const name = document.createElement("span");
+    name.className = "plan-chip-name";
+    name.textContent = f.name;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "plan-chip-remove";
+    btn.setAttribute("aria-label", `Quitar ${f.name}`);
+    btn.textContent = "×";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      fileList.splice(index, 1);
+      refreshChips(id, fileList, prefix, fileList);
+      refreshCapturasEstadoReferral(prefix, fileList);
+    });
+    chip.append(name, btn);
+    el.appendChild(chip);
+  });
 }
 
 function buildPayload() {
