@@ -35,7 +35,7 @@ public static class PlanillasSistemaExtensions
     };
 
     public static bool IsPlaceholder(this PlanillasSistema sistema) =>
-        sistema is PlanillasSistema.Chile;
+        sistema is PlanillasSistema.Legal or PlanillasSistema.Chile;
 
     public static bool BlocksOportunidad(this PlanillasSistema sistema) =>
         sistema is PlanillasSistema.Legal or PlanillasSistema.Chile;

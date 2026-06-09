@@ -14,7 +14,7 @@ public static class ReferralIdValidator
         {
             PlanillasSistema.BejermanSql => ValidateBejerman(c),
             PlanillasSistema.OnvioWeb => ValidateOnvio(c),
-            PlanillasSistema.Legal => ValidateCommonFields(c),
+            PlanillasSistema.Legal => "El módulo LEGAL estará disponible en una próxima versión.",
             PlanillasSistema.Chile => "El módulo Chile estará disponible en una próxima versión.",
             _ => "Sistema no válido.",
         };

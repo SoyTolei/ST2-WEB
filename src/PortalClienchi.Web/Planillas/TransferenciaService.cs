@@ -108,7 +108,7 @@ public sealed class TransferenciaService
     public static TransferenciaCase FromRequest(TransferenciaGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
+        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal or PlanillasSistema.Chile)
             throw new ArgumentException("Sistema no válido para transferencia.");
 
         var enlaces = (req.CapturasEnlaces ?? [])
@@ -140,8 +140,8 @@ public sealed class TransferenciaService
     public static string? ValidarRequest(TransferenciaGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
-            return "Elegí un sistema válido (Bejerman SQL, ONVIO/Bejerman WEB o LEGAL).";
+        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal or PlanillasSistema.Chile)
+            return "Elegí un sistema válido (Bejerman SQL u ONVIO/Bejerman WEB).";
 
         if (string.IsNullOrWhiteSpace(req.NumeroCliente))
             return "Completá el N° de Cliente.";

@@ -30,7 +30,7 @@ function sistemaDisplayLabel(id) {
 }
 
 function isSistemaPlaceholder(id) {
-  return id === "Chile";
+  return id === "Legal" || id === "Chile";
 }
 
 let planillasConfig = null;
@@ -102,10 +102,21 @@ function updateSistemaUi() {
   const transferBtn = document.querySelector('[data-plan-modulo="transferencia"]');
   const referralBtn = document.querySelector('[data-plan-modulo="referral"]');
   const oportunidadBtn = document.querySelector('[data-plan-modulo="oportunidad"]');
+  const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
+  const legalSelected = sistemaActual === "Legal";
+
   if (transferBtn) transferBtn.disabled = placeholderBlocked;
   if (referralBtn) referralBtn.disabled = placeholderBlocked;
-  if (oportunidadBtn) oportunidadBtn.disabled = !sistemaActual || isSistemaPlaceholder(sistemaActual);
+
+  if (oportunidadBtn) {
+    oportunidadBtn.classList.toggle("hidden", legalSelected);
+    oportunidadBtn.disabled = placeholderBlocked;
+  }
+  if (oportunidadNa) {
+    oportunidadNa.classList.toggle("hidden", !legalSelected);
+    oportunidadNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
+  }
 }
 
 function selectSistema(id) {
@@ -481,7 +492,9 @@ function openPlaceholder(moduleTitle) {
   els.placeholderText().textContent =
     sistemaActual === "Chile"
       ? "El módulo Chile estará disponible en una próxima versión."
-      : `${moduleTitle} se migrará en una próxima fase. Por ahora usá Transferencia de Casos.`;
+      : sistemaActual === "Legal"
+        ? "El módulo LEGAL estará disponible en una próxima versión."
+        : `${moduleTitle} se migrará en una próxima fase. Por ahora usá Transferencia de Casos.`;
   showView("placeholder");
 }
 
@@ -504,10 +517,6 @@ function bindEvents() {
 
   document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", async () => {
     if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
-    if (sistemaActual === "Legal") {
-      alert("Oportunidad de venta no corresponde a Legal.");
-      return;
-    }
     const mod = await loadOportunidadModule();
     mod.openOportunidadMenu();
   });
