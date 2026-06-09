@@ -25,7 +25,8 @@ internal static class WebPreviewBuilder
             processedBody,
             item.DescriptionPlain,
             item.PortalUrl,
-            media);
+            media,
+            pageOrigin);
 
         var embeddedPlayers = WebHtmlContentProcessor.ExtractAdditionalEmbeds(
             item.DescriptionHtml,

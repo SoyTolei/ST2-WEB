@@ -8,10 +8,6 @@ namespace PortalClienchi.Web;
 
 internal static class WebHtmlContentProcessor
 {
-    private static readonly Regex IframeSrcRegex = new(
-        @"<iframe[^>]+src=[""']([^""']+)[""']",
-        RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
     private static readonly Regex EmbedSrcRegex = new(
         @"<embed[^>]+src=[""']([^""']+)[""']",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -57,6 +53,9 @@ internal static class WebHtmlContentProcessor
             if (node.Name is "iframe" or "object" or "embed")
             {
                 var src = node.GetAttributeValue("src", "") ?? node.GetAttributeValue("data-src", "");
+                if (TryReplaceNodeWithStreamingEmbed(node, src, settings, pageOrigin))
+                    continue;
+
                 var link = BuildVideoLink(src, settings);
                 if (link is not null)
                 {
@@ -94,8 +93,6 @@ internal static class WebHtmlContentProcessor
             return "";
 
         var urls = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (Match match in IframeSrcRegex.Matches(html))
-            urls.Add(match.Groups[1].Value);
         foreach (Match match in EmbedSrcRegex.Matches(html))
             urls.Add(match.Groups[1].Value);
         foreach (Match match in HrefRegex.Matches(html))
@@ -177,6 +174,28 @@ internal static class WebHtmlContentProcessor
             var proxyUrl = "/api/media-proxy?url=" + Uri.EscapeDataString(absolute);
             return match.Groups[1].Value + proxyUrl + match.Groups[3].Value;
         });
+    private static bool TryReplaceNodeWithStreamingEmbed(
+        HtmlNode node,
+        string? url,
+        AppSettings settings,
+        string pageOrigin)
+    {
+        var embedBlock = BuildStreamingEmbedFromUrl(url, settings, pageOrigin);
+        if (embedBlock is null)
+            return false;
+
+        var parent = node.ParentNode;
+        if (parent is null)
+            return false;
+
+        var wrapper = HtmlNode.CreateNode("<div>" + embedBlock + "</div>");
+        var children = wrapper.ChildNodes.ToList();
+        foreach (var child in children)
+            parent.InsertBefore(child, node);
+        parent.RemoveChild(node);
+        return true;
+    }
+
     private static string? BuildVideoLink(string? url, AppSettings settings)
     {
         var absolute = MediaContentResolver.ToAbsoluteUrl(url, settings) ?? url;

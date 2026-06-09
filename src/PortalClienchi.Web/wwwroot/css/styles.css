@@ -402,12 +402,48 @@ html, body {
 }
 
 .preview-frame-wrap {
+  position: relative;
   flex: 1 1 auto;
   min-height: 240px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: #fafafa;
   overflow: hidden;
+}
+
+.preview-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.preview-loading.hidden {
+  display: none;
+}
+
+.preview-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: previewSpin 0.85s linear infinite;
+}
+
+@keyframes previewSpin {
+  to { transform: rotate(360deg); }
+}
+
+.preview-loading p {
+  margin: 0;
 }
 
 .preview-frame {

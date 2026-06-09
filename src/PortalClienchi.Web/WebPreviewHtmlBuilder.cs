@@ -13,7 +13,8 @@ internal static class WebPreviewHtmlBuilder
         string? bodyHtml,
         string? plainFallback,
         string? portalUrl = null,
-        MediaResource? media = null)
+        MediaResource? media = null,
+        string? pageOrigin = null)
     {
         var body = !string.IsNullOrWhiteSpace(bodyHtml)
             ? bodyHtml
@@ -22,6 +23,8 @@ internal static class WebPreviewHtmlBuilder
         var productLine = string.IsNullOrWhiteSpace(product)
             ? ""
             : "<p class=\"meta\"><strong>Producto:</strong> " + WebUtility.HtmlEncode(product) + "</p>";
+
+        var origin = pageOrigin ?? StreamingEmbedHelper.PreviewOrigin;
 
         return """
             <!DOCTYPE html>
@@ -95,13 +98,13 @@ internal static class WebPreviewHtmlBuilder
             "<span class=\"badge\">" + WebUtility.HtmlEncode(typeLabel) + "</span>" +
             "<h1 class=\"page-title\">" + WebUtility.HtmlEncode(title) + "</h1>" +
             productLine +
-            BuildMediaBlock(media) +
+            BuildMediaBlock(media, origin) +
             "<div class=\"content\">" + body + "</div>" +
             BuildFooter(portalUrl) +
             "</body></html>";
     }
 
-    private static string BuildMediaBlock(MediaResource? media)
+    private static string BuildMediaBlock(MediaResource? media, string pageOrigin)
     {
         if (media is null || media.Kind == MediaKind.None)
             return "";
@@ -117,7 +120,16 @@ internal static class WebPreviewHtmlBuilder
                    $"<div class=\"media-frame\"><iframe src=\"{url}\" title=\"PDF\"></iframe></div>";
         }
 
-        if (StreamingEmbedHelper.TryGetStreamingEmbedUrl(media.Url, out var embed))
+        var originEncoded = Uri.EscapeDataString(pageOrigin.TrimEnd('/'));
+        string? embed = null;
+        if (WebStreamingEmbed.TryGetYouTubeEmbedUrl(media.Url, originEncoded, out var youtube))
+            embed = youtube;
+        else if (WebStreamingEmbed.TryGetVimeoEmbedUrl(media.Url, pageOrigin, out var vimeo))
+            embed = vimeo;
+        else if (StreamingEmbedHelper.TryGetStreamingEmbedUrl(media.Url, out var fallback))
+            embed = fallback;
+
+        if (!string.IsNullOrWhiteSpace(embed))
         {
             var embedSafe = WebUtility.HtmlEncode(embed);
             return hint +

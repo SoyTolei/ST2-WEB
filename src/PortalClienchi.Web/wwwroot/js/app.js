@@ -15,6 +15,7 @@ const statusBar = document.getElementById("statusBar");
 const yearFilterPanel = document.getElementById("yearFilterPanel");
 const yearFilterButtons = document.getElementById("yearFilterButtons");
 const previewFrame = document.getElementById("previewFrame");
+const previewLoading = document.getElementById("previewLoading");
 const previewTitle = document.getElementById("previewTitle");
 const previewProduct = document.getElementById("previewProduct");
 const previewTypeBadge = document.getElementById("previewTypeBadge");
@@ -45,10 +46,28 @@ const placeholderHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf
 body{font-family:Segoe UI,sans-serif;padding:24px;color:#6b7280;background:#fff;margin:0}
 </style></head><body><p>Elegí un resultado de la lista para ver el instructivo acá.</p></body></html>`;
 
+const previewLoadingHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
+body{font-family:Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center;min-height:200px;margin:0;color:#6b7280;background:#fff}
+</style></head><body><p>Cargando instructivo…</p></body></html>`;
+
 previewFrame.srcdoc = placeholderHtml;
 previewFrame.addEventListener("load", () => {
-  previewReady = Boolean(previewFrame.src);
+  if (previewFrame.src && previewFrame.src !== "about:blank") {
+    previewReady = true;
+    hidePreviewLoading();
+  }
 });
+
+function showPreviewLoading(message = "Cargando instructivo…") {
+  previewLoading?.classList.remove("hidden");
+  const msg = previewLoading?.querySelector("p");
+  if (msg) msg.textContent = message;
+  setStatus(message);
+}
+
+function hidePreviewLoading() {
+  previewLoading?.classList.add("hidden");
+}
 
 async function apiGet(url, signal) {
   const response = await fetch(url, { signal });
@@ -296,7 +315,8 @@ async function selectResult(id, type) {
   downloadContentBtn.disabled = true;
 
   previewFrame.removeAttribute("src");
-  previewFrame.srcdoc = placeholderHtml;
+  previewFrame.srcdoc = previewLoadingHtml;
+  showPreviewLoading("Cargando detalle…");
 
   detailAbort?.abort();
   detailAbort = new AbortController();
@@ -308,6 +328,7 @@ async function selectResult(id, type) {
     selectedMedia = data.media;
     previewReady = false;
     previewFrame.removeAttribute("srcdoc");
+    showPreviewLoading("Cargando vista previa…");
     previewFrame.src = data.previewUrl ?? `/api/knowledge/${id}/preview?${params}`;
     previewTitle.textContent = data.item.title;
     previewProduct.textContent = data.item.productName ? `Producto: ${data.item.productName}` : "";
@@ -321,16 +342,23 @@ async function selectResult(id, type) {
     if (data.media?.url) {
       const isVideo = data.media.kind === "Video";
       openMediaBtn.classList.remove("hidden");
-      downloadContentBtn.classList.remove("hidden");
       openMediaBtn.disabled = false;
-      downloadContentBtn.disabled = false;
       openMediaBtn.textContent = isVideo ? "Abrir video" : "Abrir PDF";
-      downloadContentBtn.textContent = isVideo ? "Descargar video" : "Descargar archivo";
+      if (isVideo) {
+        downloadContentBtn.classList.add("hidden");
+        downloadContentBtn.disabled = true;
+      } else {
+        downloadContentBtn.classList.remove("hidden");
+        downloadContentBtn.disabled = false;
+        downloadContentBtn.textContent = "Descargar archivo";
+      }
     }
   } catch (err) {
     if (err.name === "AbortError") return;
+    hidePreviewLoading();
     previewFrame.removeAttribute("src");
     previewFrame.srcdoc = `<!DOCTYPE html><html><body><p>No se pudo cargar el detalle.<br>${escapeHtml(err.message)}</p></body></html>`;
+    setStatus(err.message || "Error al cargar el instructivo.");
   }
 }
 
