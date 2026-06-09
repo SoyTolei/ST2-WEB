@@ -13,9 +13,7 @@ public static class PlanillasEndpoints
     {
         app.MapGet("/api/planillas/config", (TransferenciaService svc, ReferralIdService referral) => Results.Ok(new
         {
-            webBuild = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA")
-                ?? typeof(PlanillasEndpoints).Assembly.GetName().Version?.ToString()
-                ?? "local",
+            webBuild = St2WebBuild.GetBuild(),
             mesas = new[] { "TECNICO", "FLEX", "SAAS", "SUELDOS" },
             sistemas = new[]
             {

@@ -36,6 +36,24 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
+app.Use(async (ctx, next) =>
+{
+    if (HttpMethods.IsGet(ctx.Request.Method)
+        && (ctx.Request.Path == "/" || ctx.Request.Path.Equals("/index.html", StringComparison.OrdinalIgnoreCase)))
+    {
+        var env = ctx.RequestServices.GetRequiredService<IWebHostEnvironment>();
+        var html = await St2IndexHtml.LoadAsync(env, ctx.RequestAborted).ConfigureAwait(false);
+        ctx.Response.ContentType = "text/html; charset=utf-8";
+        ctx.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+        ctx.Response.Headers.Pragma = "no-cache";
+        ctx.Response.Headers.Expires = "0";
+        await ctx.Response.WriteAsync(html, ctx.RequestAborted).ConfigureAwait(false);
+        return;
+    }
+
+    await next(ctx).ConfigureAwait(false);
+});
+
 app.UseDefaultFiles();
 app.UseStaticFiles(new StaticFileOptions
 {
