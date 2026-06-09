@@ -20,8 +20,6 @@ export async function refreshPlanUserSession() {
 }
 
 export async function ensurePlanUser({ forcePrompt = false } = {}) {
-  if (!forcePrompt && cachedEmail) return cachedEmail;
-
   await refreshPlanUserSession();
   if (!forcePrompt && cachedEmail) return cachedEmail;
 

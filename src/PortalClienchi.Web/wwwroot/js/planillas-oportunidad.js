@@ -1,5 +1,6 @@
 import {
   ensurePlanUser,
+  getPlanUserEmail,
   planUserFetch,
   refreshPlanUserSession,
 } from "./plan-user.js";
@@ -88,6 +89,7 @@ async function openGestor() {
 
   ctx.showView("oportunidadGestor");
 
+  resetGestorFilters();
   document.getElementById("op-gestor-sistema").textContent = sistemaLabel();
   const fechaInput = document.getElementById("op-gestor-fecha");
   if (fechaInput) fechaInput.valueAsDate = new Date();
@@ -330,15 +332,16 @@ async function gestorApiFetch(url, options = {}) {
   let response = await planUserFetch(url, options);
   if (response.status !== 401) return response;
 
-  const user = await ensurePlanUser();
-  if (!user) return response;
+  const hint = localStorage.getItem("st2_plan_user_hint") || getPlanUserEmail();
+  if (!hint) return response;
 
   await fetch("/api/planillas/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: user }),
+    body: JSON.stringify({ email: hint }),
     credentials: "include",
   });
+  await refreshPlanUserSession();
   return planUserFetch(url, options);
 }
 
@@ -358,17 +361,29 @@ async function cargarGestor(knownUser = null) {
   }
 
   const data = await response.json().catch(() => ({ items: [] }));
-  gestorAllItems = (data.items || []).map(normalizeGestorItem).filter((x) => x?.id);
+  gestorAllItems = (data.items || []).map(normalizeGestorItem).filter((x) => x && x.id != null);
   gestorPagina = 1;
   applyGestorFilterAndPage();
   const status = document.getElementById("op-gestor-status");
+  const label = document.getElementById("op-gestor-pagina-label");
   if (status) {
     if (data.storage && data.storage.ready === false) {
       status.textContent = "Sin permiso de escritura en la base. En Railway: Volume en /data/st2 y variable RAILWAY_RUN_UID=0.";
       status.classList.remove("hidden");
+    } else if (gestorFiltered.length === 0 && gestorAllItems.length > 0) {
+      status.textContent = "Hay oportunidades guardadas pero el filtro las oculta. Elegí «Todas» en el mes.";
+      status.classList.remove("hidden");
+    } else if (gestorAllItems.length === 0) {
+      status.textContent = `Sin oportunidades para ${getPlanUserEmail() || "tu usuario"}. Agregá una arriba.`;
+      status.classList.remove("hidden");
     } else {
-      status.classList.add("hidden");
+      status.textContent = `${gestorAllItems.length} oportunidad(es) cargadas.`;
+      status.classList.remove("hidden");
+      setTimeout(() => status.classList.add("hidden"), 3000);
     }
+  }
+  if (label && gestorAllItems.length > 0 && gestorFiltered.length === 0) {
+    label.textContent = `Filtro activo: 0 de ${gestorAllItems.length} visibles — elegí «Todas»`;
   }
 }
 
