@@ -13,6 +13,9 @@ public static class PlanillasEndpoints
     {
         app.MapGet("/api/planillas/config", (TransferenciaService svc, ReferralIdService referral) => Results.Ok(new
         {
+            webBuild = Environment.GetEnvironmentVariable("RAILWAY_GIT_COMMIT_SHA")
+                ?? typeof(PlanillasEndpoints).Assembly.GetName().Version?.ToString()
+                ?? "local",
             mesas = new[] { "TECNICO", "FLEX", "SAAS", "SUELDOS" },
             sistemas = new[]
             {
@@ -225,7 +228,12 @@ public static class PlanillasEndpoints
 
                 var texto = svc.GenerarTexto(caso);
                 var stamp = $"referral_id_{DateTime.Now:yyyyMMdd_HHmmss}";
-                return Results.Ok(new { texto, fileName = $"{stamp}.txt" });
+                return Results.Ok(new
+                {
+                    texto,
+                    fileName = $"{stamp}.txt",
+                    capturasSubidas = caso.CapturasEnlaces.Count,
+                });
             }
             catch (Exception ex)
             {

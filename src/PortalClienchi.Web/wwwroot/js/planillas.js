@@ -559,6 +559,9 @@ export async function initPlanillas() {
   if (!views.menu) return;
 
   await loadConfig();
+  if (planillasConfig?.webBuild) {
+    console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
+  }
   initTransferenciaIaUi();
   injectModuleHeaders();
   selectSistema("BejermanSql");

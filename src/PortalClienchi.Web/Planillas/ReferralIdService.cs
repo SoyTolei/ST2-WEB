@@ -94,12 +94,17 @@ public sealed class ReferralIdService
         return caso;
     }
 
+    public bool QuiereAdjuntarPantallas(ReferralIdCase caso) =>
+        caso.Sistema == PlanillasSistema.BejermanSql
+            ? caso.Adjuntos.Pantallas
+            : caso.Onvio.AdjuntaPantallas;
+
     public async Task<ReferralIdCase> ApplyCapturasUploadAsync(
         ReferralIdCase caso,
         IReadOnlyList<IFormFile> files,
         CancellationToken ct)
     {
-        if (files.Count == 0)
+        if (!QuiereAdjuntarPantallas(caso) || files.Count == 0)
             return caso;
 
         var archivos = files
@@ -107,11 +112,20 @@ public sealed class ReferralIdService
             .Select(f => (f.FileName, (Stream)f.OpenReadStream()))
             .ToList();
 
+        if (archivos.Count == 0)
+            return caso;
+
         var subidos = await _capturas.SubirCapturasAsync(archivos, ct).ConfigureAwait(false);
         var enlaces = caso.CapturasEnlaces.ToList();
         enlaces.AddRange(subidos);
-
         caso.CapturasEnlaces = enlaces;
+
+        if (enlaces.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "No se pudieron subir las capturas. Verificá el formato (PNG, JPG, etc.) y la configuración de hosting.");
+        }
+
         return caso;
     }
 

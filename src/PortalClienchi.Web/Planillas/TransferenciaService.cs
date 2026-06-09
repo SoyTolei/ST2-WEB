@@ -65,12 +65,8 @@ public sealed class TransferenciaService
                     errores.Add($"{r.FileName}: {r.Error}");
             }
 
-            if (errores.Count > 0 && enlaces.Count == 0)
+            if (enlaces.Count == 0 && errores.Count > 0)
                 throw new InvalidOperationException(string.Join(Environment.NewLine, errores));
-
-            if (errores.Count > 0)
-                throw new InvalidOperationException(
-                    "Algunas capturas no se subieron:" + Environment.NewLine + string.Join(Environment.NewLine, errores));
 
             return enlaces;
         }

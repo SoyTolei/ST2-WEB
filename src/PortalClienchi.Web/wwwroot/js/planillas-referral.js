@@ -408,18 +408,37 @@ function buildPayload() {
   return payload;
 }
 
+function pickReferralCapturaFiles(payload) {
+  if (isBejerman()) {
+    if (capturaFiles.length > 0) {
+      if (payload.adjuntos) payload.adjuntos.pantallas = true;
+      return capturaFiles;
+    }
+    return payload.adjuntos?.pantallas ? capturaFiles : [];
+  }
+
+  if (onvioCapturaFiles.length > 0) {
+    if (payload.onvio) payload.onvio.adjuntaPantallas = true;
+    return onvioCapturaFiles;
+  }
+  return payload.onvio?.adjuntaPantallas ? onvioCapturaFiles : [];
+}
+
 async function generarReferral(copiar) {
   const status = document.getElementById("ref-status");
   const payload = buildPayload();
-  const files = isBejerman()
-    ? (payload.adjuntos?.pantallas ? capturaFiles : [])
-    : (payload.onvio?.adjuntaPantallas ? onvioCapturaFiles : []);
+  const files = pickReferralCapturaFiles(payload);
+  const quierePantallas = isBejerman()
+    ? !!payload.adjuntos?.pantallas
+    : !!payload.onvio?.adjuntaPantallas;
 
   const form = new FormData();
   form.append("payload", JSON.stringify(payload));
-  files.forEach((f) => form.append("capturas", f, f.name));
+  if (files.length > 0) {
+    files.forEach((f) => form.append("capturas", f, f.name));
+  }
 
-  status.textContent = "Generando…";
+  status.textContent = files.length > 0 ? "Generando y subiendo capturas…" : "Generando…";
   const response = await fetch("/api/planillas/referral/generar", { method: "POST", body: form });
   const data = await response.json().catch(() => ({}));
 
@@ -441,16 +460,22 @@ async function generarReferral(copiar) {
     return;
   }
 
+  const capturasMsg = data.capturasSubidas > 0
+    ? ` (${data.capturasSubidas} captura(s) con link en el texto)`
+    : (quierePantallas && files.length === 0
+      ? " (sin archivos cargados: se indica adjunto en comentarios)"
+      : "");
+
   if (copiar) {
     await navigator.clipboard.writeText(data.texto);
-    status.textContent = "Texto copiado al portapapeles.";
+    status.textContent = `Texto copiado al portapapeles.${capturasMsg}`;
   } else {
     const blob = new Blob([data.texto], { type: "text/plain;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = data.fileName || "referral.txt";
     a.click();
-    status.textContent = "Archivo .txt descargado.";
+    status.textContent = `Archivo .txt descargado.${capturasMsg}`;
   }
 }
 

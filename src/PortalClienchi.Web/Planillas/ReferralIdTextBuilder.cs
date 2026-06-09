@@ -42,7 +42,7 @@ public static class ReferralIdTextBuilder
 
         partes.Add("");
         partes.Add("==========================================");
-        partes.Add("SE ADJUNTA EN COMENTARIOS 🗃️");
+        partes.Add("ADJUNTOS 🗃️");
         AppendAdjuntos(partes, c);
         partes.Add("==========================================");
 
