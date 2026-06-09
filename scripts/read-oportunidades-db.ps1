@@ -19,21 +19,4 @@ Write-Host "Base: $Path" -ForegroundColor Cyan
 Write-Host "Tamano: $((Get-Item $Path).Length) bytes"
 Write-Host ""
 
-python -c @"
-import sqlite3
-p = r'''$Path'''.replace('''', '')
-c = sqlite3.connect(p)
-cur = c.cursor()
-cur.execute('SELECT COUNT(*) FROM oportunidades')
-print('Total filas:', cur.fetchone()[0])
-print('')
-cur.execute('SELECT id, fecha, substr(descripcion,1,40), usuario, confirmada FROM oportunidades ORDER BY id')
-rows = cur.fetchall()
-if not rows:
-    print('(tabla vacia)')
-else:
-    print(f'{'ID':>4}  {'FECHA':<12}  {'USUARIO':<35}  CONF  DESCRIPCION')
-    print('-' * 90)
-    for r in rows:
-        print(f'{r[0]:>4}  {r[1]:<12}  {r[3]:<35}  {r[4]:<4}  {r[2]}')
-"@
+python -c "import sqlite3; p=r'$($Path -replace '\\','\\')'; c=sqlite3.connect(p); cur=c.cursor(); cur.execute('SELECT COUNT(*) FROM oportunidades'); print('Total filas:', cur.fetchone()[0]); print(''); cur.execute('SELECT id, fecha, substr(descripcion,1,40), usuario, confirmada FROM oportunidades ORDER BY id'); rows=cur.fetchall(); print('(tabla vacia)' if not rows else ''); [print(f'{r[0]:>4}  {r[1]:<12}  {r[3]:<35}  {r[4]:<4}  {r[2]}') for r in rows]"
