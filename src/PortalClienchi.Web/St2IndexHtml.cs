@@ -51,6 +51,7 @@ public static class St2IndexHtml
         html = html.Replace("/css/styles.css", $"/css/styles.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/planillas.css", $"/css/planillas.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);
+        html = html.Replace("<link rel=\"stylesheet\" href=\"/css/planillas.css", $"<link rel=\"modulepreload\" href=\"/js/planillas.js?v={v}\"/><link rel=\"modulepreload\" href=\"/js/planillas-icons.js?v={v}\"/><link rel=\"stylesheet\" href=\"/css/planillas.css", StringComparison.Ordinal);
         return html;
     }
 

@@ -1,5 +1,3 @@
-import { initReferralModule, openReferral } from "./planillas-referral.js";
-import { initOportunidadModule, openOportunidadMenu } from "./planillas-oportunidad.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
@@ -480,14 +478,16 @@ function bindEvents() {
     showView("transferencia");
   });
 
-  document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("click", () => {
+  document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("click", async () => {
     if (!sistemaActual || sistemaActual === "Legal") return;
-    openReferral();
+    const mod = await loadReferralModule();
+    mod.openReferral();
   });
 
-  document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", () => {
+  document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", async () => {
     if (!sistemaActual || sistemaActual === "Legal") return;
-    openOportunidadMenu();
+    const mod = await loadOportunidadModule();
+    mod.openOportunidadMenu();
   });
 
   document.querySelectorAll("[data-plan-back]").forEach((btn) => {
@@ -565,6 +565,29 @@ const planillasContext = {
   getConfig: () => planillasConfig,
 };
 
+let referralModulePromise = null;
+let oportunidadModulePromise = null;
+
+function loadReferralModule() {
+  if (!referralModulePromise) {
+    referralModulePromise = import("./planillas-referral.js").then((mod) => {
+      mod.initReferralModule(planillasContext);
+      return mod;
+    });
+  }
+  return referralModulePromise;
+}
+
+function loadOportunidadModule() {
+  if (!oportunidadModulePromise) {
+    oportunidadModulePromise = import("./planillas-oportunidad.js").then((mod) => {
+      mod.initOportunidadModule(planillasContext);
+      return mod;
+    });
+  }
+  return oportunidadModulePromise;
+}
+
 function initSecretRunnerTrigger() {
   const trigger = document.getElementById("planillas-secret-trigger");
   const emojiEl = document.getElementById("planillas-secret-emoji");
@@ -610,20 +633,30 @@ function initSecretRunnerTrigger() {
   });
 }
 
-export async function initPlanillas() {
+export function initPlanillas() {
   if (!views.menu) return;
 
-  await loadConfig();
-  updatePlanBuildBadge(planillasConfig?.webBuild);
-  if (planillasConfig?.webBuild) {
-    console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
-  }
-  initTransferenciaIaUi();
   injectModuleHeaders();
+  initTransferenciaIaUi();
   selectSistema("BejermanSql");
-  initReferralModule(planillasContext);
-  initOportunidadModule(planillasContext);
   bindEvents();
   initSecretRunnerTrigger();
   showView("menu");
+
+  void loadConfig().then(() => {
+    updatePlanBuildBadge(planillasConfig?.webBuild);
+    if (planillasConfig?.webBuild) {
+      console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
+    }
+  });
+
+  const prefetchHeavy = () => {
+    void loadReferralModule();
+    void loadOportunidadModule();
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(prefetchHeavy, { timeout: 4000 });
+  } else {
+    setTimeout(prefetchHeavy, 1500);
+  }
 }

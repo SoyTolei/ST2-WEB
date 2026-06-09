@@ -551,8 +551,10 @@ document.getElementById("aiOpenBtn").addEventListener("click", () => {
 searchInput.addEventListener("input", scheduleSearch);
 typeFilter.addEventListener("change", runSearch);
 
-await loadAppConfig();
-await loadTypes();
-await checkHealth();
 initEmbedReminders();
-await initPlanillas();
+void initPlanillas();
+void bootstrapPortal();
+
+async function bootstrapPortal() {
+  await Promise.allSettled([loadAppConfig(), loadTypes(), checkHealth()]);
+}
