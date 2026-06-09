@@ -782,6 +782,37 @@
   margin-bottom: 4px;
 }
 
+.plan-ia-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.plan-ia-bar .plan-ia-btn {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+}
+
+.plan-ia-undo-btn {
+  flex: 0 1 auto;
+  min-width: 120px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: #64748b;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 10px 16px;
+}
+
+.plan-ia-undo-btn:hover { background: var(--nav-hover); }
+
+.plan-op-ia-undo-bar { justify-content: center; margin-top: -4px; }
+
 .plan-ia-btn { width: 100%; margin: 8px 0 16px; }
 
 .plan-ref-block { margin-top: 8px; margin-bottom: 20px; }

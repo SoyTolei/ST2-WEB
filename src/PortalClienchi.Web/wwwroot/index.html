@@ -152,6 +152,11 @@
               </div>
             </div>
 
+            <div class="plan-ia-bar">
+              <button type="button" id="plan-btn-ia" class="btn btn-secondary plan-ia-btn hidden">✨ Mejorar redacción con IA</button>
+              <button type="button" id="plan-btn-ia-undo" class="btn btn-secondary plan-ia-undo-btn hidden">↩ Deshacer</button>
+            </div>
+
             <div class="plan-ref-actions">
               <button type="button" id="plan-btn-copiar" class="plan-action-btn green">
                 <span class="plan-action-btn-main">📋 Copiar al portapapeles</span>
@@ -220,7 +225,10 @@
               <div class="plan-field"><label for="ref-paso">Paso a paso realizado</label><textarea id="ref-paso" rows="4" class="placeholder-active"></textarea></div>
             </div>
 
-            <button type="button" id="ref-btn-ia" class="btn btn-secondary plan-ia-btn hidden">✨ Mejorar redacción con IA</button>
+            <div class="plan-ia-bar">
+              <button type="button" id="ref-btn-ia" class="btn btn-secondary plan-ia-btn hidden">✨ Mejorar redacción con IA</button>
+              <button type="button" id="ref-btn-ia-undo" class="btn btn-secondary plan-ia-undo-btn hidden">↩ Deshacer</button>
+            </div>
 
             <div id="ref-bejerman-post" class="plan-ref-block hidden">
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
@@ -462,6 +470,9 @@
                   <span aria-hidden="true">📄</span> GENERAR PDF
                 </button>
                 <button type="button" id="op-btn-ia" class="plan-op-btn-ia hidden">✨ Mejorar redacción con IA</button>
+              </div>
+              <div class="plan-ia-bar plan-op-ia-undo-bar">
+                <button type="button" id="op-btn-ia-undo" class="plan-ia-undo-btn hidden">↩ Deshacer cambios de IA</button>
               </div>
               <div class="plan-op-cargar-clear">
                 <button type="button" id="op-btn-limpiar" class="plan-op-btn-limpiar">🗑 Limpiar</button>

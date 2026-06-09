@@ -3,7 +3,9 @@ import {
   getPlanUserEmail,
   planUserFetch,
   refreshPlanUserSession,
+  syncPlanUserSession,
 } from "./plan-user.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 
 let ctx = null;
 let metodoContacto = null;
@@ -20,6 +22,7 @@ let gestorFiltered = [];
 let gestorPagina = 1;
 let gestorSelectedId = null;
 let linkPlaceholderActive = true;
+let oportunidadIaUndo = null;
 
 export function initOportunidadModule(context) {
   ctx = context;
@@ -67,6 +70,12 @@ function bindOportunidadEvents() {
   document.getElementById("op-btn-pdf")?.addEventListener("click", generarPdf);
   document.getElementById("op-btn-limpiar")?.addEventListener("click", limpiarCargar);
   document.getElementById("op-btn-ia")?.addEventListener("click", mejorarOportunidadIa);
+  oportunidadIaUndo = bindIaUndoButtons({
+    undoBtnId: "op-btn-ia-undo",
+    getSnapshot: () => snapshotFields(oportunidadIaFieldDefs()),
+    onUndo: (snap) => restoreFields(oportunidadIaFieldDefs(), snap),
+  });
+  document.getElementById("op-btn-ia-undo")?.addEventListener("click", () => oportunidadIaUndo.undo());
   document.getElementById("op-gestor-agregar")?.addEventListener("mousedown", () => {
     clearLinkPlaceholder();
   });
@@ -80,7 +89,26 @@ function openCargar() {
   ctx.showView("oportunidadCargar");
 }
 
+function oportunidadIaFieldDefs() {
+  return [
+    {
+      id: "op-metodo",
+      kind: "radio-group",
+      name: "op-metodo",
+      onRestore: (value) => setMetodoContacto(value),
+    },
+    { id: "op-numero" },
+    { id: "op-razon" },
+    { id: "op-contacto" },
+    { id: "op-telefono" },
+    { id: "op-correo" },
+    { id: "op-horarios" },
+    { id: "op-descripcion" },
+  ];
+}
+
 async function openGestor() {
+  await syncPlanUserSession();
   const user = await ensurePlanUser();
   if (!user) {
     ctx.showView("oportunidadMenu");
@@ -152,19 +180,28 @@ async function generarPdf() {
 
 async function mejorarOportunidadIa() {
   const status = document.getElementById("op-cargar-status");
+  const btn = document.getElementById("op-btn-ia");
+  oportunidadIaUndo?.saveSnapshot();
+  if (btn) btn.disabled = true;
   status.textContent = "Mejorando con IA…";
-  const response = await fetch("/api/planillas/oportunidad/mejorar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(buildCargarPayload()),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    status.textContent = data.detail || "Error IA";
-    return;
+
+  try {
+    const response = await fetch("/api/planillas/oportunidad/mejorar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildCargarPayload()),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      oportunidadIaUndo?.clearSnapshot();
+      status.textContent = data.detail || "Error IA";
+      return;
+    }
+    applyCargarPayload(data);
+    status.textContent = "Formulario actualizado con IA. Usá «Deshacer» si no te convence.";
+  } finally {
+    if (btn) btn.disabled = false;
   }
-  applyCargarPayload(data);
-  status.textContent = "Formulario actualizado con IA.";
 }
 
 function setMetodoContacto(value) {
@@ -186,6 +223,7 @@ function applyCargarPayload(data) {
 }
 
 function limpiarCargar() {
+  oportunidadIaUndo?.clearSnapshot();
   setMetodoContacto(null);
   ["op-numero", "op-razon", "op-contacto", "op-telefono", "op-correo", "op-horarios", "op-descripcion"].forEach((id) => {
     const el = document.getElementById(id);
@@ -195,6 +233,11 @@ function limpiarCargar() {
 }
 
 function initGestorUi() {
+  const combo = document.getElementById("op-filter-month-combo");
+  if (combo && combo.options.length === 0) {
+    combo.innerHTML = '<option value="Todas">Todas</option>';
+    combo.value = "Todas";
+  }
   updateLinkStatusUi();
   setLinkPlaceholder();
 }
@@ -329,26 +372,20 @@ function normalizeGestorItem(item) {
 }
 
 async function gestorApiFetch(url, options = {}) {
+  await syncPlanUserSession();
   let response = await planUserFetch(url, options);
   if (response.status !== 401) return response;
 
-  const hint = localStorage.getItem("st2_plan_user_hint") || getPlanUserEmail();
-  if (!hint) return response;
-
-  await fetch("/api/planillas/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: hint }),
-    credentials: "include",
-  });
-  await refreshPlanUserSession();
+  await syncPlanUserSession();
   return planUserFetch(url, options);
 }
 
 async function cargarGestor(knownUser = null) {
-  const user = knownUser || (await ensurePlanUser());
+  await syncPlanUserSession();
+  const user = knownUser || getPlanUserEmail() || (await ensurePlanUser());
   if (!user) return;
 
+  const previousItems = [...gestorAllItems];
   const response = await gestorApiFetch("/api/planillas/oportunidad/gestor");
 
   if (response.status === 401) {
@@ -360,8 +397,18 @@ async function cargarGestor(knownUser = null) {
     return;
   }
 
+  if (!response.ok) {
+    const status = document.getElementById("op-gestor-status");
+    if (status && previousItems.length > 0) {
+      status.textContent = "No se pudo refrescar el listado; mostrando datos locales.";
+      status.classList.remove("hidden");
+    }
+    return;
+  }
+
   const data = await response.json().catch(() => ({ items: [] }));
-  gestorAllItems = (data.items || []).map(normalizeGestorItem).filter((x) => x && x.id != null);
+  const fetched = (data.items || []).map(normalizeGestorItem).filter((x) => x && x.id != null);
+  gestorAllItems = fetched.length > 0 ? fetched : previousItems;
   gestorPagina = 1;
   applyGestorFilterAndPage();
   const status = document.getElementById("op-gestor-status");
@@ -374,7 +421,7 @@ async function cargarGestor(knownUser = null) {
       status.textContent = "Hay oportunidades guardadas pero el filtro las oculta. Elegí «Todas» en el mes.";
       status.classList.remove("hidden");
     } else if (gestorAllItems.length === 0) {
-      status.textContent = `Sin oportunidades para ${getPlanUserEmail() || "tu usuario"}. Agregá una arriba.`;
+      status.textContent = `Sin oportunidades para ${user}. Agregá una arriba.`;
       status.classList.remove("hidden");
     } else {
       status.textContent = `${gestorAllItems.length} oportunidad(es) cargadas.`;
@@ -405,6 +452,14 @@ function applyGestorFilterAndPage() {
   }
 
   gestorFiltered = query;
+
+  if (gestorFiltered.length === 0 && gestorAllItems.length > 0 && filtro !== "Todas") {
+    if (combo) combo.value = "Todas";
+    gestorFiltered = solo
+      ? gestorAllItems.filter((o) => !isConfirmada(o))
+      : [...gestorAllItems];
+  }
+
   const totalPaginas = Math.max(1, Math.ceil(gestorFiltered.length / GESTOR_POR_PAGINA));
   if (gestorPagina > totalPaginas) gestorPagina = totalPaginas;
   if (gestorPagina < 1) gestorPagina = 1;
@@ -594,7 +649,6 @@ async function agregarGestor() {
   }
 
   const created = normalizeGestorItem(data);
-  const beforeCount = gestorAllItems.length;
 
   document.getElementById("op-gestor-desc").value = "";
   setLinkPlaceholder();
@@ -602,24 +656,19 @@ async function agregarGestor() {
   resetGestorFilters();
   gestorPagina = 1;
 
-  await cargarGestor();
-
-  if (created?.id && !gestorAllItems.some((x) => x.id === created.id)) {
-    gestorAllItems = [created, ...gestorAllItems];
+  if (created?.id) {
+    gestorAllItems = [created, ...gestorAllItems.filter((x) => x.id !== created.id)];
     applyGestorFilterAndPage();
     if (status) {
-      status.textContent = "Guardada, pero el listado no sincronizó. Revisá Volume /data/st2 en Railway.";
+      status.textContent = `Oportunidad agregada (${getPlanUserEmail() || "tu usuario"}).`;
       status.classList.remove("hidden");
     }
-    return;
   }
 
-  if (status) {
-    if (gestorAllItems.length > beforeCount) {
-      status.textContent = "Oportunidad agregada.";
-      status.classList.remove("hidden");
-      setTimeout(() => status.classList.add("hidden"), 2500);
-    }
+  await cargarGestor();
+
+  if (status && created?.id) {
+    setTimeout(() => status.classList.add("hidden"), 3500);
   }
 
   document.getElementById("op-gestor-desc")?.focus();

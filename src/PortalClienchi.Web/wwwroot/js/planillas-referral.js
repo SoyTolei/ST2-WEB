@@ -4,6 +4,7 @@ import {
   runSdkDialog,
   runPlanillaDialog,
 } from "./planillas-referral-dialogs.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 
 const REF_DESC_PH = "Detalle y/o descripción del caso";
 const REF_PASO_PH = "Detalle paso a paso del proceso realizado por el usuario";
@@ -20,6 +21,7 @@ let mamPersActu = "";
 let mamTriggers = "";
 let sdkApp = "";
 let planillaState = { relevada: false, procesoFuncionaba: false, reproduceError: false, ultimaActualizOk: false };
+let referralIaUndo = null;
 
 export function initReferralModule(context) {
   ctx = context;
@@ -272,6 +274,33 @@ function bindReferralEvents() {
   document.getElementById("ref-btn-limpiar")?.addEventListener("click", resetReferralForm);
   document.getElementById("ref-btn-ia")?.addEventListener("click", mejorarReferralIa);
 
+  referralIaUndo = bindIaUndoButtons({
+    undoBtnId: "ref-btn-ia-undo",
+    getSnapshot: () => snapshotFields(referralIaFieldDefs()),
+    onUndo: (snap) => restoreFields(referralIaFieldDefs(), snap),
+  });
+  document.getElementById("ref-btn-ia-undo")?.addEventListener("click", () => referralIaUndo.undo());
+}
+
+function isRefPlaceholder(id, ph) {
+  const el = document.getElementById(id);
+  return !!el && (el.classList.contains("placeholder-active") || el.value === ph);
+}
+
+function referralIaFieldDefs() {
+  return [
+    { id: "ref-asunto" },
+    {
+      id: "ref-descripcion",
+      kind: "placeholder-textarea",
+      placeholderActive: isRefPlaceholder("ref-descripcion", REF_DESC_PH),
+    },
+    {
+      id: "ref-paso",
+      kind: "placeholder-textarea",
+      placeholderActive: isRefPlaceholder("ref-paso", REF_PASO_PH),
+    },
+  ];
 }
 
 function setupPlaceholder(id, ph) {
@@ -427,21 +456,30 @@ async function generarReferral(copiar) {
 
 async function mejorarReferralIa() {
   const status = document.getElementById("ref-status");
+  const btn = document.getElementById("ref-btn-ia");
+  referralIaUndo?.saveSnapshot();
+  if (btn) btn.disabled = true;
   status.textContent = "Mejorando con IA…";
-  const response = await fetch("/api/planillas/referral/mejorar", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ form: buildPayload() }),
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    status.textContent = data.detail || "Error IA";
-    return;
+
+  try {
+    const response = await fetch("/api/planillas/referral/mejorar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ form: buildPayload() }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      referralIaUndo?.clearSnapshot();
+      status.textContent = data.detail || "Error IA";
+      return;
+    }
+    if (data.asunto) document.getElementById("ref-asunto").value = data.asunto;
+    if (data.descripcion) setField("ref-descripcion", data.descripcion, REF_DESC_PH);
+    if (data.pasoAPaso) setField("ref-paso", data.pasoAPaso, REF_PASO_PH);
+    status.textContent = "Redacción mejorada. Usá «Deshacer» si no te convence.";
+  } finally {
+    if (btn) btn.disabled = false;
   }
-  if (data.asunto) document.getElementById("ref-asunto").value = data.asunto;
-  if (data.descripcion) setField("ref-descripcion", data.descripcion, REF_DESC_PH);
-  if (data.pasoAPaso) setField("ref-paso", data.pasoAPaso, REF_PASO_PH);
-  status.textContent = "Redacción mejorada.";
 }
 
 function setField(id, value, ph) {
@@ -452,6 +490,7 @@ function setField(id, value, ph) {
 }
 
 function resetReferralForm() {
+  referralIaUndo?.clearSnapshot();
   versionSel = null;
   moduloSel = null;
   capturaFiles = [];

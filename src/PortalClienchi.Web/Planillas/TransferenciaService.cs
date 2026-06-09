@@ -1,4 +1,5 @@
 using PortalClienchi.Core.Configuration;
+using PortalClienchi.Core.Models;
 using PortalClienchi.Core.Services;
 
 namespace PortalClienchi.Web.Planillas;
@@ -87,40 +88,25 @@ public sealed class TransferenciaService
         }
     }
 
-    public async Task<string> GenerarTextoAsync(TransferenciaCase caso, CancellationToken ct = default)
+    public Task<string> GenerarTextoAsync(TransferenciaCase caso, CancellationToken ct = default) =>
+        Task.FromResult(TransferenciaTextBuilder.Build(caso));
+
+    public async Task<TransferenciaIaBorrador> MejorarConIaAsync(TransferenciaCase caso, CancellationToken ct = default)
     {
-        if (!string.IsNullOrEmpty(caso.Mesa))
-        {
-            using var ia = new RedaccionIaService(_settings.RedaccionIa);
-            if (ia.IsConfigured)
-            {
-                var borrador = await ia.GenerarBorradorTransferenciaAsync(
-                    caso.Sistema.ToDisplayName(),
-                    caso.Mesa,
-                    caso.NumeroCliente,
-                    caso.Asunto,
-                    string.IsNullOrWhiteSpace(caso.Descripcion) ? null : caso.Descripcion,
-                    ct).ConfigureAwait(false);
+        using var ia = new RedaccionIaService(_settings.RedaccionIa);
+        if (!ia.IsConfigured)
+            throw new InvalidOperationException("La redacción con IA no está configurada.");
 
-                caso = new TransferenciaCase
-                {
-                    Sistema = caso.Sistema,
-                    NumeroCliente = caso.NumeroCliente,
-                    Mesa = caso.Mesa,
-                    Asunto = borrador.Asunto,
-                    Descripcion = borrador.Descripcion,
-                    Capturas = caso.Capturas,
-                    CapturasArchivos = caso.CapturasArchivos,
-                    CapturasEnlaces = caso.CapturasEnlaces,
-                    TicketSolicitado = caso.TicketSolicitado,
-                    NumeroTicket = caso.NumeroTicket,
-                    PortalLink = caso.PortalLink,
-                    PortalTitulo = caso.PortalTitulo,
-                };
-            }
-        }
+        if (string.IsNullOrWhiteSpace(caso.Mesa))
+            throw new InvalidOperationException("Elegí la mesa de destino antes de usar IA.");
 
-        return TransferenciaTextBuilder.Build(caso);
+        return await ia.GenerarBorradorTransferenciaAsync(
+            caso.Sistema.ToDisplayName(),
+            caso.Mesa,
+            caso.NumeroCliente,
+            caso.Asunto,
+            string.IsNullOrWhiteSpace(caso.Descripcion) ? null : caso.Descripcion,
+            ct).ConfigureAwait(false);
     }
 
     public static TransferenciaCase FromRequest(TransferenciaGenerateRequest req)

@@ -168,7 +168,7 @@ public static class PlanillasEndpoints
                 {
                     texto,
                     fileName = $"{stamp}.txt",
-                    iaUsada = svc.IaConfigured && !string.IsNullOrEmpty(caso.Mesa),
+                    iaUsada = false,
                     capturasSubidas = enlaces.Count,
                 });
             }
@@ -179,6 +179,27 @@ public static class PlanillasEndpoints
             catch (Exception ex)
             {
                 return Results.Problem(detail: ex.Message, title: "Error al generar transferencia");
+            }
+        });
+
+        app.MapPost("/api/planillas/transferencia/mejorar", async (
+            TransferenciaGenerateRequest body,
+            TransferenciaService svc,
+            CancellationToken ct) =>
+        {
+            var error = TransferenciaService.ValidarRequest(body);
+            if (error is not null)
+                return Results.BadRequest(new { error });
+
+            try
+            {
+                var caso = TransferenciaService.FromRequest(body);
+                var borrador = await svc.MejorarConIaAsync(caso, ct).ConfigureAwait(false);
+                return Results.Ok(new { asunto = borrador.Asunto, descripcion = borrador.Descripcion });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Error al mejorar con IA");
             }
         });
 

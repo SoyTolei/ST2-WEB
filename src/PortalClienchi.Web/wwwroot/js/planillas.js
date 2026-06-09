@@ -1,6 +1,7 @@
 import { initReferralModule, openReferral } from "./planillas-referral.js";
 import { initOportunidadModule, openOportunidadMenu } from "./planillas-oportunidad.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -16,6 +17,7 @@ let sistemaActual = null;
 let mesaActual = null;
 let capturaFiles = [];
 let descripcionEsPlaceholder = true;
+let transferIaUndo = null;
 
 const views = {
   menu: document.getElementById("planillas-menu"),
@@ -225,10 +227,72 @@ async function pegarCaptura() {
   }
 }
 
+function transferIaFieldDefs() {
+  return [
+    { id: "plan-asunto" },
+    {
+      id: "plan-descripcion",
+      kind: "placeholder-textarea",
+      placeholderActive: descripcionEsPlaceholder,
+      onRestore: (ph) => { descripcionEsPlaceholder = ph; },
+    },
+  ];
+}
+
+function initTransferenciaIaUi() {
+  document.getElementById("plan-btn-ia")?.classList.toggle("hidden", !planillasConfig?.iaConfigured);
+  if (!transferIaUndo) {
+    transferIaUndo = bindIaUndoButtons({
+      undoBtnId: "plan-btn-ia-undo",
+      getSnapshot: () => snapshotFields(transferIaFieldDefs()),
+      onUndo: (snap) => restoreFields(transferIaFieldDefs(), snap),
+    });
+    document.getElementById("plan-btn-ia")?.addEventListener("click", mejorarTransferenciaIa);
+    document.getElementById("plan-btn-ia-undo")?.addEventListener("click", () => transferIaUndo.undo());
+  }
+}
+
+async function mejorarTransferenciaIa() {
+  if (!validarCampos()) return;
+
+  transferIaUndo?.saveSnapshot();
+  const btn = document.getElementById("plan-btn-ia");
+  if (btn) btn.disabled = true;
+  setPlanStatus("Mejorando redacción con IA…");
+
+  try {
+    const response = await fetch("/api/planillas/transferencia/mejorar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildPayload()),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      transferIaUndo?.clearSnapshot();
+      throw new Error(data.detail || data.error || data.title || `Error ${response.status}`);
+    }
+
+    if (data.asunto) els.asunto().value = data.asunto;
+    if (data.descripcion) {
+      const desc = els.descripcion();
+      desc.value = data.descripcion;
+      desc.classList.remove("placeholder-active");
+      descripcionEsPlaceholder = false;
+    }
+    setPlanStatus("Redacción mejorada. Usá «Deshacer» si no te convence.");
+  } catch (ex) {
+    setPlanStatus(ex.message, true);
+    alert(ex.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
 function limpiarTransferencia() {
   mesaActual = null;
   capturaFiles = [];
   descripcionEsPlaceholder = true;
+  transferIaUndo?.clearSnapshot();
 
   els.numeroCliente().value = "";
   els.asunto().value = "";
@@ -254,6 +318,7 @@ function initTransferenciaForm() {
     OnvioWeb: "ONVIO/Bejerman WEB",
   };
   els.sistemaBadge().textContent = labels[sistemaActual] || "";
+  initTransferenciaIaUi();
   limpiarTransferencia();
 }
 
@@ -337,8 +402,7 @@ async function generarTexto() {
     throw new Error(data.detail || data.error || data.title || `Error ${response.status}`);
   }
 
-  const ia = data.iaUsada ? " (con IA)" : "";
-  setPlanStatus(`Planilla generada${ia}.`);
+  setPlanStatus("Planilla generada.");
   return data;
 }
 
@@ -495,6 +559,7 @@ export async function initPlanillas() {
   if (!views.menu) return;
 
   await loadConfig();
+  initTransferenciaIaUi();
   injectModuleHeaders();
   selectSistema("BejermanSql");
   initReferralModule(planillasContext);

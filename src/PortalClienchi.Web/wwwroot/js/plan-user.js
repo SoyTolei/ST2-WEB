@@ -19,6 +19,30 @@ export async function refreshPlanUserSession() {
   return cachedEmail;
 }
 
+/** Re-establece la cookie de sesión desde el correo guardado en el navegador. */
+export async function syncPlanUserSession() {
+  const hint = localStorage.getItem("st2_plan_user_hint");
+  if (!hint) return refreshPlanUserSession();
+
+  try {
+    const response = await fetch("/api/planillas/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: hint }),
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json().catch(() => ({}));
+      cachedEmail = data.email || null;
+      updatePlanUserBadge();
+      return cachedEmail;
+    }
+  } catch {
+    /* fallback a GET */
+  }
+  return refreshPlanUserSession();
+}
+
 export async function ensurePlanUser({ forcePrompt = false } = {}) {
   await refreshPlanUserSession();
   if (!forcePrompt && cachedEmail) return cachedEmail;
