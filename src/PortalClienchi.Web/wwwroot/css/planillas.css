@@ -23,8 +23,10 @@
 }
 
 .planillas-footer {
-  text-align: right;
-  padding: 10px 20px 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px 8px;
   font-size: 0.82rem;
   color: var(--text-muted);
   border-top: 1px solid var(--border);
@@ -35,14 +37,29 @@
   margin-right: auto;
 }
 
+.planillas-secret-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  user-select: none;
+}
+
 .planillas-secret-emoji {
   display: inline-block;
-  transition: transform 0.35s ease, opacity 0.35s ease;
+  animation: plan-emoji-idle 2.6s ease-in-out infinite;
+}
+
+@keyframes plan-emoji-idle {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.08); }
 }
 
 .planillas-secret-emoji.is-changing {
-  transform: scale(0.6) rotate(-12deg);
-  opacity: 0.25;
+  animation: none;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.45s ease, filter 0.45s ease;
+  transform: scale(0.35) rotate(18deg);
+  opacity: 0;
+  filter: blur(3px);
 }
 
 .planillas-card {

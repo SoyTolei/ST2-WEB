@@ -571,25 +571,28 @@ function initSecretRunnerTrigger() {
   if (!trigger) return;
 
   const secretUrl = "https://referralrunner.tolei.dev/";
-  const clicksNeeded = 5;
-  const resetMs = 2500;
+  const clicksNeeded = 8;
+  const resetMs = 4000;
   const plantEmojis = ["🌱", "🌿", "🍀", "🪴", "🌳", "🌾", "☘️", "🌲"];
   let count = 0;
   let resetTimer = null;
   let emojiIndex = 0;
   let emojiTimer = null;
+  let isAnimating = false;
 
   function rotateEmoji() {
-    if (!emojiEl) return;
+    if (!emojiEl || isAnimating) return;
+    isAnimating = true;
     emojiEl.classList.add("is-changing");
     setTimeout(() => {
       emojiIndex = (emojiIndex + 1) % plantEmojis.length;
       emojiEl.textContent = plantEmojis[emojiIndex];
       emojiEl.classList.remove("is-changing");
-    }, 180);
+      isAnimating = false;
+    }, 220);
   }
 
-  emojiTimer = setInterval(rotateEmoji, 2800);
+  emojiTimer = setInterval(rotateEmoji, 2600);
 
   trigger.addEventListener("click", () => {
     count += 1;
