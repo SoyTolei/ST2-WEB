@@ -35,6 +35,16 @@
   margin-right: auto;
 }
 
+.planillas-secret-emoji {
+  display: inline-block;
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.planillas-secret-emoji.is-changing {
+  transform: scale(0.6) rotate(-12deg);
+  opacity: 0.25;
+}
+
 .planillas-card {
   --plan-card-pad-x: 44px;
   --plan-card-pad-top: 32px;

@@ -567,19 +567,37 @@ const planillasContext = {
 
 function initSecretRunnerTrigger() {
   const trigger = document.getElementById("planillas-secret-trigger");
+  const emojiEl = document.getElementById("planillas-secret-emoji");
   if (!trigger) return;
 
   const secretUrl = "https://referralrunner.tolei.dev/";
   const clicksNeeded = 5;
   const resetMs = 2500;
+  const plantEmojis = ["🌱", "🌿", "🍀", "🪴", "🌳", "🌾", "☘️", "🌲"];
   let count = 0;
   let resetTimer = null;
+  let emojiIndex = 0;
+  let emojiTimer = null;
+
+  function rotateEmoji() {
+    if (!emojiEl) return;
+    emojiEl.classList.add("is-changing");
+    setTimeout(() => {
+      emojiIndex = (emojiIndex + 1) % plantEmojis.length;
+      emojiEl.textContent = plantEmojis[emojiIndex];
+      emojiEl.classList.remove("is-changing");
+    }, 180);
+  }
+
+  emojiTimer = setInterval(rotateEmoji, 2800);
 
   trigger.addEventListener("click", () => {
     count += 1;
     clearTimeout(resetTimer);
+    rotateEmoji();
     if (count >= clicksNeeded) {
       count = 0;
+      clearInterval(emojiTimer);
       window.location.href = secretUrl;
       return;
     }
