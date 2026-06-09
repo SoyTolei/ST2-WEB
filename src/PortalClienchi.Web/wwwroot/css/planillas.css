@@ -121,9 +121,59 @@
   border: 2px solid var(--border);
   border-radius: 16px;
   padding: 8px;
-  max-width: 920px;
   width: 100%;
   margin: 0 auto 20px;
+}
+
+.plan-sistema-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  position: relative;
+  min-height: 54px;
+  width: 100%;
+}
+
+.plan-pill-btn {
+  border: none;
+  background: transparent;
+  padding: 12px 8px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--dark);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  z-index: 1;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.15;
+  width: 100%;
+}
+
+.plan-pill-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.plan-pill-btn.active {
+  color: #fff;
+}
+
+.plan-sistema-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  background: var(--primary);
+  border-radius: 10px;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  will-change: transform, width;
 }
 
 .plan-modulos-well {
@@ -133,48 +183,6 @@
   padding: 12px 16px;
   width: 100%;
   margin: 0 0 20px;
-}
-
-.plan-sistema-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  position: relative;
-  min-height: 54px;
-}
-
-.plan-pill-btn {
-  border: none;
-  background: transparent;
-  padding: 12px 10px;
-  border-radius: 10px;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--dark);
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s;
-  z-index: 1;
-  min-height: 54px;
-}
-
-.plan-pill-btn:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.plan-pill-btn.active {
-  color: #fff;
-}
-
-.plan-sistema-indicator {
-  position: absolute;
-  top: 2px;
-  bottom: 2px;
-  left: 0;
-  width: calc(25% - 3px);
-  background: var(--primary);
-  border-radius: 10px;
-  transition: transform 0.2s ease;
-  pointer-events: none;
 }
 
 .plan-modulos-grid {

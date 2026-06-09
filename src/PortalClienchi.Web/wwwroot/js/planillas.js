@@ -86,9 +86,18 @@ function showView(name) {
 }
 
 function setSistemaIndicator(index) {
+  const grid = document.querySelector(".plan-sistema-grid");
   const indicator = els.sistemaIndicator();
-  if (!indicator) return;
-  indicator.style.transform = `translateX(${index * 100}%)`;
+  const btn = [...els.sistemaBtns()][index];
+  if (!grid || !indicator || !btn) return;
+
+  indicator.style.width = `${btn.offsetWidth}px`;
+  indicator.style.transform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
+}
+
+function refreshSistemaIndicator() {
+  const index = SISTEMA_INDEX[sistemaActual] ?? 0;
+  setSistemaIndicator(index);
 }
 
 function updateSistemaUi() {
@@ -498,6 +507,19 @@ function openPlaceholder(moduleTitle) {
   showView("placeholder");
 }
 
+function bindSistemaIndicatorLayout() {
+  const grid = document.querySelector(".plan-sistema-grid");
+  if (!grid) return;
+
+  const sync = () => requestAnimationFrame(refreshSistemaIndicator);
+  window.addEventListener("resize", sync);
+  if (typeof ResizeObserver !== "undefined") {
+    const observer = new ResizeObserver(sync);
+    observer.observe(grid);
+  }
+  sync();
+}
+
 function bindEvents() {
   els.sistemaBtns().forEach((btn) => {
     btn.addEventListener("click", () => selectSistema(btn.dataset.planSistema));
@@ -669,8 +691,9 @@ export function initPlanillas() {
 
   injectModuleHeaders();
   initTransferenciaIaUi();
-  selectSistema("BejermanSql");
   bindEvents();
+  bindSistemaIndicatorLayout();
+  selectSistema("BejermanSql");
   initSecretRunnerTrigger();
   showView("menu");
 
