@@ -1285,21 +1285,68 @@
 }
 
 .plan-gestor-date-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 2px 8px;
-  display: inline-flex;
-  max-width: 220px;
+  border-radius: 10px;
+  padding: 0 12px 0 10px;
+  min-height: 44px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.plan-gestor-date-wrap:focus-within {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.plan-gestor-date-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #7c3aed;
+}
+
+.plan-gestor-date-icon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .plan-gestor-date-wrap input[type="date"] {
+  flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   font: inherit;
   font-size: 0.92rem;
-  padding: 8px 4px;
-  min-height: 36px;
+  font-weight: 500;
+  color: var(--dark);
+  padding: 10px 0;
+  min-height: 42px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.plan-gestor-date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.75;
+  cursor: pointer;
+  margin-left: 4px;
+  filter: hue-rotate(250deg) saturate(1.2);
+}
+
+.plan-gestor-date-wrap input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+}
+
+.plan-gestor-date-wrap input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
 }
 
 .plan-gestor-form-grid textarea {
@@ -1592,21 +1639,10 @@
 .plan-gestor-user-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 10px;
   flex-wrap: wrap;
   padding-top: 4px;
-}
-
-.plan-build-badge {
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #94a3b8;
-  letter-spacing: 0.02em;
-}
-
-.plan-gestor-user-bar .plan-build-badge {
-  margin-left: auto;
 }
 
 .plan-gestor-user-badge {

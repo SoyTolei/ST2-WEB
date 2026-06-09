@@ -5,7 +5,6 @@ import {
   refreshPlanUserSession,
   syncPlanUserSession,
 } from "./plan-user.js";
-import { updatePlanBuildBadge } from "./plan-build.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 
 let ctx = null;
@@ -127,8 +126,6 @@ async function openGestor() {
   setLinkPlaceholder();
   updateLinkStatusUi();
 
-  updatePlanBuildBadge(ctx.getConfig()?.webBuild);
-
   try {
     await cargarGestor(user);
   } catch (err) {
@@ -240,9 +237,11 @@ function limpiarCargar() {
 function initGestorUi() {
   const combo = document.getElementById("op-filter-month-combo");
   if (combo && combo.options.length === 0) {
+    const mesActual = currentGestorMonthLabel();
     gestorUpdatingMonthCombo = true;
-    combo.innerHTML = '<option value="Todas">Todas</option>';
-    combo.value = "Todas";
+    combo.innerHTML =
+      `<option value="Todas">Todas</option><option value="${escapeHtml(mesActual)}">${escapeHtml(mesActual)}</option>`;
+    combo.value = mesActual;
     gestorUpdatingMonthCombo = false;
   }
   updateLinkStatusUi();
@@ -356,9 +355,13 @@ function updateLinkStatusUi() {
   icon.title = hasLink ? "Link cargado correctamente" : "Pegá el link del correo o mensaje de la oportunidad";
 }
 
+function currentGestorMonthLabel(date = new Date()) {
+  return `${GESTOR_MESES[date.getMonth()]} ${date.getFullYear()}`;
+}
+
 function resetGestorFilters() {
   const combo = document.getElementById("op-filter-month-combo");
-  if (combo) combo.value = "Todas";
+  if (combo) combo.value = currentGestorMonthLabel();
 }
 
 function parseGestorItems(data) {
@@ -532,10 +535,10 @@ function safeApplyGestorFilterAndPage() {
 
 function applyGestorFilterAndPage() {
   const combo = document.getElementById("op-filter-month-combo");
-  const keep = combo?.value || "Todas";
+  const keep = combo?.value || currentGestorMonthLabel();
   rebuildGestorMonthOptions(gestorAllItems, keep);
 
-  const filtro = combo?.value || "Todas";
+  const filtro = combo?.value || currentGestorMonthLabel();
 
   let query = [...gestorAllItems];
   if (filtro !== "Todas") {
@@ -546,11 +549,6 @@ function applyGestorFilterAndPage() {
   }
 
   gestorFiltered = query;
-
-  if (gestorFiltered.length === 0 && gestorAllItems.length > 0 && filtro !== "Todas") {
-    if (combo) combo.value = "Todas";
-    gestorFiltered = [...gestorAllItems];
-  }
 
   const totalPaginas = Math.max(1, Math.ceil(gestorFiltered.length / GESTOR_POR_PAGINA));
   if (gestorPagina > totalPaginas) gestorPagina = totalPaginas;
@@ -572,6 +570,7 @@ function rebuildGestorMonthOptions(all, keep) {
   const combo = document.getElementById("op-filter-month-combo");
   if (!combo) return;
 
+  const mesActual = currentGestorMonthLabel();
   const opciones = ["Todas"];
   const anios = [...new Set(all.map((o) => parseGestorYear(o.fecha)).filter((y) => y > 0))].sort((a, b) => b - a);
   const currentYear = new Date().getFullYear();
@@ -579,15 +578,20 @@ function rebuildGestorMonthOptions(all, keep) {
 
   for (const anio of anios) {
     for (let m = 0; m < 12; m++) {
-      if (all.some((o) => matchGestorMonth(o.fecha, anio, m + 1))) {
-        opciones.push(`${GESTOR_MESES[m]} ${anio}`);
+      const label = `${GESTOR_MESES[m]} ${anio}`;
+      if (label === mesActual || all.some((o) => matchGestorMonth(o.fecha, anio, m + 1))) {
+        opciones.push(label);
       }
     }
   }
 
+  if (!opciones.includes(mesActual)) {
+    opciones.splice(1, 0, mesActual);
+  }
+
   gestorUpdatingMonthCombo = true;
   combo.innerHTML = opciones.map((o) => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("");
-  combo.value = opciones.includes(keep) ? keep : "Todas";
+  combo.value = opciones.includes(keep) ? keep : mesActual;
   gestorUpdatingMonthCombo = false;
 }
 
