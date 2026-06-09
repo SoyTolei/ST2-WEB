@@ -647,7 +647,7 @@ function renderGestorPage() {
   }
 
   const totalPaginas = Math.max(1, Math.ceil(gestorFiltered.length / GESTOR_POR_PAGINA));
-  const pageItems = gestorFiltered.slice((gestorPagina - 1) * GESTOR_PAGINA, gestorPagina * GESTOR_POR_PAGINA);
+  const pageItems = gestorFiltered.slice((gestorPagina - 1) * GESTOR_POR_PAGINA, gestorPagina * GESTOR_POR_PAGINA);
 
   tbody.replaceChildren();
 
