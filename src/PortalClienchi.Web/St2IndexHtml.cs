@@ -31,6 +31,16 @@ public static class St2IndexHtml
             sb.Append($"    \"/js/{file}\": \"/js/{file}?v={v}\"");
             sb.AppendLine(i < JsModules.Length - 1 ? "," : "");
         }
+        sb.AppendLine("  },");
+        sb.AppendLine("  \"scopes\": {");
+        sb.AppendLine("    \"/js/\": {");
+        for (var i = 0; i < JsModules.Length; i++)
+        {
+            var file = JsModules[i];
+            sb.Append($"      \"./{file}\": \"/js/{file}?v={v}\"");
+            sb.AppendLine(i < JsModules.Length - 1 ? "," : "");
+        }
+        sb.AppendLine("    }");
         sb.AppendLine("  }");
         sb.AppendLine("}");
         sb.AppendLine("</script>");

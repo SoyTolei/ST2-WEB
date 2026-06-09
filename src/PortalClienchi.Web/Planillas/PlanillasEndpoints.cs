@@ -71,7 +71,10 @@ public static class PlanillasEndpoints
                     continue;
 
                 var ext = Path.GetExtension(file.FileName);
-                if (!ImagenExtensiones.Contains(ext))
+                var contentType = file.ContentType ?? "";
+                var esImagen = ImagenExtensiones.Contains(ext)
+                    || contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+                if (!esImagen)
                     return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}" });
 
                 archivos.Add((file.FileName, file.OpenReadStream()));
@@ -217,6 +220,10 @@ public static class PlanillasEndpoints
             {
                 var caso = svc.FromRequest(payload);
                 caso = await svc.ApplyCapturasUploadAsync(caso, files, ct).ConfigureAwait(false);
+
+                var capturasError = ReferralIdService.ValidateCapturasLinks(caso);
+                if (capturasError is not null)
+                    return Results.BadRequest(new { error = capturasError });
 
                 var error = ReferralIdValidator.ValidateForGenerate(caso);
                 if (error == ReferralIdValidator.CodeTicketConfirm)

@@ -99,6 +99,17 @@ public sealed class ReferralIdService
             ? caso.Adjuntos.Pantallas
             : caso.Onvio.AdjuntaPantallas;
 
+    public static string? ValidateCapturasLinks(ReferralIdCase caso)
+    {
+        if (caso.Sistema == PlanillasSistema.BejermanSql && caso.Adjuntos.Pantallas && caso.CapturasEnlaces.Count == 0)
+            return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
+
+        if (caso.Sistema == PlanillasSistema.OnvioWeb && caso.Onvio.AdjuntaPantallas && caso.CapturasEnlaces.Count == 0)
+            return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
+
+        return null;
+    }
+
     public async Task<ReferralIdCase> ApplyCapturasUploadAsync(
         ReferralIdCase caso,
         IReadOnlyList<IFormFile> files,

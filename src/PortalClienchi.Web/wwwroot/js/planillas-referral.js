@@ -495,6 +495,17 @@ function pickReferralCapturaFiles(payload) {
   return marcado ? files : [];
 }
 
+async function subirCapturasReferral(files) {
+  const form = new FormData();
+  files.forEach((f) => form.append("capturas", f, f.name || "captura.png"));
+  const response = await fetch("/api/planillas/capturas/upload", { method: "POST", body: form });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.detail || data.error || data.title || "Error al subir capturas");
+  }
+  return (data.enlaces || []).filter((e) => e?.url);
+}
+
 async function generarReferral(copiar) {
   const status = document.getElementById("ref-status");
   const payload = buildPayload();
@@ -509,48 +520,57 @@ async function generarReferral(copiar) {
     return;
   }
 
-  const form = new FormData();
-  form.append("payload", JSON.stringify(payload));
-  files.forEach((f) => form.append("capturas", f, f.name || "captura.png"));
-
-  status.textContent = files.length > 0 ? "Generando y subiendo capturas…" : "Generando…";
-  const response = await fetch("/api/planillas/referral/generar", { method: "POST", body: form });
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    if (data.code === "ticket_confirm") {
-      if (confirm("¿Se solicitó ticket de servicio?")) {
-        document.getElementById("ref-onvio-ticket").checked = true;
-        document.getElementById("ref-onvio-ticket-panel")?.classList.remove("hidden");
-        alert("Completá los datos del ticket y volvé a generar.");
-      } else {
-        alert("Es probable que I+D solicite un ticket de servicio para el análisis del caso.");
-        ticketAvisoOmitido = true;
+  try {
+    if (files.length > 0) {
+      status.textContent = "Subiendo capturas…";
+      payload.capturasEnlaces = await subirCapturasReferral(files);
+      if (payload.capturasEnlaces.length === 0) {
+        throw new Error("No se obtuvieron links de las capturas subidas.");
       }
-      status.textContent = "";
-      return;
     }
-    status.textContent = data.error || data.detail || "Error";
+
+    status.textContent = "Generando…";
+    const response = await fetch("/api/planillas/referral/generar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      if (data.code === "ticket_confirm") {
+        if (confirm("¿Se solicitó ticket de servicio?")) {
+          document.getElementById("ref-onvio-ticket").checked = true;
+          document.getElementById("ref-onvio-ticket-panel")?.classList.remove("hidden");
+          alert("Completá los datos del ticket y volvé a generar.");
+        } else {
+          alert("Es probable que I+D solicite un ticket de servicio para el análisis del caso.");
+          ticketAvisoOmitido = true;
+        }
+        status.textContent = "";
+        return;
+      }
+      throw new Error(data.error || data.detail || data.title || "Error al generar Referral I+D");
+    }
+
+    const capturasMsg = data.capturasSubidas > 0
+      ? ` (${data.capturasSubidas} captura(s) con link en el texto)`
+      : "";
+
+    if (copiar) {
+      await navigator.clipboard.writeText(data.texto);
+      status.textContent = `Texto copiado al portapapeles.${capturasMsg}`;
+    } else {
+      const blob = new Blob([data.texto], { type: "text/plain;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = data.fileName || "referral.txt";
+      a.click();
+      status.textContent = `Archivo .txt descargado.${capturasMsg}`;
+    }
+  } catch (ex) {
+    status.textContent = ex.message || "Error";
     alert(status.textContent);
-    return;
-  }
-
-  const capturasMsg = data.capturasSubidas > 0
-    ? ` (${data.capturasSubidas} captura(s) con link en el texto)`
-    : (quierePantallas && files.length === 0
-      ? " (sin archivos cargados: se indica adjunto en comentarios)"
-      : "");
-
-  if (copiar) {
-    await navigator.clipboard.writeText(data.texto);
-    status.textContent = `Texto copiado al portapapeles.${capturasMsg}`;
-  } else {
-    const blob = new Blob([data.texto], { type: "text/plain;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = data.fileName || "referral.txt";
-    a.click();
-    status.textContent = `Archivo .txt descargado.${capturasMsg}`;
   }
 }
 
