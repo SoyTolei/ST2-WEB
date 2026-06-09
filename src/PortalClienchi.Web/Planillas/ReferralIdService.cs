@@ -104,7 +104,7 @@ public sealed class ReferralIdService
         IReadOnlyList<IFormFile> files,
         CancellationToken ct)
     {
-        if (!QuiereAdjuntarPantallas(caso) || files.Count == 0)
+        if (files.Count == 0)
             return caso;
 
         var archivos = files
@@ -114,6 +114,11 @@ public sealed class ReferralIdService
 
         if (archivos.Count == 0)
             return caso;
+
+        if (caso.Sistema == PlanillasSistema.BejermanSql)
+            caso.Adjuntos.Pantallas = true;
+        else if (caso.Sistema == PlanillasSistema.OnvioWeb)
+            caso.Onvio.AdjuntaPantallas = true;
 
         var subidos = await _capturas.SubirCapturasAsync(archivos, ct).ConfigureAwait(false);
         var enlaces = caso.CapturasEnlaces.ToList();

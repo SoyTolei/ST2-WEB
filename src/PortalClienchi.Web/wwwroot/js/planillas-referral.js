@@ -323,12 +323,52 @@ function plainValue(id) {
   return el.value === ph ? "" : el.value.trim();
 }
 
+function setReferralPantallasUi(checked) {
+  if (isBejerman()) {
+    const check = document.getElementById("ref-adj-pantallas");
+    if (!check) return;
+    check.checked = checked;
+    const mark = document.getElementById("ref-mark-pantallas");
+    if (mark) {
+      mark.textContent = checked ? "✓" : "○";
+      mark.style.color = checked ? "#16a34a" : "#94a3b8";
+    }
+    document.getElementById("ref-capturas-panel")?.classList.toggle("hidden", !checked);
+    return;
+  }
+
+  const check = document.getElementById("ref-onvio-pantallas");
+  if (!check) return;
+  check.checked = checked;
+  const card = document.getElementById("ref-card-onvio-pantallas");
+  const mark = card?.querySelector(".card-mark");
+  if (mark) {
+    mark.textContent = checked ? "✓" : "○";
+    mark.style.color = checked ? "#16a34a" : "#94a3b8";
+  }
+  document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !checked);
+}
+
+function addReferralCapturaFiles(fileList, targetList) {
+  const allowed = /\.(png|jpe?g|gif|bmp|webp)$/i;
+  let added = 0;
+  for (const file of fileList) {
+    if (!allowed.test(file.name)) continue;
+    if (!targetList.some((f) => f.name === file.name && f.size === file.size)) {
+      targetList.push(file);
+      added++;
+    }
+  }
+  if (added > 0) setReferralPantallasUi(true);
+  return added;
+}
+
 function setupCapturas(prefix, fileList) {
   document.getElementById(`${prefix}-agregar`)?.addEventListener("click", () => {
     document.getElementById(`${prefix}-input`)?.click();
   });
   document.getElementById(`${prefix}-input`)?.addEventListener("change", (e) => {
-    for (const f of e.target.files) fileList.push(f);
+    addReferralCapturaFiles(e.target.files, fileList);
     refreshChips(`${prefix}-chips`, fileList);
     e.target.value = "";
   });
@@ -339,11 +379,16 @@ function setupCapturas(prefix, fileList) {
         const t = item.types.find((x) => x.startsWith("image/"));
         if (!t) continue;
         const blob = await item.getType(t);
-        fileList.push(new File([blob], `captura_${Date.now()}.png`, { type: t }));
+        const ext = t.split("/")[1]?.replace("jpeg", "jpg") || "png";
+        const file = new File([blob], `captura_${Date.now()}.${ext}`, { type: t });
+        addReferralCapturaFiles([file], fileList);
         refreshChips(`${prefix}-chips`, fileList);
         return;
       }
-    } catch { alert("No se pudo pegar imagen."); }
+      alert("No hay imagen en el portapapeles.");
+    } catch {
+      alert("No se pudo pegar imagen.");
+    }
   });
 }
 
@@ -409,19 +454,22 @@ function buildPayload() {
 }
 
 function pickReferralCapturaFiles(payload) {
-  if (isBejerman()) {
-    if (capturaFiles.length > 0) {
-      if (payload.adjuntos) payload.adjuntos.pantallas = true;
-      return capturaFiles;
+  const files = isBejerman() ? capturaFiles : onvioCapturaFiles;
+  if (files.length > 0) {
+    if (isBejerman()) {
+      if (!payload.adjuntos) payload.adjuntos = {};
+      payload.adjuntos.pantallas = true;
+    } else {
+      if (!payload.onvio) payload.onvio = {};
+      payload.onvio.adjuntaPantallas = true;
     }
-    return payload.adjuntos?.pantallas ? capturaFiles : [];
+    return files;
   }
 
-  if (onvioCapturaFiles.length > 0) {
-    if (payload.onvio) payload.onvio.adjuntaPantallas = true;
-    return onvioCapturaFiles;
-  }
-  return payload.onvio?.adjuntaPantallas ? onvioCapturaFiles : [];
+  const marcado = isBejerman()
+    ? !!payload.adjuntos?.pantallas
+    : !!payload.onvio?.adjuntaPantallas;
+  return marcado ? files : [];
 }
 
 async function generarReferral(copiar) {

@@ -33,14 +33,23 @@ public static class CapturasTextoHelper
         List<string> partes,
         IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
     {
+        AppendEnlacesCapturas(partes, enlaces, indentar: true);
+    }
+
+    public static void AppendEnlacesCapturas(
+        List<string> partes,
+        IReadOnlyList<TransferenciaCapturaEnlace> enlaces,
+        bool indentar = false)
+    {
+        var pad = indentar ? "  " : "";
         if (enlaces.Count > 0)
         {
-            partes.Add("  SE ADJUNTAN LOS SIGUIENTES LINKS 🗃️");
+            partes.Add($"{pad}SE ADJUNTAN LOS SIGUIENTES LINKS 🗃️");
             foreach (var enlace in enlaces)
-                partes.Add($"  {enlace.Url}");
+                partes.Add(indentar ? $"  {enlace.Url}" : enlace.Url);
             return;
         }
 
-        partes.Add("  La captura / imágenes se adjunta en comentarios.");
+        partes.Add($"{pad}La captura / imágenes se adjunta en comentarios.");
     }
 }
