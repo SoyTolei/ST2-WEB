@@ -296,13 +296,13 @@ public static class PlanillasEndpoints
                 });
             }
 
-            PlanUserIdentity.SetCookie(ctx.Response, email);
+            PlanUserIdentity.SetCookie(ctx, email);
             return Results.Ok(new { email });
         });
 
         app.MapDelete("/api/planillas/session", (HttpContext ctx) =>
         {
-            PlanUserIdentity.ClearCookie(ctx.Response);
+            PlanUserIdentity.ClearCookie(ctx);
             return Results.Ok(new { ok = true });
         });
 

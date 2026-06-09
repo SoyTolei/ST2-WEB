@@ -304,32 +304,58 @@ function updateLinkStatusUi() {
   icon.title = hasLink ? "Link cargado correctamente" : "Pegá el link del correo o mensaje de la oportunidad";
 }
 
+function resetGestorFilters() {
+  const solo = document.getElementById("op-filter-solo-pend");
+  const combo = document.getElementById("op-filter-month-combo");
+  if (solo) solo.checked = false;
+  if (combo) combo.value = "Todas";
+}
+
+function normalizeGestorItem(item) {
+  if (!item) return null;
+  return {
+    id: item.id ?? item.Id,
+    fecha: item.fecha ?? item.Fecha ?? "",
+    descripcion: item.descripcion ?? item.Descripcion ?? "",
+    link: item.link ?? item.Link ?? "",
+    confirmada: !!(item.confirmada ?? item.Confirmada),
+    porcentaje: item.porcentaje ?? item.Porcentaje ?? "N/D",
+  };
+}
+
+async function gestorApiFetch(url, options = {}) {
+  let response = await planUserFetch(url, options);
+  if (response.status !== 401) return response;
+
+  const user = await ensurePlanUser();
+  if (!user) return response;
+
+  await fetch("/api/planillas/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: user }),
+    credentials: "include",
+  });
+  return planUserFetch(url, options);
+}
+
 async function cargarGestor(knownUser = null) {
   const user = knownUser || (await ensurePlanUser());
   if (!user) return;
 
-  let response = await planUserFetch("/api/planillas/oportunidad/gestor");
-  if (response.status === 401 && user) {
-    await fetch("/api/planillas/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: user }),
-      credentials: "include",
-    });
-    response = await planUserFetch("/api/planillas/oportunidad/gestor");
-  }
+  const response = await gestorApiFetch("/api/planillas/oportunidad/gestor");
 
   if (response.status === 401) {
     const status = document.getElementById("op-gestor-status");
     if (status) {
-      status.textContent = "No se pudo validar tu sesión. Usá «Cambiar usuario» e ingresá de nuevo.";
+      status.textContent = "No se pudo validar tu sesión. Recargá la página e ingresá tu correo de nuevo.";
       status.classList.remove("hidden");
     }
     return;
   }
 
   const data = await response.json().catch(() => ({ items: [] }));
-  gestorAllItems = data.items || [];
+  gestorAllItems = (data.items || []).map(normalizeGestorItem).filter((x) => x?.id);
   gestorPagina = 1;
   applyGestorFilterAndPage();
   const status = document.getElementById("op-gestor-status");
@@ -523,21 +549,38 @@ async function agregarGestor() {
     link,
     confirmada: false,
   };
-  const response = await planUserFetch("/api/planillas/oportunidad/gestor", {
+
+  const status = document.getElementById("op-gestor-status");
+  const response = await gestorApiFetch("/api/planillas/oportunidad/gestor", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   const data = await response.json().catch(() => ({}));
+
   if (!response.ok) {
-    alert(data.error || "No se pudo agregar");
+    alert(data.error || "No se pudo agregar la oportunidad.");
     return;
+  }
+
+  const created = normalizeGestorItem(data);
+  if (created?.id) {
+    gestorAllItems = [created, ...gestorAllItems.filter((x) => x.id !== created.id)];
   }
 
   document.getElementById("op-gestor-desc").value = "";
   setLinkPlaceholder();
   document.getElementById("op-gestor-fecha").valueAsDate = new Date();
+  resetGestorFilters();
   gestorPagina = 1;
+  applyGestorFilterAndPage();
+
+  if (status) {
+    status.textContent = "Oportunidad agregada.";
+    status.classList.remove("hidden");
+    setTimeout(() => status.classList.add("hidden"), 2500);
+  }
+
   await cargarGestor();
   document.getElementById("op-gestor-desc")?.focus();
 }
@@ -550,7 +593,7 @@ async function confirmarGestorSeleccionado(id = gestorSelectedId) {
   }
   if (item.confirmada) return;
 
-  await planUserFetch(`/api/planillas/oportunidad/gestor/${item.id}`, {
+  await gestorApiFetch(`/api/planillas/oportunidad/gestor/${item.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -575,7 +618,7 @@ async function editarGestorSeleccionado(id = gestorSelectedId) {
   const link = prompt("Link", item.link);
   if (link === null) return;
   const conf = confirm("¿Oportunidad confirmada?");
-  await planUserFetch(`/api/planillas/oportunidad/gestor/${item.id}`, {
+  await gestorApiFetch(`/api/planillas/oportunidad/gestor/${item.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ fecha: item.fecha, descripcion: desc, link, confirmada: conf }),
@@ -590,7 +633,7 @@ async function eliminarGestorSeleccionado(id = gestorSelectedId) {
     return;
   }
   if (!confirm("¿Eliminar esta oportunidad?")) return;
-  await planUserFetch(`/api/planillas/oportunidad/gestor/${item.id}`, { method: "DELETE" });
+  await gestorApiFetch(`/api/planillas/oportunidad/gestor/${item.id}`, { method: "DELETE" });
   if (gestorSelectedId === item.id) gestorSelectedId = null;
   await cargarGestor();
 }

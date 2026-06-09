@@ -35,12 +35,15 @@ public static class PlanUserIdentity
         return ValidateAndNormalize(raw);
     }
 
-    public static void SetCookie(HttpResponse response, string normalizedEmail)
+    public static void SetCookie(HttpContext ctx, string normalizedEmail)
     {
-        response.Cookies.Append(CookieName, normalizedEmail, new CookieOptions
+        var secure = ctx.Request.IsHttps
+            || string.Equals(ctx.Request.Headers["X-Forwarded-Proto"], "https", StringComparison.OrdinalIgnoreCase);
+
+        ctx.Response.Cookies.Append(CookieName, normalizedEmail, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false,
+            Secure = secure,
             SameSite = SameSiteMode.Lax,
             Path = "/",
             MaxAge = TimeSpan.FromDays(90),
@@ -48,9 +51,12 @@ public static class PlanUserIdentity
         });
     }
 
-    public static void ClearCookie(HttpResponse response)
+    public static void ClearCookie(HttpContext ctx)
     {
-        response.Cookies.Delete(CookieName, new CookieOptions { Path = "/" });
+        var secure = ctx.Request.IsHttps
+            || string.Equals(ctx.Request.Headers["X-Forwarded-Proto"], "https", StringComparison.OrdinalIgnoreCase);
+
+        ctx.Response.Cookies.Delete(CookieName, new CookieOptions { Path = "/", Secure = secure });
     }
 }
 

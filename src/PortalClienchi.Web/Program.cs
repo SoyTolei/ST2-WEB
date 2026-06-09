@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using PortalClienchi.Core.Configuration;
 using PortalClienchi.Core.Models;
 using PortalClienchi.Core.Services;
@@ -18,7 +19,16 @@ builder.Services.AddSingleton<ReferralIdService>();
 builder.Services.AddSingleton<OportunidadRepository>();
 builder.Services.AddSingleton<OportunidadService>();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

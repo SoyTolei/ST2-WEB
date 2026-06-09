@@ -133,6 +133,11 @@ public sealed class OportunidadRepository
     {
         var conn = new SqliteConnection($"Data Source={_dbPath}");
         conn.Open();
+        using (var pragma = conn.CreateCommand())
+        {
+            pragma.CommandText = "PRAGMA journal_mode=WAL;";
+            pragma.ExecuteNonQuery();
+        }
         return conn;
     }
 
