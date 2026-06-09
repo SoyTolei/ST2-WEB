@@ -1,9 +1,3 @@
-import {
-  initReferralDialogs,
-  runMamDialog,
-  runSdkDialog,
-  runPlanillaDialog,
-} from "./planillas-referral-dialogs.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 
 const REF_DESC_PH = "Detalle y/o descripción del caso";
@@ -22,11 +16,22 @@ let mamTriggers = "";
 let sdkApp = "";
 let planillaState = { relevada: false, procesoFuncionaba: false, reproduceError: false, ultimaActualizOk: false };
 let referralIaUndo = null;
+let referralDialogsPromise = null;
+
+function loadReferralDialogs() {
+  if (!referralDialogsPromise) {
+    referralDialogsPromise = import("./planillas-referral-dialogs.js").then((mod) => {
+      mod.initReferralDialogs();
+      return mod;
+    });
+  }
+  return referralDialogsPromise;
+}
 
 export function initReferralModule(context) {
   ctx = context;
-  initReferralDialogs();
   bindReferralEvents();
+  void loadReferralDialogs();
 }
 
 export function openReferral() {
@@ -674,6 +679,7 @@ function resetReferralForm() {
 }
 
 async function openMamModal() {
+  const { runMamDialog } = await loadReferralDialogs();
   const result = await runMamDialog(ctx.getConfig()?.referral, { mamState, mamPersActu, mamTriggers });
   if (!result) return;
   mamState = result.mamState;
@@ -683,6 +689,7 @@ async function openMamModal() {
 }
 
 async function openSdkModal() {
+  const { runSdkDialog } = await loadReferralDialogs();
   const result = await runSdkDialog(ctx.getConfig()?.referral, { sdkState, sdkApp });
   if (!result) return;
   sdkState = result.sdkState;
@@ -691,6 +698,7 @@ async function openSdkModal() {
 }
 
 async function openPlanillaModalAsync() {
+  const { runPlanillaDialog } = await loadReferralDialogs();
   const result = await runPlanillaDialog(planillaState);
   if (!result) return;
   planillaState = { ...planillaState, ...result };

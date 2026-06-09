@@ -507,6 +507,20 @@ function openPlaceholder(moduleTitle) {
   showView("placeholder");
 }
 
+function setModuleLoading(overlayId, active) {
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  overlay.classList.toggle("hidden", !active);
+  overlay.setAttribute("aria-busy", active ? "true" : "false");
+}
+
+function openReferralShell() {
+  const badge = document.getElementById("ref-sistema-badge");
+  if (badge) badge.textContent = sistemaDisplayLabel(sistemaActual);
+  setModuleLoading("plan-referral-loading", true);
+  showView("referral");
+}
+
 function bindSistemaIndicatorLayout() {
   const grid = document.querySelector(".plan-sistema-grid");
   if (!grid) return;
@@ -533,9 +547,18 @@ function bindEvents() {
 
   document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("click", async () => {
     if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
-    const mod = await loadReferralModule();
-    mod.openReferral();
+    openReferralShell();
+    try {
+      const mod = await loadReferralModule();
+      mod.openReferral();
+    } finally {
+      setModuleLoading("plan-referral-loading", false);
+    }
   });
+
+  document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("pointerenter", () => {
+    void loadReferralModule();
+  }, { passive: true });
 
   document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", async () => {
     if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
@@ -702,15 +725,7 @@ export function initPlanillas() {
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }
-  });
-
-  const prefetchHeavy = () => {
     void loadReferralModule();
     void loadOportunidadModule();
-  };
-  if (typeof requestIdleCallback === "function") {
-    requestIdleCallback(prefetchHeavy, { timeout: 4000 });
-  } else {
-    setTimeout(prefetchHeavy, 1500);
-  }
+  });
 }
