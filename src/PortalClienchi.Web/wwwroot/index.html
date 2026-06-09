@@ -506,18 +506,22 @@
               </div>
             </div>
             <div class="plan-gestor-panel plan-gestor-panel-new">
+              <div id="op-gestor-add-loading" class="plan-gestor-add-loading hidden" aria-live="polite" aria-busy="false">
+                <div class="plan-gestor-add-spinner" aria-hidden="true"></div>
+                <p>Guardando oportunidad…</p>
+              </div>
               <div class="plan-gestor-panel-accent purple"></div>
               <h3 class="plan-gestor-panel-title">Nueva oportunidad</h3>
               <div class="plan-gestor-form-grid">
                 <label class="plan-gestor-field-label" for="op-gestor-fecha">Fecha</label>
-                <div class="plan-gestor-date-wrap">
+                <div class="plan-gestor-date-wrap" role="button" tabindex="0" aria-label="Elegir fecha">
                   <span class="plan-gestor-date-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="3" y="4" width="18" height="18" rx="2"/>
                       <path d="M16 2v4M8 2v4M3 10h18"/>
                     </svg>
                   </span>
-                  <input id="op-gestor-fecha" type="date" aria-label="Fecha de la oportunidad"/>
+                  <input id="op-gestor-fecha" type="date" aria-label="Fecha de la oportunidad" tabindex="-1"/>
                 </div>
                 <label class="plan-gestor-field-label" for="op-gestor-desc">Descripción</label>
                 <textarea id="op-gestor-desc" rows="4"></textarea>

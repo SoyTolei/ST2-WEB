@@ -1243,6 +1243,48 @@
   box-shadow: 0 2px 16px rgba(26, 31, 46, 0.08);
 }
 
+.plan-gestor-panel-new {
+  position: relative;
+}
+
+.plan-gestor-add-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(2px);
+  color: #6b7280;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.plan-gestor-add-loading.hidden {
+  display: none;
+}
+
+.plan-gestor-add-loading p {
+  margin: 0;
+}
+
+.plan-gestor-add-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: planGestorSpin 0.85s linear infinite;
+}
+
+@keyframes planGestorSpin {
+  to { transform: rotate(360deg); }
+}
+
 .plan-gestor-panel-list {
   background: #fff;
 }
@@ -1285,18 +1327,25 @@
 }
 
 .plan-gestor-date-wrap {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  max-width: 280px;
+  gap: 8px;
+  width: fit-content;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 0 12px 0 10px;
+  padding: 0 12px;
   min-height: 44px;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.plan-gestor-date-wrap:focus-visible {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
 }
 
 .plan-gestor-date-wrap:focus-within {
@@ -1320,8 +1369,8 @@
 }
 
 .plan-gestor-date-wrap input[type="date"] {
-  flex: 1;
-  min-width: 0;
+  width: 9.2rem;
+  flex: none;
   border: none;
   background: transparent;
   font: inherit;
@@ -1332,13 +1381,11 @@
   min-height: 42px;
   line-height: 1.2;
   cursor: pointer;
+  pointer-events: none;
 }
 
 .plan-gestor-date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0.75;
-  cursor: pointer;
-  margin-left: 4px;
-  filter: hue-rotate(250deg) saturate(1.2);
+  display: none;
 }
 
 .plan-gestor-date-wrap input[type="date"]::-webkit-datetime-edit {

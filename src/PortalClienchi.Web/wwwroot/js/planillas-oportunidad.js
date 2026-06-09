@@ -278,6 +278,8 @@ function bindGestorEvents() {
     if (!linkPlaceholderActive) updateLinkStatusUi();
   });
 
+  bindGestorDatePicker();
+
   const ctxMenu = document.getElementById("op-gestor-ctx");
   ctxMenu?.querySelectorAll("[data-ctx]").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -759,6 +761,39 @@ function showGestorContextMenu(x, y) {
   menu.style.top = `${y}px`;
 }
 
+function bindGestorDatePicker() {
+  const wrap = document.querySelector(".plan-gestor-date-wrap");
+  const input = document.getElementById("op-gestor-fecha");
+  if (!wrap || !input) return;
+
+  const open = () => {
+    try {
+      if (typeof input.showPicker === "function") input.showPicker();
+      else input.focus();
+    } catch {
+      input.focus();
+    }
+  };
+
+  wrap.addEventListener("click", open);
+  wrap.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      open();
+    }
+  });
+}
+
+function setGestorAddLoading(active) {
+  const overlay = document.getElementById("op-gestor-add-loading");
+  const btn = document.getElementById("op-gestor-agregar");
+  if (overlay) {
+    overlay.classList.toggle("hidden", !active);
+    overlay.setAttribute("aria-busy", active ? "true" : "false");
+  }
+  if (btn) btn.disabled = active;
+}
+
 function hideGestorContextMenu() {
   document.getElementById("op-gestor-ctx")?.classList.add("hidden");
 }
@@ -794,56 +829,63 @@ async function agregarGestor() {
   };
 
   const status = document.getElementById("op-gestor-status");
-  const response = await gestorApiFetch("/api/planillas/oportunidad/gestor", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await response.json().catch(() => ({}));
+  setGestorAddLoading(true);
+  if (status) status.classList.add("hidden");
 
-  if (!response.ok) {
-    const msg = data.detail || data.error || data.title || "No se pudo agregar la oportunidad.";
-    alert(msg);
+  try {
+    const response = await gestorApiFetch("/api/planillas/oportunidad/gestor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const msg = data.detail || data.error || data.title || "No se pudo agregar la oportunidad.";
+      alert(msg);
+      if (status) {
+        status.textContent = msg;
+        status.classList.remove("hidden");
+      }
+      return;
+    }
+
+    const created = normalizeGestorItem(data);
+
+    document.getElementById("op-gestor-desc").value = "";
+    setLinkPlaceholder();
+    document.getElementById("op-gestor-fecha").valueAsDate = new Date();
+    resetGestorFilters();
+    gestorPagina = 1;
+
+    if (!created?.id) {
+      if (status) {
+        status.textContent = "El servidor guardó la oportunidad pero no devolvió el ID. Recargá el gestor.";
+        status.classList.remove("hidden");
+      }
+      await cargarGestor();
+      return;
+    }
+
+    gestorAllItems = [created, ...gestorAllItems.filter((x) => x.id !== created.id)];
+    resetGestorFilters();
+    gestorPagina = 1;
+    safeApplyGestorFilterAndPage();
     if (status) {
-      status.textContent = msg;
+      status.textContent = `Oportunidad agregada (${getPlanUserEmail() || "tu usuario"}).`;
       status.classList.remove("hidden");
     }
-    return;
-  }
 
-  const created = normalizeGestorItem(data);
+    await cargarGestor(getPlanUserEmail());
 
-  document.getElementById("op-gestor-desc").value = "";
-  setLinkPlaceholder();
-  document.getElementById("op-gestor-fecha").valueAsDate = new Date();
-  resetGestorFilters();
-  gestorPagina = 1;
-
-  if (!created?.id) {
-    if (status) {
-      status.textContent = "El servidor guardó la oportunidad pero no devolvió el ID. Recargá el gestor.";
-      status.classList.remove("hidden");
+    if (status && created?.id) {
+      setTimeout(() => status.classList.add("hidden"), 3500);
     }
-    await cargarGestor();
-    return;
+
+    document.getElementById("op-gestor-desc")?.focus();
+  } finally {
+    setGestorAddLoading(false);
   }
-
-  gestorAllItems = [created, ...gestorAllItems.filter((x) => x.id !== created.id)];
-  resetGestorFilters();
-  gestorPagina = 1;
-  safeApplyGestorFilterAndPage();
-  if (status) {
-    status.textContent = `Oportunidad agregada (${getPlanUserEmail() || "tu usuario"}).`;
-    status.classList.remove("hidden");
-  }
-
-  await cargarGestor(getPlanUserEmail());
-
-  if (status && created?.id) {
-    setTimeout(() => status.classList.add("hidden"), 3500);
-  }
-
-  document.getElementById("op-gestor-desc")?.focus();
 }
 
 async function confirmarGestorSeleccionado(id = gestorSelectedId) {
