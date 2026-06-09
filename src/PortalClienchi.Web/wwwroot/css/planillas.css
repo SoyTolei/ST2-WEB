@@ -1264,6 +1264,12 @@
   text-align: left;
 }
 
+.plan-gestor-count {
+  font-weight: 600;
+  color: #7c3aed;
+  margin-left: 6px;
+}
+
 .plan-gestor-form-grid {
   display: grid;
   grid-template-columns: 120px 1fr;

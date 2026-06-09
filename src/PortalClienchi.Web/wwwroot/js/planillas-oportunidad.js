@@ -460,6 +460,14 @@ async function cargarGestor(knownUser = null) {
     const { items: fetched, dropped, rawCount } = parseGestorItems(data);
     gestorAllItems = fetched;
 
+    console.info("[Gestor] API", {
+      usuario: data.usuario || user,
+      total: data.total ?? rawCount,
+      parsed: fetched.length,
+      dropped,
+      db: data.storage?.path,
+    });
+
     if (dropped > 0) {
       console.warn(`[Gestor] ${dropped} de ${rawCount} fila(s) descartadas por formato inválido`);
     }
@@ -489,7 +497,8 @@ async function cargarGestor(knownUser = null) {
       status.textContent = "Hay oportunidades guardadas pero el filtro de mes las oculta. Elegí «Todas».";
       status.classList.remove("hidden");
     } else if (gestorAllItems.length === 0) {
-      status.textContent = `Sin oportunidades para ${sessionUser}. Agregá una arriba (descripción + link).`;
+      const dbHint = data.storage?.path ? ` Base del servidor: ${data.storage.path}.` : "";
+      status.textContent = `Sin oportunidades para ${sessionUser}.${dbHint} Agregá una arriba o verificá el correo (clic en el badge arriba).`;
       status.classList.remove("hidden");
     } else {
       status.textContent = `${gestorAllItems.length} oportunidad(es) para ${sessionUser}.`;
@@ -671,6 +680,11 @@ function renderGestorPage() {
 
   if (label) {
     label.textContent = `Página ${gestorPagina} de ${totalPaginas} (${gestorFiltered.length} registros)`;
+  }
+
+  const countEl = document.getElementById("op-gestor-count");
+  if (countEl) {
+    countEl.textContent = gestorFiltered.length > 0 ? `(${gestorFiltered.length})` : "";
   }
 
   const prevBtn = document.getElementById("op-gestor-prev");
