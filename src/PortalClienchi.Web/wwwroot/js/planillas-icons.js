@@ -15,6 +15,8 @@ export const PLAN_ICONS = {
   ticket: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"><path d="M7 5h10a2 2 0 0 1 2 2v3H5V7a2 2 0 0 1 2-2zM5 10v4h2M5 14v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3H5zM8 12h8M8 16h5"/></svg>`,
   building: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"><path d="M6 20V10l6-4 6 4v10H6zM10 20v-6h4v6"/></svg>`,
   hourglass: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h10v2l-5 5 5 5v2H7v-2l5-5-5-5V5z"/></svg>`,
+  clipboard: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="10" height="14" rx="2"/><path d="M7 7H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h10"/><path d="M12 11h2M12 15h2"/></svg>`,
+  saveTxt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h5"/><path d="M12 16v4M10.5 18.5 12 20l1.5-1.5"/></svg>`,
 };
 
 export function injectModuleHeaders() {
