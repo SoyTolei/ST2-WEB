@@ -433,12 +433,16 @@ function waitForPreviewImages(doc) {
   );
 }
 
+function getAboutVersionLabel() {
+  if (appConfig?.webVersionLabel) return appConfig.webVersionLabel;
+  const meta = document.querySelector('meta[name="st2-version-label"]');
+  if (meta?.content?.trim()) return meta.content.trim();
+  return "Versión WEB";
+}
+
 function showAbout() {
-  const build = appConfig?.webBuild;
   if (aboutTaglineEl) {
-    aboutTaglineEl.textContent = build
-      ? `Versión web · ${build.slice(0, 7)}`
-      : "Versión web";
+    aboutTaglineEl.textContent = getAboutVersionLabel();
   }
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");

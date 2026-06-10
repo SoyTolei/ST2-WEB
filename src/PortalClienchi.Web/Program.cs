@@ -114,6 +114,8 @@ app.MapGet("/api/app-config", (AppSettings settings) => Results.Ok(new
     settings.PortalBaseUrl,
     thomZoomFactor = settings.ThomZoomFactor,
     aiPlatformZoomFactor = settings.AiPlatformZoomFactor,
+    webBuild = St2WebBuild.GetBuild(),
+    webVersionLabel = St2WebBuild.GetVersionLabel(),
 }));
 
 app.MapGet("/api/types", () =>

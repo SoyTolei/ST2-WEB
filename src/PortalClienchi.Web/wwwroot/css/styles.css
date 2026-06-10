@@ -765,6 +765,27 @@ body.embed-active .tab-icon {
   filter: drop-shadow(0 2px 4px rgba(214, 64, 0, 0.25));
 }
 
+.st2-about-signature-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 2px;
+}
+
+.st2-about-signature-crest {
+  width: 1.35rem;
+  height: 1.35rem;
+  object-fit: contain;
+  display: block;
+  animation: st2AboutCrest 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 6px rgba(22, 163, 74, 0.4));
+}
+
+@keyframes st2AboutCrest {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.08) rotate(-3deg); }
+}
+
 @keyframes st2AboutBike {
   0%, 100% { transform: translateX(0) rotate(0deg); }
   25% { transform: translateX(3px) rotate(-4deg); }

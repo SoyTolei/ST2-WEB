@@ -46,6 +46,7 @@ public static class St2IndexHtml
         sb.AppendLine("}");
         sb.AppendLine("</script>");
         sb.AppendLine($"<meta name=\"st2-build\" content=\"{WebUtility.HtmlEncode(build)}\"/>");
+        sb.AppendLine($"<meta name=\"st2-version-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetVersionLabel())}\"/>");
 
         html = html.Replace("</head>", sb + "</head>", StringComparison.OrdinalIgnoreCase);
         html = html.Replace("/css/styles.css", $"/css/styles.css?v={v}", StringComparison.Ordinal);
