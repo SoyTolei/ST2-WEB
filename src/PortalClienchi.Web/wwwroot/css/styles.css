@@ -740,7 +740,7 @@ body.embed-active .tab-icon {
 }
 
 .st2-about-signature-by {
-  font-size: 0.95rem;
+  font-size: 0.86rem;
   font-weight: 500;
   color: #94a3b8;
   font-style: italic;
@@ -748,13 +748,26 @@ body.embed-active .tab-icon {
 }
 
 .st2-about-signature-handle {
-  font-size: 1.1rem;
+  font-size: 0.98rem;
   font-weight: 800;
   letter-spacing: 0.02em;
+  text-decoration: none;
   background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.st2-about-signature-handle:hover {
+  opacity: 0.88;
+  filter: brightness(1.08);
+}
+
+.st2-about-signature-handle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .st2-about-signature-crest-wrap {
