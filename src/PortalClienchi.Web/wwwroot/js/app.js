@@ -27,7 +27,7 @@ const exportPdfBtn = document.getElementById("exportPdfBtn");
 const aboutBtn = document.getElementById("aboutBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
-const aboutBuildEl = document.getElementById("st2-about-build");
+const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const thomFrame = document.getElementById("thomFrame");
 const aiFrame = document.getElementById("aiFrame");
 
@@ -435,14 +435,10 @@ function waitForPreviewImages(doc) {
 
 function showAbout() {
   const build = appConfig?.webBuild;
-  if (aboutBuildEl) {
-    if (build) {
-      aboutBuildEl.textContent = `Build ${build.slice(0, 7)}`;
-      aboutBuildEl.classList.remove("hidden");
-    } else {
-      aboutBuildEl.textContent = "";
-      aboutBuildEl.classList.add("hidden");
-    }
+  if (aboutTaglineEl) {
+    aboutTaglineEl.textContent = build
+      ? `Versión web · ${build.slice(0, 7)}`
+      : "Versión web";
   }
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");

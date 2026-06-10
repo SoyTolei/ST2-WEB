@@ -729,14 +729,6 @@ body.embed-active .tab-icon {
   margin-bottom: 3px;
 }
 
-.st2-about-build {
-  margin: 14px 0 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #94a3b8;
-  letter-spacing: 0.02em;
-}
-
 .st2-about-signature {
   display: flex;
   align-items: center;
