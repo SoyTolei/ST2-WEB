@@ -733,7 +733,7 @@ body.embed-active .tab-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   margin-top: 28px;
   padding-top: 22px;
   border-top: 1px solid var(--border);
@@ -747,47 +747,126 @@ body.embed-active .tab-icon {
   letter-spacing: 0.04em;
 }
 
-.st2-about-signature-lg {
-  font-size: 1.15rem;
+.st2-about-signature-handle {
+  font-size: 1.1rem;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.02em;
   background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: 0 0 24px rgba(214, 64, 0, 0.15);
+}
+
+.st2-about-signature-crest-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+.st2-about-signature-crest-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(22, 163, 74, 0.22) 0%, transparent 70%);
+  opacity: 0;
+  animation: st2AboutCrestGlow 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.st2-about-signature-crest-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(
+    125deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 62%
+  );
+  opacity: 0;
+  animation: st2AboutCrestShine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.st2-about-signature-crest {
+  position: relative;
+  z-index: 1;
+  width: 1.35rem;
+  height: 1.35rem;
+  object-fit: contain;
+  display: block;
+  animation: st2AboutCrestPulse 5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 5px rgba(22, 163, 74, 0.32));
+}
+
+.st2-about-signature-bike-track {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 1.5rem;
+  height: 1.5rem;
+  overflow: visible;
+  margin-left: 2px;
 }
 
 .st2-about-signature-bike {
   font-size: 1.25rem;
   display: inline-block;
-  animation: st2AboutBike 2.8s ease-in-out infinite;
-  filter: drop-shadow(0 2px 4px rgba(214, 64, 0, 0.25));
+  animation: st2AboutBikeRide 5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(214, 64, 0, 0.28));
+  will-change: transform;
 }
 
-.st2-about-signature-icons {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: 2px;
+@keyframes st2AboutCrestPulse {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(1.06); }
+  55% { transform: scale(1.02); }
 }
 
-.st2-about-signature-crest {
-  width: 1.35rem;
-  height: 1.35rem;
-  object-fit: contain;
-  display: block;
-  animation: st2AboutCrest 3.4s ease-in-out infinite;
-  filter: drop-shadow(0 2px 6px rgba(22, 163, 74, 0.4));
+@keyframes st2AboutCrestGlow {
+  0%, 100% { opacity: 0; transform: scale(0.92); }
+  40% { opacity: 0.85; transform: scale(1.08); }
+  60% { opacity: 0.35; transform: scale(1); }
 }
 
-@keyframes st2AboutCrest {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.08) rotate(-3deg); }
+@keyframes st2AboutCrestShine {
+  0%, 30%, 100% { opacity: 0; transform: translateX(-120%) rotate(-12deg); }
+  48% { opacity: 0.65; transform: translateX(0) rotate(-12deg); }
+  62% { opacity: 0; transform: translateX(120%) rotate(-12deg); }
 }
 
-@keyframes st2AboutBike {
-  0%, 100% { transform: translateX(0) rotate(0deg); }
-  25% { transform: translateX(3px) rotate(-4deg); }
-  75% { transform: translateX(-2px) rotate(3deg); }
+@keyframes st2AboutBikeRide {
+  0% {
+    transform: translateX(-34px) rotate(-12deg);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  42% {
+    transform: translateX(4px) rotate(4deg);
+  }
+  52% {
+    transform: translateX(-6px) rotate(-3deg);
+  }
+  60% {
+    transform: translateX(1px) rotate(1deg);
+  }
+  68%, 88% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  96% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(-34px) rotate(-12deg);
+    opacity: 0;
+  }
 }
