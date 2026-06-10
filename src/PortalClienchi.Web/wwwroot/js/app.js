@@ -25,6 +25,9 @@ const openMediaBtn = document.getElementById("openMediaBtn");
 const downloadContentBtn = document.getElementById("downloadContentBtn");
 const exportPdfBtn = document.getElementById("exportPdfBtn");
 const aboutBtn = document.getElementById("aboutBtn");
+const aboutOverlay = document.getElementById("st2-about-overlay");
+const aboutCloseBtn = document.getElementById("st2-about-close");
+const aboutBuildEl = document.getElementById("st2-about-build");
 const thomFrame = document.getElementById("thomFrame");
 const aiFrame = document.getElementById("aiFrame");
 
@@ -432,23 +435,36 @@ function waitForPreviewImages(doc) {
 
 function showAbout() {
   const build = appConfig?.webBuild;
-  const buildLine = build ? `\nVersión web: ${build.slice(0, 7)}` : "";
-  alert(
-    "ST2 Web — entorno integrado para soporte Bejerman / ONVIO" +
-    buildLine +
-    "\n\nMódulos:\n" +
-    "• Sistema de Planillas\n" +
-    "  – Transferencia entre mesas (TXT + IA manual)\n" +
-    "  – Referral a I+D (capturas, MAM/SDK, IA manual)\n" +
-    "  – Oportunidad de Venta (PDF + gestor por usuario)\n" +
-    "• Portal Cliente (búsqueda de instructivos)\n" +
-    "• THOM (CSS-TAP) y AI Platform embebidos\n\n" +
-    "Web: https://st2.tolei.dev\n" +
-    "by LG 🚲",
-  );
+  if (aboutBuildEl) {
+    if (build) {
+      aboutBuildEl.textContent = `Build ${build.slice(0, 7)}`;
+      aboutBuildEl.classList.remove("hidden");
+    } else {
+      aboutBuildEl.textContent = "";
+      aboutBuildEl.classList.add("hidden");
+    }
+  }
+  aboutOverlay?.classList.remove("hidden");
+  aboutOverlay?.setAttribute("aria-hidden", "false");
+  aboutCloseBtn?.focus();
 }
 
-aboutBtn.addEventListener("click", showAbout);
+function hideAbout() {
+  aboutOverlay?.classList.add("hidden");
+  aboutOverlay?.setAttribute("aria-hidden", "true");
+  aboutBtn?.focus();
+}
+
+aboutBtn?.addEventListener("click", showAbout);
+aboutCloseBtn?.addEventListener("click", hideAbout);
+aboutOverlay?.addEventListener("click", (e) => {
+  if (e.target === aboutOverlay) hideAbout();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && aboutOverlay && !aboutOverlay.classList.contains("hidden")) {
+    hideAbout();
+  }
+});
 
 document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => switchTab(btn.dataset.tab));
