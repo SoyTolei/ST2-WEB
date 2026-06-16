@@ -838,12 +838,24 @@
         <aside class="search-column">
           <h2 class="panel-title">Buscar instructivos</h2>
           <input id="searchInput" type="search" class="search-box" placeholder="Ej: factura electrónica, OnePass, Estados Contables…" autocomplete="off" spellcheck="false"/>
+          <label class="field-label" for="typeFilter">Tipo de contenido</label>
           <select id="typeFilter" class="combo-box"></select>
           <div id="yearFilterPanel" class="year-filter hidden">
             <span class="field-label">Año</span>
             <div id="yearFilterButtons" class="year-buttons" role="radiogroup"></div>
           </div>
-          <ul id="resultsList" class="results-list" aria-live="polite"></ul>
+          <div class="results-panel">
+            <div id="resultsSummary" class="results-summary hidden" aria-live="polite"></div>
+            <div id="searchLoading" class="search-loading hidden" aria-live="polite">
+              <div class="preview-loading-spinner" aria-hidden="true"></div>
+              <p>Buscando instructivos…</p>
+            </div>
+            <div id="resultsEmpty" class="results-empty">
+              <p id="resultsEmptyTitle">Escribí al menos 2 letras para buscar instructivos.</p>
+              <small id="resultsEmptyHint">Podés filtrar por tipo de contenido y por año.</small>
+            </div>
+            <ul id="resultsList" class="results-list hidden" aria-live="polite"></ul>
+          </div>
         </aside>
 
         <section class="preview-column">
@@ -860,7 +872,7 @@
             <iframe id="previewFrame" class="preview-frame" title="Vista previa del instructivo"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"></iframe>
           </div>
-          <div class="preview-actions">
+          <div id="previewActions" class="preview-actions hidden">
             <button id="openPortalBtn" type="button" class="btn btn-primary" disabled>Abrir en portal</button>
             <button id="exportPdfBtn" type="button" class="btn btn-secondary" disabled title="Guarda este instructivo en PDF">Exportar PDF</button>
             <button id="downloadContentBtn" type="button" class="btn btn-secondary hidden" disabled title="Descarga el PDF o video del instructivo">Descargar archivo</button>

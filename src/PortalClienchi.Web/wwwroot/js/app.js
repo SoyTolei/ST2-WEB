@@ -10,12 +10,18 @@ import {
 const searchInput = document.getElementById("searchInput");
 const typeFilter = document.getElementById("typeFilter");
 const resultsList = document.getElementById("resultsList");
+const resultsSummary = document.getElementById("resultsSummary");
+const resultsEmpty = document.getElementById("resultsEmpty");
+const resultsEmptyTitle = document.getElementById("resultsEmptyTitle");
+const resultsEmptyHint = document.getElementById("resultsEmptyHint");
 const statusText = document.getElementById("statusText");
 const statusBar = document.getElementById("statusBar");
 const yearFilterPanel = document.getElementById("yearFilterPanel");
 const yearFilterButtons = document.getElementById("yearFilterButtons");
 const previewFrame = document.getElementById("previewFrame");
 const previewLoading = document.getElementById("previewLoading");
+const previewActions = document.getElementById("previewActions");
+const searchLoading = document.getElementById("searchLoading");
 const previewTitle = document.getElementById("previewTitle");
 const previewProduct = document.getElementById("previewProduct");
 const previewTypeBadge = document.getElementById("previewTypeBadge");
@@ -70,6 +76,128 @@ function showPreviewLoading(message = "Cargando instructivo…") {
 
 function hidePreviewLoading() {
   previewLoading?.classList.add("hidden");
+}
+
+function showSearchLoading(message = "Buscando instructivos…") {
+  searchLoading?.classList.remove("hidden");
+  const msg = searchLoading?.querySelector("p");
+  if (msg) msg.textContent = message;
+  resultsList?.classList.add("is-searching");
+  resultsEmpty?.classList.add("hidden");
+  setResultsSummary("");
+  setStatus(message);
+}
+
+function hideSearchLoading() {
+  searchLoading?.classList.add("hidden");
+  resultsList?.classList.remove("is-searching");
+}
+
+function setResultsSummary(text) {
+  if (!resultsSummary) return;
+  if (!text) {
+    resultsSummary.textContent = "";
+    resultsSummary.classList.add("hidden");
+    return;
+  }
+  resultsSummary.textContent = text;
+  resultsSummary.classList.remove("hidden");
+}
+
+function setResultsEmpty(title, hint = "") {
+  if (resultsEmptyTitle) resultsEmptyTitle.textContent = title;
+  if (resultsEmptyHint) {
+    resultsEmptyHint.textContent = hint;
+    resultsEmptyHint.classList.toggle("hidden", !hint);
+  }
+  resultsEmpty?.classList.remove("hidden");
+  resultsList?.classList.add("hidden");
+}
+
+function hideResultsEmpty() {
+  resultsEmpty?.classList.add("hidden");
+  resultsList?.classList.remove("hidden");
+}
+
+function showIdleResultsState() {
+  setResultsSummary("");
+  setResultsEmpty(
+    "Escribí al menos 2 letras para buscar instructivos.",
+    "Podés filtrar por tipo de contenido y por año.",
+  );
+}
+
+function buildResultsSummary(visible) {
+  const total = lastResults.length;
+  const yearHint =
+    yearFilterMode === "all" ? "" : yearFilterMode === "undated" ? " · sin fecha" : ` · año ${yearFilterValue}`;
+  const multiTopics = groupCount(visible);
+
+  if (total === 0) {
+    return { status: "Sin resultados. Probá con otras palabras.", summary: "0 resultados" };
+  }
+  if (visible.length === 0) {
+    return {
+      status: `Ningún resultado para este filtro${yearHint}. Probá «Todos» u otro año.`,
+      summary: `0 de ${total}${yearHint}`,
+    };
+  }
+  if (multiTopics > 0) {
+    return {
+      status: `${visible.length} de ${total}${yearHint} · ${multiTopics} tema(s) con varias versiones`,
+      summary: `${visible.length} de ${total}${yearHint} · ${multiTopics} tema(s) con varias versiones`,
+    };
+  }
+  return {
+    status: `${visible.length} de ${total}${yearHint} encontrados.`,
+    summary: `${visible.length} de ${total}${yearHint} encontrados`,
+  };
+}
+
+function updateResultsPresentation(visible, displayItems) {
+  const query = searchInput.value.trim();
+  const { status, summary } = buildResultsSummary(visible);
+  setStatus(status);
+  setResultsSummary(summary);
+
+  const hasItems = (displayItems ?? []).some((item) => item.result);
+
+  if (query.length < 2) {
+    showIdleResultsState();
+    return;
+  }
+
+  if (lastResults.length === 0) {
+    setResultsEmpty("Sin resultados. Probá con otras palabras.", "Revisá la ortografía o cambiá el filtro de tipo.");
+    return;
+  }
+
+  if (visible.length === 0 || !hasItems) {
+    const yearHint =
+      yearFilterMode === "all" ? "" : yearFilterMode === "undated" ? " sin fecha" : ` del año ${yearFilterValue}`;
+    setResultsEmpty(
+      `Ningún resultado${yearHint} con este filtro.`,
+      "Probá «Todos» u otro año en los botones de arriba.",
+    );
+    return;
+  }
+
+  hideResultsEmpty();
+}
+
+function setPreviewActionsVisible(visible) {
+  previewActions?.classList.toggle("hidden", !visible);
+}
+
+function resetPreviewToPlaceholder() {
+  detailAbort?.abort();
+  hidePreviewLoading();
+  previewTitle.textContent = "Seleccioná un resultado";
+  previewProduct.textContent = "";
+  previewTypeBadge.classList.add("hidden");
+  previewFrame.removeAttribute("src");
+  previewFrame.srcdoc = placeholderHtml;
+  setPreviewActionsVisible(false);
 }
 
 async function apiGet(url, signal) {
@@ -146,9 +274,14 @@ async function runSearch() {
   const query = searchInput.value.trim();
   if (query.length < 2) {
     lastResults = [];
+    selectedResult = null;
+    selectedDetail = null;
     yearFilterPanel.classList.add("hidden");
     yearFilterButtons.innerHTML = "";
     resultsList.innerHTML = "";
+    hideSearchLoading();
+    resetPreviewToPlaceholder();
+    showIdleResultsState();
     setStatus("Escribí al menos 2 letras para buscar.");
     return;
   }
@@ -156,7 +289,7 @@ async function runSearch() {
   searchAbort?.abort();
   searchAbort = new AbortController();
 
-  setStatus("Buscando…");
+  showSearchLoading("Buscando instructivos…");
   resultsList.innerHTML = "";
 
   try {
@@ -168,10 +301,20 @@ async function runSearch() {
     yearFilterMode = "all";
     rebuildYearTabs(data.years ?? [], data.hasUndated);
     await applyYearFilterAndDisplay();
+
+    if (selectedResult && !lastResults.some((r) => r.id === selectedResult.id)) {
+      selectedResult = null;
+      selectedDetail = null;
+      resetPreviewToPlaceholder();
+    }
   } catch (err) {
     if (err.name === "AbortError") return;
     setStatus(err.message || "Error al buscar.");
+    setResultsSummary("");
+    setResultsEmpty("No se pudo completar la búsqueda.", err.message || "Intentá de nuevo en unos segundos.");
     console.error(err);
+  } finally {
+    hideSearchLoading();
   }
 }
 
@@ -205,7 +348,7 @@ function addYearButton(label, tag, active) {
     if (yearFilterMode === "specific") yearFilterValue = Number.parseInt(tag, 10);
     const years = [...new Set(lastResults.map((r) => r.sortYear).filter((y) => y > 1900 && y < 2100))].sort((a, b) => b - a);
     rebuildYearTabs(years, lastResults.some((r) => r.sortYear === 0));
-    await applyYearFilterAndDisplay();
+    await applyYearFilterAndDisplay({ showLoading: true });
   });
   yearFilterButtons.appendChild(btn);
 }
@@ -216,19 +359,24 @@ function filterByYear(results) {
   return results.filter((r) => r.sortYear === yearFilterValue);
 }
 
-async function applyYearFilterAndDisplay() {
+async function applyYearFilterAndDisplay({ showLoading = false } = {}) {
   const filtered = filterByYear(lastResults);
 
   organizeAbort?.abort();
   organizeAbort = new AbortController();
 
+  if (showLoading) showSearchLoading("Actualizando resultados…");
+
   try {
     const data = await apiPost("/api/organize", filtered, organizeAbort.signal);
-    renderResults(data.displayItems ?? []);
-    updateStatusText(filtered);
+    const displayItems = data.displayItems ?? [];
+    renderResults(displayItems);
+    updateResultsPresentation(filtered, displayItems);
   } catch (err) {
     if (err.name === "AbortError") return;
     setStatus(err.message || "Error al organizar resultados.");
+  } finally {
+    if (showLoading) hideSearchLoading();
   }
 }
 
@@ -267,23 +415,6 @@ function renderResults(items) {
   }
 }
 
-function updateStatusText(visible) {
-  const total = lastResults.length;
-  const yearHint =
-    yearFilterMode === "all" ? "" : yearFilterMode === "undated" ? " · sin fecha" : ` · año ${yearFilterValue}`;
-  const multiTopics = groupCount(visible);
-
-  if (total === 0) {
-    setStatus("Sin resultados. Probá con otras palabras.");
-  } else if (visible.length === 0) {
-    setStatus(`Ningún resultado para este filtro${yearHint}. Probá «Todos» u otro año.`);
-  } else if (multiTopics > 0) {
-    setStatus(`${visible.length} de ${total}${yearHint} · ${multiTopics} tema(s) con varias versiones`);
-  } else {
-    setStatus(`${visible.length} de ${total}${yearHint} encontrados.`);
-  }
-}
-
 function groupCount(results) {
   const groups = new Map();
   for (const r of results) {
@@ -308,6 +439,8 @@ async function selectResult(id, type) {
   previewProduct.textContent = result?.productName ? `Producto: ${result.productName}` : "";
   previewTypeBadge.textContent = result?.typeLabel ?? "";
   previewTypeBadge.classList.toggle("hidden", !result?.typeLabel);
+
+  setPreviewActionsVisible(true);
 
   copyLinkBtn.disabled = !result?.portalUrl;
   openPortalBtn.disabled = !result?.portalUrl;
@@ -572,5 +705,6 @@ void initPlanillas();
 void bootstrapPortal();
 
 async function bootstrapPortal() {
+  showIdleResultsState();
   await Promise.allSettled([loadAppConfig(), loadTypes(), checkHealth()]);
 }
