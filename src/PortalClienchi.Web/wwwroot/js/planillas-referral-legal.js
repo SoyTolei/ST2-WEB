@@ -190,8 +190,8 @@ function showTemplateForm(product, item, template) {
       <form id="ref-legal-template-form" class="plan-form-grid" autocomplete="off">${fields}</form>
       <div class="plan-ref-actions plan-ref-actions-dual plan-legal-form-actions">
         <button type="button" id="ref-legal-btn-generar" class="plan-action-btn green">
-          <span class="plan-action-btn-main">Ver Planilla</span>
-          <span class="plan-action-btn-sub">Genera y muestra la planilla en pantalla</span>
+          <span class="plan-action-btn-main">Vista previa</span>
+          <span class="plan-action-btn-sub">Genera y muestra la planilla acá en pantalla</span>
         </button>
         <button type="button" id="ref-legal-btn-limpar" class="plan-action-btn ghost">Limpiar</button>
       </div>

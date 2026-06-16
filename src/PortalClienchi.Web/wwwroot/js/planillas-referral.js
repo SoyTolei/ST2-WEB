@@ -368,7 +368,8 @@ function bindReferralEvents() {
   setupCapturas("ref-onvio-capt", onvioCapturaFiles);
   setupCapturas("ref-legal-capt", legalCapturaFiles);
 
-  document.getElementById("ref-btn-ver-planilla")?.addEventListener("click", () => generarReferral());
+  document.getElementById("ref-btn-copiar")?.addEventListener("click", () => generarReferral(true));
+  document.getElementById("ref-btn-ver-planilla")?.addEventListener("click", () => generarReferral(false));
   mountPlanTextPreview("ref-text-preview");
   document.getElementById("ref-btn-limpiar")?.addEventListener("click", resetReferralForm);
   document.getElementById("ref-btn-ia")?.addEventListener("click", mejorarReferralIa);
@@ -673,9 +674,10 @@ async function subirCapturasReferral(files) {
   return (data.enlaces || []).filter((e) => e?.url);
 }
 
-async function generarReferral() {
+async function generarReferral(copiar) {
   const status = document.getElementById("ref-status");
-  const btn = document.getElementById("ref-btn-ver-planilla");
+  const btnCopiar = document.getElementById("ref-btn-copiar");
+  const btnVer = document.getElementById("ref-btn-ver-planilla");
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
   const quierePantallas = isBejerman()
@@ -691,7 +693,8 @@ async function generarReferral() {
   }
 
   try {
-    if (btn) btn.disabled = true;
+    if (btnCopiar) btnCopiar.disabled = true;
+    if (btnVer) btnVer.disabled = true;
     if (files.length > 0) {
       status.textContent = "Subiendo capturas…";
       payload.capturasEnlaces = await subirCapturasReferral(files);
@@ -730,13 +733,19 @@ async function generarReferral() {
       ? ` (${data.capturasSubidas} captura(s) con link en el texto)`
       : "";
 
-    showPlanTextPreview("ref-text-preview", data.texto);
-    status.textContent = `Planilla lista.${capturasMsg} Podés copiar desde el panel de vista previa.`;
+    if (copiar) {
+      await navigator.clipboard.writeText(data.texto);
+      status.textContent = `Texto copiado al portapapeles.${capturasMsg}`;
+    } else {
+      showPlanTextPreview("ref-text-preview", data.texto);
+      status.textContent = `Planilla lista.${capturasMsg} Podés copiar desde el panel de vista previa.`;
+    }
   } catch (ex) {
     status.textContent = ex.message || "Error";
     alert(status.textContent);
   } finally {
-    if (btn) btn.disabled = false;
+    if (btnCopiar) btnCopiar.disabled = false;
+    if (btnVer) btnVer.disabled = false;
   }
 }
 

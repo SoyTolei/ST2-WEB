@@ -113,6 +113,7 @@ const els = {
   ticketPanel: () => document.getElementById("plan-ticket-panel"),
   ticketNumero: () => document.getElementById("plan-ticket-numero"),
   planStatus: () => document.getElementById("plan-status"),
+  btnCopiar: () => document.getElementById("plan-btn-copiar"),
   btnVerPlanilla: () => document.getElementById("plan-btn-ver-planilla"),
 };
 
@@ -642,6 +643,23 @@ async function generarTexto() {
   return data;
 }
 
+async function onCopiarAlPortapapeles() {
+  const btn = els.btnCopiar();
+  if (!btn) return;
+  btn.disabled = true;
+  try {
+    const data = await generarTexto();
+    if (!data?.texto) return;
+    await navigator.clipboard.writeText(data.texto);
+    setPlanStatus("Texto copiado al portapapeles.");
+  } catch (ex) {
+    setPlanStatus(ex.message, true);
+    alert(ex.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 async function onVerPlanilla() {
   const btn = els.btnVerPlanilla();
   if (!btn) return;
@@ -807,6 +825,7 @@ function bindEvents() {
     e.target.value = e.target.value.replace(/\D/g, "");
   });
 
+  els.btnCopiar()?.addEventListener("click", onCopiarAlPortapapeles);
   els.btnVerPlanilla()?.addEventListener("click", onVerPlanilla);
   mountPlanTextPreview("plan-text-preview");
   document.getElementById("plan-btn-limpiar")?.addEventListener("click", limpiarTransferencia);
