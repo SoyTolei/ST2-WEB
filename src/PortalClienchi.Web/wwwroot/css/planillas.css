@@ -805,7 +805,7 @@
   border-top: 1px solid var(--border);
 }
 
-.plan-op-cargar-actions:has(#op-btn-ia.hidden) {
+.plan-op-cargar-actions:has(.plan-ia-group--op.hidden) {
   grid-template-columns: 1fr;
 }
 
@@ -967,9 +967,28 @@
   margin: 8px 0 16px;
 }
 
-.plan-ia-bar .plan-ia-btn {
+.plan-ia-group {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
   flex: 1;
   min-width: 200px;
+}
+
+.plan-ia-group--op {
+  min-width: 0;
+  min-height: 52px;
+}
+
+.plan-ia-group.hidden {
+  display: none;
+}
+
+.plan-ia-bar .plan-ia-btn,
+.plan-ia-group .plan-ia-btn,
+.plan-ia-group .plan-op-btn-ia {
+  flex: 1;
+  min-width: 0;
   margin: 0;
   display: inline-flex;
   align-items: center;
@@ -993,22 +1012,45 @@
 }
 
 .plan-ia-undo-btn {
-  flex: 0 1 auto;
-  min-width: 120px;
+  flex: 0 0 auto;
+  width: 40px;
+  min-width: 40px;
+  align-self: stretch;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: #fff;
-  color: #64748b;
-  font-size: 0.8125rem;
+  color: #94a3b8;
+  font-size: 1.125rem;
+  line-height: 1;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
-  padding: 10px 16px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
 }
 
-.plan-ia-undo-btn:hover { background: var(--nav-hover); }
+.plan-ia-undo-btn:not(:disabled) {
+  color: #64748b;
+  border-color: #cbd5e1;
+}
 
-.plan-op-ia-undo-bar { justify-content: center; margin-top: -4px; }
+.plan-ia-undo-btn:not(:disabled):hover {
+  background: var(--nav-hover);
+  color: var(--primary);
+  border-color: #fdba74;
+}
+
+.plan-ia-undo-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.plan-ia-undo-btn.hidden {
+  display: none;
+}
 
 .plan-ia-btn { width: 100%; margin: 8px 0 16px; }
 

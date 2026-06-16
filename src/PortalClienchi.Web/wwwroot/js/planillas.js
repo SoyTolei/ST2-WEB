@@ -1,5 +1,5 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 
@@ -411,7 +411,7 @@ function transferIaFieldDefs() {
 }
 
 function initTransferenciaIaUi() {
-  document.getElementById("plan-btn-ia")?.classList.toggle("hidden", !planillasConfig?.iaConfigured);
+  syncIaUndoBar("plan-btn-ia", "plan-btn-ia-undo", planillasConfig?.iaConfigured);
   if (!transferIaUndo) {
     transferIaUndo = bindIaUndoButtons({
       undoBtnId: "plan-btn-ia-undo",
@@ -450,7 +450,7 @@ async function mejorarTransferenciaIa() {
       desc.classList.remove("placeholder-active");
       descripcionEsPlaceholder = false;
     }
-    setPlanStatus("Redacción mejorada. Usá «Deshacer» si no te convence.");
+    setPlanStatus("Redacción mejorada. Usá ↩ al lado si no te convence.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
     alert(ex.message);

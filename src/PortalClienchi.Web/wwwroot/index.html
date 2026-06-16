@@ -210,11 +210,13 @@
             </div>
 
             <div class="plan-ia-bar">
-              <button type="button" id="plan-btn-ia" class="btn btn-secondary plan-ia-btn hidden">
-                <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
-                Mejorar redacción con IA
-              </button>
-              <button type="button" id="plan-btn-ia-undo" class="btn btn-secondary plan-ia-undo-btn hidden">↩ Deshacer</button>
+              <div class="plan-ia-group">
+                <button type="button" id="plan-btn-ia" class="btn btn-secondary plan-ia-btn hidden">
+                  <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
+                  Mejorar redacción con IA
+                </button>
+                <button type="button" id="plan-btn-ia-undo" class="plan-ia-undo-btn hidden" aria-label="Deshacer cambios de la IA" disabled>↩</button>
+              </div>
             </div>
 
             <div class="plan-ref-actions">
@@ -328,11 +330,13 @@
             </div>
 
             <div class="plan-ia-bar">
-              <button type="button" id="ref-btn-ia" class="btn btn-secondary plan-ia-btn hidden">
-                <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
-                Mejorar redacción con IA
-              </button>
-              <button type="button" id="ref-btn-ia-undo" class="btn btn-secondary plan-ia-undo-btn hidden">↩ Deshacer</button>
+              <div class="plan-ia-group">
+                <button type="button" id="ref-btn-ia" class="btn btn-secondary plan-ia-btn hidden">
+                  <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
+                  Mejorar redacción con IA
+                </button>
+                <button type="button" id="ref-btn-ia-undo" class="plan-ia-undo-btn hidden" aria-label="Deshacer cambios de la IA" disabled>↩</button>
+              </div>
             </div>
 
             <div id="ref-bejerman-post" class="plan-ref-block hidden">
@@ -704,13 +708,13 @@
                   <span class="plan-action-btn-icon" data-plan-icon="pdf" aria-hidden="true"></span>
                   GENERAR PDF
                 </button>
-                <button type="button" id="op-btn-ia" class="plan-op-btn-ia hidden">
-                  <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
-                  Mejorar redacción con IA
-                </button>
-              </div>
-              <div class="plan-ia-bar plan-op-ia-undo-bar">
-                <button type="button" id="op-btn-ia-undo" class="plan-ia-undo-btn hidden">↩ Deshacer cambios de IA</button>
+                <div class="plan-ia-group plan-ia-group--op">
+                  <button type="button" id="op-btn-ia" class="plan-op-btn-ia hidden">
+                    <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
+                    Mejorar redacción con IA
+                  </button>
+                  <button type="button" id="op-btn-ia-undo" class="plan-ia-undo-btn hidden" aria-label="Deshacer cambios de la IA" disabled>↩</button>
+                </div>
               </div>
               <div class="plan-op-cargar-clear">
                 <button type="button" id="op-btn-limpiar" class="plan-op-btn-limpiar">🗑 Limpiar</button>

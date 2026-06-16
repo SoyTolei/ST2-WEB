@@ -5,7 +5,7 @@ import {
   refreshPlanUserSession,
   syncPlanUserSession,
 } from "./plan-user.js";
-import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
 
 let ctx = null;
 let metodoContacto = null;
@@ -92,7 +92,7 @@ function bindOportunidadEvents() {
 
 function openCargar() {
   document.getElementById("op-cargar-sistema").textContent = sistemaLabel();
-  document.getElementById("op-btn-ia")?.classList.toggle("hidden", !ctx.getConfig()?.oportunidad?.iaConfigured);
+  syncIaUndoBar("op-btn-ia", "op-btn-ia-undo", ctx.getConfig()?.oportunidad?.iaConfigured);
   ctx.showView("oportunidadCargar");
 }
 
@@ -205,7 +205,7 @@ async function mejorarOportunidadIa() {
       return;
     }
     applyCargarPayload(data);
-    status.textContent = "Formulario actualizado con IA. Usá «Deshacer» si no te convence.";
+    status.textContent = "Formulario actualizado con IA. Usá ↩ al lado si no te convence.";
   } finally {
     if (btn) btn.disabled = false;
   }

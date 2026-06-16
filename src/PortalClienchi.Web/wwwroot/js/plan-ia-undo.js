@@ -1,5 +1,15 @@
 /** Snapshot / restore de campos antes de aplicar IA manual. */
 
+export function syncIaUndoBar(iaBtnId, undoBtnId, visible) {
+  const show = !!visible;
+  document.getElementById(iaBtnId)?.classList.toggle("hidden", !show);
+  document.getElementById(undoBtnId)?.classList.toggle("hidden", !show);
+  document
+    .getElementById(undoBtnId)
+    ?.closest(".plan-ia-group")
+    ?.classList.toggle("hidden", !show);
+}
+
 export function snapshotFields(fieldDefs) {
   const snap = {};
   for (const def of fieldDefs) {
@@ -47,8 +57,15 @@ export function bindIaUndoButtons({ undoBtnId, getSnapshot, onUndo }) {
   let snapshot = null;
 
   const updateUndoUi = () => {
-    undoBtn?.classList.toggle("hidden", !snapshot);
+    if (!undoBtn) return;
+    undoBtn.disabled = !snapshot;
+    undoBtn.title = snapshot
+      ? "Deshacer cambios de la IA"
+      : "Disponible después de usar «Mejorar redacción con IA»";
+    undoBtn.setAttribute("aria-disabled", snapshot ? "false" : "true");
   };
+
+  updateUndoUi();
 
   return {
     saveSnapshot() {

@@ -1,4 +1,4 @@
-import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
 import { initLegalReferralHub, openLegalReferralHub, resetLegalReferralHub } from "./planillas-referral-legal.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 
@@ -95,7 +95,7 @@ function updateReferralPanels() {
   document.getElementById("ref-bejerman-post")?.classList.toggle("hidden", !bej);
   document.getElementById("ref-onvio-panel")?.classList.toggle("hidden", bej);
   document.getElementById("ref-legal-panel")?.classList.add("hidden");
-  document.getElementById("ref-btn-ia")?.classList.toggle("hidden", !ctx.getConfig()?.referral?.iaConfigured);
+  syncIaUndoBar("ref-btn-ia", "ref-btn-ia-undo", ctx.getConfig()?.referral?.iaConfigured);
   buildReferralPills();
   updateCheckStatuses();
   updateSqlPanel();
@@ -771,7 +771,7 @@ async function mejorarReferralIa() {
     if (data.asunto) document.getElementById("ref-asunto").value = data.asunto;
     if (data.descripcion) setField("ref-descripcion", data.descripcion, REF_DESC_PH);
     if (data.pasoAPaso) setField("ref-paso", data.pasoAPaso, REF_PASO_PH);
-    status.textContent = "Redacción mejorada. Usá «Deshacer» si no te convence.";
+    status.textContent = "Redacción mejorada. Usá ↩ al lado si no te convence.";
   } finally {
     if (btn) btn.disabled = false;
   }
