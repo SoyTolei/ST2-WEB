@@ -58,6 +58,7 @@ internal sealed class EmbedSiteProxy
 
         if (HttpMethods.IsOptions(context.Request.Method))
         {
+            ApplyEmbedCorsHeaders(context.Request, context.Response);
             context.Response.StatusCode = StatusCodes.Status204NoContent;
             return;
         }
@@ -79,6 +80,7 @@ internal sealed class EmbedSiteProxy
         context.Response.StatusCode = (int)response.StatusCode;
 
         CopyResponseHeaders(response, context.Response, site, context.Request.IsHttps);
+        ApplyEmbedCorsHeaders(context.Request, context.Response);
 
         if (response.Headers.Location is not null)
         {
@@ -224,6 +226,7 @@ internal sealed class EmbedSiteProxy
             }
 
             content = RewriteHtmlAttributeUrls(content, site);
+            content = StripCrossOriginAttributes(content);
         }
         else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
                  || contentType.Contains("css", StringComparison.OrdinalIgnoreCase))
@@ -248,6 +251,27 @@ internal sealed class EmbedSiteProxy
         content = content.Replace("http://d20xtzwzcl0ceb.cloudfront.net", "/embed/cf2", StringComparison.OrdinalIgnoreCase);
         return content;
     }
+
+    private static void ApplyEmbedCorsHeaders(HttpRequest request, HttpResponse response)
+    {
+        var origin = request.Headers.Origin.FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(origin))
+        {
+            response.Headers.AccessControlAllowOrigin = origin;
+            response.Headers.AccessControlAllowCredentials = "true";
+        }
+        else
+        {
+            response.Headers.AccessControlAllowOrigin = "*";
+        }
+
+        response.Headers.AccessControlAllowMethods = "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS";
+        response.Headers.AccessControlAllowHeaders = "Content-Type, Authorization, Accept, Origin, X-Requested-With";
+        response.Headers.Vary = "Origin";
+    }
+
+    private static string StripCrossOriginAttributes(string content) =>
+        Regex.Replace(content, @"\s+crossorigin(=(['""])?(anonymous|use-credentials)\2)?", "", RegexOptions.IgnoreCase);
 
     private static string RewriteHtmlAttributeUrls(string content, string site)
     {

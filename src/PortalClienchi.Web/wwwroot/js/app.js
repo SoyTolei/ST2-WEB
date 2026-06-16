@@ -35,6 +35,7 @@ const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const thomFrame = document.getElementById("thomFrame");
+const thomEmbedLoading = document.getElementById("thomEmbedLoading");
 const aiFrame = document.getElementById("aiFrame");
 
 let searchTimer = null;
@@ -640,6 +641,24 @@ function applyEmbedZoom(kind) {
   frame.style.zoom = String(getEmbedZoom(kind));
 }
 
+let thomLoadTimer = null;
+
+function showThomLoading(message = "Cargando THOM…") {
+  thomEmbedLoading?.classList.remove("hidden");
+  const msg = thomEmbedLoading?.querySelector("p");
+  if (msg) msg.textContent = message;
+  clearTimeout(thomLoadTimer);
+  thomLoadTimer = setTimeout(() => {
+    setEmbedHint("thom", "THOM tarda más de lo normal. Verificá VPN y probá «Abrir en navegador».");
+  }, 18000);
+}
+
+function hideThomLoading() {
+  thomEmbedLoading?.classList.add("hidden");
+  clearTimeout(thomLoadTimer);
+  thomLoadTimer = null;
+}
+
 function loadEmbedFrame(kind, { force = false } = {}) {
   const frame = kind === "thom" ? thomFrame : aiFrame;
   const url = getEmbedFrameUrl(kind);
@@ -647,6 +666,7 @@ function loadEmbedFrame(kind, { force = false } = {}) {
   if (!force && !needsEmbedReload(frame, url)) return;
   applyEmbedZoom(kind);
   clearEmbedHint(kind);
+  if (kind === "thom") showThomLoading();
   frame.src = url;
 }
 
@@ -694,13 +714,17 @@ function initEmbedReminders() {
   bindEmbedEngagement(aiFrame, "ai");
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
+    hideThomLoading();
     try {
       const loc = thomFrame.contentWindow?.location?.href ?? "";
       if (loc.includes("sso.thomsonreuters.com") || loc.includes("login.microsoftonline.com")) {
+        showThomLoading("Iniciando sesión corporativa…");
         setEmbedHint("thom", "Iniciando sesión corporativa… Si se queda en blanco, conectá VPN y usá «Abrir en navegador».");
+      } else if (loc.includes("/embed/cg/")) {
+        showThomLoading("Redirigiendo al login…");
       }
     } catch {
-      // cross-origin durante SSO
+      hideThomLoading();
     }
   });
   initDailyTabReminders();
