@@ -193,9 +193,9 @@ internal sealed class EmbedSiteProxy
         value = Regex.Replace(value, @";\s*SameSite=[^;]*", "", RegexOptions.IgnoreCase);
         value = Regex.Replace(value, @";\s*Secure", "", RegexOptions.IgnoreCase);
         if (Regex.IsMatch(value, @";\s*Path=", RegexOptions.IgnoreCase))
-            value = Regex.Replace(value, @";\s*Path=[^;]*", $"; Path=/embed/{site}/", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @";\s*Path=[^;]*", "; Path=/embed/", RegexOptions.IgnoreCase);
         else
-            value += $"; Path=/embed/{site}/";
+            value += "; Path=/embed/";
         value += isHttps ? "; SameSite=None; Secure" : "; SameSite=Lax";
         return value;
     }
@@ -203,11 +203,15 @@ internal sealed class EmbedSiteProxy
     private static bool ShouldRewrite(string contentType) =>
         TextualContentRegex.IsMatch(contentType);
 
+    private static readonly Regex OAuthRedirectUriRegex = new(
+        @"redirect_uri=([^&""'\s]+)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
     private static string RewriteContent(string content, string site, string contentType)
     {
         if (contentType.Contains("html", StringComparison.OrdinalIgnoreCase))
         {
-            content = RewriteAbsoluteHosts(content);
+            content = RewriteAbsoluteHostsPreservingOAuth(content);
 
             var baseTag = $"""<base href="/embed/{site}/">""";
             if (!content.Contains("<base ", StringComparison.OrdinalIgnoreCase))
@@ -226,12 +230,11 @@ internal sealed class EmbedSiteProxy
         {
             content = RewriteCloudFrontHosts(content);
             content = RewriteScriptOrStyleUrls(content, site);
-            if (site == "ai")
-                content = RewriteAbsoluteHosts(content);
+            content = RewriteAbsoluteHostsPreservingOAuth(content);
         }
         else
         {
-            content = RewriteAbsoluteHosts(content);
+            content = RewriteAbsoluteHostsPreservingOAuth(content);
         }
 
         return content;
@@ -271,6 +274,23 @@ internal sealed class EmbedSiteProxy
             @"url\(\s*(['""]?)/(?!embed/)(?=[a-zA-Z0-9_\-])",
             $"url($1{embed}",
             RegexOptions.IgnoreCase);
+        return content;
+    }
+
+    private static string RewriteAbsoluteHostsPreservingOAuth(string content)
+    {
+        var tokens = new List<string>();
+        content = OAuthRedirectUriRegex.Replace(content, match =>
+        {
+            tokens.Add(match.Value);
+            return $"__OAUTH_RU_{tokens.Count - 1}__";
+        });
+
+        content = RewriteAbsoluteHosts(content);
+
+        for (var i = 0; i < tokens.Count; i++)
+            content = content.Replace($"__OAUTH_RU_{i}__", tokens[i], StringComparison.Ordinal);
+
         return content;
     }
 

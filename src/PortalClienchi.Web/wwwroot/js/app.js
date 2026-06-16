@@ -646,7 +646,20 @@ function loadEmbedFrame(kind, { force = false } = {}) {
   if (!frame || !url) return;
   if (!force && !needsEmbedReload(frame, url)) return;
   applyEmbedZoom(kind);
+  clearEmbedHint(kind);
   frame.src = url;
+}
+
+function clearEmbedHint(kind) {
+  const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
+  if (el) el.textContent = kind === "thom"
+    ? "THOM via proxy · VPN activa · si falla el login, «Abrir en navegador»"
+    : "Sesión corporativa · si no carga, «Abrir en navegador»";
+}
+
+function setEmbedHint(kind, message) {
+  const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
+  if (el) el.textContent = message;
 }
 
 function switchTab(tabId) {
@@ -679,6 +692,17 @@ function switchTab(tabId) {
 function initEmbedReminders() {
   bindEmbedEngagement(thomFrame, "thom");
   bindEmbedEngagement(aiFrame, "ai");
+  thomFrame?.addEventListener("load", () => {
+    if (isEmbedFrameEmpty(thomFrame)) return;
+    try {
+      const loc = thomFrame.contentWindow?.location?.href ?? "";
+      if (loc.includes("sso.thomsonreuters.com") || loc.includes("login.microsoftonline.com")) {
+        setEmbedHint("thom", "Iniciando sesión corporativa… Si se queda en blanco, conectá VPN y usá «Abrir en navegador».");
+      }
+    } catch {
+      // cross-origin durante SSO
+    }
+  });
   initDailyTabReminders();
 }
 
