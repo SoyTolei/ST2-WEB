@@ -368,8 +368,7 @@ function bindReferralEvents() {
   setupCapturas("ref-onvio-capt", onvioCapturaFiles);
   setupCapturas("ref-legal-capt", legalCapturaFiles);
 
-  document.getElementById("ref-btn-copiar")?.addEventListener("click", () => generarReferral(true));
-  document.getElementById("ref-btn-txt")?.addEventListener("click", () => generarReferral(false));
+  document.getElementById("ref-btn-ver-planilla")?.addEventListener("click", () => generarReferral());
   mountPlanTextPreview("ref-text-preview");
   document.getElementById("ref-btn-limpiar")?.addEventListener("click", resetReferralForm);
   document.getElementById("ref-btn-ia")?.addEventListener("click", mejorarReferralIa);
@@ -674,8 +673,9 @@ async function subirCapturasReferral(files) {
   return (data.enlaces || []).filter((e) => e?.url);
 }
 
-async function generarReferral(copiar) {
+async function generarReferral() {
   const status = document.getElementById("ref-status");
+  const btn = document.getElementById("ref-btn-ver-planilla");
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
   const quierePantallas = isBejerman()
@@ -691,6 +691,7 @@ async function generarReferral(copiar) {
   }
 
   try {
+    if (btn) btn.disabled = true;
     if (files.length > 0) {
       status.textContent = "Subiendo capturas…";
       payload.capturasEnlaces = await subirCapturasReferral(files);
@@ -729,16 +730,13 @@ async function generarReferral(copiar) {
       ? ` (${data.capturasSubidas} captura(s) con link en el texto)`
       : "";
 
-    if (copiar) {
-      await navigator.clipboard.writeText(data.texto);
-      status.textContent = `Texto copiado al portapapeles.${capturasMsg}`;
-    } else {
-      showPlanTextPreview("ref-text-preview", data.texto);
-      status.textContent = `Vista previa lista.${capturasMsg} Podés copiar desde el panel o con el botón verde.`;
-    }
+    showPlanTextPreview("ref-text-preview", data.texto);
+    status.textContent = `Planilla lista.${capturasMsg} Podés copiar desde el panel de vista previa.`;
   } catch (ex) {
     status.textContent = ex.message || "Error";
     alert(status.textContent);
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 

@@ -55,15 +55,19 @@ function isLegal() {
   return sistemaActual === "Legal";
 }
 
-function isLegalBetaActive() {
-  const legal = planillasConfig?.sistemas?.find((s) => s.id === "Legal");
-  return !!(legal?.beta && !legal?.placeholder);
+function isSistemaBeta(id) {
+  return !!planillasConfig?.sistemas?.find((s) => s.id === id)?.beta;
 }
 
-function updateLegalBetaUi() {
-  const on = isLegalBetaActive();
-  document.getElementById("plan-legal-beta-pill")?.classList.toggle("hidden", !on);
-  document.getElementById("plan-legal-beta-note")?.classList.toggle("hidden", !(on && isLegal()));
+function isChile() {
+  return sistemaActual === "Chile";
+}
+
+function updateSistemaBetaUi() {
+  document.getElementById("plan-legal-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Legal"));
+  document.getElementById("plan-chile-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Chile"));
+  document.getElementById("plan-legal-beta-note")?.classList.toggle("hidden", !(isSistemaBeta("Legal") && isLegal()));
+  document.getElementById("plan-chile-beta-note")?.classList.toggle("hidden", !(isSistemaBeta("Chile") && isChile()));
 }
 
 let planillasConfig = null;
@@ -109,8 +113,7 @@ const els = {
   ticketPanel: () => document.getElementById("plan-ticket-panel"),
   ticketNumero: () => document.getElementById("plan-ticket-numero"),
   planStatus: () => document.getElementById("plan-status"),
-  btnGenerarCopiar: () => document.getElementById("plan-btn-copiar"),
-  btnGenerarTxt: () => document.getElementById("plan-btn-txt"),
+  btnVerPlanilla: () => document.getElementById("plan-btn-ver-planilla"),
 };
 
 function showView(name) {
@@ -170,7 +173,7 @@ function updateSistemaUi() {
     oportunidadNa.classList.toggle("hidden", !legalSelected);
     oportunidadNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
   }
-  updateLegalBetaUi();
+  updateSistemaBetaUi();
 }
 
 function selectSistema(id) {
@@ -639,30 +642,15 @@ async function generarTexto() {
   return data;
 }
 
-async function onGenerarCopiar() {
-  const btn = els.btnGenerarCopiar();
-  btn.disabled = true;
-  try {
-    const data = await generarTexto();
-    if (!data?.texto) return;
-    await navigator.clipboard.writeText(data.texto);
-    setPlanStatus("Texto copiado al portapapeles.");
-  } catch (ex) {
-    setPlanStatus(ex.message, true);
-    alert(ex.message);
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-async function onGenerarPreview() {
-  const btn = els.btnGenerarTxt();
+async function onVerPlanilla() {
+  const btn = els.btnVerPlanilla();
+  if (!btn) return;
   btn.disabled = true;
   try {
     const data = await generarTexto();
     if (!data?.texto) return;
     showPlanTextPreview("plan-text-preview", data.texto);
-    setPlanStatus("Vista previa lista. Podés copiar desde el panel o con el botón verde.");
+    setPlanStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
     alert(ex.message);
@@ -675,7 +663,7 @@ function openPlaceholder(moduleTitle) {
   els.placeholderTitle().textContent = moduleTitle;
   els.placeholderText().textContent =
     sistemaActual === "Chile"
-      ? "El módulo Chile estará disponible en una próxima versión."
+      ? "Chile está en versión beta y estará disponible en una próxima versión."
       : sistemaActual === "Legal"
         ? "El módulo LEGAL estará disponible en una próxima versión."
         : `${moduleTitle} se migrará en una próxima fase. Por ahora usá Transferencia de Casos.`;
@@ -819,8 +807,7 @@ function bindEvents() {
     e.target.value = e.target.value.replace(/\D/g, "");
   });
 
-  els.btnGenerarCopiar()?.addEventListener("click", onGenerarCopiar);
-  els.btnGenerarTxt()?.addEventListener("click", onGenerarPreview);
+  els.btnVerPlanilla()?.addEventListener("click", onVerPlanilla);
   mountPlanTextPreview("plan-text-preview");
   document.getElementById("plan-btn-limpiar")?.addEventListener("click", limpiarTransferencia);
 }

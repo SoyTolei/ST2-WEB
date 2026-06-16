@@ -9,7 +9,7 @@ export function planTextPreviewHtml(panelId, statusTargetId = "") {
       <div class="plan-text-preview-head">
         <p class="plan-text-preview-title">
           <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
-          Vista previa del texto
+          Vista previa de la planilla
         </p>
         <button type="button" class="plan-text-preview-copy" data-plan-preview-copy>
           <span class="plan-text-preview-copy-icon" data-plan-icon="clipboard" aria-hidden="true"></span>

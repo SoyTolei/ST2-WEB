@@ -188,12 +188,10 @@ function showTemplateForm(product, item, template) {
       <p class="plan-ref-title">${template.title || template.label}</p>
       ${blocks}
       <form id="ref-legal-template-form" class="plan-form-grid" autocomplete="off">${fields}</form>
-      <div class="plan-ref-actions plan-legal-form-actions">
+      <div class="plan-ref-actions plan-ref-actions-dual plan-legal-form-actions">
         <button type="button" id="ref-legal-btn-generar" class="plan-action-btn green">
-          <span class="plan-action-btn-main">Generar plantilla</span>
-        </button>
-        <button type="button" id="ref-legal-btn-copiar" class="plan-action-btn blue" disabled>
-          <span class="plan-action-btn-main">Copiar</span>
+          <span class="plan-action-btn-main">Ver Planilla</span>
+          <span class="plan-action-btn-sub">Genera y muestra la planilla en pantalla</span>
         </button>
         <button type="button" id="ref-legal-btn-limpar" class="plan-action-btn ghost">Limpiar</button>
       </div>
@@ -205,13 +203,11 @@ function showTemplateForm(product, item, template) {
   document.getElementById("ref-legal-btn-limpar")?.addEventListener("click", () => {
     document.getElementById("ref-legal-template-form")?.reset();
     clearPlanTextPreview("ref-legal-text-preview");
-    document.getElementById("ref-legal-btn-copiar")?.setAttribute("disabled", "true");
     setStatus("");
   });
 
   mountPlanTextPreview("ref-legal-text-preview");
   document.getElementById("ref-legal-btn-generar")?.addEventListener("click", () => generatePreview(template));
-  document.getElementById("ref-legal-btn-copiar")?.addEventListener("click", () => copyPreview());
 }
 
 function collectValues(template) {
@@ -245,19 +241,7 @@ function buildTemplateText(template) {
 function generatePreview(template) {
   const text = buildTemplateText(template);
   showPlanTextPreview("ref-legal-text-preview", text);
-  document.getElementById("ref-legal-btn-copiar")?.removeAttribute("disabled");
-  setStatus("Vista previa lista. Podés copiar desde el panel o con el botón azul.");
-}
-
-async function copyPreview() {
-  const text = buildTemplateText(template);
-  if (!text.trim()) return;
-  try {
-    await navigator.clipboard.writeText(text);
-    setStatus("Copiado al portapapeles.");
-  } catch {
-    setStatus("No se pudo copiar.", true);
-  }
+  setStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
 }
 
 function setStatus(msg, isError = false) {

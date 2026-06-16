@@ -176,7 +176,8 @@
   vertical-align: middle;
 }
 
-.plan-legal-beta-note {
+.plan-legal-beta-note,
+.plan-sistema-beta-note {
   margin: -8px 0 16px;
   padding: 10px 12px;
   border-radius: 10px;
@@ -1173,6 +1174,9 @@
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
+}
+.plan-ref-actions-dual {
+  grid-template-columns: 1fr auto;
 }
 .plan-action-btn {
   min-height: 56px;

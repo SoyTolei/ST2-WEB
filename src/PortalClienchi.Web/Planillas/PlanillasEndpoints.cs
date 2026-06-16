@@ -20,7 +20,7 @@ public static class PlanillasEndpoints
                 new { id = "BejermanSql", label = PlanillasSistemaExtensions.BejermanSqlLabel, placeholder = false, beta = false },
                 new { id = "OnvioWeb", label = PlanillasSistemaExtensions.OnvioWebLabel, placeholder = false, beta = false },
                 new { id = "Legal", label = PlanillasSistemaExtensions.LegalLabel, placeholder = !PlanillasFeatureFlags.LegalEnabled, beta = PlanillasFeatureFlags.LegalEnabled },
-                new { id = "Chile", label = PlanillasSistemaExtensions.ChileLabel, placeholder = true, beta = false },
+                new { id = "Chile", label = PlanillasSistemaExtensions.ChileLabel, placeholder = true, beta = true },
             },
             iaConfigured = svc.IaConfigured,
             capturaHosting = new

@@ -57,9 +57,10 @@
                 <button type="button" class="plan-pill-btn active" data-plan-sistema="BejermanSql">Bejerman SQL</button>
                 <button type="button" class="plan-pill-btn" data-plan-sistema="OnvioWeb">ONVIO/Bejerman WEB</button>
                 <button type="button" class="plan-pill-btn" data-plan-sistema="Legal">LEGAL <span id="plan-legal-beta-pill" class="plan-pill-beta hidden">Beta</span></button>
-                <button type="button" class="plan-pill-btn" data-plan-sistema="Chile">Chile</button>
+                <button type="button" class="plan-pill-btn" data-plan-sistema="Chile">Chile <span id="plan-chile-beta-pill" class="plan-pill-beta hidden">Beta</span></button>
               </div>
-              <p id="plan-legal-beta-note" class="plan-legal-beta-note hidden">LEGAL está en <strong>versión beta</strong> — seguimos trabajando en mejoras.</p>
+              <p id="plan-legal-beta-note" class="plan-sistema-beta-note hidden">LEGAL está en <strong>versión beta</strong> — seguimos trabajando en mejoras.</p>
+              <p id="plan-chile-beta-note" class="plan-sistema-beta-note hidden">Chile está en <strong>versión beta</strong> — seguimos trabajando en mejoras.</p>
             </div>
 
             <p class="planillas-section-title">Opciones</p>
@@ -216,20 +217,13 @@
               <button type="button" id="plan-btn-ia-undo" class="btn btn-secondary plan-ia-undo-btn hidden">↩ Deshacer</button>
             </div>
 
-            <div class="plan-ref-actions">
-              <button type="button" id="plan-btn-copiar" class="plan-action-btn green">
-                <span class="plan-action-btn-main">
-                  <span class="plan-action-btn-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
-                  Copiar al portapapeles
-                </span>
-                <span class="plan-action-btn-sub">Solo copiar y pegar</span>
-              </button>
-              <button type="button" id="plan-btn-txt" class="plan-action-btn blue">
+            <div class="plan-ref-actions plan-ref-actions-dual">
+              <button type="button" id="plan-btn-ver-planilla" class="plan-action-btn green">
                 <span class="plan-action-btn-main">
                   <span class="plan-action-btn-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
-                  Ver vista previa
+                  Ver Planilla
                 </span>
-                <span class="plan-action-btn-sub">Genera y muestra el texto acá</span>
+                <span class="plan-action-btn-sub">Genera y muestra la planilla en pantalla</span>
               </button>
               <button type="button" id="plan-btn-limpiar" class="plan-action-btn ghost">
                 <span class="plan-action-btn-main">🗑 Limpiar</span>
@@ -239,7 +233,7 @@
               <div class="plan-text-preview-head">
                 <p class="plan-text-preview-title">
                   <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
-                  Vista previa del texto
+                  Vista previa de la planilla
                 </p>
                 <button type="button" class="plan-text-preview-copy" data-plan-preview-copy>
                   <span class="plan-text-preview-copy-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
@@ -597,20 +591,13 @@
               </div>
             </div>
 
-            <div class="plan-ref-actions" id="ref-standard-actions">
-              <button type="button" id="ref-btn-copiar" class="plan-action-btn green">
-                <span class="plan-action-btn-main">
-                  <span class="plan-action-btn-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
-                  Copiar al portapapeles
-                </span>
-                <span class="plan-action-btn-sub">Solo copiar y pegar</span>
-              </button>
-              <button type="button" id="ref-btn-txt" class="plan-action-btn blue">
+            <div class="plan-ref-actions plan-ref-actions-dual" id="ref-standard-actions">
+              <button type="button" id="ref-btn-ver-planilla" class="plan-action-btn green">
                 <span class="plan-action-btn-main">
                   <span class="plan-action-btn-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
-                  Ver vista previa
+                  Ver Planilla
                 </span>
-                <span class="plan-action-btn-sub">Genera y muestra el texto acá</span>
+                <span class="plan-action-btn-sub">Genera y muestra la planilla en pantalla</span>
               </button>
               <button type="button" id="ref-btn-limpiar" class="plan-action-btn ghost">
                 <span class="plan-action-btn-main">🗑 Limpiar</span>
@@ -620,7 +607,7 @@
               <div class="plan-text-preview-head">
                 <p class="plan-text-preview-title">
                   <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
-                  Vista previa del texto
+                  Vista previa de la planilla
                 </p>
                 <button type="button" class="plan-text-preview-copy" data-plan-preview-copy>
                   <span class="plan-text-preview-copy-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
