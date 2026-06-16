@@ -17,10 +17,10 @@ public static class PlanillasEndpoints
             mesas = new[] { "TECNICO", "FLEX", "SAAS", "SUELDOS" },
             sistemas = new[]
             {
-                new { id = "BejermanSql", label = PlanillasSistemaExtensions.BejermanSqlLabel, placeholder = false },
-                new { id = "OnvioWeb", label = PlanillasSistemaExtensions.OnvioWebLabel, placeholder = false },
+                new { id = "BejermanSql", label = PlanillasSistemaExtensions.BejermanSqlLabel, placeholder = false, beta = false },
+                new { id = "OnvioWeb", label = PlanillasSistemaExtensions.OnvioWebLabel, placeholder = false, beta = false },
                 new { id = "Legal", label = PlanillasSistemaExtensions.LegalLabel, placeholder = !PlanillasFeatureFlags.LegalEnabled, beta = PlanillasFeatureFlags.LegalEnabled },
-                new { id = "Chile", label = PlanillasSistemaExtensions.ChileLabel, placeholder = true },
+                new { id = "Chile", label = PlanillasSistemaExtensions.ChileLabel, placeholder = true, beta = false },
             },
             iaConfigured = svc.IaConfigured,
             capturaHosting = new
