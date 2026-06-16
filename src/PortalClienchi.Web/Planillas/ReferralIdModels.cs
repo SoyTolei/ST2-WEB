@@ -14,6 +14,7 @@ public sealed class ReferralIdCase
     public SdkState Sdk { get; } = new();
     public PlanillaTecnicaState Planilla { get; } = new();
     public OnvioReferralState Onvio { get; } = new();
+    public LegalReferralState Legal { get; } = new();
     public AdjuntosState Adjuntos { get; } = new();
     public IReadOnlyList<TransferenciaCapturaEnlace> CapturasEnlaces { get; set; } = Array.Empty<TransferenciaCapturaEnlace>();
     public bool MamConfigured => Mam.HasSelection;
@@ -70,6 +71,28 @@ public sealed class OnvioReferralState
     public bool TicketAvisoOmitido { get; set; }
 }
 
+public sealed class LegalReferralState
+{
+    public string Produto { get; set; } = LegalConstants.PlaceholderProduto;
+    public string Modulo { get; set; } = LegalConstants.PlaceholderModulo;
+    public string Ambiente { get; set; } = LegalConstants.PlaceholderAmbiente;
+    public bool ProcesoFuncionaba { get; set; }
+    public bool ReproduceSistematicamente { get; set; }
+    public bool HayTicket { get; set; }
+    public string NumeroTicket { get; set; } = "";
+    public string Tecnico { get; set; } = "";
+    public bool ReproduceConTicket { get; set; }
+    public bool ReproduceHomologacao { get; set; }
+    public bool ReproduceOutroUsuario { get; set; }
+    public bool AdjuntaPantallas { get; set; }
+    public bool AdjuntaPlanilhaImport { get; set; }
+    public bool AdjuntaLogIntegracao { get; set; }
+    public string ChaveRegistro { get; set; } = "";
+    public string UsuarioOnePass { get; set; } = "";
+    public string Escritorio { get; set; } = "";
+    public bool TicketAvisoOmitido { get; set; }
+}
+
 public sealed class AdjuntosState
 {
     public bool Pantallas { get; set; }
@@ -98,6 +121,7 @@ public sealed class ReferralGenerateRequest
     public string? SdkAplicacionIntegracion { get; set; }
     public PlanillaTecnicaDto? Planilla { get; set; }
     public OnvioReferralDto? Onvio { get; set; }
+    public LegalReferralDto? Legal { get; set; }
     public AdjuntosDto? Adjuntos { get; set; }
     public List<CapturaEnlaceDto>? CapturasEnlaces { get; set; }
     public bool TicketAvisoOmitido { get; set; }
@@ -127,6 +151,27 @@ public sealed class OnvioReferralDto
     public bool AdjuntaPantallas { get; set; }
     public string? UsuarioContador { get; set; }
     public string? Empresa { get; set; }
+}
+
+public sealed class LegalReferralDto
+{
+    public string? Produto { get; set; }
+    public string? Modulo { get; set; }
+    public string? Ambiente { get; set; }
+    public bool ProcesoFuncionaba { get; set; }
+    public bool ReproduceSistematicamente { get; set; }
+    public bool HayTicket { get; set; }
+    public string? NumeroTicket { get; set; }
+    public string? Tecnico { get; set; }
+    public bool ReproduceConTicket { get; set; }
+    public bool ReproduceHomologacao { get; set; }
+    public bool ReproduceOutroUsuario { get; set; }
+    public bool AdjuntaPantallas { get; set; }
+    public bool AdjuntaPlanilhaImport { get; set; }
+    public bool AdjuntaLogIntegracao { get; set; }
+    public string? ChaveRegistro { get; set; }
+    public string? UsuarioOnePass { get; set; }
+    public string? Escritorio { get; set; }
 }
 
 public sealed class AdjuntosDto

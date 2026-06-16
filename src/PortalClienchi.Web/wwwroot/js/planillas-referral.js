@@ -1,4 +1,6 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
+import { initLegalReferralHub, openLegalReferralHub, resetLegalReferralHub } from "./planillas-referral-legal.js";
+import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 
 const REF_DESC_PH = "Detalle y/o descripción del caso";
 const REF_PASO_PH = "Detalle paso a paso del proceso realizado por el usuario";
@@ -8,6 +10,10 @@ let versionSel = null;
 let moduloSel = null;
 let capturaFiles = [];
 let onvioCapturaFiles = [];
+let legalCapturaFiles = [];
+let legalProdutoSel = null;
+let legalModuloSel = null;
+let legalAmbienteSel = null;
 let ticketAvisoOmitido = false;
 let mamState = {};
 let sdkState = {};
@@ -30,6 +36,7 @@ function loadReferralDialogs() {
 
 export function initReferralModule(context) {
   ctx = context;
+  initLegalReferralHub(context);
   bindReferralEvents();
   void loadReferralDialogs();
 }
@@ -38,6 +45,7 @@ export function openReferral() {
   if (!ctx) return;
   resetReferralForm();
   updateReferralPanels();
+  if (isLegal()) openLegalReferralHub();
   document.getElementById("ref-sistema-badge").textContent = sistemaLabel();
   ctx.showView("referral");
 }
@@ -56,11 +64,37 @@ function isBejerman() {
   return ctx.getSistema() === "BejermanSql";
 }
 
+function isLegal() {
+  return ctx.getSistema() === "Legal";
+}
+
 function updateReferralPanels() {
   const bej = isBejerman();
-  document.getElementById("ref-bejerman-panel")?.classList.toggle("hidden", !bej);
+  const legal = isLegal();
+  const standard = document.getElementById("ref-standard-flow");
+
+  document.getElementById("plan-legal-beta-banner")?.classList.toggle(
+    "hidden",
+    !(legal && ctx?.getConfig()?.legal?.beta),
+  );
+
+  document.getElementById("ref-bejerman-panel")?.classList.toggle("hidden", !bej || legal);
+
+  if (legal) {
+    standard?.classList.add("hidden");
+    document.getElementById("ref-bejerman-post")?.classList.add("hidden");
+    document.getElementById("ref-onvio-panel")?.classList.add("hidden");
+    document.getElementById("ref-legal-panel")?.classList.add("hidden");
+    return;
+  }
+
+  document.getElementById("ref-legal-hub")?.classList.add("hidden");
+  document.getElementById("ref-legal-templates")?.classList.add("hidden");
+  document.getElementById("ref-legal-form")?.classList.add("hidden");
+  standard?.classList.remove("hidden");
   document.getElementById("ref-bejerman-post")?.classList.toggle("hidden", !bej);
   document.getElementById("ref-onvio-panel")?.classList.toggle("hidden", bej);
+  document.getElementById("ref-legal-panel")?.classList.add("hidden");
   document.getElementById("ref-btn-ia")?.classList.toggle("hidden", !ctx.getConfig()?.referral?.iaConfigured);
   buildReferralPills();
   updateCheckStatuses();
@@ -70,6 +104,11 @@ function updateReferralPanels() {
 
 function buildReferralPills() {
   const cfg = ctx.getConfig()?.referral;
+  const legalCfg = ctx.getConfig()?.legal;
+  if (!cfg && !legalCfg) return;
+
+  if (isLegal()) return;
+
   if (!cfg) return;
 
   const verRow = document.getElementById("ref-version-pills");
@@ -181,6 +220,35 @@ function syncReferralCards() {
     ["ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket"],
     ["ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba"],
   ].forEach(([cardId, checkId]) => syncCardVisual(cardId, checkId, null));
+  document.querySelectorAll(".plan-onvio-card[data-legal]").forEach((card) => {
+    syncCardVisual(card.id, `ref-legal-${card.dataset.legal}`, null, card.querySelector(".card-mark"));
+  });
+  [
+    ["ref-card-legal-rep-ticket", "ref-legal-rep-ticket"],
+    ["ref-card-legal-rep-homolog", "ref-legal-rep-homolog"],
+    ["ref-card-legal-rep-usuario", "ref-legal-rep-usuario"],
+  ].forEach(([cardId, checkId]) => syncCardVisual(cardId, checkId, null));
+}
+
+function clearLegalTicketFields() {
+  ["ref-legal-ticket-num", "ref-legal-tecnico"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  ["ref-legal-rep-ticket", "ref-legal-rep-homolog", "ref-legal-rep-usuario"].forEach((id) => {
+    const c = document.getElementById(id);
+    if (c) c.checked = false;
+  });
+  [
+    "ref-card-legal-rep-ticket",
+    "ref-card-legal-rep-homolog",
+    "ref-card-legal-rep-usuario",
+  ].forEach((cardId) => {
+    const card = document.getElementById(cardId);
+    const mark = card?.querySelector(".card-mark");
+    card?.classList.remove("selected");
+    if (mark) { mark.textContent = "○"; mark.style.color = "#94a3b8"; }
+  });
 }
 
 function clearOnvioTicketFields() {
@@ -273,6 +341,22 @@ function bindReferralEvents() {
   bindAdjCard("ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket", null);
   bindAdjCard("ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba", null);
 
+  bindOnvioCard("ref-card-legal-proceso", "ref-legal-proceso");
+  bindOnvioCard("ref-card-legal-reproduce", "ref-legal-reproduce");
+  bindOnvioCard("ref-card-legal-pantallas", "ref-legal-pantallas", () => {
+    document.getElementById("ref-legal-capturas")?.classList.toggle("hidden", !document.getElementById("ref-legal-pantallas").checked);
+  });
+  bindOnvioCard("ref-card-legal-ticket", "ref-legal-ticket", () => {
+    const on = document.getElementById("ref-legal-ticket")?.checked;
+    document.getElementById("ref-legal-ticket-panel")?.classList.toggle("hidden", !on);
+    if (!on) clearLegalTicketFields();
+  });
+  bindOnvioCard("ref-card-legal-planilha", "ref-legal-planilha");
+  bindOnvioCard("ref-card-legal-log", "ref-legal-log");
+  bindAdjCard("ref-card-legal-rep-ticket", "ref-legal-rep-ticket", null);
+  bindAdjCard("ref-card-legal-rep-homolog", "ref-legal-rep-homolog", null);
+  bindAdjCard("ref-card-legal-rep-usuario", "ref-legal-rep-usuario", null);
+
   setupPlaceholder("ref-descripcion", REF_DESC_PH);
   setupPlaceholder("ref-paso", REF_PASO_PH);
 
@@ -282,9 +366,11 @@ function bindReferralEvents() {
 
   setupCapturas("ref-capturas", capturaFiles);
   setupCapturas("ref-onvio-capt", onvioCapturaFiles);
+  setupCapturas("ref-legal-capt", legalCapturaFiles);
 
   document.getElementById("ref-btn-copiar")?.addEventListener("click", () => generarReferral(true));
   document.getElementById("ref-btn-txt")?.addEventListener("click", () => generarReferral(false));
+  mountPlanTextPreview("ref-text-preview");
   document.getElementById("ref-btn-limpiar")?.addEventListener("click", resetReferralForm);
   document.getElementById("ref-btn-ia")?.addEventListener("click", mejorarReferralIa);
 
@@ -351,6 +437,21 @@ function setReferralPantallasUi(checked) {
     return;
   }
 
+  if (isLegal()) {
+    const check = document.getElementById("ref-legal-pantallas");
+    if (!check) return;
+    check.checked = checked;
+    const card = document.getElementById("ref-card-legal-pantallas");
+    const mark = card?.querySelector(".card-mark");
+    card?.classList.toggle("selected", checked);
+    if (mark) {
+      mark.textContent = checked ? "✓" : "○";
+      mark.style.color = checked ? "#16a34a" : "#94a3b8";
+    }
+    document.getElementById("ref-legal-capturas")?.classList.toggle("hidden", !checked);
+    return;
+  }
+
   const check = document.getElementById("ref-onvio-pantallas");
   if (!check) return;
   check.checked = checked;
@@ -382,14 +483,18 @@ function addReferralCapturaFiles(fileList, targetList) {
 }
 
 function refreshCapturasEstadoReferral(prefix, fileList) {
-  const estadoId = prefix === "ref-capturas" ? "ref-capturas-estado" : "ref-onvio-capt-estado";
+  const estadoId = prefix === "ref-capturas"
+    ? "ref-capturas-estado"
+    : prefix === "ref-legal-capt"
+      ? "ref-legal-capt-estado"
+      : "ref-onvio-capt-estado";
   const estado = document.getElementById(estadoId);
   if (!estado) return;
   if (fileList.length === 0) {
     estado.textContent = "";
     return;
   }
-  estado.textContent = `${fileList.length} imagen(es) lista(s) para subir al generar el .txt.`;
+  estado.textContent = `${fileList.length} imagen(es) lista(s) para subir al generar el texto.`;
 }
 
 function setupCapturas(prefix, fileList) {
@@ -427,7 +532,9 @@ function setupCapturas(prefix, fileList) {
 }
 
 function getReferralCapturaFiles() {
-  return isBejerman() ? capturaFiles : onvioCapturaFiles;
+  if (isBejerman()) return capturaFiles;
+  if (isLegal()) return legalCapturaFiles;
+  return onvioCapturaFiles;
 }
 
 function refreshChips(id, files, prefix, fileList) {
@@ -495,6 +602,26 @@ function buildPayload() {
       backupCg: document.getElementById("ref-backup-cg")?.checked,
       backupSj: document.getElementById("ref-backup-sj")?.checked,
     };
+  } else if (isLegal()) {
+    payload.legal = {
+      produto: legalProdutoSel || "",
+      modulo: legalModuloSel || "",
+      ambiente: legalAmbienteSel || "",
+      procesoFuncionaba: document.getElementById("ref-legal-proceso")?.checked,
+      reproduceSistematicamente: document.getElementById("ref-legal-reproduce")?.checked,
+      adjuntaPantallas: document.getElementById("ref-legal-pantallas")?.checked,
+      hayTicket: document.getElementById("ref-legal-ticket")?.checked,
+      numeroTicket: document.getElementById("ref-legal-ticket-num")?.value.trim(),
+      tecnico: document.getElementById("ref-legal-tecnico")?.value.trim(),
+      reproduceConTicket: document.getElementById("ref-legal-rep-ticket")?.checked,
+      reproduceHomologacao: document.getElementById("ref-legal-rep-homolog")?.checked,
+      reproduceOutroUsuario: document.getElementById("ref-legal-rep-usuario")?.checked,
+      adjuntaPlanilhaImport: document.getElementById("ref-legal-planilha")?.checked,
+      adjuntaLogIntegracao: document.getElementById("ref-legal-log")?.checked,
+      chaveRegistro: document.getElementById("ref-legal-chave")?.value.trim(),
+      usuarioOnePass: document.getElementById("ref-legal-usuario")?.value.trim(),
+      escritorio: document.getElementById("ref-legal-escritorio")?.value.trim(),
+    };
   } else {
     payload.onvio = {
       procesoFuncionaba: document.getElementById("ref-onvio-proceso")?.checked,
@@ -518,6 +645,9 @@ function pickReferralCapturaFiles(payload) {
     if (isBejerman()) {
       if (!payload.adjuntos) payload.adjuntos = {};
       payload.adjuntos.pantallas = true;
+    } else if (isLegal()) {
+      if (!payload.legal) payload.legal = {};
+      payload.legal.adjuntaPantallas = true;
     } else {
       if (!payload.onvio) payload.onvio = {};
       payload.onvio.adjuntaPantallas = true;
@@ -527,7 +657,9 @@ function pickReferralCapturaFiles(payload) {
 
   const marcado = isBejerman()
     ? !!payload.adjuntos?.pantallas
-    : !!payload.onvio?.adjuntaPantallas;
+    : isLegal()
+      ? !!payload.legal?.adjuntaPantallas
+      : !!payload.onvio?.adjuntaPantallas;
   return marcado ? files : [];
 }
 
@@ -548,7 +680,9 @@ async function generarReferral(copiar) {
   const files = pickReferralCapturaFiles(payload);
   const quierePantallas = isBejerman()
     ? !!payload.adjuntos?.pantallas
-    : !!payload.onvio?.adjuntaPantallas;
+    : isLegal()
+      ? !!payload.legal?.adjuntaPantallas
+      : !!payload.onvio?.adjuntaPantallas;
 
   if (quierePantallas && files.length === 0) {
     alert("Marcaste capturas pero no hay imágenes cargadas. Usá «Examinar…» o «Pegar del portapapeles» en el panel de capturas.");
@@ -575,9 +709,11 @@ async function generarReferral(copiar) {
 
     if (!response.ok) {
       if (data.code === "ticket_confirm") {
+        const ticketId = isLegal() ? "ref-legal-ticket" : "ref-onvio-ticket";
+        const panelId = isLegal() ? "ref-legal-ticket-panel" : "ref-onvio-ticket-panel";
         if (confirm("¿Se solicitó ticket de servicio?")) {
-          document.getElementById("ref-onvio-ticket").checked = true;
-          document.getElementById("ref-onvio-ticket-panel")?.classList.remove("hidden");
+          document.getElementById(ticketId).checked = true;
+          document.getElementById(panelId)?.classList.remove("hidden");
           alert("Completá los datos del ticket y volvé a generar.");
         } else {
           alert("Es probable que I+D solicite un ticket de servicio para el análisis del caso.");
@@ -597,12 +733,8 @@ async function generarReferral(copiar) {
       await navigator.clipboard.writeText(data.texto);
       status.textContent = `Texto copiado al portapapeles.${capturasMsg}`;
     } else {
-      const blob = new Blob([data.texto], { type: "text/plain;charset=utf-8" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = data.fileName || "referral.txt";
-      a.click();
-      status.textContent = `Archivo .txt descargado.${capturasMsg}`;
+      showPlanTextPreview("ref-text-preview", data.texto);
+      status.textContent = `Vista previa lista.${capturasMsg} Podés copiar desde el panel o con el botón verde.`;
     }
   } catch (ex) {
     status.textContent = ex.message || "Error";
@@ -647,10 +779,15 @@ function setField(id, value, ph) {
 
 function resetReferralForm() {
   referralIaUndo?.clearSnapshot();
+  if (isLegal()) resetLegalReferralHub();
   versionSel = null;
   moduloSel = null;
+  legalProdutoSel = null;
+  legalModuloSel = null;
+  legalAmbienteSel = null;
   capturaFiles.length = 0;
   onvioCapturaFiles.length = 0;
+  legalCapturaFiles.length = 0;
   ticketAvisoOmitido = false;
   mamState = {};
   sdkState = {};
@@ -663,18 +800,26 @@ function resetReferralForm() {
     const el = document.getElementById(id);
     if (el) { el.value = el.dataset.placeholder || ""; el.classList.add("placeholder-active"); }
   });
-  document.querySelectorAll("#ref-bejerman-post input[type=checkbox], #ref-onvio-panel input[type=checkbox]").forEach((c) => { c.checked = false; });
+  document.querySelectorAll("#ref-bejerman-post input[type=checkbox], #ref-onvio-panel input[type=checkbox], #ref-legal-panel input[type=checkbox]").forEach((c) => { c.checked = false; });
   document.querySelectorAll(".plan-adj-card, .plan-backup-base-card, .plan-onvio-card").forEach((el) => el.classList.remove("selected"));
   clearBackupBases();
   clearOnvioTicketFields();
-  ["ref-capturas-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel"].forEach((id) => {
+  clearLegalTicketFields();
+  ["ref-legal-chave", "ref-legal-usuario", "ref-legal-escritorio"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
+  ["ref-capturas-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel"].forEach((id) => {
     document.getElementById(id)?.classList.add("hidden");
   });
   document.getElementById("ref-capturas-chips").innerHTML = "";
   document.getElementById("ref-onvio-capt-chips").innerHTML = "";
+  document.getElementById("ref-legal-capt-chips").innerHTML = "";
   document.getElementById("ref-capturas-estado").textContent = "";
   document.getElementById("ref-onvio-capt-estado").textContent = "";
+  document.getElementById("ref-legal-capt-estado").textContent = "";
   document.getElementById("ref-status").textContent = "";
+  clearPlanTextPreview("ref-text-preview");
   updateReferralPanels();
 }
 

@@ -19,6 +19,14 @@ public static class ReferralIdTextBuilder
             if (c.SqlServer != ReferralIdConstants.PlaceholderSqlServer && !string.IsNullOrWhiteSpace(c.SqlServer))
                 partes.Add($"SQL SERVER: {c.SqlServer}");
         }
+        else if (c.Sistema == PlanillasSistema.Legal)
+        {
+            partes.Add($"PRODUCTO: {c.Legal.Produto}");
+            partes.Add($"MÓDULO: {c.Legal.Modulo}");
+            partes.Add($"AMBIENTE: {c.Legal.Ambiente}");
+            if (!string.IsNullOrWhiteSpace(c.Legal.ChaveRegistro))
+                partes.Add($"CLAVE DE REGISTRO: {c.Legal.ChaveRegistro.Trim()}");
+        }
 
         partes.Add("");
         partes.Add("==========================================");
@@ -39,6 +47,8 @@ public static class ReferralIdTextBuilder
             AppendOnvioComprobaciones(partes, c);
         else if (c.Sistema == PlanillasSistema.BejermanSql)
             AppendBejermanComprobaciones(partes, c);
+        else if (c.Sistema == PlanillasSistema.Legal)
+            AppendLegalComprobaciones(partes, c);
 
         partes.Add("");
         partes.Add("==========================================");
@@ -80,6 +90,43 @@ public static class ReferralIdTextBuilder
                 partes.Add($"- Usuario/Contador: {o.UsuarioContador.Trim()}");
             if (!string.IsNullOrWhiteSpace(o.Empresa))
                 partes.Add($"- Empresa: {o.Empresa.Trim()}");
+        }
+    }
+
+    private static void AppendLegalComprobaciones(List<string> partes, ReferralIdCase c)
+    {
+        var l = c.Legal;
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("COMPROBACIONES Y PROCESOS REALIZADOS ✅");
+        partes.Add($"- El proceso funcionaba correctamente: {(l.ProcesoFuncionaba ? "SÍ" : "NO")}");
+        partes.Add($"- El cliente lo reproduce sistemáticamente: {(l.ReproduceSistematicamente ? "SÍ" : "NO")}");
+        partes.Add($"- Hay ticket de servicio: {(l.HayTicket ? "SÍ" : "NO")}");
+
+        if (l.HayTicket)
+        {
+            partes.Add(string.IsNullOrWhiteSpace(l.NumeroTicket)
+                ? "  * N° de Ticket: NO"
+                : $"  * N° de Ticket: {l.NumeroTicket.Trim()}");
+            if (!string.IsNullOrWhiteSpace(l.Tecnico))
+                partes.Add($"  * Técnico que lo tomó: {l.Tecnico.Trim()}");
+            partes.Add($"  * Se pudo reproducir con el ticket de servicio: {(l.ReproduceConTicket ? "SÍ" : "NO")}");
+            partes.Add($"  * Se pudo reproducir en ambiente de homologación: {(l.ReproduceHomologacao ? "SÍ" : "NO")}");
+            partes.Add($"  * Se pudo reproducir con otro usuario OnePass: {(l.ReproduceOutroUsuario ? "SÍ" : "NO")}");
+        }
+
+        partes.Add($"- Se adjuntan capturas / imágenes: {(l.AdjuntaPantallas ? "SÍ" : "NO")}");
+        partes.Add($"- Se adjunta planilla de importación: {(l.AdjuntaPlanilhaImport ? "SÍ" : "NO")}");
+        partes.Add($"- Se adjunta log de integración: {(l.AdjuntaLogIntegracao ? "SÍ" : "NO")}");
+
+        if (!string.IsNullOrWhiteSpace(l.UsuarioOnePass) || !string.IsNullOrWhiteSpace(l.Escritorio))
+        {
+            partes.Add("");
+            partes.Add("INFORMACIÓN DEL USUARIO:");
+            if (!string.IsNullOrWhiteSpace(l.UsuarioOnePass))
+                partes.Add($"- Usuario OnePass: {l.UsuarioOnePass.Trim()}");
+            if (!string.IsNullOrWhiteSpace(l.Escritorio))
+                partes.Add($"- Estudio / Empresa: {l.Escritorio.Trim()}");
         }
     }
 
@@ -217,6 +264,20 @@ public static class ReferralIdTextBuilder
                 partes.Add("- Captura / imágenes");
                 CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
             }
+        }
+        else if (c.Sistema == PlanillasSistema.Legal)
+        {
+            var l = c.Legal;
+            hay = l.AdjuntaPantallas || l.AdjuntaPlanilhaImport || l.AdjuntaLogIntegracao;
+            if (l.AdjuntaPantallas)
+            {
+                partes.Add("- Captura / imágenes");
+                CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
+            }
+            if (l.AdjuntaPlanilhaImport)
+                partes.Add("- Planilla de importación (Excel)");
+            if (l.AdjuntaLogIntegracao)
+                partes.Add("- Log de integración");
         }
 
         if (!hay)

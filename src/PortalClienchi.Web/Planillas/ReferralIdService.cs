@@ -19,7 +19,9 @@ public sealed class ReferralIdService
     public ReferralIdCase FromRequest(ReferralGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal or PlanillasSistema.Chile)
+        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
+            throw new ArgumentException("Sistema no válido para Referral I+D.");
+        if (sistema is PlanillasSistema.Legal && !PlanillasFeatureFlags.LegalEnabled)
             throw new ArgumentException("Sistema no válido para Referral I+D.");
 
         var caso = new ReferralIdCase { Sistema = sistema };
@@ -73,7 +75,35 @@ public sealed class ReferralIdService
             caso.Onvio.UsuarioContador = req.Onvio.UsuarioContador?.Trim() ?? "";
             caso.Onvio.Empresa = req.Onvio.Empresa?.Trim() ?? "";
         }
+        if (req.Legal is not null)
+        {
+            caso.Legal.Produto = string.IsNullOrWhiteSpace(req.Legal.Produto)
+                ? LegalConstants.PlaceholderProduto
+                : req.Legal.Produto.Trim();
+            caso.Legal.Modulo = string.IsNullOrWhiteSpace(req.Legal.Modulo)
+                ? LegalConstants.PlaceholderModulo
+                : req.Legal.Modulo.Trim();
+            caso.Legal.Ambiente = string.IsNullOrWhiteSpace(req.Legal.Ambiente)
+                ? LegalConstants.PlaceholderAmbiente
+                : req.Legal.Ambiente.Trim();
+            caso.Legal.ProcesoFuncionaba = req.Legal.ProcesoFuncionaba;
+            caso.Legal.ReproduceSistematicamente = req.Legal.ReproduceSistematicamente;
+            caso.Legal.HayTicket = req.Legal.HayTicket;
+            caso.Legal.NumeroTicket = req.Legal.NumeroTicket?.Trim() ?? "";
+            caso.Legal.Tecnico = req.Legal.Tecnico?.Trim() ?? "";
+            caso.Legal.ReproduceConTicket = req.Legal.ReproduceConTicket;
+            caso.Legal.ReproduceHomologacao = req.Legal.ReproduceHomologacao;
+            caso.Legal.ReproduceOutroUsuario = req.Legal.ReproduceOutroUsuario;
+            caso.Legal.AdjuntaPantallas = req.Legal.AdjuntaPantallas;
+            caso.Legal.AdjuntaPlanilhaImport = req.Legal.AdjuntaPlanilhaImport;
+            caso.Legal.AdjuntaLogIntegracao = req.Legal.AdjuntaLogIntegracao;
+            caso.Legal.ChaveRegistro = req.Legal.ChaveRegistro?.Trim() ?? "";
+            caso.Legal.UsuarioOnePass = req.Legal.UsuarioOnePass?.Trim() ?? "";
+            caso.Legal.Escritorio = req.Legal.Escritorio?.Trim() ?? "";
+        }
         caso.Onvio.TicketAvisoOmitido = req.TicketAvisoOmitido;
+        if (sistema == PlanillasSistema.Legal)
+            caso.Legal.TicketAvisoOmitido = req.TicketAvisoOmitido;
 
         if (req.Adjuntos is not null)
         {
@@ -95,9 +125,13 @@ public sealed class ReferralIdService
     }
 
     public bool QuiereAdjuntarPantallas(ReferralIdCase caso) =>
-        caso.Sistema == PlanillasSistema.BejermanSql
-            ? caso.Adjuntos.Pantallas
-            : caso.Onvio.AdjuntaPantallas;
+        caso.Sistema switch
+        {
+            PlanillasSistema.BejermanSql => caso.Adjuntos.Pantallas,
+            PlanillasSistema.OnvioWeb => caso.Onvio.AdjuntaPantallas,
+            PlanillasSistema.Legal => caso.Legal.AdjuntaPantallas,
+            _ => false,
+        };
 
     public static string? ValidateCapturasLinks(ReferralIdCase caso)
     {
@@ -105,6 +139,9 @@ public sealed class ReferralIdService
             return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
 
         if (caso.Sistema == PlanillasSistema.OnvioWeb && caso.Onvio.AdjuntaPantallas && caso.CapturasEnlaces.Count == 0)
+            return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
+
+        if (caso.Sistema == PlanillasSistema.Legal && caso.Legal.AdjuntaPantallas && caso.CapturasEnlaces.Count == 0)
             return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
 
         return null;
@@ -153,6 +190,8 @@ public sealed class ReferralIdService
                 caso.Adjuntos.Pantallas = true;
             else if (caso.Sistema == PlanillasSistema.OnvioWeb)
                 caso.Onvio.AdjuntaPantallas = true;
+            else if (caso.Sistema == PlanillasSistema.Legal)
+                caso.Legal.AdjuntaPantallas = true;
         }
         finally
         {

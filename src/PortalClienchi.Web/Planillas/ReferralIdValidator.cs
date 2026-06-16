@@ -14,7 +14,9 @@ public static class ReferralIdValidator
         {
             PlanillasSistema.BejermanSql => ValidateBejerman(c),
             PlanillasSistema.OnvioWeb => ValidateOnvio(c),
-            PlanillasSistema.Legal => "El módulo LEGAL estará disponible en una próxima versión.",
+            PlanillasSistema.Legal => PlanillasFeatureFlags.LegalEnabled
+                ? ValidateLegal(c)
+                : "El módulo LEGAL estará disponible en una próxima versión.",
             PlanillasSistema.Chile => "El módulo Chile estará disponible en una próxima versión.",
             _ => "Sistema no válido.",
         };
@@ -72,6 +74,39 @@ public static class ReferralIdValidator
             return "Completá el N° de Ticket.";
 
         if (!c.Onvio.HayTicket && !c.Onvio.TicketAvisoOmitido)
+            return CodeTicketConfirm;
+
+        return null;
+    }
+
+    private static string? ValidateLegal(ReferralIdCase c)
+    {
+        if (c.Legal.Produto == LegalConstants.PlaceholderProduto || string.IsNullOrWhiteSpace(c.Legal.Produto))
+            return "Seleccioná el producto Legal One.";
+
+        if (c.Legal.Modulo == LegalConstants.PlaceholderModulo || string.IsNullOrWhiteSpace(c.Legal.Modulo))
+            return "Seleccioná el módulo.";
+
+        if (c.Legal.Ambiente == LegalConstants.PlaceholderAmbiente || string.IsNullOrWhiteSpace(c.Legal.Ambiente))
+            return "Seleccioná el ambiente.";
+
+        var common = ValidateCommonFields(c);
+        if (common is not null)
+            return common;
+
+        if (string.IsNullOrWhiteSpace(c.Legal.ChaveRegistro))
+            return "Completá la clave de registro.";
+
+        if (string.IsNullOrWhiteSpace(c.Legal.UsuarioOnePass))
+            return "Completá el usuario OnePass.";
+
+        if (string.IsNullOrWhiteSpace(c.Legal.Escritorio))
+            return "Completá el estudio / empresa.";
+
+        if (c.Legal.HayTicket && string.IsNullOrWhiteSpace(c.Legal.NumeroTicket))
+            return "Completá el N° de Ticket.";
+
+        if (!c.Legal.HayTicket && !c.Legal.TicketAvisoOmitido)
             return CodeTicketConfirm;
 
         return null;

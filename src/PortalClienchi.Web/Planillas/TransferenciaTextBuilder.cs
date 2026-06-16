@@ -10,13 +10,36 @@ public static class TransferenciaTextBuilder
         ["SUELDOS"] = "la mesa de Sueldos y Jornales",
     };
 
+    private static readonly Dictionary<string, string> DestinoPorMesaLegal = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["N1"] = "la mesa de Atención N1",
+        ["N2"] = "la mesa Técnica N2",
+        ["API"] = "la mesa de API / Integraciones",
+        ["FINANCEIRO"] = "la mesa Financiero / NF-e",
+        ["ONEPASS"] = "la mesa Infra / OnePass",
+    };
+
     public static string Build(TransferenciaCase c)
     {
         var partes = new List<string>();
 
         partes.Add("==========================================");
         partes.Add("DATOS DEL CLIENTE 🪪");
-        partes.Add($"N° DE CLIENTE: {c.NumeroCliente.Trim()}");
+        if (c.Sistema == PlanillasSistema.Legal)
+        {
+            partes.Add($"CLAVE DE REGISTRO: {c.NumeroCliente.Trim()}");
+            partes.Add($"PRODUCTO: {c.Legal.Produto}");
+            partes.Add($"MÓDULO: {c.Legal.Modulo}");
+            partes.Add($"AMBIENTE: {c.Legal.Ambiente}");
+            if (!string.IsNullOrWhiteSpace(c.Legal.UsuarioOnePass))
+                partes.Add($"USUARIO ONEPASS: {c.Legal.UsuarioOnePass.Trim()}");
+            if (!string.IsNullOrWhiteSpace(c.Legal.Escritorio))
+                partes.Add($"ESTUDIO / EMPRESA: {c.Legal.Escritorio.Trim()}");
+        }
+        else
+        {
+            partes.Add($"N° DE CLIENTE: {c.NumeroCliente.Trim()}");
+        }
 
         partes.Add("==========================================");
         partes.Add("DETALLES DEL CASO 📝");
@@ -32,9 +55,9 @@ public static class TransferenciaTextBuilder
                 partes.Add(asunto);
             else
             {
-                var destino = DestinoPorMesa.TryGetValue(c.Mesa, out var d)
-                    ? d
-                    : $"la mesa {c.Mesa}";
+                var destino = c.Sistema == PlanillasSistema.Legal
+                    ? (DestinoPorMesaLegal.TryGetValue(c.Mesa, out var dl) ? dl : $"la mesa {LegalConstants.MesaLabel(c.Mesa)}")
+                    : (DestinoPorMesa.TryGetValue(c.Mesa, out var d) ? d : $"la mesa {c.Mesa}");
                 partes.Add($"Se deriva a {destino} debido a la siguiente consulta o requerimiento: {asunto}");
             }
 
@@ -74,7 +97,7 @@ public static class TransferenciaTextBuilder
         var hayCapturas = c.Capturas || c.CapturasEnlaces.Count > 0;
         CapturasTextoHelper.AppendBloqueCapturas(partes, hayCapturas, c.CapturasEnlaces);
 
-        if (c.Sistema == PlanillasSistema.OnvioWeb)
+        if (c.Sistema == PlanillasSistema.OnvioWeb || c.Sistema == PlanillasSistema.Legal)
         {
             partes.Add($"¿SE SOLICITÓ TICKET DE SERVICIO?: {(c.TicketSolicitado ? "SÍ" : "NO")}");
             if (c.TicketSolicitado && !string.IsNullOrWhiteSpace(c.NumeroTicket))

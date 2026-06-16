@@ -1,0 +1,2110 @@
+{
+  "products": [
+    {
+      "id": "legal-one",
+      "label": "Legal One",
+      "categories": [
+        {
+          "id": "sistema",
+          "label": "Sistema",
+          "templates": [
+            {
+              "title": "Template - Bug Legal One",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição do Bug *",
+                  "type": "text",
+                  "placeholder": "Ex: Erro ao salvar processo"
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuário *",
+                  "type": "text",
+                  "placeholder": "Ex: admin"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Login do usuário que reportou (Opcional)",
+                  "type": "text",
+                  "placeholder": "Ex: usuario.cliente"
+                },
+                {
+                  "id": "",
+                  "label": "Nota adicional (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "id": "",
+                  "label": "Módulo *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Módulo *",
+                  "type": "textarea",
+                  "placeholder": "Descreva a ação..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Results (O que aconteceu) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o comportamento encontrado..."
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results (O que deveria acontecer) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o comportamento esperado..."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "bug",
+              "label": "Bug"
+            },
+            {
+              "title": "Template - Backup Legal One",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Backup *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ex: AppInstancia123"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "backup",
+              "label": "Backup"
+            },
+            {
+              "title": "Template - Alterar URL",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy Antiga *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente-antigo"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy Nova *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente-novo"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "alterar-url",
+              "label": "Alterar URL"
+            },
+            {
+              "title": "Template - Restaurar Base",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ex: AppInstancia123"
+                },
+                {
+                  "id": "",
+                  "label": "Found Results *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o motivo para a base ser restaurada"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "restaurar-base",
+              "label": "Restaurar Base"
+            },
+            {
+              "title": "Template - Melhoria Legal",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição da Melhoria *",
+                  "type": "textarea",
+                  "placeholder": "Descreva a melhoria sugerida"
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Password *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Note",
+                  "type": "textarea",
+                  "placeholder": "Observações adicionais (opcional)"
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Descreva os passos para reproduzir"
+                },
+                {
+                  "id": "",
+                  "label": "Produto/Versão *",
+                  "type": "text",
+                  "placeholder": "Ex: Firm 10.0"
+                },
+                {
+                  "id": "",
+                  "label": "Módulo *",
+                  "type": "text",
+                  "placeholder": "Ex: Módulo de Processos"
+                },
+                {
+                  "id": "",
+                  "label": "Resumo *",
+                  "type": "textarea",
+                  "placeholder": "Resumo da melhoria"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "sugest-o-de-melhoria",
+              "label": "Sugestão de Melhoria"
+            },
+            {
+              "title": "Template - Ativar Toggle de Importação CNJ",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Liberar Toggle de Importação CNJ"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Digite o nome do cliente"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Digite o IdSIP do cliente"
+                },
+                {
+                  "id": "",
+                  "label": "URL *",
+                  "type": "text",
+                  "placeholder": "Ex: https://exemplo.com.br"
+                },
+                {
+                  "id": "",
+                  "label": "APP Instância Dados *",
+                  "type": "text",
+                  "placeholder": "Digite a instância do APP"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "text",
+                  "placeholder": "Ex: Importação CNJ não liberada"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result *",
+                  "type": "text",
+                  "placeholder": "Ex: Ativar toggle de importação CNJ"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "toggle-cnj",
+              "label": "Toggle CNJ"
+            },
+            {
+              "title": "Template - Ativar Toggle de Tarefas do Google",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Ativar Toggle de Tarefas do Google"
+                },
+                {
+                  "id": "",
+                  "label": "URL *",
+                  "type": "text",
+                  "placeholder": "Ex: https://exemplo.com.br"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Digite o IdSIP do cliente"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Digite o nome do cliente"
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Digite a instância do APP"
+                },
+                {
+                  "id": "",
+                  "label": "Found Results *",
+                  "type": "textarea",
+                  "placeholder": "Ex: Toggle de tarefas do Google desativado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results *",
+                  "type": "textarea",
+                  "placeholder": "Ex: Ativar toggle de tarefas do Google"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "toggle-tarefas",
+              "label": "Toggle Tarefas"
+            }
+          ]
+        },
+        {
+          "id": "rto-proview",
+          "label": "RTO/Proview",
+          "templates": [
+            {
+              "title": "Template - Falha de acesso à RTO / Proview",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o problema ou solicitação"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "SAP *",
+                  "type": "text",
+                  "placeholder": "Ex: SAP123456"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "id": "",
+                  "label": "Número de Série *",
+                  "type": "text",
+                  "placeholder": "Ex: NS123456"
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ex: AppInstancia123"
+                },
+                {
+                  "id": "",
+                  "label": "SAP Customer Number - RTO *",
+                  "type": "text",
+                  "placeholder": "Ex: RTO123456"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Descreva os passos para reproduzir"
+                },
+                {
+                  "id": "",
+                  "label": "WLBR *",
+                  "type": "text",
+                  "placeholder": "Ex: WLBR123"
+                },
+                {
+                  "id": "",
+                  "label": "EREAD *",
+                  "type": "text",
+                  "placeholder": "Ex: EREAD123"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o que foi encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "falha-de-acesso",
+              "label": "Falha de acesso"
+            }
+          ]
+        },
+        {
+          "id": "nfse",
+          "label": "NFSe",
+          "templates": [
+            {
+              "title": "Template - Cadastro DFe-Tools",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "URL *",
+                  "type": "text",
+                  "placeholder": "Ex: https://exemplo.com.br"
+                },
+                {
+                  "id": "",
+                  "label": "Login *",
+                  "type": "text",
+                  "placeholder": "Login do DFe"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha do DFe"
+                },
+                {
+                  "id": "",
+                  "label": "Chave *",
+                  "type": "text",
+                  "placeholder": "Chave de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Senha do Certificado *",
+                  "type": "text",
+                  "placeholder": "Senha do certificado digital"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "cadastro-dfe-tools-n1",
+              "label": "Cadastro Dfe-Tools N1"
+            }
+          ]
+        },
+        {
+          "id": "mobile",
+          "label": "Mobile",
+          "templates": [
+            {
+              "title": "Template - Mobile",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o problema ou solicitação"
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Password *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Versão do Sistema Operacional *",
+                  "type": "text",
+                  "placeholder": "Ex: Android 13 / iOS 16.5"
+                },
+                {
+                  "id": "",
+                  "label": "Modelo do Aparelho *",
+                  "type": "text",
+                  "placeholder": "Ex: Samsung Galaxy S23 / iPhone 14 Pro"
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Conexão com a Internet *",
+                  "type": "text",
+                  "placeholder": "Ex: WiFi / 4G / 5G"
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Descreva os passos para reproduzir"
+                },
+                {
+                  "id": "",
+                  "label": "Found Results *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o que foi encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "bug",
+              "label": "Bug"
+            }
+          ]
+        },
+        {
+          "id": "datacloud",
+          "label": "Datacloud",
+          "templates": [
+            {
+              "title": "Template - Pré-Cadastro (Falha na Captura)",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto * (Editável)",
+                  "type": "text",
+                  "placeholder": "Digite a descrição"
+                },
+                {
+                  "id": "",
+                  "label": "Note (Optional) (Editável)",
+                  "type": "textarea",
+                  "placeholder": "Digite observações opcionais"
+                },
+                {
+                  "id": "",
+                  "label": "Número do Processo *",
+                  "type": "text",
+                  "placeholder": "Ex: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Órgão *",
+                  "type": "text",
+                  "placeholder": "Ex: TJSP, TJRJ, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Consulta *",
+                  "type": "text",
+                  "placeholder": "Ex: Consulta Pública, Consulta de Processos, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais Legal One (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Digite parâmetros adicionais, se houver"
+                },
+                {
+                  "id": "",
+                  "label": "Link do Site *",
+                  "type": "text",
+                  "placeholder": "Ex: https://esaj.tjsp.jus.br/cpopg/open.do"
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais Órgão (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Digite parâmetros adicionais do órgão, se houver"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result * (Editável)",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "precadastro",
+              "label": "PreCadastro"
+            },
+            {
+              "title": "Template - Alta Taxa de Erros no Agendador",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto * (Editável)",
+                  "type": "text",
+                  "placeholder": "Alta porcentagem de erro no Agendador de Consultas"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Digite o tenancy do cliente"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "User * (Padrão: Support)",
+                  "type": "text",
+                  "placeholder": "Support"
+                },
+                {
+                  "id": "",
+                  "label": "Password *",
+                  "type": "text",
+                  "placeholder": "Digite a senha"
+                },
+                {
+                  "id": "",
+                  "label": "Note (Optional)",
+                  "type": "textarea",
+                  "placeholder": "Digite observações opcionais"
+                },
+                {
+                  "id": "",
+                  "label": "Órgão *",
+                  "type": "text",
+                  "placeholder": "Ex: TJSP, TJRJ, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Consulta *",
+                  "type": "text",
+                  "placeholder": "Ex: Consulta Pública, Consulta de Processos, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Número do Processo *",
+                  "type": "text",
+                  "placeholder": "Ex: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Data/Hora da Consulta *",
+                  "type": "text",
+                  "placeholder": "Ex: 01/01/2024 10:00"
+                },
+                {
+                  "id": "",
+                  "label": "Quantidade de Falhas *",
+                  "type": "text",
+                  "placeholder": "Ex: 15 falhas, 80% de erro, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Link do Site *",
+                  "type": "text",
+                  "placeholder": "Ex: https://esaj.tjsp.jus.br/cpopg/open.do"
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais Legal One (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Digite parâmetros adicionais do Legal One, se houver"
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais Órgão (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Digite parâmetros adicionais do órgão, se houver"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result * (Editável)",
+                  "type": "textarea",
+                  "placeholder": "Diminuição da porcentagem de erro no Agendador de Consulta."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "alta-taxa-de-erros",
+              "label": "Alta taxa de erros"
+            },
+            {
+              "title": "Template - Atraso na Captura",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Atraso na captura de publicação"
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuário *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Nota adicional (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Acessar módulo Publicações \nClicar em Publicações \nLocalizar o processo"
+                },
+                {
+                  "id": "",
+                  "label": "Número do Processo *",
+                  "type": "text",
+                  "placeholder": "Ex: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Órgão *",
+                  "type": "text",
+                  "placeholder": "Ex: TJSP"
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Consulta *",
+                  "type": "text",
+                  "placeholder": "Ex: Publicações"
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais - Legal One (Opcional)",
+                  "type": "text",
+                  "placeholder": "Ex: Advogado: João Silva"
+                },
+                {
+                  "id": "",
+                  "label": "Site do Órgão *",
+                  "type": "url",
+                  "placeholder": "Ex: https://esaj.tjsp.jus.br"
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais - Site do Órgão (Opcional)",
+                  "type": "text",
+                  "placeholder": "Ex: Selecionar comarca: São Paulo"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result (O que foi encontrado) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o que foi encontrado no sistema..."
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result (O que era esperado) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o comportamento esperado..."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "atraso-na-captura",
+              "label": "Atraso na Captura"
+            },
+            {
+              "title": "Template - Intimações Eletrônicas",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Intimação Eletrônica não foi capturada"
+                },
+                {
+                  "id": "",
+                  "label": "Produto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuário *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Nota adicional (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "id": "",
+                  "label": "Número do Processo *",
+                  "type": "text",
+                  "placeholder": "Ex: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Link exato para consulta no site *",
+                  "type": "text",
+                  "placeholder": "Ex: https://..."
+                },
+                {
+                  "id": "",
+                  "label": "Usuário e senha do cliente para acessar as intimações no site *",
+                  "type": "textarea",
+                  "placeholder": "Ex: Usuário: cliente123 / Senha: senha123"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result (O que foi encontrado) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o que foi encontrado no sistema..."
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result (O que era esperado) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o que era esperado encontrar..."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "intima-es-eletr-nicas",
+              "label": "Intimações Eletrônicas"
+            },
+            {
+              "title": "Template - Restaurar Base",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "id": "",
+                  "label": "AppIdInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ex: AppInstancia123"
+                },
+                {
+                  "id": "",
+                  "label": "Serviço *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Configuração de Monitoramento está ajustada? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Autorização da Supervisão *",
+                  "type": "select",
+                  "placeholder": ""
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "restaurar-cr-dito",
+              "label": "Restaurar Crédito"
+            },
+            {
+              "title": "Melhoria Datacloud",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Implementar novo tipo de consulta"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Note (Optional)",
+                  "type": "textarea",
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "id": "",
+                  "label": "Nome da consulta no tribunal: *",
+                  "type": "textarea",
+                  "placeholder": "Ex: Consulta de Processos - TJSP"
+                },
+                {
+                  "id": "",
+                  "label": "URL Exata da consulta *",
+                  "type": "text",
+                  "placeholder": "Ex: https://..."
+                },
+                {
+                  "id": "",
+                  "label": "3 processos de exemplo *",
+                  "type": "textarea",
+                  "placeholder": "Ex:5015568-97.2024.8.13.0290; 0807049-70.2023.8.15.2003; 1000809-36.2018.5.02.0462 "
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros necessários para consultar no site do tribunal *",
+                  "type": "textarea",
+                  "placeholder": "Ex: Número do processo, CPF/CNPJ, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Quantos processos de todos os órgãos o cliente monitora atualmente no Legal One? *",
+                  "type": "text",
+                  "placeholder": "Ex: 1500 processos"
+                },
+                {
+                  "id": "",
+                  "label": "Quantos processos o cliente deseja monitorar desta consulta? *",
+                  "type": "text",
+                  "placeholder": "Ex: 200 processos"
+                },
+                {
+                  "id": "",
+                  "label": "Cliente sinalizou que vai cancelar se não tiver essa consulta? *",
+                  "type": "textarea",
+                  "placeholder": "Ex: Sim, cliente informou que precisa dessa funcionalidade urgentemente"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "sugest-o-de-melhoria",
+              "label": "Sugestão de Melhoria"
+            },
+            {
+              "title": "Falha na API",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Erro ao consumir API de consulta"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Note (Optional)",
+                  "type": "textarea",
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "id": "",
+                  "label": "Consumer Key: *",
+                  "type": "text",
+                  "placeholder": "Ex: abc123xyz..."
+                },
+                {
+                  "id": "",
+                  "label": "Consumer Secret: *",
+                  "type": "text",
+                  "placeholder": "Ex: def456uvw..."
+                },
+                {
+                  "id": "",
+                  "label": "Documentação Usada *",
+                  "type": "text",
+                  "placeholder": "Ex: https://docs.legalone.com.br/api/v1..."
+                },
+                {
+                  "id": "",
+                  "label": "URL / Endpoint *",
+                  "type": "text",
+                  "placeholder": "Ex: /api/v1/processos"
+                },
+                {
+                  "id": "",
+                  "label": "Request Type *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Body: *",
+                  "type": "textarea",
+                  "placeholder": "Ex: { \"numeroProcesso\": \"0000000-00.0000.0.00.0000\" }"
+                },
+                {
+                  "id": "",
+                  "label": "Found result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado obtido (erro, resposta inesperada, etc.)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "falha-na-api",
+              "label": "Falha na API"
+            }
+          ]
+        },
+        {
+          "id": "performance",
+          "label": "Performance",
+          "templates": [
+            {
+              "title": "Template Performance Cliente",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Lentidão no sistema"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Caso de Uso *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o caso de uso onde ocorre a lentidão..."
+                },
+                {
+                  "id": "",
+                  "label": "Dia / Horário *",
+                  "type": "text",
+                  "placeholder": "Ex: 08/12/2025 às 14:30"
+                },
+                {
+                  "id": "",
+                  "label": "Duração *",
+                  "type": "text",
+                  "placeholder": "Ex: 5 minutos"
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Descreva os passos para reproduzir a lentidão..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado encontrado (lentidão observada)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado (performance adequada)"
+                },
+                {
+                  "id": "",
+                  "label": "1. A eventualidade ocorre com todos os usuários? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Estes estão localizados fisicamente na mesma rede? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Caso não, poderia mensurar como é a estrutura atual? *",
+                  "type": "textarea",
+                  "placeholder": "Descreva a estrutura de rede atual..."
+                },
+                {
+                  "id": "",
+                  "label": "2. O usuário que está relatando a queda da performance é administrador ou possui direitos limitados? *",
+                  "type": "text",
+                  "placeholder": "Ex: Administrador ou Direitos limitados"
+                },
+                {
+                  "id": "",
+                  "label": "3. Possuem T.I. próprio? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Rede do escritório possui firewall? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Caso afirmativo foi instalado por provedor ou pelo cliente? *",
+                  "type": "text",
+                  "placeholder": "Ex: Provedor ou Cliente"
+                },
+                {
+                  "id": "",
+                  "label": "4. Quantidade de abas do Legal One ou outras aplicações concorrentes ao mesmo tempo? *",
+                  "type": "text",
+                  "placeholder": "Ex: 5 abas do Legal One + 3 abas de outras aplicações"
+                },
+                {
+                  "id": "",
+                  "label": "Inserir link de evidência para: Teste de velocidade da internet, Devtools e log do Diagnostic *",
+                  "type": "text",
+                  "placeholder": "Ex: https://..."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "checklist-cliente",
+              "label": "Checklist Cliente"
+            },
+            {
+              "title": "Template Performance Support",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Lentidão no sistema"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Caso de Uso *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o caso de uso onde ocorre a lentidão..."
+                },
+                {
+                  "id": "",
+                  "label": "Dia / Horário *",
+                  "type": "text",
+                  "placeholder": "Ex: 08/12/2025 às 14:30"
+                },
+                {
+                  "id": "",
+                  "label": "Duração *",
+                  "type": "text",
+                  "placeholder": "Ex: 5 minutos"
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Descreva os passos para reproduzir a lentidão..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado encontrado (lentidão observada)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado (performance adequada)"
+                },
+                {
+                  "id": "",
+                  "label": "1) Ocorre com todos os usuários do escritório/departamento? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "2) A queda da performance foi simulada na máquina e na rede do analista do Suporte? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Inserir link de evidência para: Teste de velocidade da internet, Devtools e log do Diagnostic *",
+                  "type": "text",
+                  "placeholder": "Ex: https://..."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "checklist-suporte",
+              "label": "Checklist Suporte"
+            },
+            {
+              "title": "Template Performance - Major Incidente",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Lentidão no sistema"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "User *",
+                  "type": "text",
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "id": "",
+                  "label": "Senha *",
+                  "type": "text",
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Password Deadline *",
+                  "type": "text",
+                  "placeholder": "Ex: 30/05/2025"
+                },
+                {
+                  "id": "",
+                  "label": "Caso de Uso *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o caso de uso onde ocorre a lentidão..."
+                },
+                {
+                  "id": "",
+                  "label": "Dia / Horário (range) *",
+                  "type": "text",
+                  "placeholder": "Ex: 30/08 – Entre 09:00 e 10:00"
+                },
+                {
+                  "id": "",
+                  "label": "Duração *",
+                  "type": "text",
+                  "placeholder": "Ex: 30 minutos"
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Descreva os passos para reproduzir o problema..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado"
+                },
+                {
+                  "id": "",
+                  "label": "1) Ocorre com todos os usuários do escritório/departamento? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "2) Número do Major Incidente *",
+                  "type": "text",
+                  "placeholder": "Ex: INC20240830"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "major-incidente",
+              "label": "Major Incidente"
+            }
+          ]
+        },
+        {
+          "id": "entitlement",
+          "label": "Entitlement",
+          "templates": [
+            {
+              "title": "Template Licenças",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Motivo: (Informar o motivo, por exemplo: Trial expirada) *",
+                  "type": "text",
+                  "placeholder": "Ex: Trial expirada"
+                },
+                {
+                  "id": "",
+                  "label": "Nome do Cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Escritório Advocacia XYZ"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Número de Série *",
+                  "type": "text",
+                  "placeholder": "Ex: XXXX-XXXX-XXXX-XXXX"
+                },
+                {
+                  "id": "",
+                  "label": "APP Instância Dados *",
+                  "type": "text",
+                  "placeholder": "Ex: app-instance-123"
+                },
+                {
+                  "id": "",
+                  "label": "Número de Série *",
+                  "type": "text",
+                  "placeholder": "Ex: YYYY-YYYY-YYYY-YYYY"
+                },
+                {
+                  "id": "",
+                  "label": "APP Instância Dados *",
+                  "type": "text",
+                  "placeholder": "Ex: app-instance-456"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "licen-as",
+              "label": "Licenças"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "legal-one-analytics",
+      "label": "Legal One Analytics",
+      "categories": [
+        {
+          "id": "general",
+          "label": "Legal One Analytics",
+          "templates": [
+            {
+              "title": "Bug Legal One Analytics",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição/Assunto *",
+                  "type": "text",
+                  "placeholder": "Ex: Erro ao gerar relatório no Analytics"
+                },
+                {
+                  "id": "",
+                  "label": "Nome / CNPJ do cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Escritório XYZ - 00.000.000/0000-00"
+                },
+                {
+                  "id": "",
+                  "label": "Login/Nome do usuário *",
+                  "type": "text",
+                  "placeholder": "Ex: joao.silva ou João Silva"
+                },
+                {
+                  "id": "",
+                  "label": "Note (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "id": "",
+                  "label": "Steps *",
+                  "type": "textarea",
+                  "placeholder": "Descreva os passos para reproduzir o bug..."
+                },
+                {
+                  "id": "",
+                  "label": "Link com relatório .xls e Dashboard em .zip *",
+                  "type": "text",
+                  "placeholder": "Ex: https://..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Results: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado encontrado (erro ou comportamento incorreto)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "bug",
+              "label": "Bug"
+            },
+            {
+              "title": "Serviço Legal One Analytics",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tipo *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Nome / CNPJ do cliente *",
+                  "type": "text",
+                  "placeholder": "Ex: Escritório XYZ - 00.000.000/0000-00"
+                },
+                {
+                  "id": "",
+                  "label": "Login/Nome do usuário que solicitou *",
+                  "type": "text",
+                  "placeholder": "Ex: joao.silva ou João Silva"
+                },
+                {
+                  "id": "",
+                  "label": "Found Results: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results: *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Criar template\" para visualizar"
+              ],
+              "actions": [
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "servicios",
+              "label": "Serviços"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "highq",
+      "label": "HighQ",
+      "categories": [
+        {
+          "id": "general",
+          "label": "HighQ",
+          "templates": [
+            {
+              "title": "Template - Bug HighQ",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "URL do cliente *",
+                  "type": "text",
+                  "placeholder": "https://latamdemo.highq.com/"
+                },
+                {
+                  "id": "",
+                  "label": "Descreva os passos para reproduzir o problema *",
+                  "type": "textarea",
+                  "placeholder": "Exemplo:Acessar o site  \r\nAcessar o módulo: iSheet XPTO "
+                },
+                {
+                  "id": "",
+                  "label": "Found result (O que aconteceu) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o comportamento encontrado..."
+                },
+                {
+                  "id": "",
+                  "label": "Expected results (O que deveria acontecer) *",
+                  "type": "textarea",
+                  "placeholder": "Descreva o comportamento esperado..."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "bug-geral",
+              "label": "Bug Geral"
+            },
+            {
+              "title": "Template - Bug Workflow",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição do problema *",
+                  "type": "text",
+                  "placeholder": "Ex: Workflow não está disparando mesmo cumprindo as condições de gatilho"
+                },
+                {
+                  "id": "",
+                  "label": "1. URL do cliente *",
+                  "type": "text",
+                  "placeholder": "https://latamdemo.highq.com/"
+                },
+                {
+                  "id": "",
+                  "label": "Descreva os passos para reproduzir o problema *",
+                  "type": "textarea",
+                  "placeholder": "Acessar o site: Exemplo\nAcessar o módulo: Admin\nAcessar o menu de regras do Workflow\nAcessar o fluxo de ID: 123\nAcessar a regra de ID: 456"
+                },
+                {
+                  "id": "",
+                  "label": "Found result (O que aconteceu) *",
+                  "type": "textarea",
+                  "placeholder": "Exemplo: Veja que as condições de gatilho da regra é a criação de um registro na iSheet XPTO, porém mesmo após o usuário criar esse registro, o fluxo não disparou. Por exemplo o registro de ID: 789"
+                },
+                {
+                  "id": "",
+                  "label": "Expected results (O que deveria acontecer) *",
+                  "type": "textarea",
+                  "placeholder": "Exemplo: Que o Workflow dispare caso as condições da regra sejam devidamente cumpridas."
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar"
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "bug-workflow",
+              "label": "Bug Workflow"
+            },
+            {
+              "title": "Template - Performance",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descrição do problema *",
+                  "type": "text",
+                  "placeholder": "Ex: Lentidão ao abrir a Home de um site"
+                },
+                {
+                  "id": "",
+                  "label": "1. URL do cliente *",
+                  "type": "text",
+                  "placeholder": "https://latamdemo.highq.com/"
+                },
+                {
+                  "id": "",
+                  "label": "Descreva os passos para reproduzir o problema *",
+                  "type": "textarea",
+                  "placeholder": "Exemplo:Acessar o site: Exemplo: Acessar o módulo: Dashboard XPTO"
+                },
+                {
+                  "id": "",
+                  "label": "Found result (O que aconteceu) *",
+                  "type": "textarea",
+                  "placeholder": "Exemplo: Veja que ao abrir a tela acima, ocorre lentidão superior a 7 segundos"
+                },
+                {
+                  "id": "",
+                  "label": "Expected results (O que deveria acontecer) *",
+                  "type": "textarea",
+                  "placeholder": "Exemplo: Que não ocorra lentidão"
+                }
+              ],
+              "blocks": [
+                "Preencha o formulário e clique em \"Gerar Template\" para visualizar",
+                "Obs: Importante Lembre-se de checar as referências de limites que o HighQ possui para operar de forma performática. Caso o cliente esteja acima do limite, a resposta padrão para ele é que ele precisa se adequar aos limites do sistema para melhorar a performance de uso da plataforma."
+              ],
+              "actions": [
+                "Gerar Template",
+                "Limpar",
+                "Copiar"
+              ],
+              "id": "performance",
+              "label": "Performance"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scrapedAt": "2026-06-11T20:23:29Z"
+}

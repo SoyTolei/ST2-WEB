@@ -56,18 +56,24 @@
                 <div id="plan-sistema-indicator" class="plan-sistema-indicator"></div>
                 <button type="button" class="plan-pill-btn active" data-plan-sistema="BejermanSql">Bejerman SQL</button>
                 <button type="button" class="plan-pill-btn" data-plan-sistema="OnvioWeb">ONVIO/Bejerman WEB</button>
-                <button type="button" class="plan-pill-btn" data-plan-sistema="Legal">LEGAL</button>
+                <button type="button" class="plan-pill-btn" data-plan-sistema="Legal">LEGAL <span id="plan-legal-beta-pill" class="plan-pill-beta hidden">Beta</span></button>
                 <button type="button" class="plan-pill-btn" data-plan-sistema="Chile">Chile</button>
               </div>
+              <p id="plan-legal-beta-note" class="plan-legal-beta-note hidden">LEGAL está en <strong>versión beta</strong> — seguimos trabajando en mejoras.</p>
             </div>
 
             <p class="planillas-section-title">Opciones</p>
             <div class="plan-modulos-well">
               <div class="plan-modulos-grid">
-                <button type="button" class="plan-modulo-btn transfer" data-plan-modulo="transferencia">
+                <button type="button" class="plan-modulo-btn transfer" data-plan-modulo="transferencia" id="plan-modulo-transferencia">
                   <span class="plan-modulo-icon" data-plan-icon="transfer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 8h8M8 11h8M8 14h5"/></svg></span>
                   Transferencia de Casos
                 </button>
+                <div id="plan-modulo-transferencia-na" class="plan-modulo-na hidden" aria-hidden="true">
+                  <span class="plan-modulo-icon muted" data-plan-icon="transfer" aria-hidden="true"></span>
+                  <span class="plan-modulo-na-title">Transferencia de Casos</span>
+                  <span class="plan-modulo-na-hint">No corresponde a LEGAL</span>
+                </div>
                 <button type="button" class="plan-modulo-btn referral" data-plan-modulo="referral">
                   <span class="plan-modulo-icon" data-plan-icon="referral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="10.5" r="4"/><path d="M12 3.5v1.7M12 15.8v1.7M18.5 10.5h-1.8M7.3 10.5H5.5M16.8 6.2l-1.3 1.3M8.5 13.5l-1.3 1.3M16.8 14.8l-1.3-1.3M8.5 7.5L7.2 6.2"/></svg></span>
                   Referral I+D
@@ -103,7 +109,7 @@
               <div class="plan-accent-bar transfer"></div>
             </div>
 
-            <div class="plan-form-grid">
+            <div id="plan-trans-standard-fields">
               <div class="plan-field">
                 <label for="plan-numero-cliente">N° de Cliente</label>
                 <input id="plan-numero-cliente" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej: 123456"/>
@@ -119,7 +125,47 @@
                 </div>
                 <p id="plan-mesa-hint" class="plan-mesa-hint">Elegí la mesa de destino para continuar.</p>
               </div>
+            </div>
 
+            <div id="plan-trans-legal-panel" class="plan-ref-block hidden">
+              <div class="plan-bej-config">
+                <div class="plan-bej-row">
+                  <span class="plan-bej-label">Producto</span>
+                  <div class="plan-segment-track plan-segment-track-wide" id="plan-legal-produto-pills"></div>
+                </div>
+                <div class="plan-bej-row">
+                  <span class="plan-bej-label">Módulo</span>
+                  <div class="plan-segment-track plan-segment-track-wide" id="plan-legal-modulo-pills"></div>
+                </div>
+                <div class="plan-bej-row">
+                  <span class="plan-bej-label">Ambiente</span>
+                  <div class="plan-segment-track" id="plan-legal-ambiente-pills"></div>
+                </div>
+              </div>
+              <div class="plan-form-grid">
+                <div class="plan-field">
+                  <label for="plan-legal-chave">Clave de registro</label>
+                  <input id="plan-legal-chave" type="text" autocomplete="off" placeholder="Identificador del cliente"/>
+                </div>
+                <div class="plan-field">
+                  <label>Deriva a mesa</label>
+                  <div class="plan-mesas" id="plan-legal-mesas"></div>
+                  <p id="plan-legal-mesa-hint" class="plan-mesa-hint">Elegí la mesa de destino para continuar.</p>
+                </div>
+                <div class="plan-form-2col plan-form-2col-tight">
+                  <div class="plan-field">
+                    <label for="plan-legal-usuario">Usuario OnePass</label>
+                    <input id="plan-legal-usuario" type="email" autocomplete="off" placeholder="email@empresa.com"/>
+                  </div>
+                  <div class="plan-field">
+                    <label for="plan-legal-escritorio">Estudio / Empresa</label>
+                    <input id="plan-legal-escritorio" type="text" autocomplete="off"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-form-grid">
               <div class="plan-field">
                 <label for="plan-asunto">Asunto y/o Error</label>
                 <input id="plan-asunto" type="text" autocomplete="off" placeholder="Resumen del caso"/>
@@ -180,14 +226,27 @@
               </button>
               <button type="button" id="plan-btn-txt" class="plan-action-btn blue">
                 <span class="plan-action-btn-main">
-                  <span class="plan-action-btn-icon" data-plan-icon="saveTxt" aria-hidden="true"></span>
-                  Guardar .txt
+                  <span class="plan-action-btn-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
+                  Ver vista previa
                 </span>
-                <span class="plan-action-btn-sub">Descarga el archivo a tu PC</span>
+                <span class="plan-action-btn-sub">Genera y muestra el texto acá</span>
               </button>
               <button type="button" id="plan-btn-limpiar" class="plan-action-btn ghost">
                 <span class="plan-action-btn-main">🗑 Limpiar</span>
               </button>
+            </div>
+            <div id="plan-text-preview" class="plan-text-preview hidden" data-status-target="plan-status">
+              <div class="plan-text-preview-head">
+                <p class="plan-text-preview-title">
+                  <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
+                  Vista previa del texto
+                </p>
+                <button type="button" class="plan-text-preview-copy" data-plan-preview-copy>
+                  <span class="plan-text-preview-copy-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
+                  Copiar
+                </button>
+              </div>
+              <pre class="plan-text-preview-body" data-plan-preview-text></pre>
             </div>
             <p id="plan-status" class="plan-status-bar"></p>
           </div>
@@ -223,6 +282,10 @@
               <div class="plan-accent-bar referral"></div>
             </div>
 
+            <div id="plan-legal-beta-banner" class="plan-legal-beta-banner hidden" role="status">
+              <strong>Versión beta.</strong> Estamos trabajando en LEGAL; podés usar Referral I+D y contarnos si algo no cierra.
+            </div>
+
             <div id="ref-bejerman-panel" class="hidden">
               <div class="plan-bej-config">
                 <div class="plan-bej-row">
@@ -236,6 +299,27 @@
               </div>
             </div>
 
+            <div id="ref-legal-hub" class="plan-ref-block plan-legal-hub hidden">
+              <p class="plan-ref-title">Producto y categoría</p>
+              <p class="plan-ref-hint">Expandí un producto y elegí la categoría que corresponda al caso.</p>
+              <p id="ref-legal-hub-status" class="plan-status-bar" aria-live="polite"></p>
+              <div id="ref-legal-hub-root" class="plan-legal-hub-root"></div>
+            </div>
+
+            <div id="ref-legal-templates" class="plan-ref-block hidden">
+              <button type="button" id="ref-legal-templates-back" class="planillas-back">← Volver</button>
+              <p class="plan-ref-title">Plantillas disponibles</p>
+              <p id="ref-legal-templates-breadcrumb" class="plan-ref-hint"></p>
+              <div id="ref-legal-templates-root" class="plan-adj-grid"></div>
+            </div>
+
+            <div id="ref-legal-form" class="plan-ref-block hidden">
+              <button type="button" id="ref-legal-form-back" class="planillas-back">← Volver</button>
+              <p id="ref-legal-form-breadcrumb" class="plan-ref-hint"></p>
+              <div id="ref-legal-form-root"></div>
+            </div>
+
+            <div id="ref-standard-flow">
             <div class="plan-form-grid">
               <div class="plan-field"><label for="ref-asunto">Asunto y/o Error</label><input id="ref-asunto" type="text"/></div>
               <div class="plan-field"><label for="ref-descripcion">Descripción del caso</label><textarea id="ref-descripcion" rows="4" class="placeholder-active"></textarea></div>
@@ -296,7 +380,7 @@
               <input type="checkbox" id="ref-adj-backup" class="hidden"/>
               <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
                 <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Cargá acá las imágenes para que el .txt incluya los links (como en Traspaso).</p>
+                <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links (como en Traspaso).</p>
                 <div id="ref-capturas-chips" class="plan-capturas-chips"></div>
                 <div class="plan-capturas-actions">
                   <button type="button" id="ref-capturas-agregar" class="btn btn-secondary">Examinar…</button>
@@ -395,7 +479,7 @@
               </div>
               <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
                 <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Cargá acá las imágenes para que el .txt incluya los links (como en Traspaso).</p>
+                <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links (como en Traspaso).</p>
                 <div id="ref-onvio-capt-chips" class="plan-capturas-chips"></div>
                 <div class="plan-capturas-actions">
                   <button type="button" id="ref-onvio-capt-agregar" class="btn btn-secondary">Examinar…</button>
@@ -413,7 +497,107 @@
               </div>
             </div>
 
-            <div class="plan-ref-actions">
+            <div id="ref-legal-panel" class="plan-ref-block hidden">
+              <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
+              <p class="plan-ref-hint">Tocá para marcar cada ítem. Ticket y usuario se completan al activarlos.</p>
+              <div class="plan-onvio-grid">
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-proceso" data-legal="proceso">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon green" data-plan-icon="checkOk"></span>
+                    <span>El proceso funcionaba correctamente</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-reproduce" data-legal="reproduce">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon orange" data-plan-icon="repeat"></span>
+                    <span>El error se reproduce sistemáticamente</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-pantallas" data-legal="pantallas">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon primary" data-plan-icon="camera"></span>
+                    <span>Captura / imágenes</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-ticket" data-legal="ticket">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon blue" data-plan-icon="ticket"></span>
+                    <span>Ticket de servicio<small>N° y técnico</small></span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-planilha" data-legal="planilha">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon purple" data-plan-icon="planilla"></span>
+                    <span>Planilla de importación</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-log" data-legal="log">
+                  <span class="plan-onvio-body">
+                    <span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>
+                    <span>Log de integración</span>
+                  </span>
+                  <span class="card-mark">○</span>
+                </button>
+              </div>
+              <input type="checkbox" id="ref-legal-proceso" class="hidden"/>
+              <input type="checkbox" id="ref-legal-reproduce" class="hidden"/>
+              <input type="checkbox" id="ref-legal-pantallas" class="hidden"/>
+              <input type="checkbox" id="ref-legal-ticket" class="hidden"/>
+              <input type="checkbox" id="ref-legal-planilha" class="hidden"/>
+              <input type="checkbox" id="ref-legal-log" class="hidden"/>
+              <div id="ref-legal-ticket-panel" class="plan-onvio-ticket-detail hidden">
+                <p class="plan-backup-detail-title">Datos del ticket</p>
+                <div class="plan-form-2col">
+                  <div class="plan-field"><label for="ref-legal-ticket-num">N° de Ticket</label><input id="ref-legal-ticket-num" type="text" maxlength="20"/></div>
+                  <div class="plan-field"><label for="ref-legal-tecnico">Técnico</label><input id="ref-legal-tecnico" type="text"/></div>
+                </div>
+                <div class="plan-onvio-ticket-options">
+                  <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-ticket">
+                    <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="ticket"></span>Se reprodujo con el ticket</span>
+                    <span class="card-mark">○</span>
+                  </button>
+                  <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-homolog">
+                    <span class="plan-adj-label"><span class="plan-inline-icon purple" data-plan-icon="building"></span>Se reproduce en homologación</span>
+                    <span class="card-mark">○</span>
+                  </button>
+                  <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-usuario">
+                    <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="checkOk"></span>Se reproduce con otro usuario OnePass</span>
+                    <span class="card-mark">○</span>
+                  </button>
+                </div>
+                <input type="checkbox" id="ref-legal-rep-ticket" class="hidden"/>
+                <input type="checkbox" id="ref-legal-rep-homolog" class="hidden"/>
+                <input type="checkbox" id="ref-legal-rep-usuario" class="hidden"/>
+              </div>
+              <div id="ref-legal-capturas" class="plan-capturas-panel hidden">
+                <p class="plan-capturas-title">Capturas / imágenes</p>
+                <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links.</p>
+                <div id="ref-legal-capt-chips" class="plan-capturas-chips"></div>
+                <div class="plan-capturas-actions">
+                  <button type="button" id="ref-legal-capt-agregar" class="btn btn-secondary">Examinar…</button>
+                  <button type="button" id="ref-legal-capt-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
+                  <input id="ref-legal-capt-input" type="file" accept="image/*" multiple class="hidden"/>
+                </div>
+                <p id="ref-legal-capt-estado" class="plan-capturas-estado"></p>
+              </div>
+              <p class="plan-ref-title">Información del cliente</p>
+              <div class="plan-well-box">
+                <div class="plan-form-grid">
+                  <div class="plan-field"><label for="ref-legal-chave">Clave de registro</label><input id="ref-legal-chave" type="text"/></div>
+                  <div class="plan-form-2col plan-form-2col-tight">
+                    <div class="plan-field"><label for="ref-legal-usuario">Usuario OnePass</label><input id="ref-legal-usuario" type="email"/></div>
+                    <div class="plan-field"><label for="ref-legal-escritorio">Estudio / Empresa</label><input id="ref-legal-escritorio" type="text"/></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="plan-ref-actions" id="ref-standard-actions">
               <button type="button" id="ref-btn-copiar" class="plan-action-btn green">
                 <span class="plan-action-btn-main">
                   <span class="plan-action-btn-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
@@ -423,16 +607,30 @@
               </button>
               <button type="button" id="ref-btn-txt" class="plan-action-btn blue">
                 <span class="plan-action-btn-main">
-                  <span class="plan-action-btn-icon" data-plan-icon="saveTxt" aria-hidden="true"></span>
-                  Guardar .txt
+                  <span class="plan-action-btn-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
+                  Ver vista previa
                 </span>
-                <span class="plan-action-btn-sub">Descarga el archivo a tu PC</span>
+                <span class="plan-action-btn-sub">Genera y muestra el texto acá</span>
               </button>
               <button type="button" id="ref-btn-limpiar" class="plan-action-btn ghost">
                 <span class="plan-action-btn-main">🗑 Limpiar</span>
               </button>
             </div>
+            <div id="ref-text-preview" class="plan-text-preview hidden" data-status-target="ref-status">
+              <div class="plan-text-preview-head">
+                <p class="plan-text-preview-title">
+                  <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
+                  Vista previa del texto
+                </p>
+                <button type="button" class="plan-text-preview-copy" data-plan-preview-copy>
+                  <span class="plan-text-preview-copy-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
+                  Copiar
+                </button>
+              </div>
+              <pre class="plan-text-preview-body" data-plan-preview-text></pre>
+            </div>
             <p id="ref-status" class="plan-status-bar"></p>
+            </div>
           </div>
         </div>
 

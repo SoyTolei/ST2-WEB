@@ -1,0 +1,2110 @@
+{
+  "products": [
+    {
+      "id": "legal-one",
+      "label": "Legal One",
+      "categories": [
+        {
+          "id": "sistema",
+          "label": "Sistema",
+          "templates": [
+            {
+              "title": "Plantilla - Bug Legal One",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción del bug *",
+                  "type": "text",
+                  "placeholder": "Ej: Error al guardar proceso"
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: admin"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Login del usuario que reportó (Opcional)",
+                  "type": "text",
+                  "placeholder": "Ej: usuario.cliente"
+                },
+                {
+                  "id": "",
+                  "label": "Nota adicional (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Información adicional..."
+                },
+                {
+                  "id": "",
+                  "label": "Módulo *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Módulo *",
+                  "type": "textarea",
+                  "placeholder": "Describí la acción..."
+                },
+                {
+                  "id": "",
+                  "label": "Resultado encontrado (qué ocurrió) *",
+                  "type": "textarea",
+                  "placeholder": "Describí el comportamiento encontrado..."
+                },
+                {
+                  "id": "",
+                  "label": "Resultado esperado (qué debería ocurrir) *",
+                  "type": "textarea",
+                  "placeholder": "Describí el comportamiento esperado..."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "bug",
+              "label": "Bug"
+            },
+            {
+              "title": "Plantilla - Backup Legal One",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de backup *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ej: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Empresa XYZ S.A."
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ej: AppInstancia123"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "backup",
+              "label": "Backup"
+            },
+            {
+              "title": "Plantilla - Cambiar URL",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ej: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Empresa XYZ S.A."
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy anterior *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente-antigo"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy nueva *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente-novo"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "alterar-url",
+              "label": "Cambiar URL"
+            },
+            {
+              "title": "Plantilla - Restaurar base",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ej: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Empresa XYZ S.A."
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ej: AppInstancia123"
+                },
+                {
+                  "id": "",
+                  "label": "Resultado encontrado *",
+                  "type": "textarea",
+                  "placeholder": "Describí el motivo para restaurar la base"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "restaurar-base",
+              "label": "Restaurar base"
+            },
+            {
+              "title": "Plantilla - Mejora Legal One",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción de la mejora *",
+                  "type": "textarea",
+                  "placeholder": "Describí la mejora sugerida"
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Nota",
+                  "type": "textarea",
+                  "placeholder": "Observaciones adicionales (opcional)"
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Describí los pasos para reproducir"
+                },
+                {
+                  "id": "",
+                  "label": "Producto/Versión *",
+                  "type": "text",
+                  "placeholder": "Ej: Firm 10.0"
+                },
+                {
+                  "id": "",
+                  "label": "Módulo *",
+                  "type": "text",
+                  "placeholder": "Ej: Módulo de procesos"
+                },
+                {
+                  "id": "",
+                  "label": "Resumen *",
+                  "type": "textarea",
+                  "placeholder": "Resumen de la mejora"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "sugest-o-de-melhoria",
+              "label": "Sugerencia de mejora"
+            },
+            {
+              "title": "Plantilla - Activar toggle de importación CNJ",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Liberar toggle de importación CNJ"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ingresá el nombre del cliente"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ingresá el IdSIP del cliente"
+                },
+                {
+                  "id": "",
+                  "label": "URL *",
+                  "type": "text",
+                  "placeholder": "Ej: https://ejemplo.com.ar"
+                },
+                {
+                  "id": "",
+                  "label": "APP Instância Dados *",
+                  "type": "text",
+                  "placeholder": "Ingresá la instancia de la APP"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "text",
+                  "placeholder": "Ej: Importación CNJ no liberada"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result *",
+                  "type": "text",
+                  "placeholder": "Ej: Activar toggle de importación CNJ"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "toggle-cnj",
+              "label": "Toggle CNJ"
+            },
+            {
+              "title": "Plantilla - Activar toggle de tareas de Google",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Activar toggle de tareas de Google"
+                },
+                {
+                  "id": "",
+                  "label": "URL *",
+                  "type": "text",
+                  "placeholder": "Ej: https://ejemplo.com.ar"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ingresá el IdSIP del cliente"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ingresá el nombre del cliente"
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ingresá la instancia de la APP"
+                },
+                {
+                  "id": "",
+                  "label": "Resultado encontrado *",
+                  "type": "textarea",
+                  "placeholder": "Ej: Toggle de tareas de Google desactivado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results *",
+                  "type": "textarea",
+                  "placeholder": "Ej: Activar toggle de tareas de Google"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "toggle-tarefas",
+              "label": "Toggle tareas"
+            }
+          ]
+        },
+        {
+          "id": "rto-proview",
+          "label": "RTO/Proview",
+          "templates": [
+            {
+              "title": "Plantilla - Falla de acceso à RTO / Proview",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "textarea",
+                  "placeholder": "Describí el problema o la solicitud"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ej: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "SAP *",
+                  "type": "text",
+                  "placeholder": "Ej: SAP123456"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Empresa XYZ S.A."
+                },
+                {
+                  "id": "",
+                  "label": "Número de Série *",
+                  "type": "text",
+                  "placeholder": "Ej: NS123456"
+                },
+                {
+                  "id": "",
+                  "label": "AppInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ej: AppInstancia123"
+                },
+                {
+                  "id": "",
+                  "label": "SAP Customer Number - RTO *",
+                  "type": "text",
+                  "placeholder": "Ej: RTO123456"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Describí los pasos para reproducir"
+                },
+                {
+                  "id": "",
+                  "label": "WLBR *",
+                  "type": "text",
+                  "placeholder": "Ej: WLBR123"
+                },
+                {
+                  "id": "",
+                  "label": "EREAD *",
+                  "type": "text",
+                  "placeholder": "Ej: EREAD123"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "textarea",
+                  "placeholder": "Describí lo encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "falha-de-acesso",
+              "label": "Falla de acceso"
+            }
+          ]
+        },
+        {
+          "id": "nfse",
+          "label": "NFSe",
+          "templates": [
+            {
+              "title": "Plantilla - Registro DFe-Tools",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "URL *",
+                  "type": "text",
+                  "placeholder": "Ej: https://ejemplo.com.ar"
+                },
+                {
+                  "id": "",
+                  "label": "Login *",
+                  "type": "text",
+                  "placeholder": "Login de DFe"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de DFe"
+                },
+                {
+                  "id": "",
+                  "label": "Chave *",
+                  "type": "text",
+                  "placeholder": "Chave de acesso"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña del certificado *",
+                  "type": "text",
+                  "placeholder": "Contraseña del certificado digital"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "cadastro-dfe-tools-n1",
+              "label": "Registro Dfe-Tools N1"
+            }
+          ]
+        },
+        {
+          "id": "mobile",
+          "label": "Mobile",
+          "templates": [
+            {
+              "title": "Plantilla - Mobile",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "textarea",
+                  "placeholder": "Describí el problema o la solicitud"
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Versión del sistema operativo *",
+                  "type": "text",
+                  "placeholder": "Ej: Android 13 / iOS 16.5"
+                },
+                {
+                  "id": "",
+                  "label": "Modelo del dispositivo *",
+                  "type": "text",
+                  "placeholder": "Ej: Samsung Galaxy S23 / iPhone 14 Pro"
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de conexión a Internet *",
+                  "type": "text",
+                  "placeholder": "Ej: WiFi / 4G / 5G"
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Describí los pasos para reproducir"
+                },
+                {
+                  "id": "",
+                  "label": "Resultado encontrado *",
+                  "type": "textarea",
+                  "placeholder": "Describí lo encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "bug",
+              "label": "Bug"
+            }
+          ]
+        },
+        {
+          "id": "datacloud",
+          "label": "Datacloud",
+          "templates": [
+            {
+              "title": "Plantilla - Pre-registro (Falla en la captura)",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto * (Editable)",
+                  "type": "text",
+                  "placeholder": "Ingresá la descripción"
+                },
+                {
+                  "id": "",
+                  "label": "Nota (Optional) (Editável)",
+                  "type": "textarea",
+                  "placeholder": "Ingresá observaciones opcionales"
+                },
+                {
+                  "id": "",
+                  "label": "Número de proceso *",
+                  "type": "text",
+                  "placeholder": "Ej: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Organismo *",
+                  "type": "text",
+                  "placeholder": "Ej: TJSP, TJRJ, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Consulta *",
+                  "type": "text",
+                  "placeholder": "Ej: Consulta Pública, Consulta de Processos, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais Legal One (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Ingresá parámetros adicionales, si corresponde"
+                },
+                {
+                  "id": "",
+                  "label": "Link del sitio *",
+                  "type": "text",
+                  "placeholder": "Ej: https://esaj.tjsp.jus.br/cpopg/open.do"
+                },
+                {
+                  "id": "",
+                  "label": "Parámetros adicionales organismo (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Ingresá parámetros adicionales del organismo, si corresponde"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result * (Editável)",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "precadastro",
+              "label": "Pre-registro"
+            },
+            {
+              "title": "Plantilla - Alta Taxa de Erros no Agendador",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto * (Editable)",
+                  "type": "text",
+                  "placeholder": "Alta porcentagem de erro no Agendador de Consultas"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ingresá el tenancy del cliente"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Usuario * (Predeterminado: Support)",
+                  "type": "text",
+                  "placeholder": "Support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Digite a senha"
+                },
+                {
+                  "id": "",
+                  "label": "Nota (Optional)",
+                  "type": "textarea",
+                  "placeholder": "Ingresá observaciones opcionales"
+                },
+                {
+                  "id": "",
+                  "label": "Organismo *",
+                  "type": "text",
+                  "placeholder": "Ej: TJSP, TJRJ, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Consulta *",
+                  "type": "text",
+                  "placeholder": "Ej: Consulta Pública, Consulta de Processos, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Número de proceso *",
+                  "type": "text",
+                  "placeholder": "Ej: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Fecha/hora de la consulta *",
+                  "type": "text",
+                  "placeholder": "Ej: 01/01/2024 10:00"
+                },
+                {
+                  "id": "",
+                  "label": "Cantidad de fallas *",
+                  "type": "text",
+                  "placeholder": "Ej: 15 falhas, 80% de erro, etc."
+                },
+                {
+                  "id": "",
+                  "label": "Link del sitio *",
+                  "type": "text",
+                  "placeholder": "Ej: https://esaj.tjsp.jus.br/cpopg/open.do"
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais Legal One (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Ingresá parámetros adicionales de Legal One, si corresponde"
+                },
+                {
+                  "id": "",
+                  "label": "Parámetros adicionales organismo (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Ingresá parámetros adicionales del organismo, si corresponde"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result * (Editável)",
+                  "type": "textarea",
+                  "placeholder": "Disminución del porcentaje de error en el agendador de consultas."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "alta-taxa-de-erros",
+              "label": "Alta tasa de errores"
+            },
+            {
+              "title": "Plantilla - Demora en la captura",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Demora en la captura de publicación"
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Nota adicional (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Información adicional..."
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Acceder al módulo Publicaciones\nHacer clic en Publicaciones\nLocalizar el proceso"
+                },
+                {
+                  "id": "",
+                  "label": "Número de proceso *",
+                  "type": "text",
+                  "placeholder": "Ej: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Organismo *",
+                  "type": "text",
+                  "placeholder": "Ej: TJSP"
+                },
+                {
+                  "id": "",
+                  "label": "Tipo de Consulta *",
+                  "type": "text",
+                  "placeholder": "Ej: Publicaciones"
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros Adicionais - Legal One (Opcional)",
+                  "type": "text",
+                  "placeholder": "Ej: Abogado: Juan Pérez"
+                },
+                {
+                  "id": "",
+                  "label": "Sitio del organismo *",
+                  "type": "url",
+                  "placeholder": "Ej: https://esaj.tjsp.jus.br"
+                },
+                {
+                  "id": "",
+                  "label": "Parámetros adicionales - Sitio del organismo (Opcional)",
+                  "type": "text",
+                  "placeholder": "Ej: Seleccionar jurisdicción: Buenos Aires"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result (O que foi encontrado) *",
+                  "type": "textarea",
+                  "placeholder": "Describí lo encontrado en el sistema..."
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result (O que era esperado) *",
+                  "type": "textarea",
+                  "placeholder": "Describí el comportamiento esperado..."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "atraso-na-captura",
+              "label": "Demora en la captura"
+            },
+            {
+              "title": "Plantilla - Intimaciones electrónicas",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Intimación electrónica no fue capturada"
+                },
+                {
+                  "id": "",
+                  "label": "Producto *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Nota adicional (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Información adicional..."
+                },
+                {
+                  "id": "",
+                  "label": "Número de proceso *",
+                  "type": "text",
+                  "placeholder": "Ej: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "id": "",
+                  "label": "Link exato para consulta no site *",
+                  "type": "text",
+                  "placeholder": "Ej: https://..."
+                },
+                {
+                  "id": "",
+                  "label": "Usuario y contraseña del cliente para acceder a las intimaciones en el sitio *",
+                  "type": "textarea",
+                  "placeholder": "Ej: Usuario: cliente123 / Contraseña: senha123"
+                },
+                {
+                  "id": "",
+                  "label": "Found Result (O que foi encontrado) *",
+                  "type": "textarea",
+                  "placeholder": "Describí lo encontrado en el sistema..."
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result (O que era esperado) *",
+                  "type": "textarea",
+                  "placeholder": "Describí lo que se esperaba encontrar..."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "intima-es-eletr-nicas",
+              "label": "Intimaciones electrónicas"
+            },
+            {
+              "title": "Plantilla - Restaurar base",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ej: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Empresa XYZ S.A."
+                },
+                {
+                  "id": "",
+                  "label": "AppIdInstanciaDados *",
+                  "type": "text",
+                  "placeholder": "Ej: AppInstancia123"
+                },
+                {
+                  "id": "",
+                  "label": "Servicio *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "¿La configuración de monitoreo está ajustada? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Autorización de supervisión *",
+                  "type": "select",
+                  "placeholder": ""
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "restaurar-cr-dito",
+              "label": "Restaurar crédito"
+            },
+            {
+              "title": "Melhoria Datacloud",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Implementar novo tipo de consulta"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Nota (Optional)",
+                  "type": "textarea",
+                  "placeholder": "Información adicional..."
+                },
+                {
+                  "id": "",
+                  "label": "Nombre de la consulta en el tribunal: *",
+                  "type": "textarea",
+                  "placeholder": "Ej: Consulta de Processos - TJSP"
+                },
+                {
+                  "id": "",
+                  "label": "URL Exata da consulta *",
+                  "type": "text",
+                  "placeholder": "Ej: https://..."
+                },
+                {
+                  "id": "",
+                  "label": "3 processos de exemplo *",
+                  "type": "textarea",
+                  "placeholder": "Ej:5015568-97.2024.8.13.0290; 0807049-70.2023.8.15.2003; 1000809-36.2018.5.02.0462 "
+                },
+                {
+                  "id": "",
+                  "label": "Parâmetros necessários para consultar no site do tribunal *",
+                  "type": "textarea",
+                  "placeholder": "Ej: Número do processo, CPF/CNPJ, etc."
+                },
+                {
+                  "id": "",
+                  "label": "¿Cuántos procesos de todos los organismos monitorea actualmente el cliente en Legal One? *",
+                  "type": "text",
+                  "placeholder": "Ej: 1500 processos"
+                },
+                {
+                  "id": "",
+                  "label": "Quantos processos o cliente deseja monitorar desta consulta? *",
+                  "type": "text",
+                  "placeholder": "Ej: 200 processos"
+                },
+                {
+                  "id": "",
+                  "label": "¿El cliente indicó que cancelará si no tiene esta consulta? *",
+                  "type": "textarea",
+                  "placeholder": "Ej: Sim, cliente informou que precisa dessa funcionalidade urgentemente"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "sugest-o-de-melhoria",
+              "label": "Sugerencia de mejora"
+            },
+            {
+              "title": "Falla en la API",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Erro ao consumir API de consulta"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Nota (Optional)",
+                  "type": "textarea",
+                  "placeholder": "Información adicional..."
+                },
+                {
+                  "id": "",
+                  "label": "Consumer Key: *",
+                  "type": "text",
+                  "placeholder": "Ej: abc123xyz..."
+                },
+                {
+                  "id": "",
+                  "label": "Consumer Secret: *",
+                  "type": "text",
+                  "placeholder": "Ej: def456uvw..."
+                },
+                {
+                  "id": "",
+                  "label": "Documentación utilizada *",
+                  "type": "text",
+                  "placeholder": "Ej: https://docs.legalone.com.br/api/v1..."
+                },
+                {
+                  "id": "",
+                  "label": "URL / Endpoint *",
+                  "type": "text",
+                  "placeholder": "Ej: /api/v1/processos"
+                },
+                {
+                  "id": "",
+                  "label": "Request Type *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Body: *",
+                  "type": "textarea",
+                  "placeholder": "Ej: { \"numeroProcesso\": \"0000000-00.0000.0.00.0000\" }"
+                },
+                {
+                  "id": "",
+                  "label": "Found result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado obtenido (error, respuesta inesperada, etc.)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "falha-na-api",
+              "label": "Falla en la API"
+            }
+          ]
+        },
+        {
+          "id": "performance",
+          "label": "Performance",
+          "templates": [
+            {
+              "title": "Plantilla - Performance cliente",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Lentitud en el sistema"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Caso de Uso *",
+                  "type": "textarea",
+                  "placeholder": "Describí el caso de uso donde ocurre la lentitud..."
+                },
+                {
+                  "id": "",
+                  "label": "Dia / Horário *",
+                  "type": "text",
+                  "placeholder": "Ej: 08/12/2025 às 14:30"
+                },
+                {
+                  "id": "",
+                  "label": "Duración *",
+                  "type": "text",
+                  "placeholder": "Ej: 5 minutos"
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Describí los pasos para reproducir la lentitud..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado encontrado (lentitud observada)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado (performance adecuada)"
+                },
+                {
+                  "id": "",
+                  "label": "1. ¿Ocurre con todos los usuarios? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "¿Están ubicados físicamente en la misma red? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Si no, ¿podés describir cómo es la estructura actual? *",
+                  "type": "textarea",
+                  "placeholder": "Describí la estructura de red actual..."
+                },
+                {
+                  "id": "",
+                  "label": "2. ¿El usuario que reporta la caída de performance es administrador o tiene permisos limitados? *",
+                  "type": "text",
+                  "placeholder": "Ej: Administrador ou Direitos limitados"
+                },
+                {
+                  "id": "",
+                  "label": "3. Possuem T.I. próprio? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "¿La red del estudio tiene firewall? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Caso afirmativo foi instalado por provedor ou pelo cliente? *",
+                  "type": "text",
+                  "placeholder": "Ej: Proveedor o cliente"
+                },
+                {
+                  "id": "",
+                  "label": "4. ¿Cantidad de pestañas de Legal One u otras aplicaciones abiertas al mismo tiempo? *",
+                  "type": "text",
+                  "placeholder": "Ej: 5 pestañas de Legal One + 3 de otras aplicaciones"
+                },
+                {
+                  "id": "",
+                  "label": "Inserir link de evidência para: Teste de velocidade da internet, Devtools e log do Diagnostic *",
+                  "type": "text",
+                  "placeholder": "Ej: https://..."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "checklist-cliente",
+              "label": "Checklist cliente"
+            },
+            {
+              "title": "Plantilla - Performance soporte",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Lentitud en el sistema"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Caso de Uso *",
+                  "type": "textarea",
+                  "placeholder": "Describí el caso de uso donde ocurre la lentitud..."
+                },
+                {
+                  "id": "",
+                  "label": "Dia / Horário *",
+                  "type": "text",
+                  "placeholder": "Ej: 08/12/2025 às 14:30"
+                },
+                {
+                  "id": "",
+                  "label": "Duración *",
+                  "type": "text",
+                  "placeholder": "Ej: 5 minutos"
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Describí los pasos para reproducir la lentitud..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado encontrado (lentitud observada)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado (performance adecuada)"
+                },
+                {
+                  "id": "",
+                  "label": "1) ¿Ocurre con todos los usuarios del estudio/departamento? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "2) A queda da performance foi simulada na máquina e na rede do analista do Suporte? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Inserir link de evidência para: Teste de velocidade da internet, Devtools e log do Diagnostic *",
+                  "type": "text",
+                  "placeholder": "Ej: https://..."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "checklist-suporte",
+              "label": "Checklist soporte"
+            },
+            {
+              "title": "Plantilla - Performance - Incidente mayor",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Lentitud en el sistema"
+                },
+                {
+                  "id": "",
+                  "label": "Tenancy *",
+                  "type": "text",
+                  "placeholder": "Ej: cliente123"
+                },
+                {
+                  "id": "",
+                  "label": "Plano *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: support"
+                },
+                {
+                  "id": "",
+                  "label": "Contraseña *",
+                  "type": "text",
+                  "placeholder": "Contraseña de acceso"
+                },
+                {
+                  "id": "",
+                  "label": "Password Deadline *",
+                  "type": "text",
+                  "placeholder": "Ej: 30/05/2025"
+                },
+                {
+                  "id": "",
+                  "label": "Caso de Uso *",
+                  "type": "textarea",
+                  "placeholder": "Describí el caso de uso donde ocurre la lentitud..."
+                },
+                {
+                  "id": "",
+                  "label": "Dia / Horário (range) *",
+                  "type": "text",
+                  "placeholder": "Ej: 30/08 – Entre 09:00 e 10:00"
+                },
+                {
+                  "id": "",
+                  "label": "Duración *",
+                  "type": "text",
+                  "placeholder": "Ej: 30 minutos"
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Describí los pasos para reproducir el problema..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Result: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado"
+                },
+                {
+                  "id": "",
+                  "label": "1) ¿Ocurre con todos los usuarios del estudio/departamento? *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "2) Número do Incidente mayor *",
+                  "type": "text",
+                  "placeholder": "Ej: INC20240830"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "major-incidente",
+              "label": "Incidente mayor"
+            }
+          ]
+        },
+        {
+          "id": "entitlement",
+          "label": "Entitlement",
+          "templates": [
+            {
+              "title": "Template Licencias",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Motivo: (Informar o motivo, por exemplo: Trial expirada) *",
+                  "type": "text",
+                  "placeholder": "Ej: Trial expirada"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Escritório Advocacia XYZ"
+                },
+                {
+                  "id": "",
+                  "label": "IdSIP *",
+                  "type": "text",
+                  "placeholder": "Ej: 12345"
+                },
+                {
+                  "id": "",
+                  "label": "Número de Série *",
+                  "type": "text",
+                  "placeholder": "Ej: XXXX-XXXX-XXXX-XXXX"
+                },
+                {
+                  "id": "",
+                  "label": "APP Instância Dados *",
+                  "type": "text",
+                  "placeholder": "Ej: app-instance-123"
+                },
+                {
+                  "id": "",
+                  "label": "Número de Série *",
+                  "type": "text",
+                  "placeholder": "Ej: YYYY-YYYY-YYYY-YYYY"
+                },
+                {
+                  "id": "",
+                  "label": "APP Instância Dados *",
+                  "type": "text",
+                  "placeholder": "Ej: app-instance-456"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "licen-as",
+              "label": "Licencias"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "legal-one-analytics",
+      "label": "Legal One Analytics",
+      "categories": [
+        {
+          "id": "general",
+          "label": "Legal One Analytics",
+          "templates": [
+            {
+              "title": "Bug Legal One Analytics",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción/Asunto *",
+                  "type": "text",
+                  "placeholder": "Ej: Erro ao gerar relatório no Analytics"
+                },
+                {
+                  "id": "",
+                  "label": "Nombre / CUIT del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Escritório XYZ - 00.000.000/0000-00"
+                },
+                {
+                  "id": "",
+                  "label": "Login/nombre del usuario *",
+                  "type": "text",
+                  "placeholder": "Ej: juan.perez o Juan Pérez"
+                },
+                {
+                  "id": "",
+                  "label": "Nota (Opcional)",
+                  "type": "textarea",
+                  "placeholder": "Información adicional..."
+                },
+                {
+                  "id": "",
+                  "label": "Pasos *",
+                  "type": "textarea",
+                  "placeholder": "Describí los pasos para reproducir el bug..."
+                },
+                {
+                  "id": "",
+                  "label": "Link com relatório .xls e Dashboard em .zip *",
+                  "type": "text",
+                  "placeholder": "Ej: https://..."
+                },
+                {
+                  "id": "",
+                  "label": "Found Results: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado encontrado (error o comportamiento incorrecto)"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "bug",
+              "label": "Bug"
+            },
+            {
+              "title": "Servicio Legal One Analytics",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Tipo *",
+                  "type": "select",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Nombre / CUIT del cliente *",
+                  "type": "text",
+                  "placeholder": "Ej: Escritório XYZ - 00.000.000/0000-00"
+                },
+                {
+                  "id": "",
+                  "label": "Login/nombre del usuario que solicitó *",
+                  "type": "text",
+                  "placeholder": "Ej: juan.perez o Juan Pérez"
+                },
+                {
+                  "id": "",
+                  "label": "Found Results: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado encontrado"
+                },
+                {
+                  "id": "",
+                  "label": "Expected Results: *",
+                  "type": "textarea",
+                  "placeholder": "Describí el resultado esperado"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Crear plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "servicios",
+              "label": "Servicios"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "highq",
+      "label": "HighQ",
+      "categories": [
+        {
+          "id": "general",
+          "label": "HighQ",
+          "templates": [
+            {
+              "title": "Plantilla - Bug HighQ",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "URL do cliente *",
+                  "type": "text",
+                  "placeholder": "https://latamdemo.highq.com/"
+                },
+                {
+                  "id": "",
+                  "label": "Describí los pasos para reproducir el problema *",
+                  "type": "textarea",
+                  "placeholder": "Ejemplo:Acceder al sitio  \r\nAcceder al módulo: iSheet XPTO "
+                },
+                {
+                  "id": "",
+                  "label": "Found result (O que aconteceu) *",
+                  "type": "textarea",
+                  "placeholder": "Describí el comportamiento encontrado..."
+                },
+                {
+                  "id": "",
+                  "label": "Expected results (O que deveria acontecer) *",
+                  "type": "textarea",
+                  "placeholder": "Describí el comportamiento esperado..."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "bug-geral",
+              "label": "Bug general"
+            },
+            {
+              "title": "Plantilla - Bug workflow",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción del problema *",
+                  "type": "text",
+                  "placeholder": "Ej: El workflow no se dispara aun cumpliendo las condiciones de gatilho"
+                },
+                {
+                  "id": "",
+                  "label": "1. URL do cliente *",
+                  "type": "text",
+                  "placeholder": "https://latamdemo.highq.com/"
+                },
+                {
+                  "id": "",
+                  "label": "Describí los pasos para reproducir el problema *",
+                  "type": "textarea",
+                  "placeholder": "Acceder al sitio: Ejemplo\nAcceder al módulo: Admin\nAcceder al menú de regras do Workflow\nAcceder al flujo de ID: 123\nAcceder a la regla de ID: 456"
+                },
+                {
+                  "id": "",
+                  "label": "Found result (O que aconteceu) *",
+                  "type": "textarea",
+                  "placeholder": "Ejemplo: Observá que las condiciones de disparo de la regla son la creación de un registro en la iSheet XPTO, pero aun después de que el usuario crea ese registro, el flujo no se dispara. Por ejemplo el registro con ID: 789"
+                },
+                {
+                  "id": "",
+                  "label": "Expected results (O que deveria acontecer) *",
+                  "type": "textarea",
+                  "placeholder": "Ejemplo: Que el workflow se dispare cuando se cumplan correctamente las condiciones de la regla."
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "bug-workflow",
+              "label": "Bug workflow"
+            },
+            {
+              "title": "Plantilla - Performance",
+              "fields": [
+                {
+                  "id": "",
+                  "label": "",
+                  "type": "checkbox",
+                  "placeholder": ""
+                },
+                {
+                  "id": "",
+                  "label": "Descripción del problema *",
+                  "type": "text",
+                  "placeholder": "Ej: Lentitud al abrir a Home de um site"
+                },
+                {
+                  "id": "",
+                  "label": "1. URL do cliente *",
+                  "type": "text",
+                  "placeholder": "https://latamdemo.highq.com/"
+                },
+                {
+                  "id": "",
+                  "label": "Describí los pasos para reproducir el problema *",
+                  "type": "textarea",
+                  "placeholder": "Ejemplo:Acceder al sitio: Ejemplo: Acceder al módulo: Dashboard XPTO"
+                },
+                {
+                  "id": "",
+                  "label": "Found result (O que aconteceu) *",
+                  "type": "textarea",
+                  "placeholder": "Ejemplo: Observá que al abrir la pantalla anterior, hay lentitud superior a 7 segundos"
+                },
+                {
+                  "id": "",
+                  "label": "Expected results (O que deveria acontecer) *",
+                  "type": "textarea",
+                  "placeholder": "Ejemplo: Que no haya lentitud"
+                }
+              ],
+              "blocks": [
+                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa",
+                "Nota: recordá revisar los límites de referencia de HighQ. Si el cliente supera el límite, la respuesta estándar es que debe ajustarse a los límites del sistema para mejorar el rendimiento."
+              ],
+              "actions": [
+                "Generar plantilla",
+                "Limpiar",
+                "Copiar"
+              ],
+              "id": "performance",
+              "label": "Performance"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scrapedAt": "2026-06-11T20:23:29Z"
+}

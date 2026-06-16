@@ -9,6 +9,8 @@ using PortalClienchi.Web.Planillas;
 
 var builder = WebApplication.CreateBuilder(args);
 
+PlanillasFeatureFlags.LegalEnabled = builder.Configuration.GetValue("Planillas:LegalEnabled", false);
+
 var appSettings = WebSettingsLoader.Load(builder.Configuration, builder.Environment.ContentRootPath);
 
 builder.Services.AddSingleton(appSettings);

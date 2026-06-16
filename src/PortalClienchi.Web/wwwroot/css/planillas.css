@@ -162,6 +162,43 @@
   color: #fff;
 }
 
+.plan-pill-beta {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.plan-legal-beta-note {
+  margin: -8px 0 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.plan-legal-beta-banner {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #78350f;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .plan-sistema-indicator {
   position: absolute;
   top: 0;
@@ -2286,6 +2323,286 @@
 .plan-sql-copy:hover { background: #eff6ff; }
 .plan-sql-copy:disabled { opacity: 0.6; cursor: default; }
 
+/* LEGAL Referral hub — estética portal ST2 */
+.plan-legal-hub-root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.plan-legal-product {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.plan-legal-product-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: none;
+  background: #fafafa;
+  color: var(--dark);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.plan-legal-product-head:hover {
+  background: var(--nav-hover);
+}
+
+.plan-legal-product.is-expanded .plan-legal-product-head {
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+
+.plan-legal-product-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.plan-legal-product-title strong {
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.plan-legal-product-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.plan-legal-product-badge svg {
+  width: 18px;
+  height: 18px;
+}
+
+.plan-legal-chevron {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.plan-legal-product-body {
+  padding: 12px 14px 14px;
+}
+
+.plan-legal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-legal-list .plan-adj-card.plan-legal-pick {
+  width: 100%;
+  min-height: 44px;
+}
+
+.plan-legal-pick-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.plan-legal-pick-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #1a1f2e;
+  flex-shrink: 0;
+}
+
+.plan-legal-pick-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.plan-adj-card.plan-legal-pick:hover {
+  border-color: #d64000;
+  background: #fffaf7;
+}
+
+.plan-legal-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+
+.plan-legal-cards .plan-op-card.plan-legal-pick-card {
+  padding: 22px 16px 18px;
+  min-height: 130px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 10px rgba(26, 31, 46, 0.06);
+}
+
+.plan-legal-cards .plan-op-card.plan-legal-pick-card:hover {
+  border-color: #d64000;
+  opacity: 1;
+}
+
+.plan-legal-cards .plan-op-card.plan-legal-pick-card strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.plan-legal-cards .plan-legal-pick-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #eef1f6;
+  color: #1a1f2e;
+}
+
+.plan-legal-detail {
+  margin-top: 4px;
+}
+
+.plan-legal-detail-back {
+  margin-bottom: 10px;
+}
+
+.plan-legal-detail-breadcrumb {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.plan-legal-detail-placeholder {
+  text-align: center;
+  padding: 28px 24px;
+}
+
+.plan-legal-detail-placeholder h3 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  color: var(--dark);
+}
+
+.plan-legal-detail-placeholder p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+  font-size: 0.88rem;
+}
+
+.plan-legal-detail-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+/* LEGAL — plantillas y formulario (estilo ST2 referral) */
+.plan-legal-form-panel .plan-ref-title { margin-top: 0; }
+.plan-legal-form-panel .plan-form-grid { margin-bottom: 0; }
+.plan-legal-form-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.plan-legal-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+}
+.plan-adj-grid .plan-adj-card .plan-legal-pick-label { flex: 1; min-width: 0; }
+.plan-adj-grid .plan-adj-card .plan-legal-pick-icon { width: 1.35rem; height: 1.35rem; }
+
+/* Vista previa de texto generado (transferencia / referral / legal) */
+.plan-text-preview {
+  margin-top: 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+.plan-text-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: #fafafa;
+}
+.plan-text-preview-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+.plan-text-preview-icon,
+.plan-text-preview-copy-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.plan-text-preview-icon svg,
+.plan-text-preview-copy-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.plan-text-preview-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: #15803c;
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.plan-text-preview-copy:hover { opacity: 0.92; }
+.plan-text-preview-copy:disabled { opacity: 0.65; cursor: default; }
+.plan-text-preview-body {
+  margin: 0;
+  padding: 14px 16px;
+  max-height: 420px;
+  overflow: auto;
+  background: #f3f4f6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #1f2937;
+}
+.plan-legal-form-panel .plan-text-preview { margin-top: 16px; }
+
+#ref-standard-flow.hidden {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .planillas-card {
     --plan-card-pad-x: 16px;
@@ -2301,7 +2618,7 @@
   .plan-modulos-grid { grid-template-columns: 1fr; }
   .plan-sistema-indicator { display: none; }
   .plan-mesas { grid-template-columns: repeat(2, 1fr); }
-  .plan-check-cards, .plan-onvio-grid, .plan-adj-grid, .plan-op-submenu, .plan-form-2col { grid-template-columns: 1fr; }
+  .plan-check-cards, .plan-onvio-grid, .plan-adj-grid, .plan-op-submenu, .plan-legal-cards, .plan-form-2col { grid-template-columns: 1fr; }
   .plan-check-wrap.mam, .plan-check-wrap.sdk { margin: 0; }
   .plan-ref-actions { grid-template-columns: 1fr; }
   .plan-action-btn.ghost { min-width: 0; justify-content: center; }

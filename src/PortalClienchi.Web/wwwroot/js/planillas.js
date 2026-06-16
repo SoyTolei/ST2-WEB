@@ -1,6 +1,7 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
+import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -25,17 +26,48 @@ const SISTEMA_INDEX = {
   Chile: 3,
 };
 
+const LEGAL_MESA_LABELS = {
+  N1: "Atención N1",
+  N2: "Técnico N2",
+  API: "API / Integraciones",
+  FINANCEIRO: "Financiero / NF-e",
+  ONEPASS: "Infra / OnePass",
+};
+
 function sistemaDisplayLabel(id) {
   return SISTEMA_LABELS[id] || "";
 }
 
+function isLegalSistema(id) {
+  return id === "Legal";
+}
+
 function isSistemaPlaceholder(id) {
-  return id === "Legal" || id === "Chile";
+  if (id === "Chile") return true;
+  if (isLegalSistema(id)) {
+    const cfg = planillasConfig?.sistemas?.find((s) => s.id === "Legal");
+    return cfg?.placeholder !== false;
+  }
+  return false;
+}
+
+function isLegalBetaActive() {
+  const legal = planillasConfig?.sistemas?.find((s) => s.id === "Legal");
+  return !!(legal?.beta && !legal?.placeholder);
+}
+
+function updateLegalBetaUi() {
+  const on = isLegalBetaActive();
+  document.getElementById("plan-legal-beta-pill")?.classList.toggle("hidden", !on);
+  document.getElementById("plan-legal-beta-note")?.classList.toggle("hidden", !(on && isLegal()));
 }
 
 let planillasConfig = null;
 let sistemaActual = null;
 let mesaActual = null;
+let legalProdutoSel = null;
+let legalModuloSel = null;
+let legalAmbienteSel = null;
 let capturaFiles = [];
 let descripcionEsPlaceholder = true;
 let transferIaUndo = null;
@@ -108,14 +140,22 @@ function updateSistemaUi() {
   });
   setSistemaIndicator(index);
 
-  const transferBtn = document.querySelector('[data-plan-modulo="transferencia"]');
+  const transferBtn = document.getElementById("plan-modulo-transferencia");
+  const transferNa = document.getElementById("plan-modulo-transferencia-na");
   const referralBtn = document.querySelector('[data-plan-modulo="referral"]');
   const oportunidadBtn = document.querySelector('[data-plan-modulo="oportunidad"]');
   const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
-  const legalSelected = sistemaActual === "Legal";
+  const legalSelected = sistemaActual === "Legal" && !isSistemaPlaceholder("Legal");
 
-  if (transferBtn) transferBtn.disabled = placeholderBlocked;
+  if (transferBtn) {
+    transferBtn.classList.toggle("hidden", legalSelected);
+    transferBtn.disabled = placeholderBlocked || legalSelected;
+  }
+  if (transferNa) {
+    transferNa.classList.toggle("hidden", !legalSelected);
+    transferNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
+  }
   if (referralBtn) referralBtn.disabled = placeholderBlocked;
 
   if (oportunidadBtn) {
@@ -126,11 +166,78 @@ function updateSistemaUi() {
     oportunidadNa.classList.toggle("hidden", !legalSelected);
     oportunidadNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
   }
+  updateLegalBetaUi();
 }
 
 function selectSistema(id) {
   sistemaActual = id;
   updateSistemaUi();
+  updateTransferenciaPanels();
+}
+
+function buildLegalTransPills() {
+  const cfg = planillasConfig?.legal;
+  if (!cfg) return;
+
+  const prodRow = document.getElementById("plan-legal-produto-pills");
+  const modRow = document.getElementById("plan-legal-modulo-pills");
+  const ambRow = document.getElementById("plan-legal-ambiente-pills");
+  if (!prodRow || !modRow || !ambRow) return;
+
+  prodRow.innerHTML = (cfg.produtos || []).map((p) =>
+    `<button type="button" class="plan-segment-btn${legalProdutoSel === p ? " active" : ""}" data-legal-produto="${p}">${p}</button>`
+  ).join("");
+  modRow.innerHTML = (cfg.modulos || []).map((m) =>
+    `<button type="button" class="plan-segment-btn${legalModuloSel === m ? " active" : ""}" data-legal-modulo="${m}">${m}</button>`
+  ).join("");
+  ambRow.innerHTML = (cfg.ambientes || []).map((a) =>
+    `<button type="button" class="plan-segment-btn${legalAmbienteSel === a ? " active" : ""}" data-legal-ambiente="${a}">${a}</button>`
+  ).join("");
+}
+
+function buildLegalMesas() {
+  const row = document.getElementById("plan-legal-mesas");
+  const cfg = planillasConfig?.legal;
+  if (!row || !cfg?.mesas) return;
+
+  row.innerHTML = cfg.mesas.map((m) =>
+    `<button type="button" class="plan-mesa-btn${mesaActual === m.id ? " active" : ""}" data-legal-mesa="${m.id}">${m.label}</button>`
+  ).join("");
+}
+
+function updateTransferenciaPanels() {
+  const legal = isLegal();
+  document.getElementById("plan-trans-standard-fields")?.classList.toggle("hidden", legal);
+  document.getElementById("plan-trans-legal-panel")?.classList.toggle("hidden", !legal);
+
+  if (legal) {
+    buildLegalTransPills();
+    buildLegalMesas();
+    refreshLegalMesaUi();
+    els.ticketWrap()?.classList.remove("hidden");
+  } else {
+    refreshMesaUi();
+  }
+}
+
+function refreshLegalMesaUi() {
+  document.querySelectorAll("#plan-legal-mesas .plan-mesa-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.legalMesa === mesaActual);
+  });
+  const hint = document.getElementById("plan-legal-mesa-hint");
+  if (hint) {
+    const label = planillasConfig?.legal?.mesas?.find((m) => m.id === mesaActual)?.label
+      || LEGAL_MESA_LABELS[mesaActual]
+      || mesaActual;
+    hint.textContent = mesaActual
+      ? `Mesa seleccionada: ${label}`
+      : "Elegí la mesa de destino para continuar.";
+  }
+}
+
+function toggleLegalMesa(mesa) {
+  mesaActual = mesaActual === mesa ? null : mesa;
+  refreshLegalMesaUi();
 }
 
 function styleTicketCard(selected) {
@@ -157,6 +264,7 @@ function showTicketSection() {
   if (!wrap || !check || !panel) return;
 
   let show =
+    sistemaActual === "Legal" ||
     sistemaActual === "OnvioWeb" ||
     (sistemaActual === "BejermanSql" && (mesaActual === "SAAS" || mesaActual === "SUELDOS"));
 
@@ -345,11 +453,17 @@ async function mejorarTransferenciaIa() {
 
 function limpiarTransferencia() {
   mesaActual = null;
+  legalProdutoSel = null;
+  legalModuloSel = null;
+  legalAmbienteSel = null;
   capturaFiles = [];
   descripcionEsPlaceholder = true;
   transferIaUndo?.clearSnapshot();
 
   els.numeroCliente().value = "";
+  document.getElementById("plan-legal-chave") && (document.getElementById("plan-legal-chave").value = "");
+  document.getElementById("plan-legal-usuario") && (document.getElementById("plan-legal-usuario").value = "");
+  document.getElementById("plan-legal-escritorio") && (document.getElementById("plan-legal-escritorio").value = "");
   els.asunto().value = "";
   const desc = els.descripcion();
   desc.value = DESCRIPCION_PLACEHOLDER;
@@ -363,7 +477,10 @@ function limpiarTransferencia() {
   styleTicketCard(false);
 
   refreshMesaUi();
+  refreshLegalMesaUi();
+  buildLegalTransPills();
   refreshCapturasUi();
+  clearPlanTextPreview("plan-text-preview");
   setPlanStatus("");
 }
 
@@ -371,6 +488,7 @@ function initTransferenciaForm() {
   els.sistemaBadge().textContent = sistemaDisplayLabel(sistemaActual);
   initTransferenciaIaUi();
   limpiarTransferencia();
+  updateTransferenciaPanels();
 }
 
 function getDescripcionPlain() {
@@ -379,18 +497,63 @@ function getDescripcionPlain() {
 }
 
 function validarCampos() {
-  if (!els.numeroCliente().value.trim()) {
-    alert("Completá el N° de Cliente.");
-    els.numeroCliente().focus();
-    return false;
-  }
-  if (!mesaActual) {
-    alert("Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).");
-    return false;
+  if (isLegal()) {
+    if (!document.getElementById("plan-legal-chave")?.value.trim()) {
+      alert("Completá la clave de registro.");
+      document.getElementById("plan-legal-chave")?.focus();
+      return false;
+    }
+    if (!legalProdutoSel) {
+      alert("Seleccioná el producto Legal One.");
+      return false;
+    }
+    if (!legalModuloSel) {
+      alert("Seleccioná el módulo.");
+      return false;
+    }
+    if (!legalAmbienteSel) {
+      alert("Seleccioná el ambiente.");
+      return false;
+    }
+    if (!mesaActual) {
+      alert("Elegí la mesa de destino.");
+      return false;
+    }
+    if (!document.getElementById("plan-legal-usuario")?.value.trim()) {
+      alert("Completá el usuario OnePass.");
+      document.getElementById("plan-legal-usuario")?.focus();
+      return false;
+    }
+    if (!document.getElementById("plan-legal-escritorio")?.value.trim()) {
+      alert("Completá el estudio / empresa.");
+      document.getElementById("plan-legal-escritorio")?.focus();
+      return false;
+    }
+  } else {
+    if (!els.numeroCliente().value.trim()) {
+      alert("Completá el N° de Cliente.");
+      els.numeroCliente().focus();
+      return false;
+    }
+    if (!mesaActual) {
+      alert("Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).");
+      return false;
+    }
   }
   if (!els.asunto().value.trim()) {
     alert("Completá el campo Asunto y/o Error.");
     els.asunto().focus();
+    return false;
+  }
+  return true;
+}
+
+function preguntarTicketLegal() {
+  if (!isLegal() || els.ticketCheck().checked) return true;
+  if (confirm("¿Se solicitó ticket de servicio?")) {
+    els.ticketCheck().checked = true;
+    onTicketToggle();
+    els.ticketNumero().focus();
     return false;
   }
   return true;
@@ -411,9 +574,11 @@ function preguntarTicketSiSaasSueldos() {
 }
 
 function buildPayload() {
-  return {
+  const payload = {
     sistema: sistemaActual,
-    numeroCliente: els.numeroCliente().value.trim(),
+    numeroCliente: isLegal()
+      ? document.getElementById("plan-legal-chave")?.value.trim() || ""
+      : els.numeroCliente().value.trim(),
     mesa: mesaActual,
     asunto: els.asunto().value.trim(),
     descripcion: getDescripcionPlain() || null,
@@ -421,6 +586,18 @@ function buildPayload() {
     ticketSolicitado: els.ticketCheck().checked === true,
     numeroTicket: els.ticketNumero().value.trim() || null,
   };
+
+  if (isLegal()) {
+    payload.legal = {
+      produto: legalProdutoSel || "",
+      modulo: legalModuloSel || "",
+      ambiente: legalAmbienteSel || "",
+      usuarioOnePass: document.getElementById("plan-legal-usuario")?.value.trim() || "",
+      escritorio: document.getElementById("plan-legal-escritorio")?.value.trim() || "",
+    };
+  }
+
+  return payload;
 }
 
 function setPlanStatus(text, isError = false) {
@@ -431,7 +608,8 @@ function setPlanStatus(text, isError = false) {
 }
 
 async function generarTexto() {
-  if (!validarCampos() || !preguntarTicketSiSaasSueldos()) return null;
+  if (!validarCampos()) return null;
+  if (!preguntarTicketLegal() || !preguntarTicketSiSaasSueldos()) return null;
 
   const payload = buildPayload();
   const form = new FormData();
@@ -473,21 +651,14 @@ async function onGenerarCopiar() {
   }
 }
 
-async function onGenerarTxt() {
+async function onGenerarPreview() {
   const btn = els.btnGenerarTxt();
   btn.disabled = true;
   try {
     const data = await generarTexto();
     if (!data?.texto) return;
-
-    const blob = new Blob([data.texto], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = data.fileName || "transferencia.txt";
-    a.click();
-    URL.revokeObjectURL(url);
-    setPlanStatus("Archivo .txt descargado.");
+    showPlanTextPreview("plan-text-preview", data.texto);
+    setPlanStatus("Vista previa lista. Podés copiar desde el panel o con el botón verde.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
     alert(ex.message);
@@ -540,7 +711,7 @@ function bindEvents() {
   });
 
   document.querySelector('[data-plan-modulo="transferencia"]')?.addEventListener("click", () => {
-    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
+    if (!sistemaActual || isSistemaPlaceholder(sistemaActual) || isLegal()) return;
     initTransferenciaForm();
     showView("transferencia");
   });
@@ -572,6 +743,29 @@ function bindEvents() {
 
   els.mesaBtns().forEach((btn) => {
     btn.addEventListener("click", () => toggleMesa(btn.dataset.mesa));
+  });
+
+  document.getElementById("plan-trans-legal-panel")?.addEventListener("click", (e) => {
+    const prod = e.target.closest("[data-legal-produto]");
+    const mod = e.target.closest("[data-legal-modulo]");
+    const amb = e.target.closest("[data-legal-ambiente]");
+    const mesa = e.target.closest("[data-legal-mesa]");
+    if (prod) {
+      const val = prod.dataset.legalProduto;
+      legalProdutoSel = legalProdutoSel === val ? null : val;
+      buildLegalTransPills();
+    }
+    if (mod) {
+      const val = mod.dataset.legalModulo;
+      legalModuloSel = legalModuloSel === val ? null : val;
+      buildLegalTransPills();
+    }
+    if (amb) {
+      const val = amb.dataset.legalAmbiente;
+      legalAmbienteSel = legalAmbienteSel === val ? null : val;
+      buildLegalTransPills();
+    }
+    if (mesa) toggleLegalMesa(mesa.dataset.legalMesa);
   });
 
   els.capturasCard()?.addEventListener("click", (e) => {
@@ -622,7 +816,8 @@ function bindEvents() {
   });
 
   els.btnGenerarCopiar()?.addEventListener("click", onGenerarCopiar);
-  els.btnGenerarTxt()?.addEventListener("click", onGenerarTxt);
+  els.btnGenerarTxt()?.addEventListener("click", onGenerarPreview);
+  mountPlanTextPreview("plan-text-preview");
   document.getElementById("plan-btn-limpiar")?.addEventListener("click", limpiarTransferencia);
 }
 
@@ -722,6 +917,7 @@ export function initPlanillas() {
 
   void loadConfig().then(() => {
     updatePlanBuildBadge(planillasConfig?.webBuild);
+    updateSistemaUi();
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }

@@ -19,7 +19,7 @@ public static class PlanillasEndpoints
             {
                 new { id = "BejermanSql", label = PlanillasSistemaExtensions.BejermanSqlLabel, placeholder = false },
                 new { id = "OnvioWeb", label = PlanillasSistemaExtensions.OnvioWebLabel, placeholder = false },
-                new { id = "Legal", label = PlanillasSistemaExtensions.LegalLabel, placeholder = true },
+                new { id = "Legal", label = PlanillasSistemaExtensions.LegalLabel, placeholder = !PlanillasFeatureFlags.LegalEnabled, beta = PlanillasFeatureFlags.LegalEnabled },
                 new { id = "Chile", label = PlanillasSistemaExtensions.ChileLabel, placeholder = true },
             },
             iaConfigured = svc.IaConfigured,
@@ -44,6 +44,30 @@ public static class PlanillasEndpoints
                     new { num = "4", title = "Habilitar todos los triggers", explanation = "Genera las sentencias ALTER TABLE … ENABLE TRIGGER ALL para volver a habilitar los triggers deshabilitados.", query = ReferralIdConstants.TriggersHabilitar },
                 },
                 iaConfigured = referral.IaConfigured,
+            },
+            legal = new
+            {
+                beta = PlanillasFeatureFlags.LegalEnabled,
+                produtos = LegalConstants.Produtos,
+                modulos = LegalConstants.Modulos,
+                ambientes = LegalConstants.Ambientes,
+                mesas = LegalConstants.Mesas.Select(m => new { id = m.Id, label = m.Label }),
+                referralHub = LegalReferralHubCatalog.Products.Select(p => new
+                {
+                    id = p.Id,
+                    label = p.Label,
+                    icon = p.Icon,
+                    layout = p.Layout,
+                    catalogProductId = p.CatalogProductId,
+                    items = p.Items.Select(i => new
+                    {
+                        id = i.Id,
+                        label = i.Label,
+                        icon = i.Icon,
+                        catalogCategoryId = i.CatalogCategoryId,
+                    }),
+                }),
+                templatesCatalogUrl = "/data/legalone-templates-catalog.json",
             },
             oportunidad = new
             {
@@ -164,6 +188,7 @@ public static class PlanillasEndpoints
                     NumeroTicket = caso.NumeroTicket,
                     PortalLink = caso.PortalLink,
                     PortalTitulo = caso.PortalTitulo,
+                    Legal = caso.Legal,
                 };
 
                 var texto = await svc.GenerarTextoAsync(caso, ct).ConfigureAwait(false);

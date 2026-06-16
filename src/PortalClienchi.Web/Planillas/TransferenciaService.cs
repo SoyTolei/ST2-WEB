@@ -108,7 +108,9 @@ public sealed class TransferenciaService
     public static TransferenciaCase FromRequest(TransferenciaGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal or PlanillasSistema.Chile)
+        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
+            throw new ArgumentException("Sistema no válido para transferencia.");
+        if (sistema is PlanillasSistema.Legal && !PlanillasFeatureFlags.LegalEnabled)
             throw new ArgumentException("Sistema no válido para transferencia.");
 
         var enlaces = (req.CapturasEnlaces ?? [])
@@ -134,14 +136,38 @@ public sealed class TransferenciaService
             NumeroTicket = req.NumeroTicket?.Trim(),
             PortalLink = req.PortalLink?.Trim(),
             PortalTitulo = req.PortalTitulo?.Trim(),
+            Legal = MapLegalTransfer(req.Legal),
+        };
+    }
+
+    private static LegalTransferFields MapLegalTransfer(LegalTransferDto? dto)
+    {
+        if (dto is null)
+            return new LegalTransferFields();
+
+        return new LegalTransferFields
+        {
+            Produto = dto.Produto?.Trim() ?? "",
+            Modulo = dto.Modulo?.Trim() ?? "",
+            Ambiente = dto.Ambiente?.Trim() ?? "",
+            UsuarioOnePass = dto.UsuarioOnePass?.Trim() ?? "",
+            Escritorio = dto.Escritorio?.Trim() ?? "",
         };
     }
 
     public static string? ValidarRequest(TransferenciaGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Legal or PlanillasSistema.Chile)
-            return "Elegí un sistema válido (Bejerman SQL u ONVIO/Bejerman WEB).";
+        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
+            return "Elegí un sistema válido (Bejerman SQL, ONVIO/Bejerman WEB o LEGAL).";
+        if (sistema is PlanillasSistema.Legal && !PlanillasFeatureFlags.LegalEnabled)
+            return "El módulo LEGAL estará disponible en una próxima versión.";
+
+        if (string.IsNullOrWhiteSpace(req.Asunto))
+            return "Completá el campo Asunto y/o Error.";
+
+        if (sistema == PlanillasSistema.Legal)
+            return ValidarLegalTransfer(req);
 
         if (string.IsNullOrWhiteSpace(req.NumeroCliente))
             return "Completá el N° de Cliente.";
@@ -149,8 +175,36 @@ public sealed class TransferenciaService
         if (string.IsNullOrWhiteSpace(req.Mesa))
             return "Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).";
 
-        if (string.IsNullOrWhiteSpace(req.Asunto))
-            return "Completá el campo Asunto y/o Error.";
+        return null;
+    }
+
+    private static string? ValidarLegalTransfer(TransferenciaGenerateRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req.NumeroCliente))
+            return "Completá la clave de registro.";
+
+        var legal = req.Legal;
+        if (legal is null
+            || string.IsNullOrWhiteSpace(legal.Produto)
+            || legal.Produto == LegalConstants.PlaceholderProduto)
+            return "Seleccioná el producto Legal One.";
+
+        if (string.IsNullOrWhiteSpace(legal.Modulo)
+            || legal.Modulo == LegalConstants.PlaceholderModulo)
+            return "Seleccioná el módulo.";
+
+        if (string.IsNullOrWhiteSpace(legal.Ambiente)
+            || legal.Ambiente == LegalConstants.PlaceholderAmbiente)
+            return "Seleccioná el ambiente.";
+
+        if (string.IsNullOrWhiteSpace(req.Mesa))
+            return "Elegí la mesa de destino.";
+
+        if (string.IsNullOrWhiteSpace(legal.UsuarioOnePass))
+            return "Completá el usuario OnePass.";
+
+        if (string.IsNullOrWhiteSpace(legal.Escritorio))
+            return "Completá el estudio / empresa.";
 
         return null;
     }
