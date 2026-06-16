@@ -51,6 +51,10 @@ function isSistemaPlaceholder(id) {
   return false;
 }
 
+function isLegal() {
+  return sistemaActual === "Legal";
+}
+
 function isLegalBetaActive() {
   const legal = planillasConfig?.sistemas?.find((s) => s.id === "Legal");
   return !!(legal?.beta && !legal?.placeholder);
