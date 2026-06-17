@@ -78,7 +78,6 @@ internal sealed class EmbedSiteProxy
         "/st2.ico",
         "/css/styles.css",
         "/css/planillas.css",
-        "/thom-viewer.html",
     ];
 
     public static bool ShouldMirrorThomPath(PathString path) =>

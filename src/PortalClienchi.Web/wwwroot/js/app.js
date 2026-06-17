@@ -652,30 +652,27 @@ function getThomTapUrl() {
   return external;
 }
 
-/** URL del visor popup (mismo origen) con zoom sobre el iframe de THOM. */
-function getThomPopupUrl() {
-  const target = getThomTapUrl();
-  const z = getEmbedZoom("thom");
-  return `${location.origin}/thom-viewer.html?z=${encodeURIComponent(z)}&u=${encodeURIComponent(target)}`;
-}
-
 let thomPopup = null;
 let thomPopupResizeTimer = null;
 
 function getThomPanelRect() {
   const panel = document.getElementById("panel-thom");
   const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
+  const toolbar = document.querySelector("#panel-thom .embed-toolbar");
+  const tabBar = document.querySelector(".tab-bar");
   if (!panel || !wrap) {
     return { top: 120, left: 120, width: 1100, height: 640 };
   }
   const panelRect = panel.getBoundingClientRect();
   const wrapRect = wrap.getBoundingClientRect();
-  const chromeTop = window.outerHeight - window.innerHeight;
-  const chromeLeft = window.outerWidth - window.innerWidth;
-  const height = Math.max(420, Math.round(wrapRect.bottom - panelRect.top));
+  const tabBottom = tabBar?.getBoundingClientRect().bottom ?? panelRect.top;
+  const toolbarTop = toolbar?.getBoundingClientRect().top ?? panelRect.top;
+  // Cubre botones del panel pero nunca tapa las pestañas ST2 de arriba.
+  const viewportTop = Math.max(tabBottom + 2, toolbarTop);
+  const height = Math.max(420, Math.round(wrapRect.bottom - viewportTop));
   return {
-    top: Math.max(0, Math.round(window.screenY + chromeTop + panelRect.top)),
-    left: Math.max(0, Math.round(window.screenX + chromeLeft + panelRect.left)),
+    top: Math.max(0, Math.round(window.screenY + viewportTop)),
+    left: Math.max(0, Math.round(window.screenX + panelRect.left)),
     width: Math.max(480, Math.round(panelRect.width)),
     height,
   };
@@ -719,26 +716,13 @@ function shouldAutoCloseThomHelp() {
 function requestThomHelpCollapse(targetWindow) {
   if (!shouldAutoCloseThomHelp() || !targetWindow) return false;
   try {
-    const frame = targetWindow.document?.querySelector?.("iframe");
-    if (frame?.contentWindow) {
-      frame.contentWindow.postMessage({ type: "st2-collapse-help" }, "*");
-      const btn = frame.contentDocument?.querySelector?.('button[class*="panelOpened"]');
-      if (btn) {
-        btn.click();
-        return true;
-      }
-    }
-  } catch {
-    // iframe cross-origin
-  }
-  try {
     const btn = targetWindow.document?.querySelector?.('button[class*="panelOpened"]');
     if (btn) {
       btn.click();
       return true;
     }
   } catch {
-    // Ventana cross-origin
+    // Ventana cross-origin (THOM directo en web pública).
   }
   try {
     targetWindow.postMessage({ type: "st2-collapse-help" }, "*");
@@ -805,7 +789,7 @@ function hideThomDirectGate() {
 }
 
 function openThomWindow({ reload = false } = {}) {
-  const url = getThomPopupUrl();
+  const url = getThomTapUrl();
   const rect = getThomPanelRect();
   const features = buildThomPopupFeatures(rect);
   const popupName = "st2ThomPanel";
