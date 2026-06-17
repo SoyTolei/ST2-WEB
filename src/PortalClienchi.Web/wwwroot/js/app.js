@@ -685,7 +685,7 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabClearance = Math.round(tabRect.bottom + 12);
   const viewportTop = Math.round(Math.max(tabClearance, toolbarTop ?? tabClearance));
   const viewportBottom = wrapRect?.bottom ?? window.innerHeight;
-  const viewportHeight = Math.max(380, Math.round(viewportBottom - viewportTop));
+  const viewportHeight = Math.max(380, Math.round(viewportBottom - viewportTop - 18));
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
   return {
