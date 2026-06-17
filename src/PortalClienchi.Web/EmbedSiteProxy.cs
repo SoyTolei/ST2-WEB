@@ -41,33 +41,40 @@ internal sealed class EmbedSiteProxy
 
     private const string ThomHost = "css-latam.int.thomsonreuters.com";
 
-    private static readonly string[] ThomMirrorPrefixes =
+    private static readonly string[] St2ReservedPrefixes =
     [
-        "/css-tap",
-        "/assets/",
-        "/auth",
-        "/cognito",
-        "/doc-index",
-        "/doc-status",
-        "/feedback",
-        "/file_upload",
-        "/llm-leaderboard",
-        "/executive-llm-leaderboard",
-        "/metaprompting",
-        "/response-data",
+        "/api/",
+        "/embed/",
+        "/js/",
+        "/img/",
+        "/data/",
+    ];
+
+    private static readonly string[] St2ReservedExact =
+    [
+        "/",
+        "/index.html",
+        "/st2.ico",
+        "/css/styles.css",
+        "/css/planillas.css",
     ];
 
     public static bool ShouldMirrorThomPath(PathString path)
     {
         var value = path.Value ?? "/";
-        foreach (var prefix in ThomMirrorPrefixes)
+        if (St2ReservedExact.Contains(value, StringComparer.OrdinalIgnoreCase))
+            return false;
+
+        foreach (var prefix in St2ReservedPrefixes)
         {
-            if (value.Equals(prefix, StringComparison.OrdinalIgnoreCase)
-                || value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                return true;
+            if (value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return false;
         }
 
-        return false;
+        if (value.StartsWith("/css/", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        return true;
     }
 
     public static string ToEmbedPath(string absoluteUrl)
@@ -239,7 +246,7 @@ internal sealed class EmbedSiteProxy
         var value = Regex.Replace(setCookie, @";\s*Domain=[^;]*", "", RegexOptions.IgnoreCase);
         value = Regex.Replace(value, @";\s*SameSite=[^;]*", "", RegexOptions.IgnoreCase);
         value = Regex.Replace(value, @";\s*Secure", "", RegexOptions.IgnoreCase);
-        var cookiePath = mirrorPaths ? "/" : "/embed/";
+        var cookiePath = "/";
         if (Regex.IsMatch(value, @";\s*Path=", RegexOptions.IgnoreCase))
             value = Regex.Replace(value, @";\s*Path=[^;]*", $"; Path={cookiePath}", RegexOptions.IgnoreCase);
         else
@@ -261,8 +268,9 @@ internal sealed class EmbedSiteProxy
         {
             if (contentType.Contains("html", StringComparison.OrdinalIgnoreCase))
             {
-                content = RewriteThomMirrorHostsPreservingOAuth(content);
-                content = StripCrossOriginAttributes(content);
+            content = RewriteThomMirrorHostsPreservingOAuth(content);
+            content = InjectThomEmbedBridge(content);
+            content = StripCrossOriginAttributes(content);
             }
             else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
                      || contentType.Contains("css", StringComparison.OrdinalIgnoreCase))
@@ -339,6 +347,33 @@ internal sealed class EmbedSiteProxy
 
     private static string StripCrossOriginAttributes(string content) =>
         Regex.Replace(content, @"\s+crossorigin(=(['""])?(anonymous|use-credentials)\2)?", "", RegexOptions.IgnoreCase);
+
+    private static string InjectThomEmbedBridge(string content)
+    {
+        const string bridge = """
+<script>
+(function () {
+  function notify() {
+    try {
+      var root = document.getElementById("root");
+      var hasContent = !!(root && root.children && root.children.length > 0);
+      parent.postMessage({ type: "st2-thom-state", hasContent: hasContent, path: location.pathname }, "*");
+    } catch (e) {}
+  }
+  window.addEventListener("load", function () { notify(); setTimeout(notify, 1500); setTimeout(notify, 5000); });
+  new MutationObserver(notify).observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+""";
+        if (content.Contains("st2-thom-state", StringComparison.Ordinal))
+            return content;
+
+        return Regex.Replace(
+            content,
+            @"</body>",
+            bridge + "</body>",
+            RegexOptions.IgnoreCase);
+    }
 
     private static string RewriteHtmlAttributeUrls(string content, string site)
     {

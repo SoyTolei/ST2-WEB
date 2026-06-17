@@ -642,6 +642,8 @@ function applyEmbedZoom(kind) {
 }
 
 let thomLoadTimer = null;
+let thomBlankTimer = null;
+let thomRendered = false;
 
 function showThomLoading(message = "Cargando THOM…") {
   thomEmbedLoading?.classList.remove("hidden");
@@ -649,14 +651,66 @@ function showThomLoading(message = "Cargando THOM…") {
   if (msg) msg.textContent = message;
   clearTimeout(thomLoadTimer);
   thomLoadTimer = setTimeout(() => {
-    setEmbedHint("thom", "THOM tarda más de lo normal. Verificá VPN y probá «Abrir en navegador».");
-  }, 18000);
+    if (!thomRendered) {
+      setEmbedHint("thom", "THOM tarda más de lo normal. Verificá VPN y probá «Recargar».");
+    }
+  }, 20000);
 }
 
 function hideThomLoading() {
   thomEmbedLoading?.classList.add("hidden");
   clearTimeout(thomLoadTimer);
   thomLoadTimer = null;
+}
+
+function resetThomEmbedState() {
+  thomRendered = false;
+  clearTimeout(thomBlankTimer);
+  thomBlankTimer = null;
+}
+
+function scheduleThomBlankCheck() {
+  clearTimeout(thomBlankTimer);
+  thomBlankTimer = setTimeout(() => {
+    if (thomRendered) return;
+    try {
+      const loc = thomFrame?.contentWindow?.location?.href ?? "";
+      if (loc.includes("/embed/cg/") || loc.includes("/embed/sso/") || loc.includes("sso.thomsonreuters.com") || loc.includes("login.microsoftonline.com")) {
+        showThomLoading("Iniciando sesión corporativa…");
+        setEmbedHint("thom", "Iniciando sesión corporativa… Completá el login si aparece el formulario.");
+        scheduleThomBlankCheck();
+        return;
+      }
+      const root = thomFrame?.contentDocument?.getElementById("root");
+      const hasContent = !!(root && root.children.length > 0);
+      if (!hasContent) {
+        showThomLoading("THOM no cargó en el panel");
+        setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá VPN, usá «Recargar» o «Abrir en navegador».");
+      }
+    } catch {
+      showThomLoading("Iniciando sesión corporativa…");
+      setEmbedHint("thom", "Autenticando con SSO corporativo…");
+      scheduleThomBlankCheck();
+    }
+  }, 12000);
+}
+
+function onThomEmbedMessage(event) {
+  if (event.source !== thomFrame?.contentWindow) return;
+  const data = event.data;
+  if (!data || data.type !== "st2-thom-state") return;
+
+  if (data.hasContent) {
+    thomRendered = true;
+    hideThomLoading();
+    clearEmbedHint("thom");
+    clearTimeout(thomBlankTimer);
+    return;
+  }
+
+  if (data.path?.includes("/embed/cg") || data.path?.includes("/auth")) {
+    showThomLoading("Iniciando sesión corporativa…");
+  }
 }
 
 function loadEmbedFrame(kind, { force = false } = {}) {
@@ -666,7 +720,11 @@ function loadEmbedFrame(kind, { force = false } = {}) {
   if (!force && !needsEmbedReload(frame, url)) return;
   applyEmbedZoom(kind);
   clearEmbedHint(kind);
-  if (kind === "thom") showThomLoading();
+  if (kind === "thom") {
+    resetThomEmbedState();
+    showThomLoading();
+    scheduleThomBlankCheck();
+  }
   frame.src = url;
 }
 
@@ -712,22 +770,14 @@ function switchTab(tabId) {
 function initEmbedReminders() {
   bindEmbedEngagement(thomFrame, "thom");
   bindEmbedEngagement(aiFrame, "ai");
+  window.addEventListener("message", onThomEmbedMessage);
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
-    try {
-      const loc = thomFrame.contentWindow?.location?.href ?? "";
-      if (loc.includes("sso.thomsonreuters.com") || loc.includes("login.microsoftonline.com") || loc.includes("/embed/cg/")) {
-        showThomLoading("Iniciando sesión corporativa…");
-        setEmbedHint("thom", "Iniciando sesión corporativa… Si se queda en blanco, conectá VPN y usá «Abrir en navegador».");
-        return;
-      }
+    if (thomRendered) {
       hideThomLoading();
-      if (loc.includes("/css-tap") || loc.includes("css-latam.int.thomsonreuters.com")) {
-        clearEmbedHint("thom");
-      }
-    } catch {
-      hideThomLoading();
+      return;
     }
+    scheduleThomBlankCheck();
   });
   initDailyTabReminders();
 }
