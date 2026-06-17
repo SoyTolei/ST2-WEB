@@ -671,6 +671,9 @@ function measureThomPopupChrome(popup = thomPopup) {
   return THOM_POPUP_CHROME_WITH_URL;
 }
 
+/** Ajuste fino: bajar el popup respecto al borde de .tab-bar */
+const THOM_POPUP_TOP_OFFSET = 30;
+
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabBar = document.querySelector(".tab-bar");
   const tabRect = tabBar?.getBoundingClientRect();
@@ -678,8 +681,7 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
     return { top: 160, left: 0, width: 1100, height: 720 };
   }
 
-  // Justo debajo del borde inferior de las pestañas ST2.
-  const viewportTop = Math.round(tabRect.bottom);
+  const viewportTop = Math.round(tabRect.bottom + THOM_POPUP_TOP_OFFSET);
   const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop + 4));
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
