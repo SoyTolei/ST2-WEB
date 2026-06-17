@@ -889,11 +889,24 @@
 
     <section id="panel-thom" class="tab-panel hidden" role="tabpanel">
       <div class="embed-toolbar">
+        <button type="button" id="thomSsoBtn" class="btn btn-primary hidden">Iniciar sesión</button>
         <button type="button" id="thomReloadBtn" class="btn btn-secondary">Recargar</button>
         <button type="button" id="thomOpenBtn" class="btn btn-secondary">Abrir en navegador</button>
       </div>
       <p class="embed-hint" id="thomEmbedHint">THOM · VPN en tu PC · si no carga, «Abrir en navegador»</p>
       <div class="embed-frame-wrap">
+        <div id="thomDirectGate" class="embed-direct-gate hidden" aria-live="polite">
+          <p><strong>THOM en la versión web</strong></p>
+          <p>El login corporativo (SSO) no puede completarse dentro del panel embebido. Con <strong>VPN activa</strong>:</p>
+          <ol>
+            <li>Hacé clic en <strong>Iniciar sesión corporativo</strong> y completá el login en la pestaña que se abre.</li>
+            <li>Volvé acá y elegí <strong>Cargar THOM en panel</strong>.</li>
+          </ol>
+          <div class="embed-direct-gate-actions">
+            <button type="button" id="thomGateSsoBtn" class="btn btn-primary">Iniciar sesión corporativo</button>
+            <button type="button" id="thomGateLoadBtn" class="btn btn-secondary">Cargar THOM en panel</button>
+          </div>
+        </div>
         <div id="thomEmbedLoading" class="embed-loading hidden" aria-live="polite">
           <div class="preview-loading-spinner" aria-hidden="true"></div>
           <p>Cargando THOM…</p>
