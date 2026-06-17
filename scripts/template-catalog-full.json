@@ -1,0 +1,1610 @@
+{
+  "source": "http://ai-support-tools.legalone.com.br/suporte/templates",
+  "products": [
+    {
+      "id": "legal-one",
+      "label": "Legal One",
+      "categories": [
+        {
+          "id": "sistema",
+          "label": "Sistema",
+          "subTemplates": [
+            {
+              "id": "bug",
+              "label": "Bug",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "",
+                  "required": false,
+                  "placeholder": "Buscar templates ou seções..."
+                }
+              ]
+            },
+            {
+              "id": "backup",
+              "label": "Backup",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Tipo de Backup",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Produto",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "AppInstanciaDados",
+                  "required": true,
+                  "placeholder": "Ex: AppInstancia123"
+                }
+              ]
+            },
+            {
+              "id": "alterar-url",
+              "label": "Alterar URL",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Produto",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy Antiga",
+                  "required": true,
+                  "placeholder": "Ex: cliente-antigo"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy Nova",
+                  "required": true,
+                  "placeholder": "Ex: cliente-novo"
+                }
+              ]
+            },
+            {
+              "id": "restaurar-base",
+              "label": "Restaurar Base",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Produto",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "AppInstanciaDados",
+                  "required": true,
+                  "placeholder": "Ex: AppInstancia123"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Results",
+                  "required": true,
+                  "placeholder": "Descreva o motivo para a base ser restaurada"
+                }
+              ]
+            },
+            {
+              "id": "sugest-o-de-melhoria",
+              "label": "Sugestão de Melhoria",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Descrição da Melhoria",
+                  "required": true,
+                  "placeholder": "Descreva a melhoria sugerida"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Produto",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Password",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Note",
+                  "required": false,
+                  "placeholder": "Observações adicionais (opcional)"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Steps",
+                  "required": true,
+                  "placeholder": "Descreva os passos para reproduzir"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Produto/Versão",
+                  "required": true,
+                  "placeholder": "Ex: Firm 10.0"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Módulo",
+                  "required": true,
+                  "placeholder": "Ex: Módulo de Processos"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Resumo",
+                  "required": true,
+                  "placeholder": "Resumo da melhoria"
+                }
+              ]
+            },
+            {
+              "id": "toggle-cnj",
+              "label": "Toggle CNJ",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Liberar Toggle de Importação CNJ"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Digite o nome do cliente"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Digite o IdSIP do cliente"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "URL",
+                  "required": true,
+                  "placeholder": "Ex: https://exemplo.com.br"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "APP Instância Dados",
+                  "required": true,
+                  "placeholder": "Digite a instância do APP"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Found Result",
+                  "required": true,
+                  "placeholder": "Ex: Importação CNJ não liberada"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Expected Result",
+                  "required": true,
+                  "placeholder": "Ex: Ativar toggle de importação CNJ"
+                }
+              ]
+            },
+            {
+              "id": "toggle-tarefas",
+              "label": "Toggle Tarefas",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Ativar Toggle de Tarefas do Google"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "URL",
+                  "required": true,
+                  "placeholder": "Ex: https://exemplo.com.br"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Digite o IdSIP do cliente"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Digite o nome do cliente"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "AppInstanciaDados",
+                  "required": true,
+                  "placeholder": "Digite a instância do APP"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Results",
+                  "required": true,
+                  "placeholder": "Ex: Toggle de tarefas do Google desativado"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Results",
+                  "required": true,
+                  "placeholder": "Ex: Ativar toggle de tarefas do Google"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "rto-proview",
+          "label": "RTO/Proview",
+          "subTemplates": [
+            {
+              "id": "falha-de-acesso",
+              "label": "Falha de acesso",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Descreva o problema ou solicitação"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "SAP",
+                  "required": true,
+                  "placeholder": "Ex: SAP123456"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Número de Série",
+                  "required": true,
+                  "placeholder": "Ex: NS123456"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "AppInstanciaDados",
+                  "required": true,
+                  "placeholder": "Ex: AppInstancia123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "SAP Customer Number - RTO",
+                  "required": true,
+                  "placeholder": "Ex: RTO123456"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Steps",
+                  "required": true,
+                  "placeholder": "Descreva os passos para reproduzir"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "WLBR",
+                  "required": true,
+                  "placeholder": "Ex: WLBR123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "EREAD",
+                  "required": true,
+                  "placeholder": "Ex: EREAD123"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Result",
+                  "required": true,
+                  "placeholder": "Descreva o que foi encontrado"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Result",
+                  "required": true,
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "nfse",
+          "label": "NFSe",
+          "subTemplates": [
+            {
+              "id": "cadastro-dfe-tools-n1",
+              "label": "Cadastro Dfe-Tools N1",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "URL",
+                  "required": true,
+                  "placeholder": "Ex: https://exemplo.com.br"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Login",
+                  "required": true,
+                  "placeholder": "Login do DFe"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha do DFe"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Chave",
+                  "required": true,
+                  "placeholder": "Chave de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha do Certificado",
+                  "required": true,
+                  "placeholder": "Senha do certificado digital"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mobile",
+          "label": "Mobile",
+          "subTemplates": [
+            {
+              "id": "bug",
+              "label": "Bug",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Descreva o problema ou solicitação"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Produto",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Password",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Versão do Sistema Operacional",
+                  "required": true,
+                  "placeholder": "Ex: Android 13 / iOS 16.5"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Modelo do Aparelho",
+                  "required": true,
+                  "placeholder": "Ex: Samsung Galaxy S23 / iPhone 14 Pro"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tipo de Conexão com a Internet",
+                  "required": true,
+                  "placeholder": "Ex: WiFi / 4G / 5G"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Steps",
+                  "required": true,
+                  "placeholder": "Descreva os passos para reproduzir"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Results",
+                  "required": true,
+                  "placeholder": "Descreva o que foi encontrado"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Results",
+                  "required": true,
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "datacloud",
+          "label": "Datacloud",
+          "subTemplates": [
+            {
+              "id": "precadastro",
+              "label": "PreCadastro",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "",
+                  "required": false,
+                  "placeholder": "Buscar templates ou seções..."
+                }
+              ]
+            },
+            {
+              "id": "alta-taxa-de-erros",
+              "label": "Alta taxa de erros",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto  (Editável)",
+                  "required": true,
+                  "placeholder": "Alta porcentagem de erro no Agendador de Consultas"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Digite o tenancy do cliente"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Plano",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User  (Padrão: Support)",
+                  "required": true,
+                  "placeholder": "Support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Password",
+                  "required": true,
+                  "placeholder": "Digite a senha"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Note (Optional)",
+                  "required": false,
+                  "placeholder": "Digite observações opcionais"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Órgão",
+                  "required": true,
+                  "placeholder": "Ex: TJSP, TJRJ, etc."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tipo de Consulta",
+                  "required": true,
+                  "placeholder": "Ex: Consulta Pública, Consulta de Processos, etc."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Número do Processo",
+                  "required": true,
+                  "placeholder": "Ex: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Data/Hora da Consulta",
+                  "required": true,
+                  "placeholder": "Ex: 01/01/2024 10:00"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Quantidade de Falhas",
+                  "required": true,
+                  "placeholder": "Ex: 15 falhas, 80% de erro, etc."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Link do Site",
+                  "required": true,
+                  "placeholder": "Ex: https://esaj.tjsp.jus.br/cpopg/open.do"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Parâmetros Adicionais Legal One (Opcional)",
+                  "required": false,
+                  "placeholder": "Digite parâmetros adicionais do Legal One, se houver"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Parâmetros Adicionais Órgão (Opcional)",
+                  "required": false,
+                  "placeholder": "Digite parâmetros adicionais do órgão, se houver"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Result",
+                  "required": true,
+                  "placeholder": "Descreva o resultado encontrado"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Result  (Editável)",
+                  "required": true,
+                  "placeholder": "Diminuição da porcentagem de erro no Agendador de Consulta."
+                }
+              ]
+            },
+            {
+              "id": "atraso-na-captura",
+              "label": "Atraso na Captura",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Atraso na captura de publicação"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Produto",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Usuário",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Nota adicional (Opcional)",
+                  "required": false,
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Steps",
+                  "required": true,
+                  "placeholder": "Acessar módulo Publicações \nClicar em Publicações \nLocalizar o processo"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Número do Processo",
+                  "required": true,
+                  "placeholder": "Ex: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Órgão",
+                  "required": true,
+                  "placeholder": "Ex: TJSP"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tipo de Consulta",
+                  "required": true,
+                  "placeholder": "Ex: Publicações"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Parâmetros Adicionais - Legal One (Opcional)",
+                  "required": false,
+                  "placeholder": "Ex: Advogado: João Silva"
+                },
+                {
+                  "name": "",
+                  "type": "url",
+                  "label": "Site do Órgão",
+                  "required": true,
+                  "placeholder": "Ex: https://esaj.tjsp.jus.br"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Parâmetros Adicionais - Site do Órgão (Opcional)",
+                  "required": false,
+                  "placeholder": "Ex: Selecionar comarca: São Paulo"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Result (O que foi encontrado)",
+                  "required": true,
+                  "placeholder": "Descreva o que foi encontrado no sistema..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Result (O que era esperado)",
+                  "required": true,
+                  "placeholder": "Descreva o comportamento esperado..."
+                }
+              ]
+            },
+            {
+              "id": "intima-es-eletr-nicas",
+              "label": "Intimações Eletrônicas",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Intimação Eletrônica não foi capturada"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Produto",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Usuário",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Nota adicional (Opcional)",
+                  "required": false,
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Número do Processo",
+                  "required": true,
+                  "placeholder": "Ex: 0000000-00.0000.0.00.0000"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Link exato para consulta no site",
+                  "required": true,
+                  "placeholder": "Ex: https://..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Usuário e senha do cliente para acessar as intimações no site",
+                  "required": true,
+                  "placeholder": "Ex: Usuário: cliente123 / Senha: senha123"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Result (O que foi encontrado)",
+                  "required": true,
+                  "placeholder": "Descreva o que foi encontrado no sistema..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Result (O que era esperado)",
+                  "required": true,
+                  "placeholder": "Descreva o que era esperado encontrar..."
+                }
+              ]
+            },
+            {
+              "id": "restaurar-cr-dito",
+              "label": "Restaurar Crédito",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Ex: Empresa XYZ Ltda"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "AppIdInstanciaDados",
+                  "required": true,
+                  "placeholder": "Ex: AppInstancia123"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Serviço",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Configuração de Monitoramento está ajustada?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Autorização da Supervisão",
+                  "required": true,
+                  "placeholder": ""
+                }
+              ]
+            },
+            {
+              "id": "sugest-o-de-melhoria",
+              "label": "Sugestão de Melhoria",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Implementar novo tipo de consulta"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Plano",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Note (Optional)",
+                  "required": false,
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Nome da consulta no tribunal:",
+                  "required": true,
+                  "placeholder": "Ex: Consulta de Processos - TJSP"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "URL Exata da consulta",
+                  "required": true,
+                  "placeholder": "Ex: https://..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "3 processos de exemplo",
+                  "required": true,
+                  "placeholder": "Ex:5015568-97.2024.8.13.0290; 0807049-70.2023.8.15.2003; 1000809-36.2018.5.02.0462 "
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Parâmetros necessários para consultar no site do tribunal",
+                  "required": true,
+                  "placeholder": "Ex: Número do processo, CPF/CNPJ, etc."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Quantos processos de todos os órgãos o cliente monitora atualmente no Legal One?",
+                  "required": true,
+                  "placeholder": "Ex: 1500 processos"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Quantos processos o cliente deseja monitorar desta consulta?",
+                  "required": true,
+                  "placeholder": "Ex: 200 processos"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Cliente sinalizou que vai cancelar se não tiver essa consulta?",
+                  "required": true,
+                  "placeholder": "Ex: Sim, cliente informou que precisa dessa funcionalidade urgentemente"
+                }
+              ]
+            },
+            {
+              "id": "falha-na-api",
+              "label": "Falha na API",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Erro ao consumir API de consulta"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Plano",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Note (Optional)",
+                  "required": false,
+                  "placeholder": "Informações adicionais..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Consumer Key:",
+                  "required": true,
+                  "placeholder": "Ex: abc123xyz..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Consumer Secret:",
+                  "required": true,
+                  "placeholder": "Ex: def456uvw..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Documentação Usada",
+                  "required": true,
+                  "placeholder": "Ex: https://docs.legalone.com.br/api/v1..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "URL / Endpoint",
+                  "required": true,
+                  "placeholder": "Ex: /api/v1/processos"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Request Type",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Body:",
+                  "required": true,
+                  "placeholder": "Ex: { \"numeroProcesso\": \"0000000-00.0000.0.00.0000\" }"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado obtido (erro, resposta inesperada, etc.)"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado esperado"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "performance",
+          "label": "Performance",
+          "subTemplates": [
+            {
+              "id": "checklist-cliente",
+              "label": "Checklist Cliente",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Lentidão no sistema"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Plano",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Caso de Uso",
+                  "required": true,
+                  "placeholder": "Descreva o caso de uso onde ocorre a lentidão..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Dia / Horário",
+                  "required": true,
+                  "placeholder": "Ex: 08/12/2025 às 14:30"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Duração",
+                  "required": true,
+                  "placeholder": "Ex: 5 minutos"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Steps",
+                  "required": true,
+                  "placeholder": "Descreva os passos para reproduzir a lentidão..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado encontrado (lentidão observada)"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado esperado (performance adequada)"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "1. A eventualidade ocorre com todos os usuários?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Estes estão localizados fisicamente na mesma rede?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Caso não, poderia mensurar como é a estrutura atual?",
+                  "required": true,
+                  "placeholder": "Descreva a estrutura de rede atual..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "2. O usuário que está relatando a queda da performance é administrador ou possui direitos limitados?",
+                  "required": true,
+                  "placeholder": "Ex: Administrador ou Direitos limitados"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "3. Possuem T.I. próprio?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Rede do escritório possui firewall?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Caso afirmativo foi instalado por provedor ou pelo cliente?",
+                  "required": true,
+                  "placeholder": "Ex: Provedor ou Cliente"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "4. Quantidade de abas do Legal One ou outras aplicações concorrentes ao mesmo tempo?",
+                  "required": true,
+                  "placeholder": "Ex: 5 abas do Legal One + 3 abas de outras aplicações"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Inserir link de evidência para: Teste de velocidade da internet, Devtools e log do Diagnostic",
+                  "required": true,
+                  "placeholder": "Ex: https://..."
+                }
+              ]
+            },
+            {
+              "id": "checklist-suporte",
+              "label": "Checklist Suporte",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Lentidão no sistema"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Plano",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Caso de Uso",
+                  "required": true,
+                  "placeholder": "Descreva o caso de uso onde ocorre a lentidão..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Dia / Horário",
+                  "required": true,
+                  "placeholder": "Ex: 08/12/2025 às 14:30"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Duração",
+                  "required": true,
+                  "placeholder": "Ex: 5 minutos"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Steps",
+                  "required": true,
+                  "placeholder": "Descreva os passos para reproduzir a lentidão..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado encontrado (lentidão observada)"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado esperado (performance adequada)"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "1) Ocorre com todos os usuários do escritório/departamento?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "2) A queda da performance foi simulada na máquina e na rede do analista do Suporte?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Inserir link de evidência para: Teste de velocidade da internet, Devtools e log do Diagnostic",
+                  "required": true,
+                  "placeholder": "Ex: https://..."
+                }
+              ]
+            },
+            {
+              "id": "major-incidente",
+              "label": "Major Incidente",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Descrição/Assunto",
+                  "required": true,
+                  "placeholder": "Ex: Lentidão no sistema"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Tenancy",
+                  "required": true,
+                  "placeholder": "Ex: cliente123"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "Plano",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "User",
+                  "required": true,
+                  "placeholder": "Ex: support"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Senha",
+                  "required": true,
+                  "placeholder": "Senha de acesso"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Password Deadline",
+                  "required": true,
+                  "placeholder": "Ex: 30/05/2025"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Caso de Uso",
+                  "required": true,
+                  "placeholder": "Descreva o caso de uso onde ocorre a lentidão..."
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Dia / Horário (range)",
+                  "required": true,
+                  "placeholder": "Ex: 30/08 – Entre 09:00 e 10:00"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Duração",
+                  "required": true,
+                  "placeholder": "Ex: 30 minutos"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Steps",
+                  "required": true,
+                  "placeholder": "Descreva os passos para reproduzir o problema..."
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Found Result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado encontrado"
+                },
+                {
+                  "name": "",
+                  "type": "textarea",
+                  "label": "Expected Result:",
+                  "required": true,
+                  "placeholder": "Descreva o resultado esperado"
+                },
+                {
+                  "name": "",
+                  "type": "select",
+                  "label": "1) Ocorre com todos os usuários do escritório/departamento?",
+                  "required": true,
+                  "placeholder": ""
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "2) Número do Major Incidente",
+                  "required": true,
+                  "placeholder": "Ex: INC20240830"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "entitlement",
+          "label": "Entitlement",
+          "subTemplates": [
+            {
+              "id": "licen-as",
+              "label": "Licenças",
+              "fields": [
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Motivo: (Informar o motivo, por exemplo: Trial expirada)",
+                  "required": true,
+                  "placeholder": "Ex: Trial expirada"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Nome do Cliente",
+                  "required": true,
+                  "placeholder": "Ex: Escritório Advocacia XYZ"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "IdSIP",
+                  "required": true,
+                  "placeholder": "Ex: 12345"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Número de Série",
+                  "required": true,
+                  "placeholder": "Ex: XXXX-XXXX-XXXX-XXXX"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "APP Instância Dados",
+                  "required": true,
+                  "placeholder": "Ex: app-instance-123"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "Número de Série",
+                  "required": true,
+                  "placeholder": "Ex: YYYY-YYYY-YYYY-YYYY"
+                },
+                {
+                  "name": "",
+                  "type": "text",
+                  "label": "APP Instância Dados",
+                  "required": true,
+                  "placeholder": "Ex: app-instance-456"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "legal-one-analytics",
+      "label": "Legal One Analytics",
+      "categories": []
+    },
+    {
+      "id": "highq",
+      "label": "HighQ",
+      "categories": []
+    }
+  ]
+}

@@ -8,10 +8,12 @@ namespace PortalClienchi.Web;
 internal sealed class EmbedSiteProxy
 {
     private readonly bool _autoCloseThomHelpPanel;
+    private readonly double _thomZoomFactor;
 
     public EmbedSiteProxy(AppSettings settings)
     {
         _autoCloseThomHelpPanel = settings.ThomAutoCloseHelpPanel;
+        _thomZoomFactor = settings.ThomZoomFactor is > 0.25 and < 2 ? settings.ThomZoomFactor : 0.88;
     }
 
     private static readonly HttpClient Http = CreateClient();
@@ -176,7 +178,7 @@ internal sealed class EmbedSiteProxy
         if (ShouldRewrite(contentType))
         {
             var text = await response.Content.ReadAsStringAsync(ct);
-            text = RewriteContent(text, site, contentType, mirrorPaths, _autoCloseThomHelpPanel);
+            text = RewriteContent(text, site, contentType, mirrorPaths, _autoCloseThomHelpPanel, _thomZoomFactor);
             var bytes = Encoding.UTF8.GetBytes(text);
             context.Response.ContentLength = bytes.Length;
             await context.Response.Body.WriteAsync(bytes, ct);
@@ -287,14 +289,14 @@ internal sealed class EmbedSiteProxy
         @"redirect_uri=([^&""'\s]+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    private static string RewriteContent(string content, string site, string contentType, bool mirrorPaths, bool autoCloseHelpPanel)
+    private static string RewriteContent(string content, string site, string contentType, bool mirrorPaths, bool autoCloseHelpPanel, double thomZoomFactor)
     {
         if (mirrorPaths)
         {
             if (contentType.Contains("html", StringComparison.OrdinalIgnoreCase))
             {
             content = RewriteThomMirrorHostsPreservingOAuth(content);
-            content = InjectThomEmbedBridge(content, autoCloseHelpPanel);
+            content = InjectThomEmbedBridge(content, autoCloseHelpPanel, thomZoomFactor);
             content = StripCrossOriginAttributes(content);
             }
             else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
@@ -378,8 +380,22 @@ internal sealed class EmbedSiteProxy
     private static string RewriteThomHelpPanelDefault(string content) =>
         content.Replace("caseId:\"\",isHelpOpen:!0", "caseId:\"\",isHelpOpen:!1", StringComparison.Ordinal);
 
-    private static string InjectThomEmbedBridge(string content, bool autoCloseHelpPanel)
+    private static string InjectThomEmbedBridge(string content, bool autoCloseHelpPanel, double thomZoomFactor)
     {
+        var zoomLiteral = thomZoomFactor.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var zoomScript = $@"
+  function applyThomZoom() {{
+    try {{
+      var z = ""{zoomLiteral}"";
+      document.documentElement.style.zoom = z;
+      if (document.body) document.body.style.zoom = z;
+    }} catch (e) {{}}
+  }}
+  applyThomZoom();
+  window.addEventListener(""load"", applyThomZoom);
+  new MutationObserver(applyThomZoom).observe(document.documentElement, {{ childList: true, subtree: true }});
+";
+
         const string helpPanelScript = """
 
   function collapseHelpPanel() {
@@ -453,7 +469,7 @@ internal sealed class EmbedSiteProxy
 </script>
 """;
 
-        var bridge = bridgeCore + (autoCloseHelpPanel ? helpPanelScript : "") + bridgeEnd;
+        var bridge = bridgeCore + zoomScript + (autoCloseHelpPanel ? helpPanelScript : "") + bridgeEnd;
         if (content.Contains("st2-thom-state", StringComparison.Ordinal))
             return content;
 

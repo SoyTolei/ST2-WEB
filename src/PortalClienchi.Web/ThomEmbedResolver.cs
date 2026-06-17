@@ -9,8 +9,7 @@ namespace PortalClienchi.Web;
 internal sealed record ThomEmbedConfig(
     string Mode,
     string FrameUrl,
-    bool ProxyReachable,
-    string? RemoteProxyBase);
+    bool ProxyReachable);
 
 internal static class ThomEmbedResolver
 {
@@ -28,19 +27,19 @@ internal static class ThomEmbedResolver
         var onRailway = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_ENVIRONMENT"));
 
         if (mode is "window" or "direct")
-            return new ThomEmbedConfig("window", tapUrl, false, null);
+            return new ThomEmbedConfig("window", tapUrl, false);
 
         if (onRailway)
-            return new ThomEmbedConfig("window", tapUrl, false, null);
+            return new ThomEmbedConfig("window", tapUrl, false);
 
         var proxyReachable = false;
         if (mode is "auto" or "proxy")
             proxyReachable = await ProbeUpstreamAsync(tapUrl).ConfigureAwait(false);
 
         if (mode == "proxy" || (mode == "auto" && proxyReachable))
-            return new ThomEmbedConfig("proxy", ToProxyFramePath(tapUrl), true, null);
+            return new ThomEmbedConfig("proxy", ToProxyFramePath(tapUrl), true);
 
-        return new ThomEmbedConfig("window", tapUrl, proxyReachable, null);
+        return new ThomEmbedConfig("window", tapUrl, proxyReachable);
     }
 
     private static string ToProxyFramePath(string tapUrl)

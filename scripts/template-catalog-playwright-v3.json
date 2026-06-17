@@ -1,0 +1,56 @@
+{
+  "source": "http://ai-support-tools.legalone.com.br/suporte/templates",
+  "products": [
+    {
+      "id": "legal-one",
+      "label": "Legal One",
+      "categories": []
+    },
+    {
+      "id": "legal-one-analytics",
+      "label": "Legal One Analytics",
+      "categories": [
+        {
+          "id": "bug",
+          "label": "Bug",
+          "subTemplates": []
+        },
+        {
+          "id": "backup",
+          "label": "Backup",
+          "subTemplates": []
+        },
+        {
+          "id": "alterar-url",
+          "label": "Alterar URL",
+          "subTemplates": []
+        },
+        {
+          "id": "restaurar-base",
+          "label": "Restaurar Base",
+          "subTemplates": []
+        },
+        {
+          "id": "sugest-o-de-melhoria",
+          "label": "Sugestão de Melhoria",
+          "subTemplates": []
+        },
+        {
+          "id": "toggle-cnj",
+          "label": "Toggle CNJ",
+          "subTemplates": []
+        },
+        {
+          "id": "toggle-tarefas",
+          "label": "Toggle Tarefas",
+          "subTemplates": []
+        }
+      ]
+    },
+    {
+      "id": "highq",
+      "label": "HighQ",
+      "categories": []
+    }
+  ]
+}

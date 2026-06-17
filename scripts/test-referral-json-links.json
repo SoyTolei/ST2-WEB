@@ -1,0 +1,24 @@
+{
+  "sistema": "BejermanSql",
+  "version": "8.80",
+  "modulo": "Contabilidad General",
+  "asunto": "Test capturas json",
+  "descripcion": "desc",
+  "pasoAPaso": "paso",
+  "adjuntos": {
+    "pantallas": true,
+    "trazaSql": false,
+    "backupBases": false
+  },
+  "mamSelections": { "No utiliza MAM": true },
+  "sdkSelections": { "No utiliza SDK": true },
+  "planilla": {
+    "relevada": true,
+    "procesoFuncionaba": true,
+    "reproduceError": true,
+    "ultimaActualizOk": true
+  },
+  "capturasEnlaces": [
+    { "fileName": "test-captura.png", "url": "https://i.ibb.co/jZx1sZdj/st2.jpg" }
+  ]
+}

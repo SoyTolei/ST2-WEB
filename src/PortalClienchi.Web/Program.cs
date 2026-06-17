@@ -139,7 +139,6 @@ app.MapGet("/api/app-config", (AppSettings settings, ThomEmbedConfig thomEmbed) 
     thomEmbedMode = thomEmbed.Mode,
     thomFrameUrl = thomEmbed.FrameUrl,
     thomProxyReachable = thomEmbed.ProxyReachable,
-    thomProxyBaseUrl = thomEmbed.RemoteProxyBase,
     webBuild = St2WebBuild.GetBuild(),
     webVersionLabel = St2WebBuild.GetVersionLabel(),
 }));
