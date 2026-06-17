@@ -3,9 +3,8 @@ using PortalClienchi.Core.Configuration;
 namespace PortalClienchi.Web;
 
 /// <summary>
-/// proxy = mismo host (localhost/Railway con VPN o proxy corporativo).
-/// proxy-remote = iframe apunta a otro ST2 con VPN (túnel Cloudflare, etc.).
-/// window = solo ventana aparte (SSO no admite iframe cross-origin directo).
+/// proxy = iframe mismo host (localhost con VPN en el servidor).
+/// window = ventana popup alineada al panel (web pública / Railway).
 /// </summary>
 internal sealed record ThomEmbedConfig(
     string Mode,
@@ -17,49 +16,28 @@ internal static class ThomEmbedResolver
 {
     public static async Task<ThomEmbedConfig> ResolveAsync(AppSettings settings, IConfiguration configuration)
     {
-        var mode = configuration["ThomEmbedMode"]?.Trim()
-            ?? Environment.GetEnvironmentVariable("THOM_EMBED_MODE")?.Trim()
-            ?? "auto";
+        var mode = configuration["ThomEmbedMode"]?.Trim();
+        if (string.IsNullOrWhiteSpace(mode))
+            mode = Environment.GetEnvironmentVariable("THOM_EMBED_MODE")?.Trim();
+        mode = (mode ?? "auto").ToLowerInvariant();
 
-        mode = mode.ToLowerInvariant();
         var tapUrl = string.IsNullOrWhiteSpace(settings.ThomTapUrl)
             ? "https://css-latam.int.thomsonreuters.com/css-tap"
             : settings.ThomTapUrl.Trim();
 
-        var remoteBase = configuration["ThomProxyBaseUrl"]?.Trim();
-        if (string.IsNullOrWhiteSpace(remoteBase))
-            remoteBase = Environment.GetEnvironmentVariable("THOM_PROXY_BASE_URL")?.Trim();
-        if (string.IsNullOrWhiteSpace(remoteBase))
-            remoteBase = Environment.GetEnvironmentVariable("ThomProxyBaseUrl")?.Trim();
+        var onRailway = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_ENVIRONMENT"));
 
-        if (!string.IsNullOrWhiteSpace(remoteBase))
-        {
-            remoteBase = remoteBase.TrimEnd('/');
-            if (!Uri.TryCreate(remoteBase, UriKind.Absolute, out _))
-                remoteBase = null;
-        }
+        if (mode is "window" or "direct")
+            return new ThomEmbedConfig("window", tapUrl, false, null);
 
-        if (!string.IsNullOrEmpty(remoteBase))
-        {
-            var remoteFrame = $"{remoteBase}{ToProxyFramePath(tapUrl)}";
-            return new ThomEmbedConfig("proxy-remote", remoteFrame, false, remoteBase);
-        }
+        if (onRailway)
+            return new ThomEmbedConfig("window", tapUrl, false, null);
 
         var proxyReachable = false;
         if (mode is "auto" or "proxy")
             proxyReachable = await ProbeUpstreamAsync(tapUrl).ConfigureAwait(false);
 
-        var onRailway = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_ENVIRONMENT"));
-
-        var useLocalProxy = mode switch
-        {
-            "proxy" => true,
-            "window" or "direct" => false,
-            _ when onRailway && !proxyReachable => false,
-            _ => proxyReachable,
-        };
-
-        if (useLocalProxy)
+        if (mode == "proxy" || (mode == "auto" && proxyReachable))
             return new ThomEmbedConfig("proxy", ToProxyFramePath(tapUrl), true, null);
 
         return new ThomEmbedConfig("window", tapUrl, proxyReachable, null);

@@ -630,13 +630,8 @@ function isThomWindowMode() {
   return mode === "window" || mode === "direct";
 }
 
-function isThomRemoteProxy() {
-  return appConfig?.thomEmbedMode === "proxy-remote";
-}
-
 function isThomEmbeddedProxy() {
-  const mode = appConfig?.thomEmbedMode;
-  return mode === "proxy" || mode === "proxy-remote";
+  return appConfig?.thomEmbedMode === "proxy";
 }
 
 /** @deprecated use isThomWindowMode */
@@ -648,36 +643,116 @@ function getThomTapUrl() {
   return appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
 }
 
+let thomPopup = null;
+let thomPopupResizeTimer = null;
+
+function getThomPanelRect() {
+  const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
+  if (!wrap) {
+    return { top: 120, left: 120, width: 1100, height: 640 };
+  }
+  const rect = wrap.getBoundingClientRect();
+  const chromeTop = window.outerHeight - window.innerHeight;
+  const chromeLeft = window.outerWidth - window.innerWidth;
+  return {
+    top: Math.max(0, Math.round(window.screenY + chromeTop + rect.top)),
+    left: Math.max(0, Math.round(window.screenX + chromeLeft + rect.left)),
+    width: Math.max(480, Math.round(rect.width)),
+    height: Math.max(400, Math.round(rect.height)),
+  };
+}
+
+function buildThomPopupFeatures(rect) {
+  return [
+    `left=${rect.left}`,
+    `top=${rect.top}`,
+    `width=${rect.width}`,
+    `height=${rect.height}`,
+    "resizable=yes",
+    "scrollbars=yes",
+    "toolbar=no",
+    "menubar=no",
+    "location=yes",
+    "status=no",
+  ].join(",");
+}
+
+function repositionThomPopup() {
+  if (!thomPopup || thomPopup.closed || !isThomWindowMode()) return;
+  const rect = getThomPanelRect();
+  try {
+    thomPopup.moveTo(rect.left, rect.top);
+    thomPopup.resizeTo(rect.width, rect.height);
+  } catch {
+    // El navegador puede bloquear moveTo/resizeTo en ventanas no propias.
+  }
+}
+
+function scheduleThomPopupReposition() {
+  clearTimeout(thomPopupResizeTimer);
+  thomPopupResizeTimer = setTimeout(repositionThomPopup, 120);
+}
+
 function updateThomDirectUi() {
   const windowMode = isThomWindowMode();
   const embedded = isThomEmbeddedProxy();
   thomSsoBtn?.classList.toggle("hidden", !windowMode);
-  document.getElementById("thomReloadBtn")?.classList.toggle("hidden", windowMode);
+  const reloadBtn = document.getElementById("thomReloadBtn");
+  if (reloadBtn) {
+    reloadBtn.classList.remove("hidden");
+    reloadBtn.textContent = windowMode ? "Recargar THOM" : "Recargar";
+  }
   const openBtn = document.getElementById("thomOpenBtn");
   if (openBtn) {
-    openBtn.classList.toggle("hidden", windowMode);
-    openBtn.textContent = "Abrir en navegador";
+    openBtn.classList.toggle("hidden", false);
+    openBtn.textContent = windowMode ? "Abrir en pestaña" : "Abrir en navegador";
   }
-  if (thomSsoBtn && windowMode) thomSsoBtn.textContent = "Abrir THOM";
+  if (thomSsoBtn && windowMode) thomSsoBtn.textContent = "Abrir THOM aquí";
   thomFrame?.classList.toggle("hidden", windowMode);
   thomDirectGate?.classList.toggle("hidden", embedded || !windowMode);
+  thomDirectGate?.classList.toggle("embed-panel-active", windowMode && !!(thomPopup && !thomPopup.closed));
 }
 
-function showThomDirectGate() {
+function showThomPanelPlaceholder() {
   thomDirectGate?.classList.remove("hidden");
   hideThomLoading();
-  setEmbedHint("thom", "Configurá THOM_PROXY_BASE_URL en Railway para embeber, o usá «Abrir THOM».");
+  setEmbedHint("thom", "THOM en ventana sobre este panel · VPN activa");
 }
 
 function hideThomDirectGate() {
   thomDirectGate?.classList.add("hidden");
 }
 
-function openThomWindow() {
+function openThomWindow({ reload = false } = {}) {
   const url = getThomTapUrl();
-  const popup = window.open(url, "st2ThomWindow", "noopener,width=1320,height=920,resizable=yes,scrollbars=yes");
-  if (!popup) window.open(url, "_blank", "noopener");
-  setEmbedHint("thom", "THOM abierto aparte. Dejá ST2 y THOM visibles (VPN activa).");
+  const rect = getThomPanelRect();
+  const features = buildThomPopupFeatures(rect);
+  const popupName = "st2ThomPanel";
+
+  if (!reload && thomPopup && !thomPopup.closed) {
+    thomPopup.focus();
+    repositionThomPopup();
+    updateThomDirectUi();
+    setEmbedHint("thom", "THOM activo sobre el panel. Usá «Enfocar THOM» si quedó detrás.");
+    return thomPopup;
+  }
+
+  thomPopup = window.open(url, popupName, features);
+  if (!thomPopup) {
+    window.open(url, "_blank", "noopener");
+    setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
+    return null;
+  }
+
+  thomPopup.focus();
+  showThomPanelPlaceholder();
+  updateThomDirectUi();
+  setEmbedHint("thom", "THOM abierto en este espacio. Mantené VPN activa.");
+  return thomPopup;
+}
+
+function openThomBrowserTab() {
+  window.open(getThomTapUrl(), "_blank", "noopener");
 }
 
 function resetThomDirectFrame() {
@@ -697,7 +772,8 @@ function activateThomTab() {
   if (isThomWindowMode()) {
     resetThomDirectFrame();
     hideThomLoading();
-    showThomDirectGate();
+    showThomPanelPlaceholder();
+    openThomWindow();
   }
 }
 
@@ -771,12 +847,7 @@ function scheduleThomBlankCheck(delayMs = 12000) {
     if (thomRendered) return;
     if (isThomWindowMode()) {
       hideThomLoading();
-      showThomDirectGate();
-      return;
-    }
-    if (isThomRemoteProxy()) {
-      hideThomLoading();
-      setEmbedHint("thom", "THOM tarda más de lo normal. Verificá que el túnel VPN siga activo.");
+      showThomPanelPlaceholder();
       return;
     }
     thomBlankAttempts += 1;
@@ -816,7 +887,7 @@ function onThomEmbedMessage(event) {
   if (event.source !== thomFrame?.contentWindow) return;
   const data = event.data;
   if (!data || data.type !== "st2-thom-state") return;
-  if (isThomWindowMode() || isThomRemoteProxy()) return;
+  if (isThomWindowMode()) return;
 
   thomBridgeAlive = true;
 
@@ -862,10 +933,8 @@ function clearEmbedHint(kind) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (el) el.textContent = kind === "thom"
     ? (isThomEmbeddedProxy()
-      ? (isThomRemoteProxy()
-        ? "THOM embebido · proxy VPN remoto (túnel)"
-        : "THOM embebido · VPN activa · el login SSO puede demorar unos segundos")
-      : "Configurá THOM_PROXY_BASE_URL en Railway o usá «Abrir THOM»")
+      ? "THOM embebido · VPN activa · el login SSO puede demorar unos segundos"
+      : "THOM en ventana sobre este panel · VPN activa")
     : "Sesión corporativa · si no carga, «Abrir en navegador»";
 }
 
@@ -908,17 +977,13 @@ function initEmbedReminders() {
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
     if (isThomWindowMode()) return;
-    if (isThomRemoteProxy()) {
-      hideThomLoading();
-      setEmbedHint("thom", "THOM embebido vía proxy VPN remoto.");
-      return;
-    }
     if (thomRendered) {
       hideThomLoading();
       return;
     }
     scheduleThomBlankCheck();
   });
+  window.addEventListener("resize", scheduleThomPopupReposition);
   initDailyTabReminders();
 }
 
@@ -926,15 +991,19 @@ document.getElementById("thomSsoBtn")?.addEventListener("click", openThomWindow)
 document.getElementById("thomGateOpenBtn")?.addEventListener("click", openThomWindow);
 document.getElementById("thomReloadBtn").addEventListener("click", () => {
   if (isThomWindowMode()) {
-    openThomWindow();
+    if (thomPopup && !thomPopup.closed) {
+      try { thomPopup.location.reload(); } catch { openThomWindow({ reload: true }); }
+      thomPopup.focus();
+      repositionThomPopup();
+    } else {
+      openThomWindow({ reload: true });
+    }
     return;
   }
   if (isEmbedFrameEmpty(thomFrame)) loadEmbedFrame("thom", { force: true });
   else thomFrame.contentWindow?.location.reload();
 });
-document.getElementById("thomOpenBtn").addEventListener("click", () => {
-  openThomWindow();
-});
+document.getElementById("thomOpenBtn").addEventListener("click", openThomBrowserTab);
 document.getElementById("aiReloadBtn").addEventListener("click", () => {
   if (isEmbedFrameEmpty(aiFrame)) loadEmbedFrame("ai", { force: true });
   else aiFrame.contentWindow?.location.reload();
