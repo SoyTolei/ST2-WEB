@@ -640,25 +640,38 @@ function isThomDirectEmbed() {
 }
 
 function getThomTapUrl() {
-  return appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
+  const external = appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
+  if (appConfig?.thomProxyReachable) {
+    try {
+      const u = new URL(external);
+      return `${window.location.origin}${u.pathname}${u.search}`;
+    } catch {
+      return `${window.location.origin}/css-tap`;
+    }
+  }
+  return external;
 }
 
 let thomPopup = null;
 let thomPopupResizeTimer = null;
 
+/** Deja visibles las pestañas ST2 y la barra de opciones detrás del popup. */
+const THOM_POPUP_HEIGHT_TRIM = 80;
+
 function getThomPanelRect() {
   const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
   if (!wrap) {
-    return { top: 120, left: 120, width: 1100, height: 640 };
+    return { top: 120, left: 120, width: 1100, height: 560 };
   }
   const rect = wrap.getBoundingClientRect();
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = window.outerWidth - window.innerWidth;
+  const height = Math.max(360, Math.round(rect.height - THOM_POPUP_HEIGHT_TRIM));
   return {
     top: Math.max(0, Math.round(window.screenY + chromeTop + rect.top)),
     left: Math.max(0, Math.round(window.screenX + chromeLeft + rect.left)),
     width: Math.max(480, Math.round(rect.width)),
-    height: Math.max(400, Math.round(rect.height)),
+    height,
   };
 }
 

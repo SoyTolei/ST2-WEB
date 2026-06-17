@@ -1,11 +1,19 @@
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using PortalClienchi.Core.Configuration;
 
 namespace PortalClienchi.Web;
 
 internal sealed class EmbedSiteProxy
 {
+    private readonly bool _autoCloseThomHelpPanel;
+
+    public EmbedSiteProxy(AppSettings settings)
+    {
+        _autoCloseThomHelpPanel = settings.ThomAutoCloseHelpPanel;
+    }
+
     private static readonly HttpClient Http = CreateClient();
 
     private static readonly Dictionary<string, string> SiteBases = new(StringComparer.OrdinalIgnoreCase)
@@ -168,7 +176,7 @@ internal sealed class EmbedSiteProxy
         if (ShouldRewrite(contentType))
         {
             var text = await response.Content.ReadAsStringAsync(ct);
-            text = RewriteContent(text, site, contentType, mirrorPaths);
+            text = RewriteContent(text, site, contentType, mirrorPaths, _autoCloseThomHelpPanel);
             var bytes = Encoding.UTF8.GetBytes(text);
             context.Response.ContentLength = bytes.Length;
             await context.Response.Body.WriteAsync(bytes, ct);
@@ -279,14 +287,14 @@ internal sealed class EmbedSiteProxy
         @"redirect_uri=([^&""'\s]+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    private static string RewriteContent(string content, string site, string contentType, bool mirrorPaths)
+    private static string RewriteContent(string content, string site, string contentType, bool mirrorPaths, bool autoCloseHelpPanel)
     {
         if (mirrorPaths)
         {
             if (contentType.Contains("html", StringComparison.OrdinalIgnoreCase))
             {
             content = RewriteThomMirrorHostsPreservingOAuth(content);
-            content = InjectThomEmbedBridge(content);
+            content = InjectThomEmbedBridge(content, autoCloseHelpPanel);
             content = StripCrossOriginAttributes(content);
             }
             else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
@@ -365,9 +373,32 @@ internal sealed class EmbedSiteProxy
     private static string StripCrossOriginAttributes(string content) =>
         Regex.Replace(content, @"\s+crossorigin(=(['""])?(anonymous|use-credentials)\2)?", "", RegexOptions.IgnoreCase);
 
-    private static string InjectThomEmbedBridge(string content)
+    private static string InjectThomEmbedBridge(string content, bool autoCloseHelpPanel)
     {
-        const string bridge = """
+        const string helpPanelScript = """
+
+  function collapseHelpPanel() {
+    var btn = document.querySelector('button[title="Close Help Panel"]');
+    if (btn) { btn.click(); return true; }
+    var opened = document.querySelector('button[class*="panelOpened"]');
+    if (opened) { opened.click(); return true; }
+    return false;
+  }
+  function scheduleHelpPanelCollapse() {
+    var tries = 0;
+    function attempt() {
+      if (collapseHelpPanel() || ++tries > 48) return;
+      setTimeout(attempt, 250);
+    }
+    attempt();
+  }
+  window.addEventListener("load", scheduleHelpPanelCollapse);
+  new MutationObserver(function () {
+    if (document.querySelector('button[title="Close Help Panel"]')) scheduleHelpPanelCollapse();
+  }).observe(document.documentElement, { childList: true, subtree: true });
+""";
+
+        const string bridgeCore = """
 <script>
 (function () {
   function notify(extra) {
@@ -396,9 +427,14 @@ internal sealed class EmbedSiteProxy
   });
   window.addEventListener("load", function () { notify(); setTimeout(notify, 1500); setTimeout(notify, 5000); });
   new MutationObserver(notify).observe(document.documentElement, { childList: true, subtree: true });
+""";
+
+        const string bridgeEnd = """
 })();
 </script>
 """;
+
+        var bridge = bridgeCore + (autoCloseHelpPanel ? helpPanelScript : "") + bridgeEnd;
         if (content.Contains("st2-thom-state", StringComparison.Ordinal))
             return content;
 
