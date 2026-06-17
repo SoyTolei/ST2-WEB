@@ -295,6 +295,14 @@ app.MapMethods("/embed/{site}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE",
     async (HttpContext ctx, string site, EmbedSiteProxy proxy, CancellationToken ct) =>
         await proxy.HandleAsync(ctx, site, "", ct));
 
+app.MapWhen(
+    ctx => EmbedSiteProxy.ShouldMirrorThomPath(ctx.Request.Path),
+    branch => branch.Run(async ctx =>
+    {
+        var proxy = ctx.RequestServices.GetRequiredService<EmbedSiteProxy>();
+        await proxy.HandleMirrorAsync(ctx, ctx.RequestAborted);
+    }));
+
 app.MapPlanillasEndpoints();
 
 app.MapFallbackToFile("index.html");

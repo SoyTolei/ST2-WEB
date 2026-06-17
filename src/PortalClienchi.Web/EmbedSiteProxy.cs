@@ -39,16 +39,59 @@ internal sealed class EmbedSiteProxy
         @"^(text/|application/javascript|application/json|application/xml|application/xhtml\+xml)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
+    private const string ThomHost = "css-latam.int.thomsonreuters.com";
+
+    private static readonly string[] ThomMirrorPrefixes =
+    [
+        "/css-tap",
+        "/assets/",
+        "/auth",
+        "/cognito",
+        "/doc-index",
+        "/doc-status",
+        "/feedback",
+        "/file_upload",
+        "/llm-leaderboard",
+        "/executive-llm-leaderboard",
+        "/metaprompting",
+        "/response-data",
+    ];
+
+    public static bool ShouldMirrorThomPath(PathString path)
+    {
+        var value = path.Value ?? "/";
+        foreach (var prefix in ThomMirrorPrefixes)
+        {
+            if (value.Equals(prefix, StringComparison.OrdinalIgnoreCase)
+                || value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
     public static string ToEmbedPath(string absoluteUrl)
     {
         if (!Uri.TryCreate(absoluteUrl, UriKind.Absolute, out var uri))
             return "/";
 
+        if (uri.Host.Equals(ThomHost, StringComparison.OrdinalIgnoreCase))
+            return $"{uri.AbsolutePath}{uri.Query}";
+
         var site = ResolveSite(uri.Host) ?? uri.Host.Split('.')[0].ToLowerInvariant();
         return $"/embed/{site}{uri.AbsolutePath}{uri.Query}";
     }
 
-    public async Task HandleAsync(HttpContext context, string site, string path, CancellationToken ct)
+    public async Task HandleMirrorAsync(HttpContext context, CancellationToken ct)
+    {
+        var path = (context.Request.Path.Value ?? "/").TrimStart('/');
+        await HandleAsync(context, "thom", path, ct, mirrorPaths: true);
+    }
+
+    public async Task HandleAsync(HttpContext context, string site, string path, CancellationToken ct) =>
+        await HandleAsync(context, site, path, ct, mirrorPaths: false);
+
+    private async Task HandleAsync(HttpContext context, string site, string path, CancellationToken ct, bool mirrorPaths)
     {
         if (!SiteBases.TryGetValue(site, out var baseUrl))
         {
@@ -79,12 +122,14 @@ internal sealed class EmbedSiteProxy
 
         context.Response.StatusCode = (int)response.StatusCode;
 
-        CopyResponseHeaders(response, context.Response, site, context.Request.IsHttps);
+        CopyResponseHeaders(response, context.Response, site, context.Request.IsHttps, mirrorPaths);
         ApplyEmbedCorsHeaders(context.Request, context.Response);
 
         if (response.Headers.Location is not null)
         {
-            var rewritten = RewriteUrl(response.Headers.Location.ToString(), site);
+            var rewritten = mirrorPaths
+                ? RewriteMirrorUrl(response.Headers.Location.ToString())
+                : RewriteUrl(response.Headers.Location.ToString(), site);
             context.Response.Headers.Location = rewritten;
         }
 
@@ -94,7 +139,7 @@ internal sealed class EmbedSiteProxy
         if (ShouldRewrite(contentType))
         {
             var text = await response.Content.ReadAsStringAsync(ct);
-            text = RewriteContent(text, site, contentType);
+            text = RewriteContent(text, site, contentType, mirrorPaths);
             var bytes = Encoding.UTF8.GetBytes(text);
             context.Response.ContentLength = bytes.Length;
             await context.Response.Body.WriteAsync(bytes, ct);
@@ -155,7 +200,7 @@ internal sealed class EmbedSiteProxy
                 ? url.TrimEnd('/') + "/"
                 : "https://css-latam.int.thomsonreuters.com/css-tap";
 
-    private static void CopyResponseHeaders(HttpResponseMessage upstream, HttpResponse response, string currentSite, bool isHttps)
+    private static void CopyResponseHeaders(HttpResponseMessage upstream, HttpResponse response, string currentSite, bool isHttps, bool mirrorPaths = false)
     {
         foreach (var header in upstream.Headers)
         {
@@ -166,7 +211,7 @@ internal sealed class EmbedSiteProxy
             if (header.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
             {
                 foreach (var cookie in header.Value)
-                    response.Headers.Append("Set-Cookie", RewriteSetCookie(cookie, currentSite, isHttps));
+                    response.Headers.Append("Set-Cookie", RewriteSetCookie(cookie, currentSite, isHttps, mirrorPaths));
                 continue;
             }
             response.Headers[header.Key] = header.Value.ToArray();
@@ -179,7 +224,7 @@ internal sealed class EmbedSiteProxy
             if (header.Key.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
             {
                 foreach (var cookie in header.Value)
-                    response.Headers.Append("Set-Cookie", RewriteSetCookie(cookie, currentSite, isHttps));
+                    response.Headers.Append("Set-Cookie", RewriteSetCookie(cookie, currentSite, isHttps, mirrorPaths));
                 continue;
             }
             response.Headers[header.Key] = header.Value.ToArray();
@@ -189,15 +234,16 @@ internal sealed class EmbedSiteProxy
         response.Headers.Remove("X-Frame-Options");
     }
 
-    private static string RewriteSetCookie(string setCookie, string site, bool isHttps)
+    private static string RewriteSetCookie(string setCookie, string site, bool isHttps, bool mirrorPaths = false)
     {
         var value = Regex.Replace(setCookie, @";\s*Domain=[^;]*", "", RegexOptions.IgnoreCase);
         value = Regex.Replace(value, @";\s*SameSite=[^;]*", "", RegexOptions.IgnoreCase);
         value = Regex.Replace(value, @";\s*Secure", "", RegexOptions.IgnoreCase);
+        var cookiePath = mirrorPaths ? "/" : "/embed/";
         if (Regex.IsMatch(value, @";\s*Path=", RegexOptions.IgnoreCase))
-            value = Regex.Replace(value, @";\s*Path=[^;]*", "; Path=/embed/", RegexOptions.IgnoreCase);
+            value = Regex.Replace(value, @";\s*Path=[^;]*", $"; Path={cookiePath}", RegexOptions.IgnoreCase);
         else
-            value += "; Path=/embed/";
+            value += $"; Path={cookiePath}";
         value += isHttps ? "; SameSite=None; Secure" : "; SameSite=Lax";
         return value;
     }
@@ -209,8 +255,29 @@ internal sealed class EmbedSiteProxy
         @"redirect_uri=([^&""'\s]+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    private static string RewriteContent(string content, string site, string contentType)
+    private static string RewriteContent(string content, string site, string contentType, bool mirrorPaths)
     {
+        if (mirrorPaths)
+        {
+            if (contentType.Contains("html", StringComparison.OrdinalIgnoreCase))
+            {
+                content = RewriteThomMirrorHostsPreservingOAuth(content);
+                content = StripCrossOriginAttributes(content);
+            }
+            else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
+                     || contentType.Contains("css", StringComparison.OrdinalIgnoreCase))
+            {
+                content = RewriteCloudFrontHosts(content);
+                content = RewriteThomMirrorHostsPreservingOAuth(content);
+            }
+            else
+            {
+                content = RewriteThomMirrorHostsPreservingOAuth(content);
+            }
+
+            return content;
+        }
+
         if (contentType.Contains("html", StringComparison.OrdinalIgnoreCase))
         {
             content = RewriteAbsoluteHostsPreservingOAuth(content);
@@ -301,7 +368,13 @@ internal sealed class EmbedSiteProxy
         return content;
     }
 
-    private static string RewriteAbsoluteHostsPreservingOAuth(string content)
+    private static string RewriteAbsoluteHostsPreservingOAuth(string content) =>
+        RewriteHostsPreservingOAuth(content, RewriteAbsoluteHosts);
+
+    private static string RewriteThomMirrorHostsPreservingOAuth(string content) =>
+        RewriteHostsPreservingOAuth(content, RewriteThomMirrorHosts);
+
+    private static string RewriteHostsPreservingOAuth(string content, Func<string, string> rewriteHosts)
     {
         var tokens = new List<string>();
         content = OAuthRedirectUriRegex.Replace(content, match =>
@@ -310,12 +383,52 @@ internal sealed class EmbedSiteProxy
             return $"__OAUTH_RU_{tokens.Count - 1}__";
         });
 
-        content = RewriteAbsoluteHosts(content);
+        content = rewriteHosts(content);
 
         for (var i = 0; i < tokens.Count; i++)
             content = content.Replace($"__OAUTH_RU_{i}__", tokens[i], StringComparison.Ordinal);
 
         return content;
+    }
+
+    private static string RewriteThomMirrorHosts(string content)
+    {
+        content = content.Replace($"https://{ThomHost}", "", StringComparison.OrdinalIgnoreCase);
+        content = content.Replace($"http://{ThomHost}", "", StringComparison.OrdinalIgnoreCase);
+        content = content.Replace($"//{ThomHost}", "", StringComparison.OrdinalIgnoreCase);
+
+        foreach (var (site, baseUrl) in SiteBases)
+        {
+            if (site.Equals("thom", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var uri = new Uri(baseUrl);
+            var embed = $"/embed/{site}";
+            content = content.Replace(baseUrl, embed, StringComparison.OrdinalIgnoreCase);
+            content = content.Replace(baseUrl.TrimEnd('/'), embed, StringComparison.OrdinalIgnoreCase);
+            content = content.Replace($"https://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
+            content = content.Replace($"http://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
+            content = content.Replace($"//{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return content;
+    }
+
+    private static string RewriteMirrorUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return "/";
+
+        if (Uri.TryCreate(url, UriKind.Absolute, out var absolute))
+        {
+            if (absolute.Host.Equals(ThomHost, StringComparison.OrdinalIgnoreCase))
+                return absolute.PathAndQuery;
+
+            var site = ResolveSite(absolute.Host);
+            return site is null ? url : $"/embed/{site}{absolute.PathAndQuery}";
+        }
+
+        return url;
     }
 
     private static string RewriteAbsoluteHosts(string content)

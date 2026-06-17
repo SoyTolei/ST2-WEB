@@ -609,9 +609,9 @@ function getEmbedFrameUrl(kind) {
     const tap = appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
     try {
       const u = new URL(tap);
-      return `/embed/thom${u.pathname}${u.search}`;
+      return `${u.pathname}${u.search}`;
     } catch {
-      return "/embed/thom/css-tap";
+      return "/css-tap";
     }
   }
   if (kind === "ai") return appConfig?.aiPlatformUrl;
@@ -673,7 +673,7 @@ function loadEmbedFrame(kind, { force = false } = {}) {
 function clearEmbedHint(kind) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (el) el.textContent = kind === "thom"
-    ? "THOM via proxy · VPN activa · si falla el login, «Abrir en navegador»"
+    ? "THOM embebido · VPN activa · el login SSO puede demorar unos segundos"
     : "Sesión corporativa · si no carga, «Abrir en navegador»";
 }
 
@@ -714,14 +714,16 @@ function initEmbedReminders() {
   bindEmbedEngagement(aiFrame, "ai");
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
-    hideThomLoading();
     try {
       const loc = thomFrame.contentWindow?.location?.href ?? "";
-      if (loc.includes("sso.thomsonreuters.com") || loc.includes("login.microsoftonline.com")) {
+      if (loc.includes("sso.thomsonreuters.com") || loc.includes("login.microsoftonline.com") || loc.includes("/embed/cg/")) {
         showThomLoading("Iniciando sesión corporativa…");
         setEmbedHint("thom", "Iniciando sesión corporativa… Si se queda en blanco, conectá VPN y usá «Abrir en navegador».");
-      } else if (loc.includes("/embed/cg/")) {
-        showThomLoading("Redirigiendo al login…");
+        return;
+      }
+      hideThomLoading();
+      if (loc.includes("/css-tap") || loc.includes("css-latam.int.thomsonreuters.com")) {
+        clearEmbedHint("thom");
       }
     } catch {
       hideThomLoading();
