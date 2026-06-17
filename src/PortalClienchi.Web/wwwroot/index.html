@@ -896,9 +896,10 @@
       <p class="embed-hint" id="thomEmbedHint">THOM · VPN en tu PC</p>
       <div class="embed-frame-wrap">
         <div id="thomDirectGate" class="embed-direct-gate hidden" aria-live="polite">
-          <p><strong>THOM en la versión web</strong></p>
-          <p>El login corporativo (<code>sso.thomsonreuters.com</code>) <strong>no puede completarse dentro del panel</strong>. Aunque inicies sesión en otra pestaña, el iframe vuelve a redirigir al SSO y falla.</p>
-          <p>En la web, THOM se abre en <strong>ventana o pestaña aparte</strong> (con VPN activa). El panel embebido funciona en <strong>localhost</strong>, donde el servidor tiene proxy con VPN.</p>
+          <p><strong>THOM embebido en la versión web</strong></p>
+          <p>Para ver THOM <strong>dentro de esta pestaña</strong> (como en localhost), Railway necesita un proxy con VPN. Configurá en el servidor:</p>
+          <p><code>THOM_PROXY_BASE_URL</code> = URL del túnel desde tu PC con VPN (script <code>scripts/start-thom-tunnel.ps1</code>).</p>
+          <p>Mientras tanto, usá el botón de abajo para abrir THOM en ventana aparte.</p>
           <div class="embed-direct-gate-actions">
             <button type="button" id="thomGateOpenBtn" class="btn btn-primary">Abrir THOM</button>
           </div>

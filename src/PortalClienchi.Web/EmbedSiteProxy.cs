@@ -181,12 +181,7 @@ internal sealed class EmbedSiteProxy
 
     private static HttpClient CreateClient()
     {
-        var handler = new SocketsHttpHandler
-        {
-            AllowAutoRedirect = false,
-            AutomaticDecompression = DecompressionMethods.All,
-            UseCookies = false,
-        };
+        var handler = ThomUpstreamHttp.CreateHandler(allowAutoRedirect: false);
         return new HttpClient(handler)
         {
             Timeout = TimeSpan.FromMinutes(3),

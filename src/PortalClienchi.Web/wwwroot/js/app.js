@@ -623,8 +623,23 @@ function getEmbedFrameUrl(kind) {
   return null;
 }
 
+function isThomWindowMode() {
+  const mode = appConfig?.thomEmbedMode;
+  return mode === "window" || mode === "direct";
+}
+
+function isThomRemoteProxy() {
+  return appConfig?.thomEmbedMode === "proxy-remote";
+}
+
+function isThomEmbeddedProxy() {
+  const mode = appConfig?.thomEmbedMode;
+  return mode === "proxy" || mode === "proxy-remote";
+}
+
+/** @deprecated use isThomWindowMode */
 function isThomDirectEmbed() {
-  return appConfig?.thomEmbedMode === "direct";
+  return isThomWindowMode();
 }
 
 function getThomTapUrl() {
@@ -632,22 +647,24 @@ function getThomTapUrl() {
 }
 
 function updateThomDirectUi() {
-  const direct = isThomDirectEmbed();
-  thomSsoBtn?.classList.toggle("hidden", !direct);
-  document.getElementById("thomReloadBtn")?.classList.toggle("hidden", direct);
+  const windowMode = isThomWindowMode();
+  const embedded = isThomEmbeddedProxy();
+  thomSsoBtn?.classList.toggle("hidden", !windowMode);
+  document.getElementById("thomReloadBtn")?.classList.toggle("hidden", windowMode);
   const openBtn = document.getElementById("thomOpenBtn");
   if (openBtn) {
-    openBtn.classList.toggle("hidden", direct);
+    openBtn.classList.toggle("hidden", windowMode);
     openBtn.textContent = "Abrir en navegador";
   }
-  if (thomSsoBtn && direct) thomSsoBtn.textContent = "Abrir THOM";
-  thomFrame?.classList.toggle("hidden", direct);
+  if (thomSsoBtn && windowMode) thomSsoBtn.textContent = "Abrir THOM";
+  thomFrame?.classList.toggle("hidden", windowMode);
+  thomDirectGate?.classList.toggle("hidden", embedded || !windowMode);
 }
 
 function showThomDirectGate() {
   thomDirectGate?.classList.remove("hidden");
   hideThomLoading();
-  setEmbedHint("thom", "Versión web: THOM se abre en ventana aparte (SSO no admite panel embebido).");
+  setEmbedHint("thom", "Configurá THOM_PROXY_BASE_URL en Railway para embeber, o usá «Abrir THOM».");
 }
 
 function hideThomDirectGate() {
@@ -668,16 +685,18 @@ function resetThomDirectFrame() {
 }
 
 function activateThomTab() {
-  if (!isThomDirectEmbed()) {
+  updateThomDirectUi();
+  if (isThomEmbeddedProxy()) {
     hideThomDirectGate();
     thomFrame?.classList.remove("hidden");
     loadEmbedFrame("thom");
     return;
   }
-  updateThomDirectUi();
-  resetThomDirectFrame();
-  hideThomLoading();
-  showThomDirectGate();
+  if (isThomWindowMode()) {
+    resetThomDirectFrame();
+    hideThomLoading();
+    showThomDirectGate();
+  }
 }
 
 function isEmbedFrameEmpty(frame) {
@@ -748,9 +767,14 @@ function scheduleThomBlankCheck(delayMs = 12000) {
   clearTimeout(thomBlankTimer);
   thomBlankTimer = setTimeout(() => {
     if (thomRendered) return;
-    if (isThomDirectEmbed()) {
+    if (isThomWindowMode()) {
       hideThomLoading();
       showThomDirectGate();
+      return;
+    }
+    if (isThomRemoteProxy()) {
+      hideThomLoading();
+      setEmbedHint("thom", "THOM tarda más de lo normal. Verificá que el túnel VPN siga activo.");
       return;
     }
     thomBlankAttempts += 1;
@@ -790,7 +814,7 @@ function onThomEmbedMessage(event) {
   if (event.source !== thomFrame?.contentWindow) return;
   const data = event.data;
   if (!data || data.type !== "st2-thom-state") return;
-  if (isThomDirectEmbed()) return;
+  if (isThomWindowMode() || isThomRemoteProxy()) return;
 
   thomBridgeAlive = true;
 
@@ -817,7 +841,7 @@ function onThomEmbedMessage(event) {
 
 function loadEmbedFrame(kind, { force = false } = {}) {
   const frame = kind === "thom" ? thomFrame : aiFrame;
-  if (kind === "thom" && isThomDirectEmbed()) return;
+  if (kind === "thom" && isThomWindowMode()) return;
   const url = getEmbedFrameUrl(kind);
   if (!frame || !url) return;
   if (!force && !needsEmbedReload(frame, url)) return;
@@ -827,7 +851,7 @@ function loadEmbedFrame(kind, { force = false } = {}) {
     resetThomEmbedState();
     hideThomDirectGate();
     showThomLoading();
-    if (!isThomDirectEmbed()) scheduleThomBlankCheck();
+    if (!isThomWindowMode()) scheduleThomBlankCheck();
   }
   frame.src = url;
 }
@@ -835,9 +859,11 @@ function loadEmbedFrame(kind, { force = false } = {}) {
 function clearEmbedHint(kind) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (el) el.textContent = kind === "thom"
-    ? (isThomDirectEmbed()
-      ? "Versión web: usá «Abrir THOM» (ventana aparte, VPN activa)"
-      : "THOM embebido · VPN activa · el login SSO puede demorar unos segundos")
+    ? (isThomEmbeddedProxy()
+      ? (isThomRemoteProxy()
+        ? "THOM embebido · proxy VPN remoto (túnel)"
+        : "THOM embebido · VPN activa · el login SSO puede demorar unos segundos")
+      : "Configurá THOM_PROXY_BASE_URL en Railway o usá «Abrir THOM»")
     : "Sesión corporativa · si no carga, «Abrir en navegador»";
 }
 
@@ -879,7 +905,12 @@ function initEmbedReminders() {
   window.addEventListener("message", onThomEmbedMessage);
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
-    if (isThomDirectEmbed()) return;
+    if (isThomWindowMode()) return;
+    if (isThomRemoteProxy()) {
+      hideThomLoading();
+      setEmbedHint("thom", "THOM embebido vía proxy VPN remoto.");
+      return;
+    }
     if (thomRendered) {
       hideThomLoading();
       return;
@@ -892,7 +923,7 @@ function initEmbedReminders() {
 document.getElementById("thomSsoBtn")?.addEventListener("click", openThomWindow);
 document.getElementById("thomGateOpenBtn")?.addEventListener("click", openThomWindow);
 document.getElementById("thomReloadBtn").addEventListener("click", () => {
-  if (isThomDirectEmbed()) {
+  if (isThomWindowMode()) {
     openThomWindow();
     return;
   }
