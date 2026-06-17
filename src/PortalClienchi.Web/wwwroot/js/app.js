@@ -757,9 +757,8 @@ function scheduleThomBlankCheck(delayMs = 12000) {
     if (thomRendered) return;
     if (isThomDirectEmbed()) {
       hideThomLoading();
-      markThomDirectReady();
-      hideThomDirectGate();
-      setEmbedHint("thom", "THOM cargado. Si ves error de SSO, usá «Iniciar sesión» y después «Recargar».");
+      showThomDirectGate();
+      setEmbedHint("thom", "Si ves error de SSO, usá «Iniciar sesión corporativo» y después «Cargar THOM en panel».");
       return;
     }
     thomBlankAttempts += 1;
