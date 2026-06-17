@@ -655,36 +655,38 @@ function getThomTapUrl() {
 let thomPopup = null;
 let thomPopupResizeTimer = null;
 
-/** Barra de título del popup hijo (sin barra de URL). */
-const THOM_POPUP_CHROME_HEIGHT = 42;
+/** Fallback si no se puede medir el chrome del popup hijo. */
+const THOM_POPUP_CHROME_HEIGHT = 40;
 
-/** Convierte coordenadas del área útil de ST2 a pantalla (incluye chrome del navegador). */
-function clientToScreen(x, y) {
+function measureThomPopupChrome(popup = thomPopup) {
+  if (!popup || popup.closed) return THOM_POPUP_CHROME_HEIGHT;
+  try {
+    const measured = popup.outerHeight - popup.innerHeight;
+    if (Number.isFinite(measured) && measured > 20 && measured < 160) return measured;
+  } catch {
+    // Tras navegar a THOM puede quedar cross-origin.
+  }
+  return THOM_POPUP_CHROME_HEIGHT;
+}
+
+function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_HEIGHT) {
+  const tabBar = document.querySelector(".tab-bar");
+  const toolbar = document.querySelector("#panel-thom .embed-toolbar");
+  const tabRect = tabBar?.getBoundingClientRect();
+  if (!tabRect) {
+    return { top: 160, left: 0, width: 1100, height: 720 };
+  }
+  // Pestañas ST2 visibles arriba; el popup cubre toolbar + panel THOM.
+  const toolbarTop = toolbar?.getBoundingClientRect().top;
+  const viewportTop = Math.round(toolbarTop ?? tabRect.bottom + 10);
+  const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop + 6));
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
   return {
-    left: Math.round(window.screenX + chromeLeft + x),
-    top: Math.round(window.screenY + chromeTop + y),
-  };
-}
-
-function getThomPanelRect() {
-  const tabBar = document.querySelector(".tab-bar");
-  const tabRect = tabBar?.getBoundingClientRect();
-  if (!tabRect) {
-    return { top: 140, left: 0, width: 1100, height: 700 };
-  }
-  // Debajo de las pestañas ST2 (Planillas, Portal, THOM, AI) — siempre visibles.
-  const viewportTop = Math.round(tabRect.bottom + 6);
-  const viewportLeft = 0;
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop));
-  const screen = clientToScreen(viewportLeft, viewportTop);
-  return {
-    top: screen.top,
-    left: screen.left,
-    width: Math.max(480, viewportWidth),
-    height: viewportHeight + THOM_POPUP_CHROME_HEIGHT,
+    top: Math.round(window.screenY + chromeTop + viewportTop),
+    left: Math.round(window.screenX + chromeLeft),
+    width: Math.max(480, Math.round(window.innerWidth)),
+    height: viewportHeight + popupChrome,
   };
 }
 
@@ -694,18 +696,19 @@ function buildThomPopupFeatures(rect) {
     `top=${rect.top}`,
     `width=${rect.width}`,
     `height=${rect.height}`,
+    "popup=yes",
     "resizable=yes",
-    "scrollbars=yes",
-    "toolbar=no",
-    "menubar=no",
-    "location=no",
-    "status=no",
+    "scrollbars=1",
+    "toolbar=0",
+    "menubar=0",
+    "location=0",
+    "status=0",
   ].join(",");
 }
 
 function repositionThomPopup() {
   if (!thomPopup || thomPopup.closed || !isThomWindowMode()) return;
-  const rect = getThomPanelRect();
+  const rect = getThomPanelRect(measureThomPopupChrome());
   try {
     thomPopup.moveTo(rect.left, rect.top);
     thomPopup.resizeTo(rect.width, rect.height);
@@ -722,7 +725,7 @@ function scheduleThomPopupReposition() {
 function alignThomPopupAfterOpen() {
   repositionThomPopup();
   scheduleThomPopupReposition();
-  [80, 280, 700].forEach((ms) => setTimeout(repositionThomPopup, ms));
+  [60, 150, 350, 700, 1200].forEach((ms) => setTimeout(repositionThomPopup, ms));
 }
 
 function shouldAutoCloseThomHelp() {
@@ -806,8 +809,6 @@ function hideThomDirectGate() {
 
 function openThomWindow({ reload = false } = {}) {
   const url = getThomTapUrl();
-  const rect = getThomPanelRect();
-  const features = buildThomPopupFeatures(rect);
   const popupName = "st2ThomPanel";
 
   if (!reload && thomPopup && !thomPopup.closed) {
@@ -818,11 +819,25 @@ function openThomWindow({ reload = false } = {}) {
     return thomPopup;
   }
 
-  thomPopup = window.open(url, popupName, features);
+  if (thomPopup?.closed) thomPopup = null;
+
+  const rect = getThomPanelRect();
+  const features = buildThomPopupFeatures(rect);
+
+  // about:blank primero: fija posición/tamaño igual en cada apertura.
+  thomPopup = window.open("about:blank", popupName, features);
   if (!thomPopup) {
     window.open(url, "_blank", "noopener");
     setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
     return null;
+  }
+
+  alignThomPopupAfterOpen();
+
+  try {
+    thomPopup.location.replace(url);
+  } catch {
+    thomPopup.location.href = url;
   }
 
   thomPopup.focus();
