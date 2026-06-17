@@ -655,26 +655,39 @@ function getThomTapUrl() {
 let thomPopup = null;
 let thomPopupResizeTimer = null;
 
+/** Barra de título + URL del popup (Edge/Chrome) para que el contenido cubra el panel. */
+const THOM_POPUP_CHROME_HEIGHT = 78;
+
+function viewportToScreenPoint(left, top) {
+  const vv = window.visualViewport;
+  const offsetX = vv?.offsetLeft ?? 0;
+  const offsetY = vv?.offsetTop ?? 0;
+  return {
+    left: Math.max(0, Math.round(window.screenX + left + offsetX)),
+    top: Math.max(0, Math.round(window.screenY + top + offsetY)),
+  };
+}
+
 function getThomPanelRect() {
   const panel = document.getElementById("panel-thom");
   const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
-  const toolbar = document.querySelector("#panel-thom .embed-toolbar");
   const tabBar = document.querySelector(".tab-bar");
+  const shell = document.querySelector(".main-shell");
   if (!panel || !wrap) {
     return { top: 120, left: 120, width: 1100, height: 640 };
   }
-  const panelRect = panel.getBoundingClientRect();
   const wrapRect = wrap.getBoundingClientRect();
-  const tabBottom = tabBar?.getBoundingClientRect().bottom ?? panelRect.top;
-  const toolbarTop = toolbar?.getBoundingClientRect().top ?? panelRect.top;
-  // Cubre botones del panel pero nunca tapa las pestañas ST2 de arriba.
-  const viewportTop = Math.max(tabBottom + 2, toolbarTop);
-  const height = Math.max(420, Math.round(wrapRect.bottom - viewportTop));
+  const tabRect = tabBar?.getBoundingClientRect();
+  const shellRect = shell?.getBoundingClientRect() ?? panel.getBoundingClientRect();
+  // Justo debajo de las pestañas ST2 (como al acomodar la ventana a mano).
+  const viewportTop = (tabRect?.bottom ?? wrapRect.top) + 4;
+  const contentHeight = Math.max(420, Math.round(wrapRect.bottom - viewportTop));
+  const screen = viewportToScreenPoint(shellRect.left, viewportTop);
   return {
-    top: Math.max(0, Math.round(window.screenY + viewportTop)),
-    left: Math.max(0, Math.round(window.screenX + panelRect.left)),
-    width: Math.max(480, Math.round(panelRect.width)),
-    height,
+    top: screen.top,
+    left: screen.left,
+    width: Math.max(480, Math.round(shellRect.width)),
+    height: contentHeight + THOM_POPUP_CHROME_HEIGHT,
   };
 }
 
@@ -707,6 +720,12 @@ function repositionThomPopup() {
 function scheduleThomPopupReposition() {
   clearTimeout(thomPopupResizeTimer);
   thomPopupResizeTimer = setTimeout(repositionThomPopup, 120);
+}
+
+function alignThomPopupAfterOpen() {
+  repositionThomPopup();
+  scheduleThomPopupReposition();
+  [80, 280, 700].forEach((ms) => setTimeout(repositionThomPopup, ms));
 }
 
 function shouldAutoCloseThomHelp() {
@@ -796,7 +815,7 @@ function openThomWindow({ reload = false } = {}) {
 
   if (!reload && thomPopup && !thomPopup.closed) {
     thomPopup.focus();
-    repositionThomPopup();
+    alignThomPopupAfterOpen();
     updateThomDirectUi();
     setEmbedHint("thom", "THOM activo sobre el panel. Usá «Enfocar THOM» si quedó detrás.");
     return thomPopup;
@@ -812,6 +831,7 @@ function openThomWindow({ reload = false } = {}) {
   thomPopup.focus();
   showThomPanelPlaceholder();
   updateThomDirectUi();
+  alignThomPopupAfterOpen();
   scheduleThomHelpCollapse(thomPopup);
   setEmbedHint("thom", "THOM abierto en este espacio. Mantené VPN activa.");
   return thomPopup;
@@ -1065,7 +1085,7 @@ document.getElementById("thomReloadBtn").addEventListener("click", () => {
     if (thomPopup && !thomPopup.closed) {
       try { thomPopup.location.reload(); } catch { openThomWindow({ reload: true }); }
       thomPopup.focus();
-      repositionThomPopup();
+      alignThomPopupAfterOpen();
     } else {
       openThomWindow({ reload: true });
     }
