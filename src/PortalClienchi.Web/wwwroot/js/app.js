@@ -657,29 +657,32 @@ let thomPopupResizeTimer = null;
 
 /** Fallback si no se puede medir el chrome del popup hijo. */
 const THOM_POPUP_CHROME_HEIGHT = 40;
+/** Edge suele agregar barra de URL al navegar a css-latam (antes de poder medir). */
+const THOM_POPUP_CHROME_WITH_URL = 84;
 
 function measureThomPopupChrome(popup = thomPopup) {
-  if (!popup || popup.closed) return THOM_POPUP_CHROME_HEIGHT;
+  if (!popup || popup.closed) return THOM_POPUP_CHROME_WITH_URL;
   try {
     const measured = popup.outerHeight - popup.innerHeight;
     if (Number.isFinite(measured) && measured > 20 && measured < 160) return measured;
   } catch {
     // Tras navegar a THOM puede quedar cross-origin.
   }
-  return THOM_POPUP_CHROME_HEIGHT;
+  return THOM_POPUP_CHROME_WITH_URL;
 }
 
-function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_HEIGHT) {
+function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabBar = document.querySelector(".tab-bar");
   const toolbar = document.querySelector("#panel-thom .embed-toolbar");
   const tabRect = tabBar?.getBoundingClientRect();
   if (!tabRect) {
     return { top: 160, left: 0, width: 1100, height: 720 };
   }
-  // Pestañas ST2 visibles arriba; el popup cubre toolbar + panel THOM.
+  const tabFloor = Math.round(tabRect.bottom + 8);
   const toolbarTop = toolbar?.getBoundingClientRect().top;
-  const viewportTop = Math.round(toolbarTop ?? tabRect.bottom + 10);
-  const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop + 6));
+  // Nunca por encima de las pestañas ST2; cubre toolbar + panel.
+  const viewportTop = Math.round(Math.max(tabFloor, toolbarTop ?? tabFloor));
+  const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop + 18));
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
   return {
@@ -722,10 +725,26 @@ function scheduleThomPopupReposition() {
   thomPopupResizeTimer = setTimeout(repositionThomPopup, 120);
 }
 
-function alignThomPopupAfterOpen() {
+function alignThomPopupAfterOpen({ afterNavigate = false } = {}) {
   repositionThomPopup();
   scheduleThomPopupReposition();
-  [60, 150, 350, 700, 1200].forEach((ms) => setTimeout(repositionThomPopup, ms));
+  const delays = afterNavigate
+    ? [80, 200, 450, 900, 1500, 2200, 3200]
+    : [60, 150, 350, 700, 1200];
+  delays.forEach((ms) => setTimeout(repositionThomPopup, ms));
+}
+
+function watchThomPopupLoad(popup) {
+  if (!popup || popup.closed) return;
+  const onLoad = () => {
+    repositionThomPopup();
+    alignThomPopupAfterOpen({ afterNavigate: true });
+  };
+  try {
+    popup.addEventListener("load", onLoad);
+  } catch {
+    // ignore
+  }
 }
 
 function shouldAutoCloseThomHelp() {
@@ -821,31 +840,37 @@ function openThomWindow({ reload = false } = {}) {
 
   if (thomPopup?.closed) thomPopup = null;
 
-  const rect = getThomPanelRect();
-  const features = buildThomPopupFeatures(rect);
+  const openPopup = () => {
+    const rect = getThomPanelRect();
+    const features = buildThomPopupFeatures(rect);
 
-  // about:blank primero: fija posición/tamaño igual en cada apertura.
-  thomPopup = window.open("about:blank", popupName, features);
-  if (!thomPopup) {
-    window.open(url, "_blank", "noopener");
-    setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
-    return null;
-  }
+    thomPopup = window.open("about:blank", popupName, features);
+    if (!thomPopup) {
+      window.open(url, "_blank", "noopener");
+      setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
+      return null;
+    }
 
-  alignThomPopupAfterOpen();
+    watchThomPopupLoad(thomPopup);
+    alignThomPopupAfterOpen();
 
-  try {
-    thomPopup.location.replace(url);
-  } catch {
-    thomPopup.location.href = url;
-  }
+    try {
+      thomPopup.location.replace(url);
+    } catch {
+      thomPopup.location.href = url;
+    }
 
-  thomPopup.focus();
-  showThomPanelPlaceholder();
-  updateThomDirectUi();
-  alignThomPopupAfterOpen();
-  scheduleThomHelpCollapse(thomPopup);
-  setEmbedHint("thom", "THOM abierto en este espacio. Mantené VPN activa.");
+    thomPopup.focus();
+    showThomPanelPlaceholder();
+    updateThomDirectUi();
+    alignThomPopupAfterOpen({ afterNavigate: true });
+    scheduleThomHelpCollapse(thomPopup);
+    setEmbedHint("thom", "THOM abierto en este espacio. Mantené VPN activa.");
+    return thomPopup;
+  };
+
+  // Esperar un frame para que el layout de pestañas (embed-active) esté medido.
+  requestAnimationFrame(() => requestAnimationFrame(openPopup));
   return thomPopup;
 }
 
