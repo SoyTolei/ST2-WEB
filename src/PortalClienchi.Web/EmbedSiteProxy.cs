@@ -13,7 +13,7 @@ internal sealed class EmbedSiteProxy
     public EmbedSiteProxy(AppSettings settings)
     {
         _autoCloseThomHelpPanel = settings.ThomAutoCloseHelpPanel;
-        _thomZoomFactor = settings.ThomZoomFactor is > 0.25 and < 2 ? settings.ThomZoomFactor : 0.88;
+        _thomZoomFactor = settings.ThomZoomFactor is > 0.25 and < 2 ? settings.ThomZoomFactor : 0.78;
     }
 
     private static readonly HttpClient Http = CreateClient();
@@ -78,6 +78,7 @@ internal sealed class EmbedSiteProxy
         "/st2.ico",
         "/css/styles.css",
         "/css/planillas.css",
+        "/thom-viewer.html",
     ];
 
     public static bool ShouldMirrorThomPath(PathString path) =>

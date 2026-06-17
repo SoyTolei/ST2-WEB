@@ -652,25 +652,31 @@ function getThomTapUrl() {
   return external;
 }
 
+/** URL del visor popup (mismo origen) con zoom sobre el iframe de THOM. */
+function getThomPopupUrl() {
+  const target = getThomTapUrl();
+  const z = getEmbedZoom("thom");
+  return `${location.origin}/thom-viewer.html?z=${encodeURIComponent(z)}&u=${encodeURIComponent(target)}`;
+}
+
 let thomPopup = null;
 let thomPopupResizeTimer = null;
 
-/** Deja visibles las pestañas ST2 y la barra de opciones detrás del popup. */
-const THOM_POPUP_HEIGHT_TRIM = 80;
-
 function getThomPanelRect() {
+  const panel = document.getElementById("panel-thom");
   const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
-  if (!wrap) {
-    return { top: 120, left: 120, width: 1100, height: 560 };
+  if (!panel || !wrap) {
+    return { top: 120, left: 120, width: 1100, height: 640 };
   }
-  const rect = wrap.getBoundingClientRect();
+  const panelRect = panel.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = window.outerWidth - window.innerWidth;
-  const height = Math.max(400, Math.round(rect.height - THOM_POPUP_HEIGHT_TRIM));
+  const height = Math.max(420, Math.round(wrapRect.bottom - panelRect.top));
   return {
-    top: Math.max(0, Math.round(window.screenY + chromeTop + rect.top)),
-    left: Math.max(0, Math.round(window.screenX + chromeLeft + rect.left)),
-    width: Math.max(480, Math.round(rect.width)),
+    top: Math.max(0, Math.round(window.screenY + chromeTop + panelRect.top)),
+    left: Math.max(0, Math.round(window.screenX + chromeLeft + panelRect.left)),
+    width: Math.max(480, Math.round(panelRect.width)),
     height,
   };
 }
@@ -713,13 +719,26 @@ function shouldAutoCloseThomHelp() {
 function requestThomHelpCollapse(targetWindow) {
   if (!shouldAutoCloseThomHelp() || !targetWindow) return false;
   try {
+    const frame = targetWindow.document?.querySelector?.("iframe");
+    if (frame?.contentWindow) {
+      frame.contentWindow.postMessage({ type: "st2-collapse-help" }, "*");
+      const btn = frame.contentDocument?.querySelector?.('button[class*="panelOpened"]');
+      if (btn) {
+        btn.click();
+        return true;
+      }
+    }
+  } catch {
+    // iframe cross-origin
+  }
+  try {
     const btn = targetWindow.document?.querySelector?.('button[class*="panelOpened"]');
     if (btn) {
       btn.click();
       return true;
     }
   } catch {
-    // Ventana cross-origin (THOM directo en web pública).
+    // Ventana cross-origin
   }
   try {
     targetWindow.postMessage({ type: "st2-collapse-help" }, "*");
@@ -786,7 +805,7 @@ function hideThomDirectGate() {
 }
 
 function openThomWindow({ reload = false } = {}) {
-  const url = getThomTapUrl();
+  const url = getThomPopupUrl();
   const rect = getThomPanelRect();
   const features = buildThomPopupFeatures(rect);
   const popupName = "st2ThomPanel";
@@ -854,7 +873,7 @@ function needsEmbedReload(frame, url) {
 function getEmbedZoom(kind) {
   const zoom = kind === "thom" ? appConfig?.thomZoomFactor : appConfig?.aiPlatformZoomFactor;
   if (typeof zoom === "number" && zoom > 0.25 && zoom < 2) return zoom;
-  return 0.88;
+  return 0.78;
 }
 
 function applyEmbedZoom(kind) {
