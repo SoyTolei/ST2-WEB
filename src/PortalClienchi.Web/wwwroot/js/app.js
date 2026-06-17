@@ -671,27 +671,51 @@ function measureThomPopupChrome(popup = thomPopup) {
   return THOM_POPUP_CHROME_WITH_URL;
 }
 
-/** Ajuste fino: borde superior del popup justo bajo .tab-bar */
-const THOM_POPUP_TAB_BOTTOM_NUDGE = 4;
-/** Compensa chrome del navegador padre (Edge) al convertir a coordenadas de pantalla. */
-const THOM_POPUP_SCREEN_NUDGE = 8;
+function getParentBrowserChromeTop() {
+  const measured = window.outerHeight - window.innerHeight;
+  if (Number.isFinite(measured) && measured >= 40) return measured;
+  // Edge a veces reporta outer≈inner; screenY queda en el borde exterior.
+  return 92;
+}
+
+function clientToScreen(clientX, clientY) {
+  const chromeTop = getParentBrowserChromeTop();
+  const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
+  const vv = window.visualViewport;
+  const left = window.screenX + (vv?.offsetLeft ?? chromeLeft) + clientX;
+  // Con chrome visible, screenY ya suele ser el tope del viewport.
+  const top =
+    chromeTop >= 40 && measuredChromeLooksLikeViewport()
+      ? window.screenY + (vv?.offsetTop ?? 0) + clientY
+      : window.screenY + chromeTop + clientY;
+  return { left: Math.round(left), top: Math.round(top) };
+}
+
+function measuredChromeLooksLikeViewport() {
+  const measured = window.outerHeight - window.innerHeight;
+  return Number.isFinite(measured) && measured >= 40;
+}
 
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabBar = document.querySelector(".tab-bar");
+  const toolbar = document.querySelector("#panel-thom .embed-toolbar");
   const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
   const tabRect = tabBar?.getBoundingClientRect();
   if (!tabRect) {
     return { top: 160, left: 0, width: 1100, height: 640 };
   }
+  const toolbarTop = toolbar?.getBoundingClientRect().top;
   const wrapRect = wrap?.getBoundingClientRect();
-  const viewportTop = Math.round(tabRect.bottom + THOM_POPUP_TAB_BOTTOM_NUDGE);
+  const tabClearance = Math.round(tabRect.bottom + 10);
+  const viewportTop = Math.round(
+    toolbarTop && toolbarTop > tabRect.bottom ? toolbarTop : tabClearance
+  );
   const viewportBottom = wrapRect?.bottom ?? window.innerHeight;
-  const viewportHeight = Math.max(380, Math.round(viewportBottom - viewportTop - 12));
-  const chromeTop = window.outerHeight - window.innerHeight;
-  const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
+  const viewportHeight = Math.max(380, Math.round(viewportBottom - viewportTop - 10));
+  const screen = clientToScreen(0, viewportTop);
   return {
-    top: Math.round(window.screenY + chromeTop + viewportTop + THOM_POPUP_SCREEN_NUDGE),
-    left: Math.round(window.screenX + chromeLeft),
+    top: screen.top,
+    left: screen.left,
     width: Math.max(480, Math.round(window.innerWidth)),
     height: viewportHeight + popupChrome,
   };
