@@ -135,6 +135,7 @@ app.MapGet("/api/app-config", (AppSettings settings, ThomEmbedConfig thomEmbed) 
     settings.PortalBaseUrl,
     thomZoomFactor = settings.ThomZoomFactor,
     aiPlatformZoomFactor = settings.AiPlatformZoomFactor,
+    thomAutoCloseHelpPanel = settings.ThomAutoCloseHelpPanel,
     thomEmbedMode = thomEmbed.Mode,
     thomFrameUrl = thomEmbed.FrameUrl,
     thomProxyReachable = thomEmbed.ProxyReachable,

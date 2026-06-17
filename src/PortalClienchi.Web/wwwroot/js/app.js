@@ -658,19 +658,37 @@ let thomPopupResizeTimer = null;
 /** Deja visibles las pestañas ST2 y la barra de opciones detrás del popup. */
 const THOM_POPUP_HEIGHT_TRIM = 80;
 
+function getThomPopupScale() {
+  const zoom = appConfig?.thomZoomFactor;
+  if (typeof zoom === "number" && zoom > 0.5 && zoom <= 1) return zoom;
+  return 0.75;
+}
+
 function getThomPanelRect() {
   const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
   if (!wrap) {
-    return { top: 120, left: 120, width: 1100, height: 560 };
+    const scale = getThomPopupScale();
+    return {
+      top: 120,
+      left: 120,
+      width: Math.round(1100 * scale),
+      height: Math.round(560 * scale),
+    };
   }
   const rect = wrap.getBoundingClientRect();
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = window.outerWidth - window.innerWidth;
-  const height = Math.max(360, Math.round(rect.height - THOM_POPUP_HEIGHT_TRIM));
+  const scale = getThomPopupScale();
+  const fullWidth = Math.round(rect.width);
+  const fullHeight = Math.max(360, Math.round(rect.height - THOM_POPUP_HEIGHT_TRIM));
+  const width = Math.max(400, Math.round(fullWidth * scale));
+  const height = Math.max(320, Math.round(fullHeight * scale));
+  const leftPad = Math.round((fullWidth - width) / 2);
+  const topPad = Math.round((fullHeight - height) / 2);
   return {
-    top: Math.max(0, Math.round(window.screenY + chromeTop + rect.top)),
-    left: Math.max(0, Math.round(window.screenX + chromeLeft + rect.left)),
-    width: Math.max(480, Math.round(rect.width)),
+    top: Math.max(0, Math.round(window.screenY + chromeTop + rect.top + topPad)),
+    left: Math.max(0, Math.round(window.screenX + chromeLeft + rect.left + leftPad)),
+    width,
     height,
   };
 }
@@ -704,6 +722,55 @@ function repositionThomPopup() {
 function scheduleThomPopupReposition() {
   clearTimeout(thomPopupResizeTimer);
   thomPopupResizeTimer = setTimeout(repositionThomPopup, 120);
+}
+
+function shouldAutoCloseThomHelp() {
+  return appConfig?.thomAutoCloseHelpPanel !== false;
+}
+
+function requestThomHelpCollapse(targetWindow) {
+  if (!shouldAutoCloseThomHelp() || !targetWindow) return false;
+  try {
+    const btn = targetWindow.document?.querySelector?.('button[class*="panelOpened"]');
+    if (btn) {
+      btn.click();
+      return true;
+    }
+  } catch {
+    // Ventana cross-origin (THOM directo en web pública).
+  }
+  try {
+    targetWindow.postMessage({ type: "st2-collapse-help" }, "*");
+  } catch {
+    // ignore
+  }
+  return false;
+}
+
+function scheduleThomHelpCollapse(targetWindow = thomPopup) {
+  if (!shouldAutoCloseThomHelp() || !targetWindow) return;
+  let tries = 0;
+  const tick = () => {
+    if (!targetWindow || targetWindow.closed) return;
+    if (requestThomHelpCollapse(targetWindow) || ++tries > 80) return;
+    setTimeout(tick, 300);
+  };
+  tick();
+}
+
+function closeThomPopup() {
+  if (!thomPopup || thomPopup.closed) {
+    thomPopup = null;
+    updateThomDirectUi();
+    return;
+  }
+  try {
+    thomPopup.close();
+  } catch {
+    // ignore
+  }
+  thomPopup = null;
+  updateThomDirectUi();
 }
 
 function updateThomDirectUi() {
@@ -760,6 +827,7 @@ function openThomWindow({ reload = false } = {}) {
   thomPopup.focus();
   showThomPanelPlaceholder();
   updateThomDirectUi();
+  scheduleThomHelpCollapse(thomPopup);
   setEmbedHint("thom", "THOM abierto en este espacio. Mantené VPN activa.");
   return thomPopup;
 }
@@ -804,7 +872,7 @@ function needsEmbedReload(frame, url) {
 function getEmbedZoom(kind) {
   const zoom = kind === "thom" ? appConfig?.thomZoomFactor : appConfig?.aiPlatformZoomFactor;
   if (typeof zoom === "number" && zoom > 0.25 && zoom < 2) return zoom;
-  return 0.82;
+  return 0.75;
 }
 
 function applyEmbedZoom(kind) {
@@ -909,6 +977,7 @@ function onThomEmbedMessage(event) {
     hideThomLoading();
     clearEmbedHint("thom");
     clearTimeout(thomBlankTimer);
+    scheduleThomHelpCollapse(thomFrame?.contentWindow);
     return;
   }
 
@@ -970,6 +1039,10 @@ function switchTab(tabId) {
 
   statusBar.classList.toggle("hidden", tabId !== "portal");
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
+
+  if (tabId !== "thom" && isThomWindowMode()) {
+    closeThomPopup();
+  }
 
   stopEngagementTimer();
   if (tabId === "thom") {

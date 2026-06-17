@@ -302,6 +302,8 @@ internal sealed class EmbedSiteProxy
             {
                 content = RewriteCloudFrontHosts(content);
                 content = RewriteThomMirrorHostsPreservingOAuth(content);
+                if (autoCloseHelpPanel && contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase))
+                    content = RewriteThomHelpPanelDefault(content);
             }
             else
             {
@@ -373,28 +375,45 @@ internal sealed class EmbedSiteProxy
     private static string StripCrossOriginAttributes(string content) =>
         Regex.Replace(content, @"\s+crossorigin(=(['""])?(anonymous|use-credentials)\2)?", "", RegexOptions.IgnoreCase);
 
+    private static string RewriteThomHelpPanelDefault(string content) =>
+        content.Replace("caseId:\"\",isHelpOpen:!0", "caseId:\"\",isHelpOpen:!1", StringComparison.Ordinal);
+
     private static string InjectThomEmbedBridge(string content, bool autoCloseHelpPanel)
     {
         const string helpPanelScript = """
 
   function collapseHelpPanel() {
-    var btn = document.querySelector('button[title="Close Help Panel"]');
-    if (btn) { btn.click(); return true; }
-    var opened = document.querySelector('button[class*="panelOpened"]');
-    if (opened) { opened.click(); return true; }
+    var buttons = document.querySelectorAll("button");
+    for (var i = 0; i < buttons.length; i++) {
+      var cls = buttons[i].className || "";
+      if (cls.indexOf("panelOpened") >= 0) {
+        buttons[i].click();
+        return true;
+      }
+    }
+    var tooltipBtn = document.querySelector('[aria-label="Close Help Panel"]');
+    if (tooltipBtn) { tooltipBtn.click(); return true; }
     return false;
   }
   function scheduleHelpPanelCollapse() {
+    if (window.__st2HelpCollapseDone) return;
     var tries = 0;
     function attempt() {
-      if (collapseHelpPanel() || ++tries > 48) return;
-      setTimeout(attempt, 250);
+      if (collapseHelpPanel()) {
+        window.__st2HelpCollapseDone = true;
+        return;
+      }
+      if (++tries > 80) return;
+      setTimeout(attempt, 300);
     }
     attempt();
   }
+  window.addEventListener("message", function (e) {
+    if (e.data && e.data.type === "st2-collapse-help") scheduleHelpPanelCollapse();
+  });
   window.addEventListener("load", scheduleHelpPanelCollapse);
   new MutationObserver(function () {
-    if (document.querySelector('button[title="Close Help Panel"]')) scheduleHelpPanelCollapse();
+    if (!window.__st2HelpCollapseDone) scheduleHelpPanelCollapse();
   }).observe(document.documentElement, { childList: true, subtree: true });
 """;
 
