@@ -671,25 +671,26 @@ function measureThomPopupChrome(popup = thomPopup) {
   return THOM_POPUP_CHROME_WITH_URL;
 }
 
+/** Ajuste fino: borde superior del popup justo bajo .tab-bar */
+const THOM_POPUP_TAB_BOTTOM_NUDGE = 4;
+/** Compensa chrome del navegador padre (Edge) al convertir a coordenadas de pantalla. */
+const THOM_POPUP_SCREEN_NUDGE = 8;
+
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabBar = document.querySelector(".tab-bar");
-  const toolbar = document.querySelector("#panel-thom .embed-toolbar");
   const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
   const tabRect = tabBar?.getBoundingClientRect();
   if (!tabRect) {
     return { top: 160, left: 0, width: 1100, height: 640 };
   }
-  const toolbarTop = toolbar?.getBoundingClientRect().top;
   const wrapRect = wrap?.getBoundingClientRect();
-  // Siempre debajo de las etiquetas de pestaña (Planillas, Portal, THOM, AI).
-  const tabClearance = Math.round(tabRect.bottom + 12);
-  const viewportTop = Math.round(Math.max(tabClearance, toolbarTop ?? tabClearance));
+  const viewportTop = Math.round(tabRect.bottom + THOM_POPUP_TAB_BOTTOM_NUDGE);
   const viewportBottom = wrapRect?.bottom ?? window.innerHeight;
-  const viewportHeight = Math.max(380, Math.round(viewportBottom - viewportTop - 18));
+  const viewportHeight = Math.max(380, Math.round(viewportBottom - viewportTop - 12));
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
   return {
-    top: Math.round(window.screenY + chromeTop + viewportTop),
+    top: Math.round(window.screenY + chromeTop + viewportTop + THOM_POPUP_SCREEN_NUDGE),
     left: Math.round(window.screenX + chromeLeft),
     width: Math.max(480, Math.round(window.innerWidth)),
     height: viewportHeight + popupChrome,
