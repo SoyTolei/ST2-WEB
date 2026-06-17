@@ -658,7 +658,7 @@ let thomPopupResizeTimer = null;
 /** Fallback si no se puede medir el chrome del popup hijo. */
 const THOM_POPUP_CHROME_HEIGHT = 40;
 /** Edge suele agregar barra de URL al navegar a css-latam (antes de poder medir). */
-const THOM_POPUP_CHROME_WITH_URL = 84;
+const THOM_POPUP_CHROME_WITH_URL = 76;
 
 function measureThomPopupChrome(popup = thomPopup) {
   if (!popup || popup.closed) return THOM_POPUP_CHROME_WITH_URL;
@@ -674,15 +674,18 @@ function measureThomPopupChrome(popup = thomPopup) {
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabBar = document.querySelector(".tab-bar");
   const toolbar = document.querySelector("#panel-thom .embed-toolbar");
+  const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
   const tabRect = tabBar?.getBoundingClientRect();
   if (!tabRect) {
-    return { top: 160, left: 0, width: 1100, height: 720 };
+    return { top: 160, left: 0, width: 1100, height: 640 };
   }
-  const tabFloor = Math.round(tabRect.bottom + 8);
   const toolbarTop = toolbar?.getBoundingClientRect().top;
-  // Nunca por encima de las pestañas ST2; cubre toolbar + panel.
-  const viewportTop = Math.round(Math.max(tabFloor, toolbarTop ?? tabFloor));
-  const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop + 18));
+  const wrapRect = wrap?.getBoundingClientRect();
+  // Siempre debajo de las etiquetas de pestaña (Planillas, Portal, THOM, AI).
+  const tabClearance = Math.round(tabRect.bottom + 12);
+  const viewportTop = Math.round(Math.max(tabClearance, toolbarTop ?? tabClearance));
+  const viewportBottom = wrapRect?.bottom ?? window.innerHeight;
+  const viewportHeight = Math.max(380, Math.round(viewportBottom - viewportTop));
   const chromeTop = window.outerHeight - window.innerHeight;
   const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
   return {
