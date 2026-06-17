@@ -655,39 +655,36 @@ function getThomTapUrl() {
 let thomPopup = null;
 let thomPopupResizeTimer = null;
 
-/** Barra de título + URL del popup (Edge/Chrome) para que el contenido cubra el panel. */
-const THOM_POPUP_CHROME_HEIGHT = 78;
+/** Barra de título del popup hijo (sin barra de URL). */
+const THOM_POPUP_CHROME_HEIGHT = 42;
 
-function viewportToScreenPoint(left, top) {
-  const vv = window.visualViewport;
-  const offsetX = vv?.offsetLeft ?? 0;
-  const offsetY = vv?.offsetTop ?? 0;
+/** Convierte coordenadas del área útil de ST2 a pantalla (incluye chrome del navegador). */
+function clientToScreen(x, y) {
+  const chromeTop = window.outerHeight - window.innerHeight;
+  const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
   return {
-    left: Math.max(0, Math.round(window.screenX + left + offsetX)),
-    top: Math.max(0, Math.round(window.screenY + top + offsetY)),
+    left: Math.round(window.screenX + chromeLeft + x),
+    top: Math.round(window.screenY + chromeTop + y),
   };
 }
 
 function getThomPanelRect() {
-  const panel = document.getElementById("panel-thom");
-  const wrap = document.querySelector("#panel-thom .embed-frame-wrap");
   const tabBar = document.querySelector(".tab-bar");
-  const shell = document.querySelector(".main-shell");
-  if (!panel || !wrap) {
-    return { top: 120, left: 120, width: 1100, height: 640 };
-  }
-  const wrapRect = wrap.getBoundingClientRect();
   const tabRect = tabBar?.getBoundingClientRect();
-  const shellRect = shell?.getBoundingClientRect() ?? panel.getBoundingClientRect();
-  // Justo debajo de las pestañas ST2 (como al acomodar la ventana a mano).
-  const viewportTop = (tabRect?.bottom ?? wrapRect.top) + 4;
-  const contentHeight = Math.max(420, Math.round(wrapRect.bottom - viewportTop));
-  const screen = viewportToScreenPoint(shellRect.left, viewportTop);
+  if (!tabRect) {
+    return { top: 140, left: 0, width: 1100, height: 700 };
+  }
+  // Debajo de las pestañas ST2 (Planillas, Portal, THOM, AI) — siempre visibles.
+  const viewportTop = Math.round(tabRect.bottom + 6);
+  const viewportLeft = 0;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop));
+  const screen = clientToScreen(viewportLeft, viewportTop);
   return {
     top: screen.top,
     left: screen.left,
-    width: Math.max(480, Math.round(shellRect.width)),
-    height: contentHeight + THOM_POPUP_CHROME_HEIGHT,
+    width: Math.max(480, viewportWidth),
+    height: viewportHeight + THOM_POPUP_CHROME_HEIGHT,
   };
 }
 
@@ -701,7 +698,7 @@ function buildThomPopupFeatures(rect) {
     "scrollbars=yes",
     "toolbar=no",
     "menubar=no",
-    "location=yes",
+    "location=no",
     "status=no",
   ].join(",");
 }
