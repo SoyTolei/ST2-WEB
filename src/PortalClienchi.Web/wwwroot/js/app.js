@@ -672,7 +672,7 @@ function measureThomPopupChrome(popup = thomPopup) {
 }
 
 /** Ajuste fino: bajar el popup respecto al borde de .tab-bar */
-const THOM_POPUP_TOP_OFFSET = 30;
+const THOM_POPUP_TOP_OFFSET = 60;
 
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabBar = document.querySelector(".tab-bar");
