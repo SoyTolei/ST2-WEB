@@ -12,8 +12,10 @@ var builder = WebApplication.CreateBuilder(args);
 PlanillasFeatureFlags.LegalEnabled = builder.Configuration.GetValue("Planillas:LegalEnabled", false);
 
 var appSettings = WebSettingsLoader.Load(builder.Configuration, builder.Environment.ContentRootPath);
+var thomEmbedConfig = await ThomEmbedResolver.ResolveAsync(appSettings, builder.Configuration);
 
 builder.Services.AddSingleton(appSettings);
+builder.Services.AddSingleton(thomEmbedConfig);
 builder.Services.AddSingleton<PortalSearchService>();
 builder.Services.AddSingleton<PortalMediaProxy>();
 builder.Services.AddSingleton<EmbedSiteProxy>();
@@ -109,13 +111,16 @@ app.MapGet("/api/health", async (PortalSearchService search, AppSettings setting
     }
 });
 
-app.MapGet("/api/app-config", (AppSettings settings) => Results.Ok(new
+app.MapGet("/api/app-config", (AppSettings settings, ThomEmbedConfig thomEmbed) => Results.Ok(new
 {
     settings.ThomTapUrl,
     settings.AiPlatformUrl,
     settings.PortalBaseUrl,
     thomZoomFactor = settings.ThomZoomFactor,
     aiPlatformZoomFactor = settings.AiPlatformZoomFactor,
+    thomEmbedMode = thomEmbed.Mode,
+    thomFrameUrl = thomEmbed.FrameUrl,
+    thomProxyReachable = thomEmbed.ProxyReachable,
     webBuild = St2WebBuild.GetBuild(),
     webVersionLabel = St2WebBuild.GetVersionLabel(),
 }));

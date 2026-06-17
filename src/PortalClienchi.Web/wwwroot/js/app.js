@@ -606,7 +606,9 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 
 function getEmbedFrameUrl(kind) {
   if (kind === "thom") {
+    if (appConfig?.thomFrameUrl) return appConfig.thomFrameUrl;
     const tap = appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
+    if (appConfig?.thomEmbedMode === "direct") return tap;
     try {
       const u = new URL(tap);
       return `${u.pathname}${u.search}`;
@@ -616,6 +618,10 @@ function getEmbedFrameUrl(kind) {
   }
   if (kind === "ai") return appConfig?.aiPlatformUrl;
   return null;
+}
+
+function isThomDirectEmbed() {
+  return appConfig?.thomEmbedMode === "direct";
 }
 
 function isEmbedFrameEmpty(frame) {
@@ -686,6 +692,11 @@ function scheduleThomBlankCheck(delayMs = 12000) {
   clearTimeout(thomBlankTimer);
   thomBlankTimer = setTimeout(() => {
     if (thomRendered) return;
+    if (isThomDirectEmbed()) {
+      hideThomLoading();
+      setEmbedHint("thom", "THOM directo desde tu navegador (VPN). Si no carga o pide login, usá «Abrir en navegador».");
+      return;
+    }
     thomBlankAttempts += 1;
     try {
       const loc = thomFrame?.contentWindow?.location?.href ?? "";
@@ -723,6 +734,7 @@ function onThomEmbedMessage(event) {
   if (event.source !== thomFrame?.contentWindow) return;
   const data = event.data;
   if (!data || data.type !== "st2-thom-state") return;
+  if (isThomDirectEmbed()) return;
 
   thomBridgeAlive = true;
 
@@ -757,7 +769,7 @@ function loadEmbedFrame(kind, { force = false } = {}) {
   if (kind === "thom") {
     resetThomEmbedState();
     showThomLoading();
-    scheduleThomBlankCheck();
+    if (!isThomDirectEmbed()) scheduleThomBlankCheck();
   }
   frame.src = url;
 }
@@ -765,7 +777,9 @@ function loadEmbedFrame(kind, { force = false } = {}) {
 function clearEmbedHint(kind) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (el) el.textContent = kind === "thom"
-    ? "THOM embebido · VPN activa · el login SSO puede demorar unos segundos"
+    ? (isThomDirectEmbed()
+      ? "THOM directo · VPN en tu PC · primer login puede requerir «Abrir en navegador»"
+      : "THOM embebido · VPN activa · el login SSO puede demorar unos segundos")
     : "Sesión corporativa · si no carga, «Abrir en navegador»";
 }
 
@@ -807,6 +821,11 @@ function initEmbedReminders() {
   window.addEventListener("message", onThomEmbedMessage);
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
+    if (isThomDirectEmbed()) {
+      hideThomLoading();
+      setEmbedHint("thom", "THOM directo desde tu navegador (VPN). Si no carga o pide login, usá «Abrir en navegador».");
+      return;
+    }
     if (thomRendered) {
       hideThomLoading();
       return;
