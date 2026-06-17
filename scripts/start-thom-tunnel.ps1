@@ -1,12 +1,20 @@
-# Expone ST2 local (con VPN) por túnel HTTPS para embeber THOM en Railway.
-# Requiere: cloudflared (https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/)
-param(
+# Expone ST2 local (con VPN) por tunel HTTPS para embeber THOM en Railway.
+# NO ejecutar con doble clic (Windows abre .ps1 en Bloc de notas).
+# Usar: start-thom-tunnel.bat en la raiz del proyecto (doble clic).param(
     [int]$Port = 5180
 )
 
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
+
+if (-not $PSScriptRoot) {
+    Write-Host 'Ejecutá este script desde la carpeta del proyecto ST2.' -ForegroundColor Red
+    exit 1
+}
+
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $bat = Join-Path $root 'publish-win64\start-portal.bat'
+
+Write-Host "Proyecto: $root" -ForegroundColor DarkGray
 
 if (-not (Get-Command cloudflared -ErrorAction SilentlyContinue)) {
     Write-Host 'Instalá cloudflared y volvé a ejecutar este script.' -ForegroundColor Yellow

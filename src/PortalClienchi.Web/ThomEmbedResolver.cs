@@ -26,18 +26,17 @@ internal static class ThomEmbedResolver
             ? "https://css-latam.int.thomsonreuters.com/css-tap"
             : settings.ThomTapUrl.Trim();
 
-        var remoteBase = configuration["ThomProxyBaseUrl"]?.Trim()
-            ?? Environment.GetEnvironmentVariable("THOM_PROXY_BASE_URL")?.Trim();
+        var remoteBase = configuration["ThomProxyBaseUrl"]?.Trim();
+        if (string.IsNullOrWhiteSpace(remoteBase))
+            remoteBase = Environment.GetEnvironmentVariable("THOM_PROXY_BASE_URL")?.Trim();
+        if (string.IsNullOrWhiteSpace(remoteBase))
+            remoteBase = Environment.GetEnvironmentVariable("ThomProxyBaseUrl")?.Trim();
 
         if (!string.IsNullOrWhiteSpace(remoteBase))
         {
             remoteBase = remoteBase.TrimEnd('/');
             if (!Uri.TryCreate(remoteBase, UriKind.Absolute, out _))
                 remoteBase = null;
-        }
-        else
-        {
-            remoteBase = null;
         }
 
         if (!string.IsNullOrEmpty(remoteBase))

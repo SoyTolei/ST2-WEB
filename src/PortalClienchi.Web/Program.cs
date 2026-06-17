@@ -43,6 +43,23 @@ app.UseForwardedHeaders();
 
 app.Use(async (ctx, next) =>
 {
+    var path = ctx.Request.Path.Value ?? "/";
+    if (EmbedSiteProxy.ShouldMirrorThomPath(ctx.Request.Path)
+        || path.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
+    {
+        ctx.Response.OnStarting(() =>
+        {
+            ctx.Response.Headers.Remove("X-Frame-Options");
+            ctx.Response.Headers.ContentSecurityPolicy = "frame-ancestors *";
+            return Task.CompletedTask;
+        });
+    }
+
+    await next(ctx).ConfigureAwait(false);
+});
+
+app.Use(async (ctx, next) =>
+{
     if (HttpMethods.IsGet(ctx.Request.Method)
         && (ctx.Request.Path == "/" || ctx.Request.Path.Equals("/index.html", StringComparison.OrdinalIgnoreCase)))
     {

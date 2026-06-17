@@ -250,6 +250,8 @@ async function loadAppConfig() {
   applyEmbedZoom("thom");
   applyEmbedZoom("ai");
   updateThomDirectUi();
+  const activeThom = document.querySelector('.tab-btn.active[data-tab="thom"]');
+  if (activeThom) activateThomTab();
 }
 
 async function checkHealth() {
