@@ -644,6 +644,17 @@ function applyEmbedZoom(kind) {
 let thomLoadTimer = null;
 let thomBlankTimer = null;
 let thomRendered = false;
+let thomBridgeAlive = false;
+let thomBlankAttempts = 0;
+
+function isThomAuthPath(path = "") {
+  return path.includes("/embed/cg/")
+    || path.includes("/embed/sso/")
+    || path.includes("/auth")
+    || path.includes("/login")
+    || path.includes("sso.thomsonreuters.com")
+    || path.includes("login.microsoftonline.com");
+}
 
 function showThomLoading(message = "Cargando THOM…") {
   thomEmbedLoading?.classList.remove("hidden");
@@ -665,40 +676,55 @@ function hideThomLoading() {
 
 function resetThomEmbedState() {
   thomRendered = false;
+  thomBridgeAlive = false;
+  thomBlankAttempts = 0;
   clearTimeout(thomBlankTimer);
   thomBlankTimer = null;
 }
 
-function scheduleThomBlankCheck() {
+function scheduleThomBlankCheck(delayMs = 12000) {
   clearTimeout(thomBlankTimer);
   thomBlankTimer = setTimeout(() => {
     if (thomRendered) return;
+    thomBlankAttempts += 1;
     try {
       const loc = thomFrame?.contentWindow?.location?.href ?? "";
-      if (loc.includes("/embed/cg/") || loc.includes("/embed/sso/") || loc.includes("sso.thomsonreuters.com") || loc.includes("login.microsoftonline.com")) {
+      if (isThomAuthPath(loc)) {
         showThomLoading("Iniciando sesión corporativa…");
         setEmbedHint("thom", "Iniciando sesión corporativa… Completá el login si aparece el formulario.");
-        scheduleThomBlankCheck();
+        scheduleThomBlankCheck(15000);
         return;
       }
       const root = thomFrame?.contentDocument?.getElementById("root");
       const hasContent = !!(root && root.children.length > 0);
-      if (!hasContent) {
-        showThomLoading("THOM no cargó en el panel");
-        setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá VPN, usá «Recargar» o «Abrir en navegador».");
+      if (hasContent) {
+        thomRendered = true;
+        hideThomLoading();
+        clearEmbedHint("thom");
+        return;
       }
+      if (thomBridgeAlive || thomBlankAttempts < 4) {
+        showThomLoading(thomBridgeAlive ? "Autenticando en THOM…" : "Cargando THOM…");
+        setEmbedHint("thom", "THOM está iniciando. Si pedís login corporativo, completalo en el panel.");
+        scheduleThomBlankCheck(15000);
+        return;
+      }
+      showThomLoading("THOM no cargó en el panel");
+      setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá VPN, usá «Recargar» o «Abrir en navegador».");
     } catch {
       showThomLoading("Iniciando sesión corporativa…");
       setEmbedHint("thom", "Autenticando con SSO corporativo…");
-      scheduleThomBlankCheck();
+      scheduleThomBlankCheck(15000);
     }
-  }, 12000);
+  }, delayMs);
 }
 
 function onThomEmbedMessage(event) {
   if (event.source !== thomFrame?.contentWindow) return;
   const data = event.data;
   if (!data || data.type !== "st2-thom-state") return;
+
+  thomBridgeAlive = true;
 
   if (data.hasContent) {
     thomRendered = true;
@@ -708,8 +734,16 @@ function onThomEmbedMessage(event) {
     return;
   }
 
-  if (data.path?.includes("/embed/cg") || data.path?.includes("/auth")) {
+  if (isThomAuthPath(data.path ?? "")) {
     showThomLoading("Iniciando sesión corporativa…");
+    setEmbedHint("thom", "Iniciando sesión corporativa… Completá el login si aparece el formulario.");
+    scheduleThomBlankCheck(15000);
+    return;
+  }
+
+  if (!thomRendered) {
+    showThomLoading("Autenticando en THOM…");
+    scheduleThomBlankCheck(15000);
   }
 }
 

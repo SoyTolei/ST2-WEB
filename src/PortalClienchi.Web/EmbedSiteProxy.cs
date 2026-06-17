@@ -43,11 +43,22 @@ internal sealed class EmbedSiteProxy
 
     private static readonly string[] St2ReservedPrefixes =
     [
-        "/api/",
         "/embed/",
         "/js/",
         "/img/",
         "/data/",
+    ];
+
+    private static readonly string[] St2ApiPrefixes =
+    [
+        "/api/health",
+        "/api/app-config",
+        "/api/types",
+        "/api/organize",
+        "/api/media-proxy",
+        "/api/search",
+        "/api/knowledge/",
+        "/api/planillas/",
     ];
 
     private static readonly string[] St2ReservedExact =
@@ -59,22 +70,33 @@ internal sealed class EmbedSiteProxy
         "/css/planillas.css",
     ];
 
-    public static bool ShouldMirrorThomPath(PathString path)
+    public static bool ShouldMirrorThomPath(PathString path) =>
+        !IsSt2OwnedPath(path.Value ?? "/");
+
+    private static bool IsSt2OwnedPath(string value)
     {
-        var value = path.Value ?? "/";
         if (St2ReservedExact.Contains(value, StringComparer.OrdinalIgnoreCase))
-            return false;
+            return true;
 
         foreach (var prefix in St2ReservedPrefixes)
         {
             if (value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                return false;
+                return true;
         }
 
         if (value.StartsWith("/css/", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (!value.StartsWith("/api/", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        return true;
+        foreach (var prefix in St2ApiPrefixes)
+        {
+            if (value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
     }
 
     public static string ToEmbedPath(string absoluteUrl)
@@ -353,13 +375,30 @@ internal sealed class EmbedSiteProxy
         const string bridge = """
 <script>
 (function () {
-  function notify() {
+  function notify(extra) {
     try {
       var root = document.getElementById("root");
       var hasContent = !!(root && root.children && root.children.length > 0);
-      parent.postMessage({ type: "st2-thom-state", hasContent: hasContent, path: location.pathname }, "*");
+      parent.postMessage({
+        type: "st2-thom-state",
+        hasContent: hasContent,
+        path: location.pathname,
+        ready: document.readyState,
+        alive: true
+      }, "*");
     } catch (e) {}
   }
+  window.addEventListener("error", function (e) {
+    try {
+      parent.postMessage({
+        type: "st2-thom-state",
+        hasContent: false,
+        path: location.pathname,
+        error: e.message || "script-error",
+        alive: true
+      }, "*");
+    } catch (x) {}
+  });
   window.addEventListener("load", function () { notify(); setTimeout(notify, 1500); setTimeout(notify, 5000); });
   new MutationObserver(notify).observe(document.documentElement, { childList: true, subtree: true });
 })();
