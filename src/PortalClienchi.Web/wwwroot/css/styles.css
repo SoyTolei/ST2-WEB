@@ -671,6 +671,15 @@ html, body {
   margin-top: 4px;
 }
 
+.embed-direct-gate code {
+  font-size: 12px;
+  color: #b45309;
+}
+
+.embed-frame.hidden {
+  display: none;
+}
+
 .embed-frame {
   display: block;
   width: 100%;

@@ -634,57 +634,50 @@ function getThomTapUrl() {
 function updateThomDirectUi() {
   const direct = isThomDirectEmbed();
   thomSsoBtn?.classList.toggle("hidden", !direct);
+  document.getElementById("thomReloadBtn")?.classList.toggle("hidden", direct);
+  const openBtn = document.getElementById("thomOpenBtn");
+  if (openBtn) {
+    openBtn.classList.toggle("hidden", direct);
+    openBtn.textContent = "Abrir en navegador";
+  }
+  if (thomSsoBtn && direct) thomSsoBtn.textContent = "Abrir THOM";
+  thomFrame?.classList.toggle("hidden", direct);
 }
 
 function showThomDirectGate() {
   thomDirectGate?.classList.remove("hidden");
   hideThomLoading();
-  setEmbedHint("thom", "En la web, el SSO se hace en otra pestaña. Después cargá THOM en el panel.");
+  setEmbedHint("thom", "Versión web: THOM se abre en ventana aparte (SSO no admite panel embebido).");
 }
 
 function hideThomDirectGate() {
   thomDirectGate?.classList.add("hidden");
 }
 
-function openThomSsoTab() {
+function openThomWindow() {
   const url = getThomTapUrl();
-  window.open(url, "_blank", "noopener");
-  setEmbedHint("thom", "Completá el login en la pestaña abierta. Luego «Cargar THOM en panel» o «Recargar».");
+  const popup = window.open(url, "st2ThomWindow", "noopener,width=1320,height=920,resizable=yes,scrollbars=yes");
+  if (!popup) window.open(url, "_blank", "noopener");
+  setEmbedHint("thom", "THOM abierto aparte. Dejá ST2 y THOM visibles (VPN activa).");
 }
 
-function shouldAutoLoadThomDirect() {
-  try {
-    return sessionStorage.getItem("st2ThomPanelReady") === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markThomDirectReady() {
-  try {
-    sessionStorage.setItem("st2ThomPanelReady", "1");
-  } catch {
-    // ignore
-  }
+function resetThomDirectFrame() {
+  if (!thomFrame) return;
+  thomFrame.removeAttribute("src");
+  thomFrame.src = "about:blank";
 }
 
 function activateThomTab() {
   if (!isThomDirectEmbed()) {
+    hideThomDirectGate();
+    thomFrame?.classList.remove("hidden");
     loadEmbedFrame("thom");
     return;
   }
   updateThomDirectUi();
-  if (shouldAutoLoadThomDirect() && !isEmbedFrameEmpty(thomFrame)) {
-    hideThomDirectGate();
-    loadEmbedFrame("thom");
-    return;
-  }
-  if (isEmbedFrameEmpty(thomFrame)) {
-    showThomDirectGate();
-    return;
-  }
-  hideThomDirectGate();
-  loadEmbedFrame("thom");
+  resetThomDirectFrame();
+  hideThomLoading();
+  showThomDirectGate();
 }
 
 function isEmbedFrameEmpty(frame) {
@@ -758,7 +751,6 @@ function scheduleThomBlankCheck(delayMs = 12000) {
     if (isThomDirectEmbed()) {
       hideThomLoading();
       showThomDirectGate();
-      setEmbedHint("thom", "Si ves error de SSO, usá «Iniciar sesión corporativo» y después «Cargar THOM en panel».");
       return;
     }
     thomBlankAttempts += 1;
@@ -825,6 +817,7 @@ function onThomEmbedMessage(event) {
 
 function loadEmbedFrame(kind, { force = false } = {}) {
   const frame = kind === "thom" ? thomFrame : aiFrame;
+  if (kind === "thom" && isThomDirectEmbed()) return;
   const url = getEmbedFrameUrl(kind);
   if (!frame || !url) return;
   if (!force && !needsEmbedReload(frame, url)) return;
@@ -843,7 +836,7 @@ function clearEmbedHint(kind) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (el) el.textContent = kind === "thom"
     ? (isThomDirectEmbed()
-      ? "Versión web: SSO en otra pestaña, luego «Cargar THOM en panel»"
+      ? "Versión web: usá «Abrir THOM» (ventana aparte, VPN activa)"
       : "THOM embebido · VPN activa · el login SSO puede demorar unos segundos")
     : "Sesión corporativa · si no carga, «Abrir en navegador»";
 }
@@ -886,13 +879,7 @@ function initEmbedReminders() {
   window.addEventListener("message", onThomEmbedMessage);
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
-    if (isThomDirectEmbed()) {
-      hideThomLoading();
-      markThomDirectReady();
-      hideThomDirectGate();
-      setEmbedHint("thom", "THOM cargado. Si ves error de SSO, usá «Iniciar sesión» y después «Recargar».");
-      return;
-    }
+    if (isThomDirectEmbed()) return;
     if (thomRendered) {
       hideThomLoading();
       return;
@@ -902,22 +889,18 @@ function initEmbedReminders() {
   initDailyTabReminders();
 }
 
-document.getElementById("thomSsoBtn")?.addEventListener("click", openThomSsoTab);
-document.getElementById("thomGateSsoBtn")?.addEventListener("click", openThomSsoTab);
-document.getElementById("thomGateLoadBtn")?.addEventListener("click", () => {
-  hideThomDirectGate();
-  loadEmbedFrame("thom", { force: true });
-});
+document.getElementById("thomSsoBtn")?.addEventListener("click", openThomWindow);
+document.getElementById("thomGateOpenBtn")?.addEventListener("click", openThomWindow);
 document.getElementById("thomReloadBtn").addEventListener("click", () => {
-  if (isThomDirectEmbed() && isEmbedFrameEmpty(thomFrame)) {
-    showThomDirectGate();
+  if (isThomDirectEmbed()) {
+    openThomWindow();
     return;
   }
   if (isEmbedFrameEmpty(thomFrame)) loadEmbedFrame("thom", { force: true });
   else thomFrame.contentWindow?.location.reload();
 });
 document.getElementById("thomOpenBtn").addEventListener("click", () => {
-  if (appConfig?.thomTapUrl) window.open(appConfig.thomTapUrl, "_blank", "noopener");
+  openThomWindow();
 });
 document.getElementById("aiReloadBtn").addEventListener("click", () => {
   if (isEmbedFrameEmpty(aiFrame)) loadEmbedFrame("ai", { force: true });
