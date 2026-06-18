@@ -812,7 +812,7 @@ function resetReferralForm() {
   clearBackupBases();
   clearOnvioTicketFields();
   clearLegalTicketFields();
-  ["ref-legal-chave", "ref-legal-usuario", "ref-legal-escritorio"].forEach((id) => {
+  ["ref-legal-chave", "ref-legal-usuario", "ref-legal-escritorio", "ref-onvio-usuario", "ref-onvio-empresa"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
