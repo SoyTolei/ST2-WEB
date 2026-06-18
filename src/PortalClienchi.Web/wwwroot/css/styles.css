@@ -40,6 +40,29 @@ html, body {
   gap: 14px;
 }
 
+.brand-home-btn {
+  border: none;
+  background: transparent;
+  padding: 4px 6px;
+  margin: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.brand-home-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.brand-home-btn:active {
+  transform: scale(0.98);
+}
+
+.brand-home-btn:focus-visible {
+  outline: 2px solid rgba(255, 122, 51, 0.85);
+  outline-offset: 2px;
+}
+
 .brand-icon {
   image-rendering: -webkit-optimize-contrast;
 }

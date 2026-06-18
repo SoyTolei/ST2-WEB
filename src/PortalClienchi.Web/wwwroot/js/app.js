@@ -1,4 +1,4 @@
-import { initPlanillas } from "./planillas.js";
+import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import {
   initDailyTabReminders,
   refreshBadges,
@@ -31,6 +31,7 @@ const openMediaBtn = document.getElementById("openMediaBtn");
 const downloadContentBtn = document.getElementById("downloadContentBtn");
 const exportPdfBtn = document.getElementById("exportPdfBtn");
 const aboutBtn = document.getElementById("aboutBtn");
+const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
@@ -659,6 +660,7 @@ function hideAbout() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
+homeBtn?.addEventListener("click", goHome);
 aboutCloseBtn?.addEventListener("click", hideAbout);
 aboutOverlay?.addEventListener("click", (e) => {
   if (e.target === aboutOverlay) hideAbout();
@@ -1124,6 +1126,14 @@ function clearEmbedHint(kind) {
 function setEmbedHint(kind, message) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (el) el.textContent = message;
+}
+
+function goHome() {
+  hideAbout();
+  closeThomPopup();
+  goPlanillasHome();
+  switchTab("planillas");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function switchTab(tabId) {

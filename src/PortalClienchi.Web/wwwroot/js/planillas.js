@@ -914,6 +914,12 @@ function initSecretRunnerTrigger() {
   });
 }
 
+export function goPlanillasHome() {
+  if (!views.menu) return;
+  showView("menu");
+  selectSistema("BejermanSql");
+}
+
 export function initPlanillas() {
   if (!views.menu) return;
 
