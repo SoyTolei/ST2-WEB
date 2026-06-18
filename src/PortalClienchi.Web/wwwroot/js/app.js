@@ -1140,6 +1140,7 @@ function switchTab(tabId) {
 
   statusBar.classList.toggle("hidden", tabId !== "portal");
   portalSistemaBar?.classList.toggle("hidden", tabId !== "portal");
+  document.body.classList.toggle("portal-tab-active", tabId === "portal");
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
 
   if (tabId !== "thom" && isThomWindowMode()) {

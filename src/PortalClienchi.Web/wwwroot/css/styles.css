@@ -8,6 +8,9 @@
   --nav-well: #eef1f6;
   --nav-hover: #e1e6f0;
   --white: #ffffff;
+  --portal-sub: #3b5bdb;
+  --portal-sub-glow: rgba(59, 91, 219, 0.28);
+  --portal-sub-soft: #eef2ff;
 }
 
 * { box-sizing: border-box; }
@@ -84,6 +87,18 @@ html, body {
   background: var(--nav-well);
   border: 1px solid var(--border);
   border-radius: 13px;
+  overflow: visible;
+}
+
+body.portal-tab-active .tab-bar {
+  padding-bottom: 52px;
+}
+
+.tab-portal-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .tab-btn {
@@ -189,16 +204,22 @@ html, body {
 }
 
 .portal-sistema-bar {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  flex-shrink: 0;
-  margin: 0 0 10px;
-  padding: 8px 12px;
-  background: var(--nav-well);
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 10px;
+  background: var(--white);
   border: 1px solid var(--border);
   border-radius: 11px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
 }
 
 .portal-sistema-bar.hidden {
@@ -209,18 +230,17 @@ html, body {
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 .portal-sistema-pills {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px 10px;
-  background: var(--nav-well);
-  border: 1px solid var(--border);
-  border-radius: 11px;
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 .portal-sistema-pill {
@@ -235,14 +255,14 @@ html, body {
 }
 
 .portal-sistema-pill:hover {
-  background: var(--nav-hover);
-  color: var(--dark);
+  background: var(--portal-sub-soft);
+  color: var(--portal-sub);
 }
 
 .portal-sistema-pill.active {
-  background: var(--primary);
+  background: var(--portal-sub);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(214, 64, 0, 0.22);
+  box-shadow: 0 2px 8px var(--portal-sub-glow);
 }
 
 .search-column,

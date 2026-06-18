@@ -114,7 +114,7 @@ internal static class PortalSettingsNormalizer
         {
             root.Portals["Bejerman"] = new PortalProfileSettings
             {
-                Label = "Bejerman SQL / ONVIO",
+                Label = "Bejerman SQL/WEB - ONVIO",
                 ApiBaseUrl = root.ApiBaseUrl,
                 PortalBaseUrl = root.PortalBaseUrl,
                 Email = root.Email,
@@ -125,7 +125,7 @@ internal static class PortalSettingsNormalizer
 
         EnsureProfile(root, "Bejerman", new PortalProfileSettings
         {
-            Label = "Bejerman SQL / ONVIO",
+            Label = "Bejerman SQL/WEB - ONVIO",
             ApiBaseUrl = string.IsNullOrWhiteSpace(root.ApiBaseUrl)
                 ? "https://clientes.thomsonreuters.com.ar:3333"
                 : root.ApiBaseUrl,
@@ -137,8 +137,7 @@ internal static class PortalSettingsNormalizer
         EnsureProfile(root, "Legal", new PortalProfileSettings
         {
             Label = "LEGAL",
-            // Misma API REST que Bejerman; el sitio público de LEGAL es otro dominio.
-            ApiBaseUrl = "https://clientes.thomsonreuters.com.ar:3333",
+            ApiBaseUrl = "https://portaldelcliente.thomsonreuters.com.ar:3334",
             PortalBaseUrl = "https://portaldelcliente.thomsonreuters.com.ar",
         });
 
@@ -157,6 +156,8 @@ internal static class PortalSettingsNormalizer
             legal.Email = bejerman.Email;
         if (string.IsNullOrWhiteSpace(legal.Password) && !string.IsNullOrWhiteSpace(bejerman.Password))
             legal.Password = bejerman.Password;
+
+        legal.ApiBaseUrl = NormalizeLegalApiBaseUrl(legal.ApiBaseUrl, bejerman.ApiBaseUrl);
 
         root.ApiBaseUrl = bejerman.ApiBaseUrl;
         root.PortalBaseUrl = bejerman.PortalBaseUrl;
@@ -206,4 +207,34 @@ internal static class PortalSettingsNormalizer
     public static bool HasCredentials(AppSettings settings) =>
         !string.IsNullOrWhiteSpace(settings.Email)
         && !string.IsNullOrWhiteSpace(settings.Password);
+
+    /// <summary>
+    /// Corrige URLs legacy (clientes:3333 o portaldelcliente:3333) al backend real de LEGAL (:3334).
+    /// </summary>
+    public static string NormalizeLegalApiBaseUrl(string? configured, string? bejermanApiBaseUrl)
+    {
+        const string legalApi = "https://portaldelcliente.thomsonreuters.com.ar:3334";
+        if (string.IsNullOrWhiteSpace(configured))
+            return legalApi;
+
+        var trimmed = configured.Trim().TrimEnd('/');
+        if (trimmed.Equals(legalApi, StringComparison.OrdinalIgnoreCase))
+            return legalApi;
+
+        if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
+        {
+            if (uri.Host.Contains("portaldelcliente", StringComparison.OrdinalIgnoreCase)
+                && uri.Port is 3333 or 443 or -1)
+                return legalApi;
+
+            if (uri.Host.Contains("clientes.thomsonreuters", StringComparison.OrdinalIgnoreCase))
+                return legalApi;
+        }
+
+        if (!string.IsNullOrWhiteSpace(bejermanApiBaseUrl)
+            && trimmed.Equals(bejermanApiBaseUrl.Trim().TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+            return legalApi;
+
+        return trimmed;
+    }
 }
