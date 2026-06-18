@@ -799,10 +799,12 @@ function closeThomPopup() {
 function updateThomDirectUi() {
   const windowMode = isThomWindowMode();
   const embedded = isThomEmbeddedProxy();
+  const openLabel = windowMode ? "Abrir en otra pestaña del navegador" : "Abrir en navegador";
   const openBtn = document.getElementById("thomOpenBtn");
-  if (openBtn) {
-    openBtn.textContent = windowMode ? "Abrir en pestaña" : "Abrir en navegador";
-  }
+  const proxyOpenBtn = document.getElementById("thomProxyOpenBtn");
+  if (openBtn) openBtn.textContent = openLabel;
+  if (proxyOpenBtn) proxyOpenBtn.textContent = openLabel;
+  document.getElementById("thomProxyOpenWrap")?.classList.toggle("hidden", !embedded);
   thomFrame?.classList.toggle("hidden", windowMode);
   thomDirectGate?.classList.toggle("hidden", embedded || !windowMode);
   thomDirectGate?.classList.toggle("embed-panel-active", windowMode && !!(thomPopup && !thomPopup.closed));
@@ -989,7 +991,7 @@ function scheduleThomBlankCheck(delayMs = 12000) {
         return;
       }
       showThomLoading("THOM no cargó en el panel");
-      setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá ZScaler o usá «Abrir en navegador».");
+      setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá ZScaler o usá «Abrir en otra pestaña del navegador».");
     } catch {
       showThomLoading("Iniciando sesión corporativa…");
       setEmbedHint("thom", "Autenticando con SSO corporativo…");
@@ -1108,7 +1110,8 @@ function initEmbedReminders() {
 }
 
 document.getElementById("thomGateOpenBtn")?.addEventListener("click", openThomWindow);
-document.getElementById("thomOpenBtn").addEventListener("click", openThomBrowserTab);
+document.getElementById("thomOpenBtn")?.addEventListener("click", openThomBrowserTab);
+document.getElementById("thomProxyOpenBtn")?.addEventListener("click", openThomBrowserTab);
 document.getElementById("aiReloadBtn").addEventListener("click", () => {
   if (isEmbedFrameEmpty(aiFrame)) loadEmbedFrame("ai", { force: true });
   else aiFrame.contentWindow?.location.reload();
