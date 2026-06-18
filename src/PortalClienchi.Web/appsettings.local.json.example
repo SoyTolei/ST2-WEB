@@ -1,6 +1,16 @@
 {
   "Email": "tu.usuario@thomsonreuters.com",
-  "Password": "tu-contraseña-del-portal",
+  "Password": "tu-contraseña-del-portal-bejerman",
+  "Portals": {
+    "Bejerman": {
+      "Email": "tu.usuario@thomsonreuters.com",
+      "Password": "tu-contraseña-del-portal-bejerman"
+    },
+    "Legal": {
+      "Email": "tu.usuario@thomsonreuters.com",
+      "Password": "tu-contraseña-del-portal-legal"
+    }
+  },
   "CapturaHosting": {
     "Enabled": true,
     "Provider": "Auto",

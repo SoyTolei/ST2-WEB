@@ -52,6 +52,9 @@ let selectedDetail = null;
 let selectedMedia = null;
 let previewReady = false;
 let appConfig = null;
+let activePortalId = "bejerman";
+
+const portalSistemaPills = document.getElementById("portalSistemaPills");
 
 const placeholderHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
 body{font-family:Segoe UI,sans-serif;padding:24px;color:#6b7280;background:#fff;margin:0}
@@ -237,6 +240,65 @@ function setStatus(message) {
   statusText.textContent = message;
 }
 
+function buildPortalParams(extra = {}) {
+  const params = new URLSearchParams({ portal: activePortalId });
+  for (const [key, value] of Object.entries(extra)) {
+    if (value !== undefined && value !== null && value !== "")
+      params.set(key, value);
+  }
+  return params;
+}
+
+function initPortalPicker() {
+  const portals = appConfig?.portals ?? [];
+  if (!portals.length || !portalSistemaPills) return;
+
+  activePortalId = appConfig?.defaultPortalId ?? portals[0]?.id ?? "bejerman";
+  portalSistemaPills.innerHTML = portals
+    .map(
+      (p) =>
+        `<button type="button" class="portal-sistema-pill${p.id === activePortalId ? " active" : ""}" data-portal-id="${escapeHtml(p.id)}" role="tab" aria-selected="${p.id === activePortalId ? "true" : "false"}">${escapeHtml(p.label)}</button>`,
+    )
+    .join("");
+
+  for (const btn of portalSistemaPills.querySelectorAll(".portal-sistema-pill")) {
+    btn.addEventListener("click", () => switchPortal(btn.dataset.portalId));
+  }
+}
+
+function resetPortalSearchUi() {
+  lastResults = [];
+  selectedResult = null;
+  selectedDetail = null;
+  selectedMedia = null;
+  yearFilterMode = "all";
+  searchAbort?.abort();
+  detailAbort?.abort();
+  organizeAbort?.abort();
+  yearFilterPanel.classList.add("hidden");
+  yearFilterButtons.innerHTML = "";
+  resultsList.innerHTML = "";
+  hideSearchLoading();
+  resetPreviewToPlaceholder();
+  showIdleResultsState();
+}
+
+async function switchPortal(portalId) {
+  if (!portalId || portalId === activePortalId) return;
+  activePortalId = portalId;
+
+  for (const btn of portalSistemaPills?.querySelectorAll(".portal-sistema-pill") ?? []) {
+    const active = btn.dataset.portalId === portalId;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  }
+
+  searchInput.value = "";
+  if (typeFilter.options.length) typeFilter.selectedIndex = 0;
+  resetPortalSearchUi();
+  await checkHealth();
+}
+
 async function loadTypes() {
   const types = await apiGet("/api/types");
   typeFilter.innerHTML = types
@@ -246,6 +308,7 @@ async function loadTypes() {
 
 async function loadAppConfig() {
   appConfig = await apiGet("/api/app-config");
+  initPortalPicker();
   applyEmbedZoom("thom");
   applyEmbedZoom("ai");
   updateThomDirectUi();
@@ -255,16 +318,17 @@ async function loadAppConfig() {
 
 async function checkHealth() {
   try {
-    const health = await apiGet("/api/health");
+    const health = await apiGet(`/api/health?portal=${encodeURIComponent(activePortalId)}`);
+    const portalLabel = health.label ?? activePortalId;
     if (!health.credentialsConfigured) {
-      setStatus("Faltan credenciales. Copiá appsettings.local.json en la carpeta del proyecto y reiniciá el servidor.");
+      setStatus(`Faltan credenciales para ${portalLabel}. Configurá appsettings.local.json y reiniciá el servidor.`);
       return;
     }
     if (!health.connected) {
-      setStatus(health.message || "No se pudo conectar al portal. Verificá usuario/contraseña y reiniciá el servidor.");
+      setStatus(health.message || `No se pudo conectar a ${portalLabel}. Verificá usuario/contraseña.`);
       return;
     }
-    setStatus("Escribí al menos 2 letras para buscar (ignora tildes).");
+    setStatus(`Portal ${portalLabel}: escribí al menos 2 letras para buscar (ignora tildes).`);
   } catch (err) {
     setStatus(`Error de API: ${err.message}`);
   }
@@ -298,7 +362,7 @@ async function runSearch() {
   resultsList.innerHTML = "";
 
   try {
-    const params = new URLSearchParams({ q: query });
+    const params = buildPortalParams({ q: query });
     if (typeFilter.value) params.set("type", typeFilter.value);
 
     const data = await apiGet(`/api/search?${params}`, searchAbort.signal);
@@ -463,7 +527,7 @@ async function selectResult(id, type) {
   detailAbort = new AbortController();
 
   try {
-    const params = new URLSearchParams({ type: type ?? result?.type ?? "faq" });
+    const params = buildPortalParams({ type: type ?? result?.type ?? "faq" });
     const data = await apiGet(`/api/knowledge/${id}?${params}`, detailAbort.signal);
     selectedDetail = data.item;
     selectedMedia = data.media;

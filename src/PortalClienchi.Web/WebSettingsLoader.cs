@@ -22,7 +22,10 @@ internal static class WebSettingsLoader
         return settings;
     }
 
-    public static bool HasPortalCredentials(AppSettings settings) =>
-        !string.IsNullOrWhiteSpace(settings.Email)
-        && !string.IsNullOrWhiteSpace(settings.Password);
+    public static bool HasPortalCredentials(AppSettings settings)
+    {
+        PortalSettingsNormalizer.Normalize(settings);
+        return settings.Portals.Values.Any(p =>
+            !string.IsNullOrWhiteSpace(p.Email) && !string.IsNullOrWhiteSpace(p.Password));
+    }
 }

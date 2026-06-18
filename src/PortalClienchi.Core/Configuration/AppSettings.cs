@@ -18,6 +18,9 @@ public sealed class AppSettings
     public bool AiPlatformAutoCloseHelpPanel { get; set; } = true;
     public string Email { get; set; } = "";
     public string Password { get; set; } = "";
+    /// <summary>Perfiles del Portal Cliente (Bejerman, LEGAL, etc.).</summary>
+    public Dictionary<string, PortalProfileSettings> Portals { get; set; } =
+        new(StringComparer.OrdinalIgnoreCase);
     public int SyncPageSize { get; set; } = 100;
     public int[] SyncTypes { get; set; } = [1, 2, 3, 4, 5, 6];
 

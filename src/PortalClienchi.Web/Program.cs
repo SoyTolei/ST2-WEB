@@ -16,8 +16,7 @@ var thomEmbedConfig = await ThomEmbedResolver.ResolveAsync(appSettings, builder.
 
 builder.Services.AddSingleton(appSettings);
 builder.Services.AddSingleton(thomEmbedConfig);
-builder.Services.AddSingleton<PortalSearchService>();
-builder.Services.AddSingleton<PortalMediaProxy>();
+builder.Services.AddSingleton<PortalRegistry>();
 builder.Services.AddSingleton<EmbedSiteProxy>();
 builder.Services.AddSingleton<TransferenciaService>();
 builder.Services.AddSingleton<ReferralIdService>();
@@ -93,46 +92,79 @@ app.UseStaticFiles(new StaticFileOptions
     },
 });
 
-static IResult CredentialsMissing() =>
-    Results.Problem(
-        detail: "Faltan credenciales del portal. Copiá appsettings.local.json.example a appsettings.local.json " +
-                "en la carpeta del proyecto, o usá el mismo archivo en %LOCALAPPDATA%\\ST2\\appsettings.local.json (como ST2 de escritorio).",
+static IResult CredentialsMissing(string? portalId = null)
+{
+    var portalHint = string.IsNullOrWhiteSpace(portalId) ? "" : $" ({portalId})";
+    return Results.Problem(
+        detail: "Faltan credenciales del portal" + portalHint + ". Copiá appsettings.local.json.example a appsettings.local.json " +
+                "en la carpeta del proyecto, o usá el mismo archivo en %LOCALAPPDATA%\\ST2\\appsettings.local.json (como ST2 de escritorio). " +
+                "En Railway podés usar Portals__Bejerman__Email, Portals__Legal__Email, etc.",
         title: "Credenciales no configuradas",
         statusCode: StatusCodes.Status503ServiceUnavailable);
+}
 
-app.MapGet("/api/health", async (PortalSearchService search, AppSettings settings, CancellationToken ct) =>
+app.MapGet("/api/health", async (PortalRegistry registry, string? portal, CancellationToken ct) =>
 {
-    if (!WebSettingsLoader.HasPortalCredentials(settings))
+    async Task<object> CheckOne(string id)
     {
-        return Results.Ok(new
+        var runtime = registry.Resolve(id);
+        if (!registry.HasCredentials(id))
         {
-            connected = false,
-            credentialsConfigured = false,
-            message = "Faltan Email/Password en la configuración.",
-        });
+            return new
+            {
+                id = runtime.Info.Id,
+                label = runtime.Info.Label,
+                connected = false,
+                credentialsConfigured = false,
+                message = "Faltan Email/Password en la configuración.",
+            };
+        }
+
+        try
+        {
+            await runtime.Search.EnsureConnectedAsync(ct);
+            return new
+            {
+                id = runtime.Info.Id,
+                label = runtime.Info.Label,
+                connected = true,
+                credentialsConfigured = true,
+                message = "Conectado al portal.",
+            };
+        }
+        catch (Exception ex)
+        {
+            return new
+            {
+                id = runtime.Info.Id,
+                label = runtime.Info.Label,
+                connected = false,
+                credentialsConfigured = true,
+                message = ex.Message,
+            };
+        }
     }
 
-    try
+    if (!string.IsNullOrWhiteSpace(portal))
     {
-        await search.EnsureConnectedAsync(ct);
-        return Results.Ok(new { connected = true, credentialsConfigured = true, message = "Conectado al portal." });
+        var single = await CheckOne(portal);
+        return Results.Ok(single);
     }
-    catch (Exception ex)
-    {
-        return Results.Ok(new
-        {
-            connected = false,
-            credentialsConfigured = true,
-            message = ex.Message,
-        });
-    }
+
+    var statuses = new List<object>();
+    foreach (var info in registry.List())
+        statuses.Add(await CheckOne(info.Id));
+
+    return Results.Ok(new { portals = statuses });
 });
 
-app.MapGet("/api/app-config", (AppSettings settings, ThomEmbedConfig thomEmbed) => Results.Ok(new
+app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, ThomEmbedConfig thomEmbed) => Results.Ok(new
 {
     settings.ThomTapUrl,
     settings.AiPlatformUrl,
     settings.PortalBaseUrl,
+    defaultPortalId = registry.DefaultId,
+    portals = registry.List().Select(p => new { id = p.Id, label = p.Label }),
     thomZoomFactor = settings.ThomZoomFactor,
     aiPlatformZoomFactor = settings.AiPlatformZoomFactor,
     thomAutoCloseHelpPanel = settings.ThomAutoCloseHelpPanel,
@@ -151,14 +183,18 @@ app.MapGet("/api/types", () =>
 app.MapPost("/api/organize", (List<SearchResult> results) =>
     Results.Ok(new { displayItems = SearchResultOrganizer.Organize(results) }));
 
-app.MapGet("/api/media-proxy", async (string url, PortalMediaProxy proxy, CancellationToken ct) =>
+app.MapGet("/api/media-proxy", async (string url, string? portal, PortalRegistry registry, CancellationToken ct) =>
 {
     if (string.IsNullOrWhiteSpace(url))
         return Results.BadRequest(new { error = "URL requerida." });
 
+    var runtime = !string.IsNullOrWhiteSpace(portal)
+        ? registry.Resolve(portal)
+        : registry.ResolveByMediaUrl(url);
+
     try
     {
-        var result = await proxy.FetchAsync(url, ct);
+        var result = await runtime.Media.FetchAsync(url, ct);
         if (result is null)
             return Results.BadRequest(new { error = "URL no permitida." });
 
@@ -173,12 +209,13 @@ app.MapGet("/api/media-proxy", async (string url, PortalMediaProxy proxy, Cancel
 app.MapGet("/api/search", async (
     string q,
     string? type,
-    PortalSearchService search,
-    AppSettings settings,
+    string? portal,
+    PortalRegistry registry,
     CancellationToken ct) =>
 {
-    if (!WebSettingsLoader.HasPortalCredentials(settings))
-        return CredentialsMissing();
+    var runtime = registry.Resolve(portal);
+    if (!registry.HasCredentials(runtime.Info.Id))
+        return CredentialsMissing(runtime.Info.Id);
 
     var query = (q ?? "").Trim();
     if (query.Length < 2)
@@ -188,7 +225,7 @@ app.MapGet("/api/search", async (
 
     try
     {
-        var results = (await search.SearchAsync(query, type, ct)).ToList();
+        var results = (await runtime.Search.SearchAsync(query, type, ct)).ToList();
         var displayItems = SearchResultOrganizer.Organize(results);
         var years = results
             .Select(r => r.SortYear)
@@ -200,6 +237,7 @@ app.MapGet("/api/search", async (
 
         return Results.Ok(new
         {
+            portalId = runtime.Info.Id,
             results,
             displayItems,
             years,
@@ -220,27 +258,28 @@ app.MapGet("/api/search", async (
 app.MapGet("/api/knowledge/{id:int}/preview", async (
     int id,
     string? type,
-    PortalSearchService search,
-    AppSettings settings,
+    string? portal,
+    PortalRegistry registry,
     HttpContext http,
     CancellationToken ct) =>
 {
-    if (!WebSettingsLoader.HasPortalCredentials(settings))
-        return CredentialsMissing();
+    var runtime = registry.Resolve(portal);
+    if (!registry.HasCredentials(runtime.Info.Id))
+        return CredentialsMissing(runtime.Info.Id);
 
     if (!Enum.TryParse<KnowledgeType>(type, true, out var knowledgeType))
         knowledgeType = KnowledgeType.Faq;
 
     try
     {
-        var item = await search.GetDetailAsync(id, knowledgeType, ct);
+        var item = await runtime.Search.GetDetailAsync(id, knowledgeType, ct);
         var typeLabel = item.Type.ToDisplayName();
-        var media = MediaContentResolver.Resolve(item, settings);
+        var media = MediaContentResolver.Resolve(item, runtime.Settings);
         var html = WebPreviewBuilder.Build(
             item,
             typeLabel,
             media,
-            settings,
+            runtime.Settings,
             WebPreviewBuilder.GetPageOrigin(http.Request));
 
         return Results.Content(html, "text/html; charset=utf-8");
@@ -258,32 +297,36 @@ app.MapGet("/api/knowledge/{id:int}/preview", async (
 app.MapGet("/api/knowledge/{id:int}", async (
     int id,
     string? type,
-    PortalSearchService search,
-    AppSettings settings,
+    string? portal,
+    PortalRegistry registry,
     HttpContext http,
     CancellationToken ct) =>
 {
-    if (!WebSettingsLoader.HasPortalCredentials(settings))
-        return CredentialsMissing();
+    var runtime = registry.Resolve(portal);
+    if (!registry.HasCredentials(runtime.Info.Id))
+        return CredentialsMissing(runtime.Info.Id);
 
     if (!Enum.TryParse<KnowledgeType>(type, true, out var knowledgeType))
         knowledgeType = KnowledgeType.Faq;
 
     try
     {
-        var item = await search.GetDetailAsync(id, knowledgeType, ct);
+        var item = await runtime.Search.GetDetailAsync(id, knowledgeType, ct);
         var typeLabel = item.Type.ToDisplayName();
-        var media = MediaContentResolver.Resolve(item, settings);
+        var media = MediaContentResolver.Resolve(item, runtime.Settings);
         var previewHtml = WebPreviewBuilder.Build(
             item,
             typeLabel,
             media,
-            settings,
+            runtime.Settings,
             WebPreviewBuilder.GetPageOrigin(http.Request));
-        var previewUrl = $"/api/knowledge/{id}/preview?type={Uri.EscapeDataString(knowledgeType.ToString().ToLowerInvariant())}";
+        var portalParam = $"portal={Uri.EscapeDataString(runtime.Info.Id)}&";
+        var previewUrl =
+            $"/api/knowledge/{id}/preview?{portalParam}type={Uri.EscapeDataString(knowledgeType.ToString().ToLowerInvariant())}";
 
         return Results.Ok(new
         {
+            portalId = runtime.Info.Id,
             item,
             typeLabel,
             previewHtml,
