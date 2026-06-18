@@ -37,7 +37,6 @@ const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const thomFrame = document.getElementById("thomFrame");
 const thomEmbedLoading = document.getElementById("thomEmbedLoading");
 const thomDirectGate = document.getElementById("thomDirectGate");
-const thomSsoBtn = document.getElementById("thomSsoBtn");
 const aiFrame = document.getElementById("aiFrame");
 
 let searchTimer = null;
@@ -671,7 +670,7 @@ function measureThomPopupChrome(popup = thomPopup) {
   return THOM_POPUP_CHROME_WITH_URL;
 }
 
-/** Ajuste fino: bajar el popup respecto al borde de .tab-bar */
+/** Offset definitivo del popup THOM respecto al borde de .tab-bar (calibrado en Edge). */
 const THOM_POPUP_TOP_OFFSET = 75;
 
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
@@ -800,18 +799,10 @@ function closeThomPopup() {
 function updateThomDirectUi() {
   const windowMode = isThomWindowMode();
   const embedded = isThomEmbeddedProxy();
-  thomSsoBtn?.classList.toggle("hidden", !windowMode);
-  const reloadBtn = document.getElementById("thomReloadBtn");
-  if (reloadBtn) {
-    reloadBtn.classList.remove("hidden");
-    reloadBtn.textContent = windowMode ? "Recargar THOM" : "Recargar";
-  }
   const openBtn = document.getElementById("thomOpenBtn");
   if (openBtn) {
-    openBtn.classList.toggle("hidden", false);
     openBtn.textContent = windowMode ? "Abrir en pestaña" : "Abrir en navegador";
   }
-  if (thomSsoBtn && windowMode) thomSsoBtn.textContent = "Abrir THOM aquí";
   thomFrame?.classList.toggle("hidden", windowMode);
   thomDirectGate?.classList.toggle("hidden", embedded || !windowMode);
   thomDirectGate?.classList.toggle("embed-panel-active", windowMode && !!(thomPopup && !thomPopup.closed));
@@ -820,7 +811,7 @@ function updateThomDirectUi() {
 function showThomPanelPlaceholder() {
   thomDirectGate?.classList.remove("hidden");
   hideThomLoading();
-  setEmbedHint("thom", "THOM en ventana sobre este panel · VPN activa");
+  setEmbedHint("thom", "THOM en ventana sobre este panel. Necesitas tener ZScaler activado.");
 }
 
 function hideThomDirectGate() {
@@ -866,7 +857,7 @@ function openThomWindow({ reload = false } = {}) {
     updateThomDirectUi();
     alignThomPopupAfterOpen({ afterNavigate: true });
     scheduleThomHelpCollapse(thomPopup);
-    setEmbedHint("thom", "THOM abierto en este espacio. Mantené VPN activa.");
+    setEmbedHint("thom", "THOM abierto en este espacio. Necesitas tener ZScaler activado.");
     return thomPopup;
   };
 
@@ -946,7 +937,7 @@ function showThomLoading(message = "Cargando THOM…") {
   clearTimeout(thomLoadTimer);
   thomLoadTimer = setTimeout(() => {
     if (!thomRendered) {
-      setEmbedHint("thom", "THOM tarda más de lo normal. Verificá VPN y probá «Recargar».");
+      setEmbedHint("thom", "THOM tarda más de lo normal. Verificá ZScaler.");
     }
   }, 20000);
 }
@@ -998,7 +989,7 @@ function scheduleThomBlankCheck(delayMs = 12000) {
         return;
       }
       showThomLoading("THOM no cargó en el panel");
-      setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá VPN, usá «Recargar» o «Abrir en navegador».");
+      setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá ZScaler o usá «Abrir en navegador».");
     } catch {
       showThomLoading("Iniciando sesión corporativa…");
       setEmbedHint("thom", "Autenticando con SSO corporativo…");
@@ -1058,8 +1049,8 @@ function clearEmbedHint(kind) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (el) el.textContent = kind === "thom"
     ? (isThomEmbeddedProxy()
-      ? "THOM embebido · VPN activa · el login SSO puede demorar unos segundos"
-      : "THOM en ventana sobre este panel · VPN activa")
+      ? "THOM embebido · ZScaler activado · el login SSO puede demorar unos segundos"
+      : "THOM en ventana sobre este panel. Necesitas tener ZScaler activado.")
     : "Sesión corporativa · si no carga, «Abrir en navegador»";
 }
 
@@ -1116,22 +1107,7 @@ function initEmbedReminders() {
   initDailyTabReminders();
 }
 
-document.getElementById("thomSsoBtn")?.addEventListener("click", openThomWindow);
 document.getElementById("thomGateOpenBtn")?.addEventListener("click", openThomWindow);
-document.getElementById("thomReloadBtn").addEventListener("click", () => {
-  if (isThomWindowMode()) {
-    if (thomPopup && !thomPopup.closed) {
-      try { thomPopup.location.reload(); } catch { openThomWindow({ reload: true }); }
-      thomPopup.focus();
-      alignThomPopupAfterOpen();
-    } else {
-      openThomWindow({ reload: true });
-    }
-    return;
-  }
-  if (isEmbedFrameEmpty(thomFrame)) loadEmbedFrame("thom", { force: true });
-  else thomFrame.contentWindow?.location.reload();
-});
 document.getElementById("thomOpenBtn").addEventListener("click", openThomBrowserTab);
 document.getElementById("aiReloadBtn").addEventListener("click", () => {
   if (isEmbedFrameEmpty(aiFrame)) loadEmbedFrame("ai", { force: true });
