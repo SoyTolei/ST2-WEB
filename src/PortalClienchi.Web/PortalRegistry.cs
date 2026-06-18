@@ -137,7 +137,8 @@ internal static class PortalSettingsNormalizer
         EnsureProfile(root, "Legal", new PortalProfileSettings
         {
             Label = "LEGAL",
-            ApiBaseUrl = "https://portaldelcliente.thomsonreuters.com.ar:3333",
+            // Misma API REST que Bejerman; el sitio público de LEGAL es otro dominio.
+            ApiBaseUrl = "https://clientes.thomsonreuters.com.ar:3333",
             PortalBaseUrl = "https://portaldelcliente.thomsonreuters.com.ar",
         });
 
@@ -146,6 +147,16 @@ internal static class PortalSettingsNormalizer
             bejerman.Email = root.Email;
         if (string.IsNullOrWhiteSpace(bejerman.Password) && !string.IsNullOrWhiteSpace(root.Password))
             bejerman.Password = root.Password;
+
+        var legal = root.Portals["Legal"];
+        if (string.IsNullOrWhiteSpace(legal.Email) && !string.IsNullOrWhiteSpace(root.Email))
+            legal.Email = root.Email;
+        if (string.IsNullOrWhiteSpace(legal.Password) && !string.IsNullOrWhiteSpace(root.Password))
+            legal.Password = root.Password;
+        if (string.IsNullOrWhiteSpace(legal.Email) && !string.IsNullOrWhiteSpace(bejerman.Email))
+            legal.Email = bejerman.Email;
+        if (string.IsNullOrWhiteSpace(legal.Password) && !string.IsNullOrWhiteSpace(bejerman.Password))
+            legal.Password = bejerman.Password;
 
         root.ApiBaseUrl = bejerman.ApiBaseUrl;
         root.PortalBaseUrl = bejerman.PortalBaseUrl;

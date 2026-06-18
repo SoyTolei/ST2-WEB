@@ -54,6 +54,7 @@ let previewReady = false;
 let appConfig = null;
 let activePortalId = "bejerman";
 
+const portalSistemaBar = document.getElementById("portalSistemaBar");
 const portalSistemaPills = document.getElementById("portalSistemaPills");
 
 const placeholderHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
@@ -1138,6 +1139,7 @@ function switchTab(tabId) {
   });
 
   statusBar.classList.toggle("hidden", tabId !== "portal");
+  portalSistemaBar?.classList.toggle("hidden", tabId !== "portal");
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
 
   if (tabId !== "thom" && isThomWindowMode()) {
