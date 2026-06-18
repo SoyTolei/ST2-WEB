@@ -2,6 +2,10 @@
   --primary: #d64000;
   --primary-glow: rgba(214, 64, 0, 0.45);
   --dark: #1a1f2e;
+  --header-top: #131820;
+  --header-bottom: #1c2433;
+  --header-line: rgba(255, 255, 255, 0.07);
+  --header-accent: rgba(214, 64, 0, 0.55);
   --panel: #f4f6fa;
   --border: #e2e6ef;
   --text-muted: #6b7280;
@@ -26,76 +30,137 @@ html, body {
 .hidden { display: none !important; }
 
 .app-header {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
-  padding: 0 20px;
-  background: var(--dark);
+  height: 64px;
+  padding: 0 22px;
+  background: linear-gradient(180deg, var(--header-top) 0%, var(--header-bottom) 100%);
+  border-bottom: 1px solid var(--header-line);
+  box-shadow: 0 8px 24px rgba(15, 18, 28, 0.18);
+}
+
+.app-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--header-accent) 18%,
+    rgba(255, 122, 51, 0.85) 50%,
+    var(--header-accent) 82%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .brand-home-btn {
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
-  padding: 4px 6px;
+  padding: 5px 12px 5px 5px;
   margin: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.12s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.12s ease;
 }
 
 .brand-home-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .brand-home-btn:active {
-  transform: scale(0.98);
+  transform: translateY(1px);
 }
 
 .brand-home-btn:focus-visible {
-  outline: 2px solid rgba(255, 122, 51, 0.85);
-  outline-offset: 2px;
+  outline: 2px solid rgba(255, 122, 51, 0.75);
+  outline-offset: 3px;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .brand-icon {
+  width: 28px;
+  height: 28px;
   image-rendering: -webkit-optimize-contrast;
 }
 
-.brand-logo {
-  font-size: 32px;
-  font-weight: 700;
-  text-shadow: 0 0 14px rgba(214, 64, 0, 0.6);
+.brand-wordmark {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.brand-st { color: #fff; }
-.brand-two { color: #ff7a33; }
+.brand-logo {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.brand-st {
+  color: #f3f5f8;
+  font-weight: 600;
+}
+
+.brand-two {
+  color: #ff7a33;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
 
 .btn-ghost {
-  border: none;
-  background: transparent;
-  color: #e8eaed;
-  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d8dde7;
+  font-size: 12.5px;
   font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 8px;
+  letter-spacing: 0.02em;
+  padding: 7px 14px;
+  border-radius: 999px;
   cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
   color: #fff;
 }
 
 .main-shell {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 72px - 36px);
+  height: calc(100vh - 64px - 36px);
   padding: 12px 16px 8px;
   min-height: 0;
 }
@@ -854,16 +919,26 @@ body.portal-tab-active .tab-bar {
 
 body.embed-active .main-shell {
   padding: 4px 8px 4px;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 52px);
 }
 
 body.embed-active .app-header {
-  height: 56px;
+  height: 52px;
   padding: 0 14px;
 }
 
+body.embed-active .brand-mark {
+  width: 36px;
+  height: 36px;
+}
+
+body.embed-active .brand-icon {
+  width: 24px;
+  height: 24px;
+}
+
 body.embed-active .brand-logo {
-  font-size: 26px;
+  font-size: 24px;
 }
 
 body.embed-active .tab-bar {
