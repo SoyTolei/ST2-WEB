@@ -811,7 +811,7 @@ function updateThomDirectUi() {
 function showThomPanelPlaceholder() {
   thomDirectGate?.classList.remove("hidden");
   hideThomLoading();
-  setEmbedHint("thom", "THOM en ventana sobre este panel. Necesitas tener ZScaler activado.");
+  setEmbedHint("thom", "Necesitas tener ZScaler activado.");
 }
 
 function hideThomDirectGate() {
@@ -1050,7 +1050,7 @@ function clearEmbedHint(kind) {
   if (el) el.textContent = kind === "thom"
     ? (isThomEmbeddedProxy()
       ? "THOM embebido · ZScaler activado · el login SSO puede demorar unos segundos"
-      : "THOM en ventana sobre este panel. Necesitas tener ZScaler activado.")
+      : "Necesitas tener ZScaler activado.")
     : "Sesión corporativa · si no carga, «Abrir en navegador»";
 }
 
