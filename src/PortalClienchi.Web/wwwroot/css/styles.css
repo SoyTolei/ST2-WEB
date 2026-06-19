@@ -1197,10 +1197,15 @@ body.embed-active .tab-icon {
 .st2-about-signature {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 28px;
-  padding-top: 22px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  text-align: right;
+  width: 100%;
+  box-sizing: border-box;
+  align-self: stretch;
+  flex-shrink: 0;
+  margin-top: 20px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 
