@@ -48,4 +48,20 @@ public static class St2WebBuild
 
         return $"Versión WEB · {monthYear}";
     }
+
+    public static string GetUpdatedLabel()
+    {
+        var updated = GetBuildUpdatedUtc();
+        if (updated is null)
+            return "";
+
+        var culture = new CultureInfo("es-AR");
+        var local = updated.Value.ToLocalTime();
+        var date = local.ToString("d 'de' MMMM yyyy", culture);
+        var shortBuild = GetShortBuild();
+
+        return shortBuild is "local"
+            ? $"Actualizado el {date}"
+            : $"Actualizado el {date} · build {shortBuild}";
+    }
 }

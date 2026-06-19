@@ -1173,6 +1173,68 @@ body.embed-active .tab-icon {
   margin-bottom: 3px;
 }
 
+.st2-about-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.st2-about-badge-new {
+  background: #e8edf3;
+  color: #3d4a5c;
+  border: 1px solid #cfd8e6;
+}
+
+.st2-about-badge-beta {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.st2-about-portal-line {
+  list-style: none;
+  margin-left: -18px;
+  margin-top: 6px;
+}
+
+.st2-about-portal-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.st2-about-tag {
+  display: inline-block;
+  margin: 0 6px 4px 0;
+  padding: 4px 9px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.st2-about-updated {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.st2-about-updated.hidden {
+  display: none;
+}
+
 .st2-about-signature {
   display: flex;
   align-items: center;

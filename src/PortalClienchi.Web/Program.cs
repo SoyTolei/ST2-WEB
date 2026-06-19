@@ -173,6 +173,7 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
     thomProxyReachable = thomEmbed.ProxyReachable,
     webBuild = St2WebBuild.GetBuild(),
     webVersionLabel = St2WebBuild.GetVersionLabel(),
+    webUpdatedLabel = St2WebBuild.GetUpdatedLabel(),
 }));
 
 app.MapGet("/api/types", () =>

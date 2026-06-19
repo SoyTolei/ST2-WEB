@@ -35,6 +35,7 @@ const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
+const aboutUpdatedEl = document.getElementById("st2-about-updated");
 const thomFrame = document.getElementById("thomFrame");
 const thomEmbedLoading = document.getElementById("thomEmbedLoading");
 const thomDirectGate = document.getElementById("thomDirectGate");
@@ -647,6 +648,11 @@ function getAboutVersionLabel() {
 function showAbout() {
   if (aboutTaglineEl) {
     aboutTaglineEl.textContent = getAboutVersionLabel();
+  }
+  if (aboutUpdatedEl) {
+    const updated = appConfig?.webUpdatedLabel?.trim();
+    aboutUpdatedEl.textContent = updated || "";
+    aboutUpdatedEl.classList.toggle("hidden", !updated);
   }
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
