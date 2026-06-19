@@ -1055,7 +1055,9 @@ body.embed-active .tab-icon {
 
 .st2-about-dialog {
   position: relative;
-  width: min(100%, 420px);
+  width: min(100%, 440px);
+  max-height: min(90vh, 680px);
+  overflow: auto;
   background: var(--white);
   border-radius: 16px;
   padding: 28px 28px 24px;
@@ -1127,108 +1129,65 @@ body.embed-active .tab-icon {
 }
 
 .st2-about-accent {
-  height: 3px;
+  height: 2px;
   border-radius: 2px;
-  background: linear-gradient(90deg, var(--primary) 0%, #ff7a33 55%, #7c3aed 100%);
-  margin-bottom: 18px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(214, 64, 0, 0.35) 20%,
+    var(--primary) 50%,
+    rgba(214, 64, 0, 0.35) 80%,
+    transparent 100%
+  );
+  margin-bottom: 16px;
 }
 
 .st2-about-body {
   text-align: left;
 }
 
-.st2-about-section-title {
-  margin: 0 0 10px;
-  font-size: 0.72rem;
+.st2-about-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st2-about-module {
+  padding: 11px 13px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.st2-about-module-title {
+  margin: 0 0 4px;
+  font-size: 0.88rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-
-.st2-about-list {
-  margin: 0;
-  padding: 0 0 0 18px;
-  font-size: 0.9rem;
-  line-height: 1.5;
   color: var(--dark);
+  letter-spacing: 0.01em;
 }
 
-.st2-about-list > li {
-  margin-bottom: 10px;
-}
-
-.st2-about-list > li:last-child {
-  margin-bottom: 0;
-}
-
-.st2-about-list ul {
-  margin: 6px 0 0;
-  padding-left: 18px;
+.st2-about-module-text {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
   color: #4b5563;
-  font-size: 0.86rem;
 }
 
-.st2-about-list li li {
-  margin-bottom: 3px;
-}
-
-.st2-about-badge {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-
-.st2-about-badge-new {
-  background: #e8edf3;
-  color: #3d4a5c;
-  border: 1px solid #cfd8e6;
-}
-
-.st2-about-badge-beta {
-  background: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fcd34d;
-}
-
-.st2-about-portal-line {
-  list-style: none;
-  margin-left: -18px;
-  margin-top: 6px;
-}
-
-.st2-about-portal-label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 0.8rem;
+.st2-about-module-meta {
+  margin: 6px 0 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.4;
   color: #64748b;
 }
 
-.st2-about-tag {
-  display: inline-block;
-  margin: 0 6px 4px 0;
-  padding: 4px 9px;
-  border-radius: 8px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  color: #334155;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
 .st2-about-updated {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  font-size: 0.8rem;
+  margin: 14px 0 0;
+  font-size: 0.76rem;
   color: var(--text-muted);
-  line-height: 1.45;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .st2-about-updated.hidden {
