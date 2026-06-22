@@ -183,7 +183,8 @@ html, body {
 }
 
 body.portal-tab-active .tab-bar {
-  padding-bottom: 58px;
+  margin-bottom: 8px;
+  padding: 4px 4px 46px;
 }
 
 .tab-portal-wrap {
@@ -326,7 +327,7 @@ body.portal-tab-active .tab-bar {
 
 .portal-sistema-bar {
   position: absolute;
-  top: calc(100% + 11px);
+  top: calc(100% + 9px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 12;
@@ -413,8 +414,20 @@ body.portal-tab-active .tab-bar {
 .search-column {
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 14px;
   grid-column: 1;
+}
+
+body.portal-tab-active .panel-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+body.portal-tab-active .search-box,
+body.portal-tab-active .combo-box {
+  padding: 8px 12px;
+  font-size: 14px;
+  margin-bottom: 6px;
 }
 
 .panel-title {
@@ -970,22 +983,31 @@ body.embed-active .main-shell {
   height: calc(100vh - 52px);
 }
 
-body.embed-active .app-header {
+body.portal-tab-active .main-shell {
+  padding: 6px 16px 6px;
+  height: calc(100vh - 52px - 36px);
+}
+
+body.embed-active .app-header,
+body.portal-tab-active .app-header {
   height: 52px;
   padding: 0 14px;
 }
 
-body.embed-active .brand-mark {
+body.embed-active .brand-mark,
+body.portal-tab-active .brand-mark {
   width: 36px;
   height: 36px;
 }
 
-body.embed-active .brand-icon {
+body.embed-active .brand-icon,
+body.portal-tab-active .brand-icon {
   width: 24px;
   height: 24px;
 }
 
-body.embed-active .brand-logo {
+body.embed-active .brand-logo,
+body.portal-tab-active .brand-logo {
   font-size: 24px;
 }
 
@@ -994,12 +1016,14 @@ body.embed-active .tab-bar {
   padding: 4px 4px 2px;
 }
 
-body.embed-active .tab-btn {
+body.embed-active .tab-btn,
+body.portal-tab-active .tab-btn {
   padding: 6px 11px;
   font-size: 12px;
 }
 
-body.embed-active .tab-icon {
+body.embed-active .tab-icon,
+body.portal-tab-active .tab-icon {
   width: 15px;
   height: 15px;
 }
