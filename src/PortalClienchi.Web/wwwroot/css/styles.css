@@ -183,8 +183,8 @@ html, body {
 }
 
 body.portal-tab-active .tab-bar {
-  margin-bottom: 8px;
-  padding: 4px 4px 46px;
+  margin-bottom: 44px;
+  padding: 4px 4px 4px;
 }
 
 .tab-portal-wrap {
@@ -327,7 +327,7 @@ body.portal-tab-active .tab-bar {
 
 .portal-sistema-bar {
   position: absolute;
-  top: calc(100% + 9px);
+  top: calc(100% + 7px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 12;
