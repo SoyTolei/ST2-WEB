@@ -2002,6 +2002,71 @@
   margin-top: 16px;
 }
 
+.op-edit-dialog {
+  width: min(460px, 96vw);
+}
+
+.op-edit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.op-edit-grid .plan-user-label {
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+.op-edit-grid .plan-user-label:first-child {
+  margin-top: 0;
+}
+
+.op-edit-date {
+  width: 100%;
+}
+
+.op-edit-date input[type="date"] {
+  width: 100%;
+  flex: 1;
+}
+
+.op-edit-textarea {
+  width: 100%;
+  min-height: 96px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.92rem;
+  resize: vertical;
+  background: #fff;
+}
+
+.op-edit-textarea:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.op-edit-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.op-edit-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #16a34a;
+  cursor: pointer;
+}
+
 .plan-gestor-ctx {
   position: fixed;
   z-index: 1100;

@@ -994,6 +994,37 @@
     </div>
   </div>
 
+  <div id="op-edit-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="op-edit-title" aria-modal="true">
+    <div class="plan-user-dialog op-edit-dialog">
+      <h3 id="op-edit-title">Editar oportunidad</h3>
+      <p class="plan-user-hint">Modificá los datos y guardá los cambios.</p>
+      <div class="op-edit-grid">
+        <label class="plan-user-label" for="op-edit-fecha">Fecha</label>
+        <div class="plan-gestor-date-wrap op-edit-date" role="button" tabindex="0" aria-label="Elegir fecha">
+          <span class="plan-gestor-date-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <path d="M16 2v4M8 2v4M3 10h18"/>
+            </svg>
+          </span>
+          <input id="op-edit-fecha" type="date" aria-label="Fecha de la oportunidad" tabindex="-1"/>
+        </div>
+        <label class="plan-user-label" for="op-edit-desc">Descripción</label>
+        <textarea id="op-edit-desc" class="op-edit-textarea" rows="4"></textarea>
+        <label class="plan-user-label" for="op-edit-link">Link</label>
+        <input id="op-edit-link" type="text" class="plan-user-input" autocomplete="off" spellcheck="false" placeholder="Pegar link de la oportunidad"/>
+        <label class="op-edit-check">
+          <input id="op-edit-confirmada" type="checkbox"/>
+          <span>Oportunidad confirmada</span>
+        </label>
+      </div>
+      <div class="plan-user-actions">
+        <button type="button" id="op-edit-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="op-edit-save" class="plan-gestor-btn-add">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
   <div id="plan-user-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="plan-user-title" aria-modal="true">
     <div class="plan-user-dialog">
       <h3 id="plan-user-title">Identificá tu usuario</h3>

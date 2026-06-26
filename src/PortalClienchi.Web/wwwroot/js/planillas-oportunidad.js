@@ -284,6 +284,7 @@ function bindGestorEvents() {
   });
 
   bindGestorDatePicker();
+  bindEditModal();
 
   const ctxMenu = document.getElementById("op-gestor-ctx");
   ctxMenu?.querySelectorAll("[data-ctx]").forEach((btn) => {
@@ -613,9 +614,9 @@ function parseGestorFiltro(filtro) {
 
 function parseGestorFechaParts(fecha) {
   const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fecha || "");
-  if (iso) return { year: parseInt(iso[1], 10), month: parseInt(iso[2], 10) };
+  if (iso) return { year: parseInt(iso[1], 10), month: parseInt(iso[2], 10), day: parseInt(iso[3], 10) };
   const dmy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(fecha || "");
-  if (dmy) return { year: parseInt(dmy[3], 10), month: parseInt(dmy[2], 10) };
+  if (dmy) return { year: parseInt(dmy[3], 10), month: parseInt(dmy[2], 10), day: parseInt(dmy[1], 10) };
   return null;
 }
 
@@ -915,23 +916,96 @@ async function confirmarGestorSeleccionado(id = gestorSelectedId) {
   await cargarGestor();
 }
 
+let editGestorId = null;
+
+function gestorFechaToIso(fecha) {
+  const parts = parseGestorFechaParts(fecha);
+  if (!parts) return "";
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day ?? 1).padStart(2, "0")}`;
+}
+
+function openEditModal(item) {
+  editGestorId = item.id;
+  const overlay = document.getElementById("op-edit-overlay");
+  const fecha = document.getElementById("op-edit-fecha");
+  const desc = document.getElementById("op-edit-desc");
+  const link = document.getElementById("op-edit-link");
+  const conf = document.getElementById("op-edit-confirmada");
+  if (fecha) fecha.value = gestorFechaToIso(item.fecha) || "";
+  if (desc) desc.value = item.descripcion || "";
+  if (link) link.value = item.link || "";
+  if (conf) conf.checked = isConfirmada(item);
+  overlay?.classList.remove("hidden");
+  desc?.focus();
+}
+
+function closeEditModal() {
+  editGestorId = null;
+  document.getElementById("op-edit-overlay")?.classList.add("hidden");
+}
+
+async function saveEditModal() {
+  if (editGestorId == null) return;
+  const fecha = document.getElementById("op-edit-fecha")?.value || "";
+  const descripcion = document.getElementById("op-edit-desc")?.value ?? "";
+  const link = document.getElementById("op-edit-link")?.value?.trim() ?? "";
+  const confirmada = !!document.getElementById("op-edit-confirmada")?.checked;
+  const saveBtn = document.getElementById("op-edit-save");
+  if (saveBtn) saveBtn.disabled = true;
+  try {
+    await gestorApiFetch(`/api/planillas/oportunidad/gestor/${editGestorId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fecha, descripcion, link, confirmada }),
+    });
+    closeEditModal();
+    await cargarGestor();
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
+
+function bindEditModal() {
+  const overlay = document.getElementById("op-edit-overlay");
+  if (!overlay || overlay.dataset.bound) return;
+  overlay.dataset.bound = "1";
+  document.getElementById("op-edit-cancel")?.addEventListener("click", closeEditModal);
+  document.getElementById("op-edit-save")?.addEventListener("click", () => void saveEditModal());
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeEditModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.classList.contains("hidden")) closeEditModal();
+  });
+
+  const wrap = overlay.querySelector(".op-edit-date");
+  const input = document.getElementById("op-edit-fecha");
+  if (wrap && input) {
+    const open = () => {
+      try {
+        if (typeof input.showPicker === "function") input.showPicker();
+        else input.focus();
+      } catch {
+        input.focus();
+      }
+    };
+    wrap.addEventListener("click", open);
+    wrap.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        open();
+      }
+    });
+  }
+}
+
 async function editarGestorSeleccionado(id = gestorSelectedId) {
   const item = getGestorItem(id);
   if (!item) {
     alert("Seleccioná una oportunidad para editar.");
     return;
   }
-  const desc = prompt("Descripción", item.descripcion);
-  if (desc === null) return;
-  const link = prompt("Link", item.link);
-  if (link === null) return;
-  const conf = confirm("¿Oportunidad confirmada?");
-  await gestorApiFetch(`/api/planillas/oportunidad/gestor/${item.id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fecha: item.fecha, descripcion: desc, link, confirmada: conf }),
-  });
-  await cargarGestor();
+  openEditModal(item);
 }
 
 async function eliminarGestorSeleccionado(id = gestorSelectedId) {
