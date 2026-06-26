@@ -926,7 +926,7 @@ function updateConfirmActionLabels() {
   const confirmada = item ? isConfirmada(item) : false;
   const btn = document.getElementById("op-gestor-confirmar");
   const ctx = document.getElementById("op-ctx-confirmar");
-  if (btn) btn.textContent = confirmada ? "Desconfirmar" : "Confirmar";
+  if (btn) btn.textContent = confirmada ? "No confirmada" : "Confirmar";
   if (ctx) ctx.textContent = confirmada ? "↩️ Marcar como no confirmada" : "✅ Confirmar oportunidad";
 }
 
