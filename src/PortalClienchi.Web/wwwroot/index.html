@@ -817,7 +817,7 @@
             </div>
 
             <div id="op-gestor-ctx" class="plan-gestor-ctx hidden" role="menu">
-              <button type="button" data-ctx="confirmar">✅ Confirmar oportunidad</button>
+              <button type="button" data-ctx="confirmar" id="op-ctx-confirmar">✅ Confirmar oportunidad</button>
               <hr/>
               <button type="button" data-ctx="abrir">🌐 Abrir en el navegador</button>
               <button type="button" data-ctx="editar">✏️ Editar</button>
@@ -1021,6 +1021,18 @@
       <div class="plan-user-actions">
         <button type="button" id="op-edit-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="op-edit-save" class="plan-gestor-btn-add">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="op-delete-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="op-delete-title" aria-modal="true">
+    <div class="plan-user-dialog op-delete-dialog">
+      <h3 id="op-delete-title">Eliminar oportunidad</h3>
+      <p class="plan-user-hint">¿Seguro que querés eliminar esta oportunidad? Esta acción no se puede deshacer.</p>
+      <p id="op-delete-desc" class="op-delete-desc"></p>
+      <div class="plan-user-actions">
+        <button type="button" id="op-delete-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="op-delete-confirm" class="plan-gestor-btn-red">Eliminar</button>
       </div>
     </div>
   </div>

@@ -285,6 +285,7 @@ function bindGestorEvents() {
 
   bindGestorDatePicker();
   bindEditModal();
+  bindDeleteModal();
 
   const ctxMenu = document.getElementById("op-gestor-ctx");
   ctxMenu?.querySelectorAll("[data-ctx]").forEach((btn) => {
@@ -696,6 +697,8 @@ function renderGestorPage() {
   const nextBtn = document.getElementById("op-gestor-next");
   if (prevBtn) prevBtn.disabled = gestorPagina <= 1;
   if (nextBtn) nextBtn.disabled = gestorPagina >= totalPaginas;
+
+  updateConfirmActionLabels();
 }
 
 function buildGestorRow(r, tbody) {
@@ -742,12 +745,14 @@ function buildGestorRow(r, tbody) {
     gestorSelectedId = r.id;
     tbody.querySelectorAll("tr.selected").forEach((tr) => tr.classList.remove("selected"));
     row.classList.add("selected");
+    updateConfirmActionLabels();
   });
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     gestorSelectedId = r.id;
     tbody.querySelectorAll("tr.selected").forEach((tr) => tr.classList.remove("selected"));
     row.classList.add("selected");
+    updateConfirmActionLabels();
     showGestorContextMenu(e.clientX, e.clientY);
   });
 
@@ -900,8 +905,8 @@ async function confirmarGestorSeleccionado(id = gestorSelectedId) {
     alert("Seleccioná una oportunidad para confirmar.");
     return;
   }
-  if (item.confirmada) return;
 
+  const nuevoEstado = !isConfirmada(item);
   await gestorApiFetch(`/api/planillas/oportunidad/gestor/${item.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -909,11 +914,20 @@ async function confirmarGestorSeleccionado(id = gestorSelectedId) {
       fecha: item.fecha,
       descripcion: item.descripcion,
       link: item.link,
-      confirmada: true,
+      confirmada: nuevoEstado,
       porcentaje: item.porcentaje,
     }),
   });
   await cargarGestor();
+}
+
+function updateConfirmActionLabels() {
+  const item = getGestorItem();
+  const confirmada = item ? isConfirmada(item) : false;
+  const btn = document.getElementById("op-gestor-confirmar");
+  const ctx = document.getElementById("op-ctx-confirmar");
+  if (btn) btn.textContent = confirmada ? "Desconfirmar" : "Confirmar";
+  if (ctx) ctx.textContent = confirmada ? "↩️ Marcar como no confirmada" : "✅ Confirmar oportunidad";
 }
 
 let editGestorId = null;
@@ -1008,16 +1022,62 @@ async function editarGestorSeleccionado(id = gestorSelectedId) {
   openEditModal(item);
 }
 
+let deleteGestorId = null;
+
+function openDeleteModal(item) {
+  deleteGestorId = item.id;
+  const overlay = document.getElementById("op-delete-overlay");
+  const desc = document.getElementById("op-delete-desc");
+  if (desc) {
+    const texto = (item.descripcion || "").trim();
+    const fecha = formatGestorFecha(item.fecha);
+    desc.textContent = texto ? `${fecha ? fecha + " · " : ""}${texto}` : (fecha || "");
+  }
+  overlay?.classList.remove("hidden");
+  document.getElementById("op-delete-cancel")?.focus();
+}
+
+function closeDeleteModal() {
+  deleteGestorId = null;
+  document.getElementById("op-delete-overlay")?.classList.add("hidden");
+}
+
+async function confirmDeleteModal() {
+  if (deleteGestorId == null) return;
+  const id = deleteGestorId;
+  const btn = document.getElementById("op-delete-confirm");
+  if (btn) btn.disabled = true;
+  try {
+    await gestorApiFetch(`/api/planillas/oportunidad/gestor/${id}`, { method: "DELETE" });
+    if (gestorSelectedId === id) gestorSelectedId = null;
+    closeDeleteModal();
+    await cargarGestor();
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function bindDeleteModal() {
+  const overlay = document.getElementById("op-delete-overlay");
+  if (!overlay || overlay.dataset.bound) return;
+  overlay.dataset.bound = "1";
+  document.getElementById("op-delete-cancel")?.addEventListener("click", closeDeleteModal);
+  document.getElementById("op-delete-confirm")?.addEventListener("click", () => void confirmDeleteModal());
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeDeleteModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !overlay.classList.contains("hidden")) closeDeleteModal();
+  });
+}
+
 async function eliminarGestorSeleccionado(id = gestorSelectedId) {
   const item = getGestorItem(id);
   if (!item) {
     alert("Seleccioná una oportunidad para eliminar.");
     return;
   }
-  if (!confirm("¿Eliminar esta oportunidad?")) return;
-  await gestorApiFetch(`/api/planillas/oportunidad/gestor/${item.id}`, { method: "DELETE" });
-  if (gestorSelectedId === item.id) gestorSelectedId = null;
-  await cargarGestor();
+  openDeleteModal(item);
 }
 
 function escapeHtml(s) {

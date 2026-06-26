@@ -2067,6 +2067,22 @@
   cursor: pointer;
 }
 
+.op-delete-desc {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  color: #7f1d1d;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.op-delete-desc:empty {
+  display: none;
+}
+
 .plan-gestor-ctx {
   position: fixed;
   z-index: 1100;
