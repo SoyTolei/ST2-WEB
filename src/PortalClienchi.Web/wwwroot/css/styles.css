@@ -1282,22 +1282,6 @@ body.portal-tab-active .tab-icon {
   flex-shrink: 0;
 }
 
-.st2-about-signature-crest-wrap::before {
-  content: "";
-  position: absolute;
-  inset: -7px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(34, 197, 94, 0.5) 0%,
-    rgba(22, 163, 74, 0.22) 48%,
-    transparent 72%
-  );
-  opacity: 0.4;
-  animation: st2AboutCrestGlow 3.8s ease-in-out infinite;
-  pointer-events: none;
-}
-
 .st2-about-signature-crest-wrap::after {
   content: "";
   position: absolute;
@@ -1305,13 +1289,13 @@ body.portal-tab-active .tab-icon {
   border-radius: 50%;
   background: linear-gradient(
     125deg,
-    transparent 28%,
-    rgba(255, 255, 255, 0.85) 46%,
-    rgba(187, 247, 208, 0.55) 52%,
-    transparent 68%
+    transparent 30%,
+    rgba(255, 255, 255, 0.75) 48%,
+    rgba(255, 255, 255, 0.35) 54%,
+    transparent 70%
   );
   opacity: 0;
-  animation: st2AboutCrestShine 3.8s ease-in-out infinite;
+  animation: st2AboutCrestShine 4.2s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -1322,10 +1306,8 @@ body.portal-tab-active .tab-icon {
   height: 1.4rem;
   object-fit: contain;
   display: block;
-  animation: st2AboutCrestPulse 3.8s ease-in-out infinite;
-  filter:
-    drop-shadow(0 0 7px rgba(34, 197, 94, 0.55))
-    drop-shadow(0 2px 5px rgba(22, 163, 74, 0.45));
+  animation: st2AboutCrestPulse 4.2s ease-in-out infinite;
+  filter: drop-shadow(0 1px 3px rgba(15, 23, 42, 0.22));
 }
 
 .st2-about-signature-bike-track {
@@ -1348,13 +1330,7 @@ body.portal-tab-active .tab-icon {
 
 @keyframes st2AboutCrestPulse {
   0%, 100% { transform: scale(1); }
-  45% { transform: scale(1.1); }
-  55% { transform: scale(1.04); }
-}
-
-@keyframes st2AboutCrestGlow {
-  0%, 100% { opacity: 0.4; transform: scale(0.94); }
-  50% { opacity: 0.95; transform: scale(1.14); }
+  50% { transform: scale(1.06); }
 }
 
 @keyframes st2AboutCrestShine {
