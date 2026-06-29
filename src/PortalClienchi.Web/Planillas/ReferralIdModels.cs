@@ -53,7 +53,7 @@ public sealed class PlanillaTecnicaState
     public bool OptBaseModelo { get; set; }
     public bool OptSoloCliente { get; set; }
     public bool OptReproduceSistematicamente { get; set; }
-    public bool IsComplete => Relevada && ProcesoFuncionaba && ReproduceError && UltimaActualizOk;
+    public bool IsComplete => Relevada && ReproduceError && UltimaActualizOk;
 }
 
 public sealed class OnvioReferralState
