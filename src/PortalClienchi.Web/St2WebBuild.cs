@@ -35,19 +35,7 @@ public static class St2WebBuild
         return null;
     }
 
-    public static string GetVersionLabel()
-    {
-        var updated = GetBuildUpdatedUtc();
-        if (updated is null)
-            return "Versión WEB";
-
-        var local = updated.Value.ToLocalTime();
-        var monthYear = local.ToString("MMMM yyyy", new CultureInfo("es-AR"));
-        if (monthYear.Length > 0)
-            monthYear = char.ToUpper(monthYear[0], new CultureInfo("es-AR")) + monthYear[1..];
-
-        return $"Versión WEB · {monthYear}";
-    }
+    public static string GetVersionLabel() => "Versión WEB";
 
     public static string GetUpdatedLabel()
     {
