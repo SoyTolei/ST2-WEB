@@ -69,6 +69,7 @@ internal sealed class EmbedSiteProxy
         "/api/search",
         "/api/knowledge/",
         "/api/planillas/",
+        "/api/access/",
     ];
 
     private static readonly string[] St2ReservedExact =

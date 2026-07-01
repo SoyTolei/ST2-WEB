@@ -26,15 +26,20 @@ public static class St2AccessAdminAuth
         if (user.Length == 0 || pass.Length == 0)
             return false;
 
-        var userOk = CryptographicOperations.FixedTimeEquals(
-            Encoding.UTF8.GetBytes(user.ToLowerInvariant()),
-            Encoding.UTF8.GetBytes(expectedUser.ToLowerInvariant()));
-
-        var passOk = CryptographicOperations.FixedTimeEquals(
-            Encoding.UTF8.GetBytes(pass),
-            Encoding.UTF8.GetBytes(expectedPass));
+        var userOk = SecureEquals(user.ToLowerInvariant(), expectedUser.ToLowerInvariant());
+        var passOk = SecureEquals(pass, expectedPass);
 
         return userOk && passOk;
+    }
+
+    private static bool SecureEquals(string left, string right)
+    {
+        var leftBytes = Encoding.UTF8.GetBytes(left);
+        var rightBytes = Encoding.UTF8.GetBytes(right);
+        if (leftBytes.Length != rightBytes.Length)
+            return false;
+
+        return CryptographicOperations.FixedTimeEquals(leftBytes, rightBytes);
     }
 
     public static string CreateSessionToken(IConfiguration configuration)
@@ -94,11 +99,13 @@ public static class St2AccessAdminAuth
     {
         var user = FirstNonEmpty(
             Environment.GetEnvironmentVariable("ST2_ACCESS_ADMIN_USER"),
+            Environment.GetEnvironmentVariable("St2AccessAdmin__Username"),
             configuration["ST2_ACCESS_ADMIN_USER"],
             configuration["St2AccessAdmin:Username"]);
 
         var pass = FirstNonEmpty(
             Environment.GetEnvironmentVariable("ST2_ACCESS_ADMIN_PASSWORD"),
+            Environment.GetEnvironmentVariable("St2AccessAdmin__Password"),
             configuration["ST2_ACCESS_ADMIN_PASSWORD"],
             configuration["St2AccessAdmin:Password"]);
 

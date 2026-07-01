@@ -763,6 +763,11 @@ async function submitAccessAdminLogin() {
       credentials: "include",
     });
     const data = await response.json().catch(() => ({}));
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      if (accessAdminError) accessAdminError.textContent = "Respuesta inválida del servidor.";
+      return;
+    }
     if (response.status === 404) {
       if (accessAdminError) {
         accessAdminError.textContent = "Panel no configurado en el servidor (faltan variables de admin).";

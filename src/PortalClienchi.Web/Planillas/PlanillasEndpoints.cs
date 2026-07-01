@@ -375,10 +375,14 @@ public static class PlanillasEndpoints
             return Results.Ok(new { authenticated = St2AccessAdminAuth.IsAuthenticated(config, ctx) });
         });
 
-        app.MapPost("/api/access/admin/session", (HttpContext ctx, IConfiguration config, St2AccessAdminLoginRequest body) =>
+        app.MapPost("/api/access/admin/session", async (HttpContext ctx, IConfiguration config, CancellationToken ct) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
                 return Results.NotFound();
+
+            var body = await ctx.Request.ReadFromJsonAsync<St2AccessAdminLoginRequest>(cancellationToken: ct).ConfigureAwait(false);
+            if (body is null)
+                return Results.BadRequest(new { error = "Datos inválidos." });
 
             if (!St2AccessAdminAuth.ValidateLogin(config, body.Username, body.Password))
             {
