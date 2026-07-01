@@ -1243,6 +1243,125 @@ body.portal-tab-active .tab-icon {
   display: none;
 }
 
+.st2-about-access {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.st2-about-access-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: var(--dark);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.st2-about-access-toggle:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.st2-about-access-toggle[aria-expanded="true"] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+}
+
+.st2-about-access-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #e2e8f0;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.st2-about-access-count.hidden {
+  display: none !important;
+}
+
+.st2-about-access-panel {
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  padding: 10px 12px 12px;
+  background: #fff;
+}
+
+.st2-about-access-panel.hidden {
+  display: none !important;
+}
+
+.st2-about-access-status {
+  margin: 0 0 8px;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.st2-about-access-table-wrap {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.st2-about-access-table-wrap.hidden {
+  display: none !important;
+}
+
+.st2-about-access-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+.st2-about-access-table th,
+.st2-about-access-table td {
+  padding: 7px 8px;
+  text-align: left;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: top;
+}
+
+.st2-about-access-table th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  font-weight: 700;
+  color: #475569;
+  font-size: 0.72rem;
+}
+
+.st2-about-access-table tr:last-child td {
+  border-bottom: none;
+}
+
+.st2-about-access-email {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.st2-about-access-num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: #64748b;
+}
+
 .st2-about-signature {
   display: flex;
   align-items: center;

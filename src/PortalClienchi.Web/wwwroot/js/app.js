@@ -37,6 +37,12 @@ const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const aboutUpdatedEl = document.getElementById("st2-about-updated");
+const aboutAccessToggle = document.getElementById("st2-about-access-toggle");
+const aboutAccessPanel = document.getElementById("st2-about-access-panel");
+const aboutAccessStatus = document.getElementById("st2-about-access-status");
+const aboutAccessBody = document.getElementById("st2-about-access-body");
+const aboutAccessCount = document.getElementById("st2-about-access-count");
+const aboutAccessTableWrap = document.getElementById("st2-about-access-table-wrap");
 const thomFrame = document.getElementById("thomFrame");
 const thomEmbedLoading = document.getElementById("thomEmbedLoading");
 const thomDirectGate = document.getElementById("thomDirectGate");
@@ -646,6 +652,80 @@ function getAboutVersionLabel() {
   return "Versión WEB";
 }
 
+function formatAccessDate(iso) {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleString("es-AR", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+let aboutAccessLoaded = false;
+let aboutAccessLoading = false;
+
+function setAboutAccessOpen(open) {
+  aboutAccessPanel?.classList.toggle("hidden", !open);
+  aboutAccessToggle?.setAttribute("aria-expanded", open ? "true" : "false");
+  if (open && !aboutAccessLoaded && !aboutAccessLoading) {
+    void loadAboutAccessRegistrations();
+  }
+}
+
+async function loadAboutAccessRegistrations() {
+  if (!aboutAccessStatus) return;
+  aboutAccessLoading = true;
+  aboutAccessStatus.textContent = "Cargando…";
+  aboutAccessStatus.classList.remove("hidden");
+  aboutAccessTableWrap?.classList.add("hidden");
+
+  try {
+    const response = await fetch("/api/access/registrations", { credentials: "include" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      aboutAccessStatus.textContent = data.error || "No se pudo cargar la lista.";
+      return;
+    }
+
+    const items = Array.isArray(data.items) ? data.items : [];
+    aboutAccessLoaded = true;
+
+    if (aboutAccessCount) {
+      aboutAccessCount.textContent = String(items.length);
+      aboutAccessCount.classList.toggle("hidden", items.length === 0);
+    }
+
+    if (!items.length) {
+      aboutAccessStatus.textContent = "Todavía no hay accesos registrados.";
+      return;
+    }
+
+    aboutAccessStatus.textContent = `${items.length} usuario${items.length === 1 ? "" : "s"} registrado${items.length === 1 ? "" : "s"}.`;
+    if (aboutAccessBody) {
+      aboutAccessBody.innerHTML = items.map((item) => {
+        const email = item.email || item.Email || "";
+        const lastSeen = item.lastSeenAt || item.LastSeenAt || "";
+        const count = item.loginCount ?? item.LoginCount ?? 0;
+        return `<tr>
+          <td class="st2-about-access-email" title="${escapeHtml(email)}">${escapeHtml(email)}</td>
+          <td>${escapeHtml(formatAccessDate(lastSeen))}</td>
+          <td class="st2-about-access-num">${escapeHtml(String(count))}</td>
+        </tr>`;
+      }).join("");
+    }
+
+    aboutAccessTableWrap?.classList.remove("hidden");
+  } catch {
+    aboutAccessStatus.textContent = "No se pudo contactar al servidor.";
+  } finally {
+    aboutAccessLoading = false;
+  }
+}
+
 function showAbout() {
   if (aboutTaglineEl) {
     aboutTaglineEl.textContent = getAboutVersionLabel();
@@ -667,6 +747,10 @@ function hideAbout() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
+aboutAccessToggle?.addEventListener("click", () => {
+  const open = aboutAccessPanel?.classList.contains("hidden");
+  setAboutAccessOpen(open);
+});
 homeBtn?.addEventListener("click", goHome);
 aboutCloseBtn?.addEventListener("click", hideAbout);
 aboutOverlay?.addEventListener("click", (e) => {
