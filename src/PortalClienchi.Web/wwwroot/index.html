@@ -9,7 +9,8 @@
   <link rel="stylesheet" href="/css/styles.css"/>
   <link rel="stylesheet" href="/css/planillas.css"/>
 </head>
-<body>
+<body class="st2-access-pending">
+  <div id="st2-app-root" class="st2-app-root">
   <header class="app-header">
     <button type="button" class="brand brand-home-btn" id="homeBtn" aria-label="Volver al inicio">
       <span class="brand-mark" aria-hidden="true">
@@ -1048,6 +1049,23 @@
         <button type="button" id="plan-user-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="plan-user-submit" class="plan-gestor-btn-add">Continuar</button>
       </div>
+    </div>
+  </div>
+
+  </div>
+
+  <div id="st2-access-gate" class="st2-access-gate" role="dialog" aria-labelledby="st2-access-title" aria-modal="true">
+    <div class="st2-access-card">
+      <div class="st2-access-brand">
+        <img src="/st2.ico" alt="" width="40" height="40" class="st2-access-icon"/>
+        <h2 id="st2-access-title" class="st2-access-title">ST2</h2>
+      </div>
+      <p class="st2-access-hint">Acceso interno. Ingresá tu correo corporativo para continuar.</p>
+      <label class="st2-access-label" for="st2-access-email">Correo</label>
+      <input id="st2-access-email" type="email" class="st2-access-input" placeholder="nombre.apellido@thomsonreuters.com" autocomplete="email" spellcheck="false"/>
+      <p id="st2-access-error" class="st2-access-error" role="alert"></p>
+      <button type="button" id="st2-access-submit" class="st2-access-submit">Entrar</button>
+      <p class="st2-access-foot">Solo correos <strong>@thomsonreuters.com</strong></p>
     </div>
   </div>
 

@@ -1368,3 +1368,122 @@ body.portal-tab-active .tab-icon {
     opacity: 0;
   }
 }
+
+/* ── Acceso corporativo (gate de entrada) ── */
+body.st2-access-pending .st2-app-root {
+  filter: blur(7px) grayscale(0.45);
+  pointer-events: none;
+  user-select: none;
+}
+
+.st2-access-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.st2-access-gate.hidden {
+  display: none !important;
+}
+
+.st2-access-card {
+  width: min(420px, 96vw);
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 30px 24px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.st2-access-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.st2-access-icon {
+  border-radius: 8px;
+}
+
+.st2-access-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--dark);
+  letter-spacing: -0.02em;
+}
+
+.st2-access-hint {
+  margin: 0 0 18px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.st2-access-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.st2-access-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-size: 0.95rem;
+  color: var(--dark);
+  background: #fff;
+}
+
+.st2-access-input:focus {
+  outline: 2px solid rgba(214, 64, 0, 0.35);
+  border-color: var(--primary);
+}
+
+.st2-access-error {
+  min-height: 1.2em;
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #dc2626;
+}
+
+.st2-access-submit {
+  width: 100%;
+  margin-top: 14px;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+  cursor: pointer;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.st2-access-submit:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.st2-access-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.st2-access-foot {
+  margin: 14px 0 0;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  text-align: center;
+}

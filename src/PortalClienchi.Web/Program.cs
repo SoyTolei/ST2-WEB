@@ -22,6 +22,7 @@ builder.Services.AddSingleton<TransferenciaService>();
 builder.Services.AddSingleton<ReferralIdService>();
 builder.Services.AddSingleton<OportunidadRepository>();
 builder.Services.AddSingleton<OportunidadService>();
+builder.Services.AddSingleton<AppAccessRepository>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -91,6 +92,8 @@ app.UseStaticFiles(new StaticFileOptions
         }
     },
 });
+
+app.UseSt2AccessGate();
 
 static IResult CredentialsMissing(string? portalId = null)
 {

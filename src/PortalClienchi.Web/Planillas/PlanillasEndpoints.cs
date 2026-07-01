@@ -345,7 +345,7 @@ public static class PlanillasEndpoints
             return Results.Ok(new { email, allowedDomain = "thomsonreuters.com" });
         });
 
-        app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body) =>
+        app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body, AppAccessRepository accessRepo) =>
         {
             var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
             if (email is null)
@@ -357,6 +357,7 @@ public static class PlanillasEndpoints
             }
 
             PlanUserIdentity.SetCookie(ctx, email);
+            accessRepo.RecordAccess(email);
             return Results.Ok(new { email });
         });
 
@@ -364,6 +365,21 @@ public static class PlanillasEndpoints
         {
             PlanUserIdentity.ClearCookie(ctx);
             return Results.Ok(new { ok = true });
+        });
+
+        app.MapGet("/api/access/registrations", (HttpContext ctx, AppAccessRepository accessRepo) =>
+        {
+            var usuario = PlanUserIdentity.GetFromRequest(ctx);
+            if (usuario is null)
+                return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            var items = accessRepo.ListAll();
+            return Results.Ok(new
+            {
+                items,
+                total = items.Count,
+                storage = new { ready = accessRepo.StorageReady, path = accessRepo.DatabasePath },
+            });
         });
 
         app.MapGet("/api/planillas/oportunidad/gestor", (

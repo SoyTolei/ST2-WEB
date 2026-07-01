@@ -1,4 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
+import { ensureAppAccess } from "./plan-user.js";
 import {
   initDailyTabReminders,
   refreshBadges,
@@ -1206,9 +1207,14 @@ document.getElementById("aiOpenBtn").addEventListener("click", () => {
 searchInput.addEventListener("input", scheduleSearch);
 typeFilter.addEventListener("change", runSearch);
 
-initEmbedReminders();
-void initPlanillas();
-void bootstrapPortal();
+async function bootstrapApp() {
+  await ensureAppAccess();
+  initEmbedReminders();
+  void initPlanillas();
+  void bootstrapPortal();
+}
+
+void bootstrapApp();
 
 async function bootstrapPortal() {
   showIdleResultsState();
