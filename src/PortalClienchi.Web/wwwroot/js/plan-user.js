@@ -4,7 +4,31 @@ let accessPromise = null;
 let appUnlocked = false;
 
 const SESSION_OPTS = { credentials: "include" };
-const CORPORATE_DOMAIN = "@thomsonreuters.com";
+const ALLOWED_DOMAIN = "thomsonreuters.com";
+
+function isAllowedEmail(email) {
+  const normalized = email.trim().toLowerCase();
+  const at = normalized.lastIndexOf("@");
+  if (at <= 0 || at >= normalized.length - 1) return false;
+  const local = normalized.slice(0, at);
+  const domain = normalized.slice(at + 1);
+  if (!local || local.includes(" ") || local.includes("@")) return false;
+  return domain === ALLOWED_DOMAIN;
+}
+
+function updateSessionEmailDisplay() {
+  const el = document.getElementById("st2-session-email");
+  if (!el) return;
+  if (cachedEmail) {
+    el.textContent = cachedEmail;
+    el.title = cachedEmail;
+    el.classList.remove("hidden");
+  } else {
+    el.textContent = "";
+    el.title = "";
+    el.classList.add("hidden");
+  }
+}
 
 export function isAppAccessGranted() {
   return appUnlocked && !!cachedEmail;
@@ -67,11 +91,11 @@ function showAccessGate(resolve) {
     const email = input.value.trim();
     if (error) error.textContent = "";
     if (!email) {
-      if (error) error.textContent = "Ingresá tu correo corporativo.";
+      if (error) error.textContent = "Ingresá tu correo.";
       return;
     }
-    if (!email.toLowerCase().includes(CORPORATE_DOMAIN)) {
-      if (error) error.textContent = `Solo se permiten correos ${CORPORATE_DOMAIN}`;
+    if (!isAllowedEmail(email)) {
+      if (error) error.textContent = "Correo inválido.";
       return;
     }
 
@@ -228,7 +252,11 @@ function showPlanUserModal(resolve) {
     const email = input.value.trim();
     if (error) error.textContent = "";
     if (!email) {
-      if (error) error.textContent = "Ingresá tu correo corporativo.";
+      if (error) error.textContent = "Ingresá tu correo.";
+      return;
+    }
+    if (!isAllowedEmail(email)) {
+      if (error) error.textContent = "Correo inválido.";
       return;
     }
 
@@ -304,6 +332,7 @@ function showPlanUserModal(resolve) {
 }
 
 function updatePlanUserBadge() {
+  updateSessionEmailDisplay();
   const badge = document.getElementById("op-gestor-user-badge");
   if (!badge) return;
   if (cachedEmail) {

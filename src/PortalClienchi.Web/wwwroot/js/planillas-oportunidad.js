@@ -437,7 +437,7 @@ async function cargarGestor(knownUser = null) {
   const status = document.getElementById("op-gestor-status");
   if (!user) {
     if (status) {
-      status.textContent = "Ingresá tu correo corporativo para ver tus oportunidades.";
+      status.textContent = "Ingresá tu correo para ver tus oportunidades.";
       status.classList.remove("hidden");
     }
     gestorAllItems = [];

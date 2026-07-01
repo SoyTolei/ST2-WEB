@@ -20,7 +20,10 @@
         <span class="brand-logo"><span class="brand-st">ST</span><span class="brand-two">2</span></span>
       </span>
     </button>
-    <button type="button" id="aboutBtn" class="btn-ghost">Acerca de</button>
+    <div class="app-header-right">
+      <span id="st2-session-email" class="st2-session-email hidden" aria-label="Usuario conectado"></span>
+      <button type="button" id="aboutBtn" class="btn-ghost">Acerca de</button>
+    </div>
   </header>
 
   <div class="main-shell">
@@ -1041,9 +1044,9 @@
   <div id="plan-user-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="plan-user-title" aria-modal="true">
     <div class="plan-user-dialog">
       <h3 id="plan-user-title">Identificá tu usuario</h3>
-      <p class="plan-user-hint">Usá tu correo corporativo de Thomson Reuters. Solo vas a ver tus oportunidades.</p>
+      <p class="plan-user-hint">Ingresá tu correo para continuar.</p>
       <label class="plan-user-label" for="plan-user-email">Correo</label>
-      <input id="plan-user-email" type="email" class="plan-user-input" placeholder="nombre.apellido@thomsonreuters.com" autocomplete="email"/>
+      <input id="plan-user-email" type="email" class="plan-user-input" placeholder="correo@empresa.com" autocomplete="email"/>
       <p id="plan-user-error" class="plan-user-error"></p>
       <div class="plan-user-actions">
         <button type="button" id="plan-user-cancel" class="plan-gestor-btn-tool">Cancelar</button>
@@ -1060,12 +1063,11 @@
         <img src="/st2.ico" alt="" width="40" height="40" class="st2-access-icon"/>
         <h2 id="st2-access-title" class="st2-access-title">ST2</h2>
       </div>
-      <p class="st2-access-hint">Acceso interno. Ingresá tu correo corporativo para continuar.</p>
+      <p class="st2-access-hint">Ingresá tu correo para continuar.</p>
       <label class="st2-access-label" for="st2-access-email">Correo</label>
-      <input id="st2-access-email" type="email" class="st2-access-input" placeholder="nombre.apellido@thomsonreuters.com" autocomplete="email" spellcheck="false"/>
+      <input id="st2-access-email" type="email" class="st2-access-input" placeholder="correo@empresa.com" autocomplete="email" spellcheck="false"/>
       <p id="st2-access-error" class="st2-access-error" role="alert"></p>
       <button type="button" id="st2-access-submit" class="st2-access-submit">Entrar</button>
-      <p class="st2-access-foot">Solo correos <strong>@thomsonreuters.com</strong></p>
     </div>
   </div>
 

@@ -42,7 +42,7 @@ public static class St2AccessMiddleware
             ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
             await ctx.Response.WriteAsJsonAsync(new
             {
-                error = "Identificá tu usuario con tu correo corporativo (@thomsonreuters.com).",
+                error = "Identificá tu usuario para continuar.",
             }).ConfigureAwait(false);
         });
 }

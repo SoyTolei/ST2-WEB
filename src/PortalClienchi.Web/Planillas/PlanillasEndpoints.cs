@@ -342,7 +342,7 @@ public static class PlanillasEndpoints
         app.MapGet("/api/planillas/session", (HttpContext ctx) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
-            return Results.Ok(new { email, allowedDomain = "thomsonreuters.com" });
+            return Results.Ok(new { email });
         });
 
         app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body, AppAccessRepository accessRepo) =>
@@ -352,7 +352,7 @@ public static class PlanillasEndpoints
             {
                 return Results.BadRequest(new
                 {
-                    error = "Ingresá un correo corporativo válido (@thomsonreuters.com).",
+                    error = "Correo inválido.",
                 });
             }
 
@@ -371,7 +371,7 @@ public static class PlanillasEndpoints
         {
             var usuario = PlanUserIdentity.GetFromRequest(ctx);
             if (usuario is null)
-                return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             var items = accessRepo.ListAll();
             return Results.Ok(new
@@ -392,7 +392,7 @@ public static class PlanillasEndpoints
         {
             var usuario = PlanUserIdentity.GetFromRequest(ctx);
             if (usuario is null)
-                return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             var items = svc.ListarGestor(usuario, year, month, soloNoConfirmadas);
             return Results.Ok(new
@@ -408,7 +408,7 @@ public static class PlanillasEndpoints
         {
             var usuario = PlanUserIdentity.GetFromRequest(ctx);
             if (usuario is null)
-                return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             var error = OportunidadValidator.ValidateGestorUpsert(body);
             if (error is not null)
@@ -428,7 +428,7 @@ public static class PlanillasEndpoints
         {
             var usuario = PlanUserIdentity.GetFromRequest(ctx);
             if (usuario is null)
-                return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             var error = OportunidadValidator.ValidateGestorUpsert(body);
             if (error is not null)
@@ -444,7 +444,7 @@ public static class PlanillasEndpoints
         {
             var usuario = PlanUserIdentity.GetFromRequest(ctx);
             if (usuario is null)
-                return Results.Json(new { error = "Identificá tu usuario con tu correo corporativo." }, statusCode: StatusCodes.Status401Unauthorized);
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             if (!svc.Eliminar(id, usuario))
                 return Results.NotFound(new { error = "Oportunidad no encontrada." });
