@@ -14,10 +14,19 @@ public static class St2AccessMiddleware
             || HttpMethods.IsDelete(method);
     }
 
+    public static bool IsPublicPath(PathString path, string method)
+    {
+        if (IsSessionExempt(path, method))
+            return true;
+
+        return path.Equals("/api/health", StringComparison.OrdinalIgnoreCase)
+            && HttpMethods.IsGet(method);
+    }
+
     public static bool RequiresAuthenticatedUser(PathString path, string method)
     {
         var value = path.Value ?? "";
-        if (IsSessionExempt(path, method))
+        if (IsPublicPath(path, method))
             return false;
 
         return value.StartsWith("/api/", StringComparison.OrdinalIgnoreCase)
