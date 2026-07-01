@@ -976,33 +976,6 @@
           </article>
         </div>
         <p id="st2-about-updated" class="st2-about-updated hidden" aria-live="polite"></p>
-        <section class="st2-about-access" id="st2-about-access">
-          <button
-            type="button"
-            id="st2-about-access-toggle"
-            class="st2-about-access-toggle"
-            aria-expanded="false"
-            aria-controls="st2-about-access-panel"
-          >
-            <span>Accesos registrados</span>
-            <span id="st2-about-access-count" class="st2-about-access-count hidden"></span>
-          </button>
-          <div id="st2-about-access-panel" class="st2-about-access-panel hidden">
-            <p id="st2-about-access-status" class="st2-about-access-status">Cargando…</p>
-            <div class="st2-about-access-table-wrap hidden" id="st2-about-access-table-wrap">
-              <table class="st2-about-access-table">
-                <thead>
-                  <tr>
-                    <th>Correo</th>
-                    <th>Último acceso</th>
-                    <th>Ingresos</th>
-                  </tr>
-                </thead>
-                <tbody id="st2-about-access-body"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
       </div>
       <div class="st2-about-signature" aria-label="× @LG">
         <span class="st2-about-signature-crest-wrap" aria-hidden="true">
@@ -1082,6 +1055,40 @@
     </div>
   </div>
 
+  </div>
+
+  <div id="st2-access-admin-overlay" class="st2-access-admin-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-admin-title">
+    <div class="st2-access-admin-dialog">
+      <button type="button" id="st2-access-admin-close" class="st2-access-admin-close" aria-label="Cerrar">×</button>
+      <div id="st2-access-admin-login">
+        <h3 id="st2-access-admin-title" class="st2-access-admin-title">Accesos</h3>
+        <label class="st2-access-admin-label" for="st2-access-admin-user">Usuario</label>
+        <input id="st2-access-admin-user" type="text" class="st2-access-admin-input" autocomplete="username" spellcheck="false"/>
+        <label class="st2-access-admin-label" for="st2-access-admin-pass">Contraseña</label>
+        <input id="st2-access-admin-pass" type="password" class="st2-access-admin-input" autocomplete="current-password"/>
+        <p id="st2-access-admin-error" class="st2-access-admin-error" role="alert"></p>
+        <button type="button" id="st2-access-admin-submit" class="st2-access-admin-submit">Ingresar</button>
+      </div>
+      <div id="st2-access-admin-panel" class="st2-access-admin-panel hidden">
+        <div class="st2-access-admin-panel-head">
+          <h3 class="st2-access-admin-title">Accesos registrados</h3>
+          <span id="st2-access-admin-count" class="st2-access-admin-count"></span>
+        </div>
+        <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
+        <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
+          <table class="st2-access-admin-table">
+            <thead>
+              <tr>
+                <th>Correo</th>
+                <th>Último acceso</th>
+                <th>Ingresos</th>
+              </tr>
+            </thead>
+            <tbody id="st2-access-admin-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="st2-access-gate" class="st2-access-gate" role="dialog" aria-labelledby="st2-access-title" aria-modal="true">

@@ -367,18 +367,47 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true });
         });
 
-        app.MapGet("/api/access/registrations", (HttpContext ctx, AppAccessRepository accessRepo) =>
+        app.MapGet("/api/access/admin/session", (HttpContext ctx, IConfiguration config) =>
         {
-            var usuario = PlanUserIdentity.GetFromRequest(ctx);
-            if (usuario is null)
-                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+            if (!St2AccessAdminAuth.IsConfigured(config))
+                return Results.NotFound();
+
+            return Results.Ok(new { authenticated = St2AccessAdminAuth.IsAuthenticated(config, ctx) });
+        });
+
+        app.MapPost("/api/access/admin/session", (HttpContext ctx, IConfiguration config, St2AccessAdminLoginRequest body) =>
+        {
+            if (!St2AccessAdminAuth.IsConfigured(config))
+                return Results.NotFound();
+
+            if (!St2AccessAdminAuth.ValidateLogin(config, body.Username, body.Password))
+            {
+                return Results.Json(new { error = "Usuario o contraseña incorrectos." }, statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+            St2AccessAdminAuth.SetCookie(ctx, config);
+            return Results.Ok(new { ok = true });
+        });
+
+        app.MapDelete("/api/access/admin/session", (HttpContext ctx) =>
+        {
+            St2AccessAdminAuth.ClearCookie(ctx);
+            return Results.Ok(new { ok = true });
+        });
+
+        app.MapGet("/api/access/registrations", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo) =>
+        {
+            if (!St2AccessAdminAuth.IsConfigured(config))
+                return Results.NotFound();
+
+            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
+                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
 
             var items = accessRepo.ListAll();
             return Results.Ok(new
             {
                 items,
                 total = items.Count,
-                storage = new { ready = accessRepo.StorageReady, path = accessRepo.DatabasePath },
             });
         });
 

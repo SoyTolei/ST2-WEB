@@ -22,5 +22,9 @@
     "ApiKey": "gsk_TU_CLAVE_DE_CONSOLE_GROQ",
     "Model": "llama-3.3-70b-versatile",
     "TimeoutSeconds": 90
+  },
+  "St2AccessAdmin": {
+    "Username": "tu-usuario-admin",
+    "Password": "tu-contraseña-admin"
   }
 }

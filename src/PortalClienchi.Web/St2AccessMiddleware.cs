@@ -6,12 +6,21 @@ public static class St2AccessMiddleware
 {
     public static bool IsSessionExempt(PathString path, string method)
     {
-        if (!path.Equals("/api/planillas/session", StringComparison.OrdinalIgnoreCase))
-            return false;
+        if (path.Equals("/api/planillas/session", StringComparison.OrdinalIgnoreCase))
+        {
+            return HttpMethods.IsGet(method)
+                || HttpMethods.IsPost(method)
+                || HttpMethods.IsDelete(method);
+        }
 
-        return HttpMethods.IsGet(method)
-            || HttpMethods.IsPost(method)
-            || HttpMethods.IsDelete(method);
+        if (path.Equals("/api/access/admin/session", StringComparison.OrdinalIgnoreCase))
+        {
+            return HttpMethods.IsGet(method)
+                || HttpMethods.IsPost(method)
+                || HttpMethods.IsDelete(method);
+        }
+
+        return false;
     }
 
     public static bool IsPublicPath(PathString path, string method)
