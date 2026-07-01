@@ -1159,6 +1159,7 @@ body.portal-tab-active .tab-icon {
 .st2-about-icon {
   flex-shrink: 0;
   border-radius: 10px;
+  cursor: default;
 }
 
 .st2-about-title {
@@ -1271,22 +1272,6 @@ body.portal-tab-active .tab-icon {
   border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
-.st2-access-admin-close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  border: none;
-  background: transparent;
-  color: #94a3b8;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.st2-access-admin-close:hover {
-  color: #475569;
-}
-
 .st2-access-admin-title {
   margin: 0 0 14px;
   font-size: 1.05rem;
@@ -1326,7 +1311,7 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-admin-submit {
-  width: 100%;
+  flex: 1;
   border: none;
   border-radius: 8px;
   padding: 10px 16px;
@@ -1335,6 +1320,32 @@ body.portal-tab-active .tab-icon {
   color: #fff;
   background: var(--primary);
   cursor: pointer;
+}
+
+.st2-access-admin-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.st2-access-admin-actions-panel {
+  margin-top: 14px;
+}
+
+.st2-access-admin-cancel {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #475569;
+  background: #fff;
+  cursor: pointer;
+}
+
+.st2-access-admin-cancel:hover {
+  background: #f8fafc;
 }
 
 .st2-access-admin-submit:disabled {

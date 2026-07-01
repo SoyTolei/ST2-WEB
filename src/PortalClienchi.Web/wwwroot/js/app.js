@@ -36,15 +36,17 @@ const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
+const aboutIconEl = document.getElementById("st2-about-icon");
 const aboutUpdatedEl = document.getElementById("st2-about-updated");
 const accessAdminOverlay = document.getElementById("st2-access-admin-overlay");
-const accessAdminClose = document.getElementById("st2-access-admin-close");
 const accessAdminLogin = document.getElementById("st2-access-admin-login");
 const accessAdminPanel = document.getElementById("st2-access-admin-panel");
 const accessAdminUser = document.getElementById("st2-access-admin-user");
 const accessAdminPass = document.getElementById("st2-access-admin-pass");
 const accessAdminError = document.getElementById("st2-access-admin-error");
 const accessAdminSubmit = document.getElementById("st2-access-admin-submit");
+const accessAdminCancel = document.getElementById("st2-access-admin-cancel");
+const accessAdminClosePanel = document.getElementById("st2-access-admin-close-panel");
 const accessAdminStatus = document.getElementById("st2-access-admin-status");
 const accessAdminBody = document.getElementById("st2-access-admin-body");
 const accessAdminCount = document.getElementById("st2-access-admin-count");
@@ -671,28 +673,29 @@ function formatAccessDate(iso) {
   });
 }
 
-const ADMIN_ENTRY_HASH = "#st2-reg";
-const ADMIN_TAGLINE_CLICKS = 5;
-const ADMIN_TAGLINE_WINDOW_MS = 2500;
+const ADMIN_ICON_CLICKS = 5;
+const ADMIN_ICON_WINDOW_MS = 2500;
 
-let adminTaglineClicks = 0;
-let adminTaglineTimer = null;
+let adminIconClicks = 0;
+let adminIconTimer = null;
 let accessAdminLoading = false;
 
-function resetAdminTaglineClicks() {
-  adminTaglineClicks = 0;
-  if (adminTaglineTimer) {
-    clearTimeout(adminTaglineTimer);
-    adminTaglineTimer = null;
+function resetAdminIconClicks() {
+  adminIconClicks = 0;
+  if (adminIconTimer) {
+    clearTimeout(adminIconTimer);
+    adminIconTimer = null;
   }
 }
 
-function registerAdminTaglineClick() {
-  adminTaglineClicks += 1;
-  if (adminTaglineTimer) clearTimeout(adminTaglineTimer);
-  adminTaglineTimer = setTimeout(resetAdminTaglineClicks, ADMIN_TAGLINE_WINDOW_MS);
-  if (adminTaglineClicks >= ADMIN_TAGLINE_CLICKS) {
-    resetAdminTaglineClicks();
+function registerAdminIconClick(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  adminIconClicks += 1;
+  if (adminIconTimer) clearTimeout(adminIconTimer);
+  adminIconTimer = setTimeout(resetAdminIconClicks, ADMIN_ICON_WINDOW_MS);
+  if (adminIconClicks >= ADMIN_ICON_CLICKS) {
+    resetAdminIconClicks();
     void openAccessAdminOverlay();
   }
 }
@@ -718,7 +721,10 @@ async function openAccessAdminOverlay() {
   try {
     const response = await fetch("/api/access/admin/session", { credentials: "include" });
     if (response.status === 404) {
-      hideAccessAdminOverlay();
+      if (accessAdminError) {
+        accessAdminError.textContent = "Panel no configurado en el servidor (faltan variables de admin).";
+      }
+      accessAdminUser?.focus();
       return;
     }
     const data = await response.json().catch(() => ({}));
@@ -757,8 +763,16 @@ async function submitAccessAdminLogin() {
       credentials: "include",
     });
     const data = await response.json().catch(() => ({}));
+    if (response.status === 404) {
+      if (accessAdminError) {
+        accessAdminError.textContent = "Panel no configurado en el servidor (faltan variables de admin).";
+      }
+      return;
+    }
     if (!response.ok) {
-      if (accessAdminError) accessAdminError.textContent = data.error || "Acceso denegado.";
+      if (accessAdminError) {
+        accessAdminError.textContent = data.error || "Usuario o contraseña incorrectos.";
+      }
       return;
     }
     showAccessAdminPanel();
@@ -844,14 +858,12 @@ function hideAbout() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
-aboutTaglineEl?.addEventListener("click", registerAdminTaglineClick);
-accessAdminClose?.addEventListener("click", hideAccessAdminOverlay);
+aboutIconEl?.addEventListener("click", registerAdminIconClick);
+accessAdminCancel?.addEventListener("click", hideAccessAdminOverlay);
+accessAdminClosePanel?.addEventListener("click", hideAccessAdminOverlay);
 accessAdminSubmit?.addEventListener("click", () => { void submitAccessAdminLogin(); });
 accessAdminPass?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") void submitAccessAdminLogin();
-});
-accessAdminOverlay?.addEventListener("click", (e) => {
-  if (e.target === accessAdminOverlay) hideAccessAdminOverlay();
 });
 homeBtn?.addEventListener("click", goHome);
 aboutCloseBtn?.addEventListener("click", hideAbout);
@@ -862,12 +874,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && aboutOverlay && !aboutOverlay.classList.contains("hidden")) {
     hideAbout();
   }
-  if (e.key === "Escape" && accessAdminOverlay && !accessAdminOverlay.classList.contains("hidden")) {
-    hideAccessAdminOverlay();
-  }
-});
-window.addEventListener("hashchange", () => {
-  if (location.hash === ADMIN_ENTRY_HASH) void openAccessAdminOverlay();
 });
 
 document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -1401,9 +1407,6 @@ typeFilter.addEventListener("change", runSearch);
 
 async function bootstrapApp() {
   await ensureAppAccess();
-  if (location.hash === ADMIN_ENTRY_HASH) {
-    void openAccessAdminOverlay();
-  }
   initEmbedReminders();
   void initPlanillas();
   void bootstrapPortal();

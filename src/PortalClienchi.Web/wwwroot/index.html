@@ -947,7 +947,7 @@
     <div class="st2-about-dialog">
       <button type="button" id="st2-about-close" class="st2-about-close" aria-label="Cerrar">×</button>
       <div class="st2-about-head">
-        <img src="/st2.ico" alt="" class="st2-about-icon" width="40" height="40"/>
+        <img src="/st2.ico" alt="" id="st2-about-icon" class="st2-about-icon" width="40" height="40"/>
         <div>
           <h2 id="st2-about-title" class="st2-about-title">Acerca de ST2</h2>
           <p id="st2-about-tagline" class="st2-about-tagline">Versión WEB</p>
@@ -1059,7 +1059,6 @@
 
   <div id="st2-access-admin-overlay" class="st2-access-admin-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-admin-title">
     <div class="st2-access-admin-dialog">
-      <button type="button" id="st2-access-admin-close" class="st2-access-admin-close" aria-label="Cerrar">×</button>
       <div id="st2-access-admin-login">
         <h3 id="st2-access-admin-title" class="st2-access-admin-title">Accesos</h3>
         <label class="st2-access-admin-label" for="st2-access-admin-user">Usuario</label>
@@ -1067,7 +1066,10 @@
         <label class="st2-access-admin-label" for="st2-access-admin-pass">Contraseña</label>
         <input id="st2-access-admin-pass" type="password" class="st2-access-admin-input" autocomplete="current-password"/>
         <p id="st2-access-admin-error" class="st2-access-admin-error" role="alert"></p>
-        <button type="button" id="st2-access-admin-submit" class="st2-access-admin-submit">Ingresar</button>
+        <div class="st2-access-admin-actions">
+          <button type="button" id="st2-access-admin-cancel" class="st2-access-admin-cancel">Cancelar</button>
+          <button type="button" id="st2-access-admin-submit" class="st2-access-admin-submit">Ingresar</button>
+        </div>
       </div>
       <div id="st2-access-admin-panel" class="st2-access-admin-panel hidden">
         <div class="st2-access-admin-panel-head">
@@ -1086,6 +1088,9 @@
             </thead>
             <tbody id="st2-access-admin-body"></tbody>
           </table>
+        </div>
+        <div class="st2-access-admin-actions st2-access-admin-actions-panel">
+          <button type="button" id="st2-access-admin-close-panel" class="st2-access-admin-cancel">Cancelar</button>
         </div>
       </div>
     </div>

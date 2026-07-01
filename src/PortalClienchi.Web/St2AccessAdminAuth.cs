@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
 
+using System.Text.Json.Serialization;
+
 namespace PortalClienchi.Web;
 
 public static class St2AccessAdminAuth
@@ -73,7 +75,7 @@ public static class St2AccessAdminAuth
         {
             HttpOnly = true,
             Secure = secure,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.Lax,
             Path = "/",
             MaxAge = TimeSpan.FromHours(8),
             IsEssential = true,
@@ -91,14 +93,34 @@ public static class St2AccessAdminAuth
     private static (string? User, string? Password) GetCredentials(IConfiguration configuration)
     {
         var user = FirstNonEmpty(
+            Environment.GetEnvironmentVariable("ST2_ACCESS_ADMIN_USER"),
             configuration["ST2_ACCESS_ADMIN_USER"],
             configuration["St2AccessAdmin:Username"]);
 
         var pass = FirstNonEmpty(
+            Environment.GetEnvironmentVariable("ST2_ACCESS_ADMIN_PASSWORD"),
             configuration["ST2_ACCESS_ADMIN_PASSWORD"],
             configuration["St2AccessAdmin:Password"]);
 
-        return (user, pass);
+        return (NormalizeCredential(user), NormalizeCredential(pass));
+    }
+
+    private static string? NormalizeCredential(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        value = value.Trim();
+        if (value.Length >= 2)
+        {
+            if ((value.StartsWith('"') && value.EndsWith('"'))
+                || (value.StartsWith('\'') && value.EndsWith('\'')))
+            {
+                value = value[1..^1].Trim();
+            }
+        }
+
+        return string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
     private static string? FirstNonEmpty(params string?[] values)
@@ -115,6 +137,9 @@ public static class St2AccessAdminAuth
 
 public sealed class St2AccessAdminLoginRequest
 {
+    [JsonPropertyName("username")]
     public string Username { get; set; } = "";
+
+    [JsonPropertyName("password")]
     public string Password { get; set; } = "";
 }
