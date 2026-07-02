@@ -25,7 +25,7 @@ public sealed class AppAccessRepository
 
     public void RecordAccess(string email)
     {
-        if (!StorageReady)
+        if (!StorageReady || AppAccessExclusions.IsExcluded(email))
             return;
 
         var now = UtcNowIso();
@@ -45,7 +45,7 @@ public sealed class AppAccessRepository
 
     public void TouchActivity(string email)
     {
-        if (!StorageReady)
+        if (!StorageReady || AppAccessExclusions.IsExcluded(email))
             return;
 
         var now = UtcNowIso();
@@ -91,9 +91,13 @@ public sealed class AppAccessRepository
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
+            var email = reader.GetString(0);
+            if (AppAccessExclusions.IsExcluded(email))
+                continue;
+
             list.Add(new AppAccessRecordDto
             {
-                Email = reader.GetString(0),
+                Email = email,
                 FirstSeenAt = reader.GetString(1),
                 LastSeenAt = reader.GetString(2),
                 LoginCount = reader.GetInt32(3),
