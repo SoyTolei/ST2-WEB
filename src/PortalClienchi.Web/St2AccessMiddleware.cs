@@ -51,8 +51,10 @@ public static class St2AccessMiddleware
                 return;
             }
 
-            if (PlanUserIdentity.GetFromRequest(ctx) is not null)
+            var email = PlanUserIdentity.GetFromRequest(ctx);
+            if (email is not null)
             {
+                ctx.RequestServices.GetService<AppAccessRepository>()?.TouchActivity(email);
                 await next(ctx).ConfigureAwait(false);
                 return;
             }

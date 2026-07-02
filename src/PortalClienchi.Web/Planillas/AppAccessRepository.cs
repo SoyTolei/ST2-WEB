@@ -28,7 +28,7 @@ public sealed class AppAccessRepository
         if (!StorageReady)
             return;
 
-        var now = DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture);
+        var now = UtcNowIso();
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
@@ -41,6 +41,38 @@ public sealed class AppAccessRepository
         cmd.Parameters.AddWithValue("$email", email);
         cmd.Parameters.AddWithValue("$now", now);
         cmd.ExecuteNonQuery();
+    }
+
+    public void TouchActivity(string email)
+    {
+        if (!StorageReady)
+            return;
+
+        var now = UtcNowIso();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE app_access
+            SET last_seen_at = $now
+            WHERE email = $email
+              AND (
+                julianday($now) - julianday(last_seen_at)
+              ) * 86400 >= 45
+            """;
+        cmd.Parameters.AddWithValue("$email", email);
+        cmd.Parameters.AddWithValue("$now", now);
+        cmd.ExecuteNonQuery();
+    }
+
+    public static bool IsRecentlyActive(string? lastSeenAtIso, TimeSpan window)
+    {
+        if (string.IsNullOrWhiteSpace(lastSeenAtIso))
+            return false;
+
+        if (!DateTime.TryParse(lastSeenAtIso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var lastSeen))
+            return false;
+
+        return DateTime.UtcNow - lastSeen.ToUniversalTime() <= window;
     }
 
     public IReadOnlyList<AppAccessRecordDto> ListAll()
@@ -114,6 +146,9 @@ public sealed class AppAccessRepository
 
         return conn;
     }
+
+    private static string UtcNowIso() =>
+        DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture);
 }
 
 public sealed class AppAccessRecordDto

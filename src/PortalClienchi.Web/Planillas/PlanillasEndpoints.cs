@@ -339,10 +339,23 @@ public static class PlanillasEndpoints
             }
         });
 
-        app.MapGet("/api/planillas/session", (HttpContext ctx) =>
+        app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
+            if (email is not null)
+                accessRepo.TouchActivity(email);
+
             return Results.Ok(new { email });
+        });
+
+        app.MapPost("/api/planillas/session/heartbeat", (HttpContext ctx, AppAccessRepository accessRepo) =>
+        {
+            var email = PlanUserIdentity.GetFromRequest(ctx);
+            if (email is null)
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            accessRepo.TouchActivity(email);
+            return Results.Ok(new { ok = true });
         });
 
         app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body, AppAccessRepository accessRepo) =>
@@ -408,10 +421,23 @@ public static class PlanillasEndpoints
                 return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
 
             var items = accessRepo.ListAll();
+            const int activeMinutes = 5;
+            var activeWindow = TimeSpan.FromMinutes(activeMinutes);
+            var mapped = items.Select(item => new
+            {
+                item.Email,
+                item.FirstSeenAt,
+                item.LastSeenAt,
+                item.LoginCount,
+                isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
+            }).ToList();
+
             return Results.Ok(new
             {
-                items,
-                total = items.Count,
+                items = mapped,
+                total = mapped.Count,
+                activeCount = mapped.Count(i => i.isActive),
+                activeWindowMinutes = activeMinutes,
             });
         });
 

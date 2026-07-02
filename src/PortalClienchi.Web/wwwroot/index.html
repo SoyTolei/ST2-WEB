@@ -1074,15 +1074,19 @@
       <div id="st2-access-admin-panel" class="st2-access-admin-panel hidden">
         <div class="st2-access-admin-panel-head">
           <h3 class="st2-access-admin-title">Accesos registrados</h3>
-          <span id="st2-access-admin-count" class="st2-access-admin-count"></span>
+          <div class="st2-access-admin-badges">
+            <span id="st2-access-admin-active" class="st2-access-admin-active-badge hidden"></span>
+            <span id="st2-access-admin-count" class="st2-access-admin-count"></span>
+          </div>
         </div>
         <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
         <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
           <table class="st2-access-admin-table">
             <thead>
               <tr>
+                <th>Estado</th>
                 <th>Correo</th>
-                <th>Último acceso</th>
+                <th>Última actividad</th>
                 <th>Ingresos</th>
               </tr>
             </thead>
