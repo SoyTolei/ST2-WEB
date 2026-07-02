@@ -1372,6 +1372,47 @@ body.portal-tab-active .tab-icon {
   flex-shrink: 0;
 }
 
+.st2-access-admin-refresh {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.2s ease;
+}
+
+.st2-access-admin-refresh:hover {
+  background: #f8fafc;
+}
+
+.st2-access-admin-refresh.is-loading {
+  animation: st2AccessAdminSpin 0.8s linear infinite;
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+@keyframes st2AccessAdminSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.st2-access-admin-updated {
+  margin: -4px 0 8px;
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.st2-access-admin-updated.hidden {
+  display: none !important;
+}
+
 .st2-access-admin-active-badge {
   font-size: 0.72rem;
   font-weight: 700;

@@ -51,6 +51,8 @@ const accessAdminStatus = document.getElementById("st2-access-admin-status");
 const accessAdminBody = document.getElementById("st2-access-admin-body");
 const accessAdminCount = document.getElementById("st2-access-admin-count");
 const accessAdminActive = document.getElementById("st2-access-admin-active");
+const accessAdminRefresh = document.getElementById("st2-access-admin-refresh");
+const accessAdminUpdated = document.getElementById("st2-access-admin-updated");
 const accessAdminTableWrap = document.getElementById("st2-access-admin-table-wrap");
 const thomFrame = document.getElementById("thomFrame");
 const thomEmbedLoading = document.getElementById("thomEmbedLoading");
@@ -681,6 +683,53 @@ let adminIconClicks = 0;
 let adminIconTimer = null;
 let accessAdminLoading = false;
 let accessAdminPollTimer = null;
+let accessAdminLastSnapshot = "";
+let accessAdminLastActiveEmails = [];
+
+function normalizeAccessAdminItems(items) {
+  return items.map((item) => ({
+    email: item.email || item.Email || "",
+    firstSeenAt: item.firstSeenAt || item.FirstSeenAt || "",
+    lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
+    loginCount: item.loginCount ?? item.LoginCount ?? 0,
+    isActive: !!(item.isActive ?? item.IsActive),
+  }));
+}
+
+function buildAccessAdminSnapshot(items, activeCount) {
+  return JSON.stringify({
+    total: items.length,
+    activeCount,
+    activeEmails: items.filter((item) => item.isActive).map((item) => item.email).sort(),
+    rows: items.map((item) => ({
+      email: item.email,
+      lastSeenAt: item.lastSeenAt,
+      loginCount: item.loginCount,
+      isActive: item.isActive,
+    })),
+  });
+}
+
+function getNewActiveEmails(previousActive, currentActive) {
+  const prev = new Set(previousActive);
+  return currentActive.filter((email) => !prev.has(email));
+}
+
+function resetAccessAdminSnapshot() {
+  accessAdminLastSnapshot = "";
+  accessAdminLastActiveEmails = [];
+}
+
+function setAccessAdminUpdatedHint(text) {
+  if (!accessAdminUpdated) return;
+  if (!text) {
+    accessAdminUpdated.textContent = "";
+    accessAdminUpdated.classList.add("hidden");
+    return;
+  }
+  accessAdminUpdated.textContent = text;
+  accessAdminUpdated.classList.remove("hidden");
+}
 
 function stopAccessAdminPolling() {
   if (accessAdminPollTimer) {
@@ -696,8 +745,8 @@ function startAccessAdminPolling() {
       stopAccessAdminPolling();
       return;
     }
-    void loadAccessAdminRegistrations({ silent: true });
-  }, 30000);
+    void loadAccessAdminRegistrations({ silent: true, auto: true });
+  }, 20000);
 }
 
 function resetAdminIconClicks() {
@@ -763,6 +812,7 @@ async function openAccessAdminOverlay() {
 
 function hideAccessAdminOverlay() {
   stopAccessAdminPolling();
+  resetAccessAdminSnapshot();
   accessAdminOverlay?.classList.add("hidden");
   accessAdminOverlay?.setAttribute("aria-hidden", "true");
 }
@@ -812,9 +862,11 @@ async function submitAccessAdminLogin() {
   }
 }
 
-async function loadAccessAdminRegistrations({ silent = false } = {}) {
+async function loadAccessAdminRegistrations({ silent = false, force = false, auto = false } = {}) {
   if (!accessAdminStatus || accessAdminLoading) return;
   accessAdminLoading = true;
+  accessAdminRefresh?.classList.toggle("is-loading", force || !silent);
+
   if (!silent) {
     accessAdminStatus.textContent = "Cargando…";
     accessAdminTableWrap?.classList.add("hidden");
@@ -837,9 +889,32 @@ async function loadAccessAdminRegistrations({ silent = false } = {}) {
       return;
     }
 
-    const items = Array.isArray(data.items) ? data.items : [];
-    const activeCount = data.activeCount ?? items.filter((item) => item.isActive ?? item.IsActive).length;
+    const rawItems = Array.isArray(data.items) ? data.items : [];
+    const items = normalizeAccessAdminItems(rawItems);
+    const activeCount = data.activeCount ?? items.filter((item) => item.isActive).length;
     const activeMinutes = data.activeWindowMinutes ?? 5;
+    const snapshot = buildAccessAdminSnapshot(items, activeCount);
+    const activeEmails = items.filter((item) => item.isActive).map((item) => item.email);
+    const newActiveEmails = getNewActiveEmails(accessAdminLastActiveEmails, activeEmails);
+
+    if (auto && !force && snapshot === accessAdminLastSnapshot) {
+      return;
+    }
+
+    if (auto && !force && newActiveEmails.length === 0 && snapshot !== accessAdminLastSnapshot) {
+      const prev = JSON.parse(accessAdminLastSnapshot || "{}");
+      const onlyActivityShift = prev.total === items.length
+        && prev.activeCount === activeCount
+        && JSON.stringify(prev.activeEmails || []) === JSON.stringify(activeEmails);
+      if (onlyActivityShift) {
+        accessAdminLastSnapshot = snapshot;
+        accessAdminLastActiveEmails = activeEmails;
+        return;
+      }
+    }
+
+    accessAdminLastSnapshot = snapshot;
+    accessAdminLastActiveEmails = activeEmails;
 
     if (accessAdminCount) accessAdminCount.textContent = String(items.length);
     if (accessAdminActive) {
@@ -854,33 +929,39 @@ async function loadAccessAdminRegistrations({ silent = false } = {}) {
 
     if (!items.length) {
       accessAdminStatus.textContent = "Todavía no hay accesos registrados.";
+      setAccessAdminUpdatedHint("");
       return;
     }
 
     accessAdminStatus.textContent = `${items.length} registrado${items.length === 1 ? "" : "s"} · activos = últimos ${activeMinutes} min`;
+
+    const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+    if (newActiveEmails.length > 0) {
+      setAccessAdminUpdatedHint(`Nuevo activo detectado · ${nowLabel}`);
+    } else {
+      setAccessAdminUpdatedHint(`Actualizado ${nowLabel}`);
+    }
+
     if (accessAdminBody) {
       accessAdminBody.innerHTML = items.map((item) => {
-        const email = item.email || item.Email || "";
-        const lastSeen = item.lastSeenAt || item.LastSeenAt || "";
-        const count = item.loginCount ?? item.LoginCount ?? 0;
-        const isActive = item.isActive ?? item.IsActive ?? false;
-        const statusCell = isActive
+        const statusCell = item.isActive
           ? '<span class="st2-access-admin-live">Activo</span>'
           : '<span class="st2-access-admin-idle">—</span>';
-        return `<tr class="${isActive ? "is-active" : ""}">
+        return `<tr class="${item.isActive ? "is-active" : ""}">
           <td class="st2-access-admin-state">${statusCell}</td>
-          <td class="st2-access-admin-email" title="${escapeHtml(email)}">${escapeHtml(email)}</td>
-          <td>${escapeHtml(formatAccessDate(lastSeen))}</td>
-          <td class="st2-access-admin-num">${escapeHtml(String(count))}</td>
+          <td class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(item.email)}</td>
+          <td>${escapeHtml(formatAccessDate(item.lastSeenAt))}</td>
+          <td class="st2-access-admin-num">${escapeHtml(String(item.loginCount))}</td>
         </tr>`;
       }).join("");
     }
 
     accessAdminTableWrap?.classList.remove("hidden");
   } catch {
-    accessAdminStatus.textContent = "No se pudo contactar al servidor.";
+    if (!silent) accessAdminStatus.textContent = "No se pudo contactar al servidor.";
   } finally {
     accessAdminLoading = false;
+    accessAdminRefresh?.classList.remove("is-loading");
   }
 }
 
@@ -908,6 +989,9 @@ aboutBtn?.addEventListener("click", showAbout);
 aboutIconEl?.addEventListener("click", registerAdminIconClick);
 accessAdminCancel?.addEventListener("click", hideAccessAdminOverlay);
 accessAdminClosePanel?.addEventListener("click", hideAccessAdminOverlay);
+accessAdminRefresh?.addEventListener("click", () => {
+  void loadAccessAdminRegistrations({ silent: true, force: true });
+});
 accessAdminSubmit?.addEventListener("click", () => { void submitAccessAdminLogin(); });
 accessAdminPass?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") void submitAccessAdminLogin();
