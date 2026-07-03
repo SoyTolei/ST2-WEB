@@ -64,21 +64,11 @@ public sealed class AppAccessRepository
         cmd.ExecuteNonQuery();
     }
 
-    public const int NewUserWindowDays = 7;
-
     private static readonly TimeZoneInfo ArgentinaTimeZone = ResolveArgentinaTimeZone();
 
     public static bool IsRecentlyActive(string? lastSeenAtIso, TimeSpan window)
     {
         if (!TryParseUtc(lastSeenAtIso, out var instant))
-            return false;
-
-        return DateTime.UtcNow - instant <= window;
-    }
-
-    public static bool IsRegisteredWithin(string? firstSeenAtIso, TimeSpan window)
-    {
-        if (!TryParseUtc(firstSeenAtIso, out var instant))
             return false;
 
         return DateTime.UtcNow - instant <= window;
@@ -94,19 +84,20 @@ public sealed class AppAccessRepository
         return local.Date == nowLocal.Date;
     }
 
+    public static bool IsNewTodayRegistration(string? firstSeenAtIso, int loginCount)
+    {
+        return loginCount == 1 && IsRegisteredToday(firstSeenAtIso);
+    }
+
     public AccessSummaryDto BuildSummary(IReadOnlyList<AppAccessRecordDto> items, TimeSpan activeWindow)
     {
-        var newWeekWindow = TimeSpan.FromDays(NewUserWindowDays);
         var newToday = 0;
-        var newWeek = 0;
         var active = 0;
 
         foreach (var item in items)
         {
-            if (IsRegisteredToday(item.FirstSeenAt))
+            if (IsNewTodayRegistration(item.FirstSeenAt, item.LoginCount))
                 newToday++;
-            if (IsRegisteredWithin(item.FirstSeenAt, newWeekWindow))
-                newWeek++;
             if (IsRecentlyActive(item.LastSeenAt, activeWindow))
                 active++;
         }
@@ -116,9 +107,7 @@ public sealed class AppAccessRepository
             Total = items.Count,
             ActiveCount = active,
             NewTodayCount = newToday,
-            NewWeekCount = newWeek,
             ActiveWindowMinutes = (int)activeWindow.TotalMinutes,
-            NewUserWindowDays = NewUserWindowDays,
         };
     }
 
@@ -247,7 +236,5 @@ public sealed class AccessSummaryDto
     public int Total { get; init; }
     public int ActiveCount { get; init; }
     public int NewTodayCount { get; init; }
-    public int NewWeekCount { get; init; }
     public int ActiveWindowMinutes { get; init; }
-    public int NewUserWindowDays { get; init; }
 }

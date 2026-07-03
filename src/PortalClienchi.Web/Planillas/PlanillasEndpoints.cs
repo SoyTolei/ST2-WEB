@@ -423,7 +423,6 @@ public static class PlanillasEndpoints
             var items = accessRepo.ListAll();
             const int activeMinutes = 5;
             var activeWindow = TimeSpan.FromMinutes(activeMinutes);
-            var newUserWindow = TimeSpan.FromDays(AppAccessRepository.NewUserWindowDays);
             var mapped = items.Select(item => new
             {
                 item.Email,
@@ -431,8 +430,7 @@ public static class PlanillasEndpoints
                 item.LastSeenAt,
                 item.LoginCount,
                 isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
-                isNewUser = AppAccessRepository.IsRegisteredWithin(item.FirstSeenAt, newUserWindow),
-                isNewToday = AppAccessRepository.IsRegisteredToday(item.FirstSeenAt),
+                isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt, item.LoginCount),
                 isReturning = item.LoginCount > 1,
             }).ToList();
 
@@ -444,9 +442,7 @@ public static class PlanillasEndpoints
                 total = summary.Total,
                 activeCount = summary.ActiveCount,
                 newTodayCount = summary.NewTodayCount,
-                newWeekCount = summary.NewWeekCount,
                 activeWindowMinutes = summary.ActiveWindowMinutes,
-                newUserWindowDays = summary.NewUserWindowDays,
             });
         });
 
