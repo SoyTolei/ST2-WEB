@@ -51,6 +51,8 @@ const accessAdminStatus = document.getElementById("st2-access-admin-status");
 const accessAdminBody = document.getElementById("st2-access-admin-body");
 const accessAdminCount = document.getElementById("st2-access-admin-count");
 const accessAdminActive = document.getElementById("st2-access-admin-active");
+const accessAdminNew = document.getElementById("st2-access-admin-new");
+const accessAdminSummary = document.getElementById("st2-access-admin-summary");
 const accessAdminRefresh = document.getElementById("st2-access-admin-refresh");
 const accessAdminUpdated = document.getElementById("st2-access-admin-updated");
 const accessAdminTableWrap = document.getElementById("st2-access-admin-table-wrap");
@@ -685,6 +687,7 @@ let accessAdminLoading = false;
 let accessAdminPollTimer = null;
 let accessAdminLastSnapshot = "";
 let accessAdminLastActiveEmails = [];
+let accessAdminLastKnownEmails = [];
 
 function normalizeAccessAdminItems(items) {
   return items.map((item) => ({
@@ -693,6 +696,9 @@ function normalizeAccessAdminItems(items) {
     lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
     loginCount: item.loginCount ?? item.LoginCount ?? 0,
     isActive: !!(item.isActive ?? item.IsActive),
+    isNewUser: !!(item.isNewUser ?? item.IsNewUser),
+    isNewToday: !!(item.isNewToday ?? item.IsNewToday),
+    isReturning: !!(item.isReturning ?? item.IsReturning),
   }));
 }
 
@@ -701,11 +707,15 @@ function buildAccessAdminSnapshot(items, activeCount) {
     total: items.length,
     activeCount,
     activeEmails: items.filter((item) => item.isActive).map((item) => item.email).sort(),
+    emails: items.map((item) => item.email).sort(),
     rows: items.map((item) => ({
       email: item.email,
+      firstSeenAt: item.firstSeenAt,
       lastSeenAt: item.lastSeenAt,
       loginCount: item.loginCount,
       isActive: item.isActive,
+      isNewUser: item.isNewUser,
+      isNewToday: item.isNewToday,
     })),
   });
 }
@@ -715,9 +725,46 @@ function getNewActiveEmails(previousActive, currentActive) {
   return currentActive.filter((email) => !prev.has(email));
 }
 
+function getNewRegistrationEmails(previousEmails, currentEmails) {
+  if (!previousEmails.length) return [];
+  const prev = new Set(previousEmails);
+  return currentEmails.filter((email) => !prev.has(email));
+}
+
 function resetAccessAdminSnapshot() {
   accessAdminLastSnapshot = "";
   accessAdminLastActiveEmails = [];
+  accessAdminLastKnownEmails = [];
+}
+
+function setAccessAdminSummary(text) {
+  if (!accessAdminSummary) return;
+  if (!text) {
+    accessAdminSummary.textContent = "";
+    accessAdminSummary.classList.add("hidden");
+    return;
+  }
+  accessAdminSummary.textContent = text;
+  accessAdminSummary.classList.remove("hidden");
+}
+
+function buildAccessAdminSummaryLine(data, items) {
+  const parts = [];
+  const newToday = data.newTodayCount ?? items.filter((item) => item.isNewToday).length;
+  const newWeek = data.newWeekCount ?? items.filter((item) => item.isNewUser).length;
+  const returning = items.filter((item) => item.isReturning).length;
+
+  if (newToday > 0) {
+    parts.push(`${newToday} nuevo${newToday === 1 ? "" : "s"} hoy`);
+  }
+  if (newWeek > 0) {
+    parts.push(`${newWeek} en los últimos ${data.newUserWindowDays ?? 7} días`);
+  }
+  if (returning > 0) {
+    parts.push(`${returning} recurrente${returning === 1 ? "" : "s"}`);
+  }
+
+  return parts.join(" · ");
 }
 
 function setAccessAdminUpdatedHint(text) {
@@ -892,31 +939,47 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     const rawItems = Array.isArray(data.items) ? data.items : [];
     const items = normalizeAccessAdminItems(rawItems);
     const activeCount = data.activeCount ?? items.filter((item) => item.isActive).length;
+    const newTodayCount = data.newTodayCount ?? items.filter((item) => item.isNewToday).length;
+    const newWeekCount = data.newWeekCount ?? items.filter((item) => item.isNewUser).length;
     const activeMinutes = data.activeWindowMinutes ?? 5;
     const snapshot = buildAccessAdminSnapshot(items, activeCount);
     const activeEmails = items.filter((item) => item.isActive).map((item) => item.email);
+    const allEmails = items.map((item) => item.email);
     const newActiveEmails = getNewActiveEmails(accessAdminLastActiveEmails, activeEmails);
+    const newRegistrationEmails = getNewRegistrationEmails(accessAdminLastKnownEmails, allEmails);
 
     if (auto && !force && snapshot === accessAdminLastSnapshot) {
       return;
     }
 
-    if (auto && !force && newActiveEmails.length === 0 && snapshot !== accessAdminLastSnapshot) {
+    if (auto && !force && newActiveEmails.length === 0 && newRegistrationEmails.length === 0 && snapshot !== accessAdminLastSnapshot) {
       const prev = JSON.parse(accessAdminLastSnapshot || "{}");
       const onlyActivityShift = prev.total === items.length
         && prev.activeCount === activeCount
-        && JSON.stringify(prev.activeEmails || []) === JSON.stringify(activeEmails);
+        && JSON.stringify(prev.activeEmails || []) === JSON.stringify(activeEmails)
+        && JSON.stringify(prev.emails || []) === JSON.stringify(allEmails.sort());
       if (onlyActivityShift) {
         accessAdminLastSnapshot = snapshot;
         accessAdminLastActiveEmails = activeEmails;
+        accessAdminLastKnownEmails = allEmails;
         return;
       }
     }
 
     accessAdminLastSnapshot = snapshot;
     accessAdminLastActiveEmails = activeEmails;
+    accessAdminLastKnownEmails = allEmails;
 
     if (accessAdminCount) accessAdminCount.textContent = String(items.length);
+    if (accessAdminNew) {
+      if (newWeekCount > 0) {
+        accessAdminNew.textContent = `${newWeekCount} nuevo${newWeekCount === 1 ? "" : "s"}`;
+        accessAdminNew.classList.remove("hidden");
+      } else {
+        accessAdminNew.textContent = "";
+        accessAdminNew.classList.add("hidden");
+      }
+    }
     if (accessAdminActive) {
       if (activeCount > 0) {
         accessAdminActive.textContent = `${activeCount} activo${activeCount === 1 ? "" : "s"} ahora`;
@@ -929,14 +992,21 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
 
     if (!items.length) {
       accessAdminStatus.textContent = "Todavía no hay accesos registrados.";
+      setAccessAdminSummary("");
       setAccessAdminUpdatedHint("");
       return;
     }
 
     accessAdminStatus.textContent = `${items.length} registrado${items.length === 1 ? "" : "s"} · activos = últimos ${activeMinutes} min`;
+    setAccessAdminSummary(buildAccessAdminSummaryLine(data, items));
 
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-    if (newActiveEmails.length > 0) {
+    if (newRegistrationEmails.length > 0) {
+      const label = newRegistrationEmails.length === 1
+        ? `Nuevo registro: ${newRegistrationEmails[0]}`
+        : `${newRegistrationEmails.length} registros nuevos detectados`;
+      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+    } else if (newActiveEmails.length > 0) {
       setAccessAdminUpdatedHint(`Nuevo activo detectado · ${nowLabel}`);
     } else {
       setAccessAdminUpdatedHint(`Actualizado ${nowLabel}`);
@@ -944,14 +1014,26 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
 
     if (accessAdminBody) {
       accessAdminBody.innerHTML = items.map((item) => {
-        const statusCell = item.isActive
-          ? '<span class="st2-access-admin-live">Activo</span>'
+        const statusParts = [];
+        if (item.isActive) {
+          statusParts.push('<span class="st2-access-admin-live">Activo</span>');
+        }
+        if (item.isNewUser) {
+          statusParts.push('<span class="st2-access-admin-new-user">Nuevo</span>');
+        }
+        const statusCell = statusParts.length
+          ? statusParts.join(" ")
           : '<span class="st2-access-admin-idle">—</span>';
-        return `<tr class="${item.isActive ? "is-active" : ""}">
+        const rowClass = [
+          item.isActive ? "is-active" : "",
+          item.isNewUser ? "is-new" : "",
+        ].filter(Boolean).join(" ");
+        return `<tr class="${rowClass}">
           <td class="st2-access-admin-state">${statusCell}</td>
           <td class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(item.email)}</td>
+          <td>${escapeHtml(formatAccessDate(item.firstSeenAt))}</td>
           <td>${escapeHtml(formatAccessDate(item.lastSeenAt))}</td>
-          <td class="st2-access-admin-num">${escapeHtml(String(item.loginCount))}</td>
+          <td class="st2-access-admin-num" title="${item.isReturning ? "Usuario recurrente" : "Primer ingreso"}">${escapeHtml(String(item.loginCount))}</td>
         </tr>`;
       }).join("");
     }

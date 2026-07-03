@@ -64,15 +64,94 @@ public sealed class AppAccessRepository
         cmd.ExecuteNonQuery();
     }
 
+    public const int NewUserWindowDays = 7;
+
+    private static readonly TimeZoneInfo ArgentinaTimeZone = ResolveArgentinaTimeZone();
+
     public static bool IsRecentlyActive(string? lastSeenAtIso, TimeSpan window)
     {
-        if (string.IsNullOrWhiteSpace(lastSeenAtIso))
+        if (!TryParseUtc(lastSeenAtIso, out var instant))
             return false;
 
-        if (!DateTime.TryParse(lastSeenAtIso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var lastSeen))
+        return DateTime.UtcNow - instant <= window;
+    }
+
+    public static bool IsRegisteredWithin(string? firstSeenAtIso, TimeSpan window)
+    {
+        if (!TryParseUtc(firstSeenAtIso, out var instant))
             return false;
 
-        return DateTime.UtcNow - lastSeen.ToUniversalTime() <= window;
+        return DateTime.UtcNow - instant <= window;
+    }
+
+    public static bool IsRegisteredToday(string? firstSeenAtIso)
+    {
+        if (!TryParseUtc(firstSeenAtIso, out var instant))
+            return false;
+
+        var local = TimeZoneInfo.ConvertTimeFromUtc(instant, ArgentinaTimeZone);
+        var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone);
+        return local.Date == nowLocal.Date;
+    }
+
+    public AccessSummaryDto BuildSummary(IReadOnlyList<AppAccessRecordDto> items, TimeSpan activeWindow)
+    {
+        var newWeekWindow = TimeSpan.FromDays(NewUserWindowDays);
+        var newToday = 0;
+        var newWeek = 0;
+        var active = 0;
+
+        foreach (var item in items)
+        {
+            if (IsRegisteredToday(item.FirstSeenAt))
+                newToday++;
+            if (IsRegisteredWithin(item.FirstSeenAt, newWeekWindow))
+                newWeek++;
+            if (IsRecentlyActive(item.LastSeenAt, activeWindow))
+                active++;
+        }
+
+        return new AccessSummaryDto
+        {
+            Total = items.Count,
+            ActiveCount = active,
+            NewTodayCount = newToday,
+            NewWeekCount = newWeek,
+            ActiveWindowMinutes = (int)activeWindow.TotalMinutes,
+            NewUserWindowDays = NewUserWindowDays,
+        };
+    }
+
+    private static bool TryParseUtc(string? iso, out DateTime instant)
+    {
+        instant = default;
+        if (string.IsNullOrWhiteSpace(iso))
+            return false;
+
+        if (!DateTime.TryParse(iso, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var parsed))
+            return false;
+
+        instant = parsed.ToUniversalTime();
+        return true;
+    }
+
+    private static TimeZoneInfo ResolveArgentinaTimeZone()
+    {
+        foreach (var id in new[] { "America/Argentina/Buenos_Aires", "Argentina Standard Time" })
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(id);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+            }
+            catch (InvalidTimeZoneException)
+            {
+            }
+        }
+
+        return TimeZoneInfo.Utc;
     }
 
     public IReadOnlyList<AppAccessRecordDto> ListAll()
@@ -161,4 +240,14 @@ public sealed class AppAccessRecordDto
     public string FirstSeenAt { get; init; } = "";
     public string LastSeenAt { get; init; } = "";
     public int LoginCount { get; init; }
+}
+
+public sealed class AccessSummaryDto
+{
+    public int Total { get; init; }
+    public int ActiveCount { get; init; }
+    public int NewTodayCount { get; init; }
+    public int NewWeekCount { get; init; }
+    public int ActiveWindowMinutes { get; init; }
+    public int NewUserWindowDays { get; init; }
 }
