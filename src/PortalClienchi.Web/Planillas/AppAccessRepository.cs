@@ -136,9 +136,13 @@ public sealed class AppAccessRepository
         return local.Date == nowLocal.Date;
     }
 
-    public static bool IsNewTodayRegistration(string? firstSeenAtIso, int loginCount)
+    /// <summary>
+    /// Primer día de acceso (zona Argentina), independientemente de cuántas veces ingresó hoy.
+    /// </summary>
+    public static bool IsNewTodayRegistration(string? firstSeenAtIso, int loginCount = 0)
     {
-        return loginCount == 1 && IsRegisteredToday(firstSeenAtIso);
+        _ = loginCount;
+        return IsRegisteredToday(firstSeenAtIso);
     }
 
     public AccessSummaryDto BuildSummary(IReadOnlyList<AppAccessRecordDto> items, TimeSpan activeWindow)
@@ -148,7 +152,7 @@ public sealed class AppAccessRepository
 
         foreach (var item in items)
         {
-            if (IsNewTodayRegistration(item.FirstSeenAt, item.LoginCount))
+            if (IsNewTodayRegistration(item.FirstSeenAt))
                 newToday++;
             if (IsRecentlyActive(item.LastSeenAt, activeWindow))
                 active++;

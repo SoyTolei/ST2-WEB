@@ -430,7 +430,7 @@ public static class PlanillasEndpoints
                 item.LastSeenAt,
                 item.LoginCount,
                 isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
-                isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt, item.LoginCount),
+                isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
                 isReturning = item.LoginCount > 1,
             }).ToList();
 

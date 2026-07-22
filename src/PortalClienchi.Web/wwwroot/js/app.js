@@ -713,7 +713,7 @@ function formatAccessDateCompact(iso) {
 function sortAccessAdminItems(items) {
   return [...items].sort((a, b) => {
     if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
-    if (a.isNewToday !== b.isNewToday) return a.isNewToday ? -1 : 1;
+    if (a.isUnseenNew !== b.isUnseenNew) return a.isUnseenNew ? -1 : 1;
     const aTime = new Date(a.lastSeenAt).getTime();
     const bTime = new Date(b.lastSeenAt).getTime();
     return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
@@ -722,6 +722,7 @@ function sortAccessAdminItems(items) {
 
 const ADMIN_ICON_CLICKS = 5;
 const ADMIN_ICON_WINDOW_MS = 2500;
+const ACCESS_ADMIN_SEEN_KEY = "st2-access-admin-seen-v1";
 
 let adminIconClicks = 0;
 let adminIconTimer = null;
@@ -731,20 +732,76 @@ let accessAdminLastSnapshot = "";
 let accessAdminLastActiveEmails = [];
 let accessAdminLastKnownEmails = [];
 let accessAdminItemsCache = [];
-let accessAdminMeta = { activeCount: 0, newTodayCount: 0, activeWindowMinutes: 5 };
+let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
 let accessAdminFilter = "all";
 let accessAdminQuery = "";
 
+function loadAccessAdminSeenMap() {
+  try {
+    const raw = localStorage.getItem(ACCESS_ADMIN_SEEN_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveAccessAdminSeenMap(map) {
+  try {
+    localStorage.setItem(ACCESS_ADMIN_SEEN_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function hasAdminSeenAccessEmail(email) {
+  if (!email) return false;
+  return !!loadAccessAdminSeenMap()[email.trim().toLowerCase()];
+}
+
+function markAccessAdminEmailsAsSeen(items) {
+  const map = loadAccessAdminSeenMap();
+  const today = new Date().toISOString().slice(0, 10);
+  let changed = false;
+  for (const item of items) {
+    if (!item.isNewToday || !item.email) continue;
+    const key = item.email.trim().toLowerCase();
+    if (!map[key]) {
+      map[key] = today;
+      changed = true;
+    }
+  }
+  for (const key of Object.keys(map)) {
+    const day = String(map[key] || "");
+    if (day.length !== 10) {
+      delete map[key];
+      changed = true;
+      continue;
+    }
+    const ageMs = Date.now() - new Date(`${day}T12:00:00`).getTime();
+    if (Number.isFinite(ageMs) && ageMs > 3 * 86400000) {
+      delete map[key];
+      changed = true;
+    }
+  }
+  if (changed) saveAccessAdminSeenMap(map);
+}
+
 function normalizeAccessAdminItems(items) {
-  return items.map((item) => ({
-    email: item.email || item.Email || "",
-    firstSeenAt: item.firstSeenAt || item.FirstSeenAt || "",
-    lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
-    loginCount: item.loginCount ?? item.LoginCount ?? 0,
-    isActive: !!(item.isActive ?? item.IsActive),
-    isNewToday: !!(item.isNewToday ?? item.IsNewToday),
-    isReturning: !!(item.isReturning ?? item.IsReturning),
-  }));
+  return items.map((item) => {
+    const email = item.email || item.Email || "";
+    const isNewToday = !!(item.isNewToday ?? item.IsNewToday);
+    return {
+      email,
+      firstSeenAt: item.firstSeenAt || item.FirstSeenAt || "",
+      lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
+      loginCount: item.loginCount ?? item.LoginCount ?? 0,
+      isActive: !!(item.isActive ?? item.IsActive),
+      isNewToday,
+      isUnseenNew: isNewToday && !hasAdminSeenAccessEmail(email),
+      isReturning: !!(item.isReturning ?? item.IsReturning),
+    };
+  });
 }
 
 function buildAccessAdminSnapshot(items, activeCount) {
@@ -780,7 +837,7 @@ function resetAccessAdminSnapshot() {
   accessAdminLastActiveEmails = [];
   accessAdminLastKnownEmails = [];
   accessAdminItemsCache = [];
-  accessAdminMeta = { activeCount: 0, newTodayCount: 0, activeWindowMinutes: 5 };
+  accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
   accessAdminFilter = "all";
   accessAdminQuery = "";
   if (accessAdminSearch) accessAdminSearch.value = "";
@@ -802,13 +859,13 @@ function setAccessAdminSummary(text) {
 
 function updateAccessAdminSummaryLine() {
   const total = accessAdminItemsCache.length;
-  const { activeCount, newTodayCount } = accessAdminMeta;
+  const { activeCount } = accessAdminMeta;
   if (!total) {
     setAccessAdminSummary("");
     return;
   }
   setAccessAdminSummary(
-    `${total} registrado${total === 1 ? "" : "s"} · ${activeCount} activo${activeCount === 1 ? "" : "s"} · ${newTodayCount} nuevo${newTodayCount === 1 ? "" : "s"} hoy`
+    `${total} registrado${total === 1 ? "" : "s"} · ${activeCount} activo${activeCount === 1 ? "" : "s"}`
   );
 }
 
@@ -827,7 +884,6 @@ function getFilteredAccessAdminItems() {
   const q = accessAdminQuery.trim().toLowerCase();
   return accessAdminItemsCache.filter((item) => {
     if (accessAdminFilter === "active" && !item.isActive) return false;
-    if (accessAdminFilter === "new" && !item.isNewToday) return false;
     if (q && !item.email.toLowerCase().includes(q)) return false;
     return true;
   });
@@ -860,40 +916,31 @@ function renderAccessAdminTable() {
     if (item.isActive) {
       badges.push('<span class="st2-access-admin-live" title="Activo ahora"><span class="st2-access-admin-live-dot" aria-hidden="true"></span></span>');
     }
-    if (item.isNewToday) {
-      badges.push('<span class="st2-access-admin-new-user">Nuevo</span>');
+    if (item.isUnseenNew) {
+      badges.push('<span class="st2-access-admin-new-user" title="Primer ingreso hoy">Nuevo</span>');
     }
     const badgeHtml = badges.length
       ? `<span class="st2-access-admin-email-badges">${badges.join("")}</span>`
       : "";
     const rowClass = [
       item.isActive ? "is-active" : "",
-      item.isNewToday ? "is-new" : "",
+      item.isUnseenNew ? "is-new" : "",
     ].filter(Boolean).join(" ");
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
-          <button type="button" class="st2-access-admin-email-btn" data-copy-email="${escapeHtml(item.email)}" title="Clic para copiar">${escapeHtml(item.email)}</button>
+          <span class="st2-access-admin-email">${escapeHtml(item.email)}</span>
           ${badgeHtml}
         </div>
       </td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="${item.isReturning ? "Usuario recurrente" : "Primer ingreso"}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">
-        <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar">Eliminar</button>
+        <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(item.email)}">×</button>
       </td>
     </tr>`;
   }).join("");
   accessAdminTableWrap?.classList.remove("hidden");
-}
-
-async function copyAccessAdminEmail(email) {
-  try {
-    await navigator.clipboard.writeText(email);
-    setAccessAdminUpdatedHint(`Copiado: ${email}`);
-  } catch {
-    setAccessAdminUpdatedHint("No se pudo copiar el correo.");
-  }
 }
 
 async function deleteAccessAdminEmail(email) {
@@ -917,7 +964,6 @@ async function deleteAccessAdminEmail(email) {
     }
     accessAdminItemsCache = accessAdminItemsCache.filter((item) => item.email !== email);
     accessAdminMeta.activeCount = accessAdminItemsCache.filter((item) => item.isActive).length;
-    accessAdminMeta.newTodayCount = accessAdminItemsCache.filter((item) => item.isNewToday).length;
     accessAdminLastKnownEmails = accessAdminItemsCache.map((item) => item.email);
     accessAdminLastActiveEmails = accessAdminItemsCache.filter((item) => item.isActive).map((item) => item.email);
     accessAdminLastSnapshot = buildAccessAdminSnapshot(accessAdminItemsCache, accessAdminMeta.activeCount);
@@ -1009,6 +1055,7 @@ async function openAccessAdminOverlay() {
 }
 
 function hideAccessAdminOverlay() {
+  markAccessAdminEmailsAsSeen(accessAdminItemsCache);
   stopAccessAdminPolling();
   resetAccessAdminSnapshot();
   accessAdminOverlay?.classList.add("hidden");
@@ -1091,7 +1138,6 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     const rawItems = Array.isArray(data.items) ? data.items : [];
     const items = sortAccessAdminItems(normalizeAccessAdminItems(rawItems));
     const activeCount = data.activeCount ?? items.filter((item) => item.isActive).length;
-    const newTodayCount = data.newTodayCount ?? items.filter((item) => item.isNewToday).length;
     const snapshot = buildAccessAdminSnapshot(items, activeCount);
     const activeEmails = items.filter((item) => item.isActive).map((item) => item.email);
     const allEmails = items.map((item) => item.email);
@@ -1108,7 +1154,6 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     accessAdminItemsCache = items;
     accessAdminMeta = {
       activeCount,
-      newTodayCount,
       activeWindowMinutes: data.activeWindowMinutes ?? 5,
     };
 
@@ -1182,11 +1227,6 @@ accessAdminSearch?.addEventListener("input", () => {
 accessAdminBody?.addEventListener("click", (e) => {
   const target = e.target;
   if (!(target instanceof HTMLElement)) return;
-  const copyBtn = target.closest("[data-copy-email]");
-  if (copyBtn instanceof HTMLElement) {
-    void copyAccessAdminEmail(copyBtn.dataset.copyEmail || "");
-    return;
-  }
   const deleteBtn = target.closest("[data-delete-email]");
   if (deleteBtn instanceof HTMLElement) {
     void deleteAccessAdminEmail(deleteBtn.dataset.deleteEmail || "");
