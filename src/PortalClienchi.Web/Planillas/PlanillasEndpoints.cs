@@ -446,6 +446,28 @@ public static class PlanillasEndpoints
             });
         });
 
+        app.MapDelete("/api/access/registrations", (
+            HttpContext ctx,
+            IConfiguration config,
+            AppAccessRepository accessRepo,
+            string? email) =>
+        {
+            if (!St2AccessAdminAuth.IsConfigured(config))
+                return Results.NotFound();
+
+            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
+                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            if (string.IsNullOrWhiteSpace(email))
+                return Results.BadRequest(new { error = "Falta el correo." });
+
+            var removed = accessRepo.DeleteByEmail(email);
+            if (removed <= 0)
+                return Results.NotFound(new { error = "No se encontró ese acceso." });
+
+            return Results.Ok(new { ok = true, email = email.Trim().ToLowerInvariant(), removed });
+        });
+
         app.MapGet("/api/planillas/oportunidad/gestor", (
             HttpContext ctx,
             OportunidadService svc,
