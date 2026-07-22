@@ -26,7 +26,7 @@ function isAllowedEmail(email) {
   return !local.split(".").some((token) => BLOCKED_LOCAL_TOKENS.has(token));
 }
 
-const EMAIL_HINT = "Usá tu correo corporativo (ej. juan.perez@thomsonreuters.com).";
+const EMAIL_HINT = "Correo inválido.";
 
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
