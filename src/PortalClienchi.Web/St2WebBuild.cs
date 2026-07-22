@@ -47,6 +47,6 @@ public static class St2WebBuild
         var local = updated.Value.ToLocalTime();
         var date = local.ToString("d 'de' MMMM yyyy", culture);
 
-        return $"Actualizado el {date}";
+        return $"Última actualización: {date}";
     }
 }
