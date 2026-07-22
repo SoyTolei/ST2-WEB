@@ -16,12 +16,64 @@ public sealed class AppAccessRepository
         _dbPath = Path.Combine(st2Dir, "app_access.db");
         EnsureWritable(st2Dir);
         EnsureSchema();
+        PurgeInvalidEmails();
         _logger.LogInformation("Accesos ST2 SQLite en {DbPath}", _dbPath);
     }
 
     public string DatabasePath => _dbPath;
 
     public bool StorageReady { get; private set; }
+
+    /// <summary>
+    /// Elimina registros cuyo correo ya no pasa la validación corporativa
+    /// (p. ej. test.upload@thomsonreuters.com).
+    /// </summary>
+    public int PurgeInvalidEmails()
+    {
+        if (!StorageReady)
+            return 0;
+
+        var removed = 0;
+        using var conn = Open();
+        using (var list = conn.CreateCommand())
+        {
+            list.CommandText = "SELECT email FROM app_access";
+            using var reader = list.ExecuteReader();
+            var toDelete = new List<string>();
+            while (reader.Read())
+            {
+                var email = reader.GetString(0);
+                if (PlanUserIdentity.ValidateAndNormalize(email) is null)
+                    toDelete.Add(email);
+            }
+
+            reader.Close();
+            foreach (var email in toDelete)
+            {
+                using var del = conn.CreateCommand();
+                del.CommandText = "DELETE FROM app_access WHERE email = $email";
+                del.Parameters.AddWithValue("$email", email);
+                removed += del.ExecuteNonQuery();
+            }
+        }
+
+        if (removed > 0)
+            _logger.LogInformation("Purga de accesos inválidos: {Count} eliminado(s)", removed);
+
+        return removed;
+    }
+
+    public int DeleteByEmail(string email)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return 0;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM app_access WHERE lower(email) = lower($email)";
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        return cmd.ExecuteNonQuery();
+    }
 
     public void RecordAccess(string email)
     {

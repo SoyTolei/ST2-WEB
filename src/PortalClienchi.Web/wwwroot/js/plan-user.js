@@ -5,6 +5,14 @@ let appUnlocked = false;
 
 const SESSION_OPTS = { credentials: "include" };
 const ALLOWED_DOMAIN = "thomsonreuters.com";
+const LOCAL_NAME_PATTERN = /^[a-z]{2,}(?:\.[a-z]{2,})+$/;
+const BLOCKED_LOCAL_TOKENS = new Set([
+  "test", "testing", "tester", "upload", "uploads", "admin", "administrator",
+  "user", "users", "usuario", "demo", "dummy", "fake", "sample", "example",
+  "temp", "tmp", "prueba", "guest", "root", "support", "info", "noreply",
+  "no-reply", "mailer", "service", "system", "bot", "null", "undefined",
+  "foo", "bar", "baz", "asdf", "qwerty", "xxx", "abc", "aaa",
+]);
 
 function isAllowedEmail(email) {
   const normalized = email.trim().toLowerCase();
@@ -13,8 +21,12 @@ function isAllowedEmail(email) {
   const local = normalized.slice(0, at);
   const domain = normalized.slice(at + 1);
   if (!local || local.includes(" ") || local.includes("@")) return false;
-  return domain === ALLOWED_DOMAIN;
+  if (domain !== ALLOWED_DOMAIN) return false;
+  if (!LOCAL_NAME_PATTERN.test(local)) return false;
+  return !local.split(".").some((token) => BLOCKED_LOCAL_TOKENS.has(token));
 }
+
+const EMAIL_HINT = "Usá tu correo corporativo (ej. juan.perez@thomsonreuters.com).";
 
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
@@ -95,7 +107,7 @@ function showAccessGate(resolve) {
       return;
     }
     if (!isAllowedEmail(email)) {
-      if (error) error.textContent = "Correo inválido.";
+      if (error) error.textContent = EMAIL_HINT;
       return;
     }
 
@@ -123,7 +135,7 @@ function showAccessGate(resolve) {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      if (error) error.textContent = data.error || "Correo no válido.";
+      if (error) error.textContent = data.error || EMAIL_HINT;
       submit.disabled = false;
       return;
     }
@@ -256,7 +268,7 @@ function showPlanUserModal(resolve) {
       return;
     }
     if (!isAllowedEmail(email)) {
-      if (error) error.textContent = "Correo inválido.";
+      if (error) error.textContent = EMAIL_HINT;
       return;
     }
 
@@ -285,7 +297,7 @@ function showPlanUserModal(resolve) {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      if (error) error.textContent = data.error || "Correo no válido.";
+      if (error) error.textContent = data.error || EMAIL_HINT;
       return;
     }
 

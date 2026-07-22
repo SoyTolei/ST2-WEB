@@ -365,7 +365,7 @@ public static class PlanillasEndpoints
             {
                 return Results.BadRequest(new
                 {
-                    error = "Correo inválido.",
+                    error = "Usá tu correo corporativo (ej. juan.perez@thomsonreuters.com).",
                 });
             }
 
