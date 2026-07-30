@@ -429,6 +429,7 @@ public static class PlanillasEndpoints
                 item.FirstSeenAt,
                 item.LastSeenAt,
                 item.LoginCount,
+                item.DisplayName,
                 isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
                 isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
                 isReturning = item.LoginCount > 1,
@@ -466,6 +467,34 @@ public static class PlanillasEndpoints
                 return Results.NotFound(new { error = "No se encontró ese acceso." });
 
             return Results.Ok(new { ok = true, email = email.Trim().ToLowerInvariant(), removed });
+        });
+
+        app.MapPatch("/api/access/registrations", async (
+            HttpContext ctx,
+            IConfiguration config,
+            AppAccessRepository accessRepo,
+            CancellationToken ct) =>
+        {
+            if (!St2AccessAdminAuth.IsConfigured(config))
+                return Results.NotFound();
+
+            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
+                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            var body = await ctx.Request.ReadFromJsonAsync<AccessDisplayNameRequest>(cancellationToken: ct).ConfigureAwait(false);
+            if (body is null || string.IsNullOrWhiteSpace(body.Email))
+                return Results.BadRequest(new { error = "Falta el correo." });
+
+            var updated = accessRepo.UpdateDisplayName(body.Email, body.DisplayName);
+            if (updated <= 0)
+                return Results.NotFound(new { error = "No se encontró ese acceso." });
+
+            return Results.Ok(new
+            {
+                ok = true,
+                email = body.Email.Trim().ToLowerInvariant(),
+                displayName = string.IsNullOrWhiteSpace(body.DisplayName) ? null : body.DisplayName.Trim(),
+            });
         });
 
         app.MapGet("/api/planillas/oportunidad/gestor", (

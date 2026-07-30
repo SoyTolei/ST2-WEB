@@ -1,6 +1,14 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess } from "./plan-user.js";
 import {
+  ACCESS_NAME_PARTICLES,
+  ACCESS_NAME_ALIASES,
+  foldAccessName,
+  isAccessGivenName,
+  isAccessSurname,
+  isAccessKnownNamePart,
+} from "./access-name-dict.js";
+import {
   initDailyTabReminders,
   refreshBadges,
   startEngagementTimer,
@@ -665,142 +673,14 @@ function getAboutVersionLabel() {
   return "Versión WEB";
 }
 
-const ACCESS_NAME_PARTICLES = new Set([
-  "de", "del", "la", "las", "los", "y", "e", "da", "do", "das", "dos",
-  "van", "von", "di", "le", "du", "san", "santa",
-]);
-
-/** Formas canónicas de display (clave sin acento). */
-const ACCESS_NAME_ALIASES = {
-  ma: "María",
-  maria: "María",
-  jose: "José",
-  jesus: "Jesús",
-  angel: "Ángel",
-  angeles: "Ángeles",
-  monica: "Mónica",
-  martin: "Martín",
-  andres: "Andrés",
-  ramon: "Ramón",
-  raul: "Raúl",
-  adrian: "Adrián",
-  julian: "Julián",
-  sebastian: "Sebastián",
-  nicolas: "Nicolás",
-  lucia: "Lucía",
-  sofia: "Sofía",
-  agustin: "Agustín",
-  tomas: "Tomás",
-  benjamin: "Benjamín",
-  hermes: "Hermes",
-  vanesa: "Vanesa",
-  vanessa: "Vanessa",
-  georgina: "Georgina",
-  munoz: "Muñoz",
-  velasquez: "Velázquez",
-  velazquez: "Velázquez",
-  garcia: "García",
-  gomez: "Gómez",
-  lopez: "López",
-  martinez: "Martínez",
-  hernandez: "Hernández",
-  sanchez: "Sánchez",
-  perez: "Pérez",
-  ramirez: "Ramírez",
-  rodriguez: "Rodríguez",
-  fernandez: "Fernández",
-  alvarez: "Álvarez",
-  gutierrez: "Gutiérrez",
-  jimenez: "Jiménez",
-  vazquez: "Vázquez",
-  ibanez: "Ibáñez",
-  nunez: "Núñez",
-  peña: "Peña",
-  pena: "Peña",
-};
-
-const ACCESS_GIVEN_NAMES = new Set([
-  "jose", "maria", "ma", "luis", "carlos", "antonio", "francisco", "juan", "jesus",
-  "angel", "manuel", "miguel", "pedro", "pablo", "andres", "diego", "martin",
-  "alejandro", "sebastian", "fernando", "ricardo", "daniel", "david", "jorge",
-  "raul", "adrian", "julian", "ana", "lucia", "laura", "carmen", "sofia",
-  "valentina", "camila", "paula", "florencia", "agustin", "nicolas", "tomas",
-  "ignacio", "santiago", "mateo", "benjamin", "gabriel", "emilia", "martina",
-  "vanesa", "vanessa", "georgina", "andrea", "silvia", "claudia", "monica",
-  "veronica", "cecilia", "romina", "natalia", "carolina", "daniela", "mariana",
-  "julieta", "agustina", "melina", "soledad", "patricia", "alejandra", "gabriela",
-  "lorena", "silvana", "viviana", "yesica", "jessica", "jennifer", "nancy",
-  "beatriz", "graciela", "norma", "susana", "elena", "ines", "iris", "ivana",
-  "jimena", "joaquin", "leonardo", "lucas", "marcos", "matias", "maxi", "maximiliano",
-  "oscar", "hector", "edgar", "eduardo", "enrique", "esteban", "facundo", "federico",
-  "german", "gonzalo", "guillermo", "hernan", "horacio", "hugo", "ivan", "javier",
-  "jonathan", "kevin", "leandro", "marcelo", "mario", "mauricio", "nelson", "omar",
-  "orlando", "osvaldo", "pato", "patricio", "raul", "roberto", "rodolfo", "rodrigo",
-  "ruben", "sergio", "victor", "walter", "william", "cristina", "debora", "elisa",
-  "erica", "erika", "eugenia", "fabiana", "gisela", "gladys", "ines", "karina",
-  "leticia", "liliana", "magali", "marcela", "mercedes", "miriam", "noelia", "nora",
-  "pamela", "raquel", "rocio", "roxana", "silvina", "stefania", "tamara", "virginia",
-  "yamila", "yesica", "zoe", "bruno", "franco", "thiago", "bautista", "benicio",
-  "valentin", "antonella", "constanza", "milagros", "morena", "abril", "ayana",
-]);
-
-const ACCESS_SURNAMES = new Set([
-  "garcia", "gomez", "lopez", "martinez", "hernandez", "sanchez", "perez", "romero",
-  "gonzalez", "rodriguez", "fernandez", "alvarez", "gutierrez", "jimenez", "ruiz",
-  "diaz", "torres", "ramirez", "flores", "acosta", "benitez", "castro", "dominguez",
-  "suarez", "vazquez", "ramos", "blanco", "molina", "ortega", "delgado", "cruz",
-  "morales", "reyes", "aguirre", "medina", "silva", "vargas", "mendez", "aguilar",
-  "castillo", "guerrero", "rojas", "soto", "contreras", "figueroa", "herrera",
-  "ibanez", "nunez", "pena", "peña", "munoz", "velasquez", "velazquez", "vega",
-  "campos", "navarro", "serrano", "mendoza", "guzman", "ponce", "luna", "cabrera",
-  "franco", "paz", "rivas", "salas", "salazar", "sandoval", "espinoza", "espinosa",
-  "correa", "cardozo", "cardenas", "avalos", "avila", "ayala", "bustos", "cano",
-  "carrizo", "chavez", "cisneros", "cohen", "colina", "cordoba", "coronel", "cuesta",
-  "duarte", "escobar", "espinal", "fonseca", "fuentes", "galvez", "gallo", "gimenez",
-  "godoy", "guerra", "ibarra", "juarez", "lara", "leiva", "leon", "lobo", "lozano",
-  "maciel", "maldonado", "marquez", "mejia", "miranda", "montoya", "mora", "moreira",
-  "moya", "nieto", "oliva", "ojeda", "olivares", "ortiz", "ospina", "padrino",
-  "palacios", "paredes", "parra", "pasquale", "pastor", "peralta", "pereyra",
-  "pinero", "pizarro", "plata", "prado", "prieto", "quiroga", "quintero", "quiros",
-  "rangel", "reda", "riera", "rios", "rivera", "rivero", "robles", "roca", "roca",
-  "rojo", "rosales", "rosas", "rubio", "ruiz", "saavedra", "sosa", "sotelo",
-  "tapia", "toledo", "trujillo", "ulloa", "uria", "uribe", "valdez", "valencia",
-  "valenzuela", "valle", "varela", "vasquez", "vera", "vidal", "villalba", "villar",
-  "villareal", "villarroel", "yanez", "zambrano", "zamora", "zapata", "zarate",
-  "alonso", "caballero", "calvo", "camacho", "carrera", "cortes", "cuesta", "duro",
-  "estero", "galindo", "iglesias", "marin", "montero", "moreno", "nogueira", "nolan",
-  "oliva", "pardo", "querido", "rojo", "solano", "solis", "tello", "ulloa",
-]);
-
-function foldAccessName(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-function isAccessGivenName(folded) {
-  return ACCESS_GIVEN_NAMES.has(folded) || ACCESS_GIVEN_NAME_HINTS.has(folded);
-}
-
-function isAccessSurname(folded) {
-  return ACCESS_SURNAMES.has(folded);
-}
-
-function isAccessKnownNamePart(folded) {
-  return ACCESS_NAME_PARTICLES.has(folded)
-    || isAccessGivenName(folded)
-    || isAccessSurname(folded)
-    || !!ACCESS_NAME_ALIASES[folded];
-}
-
 /**
  * Parte tokens pegados sin separador: vanesageorgina → vanesa + georgina,
  * velasquezmunoz → velasquez + munoz.
+ * Acepta corte si ambos son conocidos, o si uno es conocido y el otro parece nombre.
  */
-function splitGluedAccessNamePart(raw) {
+function splitGluedAccessNamePart(raw, depth = 0) {
   const token = String(raw || "").trim();
-  if (!token) return [];
+  if (!token || depth > 2) return token ? [token] : [];
   const folded = foldAccessName(token).replace(/^\d+|\d+$/g, "");
   if (folded.length < 8) return [token];
   if (isAccessKnownNamePart(folded)) return [token];
@@ -815,17 +695,23 @@ function splitGluedAccessNamePart(raw) {
     const rightGiven = isAccessGivenName(right);
     const leftSur = isAccessSurname(left);
     const rightSur = isAccessSurname(right);
-    if (!(leftGiven || leftSur) || !(rightGiven || rightSur)) continue;
+    const leftOk = leftGiven || leftSur;
+    const rightOk = rightGiven || rightSur;
+    const leftLooks = leftOk || (left.length >= 4 && /^[a-z]+$/.test(left));
+    const rightLooks = rightOk || (right.length >= 4 && /^[a-z]+$/.test(right));
+
+    if (!leftOk && !rightOk) continue;
+    if (!leftLooks || !rightLooks) continue;
 
     let score = 0;
-    if (leftGiven) score += 3;
-    if (rightGiven) score += 3;
-    if (leftSur) score += 2;
-    if (rightSur) score += 2;
+    if (leftGiven) score += 4;
+    if (rightGiven) score += 4;
+    if (leftSur) score += 3;
+    if (rightSur) score += 3;
+    if (leftOk && rightOk) score += 5;
     if (leftGiven && rightGiven) score += 3;
     if (leftSur && rightSur) score += 3;
     if (leftGiven && rightSur) score += 2;
-    // Preferí cortes más equilibrados
     score += 1 - Math.abs(left.length - right.length) / folded.length;
 
     if (score > bestScore) {
@@ -836,12 +722,10 @@ function splitGluedAccessNamePart(raw) {
 
   if (!best) return [token];
 
-  // Si el resto aún está pegado (3 nombres), intentá partir de nuevo el lado largo
-  return best.flatMap((piece, idx) => {
+  return best.flatMap((piece) => {
     const f = foldAccessName(piece);
-    if (piece.length >= 10 && !isAccessKnownNamePart(f) && idx === best.length - 1) {
-      const again = splitGluedAccessNamePart(piece);
-      return again.length > 1 ? again : [piece];
+    if (piece.length >= 8 && !isAccessKnownNamePart(f)) {
+      return splitGluedAccessNamePart(piece, depth + 1);
     }
     return [piece];
   });
@@ -854,7 +738,6 @@ function titleAccessNameToken(raw) {
   const lower = foldAccessName(token);
   if (ACCESS_NAME_ALIASES[lower]) return ACCESS_NAME_ALIASES[lower];
 
-  // Compound hyphenated: ana-maria → Ana-Maria
   if (token.includes("-")) {
     return token
       .split("-")
@@ -865,19 +748,14 @@ function titleAccessNameToken(raw) {
   }
 
   if (ACCESS_NAME_PARTICLES.has(lower)) return lower;
-
-  // Initials: j → J
   if (lower.length === 1) return lower.toUpperCase();
 
-  // Mc/Mac prefixes
   if (/^mc[a-z]/i.test(lower)) {
     return `Mc${lower.slice(2, 3).toUpperCase()}${lower.slice(3)}`;
   }
   if (/^mac[a-z]{2,}/i.test(lower)) {
     return `Mac${lower.slice(3, 4).toUpperCase()}${lower.slice(4)}`;
   }
-
-  // O'Brien style
   if (/^o'[a-z]/i.test(lower)) {
     return `O'${lower.slice(2, 3).toUpperCase()}${lower.slice(3)}`;
   }
@@ -894,24 +772,6 @@ function tokenizeAccessEmailLocal(local) {
     .flatMap((part) => splitGluedAccessNamePart(part));
 }
 
-const ACCESS_GIVEN_NAME_HINTS = new Set([
-  "jose", "josé", "maria", "maría", "ma", "luis", "carlos", "antonio", "francisco",
-  "juan", "jesus", "jesús", "angel", "ángel", "manuel", "miguel", "pedro", "pablo",
-  "andres", "andrés", "diego", "martin", "martín", "alejandro", "sebastian", "sebastián",
-  "fernando", "ricardo", "daniel", "david", "jorge", "raul", "raúl", "adrian", "adrián",
-  "ana", "lucia", "lucía", "laura", "carmen", "sofia", "sofía", "valentina", "camila",
-  "paula", "florencia", "agustin", "agustín", "nicolas", "nicolás", "tomás", "tomas",
-  "ignacio", "santiago", "mateo", "benjamín", "benjamin", "gabriel", "emilia", "martina",
-  "vanesa", "vanessa", "georgina", "andrea", "claudia", "monica", "veronica", "cecilia",
-]);
-
-/**
- * Heurística LATAM/corporativa sobre local-part:
- * 1 → nombre
- * 2 → nombre + apellido
- * 3 → si el del medio parece segundo nombre: N1 N2 A; si no: N A1 A2
- * 4+ → nombre(s) + apellido + segundo apellido (últimos 2 = apellidos)
- */
 function parseAccessNameFromEmail(email) {
   const local = String(email || "").split("@")[0].trim();
   const rawParts = tokenizeAccessEmailLocal(local);
@@ -949,7 +809,6 @@ function parseAccessNameFromEmail(email) {
     secondLastName = parts[parts.length - 1];
   }
 
-  // Repegar partículas al apellido siguiente: "de" + "la" + "Cruz" → "de la Cruz"
   const ordered = [firstName, secondName, lastName, secondLastName].filter(Boolean);
   const merged = [];
   for (let i = 0; i < ordered.length; i++) {
@@ -987,7 +846,9 @@ function parseAccessNameFromEmail(email) {
   };
 }
 
-function formatAccessDisplayName(email) {
+function formatAccessDisplayName(email, override) {
+  const custom = String(override || "").trim();
+  if (custom) return custom;
   return parseAccessNameFromEmail(email).display;
 }
 
@@ -1117,8 +978,10 @@ function normalizeAccessAdminItems(items) {
   return items.map((item) => {
     const email = item.email || item.Email || "";
     const isNewToday = !!(item.isNewToday ?? item.IsNewToday);
+    const displayNameOverride = (item.displayName ?? item.DisplayName ?? "").trim() || null;
     return {
       email,
+      displayNameOverride,
       firstSeenAt: item.firstSeenAt || item.FirstSeenAt || "",
       lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
       loginCount: item.loginCount ?? item.LoginCount ?? 0,
@@ -1143,6 +1006,7 @@ function buildAccessAdminSnapshot(items, activeCount) {
       loginCount: item.loginCount,
       isActive: item.isActive,
       isNewToday: item.isNewToday,
+      displayNameOverride: item.displayNameOverride || "",
     })),
   });
 }
@@ -1212,7 +1076,7 @@ function getFilteredAccessAdminItems() {
     if (accessAdminFilter === "active" && !item.isActive) return false;
     if (q) {
       const email = item.email.toLowerCase();
-      const name = formatAccessDisplayName(item.email).toLowerCase();
+      const name = formatAccessDisplayName(item.email, item.displayNameOverride).toLowerCase();
       if (!email.includes(q) && !name.includes(q)) return false;
     }
     return true;
@@ -1256,12 +1120,16 @@ function renderAccessAdminTable() {
       item.isActive ? "is-active" : "",
       item.isUnseenNew ? "is-new" : "",
     ].filter(Boolean).join(" ");
-    const displayName = formatAccessDisplayName(item.email);
+    const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
+    const editClass = item.displayNameOverride
+      ? "st2-access-admin-edit is-custom"
+      : "st2-access-admin-edit";
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
           <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
+          <button type="button" class="${editClass}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}">✎</button>
         </div>
       </td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
@@ -1274,9 +1142,51 @@ function renderAccessAdminTable() {
   accessAdminTableWrap?.classList.remove("hidden");
 }
 
+async function editAccessAdminDisplayName(email) {
+  if (!email) return;
+  const current = accessAdminItemsCache.find((item) => item.email === email);
+  const suggested = formatAccessDisplayName(email, current?.displayNameOverride);
+  const next = window.prompt(
+    `Nombre visible para ${email}\n(dejá vacío para volver al automático)`,
+    suggested,
+  );
+  if (next === null) return;
+
+  const displayName = next.trim();
+  try {
+    const response = await fetch("/api/access/registrations", {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, displayName: displayName || null }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showAccessAdminLogin();
+      if (accessAdminError) accessAdminError.textContent = "Sesión expirada. Volvé a ingresar.";
+      return;
+    }
+    if (!response.ok) {
+      setAccessAdminUpdatedHint(data.error || "No se pudo guardar el nombre.");
+      return;
+    }
+    accessAdminItemsCache = accessAdminItemsCache.map((item) => (
+      item.email === email
+        ? { ...item, displayNameOverride: displayName || null }
+        : item
+    ));
+    accessAdminLastSnapshot = buildAccessAdminSnapshot(accessAdminItemsCache, accessAdminMeta.activeCount);
+    renderAccessAdminTable();
+    setAccessAdminUpdatedHint(displayName ? `Nombre guardado: ${displayName}` : "Nombre automático restaurado.");
+  } catch {
+    setAccessAdminUpdatedHint("No se pudo contactar al servidor.");
+  }
+}
+
 async function deleteAccessAdminEmail(email) {
   if (!email) return;
-  const name = formatAccessDisplayName(email);
+  const current = accessAdminItemsCache.find((item) => item.email === email);
+  const name = formatAccessDisplayName(email, current?.displayNameOverride);
   if (!confirm(`¿Eliminar el acceso de ${name}?\n${email}`)) return;
 
   try {
@@ -1559,6 +1469,11 @@ accessAdminSearch?.addEventListener("input", () => {
 accessAdminBody?.addEventListener("click", (e) => {
   const target = e.target;
   if (!(target instanceof HTMLElement)) return;
+  const editBtn = target.closest("[data-edit-email]");
+  if (editBtn instanceof HTMLElement) {
+    void editAccessAdminDisplayName(editBtn.dataset.editEmail || "");
+    return;
+  }
   const deleteBtn = target.closest("[data-delete-email]");
   if (deleteBtn instanceof HTMLElement) {
     void deleteAccessAdminEmail(deleteBtn.dataset.deleteEmail || "");

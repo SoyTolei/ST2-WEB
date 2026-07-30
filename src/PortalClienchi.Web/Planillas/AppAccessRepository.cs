@@ -75,6 +75,24 @@ public sealed class AppAccessRepository
         return cmd.ExecuteNonQuery();
     }
 
+    public int UpdateDisplayName(string email, string? displayName)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return 0;
+
+        var value = string.IsNullOrWhiteSpace(displayName) ? null : displayName.Trim();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE app_access
+            SET display_name = $name
+            WHERE lower(email) = lower($email)
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        cmd.Parameters.AddWithValue("$name", (object?)value ?? DBNull.Value);
+        return cmd.ExecuteNonQuery();
+    }
+
     public void RecordAccess(string email)
     {
         if (!StorageReady || AppAccessExclusions.IsExcluded(email))
@@ -208,7 +226,7 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name
             FROM app_access
             ORDER BY last_seen_at DESC
             """;
@@ -225,6 +243,7 @@ public sealed class AppAccessRepository
                 FirstSeenAt = reader.GetString(1),
                 LastSeenAt = reader.GetString(2),
                 LoginCount = reader.GetInt32(3),
+                DisplayName = reader.IsDBNull(4) ? null : reader.GetString(4),
             });
         }
 
@@ -234,16 +253,38 @@ public sealed class AppAccessRepository
     private void EnsureSchema()
     {
         using var conn = Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            CREATE TABLE IF NOT EXISTS app_access (
-                email TEXT PRIMARY KEY,
-                first_seen_at TEXT NOT NULL,
-                last_seen_at TEXT NOT NULL,
-                login_count INTEGER NOT NULL DEFAULT 1
-            )
-            """;
-        cmd.ExecuteNonQuery();
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = """
+                CREATE TABLE IF NOT EXISTS app_access (
+                    email TEXT PRIMARY KEY,
+                    first_seen_at TEXT NOT NULL,
+                    last_seen_at TEXT NOT NULL,
+                    login_count INTEGER NOT NULL DEFAULT 1,
+                    display_name TEXT NULL
+                )
+                """;
+            cmd.ExecuteNonQuery();
+        }
+
+        EnsureColumn(conn, "app_access", "display_name", "TEXT NULL");
+    }
+
+    private static void EnsureColumn(SqliteConnection conn, string table, string column, string typeSql)
+    {
+        using var check = conn.CreateCommand();
+        check.CommandText = $"PRAGMA table_info({table})";
+        using var reader = check.ExecuteReader();
+        while (reader.Read())
+        {
+            if (string.Equals(reader.GetString(1), column, StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        reader.Close();
+        using var alter = conn.CreateCommand();
+        alter.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {typeSql}";
+        alter.ExecuteNonQuery();
     }
 
     private void EnsureWritable(string dir)
@@ -285,6 +326,7 @@ public sealed class AppAccessRecordDto
     public string FirstSeenAt { get; init; } = "";
     public string LastSeenAt { get; init; } = "";
     public int LoginCount { get; init; }
+    public string? DisplayName { get; init; }
 }
 
 public sealed class AccessSummaryDto
@@ -293,4 +335,10 @@ public sealed class AccessSummaryDto
     public int ActiveCount { get; init; }
     public int NewTodayCount { get; init; }
     public int ActiveWindowMinutes { get; init; }
+}
+
+public sealed class AccessDisplayNameRequest
+{
+    public string Email { get; set; } = "";
+    public string? DisplayName { get; set; }
 }

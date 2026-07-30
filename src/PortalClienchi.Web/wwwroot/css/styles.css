@@ -1580,6 +1580,28 @@ body.portal-tab-active .tab-icon {
   min-width: 0;
 }
 
+.st2-access-admin-edit {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0.45;
+}
+
+.st2-access-admin-edit:hover,
+.st2-access-admin-edit.is-custom {
+  background: #f1f5f9;
+  color: #334155;
+  opacity: 1;
+}
+
 .st2-access-admin-email {
   flex: 1 1 auto;
   min-width: 0;
