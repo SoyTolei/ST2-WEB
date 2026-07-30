@@ -62,6 +62,18 @@ const accessAdminRefresh = document.getElementById("st2-access-admin-refresh");
 const accessAdminUpdated = document.getElementById("st2-access-admin-updated");
 const accessAdminTableWrap = document.getElementById("st2-access-admin-table-wrap");
 const accessAdminToolbar = document.getElementById("st2-access-admin-toolbar");
+const accessNameEditOverlay = document.getElementById("st2-access-name-edit-overlay");
+const accessNameEditEmail = document.getElementById("st2-access-name-edit-email");
+const accessNameEditInput = document.getElementById("st2-access-name-edit-input");
+const accessNameEditSuggest = document.getElementById("st2-access-name-edit-suggest");
+const accessNameEditError = document.getElementById("st2-access-name-edit-error");
+const accessNameEditClose = document.getElementById("st2-access-name-edit-close");
+const accessNameEditCancel = document.getElementById("st2-access-name-edit-cancel");
+const accessNameEditReset = document.getElementById("st2-access-name-edit-reset");
+const accessNameEditSave = document.getElementById("st2-access-name-edit-save");
+let accessNameEditEmailValue = "";
+let accessNameEditAutoValue = "";
+let accessNameEditSaving = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
 const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
 const thomFrame = document.getElementById("thomFrame");
@@ -1139,45 +1151,77 @@ function renderAccessAdminTable() {
   accessAdminTableWrap?.classList.remove("hidden");
 }
 
-async function editAccessAdminDisplayName(email) {
-  if (!email) return;
-  const current = accessAdminItemsCache.find((item) => item.email === email);
-  const suggested = formatAccessDisplayName(email, current?.displayNameOverride);
-  const next = window.prompt(
-    `Nombre visible para ${email}\n(dejá vacío para volver al automático)`,
-    suggested,
-  );
-  if (next === null) return;
+function closeAccessNameEditModal() {
+  accessNameEditOverlay?.classList.add("hidden");
+  accessNameEditEmailValue = "";
+  accessNameEditAutoValue = "";
+  if (accessNameEditError) accessNameEditError.textContent = "";
+  if (accessNameEditInput) accessNameEditInput.value = "";
+  if (accessNameEditSave) accessNameEditSave.disabled = false;
+}
 
-  const displayName = next.trim();
+function openAccessNameEditModal(email) {
+  if (!accessNameEditOverlay || !email) return;
+  const current = accessAdminItemsCache.find((item) => item.email === email);
+  accessNameEditEmailValue = email;
+  accessNameEditAutoValue = parseAccessNameFromEmail(email).display;
+  if (accessNameEditEmail) accessNameEditEmail.textContent = email;
+  if (accessNameEditSuggest) accessNameEditSuggest.textContent = accessNameEditAutoValue;
+  if (accessNameEditInput) {
+    accessNameEditInput.value = formatAccessDisplayName(email, current?.displayNameOverride);
+  }
+  if (accessNameEditError) accessNameEditError.textContent = "";
+  accessNameEditOverlay.classList.remove("hidden");
+  accessNameEditInput?.focus();
+  accessNameEditInput?.select();
+}
+
+async function saveAccessNameEdit(displayName) {
+  if (!accessNameEditEmailValue || accessNameEditSaving) return;
+  accessNameEditSaving = true;
+  if (accessNameEditSave) accessNameEditSave.disabled = true;
+  if (accessNameEditError) accessNameEditError.textContent = "";
+
+  const email = accessNameEditEmailValue;
+  const value = String(displayName || "").trim();
+
   try {
     const response = await fetch("/api/access/registrations", {
       method: "PATCH",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, displayName: displayName || null }),
+      body: JSON.stringify({ email, displayName: value || null }),
     });
     const data = await response.json().catch(() => ({}));
     if (response.status === 401) {
+      closeAccessNameEditModal();
       showAccessAdminLogin();
       if (accessAdminError) accessAdminError.textContent = "Sesión expirada. Volvé a ingresar.";
       return;
     }
     if (!response.ok) {
-      setAccessAdminUpdatedHint(data.error || "No se pudo guardar el nombre.");
+      if (accessNameEditError) accessNameEditError.textContent = data.error || "No se pudo guardar el nombre.";
       return;
     }
     accessAdminItemsCache = accessAdminItemsCache.map((item) => (
       item.email === email
-        ? { ...item, displayNameOverride: displayName || null }
+        ? { ...item, displayNameOverride: value || null }
         : item
     ));
     accessAdminLastSnapshot = buildAccessAdminSnapshot(accessAdminItemsCache, accessAdminMeta.activeCount);
     renderAccessAdminTable();
-    setAccessAdminUpdatedHint(displayName ? `Nombre guardado: ${displayName}` : "Nombre automático restaurado.");
+    closeAccessNameEditModal();
+    setAccessAdminUpdatedHint(value ? `Nombre guardado: ${value}` : "Nombre automático restaurado.");
   } catch {
-    setAccessAdminUpdatedHint("No se pudo contactar al servidor.");
+    if (accessNameEditError) accessNameEditError.textContent = "No se pudo contactar al servidor.";
+  } finally {
+    accessNameEditSaving = false;
+    if (accessNameEditSave) accessNameEditSave.disabled = false;
   }
+}
+
+function editAccessAdminDisplayName(email) {
+  openAccessNameEditModal(email);
 }
 
 async function deleteAccessAdminEmail(email) {
@@ -1468,13 +1512,41 @@ accessAdminBody?.addEventListener("click", (e) => {
   if (!(target instanceof HTMLElement)) return;
   const editBtn = target.closest("[data-edit-email]");
   if (editBtn instanceof HTMLElement) {
-    void editAccessAdminDisplayName(editBtn.dataset.editEmail || "");
+    editAccessAdminDisplayName(editBtn.dataset.editEmail || "");
     return;
   }
   const deleteBtn = target.closest("[data-delete-email]");
   if (deleteBtn instanceof HTMLElement) {
     void deleteAccessAdminEmail(deleteBtn.dataset.deleteEmail || "");
   }
+});
+accessNameEditClose?.addEventListener("click", closeAccessNameEditModal);
+accessNameEditCancel?.addEventListener("click", closeAccessNameEditModal);
+accessNameEditSuggest?.addEventListener("click", () => {
+  if (accessNameEditInput) {
+    accessNameEditInput.value = accessNameEditAutoValue;
+    accessNameEditInput.focus();
+    accessNameEditInput.select();
+  }
+});
+accessNameEditReset?.addEventListener("click", () => {
+  void saveAccessNameEdit("");
+});
+accessNameEditSave?.addEventListener("click", () => {
+  void saveAccessNameEdit(accessNameEditInput?.value || "");
+});
+accessNameEditInput?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    void saveAccessNameEdit(accessNameEditInput.value || "");
+  }
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeAccessNameEditModal();
+  }
+});
+accessNameEditOverlay?.addEventListener("click", (e) => {
+  if (e.target === accessNameEditOverlay) closeAccessNameEditModal();
 });
 homeBtn?.addEventListener("click", goHome);
 aboutCloseBtn?.addEventListener("click", hideAbout);

@@ -1692,6 +1692,131 @@ body.portal-tab-active .tab-icon {
   opacity: 1;
 }
 
+.st2-access-name-edit-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  animation: st2AccessNameEditIn 0.18s ease-out;
+}
+
+.st2-access-name-edit-overlay.hidden {
+  display: none !important;
+}
+
+@keyframes st2AccessNameEditIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.st2-access-name-edit-dialog {
+  width: min(420px, 94vw);
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 20px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.28);
+  animation: st2AccessNameEditPop 0.2s ease-out;
+}
+
+@keyframes st2AccessNameEditPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.st2-access-name-edit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.st2-access-name-edit-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.st2-access-name-edit-x {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.st2-access-name-edit-x:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.st2-access-name-edit-email {
+  margin: 0 0 14px;
+  font-size: 0.78rem;
+  color: #64748b;
+  word-break: break-all;
+}
+
+.st2-access-name-edit-input {
+  margin-bottom: 8px;
+}
+
+.st2-access-name-edit-hint {
+  margin: 0 0 10px;
+  font-size: 0.74rem;
+  color: #64748b;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.st2-access-name-edit-suggest {
+  border: 0;
+  background: #f1f5f9;
+  color: #334155;
+  font: inherit;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.st2-access-name-edit-suggest:hover {
+  background: #e2e8f0;
+}
+
+.st2-access-name-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.st2-access-name-edit-actions-end {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.st2-access-name-edit-actions .st2-access-admin-submit {
+  flex: 0 0 auto;
+  min-width: 96px;
+}
+
 .st2-about-signature {
   display: flex;
   align-items: center;

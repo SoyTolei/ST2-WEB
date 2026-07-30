@@ -1116,6 +1116,30 @@
     </div>
   </div>
 
+  <div id="st2-access-name-edit-overlay" class="st2-access-name-edit-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-name-edit-title">
+    <div class="st2-access-name-edit-dialog">
+      <div class="st2-access-name-edit-head">
+        <h3 id="st2-access-name-edit-title" class="st2-access-name-edit-title">Editar nombre</h3>
+        <button type="button" id="st2-access-name-edit-close" class="st2-access-name-edit-x" aria-label="Cerrar">×</button>
+      </div>
+      <p id="st2-access-name-edit-email" class="st2-access-name-edit-email"></p>
+      <label class="st2-access-admin-label" for="st2-access-name-edit-input">Nombre visible</label>
+      <input id="st2-access-name-edit-input" type="text" class="st2-access-admin-input st2-access-name-edit-input" autocomplete="off" spellcheck="false"/>
+      <p class="st2-access-name-edit-hint">
+        Sugerido automático:
+        <button type="button" id="st2-access-name-edit-suggest" class="st2-access-name-edit-suggest"></button>
+      </p>
+      <p id="st2-access-name-edit-error" class="st2-access-admin-error" role="alert"></p>
+      <div class="st2-access-name-edit-actions">
+        <button type="button" id="st2-access-name-edit-reset" class="st2-access-admin-cancel">Usar automático</button>
+        <div class="st2-access-name-edit-actions-end">
+          <button type="button" id="st2-access-name-edit-cancel" class="st2-access-admin-cancel">Cancelar</button>
+          <button type="button" id="st2-access-name-edit-save" class="st2-access-admin-submit">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="st2-access-gate" class="st2-access-gate" role="dialog" aria-labelledby="st2-access-title" aria-modal="true">
     <div class="st2-access-card">
       <div class="st2-access-brand">
