@@ -355,9 +355,17 @@
 
             <div id="ref-bejerman-post" class="plan-ref-block hidden">
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
-              <p class="plan-ref-hint">Cada tarjeta abre su checklist. El indicador a la derecha marca si ya completaste la opción.</p>
+              <div class="plan-ref-perfil" role="group" aria-label="Perfil del agente">
+                <span class="plan-ref-perfil-label">Tu perfil</span>
+                <div class="plan-segment-track plan-ref-perfil-seg">
+                  <button type="button" class="plan-segment-btn active" id="ref-perfil-otra" data-perfil="otra">Otra mesa</button>
+                  <button type="button" class="plan-segment-btn" id="ref-perfil-tecnico" data-perfil="tecnico">Técnico</button>
+                </div>
+              </div>
+              <p class="plan-ref-hint" id="ref-perfil-hint">MAM y SDK son opcionales. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.</p>
               <div class="plan-check-cards">
                 <div class="plan-check-wrap planilla">
+                  <span class="plan-check-badge" id="ref-planilla-badge">Auto si vacía</span>
                   <span class="plan-check-mark" id="ref-planilla-status">○</span>
                   <button type="button" class="plan-check-btn planilla" id="ref-btn-planilla">
                     <span class="plan-check-btn-icon" data-plan-icon="planilla"></span>
@@ -365,7 +373,8 @@
                     <small>Datos para el equipo técnico</small>
                   </button>
                 </div>
-                <div class="plan-check-wrap mam">
+                <div class="plan-check-wrap mam" id="ref-wrap-mam">
+                  <span class="plan-check-badge" id="ref-mam-badge">Opcional</span>
                   <span class="plan-check-mark" id="ref-mam-status">○</span>
                   <button type="button" class="plan-check-btn mam" id="ref-btn-mam">
                     <span class="plan-check-btn-icon" data-plan-icon="mam"></span>
@@ -373,7 +382,8 @@
                     <small>Modificaciones a Medida</small>
                   </button>
                 </div>
-                <div class="plan-check-wrap sdk">
+                <div class="plan-check-wrap sdk" id="ref-wrap-sdk">
+                  <span class="plan-check-badge" id="ref-sdk-badge">Opcional</span>
                   <span class="plan-check-mark" id="ref-sdk-status">○</span>
                   <button type="button" class="plan-check-btn sdk" id="ref-btn-sdk">
                     <span class="plan-check-btn-icon" data-plan-icon="sdk"></span>

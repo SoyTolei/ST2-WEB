@@ -17,6 +17,7 @@ public sealed class ReferralIdCase
     public LegalReferralState Legal { get; } = new();
     public AdjuntosState Adjuntos { get; } = new();
     public IReadOnlyList<TransferenciaCapturaEnlace> CapturasEnlaces { get; set; } = Array.Empty<TransferenciaCapturaEnlace>();
+    public bool EsTecnico { get; set; }
     public bool MamConfigured => Mam.HasSelection;
     public bool SdkConfigured => Sdk.HasSelection;
     public bool PlanillaConfigured => Planilla.IsComplete;
@@ -54,6 +55,29 @@ public sealed class PlanillaTecnicaState
     public bool OptSoloCliente { get; set; }
     public bool OptReproduceSistematicamente { get; set; }
     public bool IsComplete => Relevada && ReproduceError && UltimaActualizOk;
+
+    public bool IsEmpty =>
+        !Relevada
+        && !ProcesoFuncionaba
+        && !ReproduceError
+        && !UltimaActualizOk
+        && !OptVinculos
+        && !OptBaseModelo
+        && !OptSoloCliente
+        && !OptReproduceSistematicamente;
+
+    /// <summary>
+    /// Si el agente no marcó nada, completa los 3 ítems obligatorios para no bloquear el TXT.
+    /// </summary>
+    public void ApplyMandatoryDefaultsIfEmpty()
+    {
+        if (!IsEmpty)
+            return;
+
+        Relevada = true;
+        ReproduceError = true;
+        UltimaActualizOk = true;
+    }
 }
 
 public sealed class OnvioReferralState
@@ -125,6 +149,7 @@ public sealed class ReferralGenerateRequest
     public AdjuntosDto? Adjuntos { get; set; }
     public List<CapturaEnlaceDto>? CapturasEnlaces { get; set; }
     public bool TicketAvisoOmitido { get; set; }
+    public bool EsTecnico { get; set; }
 }
 
 public sealed class PlanillaTecnicaDto

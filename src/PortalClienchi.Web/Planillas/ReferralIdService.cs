@@ -62,6 +62,12 @@ public sealed class ReferralIdService
             caso.Planilla.OptReproduceSistematicamente = req.Planilla.OptReproduceSistematicamente;
         }
 
+        if (sistema == PlanillasSistema.BejermanSql)
+        {
+            caso.EsTecnico = req.EsTecnico;
+            caso.Planilla.ApplyMandatoryDefaultsIfEmpty();
+        }
+
         if (req.Onvio is not null)
         {
             caso.Onvio.ProcesoFuncionaba = req.Onvio.ProcesoFuncionaba;

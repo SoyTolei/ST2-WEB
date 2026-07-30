@@ -23,6 +23,80 @@ let sdkApp = "";
 let planillaState = { relevada: false, procesoFuncionaba: false, reproduceError: false, ultimaActualizOk: false };
 let referralIaUndo = null;
 let referralDialogsPromise = null;
+const REF_PERFIL_KEY = "st2-ref-perfil-tecnico";
+let esTecnico = loadEsTecnico();
+
+function loadEsTecnico() {
+  try {
+    return localStorage.getItem(REF_PERFIL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function saveEsTecnico(value) {
+  esTecnico = !!value;
+  try {
+    localStorage.setItem(REF_PERFIL_KEY, esTecnico ? "1" : "0");
+  } catch {
+    /* ignore */
+  }
+}
+
+function isPlanillaEmpty(state = planillaState) {
+  return !(
+    state.relevada
+    || state.procesoFuncionaba
+    || state.reproduceError
+    || state.ultimaActualizOk
+    || state.optVinculos
+    || state.optBaseModelo
+    || state.optSoloCliente
+    || state.optReproduceSistematicamente
+  );
+}
+
+/** Si no marcaron nada en planilla, completa los 3 obligatorios. */
+function ensurePlanillaDefaults() {
+  if (!isBejerman() || !isPlanillaEmpty()) return false;
+  planillaState = {
+    ...planillaState,
+    relevada: true,
+    reproduceError: true,
+    ultimaActualizOk: true,
+  };
+  updateCheckStatuses();
+  return true;
+}
+
+function syncPerfilUi() {
+  const otra = document.getElementById("ref-perfil-otra");
+  const tecnico = document.getElementById("ref-perfil-tecnico");
+  otra?.classList.toggle("active", !esTecnico);
+  tecnico?.classList.toggle("active", esTecnico);
+
+  const hint = document.getElementById("ref-perfil-hint");
+  if (hint) {
+    hint.textContent = esTecnico
+      ? "Como técnico, MAM y SDK son obligatorios. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar."
+      : "MAM y SDK son opcionales. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.";
+  }
+
+  const mamBadge = document.getElementById("ref-mam-badge");
+  const sdkBadge = document.getElementById("ref-sdk-badge");
+  const planBadge = document.getElementById("ref-planilla-badge");
+  if (planBadge) {
+    planBadge.textContent = "Auto si vacía";
+    planBadge.className = "plan-check-badge is-auto";
+  }
+  for (const badge of [mamBadge, sdkBadge]) {
+    if (!badge) continue;
+    badge.textContent = esTecnico ? "Obligatorio" : "Opcional";
+    badge.className = `plan-check-badge ${esTecnico ? "is-required" : "is-optional"}`;
+  }
+  document.getElementById("ref-wrap-mam")?.classList.toggle("is-optional-card", !esTecnico);
+  document.getElementById("ref-wrap-sdk")?.classList.toggle("is-optional-card", !esTecnico);
+}
 
 function loadReferralDialogs() {
   if (!referralDialogsPromise) {
@@ -97,6 +171,7 @@ function updateReferralPanels() {
   document.getElementById("ref-legal-panel")?.classList.add("hidden");
   syncIaUndoBar("ref-btn-ia", "ref-btn-ia-undo", ctx.getConfig()?.referral?.iaConfigured);
   buildReferralPills();
+  syncPerfilUi();
   updateCheckStatuses();
   updateSqlPanel();
   syncReferralCards();
@@ -363,6 +438,17 @@ function bindReferralEvents() {
   document.getElementById("ref-btn-mam")?.addEventListener("click", () => openMamModal());
   document.getElementById("ref-btn-sdk")?.addEventListener("click", () => openSdkModal());
   document.getElementById("ref-btn-planilla")?.addEventListener("click", () => openPlanillaModalAsync());
+  document.getElementById("ref-perfil-otra")?.addEventListener("click", () => {
+    saveEsTecnico(false);
+    syncPerfilUi();
+    updateCheckStatuses();
+  });
+  document.getElementById("ref-perfil-tecnico")?.addEventListener("click", () => {
+    saveEsTecnico(true);
+    syncPerfilUi();
+    updateCheckStatuses();
+  });
+  syncPerfilUi();
 
   setupCapturas("ref-capturas", capturaFiles);
   setupCapturas("ref-onvio-capt", onvioCapturaFiles);
@@ -565,6 +651,8 @@ function refreshChips(id, files, prefix, fileList) {
 }
 
 function buildPayload() {
+  if (isBejerman()) ensurePlanillaDefaults();
+
   const payload = {
     sistema: ctx.getSistema(),
     asunto: document.getElementById("ref-asunto")?.value.trim() || "",
@@ -578,6 +666,7 @@ function buildPayload() {
     payload.modulo = moduloSel || "";
     payload.collation = document.getElementById("ref-collation")?.value || "";
     payload.sqlServer = document.getElementById("ref-sql-server")?.value || "";
+    payload.esTecnico = esTecnico;
     payload.mamSelections = { ...mamState };
     payload.mamPersActuNombre = mamPersActu;
     payload.mamTriggersDesactivados = mamTriggers;
@@ -678,6 +767,7 @@ async function generarReferral(copiar) {
   const status = document.getElementById("ref-status");
   const btnCopiar = document.getElementById("ref-btn-copiar");
   const btnVer = document.getElementById("ref-btn-ver-planilla");
+  const autoPlanilla = isBejerman() && isPlanillaEmpty();
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
   const quierePantallas = isBejerman()
@@ -732,13 +822,14 @@ async function generarReferral(copiar) {
     const capturasMsg = data.capturasSubidas > 0
       ? ` (${data.capturasSubidas} captura(s) con link en el texto)`
       : "";
+    const autoMsg = autoPlanilla ? " Se marcaron los ítems obligatorios de planilla técnica." : "";
 
     if (copiar) {
       await navigator.clipboard.writeText(data.texto);
-      status.textContent = `Texto copiado al portapapeles.${capturasMsg}`;
+      status.textContent = `Texto copiado al portapapeles.${capturasMsg}${autoMsg}`;
     } else {
       showPlanTextPreview("ref-text-preview", data.texto);
-      status.textContent = `Planilla lista.${capturasMsg} Podés copiar desde el panel de vista previa.`;
+      status.textContent = `Planilla lista.${capturasMsg}${autoMsg} Podés copiar desde el panel de vista previa.`;
     }
   } catch (ex) {
     status.textContent = ex.message || "Error";

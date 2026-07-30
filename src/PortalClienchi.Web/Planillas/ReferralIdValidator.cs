@@ -42,11 +42,14 @@ public static class ReferralIdValidator
                 return "Adjuntaste backup de bases: seleccioná la versión de SQL Server.";
         }
 
-        if (!c.MamConfigured)
-            return "Abrí MAM y marcá al menos una opción (o «No utiliza MAM»).";
+        if (c.EsTecnico)
+        {
+            if (!c.MamConfigured)
+                return "Abrí MAM y marcá al menos una opción (o «No utiliza MAM»).";
 
-        if (!c.SdkConfigured)
-            return "Abrí SDK y marcá al menos una opción (o «No utiliza SDK»).";
+            if (!c.SdkConfigured)
+                return "Abrí SDK y marcá al menos una opción (o «No utiliza SDK»).";
+        }
 
         if (!c.PlanillaConfigured)
             return "Completá la planilla técnica (todas las opciones obligatorias).";

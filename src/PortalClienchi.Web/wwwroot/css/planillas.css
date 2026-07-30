@@ -1069,6 +1069,23 @@
   margin: 0 0 14px;
   line-height: 1.45;
 }
+.plan-ref-perfil {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 0 8px;
+}
+.plan-ref-perfil-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+}
+.plan-ref-perfil-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .plan-well-box {
   background: #fafafa;
   border: 1px solid var(--border);
@@ -1092,6 +1109,39 @@
   display: flex;
   align-items: flex-start;
   gap: 6px;
+}
+.plan-check-badge {
+  position: absolute;
+  top: -8px;
+  right: 10px;
+  z-index: 1;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.plan-check-badge.is-required {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+.plan-check-badge.is-optional {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+.plan-check-badge.is-auto {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+}
+.plan-check-wrap.is-optional-card {
+  opacity: 0.92;
 }
 .plan-check-wrap.planilla {
   grid-column: 1 / -1;
