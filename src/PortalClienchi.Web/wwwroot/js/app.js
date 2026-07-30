@@ -665,14 +665,171 @@ function getAboutVersionLabel() {
   return "Versión WEB";
 }
 
-function formatAccessDisplayName(email) {
-  const local = String(email || "").split("@")[0].trim();
-  if (!local) return email || "—";
-  return local
-    .split(/[._\-+]+/)
+const ACCESS_NAME_PARTICLES = new Set([
+  "de", "del", "la", "las", "los", "y", "e", "da", "do", "das", "dos",
+  "van", "von", "di", "le", "du", "san", "santa",
+]);
+
+const ACCESS_NAME_ALIASES = {
+  ma: "María",
+  maria: "María",
+  jose: "José",
+  jesus: "Jesús",
+  angel: "Ángel",
+  angeles: "Ángeles",
+  monica: "Mónica",
+  martin: "Martín",
+  andres: "Andrés",
+  ramon: "Ramón",
+  raul: "Raúl",
+  adrian: "Adrián",
+  julian: "Julián",
+  sebastian: "Sebastián",
+  nicholas: "Nicholas",
+  nicolas: "Nicolás",
+};
+
+function titleAccessNameToken(raw) {
+  const token = String(raw || "").replace(/^\d+|\d+$/g, "").trim();
+  if (!token) return "";
+
+  const lower = token.toLowerCase();
+  if (ACCESS_NAME_ALIASES[lower]) return ACCESS_NAME_ALIASES[lower];
+
+  // Compound hyphenated: ana-maria → Ana-Maria
+  if (token.includes("-")) {
+    return token
+      .split("-")
+      .filter(Boolean)
+      .map((piece) => titleAccessNameToken(piece))
+      .filter(Boolean)
+      .join("-");
+  }
+
+  if (ACCESS_NAME_PARTICLES.has(lower)) return lower;
+
+  // Initials: j → J
+  if (lower.length === 1) return lower.toUpperCase();
+
+  // Mc/Mac prefixes
+  if (/^mc[a-z]/i.test(lower)) {
+    return `Mc${lower.slice(2, 3).toUpperCase()}${lower.slice(3)}`;
+  }
+  if (/^mac[a-z]{2,}/i.test(lower)) {
+    return `Mac${lower.slice(3, 4).toUpperCase()}${lower.slice(4)}`;
+  }
+
+  // O'Brien style
+  if (/^o'[a-z]/i.test(lower)) {
+    return `O'${lower.slice(2, 3).toUpperCase()}${lower.slice(3)}`;
+  }
+
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+function tokenizeAccessEmailLocal(local) {
+  return String(local || "")
+    .split(/[._+]+/)
+    .map((part) => part.replace(/^\d+|\d+$/g, "").trim())
     .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(" ");
+    .filter((part) => !/^(ext|tr|temp|test|usr|user)$/i.test(part));
+}
+
+const ACCESS_GIVEN_NAME_HINTS = new Set([
+  "jose", "josé", "maria", "maría", "ma", "luis", "carlos", "antonio", "francisco",
+  "juan", "jesus", "jesús", "angel", "ángel", "manuel", "miguel", "pedro", "pablo",
+  "andres", "andrés", "diego", "martin", "martín", "alejandro", "sebastian", "sebastián",
+  "fernando", "ricardo", "daniel", "david", "jorge", "raul", "raúl", "adrian", "adrián",
+  "ana", "lucia", "lucía", "laura", "carmen", "sofia", "sofía", "valentina", "camila",
+  "paula", "florencia", "agustin", "agustín", "nicolas", "nicolás", "tomás", "tomas",
+  "ignacio", "santiago", "mateo", "benjamín", "benjamin", "gabriel", "emilia", "martina",
+]);
+
+/**
+ * Heurística LATAM/corporativa sobre local-part:
+ * 1 → nombre
+ * 2 → nombre + apellido
+ * 3 → si el del medio parece segundo nombre: N1 N2 A; si no: N A1 A2
+ * 4+ → nombre(s) + apellido + segundo apellido (últimos 2 = apellidos)
+ */
+function parseAccessNameFromEmail(email) {
+  const local = String(email || "").split("@")[0].trim();
+  const rawParts = tokenizeAccessEmailLocal(local);
+  const parts = rawParts.map(titleAccessNameToken).filter(Boolean);
+  if (!parts.length) {
+    return { firstName: "", secondName: "", lastName: "", secondLastName: "", display: email || "—" };
+  }
+
+  let firstName = "";
+  let secondName = "";
+  let lastName = "";
+  let secondLastName = "";
+
+  if (parts.length === 1) {
+    firstName = parts[0];
+  } else if (parts.length === 2) {
+    firstName = parts[0];
+    lastName = parts[1];
+  } else if (parts.length === 3) {
+    const middleRaw = rawParts[1].toLowerCase().replace(/^\d+|\d+$/g, "");
+    const middleIsGiven = ACCESS_NAME_PARTICLES.has(middleRaw) || ACCESS_GIVEN_NAME_HINTS.has(middleRaw);
+    if (middleIsGiven) {
+      firstName = parts[0];
+      secondName = parts[1];
+      lastName = parts[2];
+    } else {
+      firstName = parts[0];
+      lastName = parts[1];
+      secondLastName = parts[2];
+    }
+  } else {
+    firstName = parts[0];
+    secondName = parts.slice(1, -2).join(" ");
+    lastName = parts[parts.length - 2];
+    secondLastName = parts[parts.length - 1];
+  }
+
+  // Repegar partículas al apellido siguiente: "de" + "la" + "Cruz" → "de la Cruz"
+  const ordered = [firstName, secondName, lastName, secondLastName].filter(Boolean);
+  const merged = [];
+  for (let i = 0; i < ordered.length; i++) {
+    const cur = ordered[i];
+    const bits = cur.split(/\s+/);
+    let j = 0;
+    while (j < bits.length) {
+      if (ACCESS_NAME_PARTICLES.has(bits[j].toLowerCase())) {
+        const particleRun = [];
+        while (j < bits.length && ACCESS_NAME_PARTICLES.has(bits[j].toLowerCase())) {
+          particleRun.push(bits[j].toLowerCase());
+          j++;
+        }
+        if (j < bits.length) {
+          merged.push(`${particleRun.join(" ")} ${bits[j]}`);
+          j++;
+        } else if (i + 1 < ordered.length) {
+          // partícula suelta al final del bloque → pegar al siguiente bloque
+          ordered[i + 1] = `${particleRun.join(" ")} ${ordered[i + 1]}`;
+        } else {
+          merged.push(particleRun.join(" "));
+        }
+      } else {
+        merged.push(bits[j]);
+        j++;
+      }
+    }
+  }
+
+  return {
+    firstName,
+    secondName,
+    lastName,
+    secondLastName,
+    display: merged.join(" ").replace(/\s+/g, " ").trim() || email || "—",
+  };
+}
+
+function formatAccessDisplayName(email) {
+  return parseAccessNameFromEmail(email).display;
 }
 
 function formatAccessDate(iso) {
