@@ -77,9 +77,9 @@ function syncPerfilUi() {
 
   const hint = document.getElementById("ref-perfil-hint");
   if (hint) {
-    hint.textContent = esTecnico
+    hint.innerHTML = esTecnico
       ? "Como técnico, MAM y SDK son obligatorios. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar."
-      : "MAM y SDK son opcionales. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.";
+      : "<strong>Flex, SaaS o SJ.</strong> MAM y SDK son opcionales. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.";
   }
 
   const mamBadge = document.getElementById("ref-mam-badge");
