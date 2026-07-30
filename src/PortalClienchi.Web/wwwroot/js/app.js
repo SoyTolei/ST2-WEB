@@ -670,6 +670,7 @@ const ACCESS_NAME_PARTICLES = new Set([
   "van", "von", "di", "le", "du", "san", "santa",
 ]);
 
+/** Formas canónicas de display (clave sin acento). */
 const ACCESS_NAME_ALIASES = {
   ma: "María",
   maria: "María",
@@ -685,15 +686,172 @@ const ACCESS_NAME_ALIASES = {
   adrian: "Adrián",
   julian: "Julián",
   sebastian: "Sebastián",
-  nicholas: "Nicholas",
   nicolas: "Nicolás",
+  lucia: "Lucía",
+  sofia: "Sofía",
+  agustin: "Agustín",
+  tomas: "Tomás",
+  benjamin: "Benjamín",
+  hermes: "Hermes",
+  vanesa: "Vanesa",
+  vanessa: "Vanessa",
+  georgina: "Georgina",
+  munoz: "Muñoz",
+  velasquez: "Velázquez",
+  velazquez: "Velázquez",
+  garcia: "García",
+  gomez: "Gómez",
+  lopez: "López",
+  martinez: "Martínez",
+  hernandez: "Hernández",
+  sanchez: "Sánchez",
+  perez: "Pérez",
+  ramirez: "Ramírez",
+  rodriguez: "Rodríguez",
+  fernandez: "Fernández",
+  alvarez: "Álvarez",
+  gutierrez: "Gutiérrez",
+  jimenez: "Jiménez",
+  vazquez: "Vázquez",
+  ibanez: "Ibáñez",
+  nunez: "Núñez",
+  peña: "Peña",
+  pena: "Peña",
 };
+
+const ACCESS_GIVEN_NAMES = new Set([
+  "jose", "maria", "ma", "luis", "carlos", "antonio", "francisco", "juan", "jesus",
+  "angel", "manuel", "miguel", "pedro", "pablo", "andres", "diego", "martin",
+  "alejandro", "sebastian", "fernando", "ricardo", "daniel", "david", "jorge",
+  "raul", "adrian", "julian", "ana", "lucia", "laura", "carmen", "sofia",
+  "valentina", "camila", "paula", "florencia", "agustin", "nicolas", "tomas",
+  "ignacio", "santiago", "mateo", "benjamin", "gabriel", "emilia", "martina",
+  "vanesa", "vanessa", "georgina", "andrea", "silvia", "claudia", "monica",
+  "veronica", "cecilia", "romina", "natalia", "carolina", "daniela", "mariana",
+  "julieta", "agustina", "melina", "soledad", "patricia", "alejandra", "gabriela",
+  "lorena", "silvana", "viviana", "yesica", "jessica", "jennifer", "nancy",
+  "beatriz", "graciela", "norma", "susana", "elena", "ines", "iris", "ivana",
+  "jimena", "joaquin", "leonardo", "lucas", "marcos", "matias", "maxi", "maximiliano",
+  "oscar", "hector", "edgar", "eduardo", "enrique", "esteban", "facundo", "federico",
+  "german", "gonzalo", "guillermo", "hernan", "horacio", "hugo", "ivan", "javier",
+  "jonathan", "kevin", "leandro", "marcelo", "mario", "mauricio", "nelson", "omar",
+  "orlando", "osvaldo", "pato", "patricio", "raul", "roberto", "rodolfo", "rodrigo",
+  "ruben", "sergio", "victor", "walter", "william", "cristina", "debora", "elisa",
+  "erica", "erika", "eugenia", "fabiana", "gisela", "gladys", "ines", "karina",
+  "leticia", "liliana", "magali", "marcela", "mercedes", "miriam", "noelia", "nora",
+  "pamela", "raquel", "rocio", "roxana", "silvina", "stefania", "tamara", "virginia",
+  "yamila", "yesica", "zoe", "bruno", "franco", "thiago", "bautista", "benicio",
+  "valentin", "antonella", "constanza", "milagros", "morena", "abril", "ayana",
+]);
+
+const ACCESS_SURNAMES = new Set([
+  "garcia", "gomez", "lopez", "martinez", "hernandez", "sanchez", "perez", "romero",
+  "gonzalez", "rodriguez", "fernandez", "alvarez", "gutierrez", "jimenez", "ruiz",
+  "diaz", "torres", "ramirez", "flores", "acosta", "benitez", "castro", "dominguez",
+  "suarez", "vazquez", "ramos", "blanco", "molina", "ortega", "delgado", "cruz",
+  "morales", "reyes", "aguirre", "medina", "silva", "vargas", "mendez", "aguilar",
+  "castillo", "guerrero", "rojas", "soto", "contreras", "figueroa", "herrera",
+  "ibanez", "nunez", "pena", "peña", "munoz", "velasquez", "velazquez", "vega",
+  "campos", "navarro", "serrano", "mendoza", "guzman", "ponce", "luna", "cabrera",
+  "franco", "paz", "rivas", "salas", "salazar", "sandoval", "espinoza", "espinosa",
+  "correa", "cardozo", "cardenas", "avalos", "avila", "ayala", "bustos", "cano",
+  "carrizo", "chavez", "cisneros", "cohen", "colina", "cordoba", "coronel", "cuesta",
+  "duarte", "escobar", "espinal", "fonseca", "fuentes", "galvez", "gallo", "gimenez",
+  "godoy", "guerra", "ibarra", "juarez", "lara", "leiva", "leon", "lobo", "lozano",
+  "maciel", "maldonado", "marquez", "mejia", "miranda", "montoya", "mora", "moreira",
+  "moya", "nieto", "oliva", "ojeda", "olivares", "ortiz", "ospina", "padrino",
+  "palacios", "paredes", "parra", "pasquale", "pastor", "peralta", "pereyra",
+  "pinero", "pizarro", "plata", "prado", "prieto", "quiroga", "quintero", "quiros",
+  "rangel", "reda", "riera", "rios", "rivera", "rivero", "robles", "roca", "roca",
+  "rojo", "rosales", "rosas", "rubio", "ruiz", "saavedra", "sosa", "sotelo",
+  "tapia", "toledo", "trujillo", "ulloa", "uria", "uribe", "valdez", "valencia",
+  "valenzuela", "valle", "varela", "vasquez", "vera", "vidal", "villalba", "villar",
+  "villareal", "villarroel", "yanez", "zambrano", "zamora", "zapata", "zarate",
+  "alonso", "caballero", "calvo", "camacho", "carrera", "cortes", "cuesta", "duro",
+  "estero", "galindo", "iglesias", "marin", "montero", "moreno", "nogueira", "nolan",
+  "oliva", "pardo", "querido", "rojo", "solano", "solis", "tello", "ulloa",
+]);
+
+function foldAccessName(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function isAccessGivenName(folded) {
+  return ACCESS_GIVEN_NAMES.has(folded) || ACCESS_GIVEN_NAME_HINTS.has(folded);
+}
+
+function isAccessSurname(folded) {
+  return ACCESS_SURNAMES.has(folded);
+}
+
+function isAccessKnownNamePart(folded) {
+  return ACCESS_NAME_PARTICLES.has(folded)
+    || isAccessGivenName(folded)
+    || isAccessSurname(folded)
+    || !!ACCESS_NAME_ALIASES[folded];
+}
+
+/**
+ * Parte tokens pegados sin separador: vanesageorgina → vanesa + georgina,
+ * velasquezmunoz → velasquez + munoz.
+ */
+function splitGluedAccessNamePart(raw) {
+  const token = String(raw || "").trim();
+  if (!token) return [];
+  const folded = foldAccessName(token).replace(/^\d+|\d+$/g, "");
+  if (folded.length < 8) return [token];
+  if (isAccessKnownNamePart(folded)) return [token];
+
+  let best = null;
+  let bestScore = -1;
+
+  for (let i = 3; i <= folded.length - 3; i++) {
+    const left = folded.slice(0, i);
+    const right = folded.slice(i);
+    const leftGiven = isAccessGivenName(left);
+    const rightGiven = isAccessGivenName(right);
+    const leftSur = isAccessSurname(left);
+    const rightSur = isAccessSurname(right);
+    if (!(leftGiven || leftSur) || !(rightGiven || rightSur)) continue;
+
+    let score = 0;
+    if (leftGiven) score += 3;
+    if (rightGiven) score += 3;
+    if (leftSur) score += 2;
+    if (rightSur) score += 2;
+    if (leftGiven && rightGiven) score += 3;
+    if (leftSur && rightSur) score += 3;
+    if (leftGiven && rightSur) score += 2;
+    // Preferí cortes más equilibrados
+    score += 1 - Math.abs(left.length - right.length) / folded.length;
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = [token.slice(0, i), token.slice(i)];
+    }
+  }
+
+  if (!best) return [token];
+
+  // Si el resto aún está pegado (3 nombres), intentá partir de nuevo el lado largo
+  return best.flatMap((piece, idx) => {
+    const f = foldAccessName(piece);
+    if (piece.length >= 10 && !isAccessKnownNamePart(f) && idx === best.length - 1) {
+      const again = splitGluedAccessNamePart(piece);
+      return again.length > 1 ? again : [piece];
+    }
+    return [piece];
+  });
+}
 
 function titleAccessNameToken(raw) {
   const token = String(raw || "").replace(/^\d+|\d+$/g, "").trim();
   if (!token) return "";
 
-  const lower = token.toLowerCase();
+  const lower = foldAccessName(token);
   if (ACCESS_NAME_ALIASES[lower]) return ACCESS_NAME_ALIASES[lower];
 
   // Compound hyphenated: ana-maria → Ana-Maria
@@ -732,7 +890,8 @@ function tokenizeAccessEmailLocal(local) {
     .split(/[._+]+/)
     .map((part) => part.replace(/^\d+|\d+$/g, "").trim())
     .filter(Boolean)
-    .filter((part) => !/^(ext|tr|temp|test|usr|user)$/i.test(part));
+    .filter((part) => !/^(ext|tr|temp|test|usr|user)$/i.test(part))
+    .flatMap((part) => splitGluedAccessNamePart(part));
 }
 
 const ACCESS_GIVEN_NAME_HINTS = new Set([
@@ -743,6 +902,7 @@ const ACCESS_GIVEN_NAME_HINTS = new Set([
   "ana", "lucia", "lucía", "laura", "carmen", "sofia", "sofía", "valentina", "camila",
   "paula", "florencia", "agustin", "agustín", "nicolas", "nicolás", "tomás", "tomas",
   "ignacio", "santiago", "mateo", "benjamín", "benjamin", "gabriel", "emilia", "martina",
+  "vanesa", "vanessa", "georgina", "andrea", "claudia", "monica", "veronica", "cecilia",
 ]);
 
 /**
@@ -771,8 +931,8 @@ function parseAccessNameFromEmail(email) {
     firstName = parts[0];
     lastName = parts[1];
   } else if (parts.length === 3) {
-    const middleRaw = rawParts[1].toLowerCase().replace(/^\d+|\d+$/g, "");
-    const middleIsGiven = ACCESS_NAME_PARTICLES.has(middleRaw) || ACCESS_GIVEN_NAME_HINTS.has(middleRaw);
+    const middleRaw = foldAccessName(rawParts[1] || "");
+    const middleIsGiven = ACCESS_NAME_PARTICLES.has(middleRaw) || isAccessGivenName(middleRaw);
     if (middleIsGiven) {
       firstName = parts[0];
       secondName = parts[1];
@@ -797,17 +957,16 @@ function parseAccessNameFromEmail(email) {
     const bits = cur.split(/\s+/);
     let j = 0;
     while (j < bits.length) {
-      if (ACCESS_NAME_PARTICLES.has(bits[j].toLowerCase())) {
+      if (ACCESS_NAME_PARTICLES.has(foldAccessName(bits[j]))) {
         const particleRun = [];
-        while (j < bits.length && ACCESS_NAME_PARTICLES.has(bits[j].toLowerCase())) {
-          particleRun.push(bits[j].toLowerCase());
+        while (j < bits.length && ACCESS_NAME_PARTICLES.has(foldAccessName(bits[j]))) {
+          particleRun.push(foldAccessName(bits[j]));
           j++;
         }
         if (j < bits.length) {
           merged.push(`${particleRun.join(" ")} ${bits[j]}`);
           j++;
         } else if (i + 1 < ordered.length) {
-          // partícula suelta al final del bloque → pegar al siguiente bloque
           ordered[i + 1] = `${particleRun.join(" ")} ${ordered[i + 1]}`;
         } else {
           merged.push(particleRun.join(" "));
