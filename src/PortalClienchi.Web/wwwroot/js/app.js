@@ -665,6 +665,16 @@ function getAboutVersionLabel() {
   return "Versión WEB";
 }
 
+function formatAccessDisplayName(email) {
+  const local = String(email || "").split("@")[0].trim();
+  if (!local) return email || "—";
+  return local
+    .split(/[._\-+]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
 function formatAccessDate(iso) {
   if (!iso) return "—";
   const date = new Date(iso);
@@ -884,7 +894,11 @@ function getFilteredAccessAdminItems() {
   const q = accessAdminQuery.trim().toLowerCase();
   return accessAdminItemsCache.filter((item) => {
     if (accessAdminFilter === "active" && !item.isActive) return false;
-    if (q && !item.email.toLowerCase().includes(q)) return false;
+    if (q) {
+      const email = item.email.toLowerCase();
+      const name = formatAccessDisplayName(item.email).toLowerCase();
+      if (!email.includes(q) && !name.includes(q)) return false;
+    }
     return true;
   });
 }
@@ -926,17 +940,18 @@ function renderAccessAdminTable() {
       item.isActive ? "is-active" : "",
       item.isUnseenNew ? "is-new" : "",
     ].filter(Boolean).join(" ");
+    const displayName = formatAccessDisplayName(item.email);
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
-          <span class="st2-access-admin-email">${escapeHtml(item.email)}</span>
+          <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
         </div>
       </td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
-      <td class="st2-access-admin-num" title="${item.isReturning ? "Usuario recurrente" : "Primer ingreso"}">${escapeHtml(String(item.loginCount))}</td>
+      <td class="st2-access-admin-num" title="Ingresos a la web: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">
-        <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(item.email)}">×</button>
+        <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>
       </td>
     </tr>`;
   }).join("");
@@ -945,7 +960,8 @@ function renderAccessAdminTable() {
 
 async function deleteAccessAdminEmail(email) {
   if (!email) return;
-  if (!confirm(`¿Eliminar el acceso de ${email}?`)) return;
+  const name = formatAccessDisplayName(email);
+  if (!confirm(`¿Eliminar el acceso de ${name}?\n${email}`)) return;
 
   try {
     const response = await fetch(`/api/access/registrations?email=${encodeURIComponent(email)}`, {
