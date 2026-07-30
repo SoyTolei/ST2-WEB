@@ -1121,20 +1121,17 @@ function renderAccessAdminTable() {
       item.isUnseenNew ? "is-new" : "",
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
-    const editClass = item.displayNameOverride
-      ? "st2-access-admin-edit is-custom"
-      : "st2-access-admin-edit";
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
           <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
-          <button type="button" class="${editClass}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}">✎</button>
         </div>
       </td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Ingresos a la web: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">
+        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}">Editar</button>
         <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>
       </td>
     </tr>`;
