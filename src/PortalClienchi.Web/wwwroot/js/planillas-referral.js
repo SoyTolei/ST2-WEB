@@ -585,6 +585,14 @@ function refreshCapturasEstadoReferral(prefix, fileList) {
   estado.textContent = `${fileList.length} imagen(es) lista(s) para subir al generar el texto.`;
 }
 
+function revokeCapturaThumbUrls(container) {
+  if (!container) return;
+  container.querySelectorAll("img[data-object-url]").forEach((img) => {
+    const url = img.getAttribute("data-object-url");
+    if (url) URL.revokeObjectURL(url);
+  });
+}
+
 function setupCapturas(prefix, fileList) {
   document.getElementById(`${prefix}-agregar`)?.addEventListener("click", () => {
     document.getElementById(`${prefix}-input`)?.click();
@@ -598,25 +606,6 @@ function setupCapturas(prefix, fileList) {
     refreshCapturasEstadoReferral(prefix, fileList);
     e.target.value = "";
   });
-  document.getElementById(`${prefix}-pegar`)?.addEventListener("click", async () => {
-    try {
-      const items = await navigator.clipboard.read();
-      for (const item of items) {
-        const t = item.types.find((x) => x.startsWith("image/"));
-        if (!t) continue;
-        const blob = await item.getType(t);
-        const ext = t.split("/")[1]?.replace("jpeg", "jpg") || "png";
-        const file = new File([blob], `captura_${Date.now()}.${ext}`, { type: t });
-        addReferralCapturaFiles([file], fileList);
-        refreshChips(`${prefix}-chips`, fileList, prefix, fileList);
-        refreshCapturasEstadoReferral(prefix, fileList);
-        return;
-      }
-      alert("No hay imagen en el portapapeles.");
-    } catch {
-      alert("No se pudo pegar imagen.");
-    }
-  });
 }
 
 function getReferralCapturaFiles() {
@@ -628,16 +617,26 @@ function getReferralCapturaFiles() {
 function refreshChips(id, files, prefix, fileList) {
   const el = document.getElementById(id);
   if (!el) return;
+  revokeCapturaThumbUrls(el);
   el.innerHTML = "";
   files.forEach((f, index) => {
-    const chip = document.createElement("span");
-    chip.className = "plan-chip";
+    const card = document.createElement("div");
+    card.className = "plan-captura-thumb";
+
+    const img = document.createElement("img");
+    const url = URL.createObjectURL(f);
+    img.src = url;
+    img.alt = f.name;
+    img.setAttribute("data-object-url", url);
+
     const name = document.createElement("span");
-    name.className = "plan-chip-name";
+    name.className = "plan-captura-thumb-name";
     name.textContent = f.name;
+    name.title = f.name;
+
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "plan-chip-remove";
+    btn.className = "plan-captura-thumb-remove";
     btn.setAttribute("aria-label", `Quitar ${f.name}`);
     btn.textContent = "×";
     btn.addEventListener("click", (e) => {
@@ -647,8 +646,9 @@ function refreshChips(id, files, prefix, fileList) {
       refreshChips(id, fileList, prefix, fileList);
       refreshCapturasEstadoReferral(prefix, fileList);
     });
-    chip.append(name, btn);
-    el.appendChild(chip);
+
+    card.append(img, name, btn);
+    el.appendChild(card);
   });
 }
 
@@ -913,6 +913,9 @@ function resetReferralForm() {
   ["ref-capturas-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel"].forEach((id) => {
     document.getElementById(id)?.classList.add("hidden");
   });
+  revokeCapturaThumbUrls(document.getElementById("ref-capturas-chips"));
+  revokeCapturaThumbUrls(document.getElementById("ref-onvio-capt-chips"));
+  revokeCapturaThumbUrls(document.getElementById("ref-legal-capt-chips"));
   document.getElementById("ref-capturas-chips").innerHTML = "";
   document.getElementById("ref-onvio-capt-chips").innerHTML = "";
   document.getElementById("ref-legal-capt-chips").innerHTML = "";

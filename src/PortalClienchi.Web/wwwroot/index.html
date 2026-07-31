@@ -409,13 +409,18 @@
               <input type="checkbox" id="ref-adj-backup" class="hidden"/>
               <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
                 <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links (como en Traspaso).</p>
-                <div id="ref-capturas-chips" class="plan-capturas-chips"></div>
+                <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
                 <div class="plan-capturas-actions">
-                  <button type="button" id="ref-capturas-agregar" class="btn btn-secondary">Examinar…</button>
-                  <button type="button" id="ref-capturas-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
+                  <button type="button" id="ref-capturas-agregar" class="plan-capturas-browse">
+                    <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                    <span class="plan-capturas-browse-text">
+                      <strong>Examinar imágenes</strong>
+                      <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                    </span>
+                  </button>
                   <input id="ref-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
                 </div>
+                <div id="ref-capturas-chips" class="plan-capturas-thumbs"></div>
                 <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
               </div>
               <button type="button" class="plan-adj-card plan-adj-backup" id="ref-card-backup" data-adj="backup">
@@ -508,13 +513,18 @@
               </div>
               <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
                 <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links (como en Traspaso).</p>
-                <div id="ref-onvio-capt-chips" class="plan-capturas-chips"></div>
+                <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
                 <div class="plan-capturas-actions">
-                  <button type="button" id="ref-onvio-capt-agregar" class="btn btn-secondary">Examinar…</button>
-                  <button type="button" id="ref-onvio-capt-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
+                  <button type="button" id="ref-onvio-capt-agregar" class="plan-capturas-browse">
+                    <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                    <span class="plan-capturas-browse-text">
+                      <strong>Examinar imágenes</strong>
+                      <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                    </span>
+                  </button>
                   <input id="ref-onvio-capt-input" type="file" accept="image/*" multiple class="hidden"/>
                 </div>
+                <div id="ref-onvio-capt-chips" class="plan-capturas-thumbs"></div>
                 <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
               </div>
               <p class="plan-ref-title">Información del usuario</p>
@@ -606,12 +616,17 @@
               <div id="ref-legal-capturas" class="plan-capturas-panel hidden">
                 <p class="plan-capturas-title">Capturas / imágenes</p>
                 <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links.</p>
-                <div id="ref-legal-capt-chips" class="plan-capturas-chips"></div>
                 <div class="plan-capturas-actions">
-                  <button type="button" id="ref-legal-capt-agregar" class="btn btn-secondary">Examinar…</button>
-                  <button type="button" id="ref-legal-capt-pegar" class="btn btn-secondary">Pegar del portapapeles</button>
+                  <button type="button" id="ref-legal-capt-agregar" class="plan-capturas-browse">
+                    <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                    <span class="plan-capturas-browse-text">
+                      <strong>Examinar imágenes</strong>
+                      <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                    </span>
+                  </button>
                   <input id="ref-legal-capt-input" type="file" accept="image/*" multiple class="hidden"/>
                 </div>
+                <div id="ref-legal-capt-chips" class="plan-capturas-thumbs"></div>
                 <p id="ref-legal-capt-estado" class="plan-capturas-estado"></p>
               </div>
               <p class="plan-ref-title">Información del cliente</p>
