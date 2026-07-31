@@ -1242,7 +1242,7 @@
 
 .plan-check-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
   margin-bottom: 18px;
 }
@@ -1289,20 +1289,19 @@
   opacity: 0.92;
 }
 .plan-check-wrap.planilla {
-  grid-column: 1 / -1;
   border-color: #7c3aed;
   background: #f5f3ff;
-  margin-bottom: 0;
+  margin: 0;
 }
 .plan-check-wrap.mam {
   border-color: #2563eb;
   background: #eff6ff;
-  margin-right: 4px;
+  margin: 0;
 }
 .plan-check-wrap.sdk {
   border-color: #d97706;
   background: #fffbeb;
-  margin-left: 4px;
+  margin: 0;
 }
 .plan-check-mark {
   font-size: 1.1rem;
@@ -1493,6 +1492,20 @@
 .plan-adj-backup-text small { font-size: 0.68rem; font-weight: 500; color: var(--text-muted); }
 
 .plan-adj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.plan-adj-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.plan-adj-stack .plan-capturas-panel,
+.plan-adj-stack .plan-backup-detail {
+  margin: 0;
+}
+.plan-adj-stack .plan-adj-card {
+  width: 100%;
+  margin: 0;
+}
 .plan-adj-card {
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -1519,7 +1532,6 @@
 
 .plan-adj-backup {
   width: 100%;
-  margin: 8px 0;
   min-height: 52px;
   border-radius: 10px;
   padding: 12px 14px;

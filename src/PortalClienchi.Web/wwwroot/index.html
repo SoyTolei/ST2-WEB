@@ -393,63 +393,65 @@
                 </div>
               </div>
               <p class="plan-ref-title">Adjuntos</p>
-              <p class="plan-ref-hint">Marcá lo enviado; si pedís backup, elegí las bases abajo.</p>
-              <div class="plan-adj-grid">
+              <p class="plan-ref-hint">Marcá lo enviado; cada opción se abre debajo sin correr las demás.</p>
+              <div class="plan-adj-stack">
                 <button type="button" class="plan-adj-card" id="ref-card-pantallas" data-adj="pantallas">
                   <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Captura / imágenes</span>
                   <span class="card-mark" id="ref-mark-pantallas">○</span>
                 </button>
+                <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
+                <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
+                  <p class="plan-capturas-title">Capturas / imágenes</p>
+                  <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
+                  <div class="plan-capturas-actions">
+                    <button type="button" id="ref-capturas-agregar" class="plan-capturas-browse">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                      <span class="plan-capturas-browse-text">
+                        <strong>Examinar imágenes</strong>
+                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                      </span>
+                    </button>
+                    <input id="ref-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
+                  </div>
+                  <div id="ref-capturas-chips" class="plan-capturas-thumbs"></div>
+                  <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
+                </div>
+
                 <button type="button" class="plan-adj-card" id="ref-card-traza" data-adj="traza">
                   <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>Traza SQL</span>
                   <span class="card-mark" id="ref-mark-traza">○</span>
                 </button>
-              </div>
-              <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
-              <input type="checkbox" id="ref-adj-traza" class="hidden"/>
-              <input type="checkbox" id="ref-adj-backup" class="hidden"/>
-              <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
-                <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
-                <div class="plan-capturas-actions">
-                  <button type="button" id="ref-capturas-agregar" class="plan-capturas-browse">
-                    <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
-                    <span class="plan-capturas-browse-text">
-                      <strong>Examinar imágenes</strong>
-                      <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                <input type="checkbox" id="ref-adj-traza" class="hidden"/>
+
+                <button type="button" class="plan-adj-card plan-adj-backup" id="ref-card-backup" data-adj="backup">
+                  <span class="plan-adj-label">
+                    <span class="plan-inline-icon blue" data-plan-icon="backup"></span>
+                    <span class="plan-adj-backup-text">
+                      <strong>Backup de bases</strong>
+                      <small>Tocá para elegir las bases</small>
                     </span>
-                  </button>
-                  <input id="ref-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
-                </div>
-                <div id="ref-capturas-chips" class="plan-capturas-thumbs"></div>
-                <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
-              </div>
-              <button type="button" class="plan-adj-card plan-adj-backup" id="ref-card-backup" data-adj="backup">
-                <span class="plan-adj-label">
-                  <span class="plan-inline-icon blue" data-plan-icon="backup"></span>
-                  <span class="plan-adj-backup-text">
-                    <strong>Backup de bases</strong>
-                    <small>Tocá para elegir las bases</small>
                   </span>
-                </span>
-                <span class="card-mark" id="ref-mark-backup">○</span>
-              </button>
-              <div id="ref-backup-panel" class="plan-backup-detail hidden">
-                <p class="plan-backup-detail-title">Bases incluidas en el backup</p>
-                <div class="plan-backup-bases-grid">
-                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-manager"><span>Manager</span><span class="card-mark" id="ref-mark-backup-manager">○</span></button>
-                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-sbda"><span>SBDA</span><span class="card-mark" id="ref-mark-backup-sbda">○</span></button>
-                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-cg"><span>CG</span><span class="card-mark" id="ref-mark-backup-cg">○</span></button>
-                  <button type="button" class="plan-backup-base-card" id="ref-card-backup-sj"><span>SJ</span><span class="card-mark" id="ref-mark-backup-sj">○</span></button>
-                </div>
-                <input type="checkbox" id="ref-backup-manager" class="hidden"/>
-                <input type="checkbox" id="ref-backup-sbda" class="hidden"/>
-                <input type="checkbox" id="ref-backup-cg" class="hidden"/>
-                <input type="checkbox" id="ref-backup-sj" class="hidden"/>
-                <div id="ref-sql-panel" class="plan-backup-sql hidden">
-                  <p class="plan-backup-detail-title">Collation y SQL Server</p>
-                  <div class="plan-form-2col plan-form-2col-tight">
-                    <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
-                    <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
+                  <span class="card-mark" id="ref-mark-backup">○</span>
+                </button>
+                <input type="checkbox" id="ref-adj-backup" class="hidden"/>
+                <div id="ref-backup-panel" class="plan-backup-detail hidden">
+                  <p class="plan-backup-detail-title">Bases incluidas en el backup</p>
+                  <div class="plan-backup-bases-grid">
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-manager"><span>Manager</span><span class="card-mark" id="ref-mark-backup-manager">○</span></button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-sbda"><span>SBDA</span><span class="card-mark" id="ref-mark-backup-sbda">○</span></button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-cg"><span>CG</span><span class="card-mark" id="ref-mark-backup-cg">○</span></button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-sj"><span>SJ</span><span class="card-mark" id="ref-mark-backup-sj">○</span></button>
+                  </div>
+                  <input type="checkbox" id="ref-backup-manager" class="hidden"/>
+                  <input type="checkbox" id="ref-backup-sbda" class="hidden"/>
+                  <input type="checkbox" id="ref-backup-cg" class="hidden"/>
+                  <input type="checkbox" id="ref-backup-sj" class="hidden"/>
+                  <div id="ref-sql-panel" class="plan-backup-sql hidden">
+                    <p class="plan-backup-detail-title">Collation y SQL Server</p>
+                    <div class="plan-form-2col plan-form-2col-tight">
+                      <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
+                      <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
+                    </div>
                   </div>
                 </div>
               </div>
