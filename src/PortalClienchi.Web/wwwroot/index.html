@@ -402,7 +402,7 @@
               <p class="plan-ref-title">Adjuntos</p>
               <p class="plan-ref-hint">Marcá lo enviado; cada opción se abre debajo sin correr las demás.</p>
               <div class="plan-adj-stack">
-                <button type="button" class="plan-adj-card" id="ref-card-pantallas" data-adj="pantallas">
+                <button type="button" class="plan-adj-card tone-orange" id="ref-card-pantallas" data-adj="pantallas">
                   <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Captura / imágenes</span>
                   <span class="card-mark" id="ref-mark-pantallas">○</span>
                 </button>
@@ -424,13 +424,13 @@
                   <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
                 </div>
 
-                <button type="button" class="plan-adj-card" id="ref-card-traza" data-adj="traza">
+                <button type="button" class="plan-adj-card tone-green" id="ref-card-traza" data-adj="traza">
                   <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>Traza SQL</span>
                   <span class="card-mark" id="ref-mark-traza">○</span>
                 </button>
                 <input type="checkbox" id="ref-adj-traza" class="hidden"/>
 
-                <button type="button" class="plan-adj-card plan-adj-backup" id="ref-card-backup" data-adj="backup">
+                <button type="button" class="plan-adj-card plan-adj-backup tone-blue" id="ref-card-backup" data-adj="backup">
                   <span class="plan-adj-label">
                     <span class="plan-inline-icon blue" data-plan-icon="backup"></span>
                     <span class="plan-adj-backup-text">
@@ -468,74 +468,74 @@
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
               <p class="plan-ref-hint">Tocá para marcar cada ítem. Ticket y usuario se completan al activarlos.</p>
               <div class="plan-onvio-grid">
-                <button type="button" class="plan-onvio-card" id="ref-card-onvio-proceso" data-onvio="proceso">
+                <button type="button" class="plan-onvio-card tone-green" id="ref-card-onvio-proceso" data-onvio="proceso">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon green" data-plan-icon="checkOk"></span>
                     <span>El proceso funcionaba correctamente</span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-onvio-reproduce" data-onvio="reproduce">
+                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-onvio-reproduce" data-onvio="reproduce">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon orange" data-plan-icon="repeat"></span>
                     <span>El error se reproduce sistemáticamente</span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-onvio-pantallas" data-onvio="pantallas">
+                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-onvio-pantallas" data-onvio="pantallas">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon primary" data-plan-icon="camera"></span>
                     <span>Captura / imágenes</span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-onvio-ticket" data-onvio="ticket">
+                <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
+                <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
+                  <p class="plan-capturas-title">Capturas / imágenes</p>
+                  <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
+                  <div class="plan-capturas-actions">
+                    <button type="button" id="ref-onvio-capt-agregar" class="plan-capturas-browse">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                      <span class="plan-capturas-browse-text">
+                        <strong>Examinar imágenes</strong>
+                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                      </span>
+                    </button>
+                    <input id="ref-onvio-capt-input" type="file" accept="image/*" multiple class="hidden"/>
+                  </div>
+                  <div id="ref-onvio-capt-chips" class="plan-capturas-thumbs"></div>
+                  <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
+                </div>
+                <button type="button" class="plan-onvio-card tone-blue" id="ref-card-onvio-ticket" data-onvio="ticket">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon blue" data-plan-icon="ticket"></span>
                     <span>Ticket de servicio<small>N° y técnico</small></span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
+                <input type="checkbox" id="ref-onvio-ticket" class="hidden"/>
+                <div id="ref-onvio-ticket-panel" class="plan-onvio-ticket-detail hidden">
+                  <p class="plan-backup-detail-title">Datos del ticket</p>
+                  <div class="plan-form-2col">
+                    <div class="plan-field"><label for="ref-onvio-ticket-num">N° de Ticket</label><input id="ref-onvio-ticket-num" type="text" maxlength="20"/></div>
+                    <div class="plan-field"><label for="ref-onvio-tecnico">Técnico</label><input id="ref-onvio-tecnico" type="text"/></div>
+                  </div>
+                  <div class="plan-onvio-ticket-options">
+                    <button type="button" class="plan-backup-base-card" id="ref-card-onvio-rep-ticket">
+                      <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="ticket"></span>Se reprodujo con el ticket</span>
+                      <span class="card-mark">○</span>
+                    </button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-onvio-rep-prueba">
+                      <span class="plan-adj-label"><span class="plan-inline-icon purple" data-plan-icon="building"></span>Se reproduce con la empresa de prueba</span>
+                      <span class="card-mark">○</span>
+                    </button>
+                  </div>
+                  <input type="checkbox" id="ref-onvio-rep-ticket" class="hidden"/>
+                  <input type="checkbox" id="ref-onvio-rep-prueba" class="hidden"/>
+                </div>
               </div>
               <input type="checkbox" id="ref-onvio-proceso" class="hidden"/>
               <input type="checkbox" id="ref-onvio-reproduce" class="hidden"/>
-              <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
-              <input type="checkbox" id="ref-onvio-ticket" class="hidden"/>
-              <div id="ref-onvio-ticket-panel" class="plan-onvio-ticket-detail hidden">
-                <p class="plan-backup-detail-title">Datos del ticket</p>
-                <div class="plan-form-2col">
-                  <div class="plan-field"><label for="ref-onvio-ticket-num">N° de Ticket</label><input id="ref-onvio-ticket-num" type="text" maxlength="20"/></div>
-                  <div class="plan-field"><label for="ref-onvio-tecnico">Técnico</label><input id="ref-onvio-tecnico" type="text"/></div>
-                </div>
-                <div class="plan-onvio-ticket-options">
-                  <button type="button" class="plan-backup-base-card" id="ref-card-onvio-rep-ticket">
-                    <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="ticket"></span>Se reprodujo con el ticket</span>
-                    <span class="card-mark">○</span>
-                  </button>
-                  <button type="button" class="plan-backup-base-card" id="ref-card-onvio-rep-prueba">
-                    <span class="plan-adj-label"><span class="plan-inline-icon purple" data-plan-icon="building"></span>Se reproduce con la empresa de prueba</span>
-                    <span class="card-mark">○</span>
-                  </button>
-                </div>
-                <input type="checkbox" id="ref-onvio-rep-ticket" class="hidden"/>
-                <input type="checkbox" id="ref-onvio-rep-prueba" class="hidden"/>
-              </div>
-              <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
-                <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
-                <div class="plan-capturas-actions">
-                  <button type="button" id="ref-onvio-capt-agregar" class="plan-capturas-browse">
-                    <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
-                    <span class="plan-capturas-browse-text">
-                      <strong>Examinar imágenes</strong>
-                      <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
-                    </span>
-                  </button>
-                  <input id="ref-onvio-capt-input" type="file" accept="image/*" multiple class="hidden"/>
-                </div>
-                <div id="ref-onvio-capt-chips" class="plan-capturas-thumbs"></div>
-                <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
-              </div>
               <p class="plan-ref-title">Información del usuario</p>
               <div class="plan-well-box">
                 <div class="plan-form-2col plan-form-2col-tight">
@@ -549,42 +549,84 @@
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
               <p class="plan-ref-hint">Tocá para marcar cada ítem. Ticket y usuario se completan al activarlos.</p>
               <div class="plan-onvio-grid">
-                <button type="button" class="plan-onvio-card" id="ref-card-legal-proceso" data-legal="proceso">
+                <button type="button" class="plan-onvio-card tone-green" id="ref-card-legal-proceso" data-legal="proceso">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon green" data-plan-icon="checkOk"></span>
                     <span>El proceso funcionaba correctamente</span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-legal-reproduce" data-legal="reproduce">
+                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-legal-reproduce" data-legal="reproduce">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon orange" data-plan-icon="repeat"></span>
                     <span>El error se reproduce sistemáticamente</span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-legal-pantallas" data-legal="pantallas">
+                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-legal-pantallas" data-legal="pantallas">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon primary" data-plan-icon="camera"></span>
                     <span>Captura / imágenes</span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-legal-ticket" data-legal="ticket">
+                <input type="checkbox" id="ref-legal-pantallas" class="hidden"/>
+                <div id="ref-legal-capturas" class="plan-capturas-panel hidden">
+                  <p class="plan-capturas-title">Capturas / imágenes</p>
+                  <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links.</p>
+                  <div class="plan-capturas-actions">
+                    <button type="button" id="ref-legal-capt-agregar" class="plan-capturas-browse">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                      <span class="plan-capturas-browse-text">
+                        <strong>Examinar imágenes</strong>
+                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                      </span>
+                    </button>
+                    <input id="ref-legal-capt-input" type="file" accept="image/*" multiple class="hidden"/>
+                  </div>
+                  <div id="ref-legal-capt-chips" class="plan-capturas-thumbs"></div>
+                  <p id="ref-legal-capt-estado" class="plan-capturas-estado"></p>
+                </div>
+                <button type="button" class="plan-onvio-card tone-blue" id="ref-card-legal-ticket" data-legal="ticket">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon blue" data-plan-icon="ticket"></span>
                     <span>Ticket de servicio<small>N° y técnico</small></span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-legal-planilha" data-legal="planilha">
+                <input type="checkbox" id="ref-legal-ticket" class="hidden"/>
+                <div id="ref-legal-ticket-panel" class="plan-onvio-ticket-detail hidden">
+                  <p class="plan-backup-detail-title">Datos del ticket</p>
+                  <div class="plan-form-2col">
+                    <div class="plan-field"><label for="ref-legal-ticket-num">N° de Ticket</label><input id="ref-legal-ticket-num" type="text" maxlength="20"/></div>
+                    <div class="plan-field"><label for="ref-legal-tecnico">Técnico</label><input id="ref-legal-tecnico" type="text"/></div>
+                  </div>
+                  <div class="plan-onvio-ticket-options">
+                    <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-ticket">
+                      <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="ticket"></span>Se reprodujo con el ticket</span>
+                      <span class="card-mark">○</span>
+                    </button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-homolog">
+                      <span class="plan-adj-label"><span class="plan-inline-icon purple" data-plan-icon="building"></span>Se reproduce en homologación</span>
+                      <span class="card-mark">○</span>
+                    </button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-usuario">
+                      <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="checkOk"></span>Se reproduce con otro usuario OnePass</span>
+                      <span class="card-mark">○</span>
+                    </button>
+                  </div>
+                  <input type="checkbox" id="ref-legal-rep-ticket" class="hidden"/>
+                  <input type="checkbox" id="ref-legal-rep-homolog" class="hidden"/>
+                  <input type="checkbox" id="ref-legal-rep-usuario" class="hidden"/>
+                </div>
+                <button type="button" class="plan-onvio-card tone-purple" id="ref-card-legal-planilha" data-legal="planilha">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon purple" data-plan-icon="planilla"></span>
                     <span>Planilla de importación</span>
                   </span>
                   <span class="card-mark">○</span>
                 </button>
-                <button type="button" class="plan-onvio-card" id="ref-card-legal-log" data-legal="log">
+                <button type="button" class="plan-onvio-card tone-green" id="ref-card-legal-log" data-legal="log">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>
                     <span>Log de integración</span>
@@ -594,50 +636,8 @@
               </div>
               <input type="checkbox" id="ref-legal-proceso" class="hidden"/>
               <input type="checkbox" id="ref-legal-reproduce" class="hidden"/>
-              <input type="checkbox" id="ref-legal-pantallas" class="hidden"/>
-              <input type="checkbox" id="ref-legal-ticket" class="hidden"/>
               <input type="checkbox" id="ref-legal-planilha" class="hidden"/>
               <input type="checkbox" id="ref-legal-log" class="hidden"/>
-              <div id="ref-legal-ticket-panel" class="plan-onvio-ticket-detail hidden">
-                <p class="plan-backup-detail-title">Datos del ticket</p>
-                <div class="plan-form-2col">
-                  <div class="plan-field"><label for="ref-legal-ticket-num">N° de Ticket</label><input id="ref-legal-ticket-num" type="text" maxlength="20"/></div>
-                  <div class="plan-field"><label for="ref-legal-tecnico">Técnico</label><input id="ref-legal-tecnico" type="text"/></div>
-                </div>
-                <div class="plan-onvio-ticket-options">
-                  <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-ticket">
-                    <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="ticket"></span>Se reprodujo con el ticket</span>
-                    <span class="card-mark">○</span>
-                  </button>
-                  <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-homolog">
-                    <span class="plan-adj-label"><span class="plan-inline-icon purple" data-plan-icon="building"></span>Se reproduce en homologación</span>
-                    <span class="card-mark">○</span>
-                  </button>
-                  <button type="button" class="plan-backup-base-card" id="ref-card-legal-rep-usuario">
-                    <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="checkOk"></span>Se reproduce con otro usuario OnePass</span>
-                    <span class="card-mark">○</span>
-                  </button>
-                </div>
-                <input type="checkbox" id="ref-legal-rep-ticket" class="hidden"/>
-                <input type="checkbox" id="ref-legal-rep-homolog" class="hidden"/>
-                <input type="checkbox" id="ref-legal-rep-usuario" class="hidden"/>
-              </div>
-              <div id="ref-legal-capturas" class="plan-capturas-panel hidden">
-                <p class="plan-capturas-title">Capturas / imágenes</p>
-                <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links.</p>
-                <div class="plan-capturas-actions">
-                  <button type="button" id="ref-legal-capt-agregar" class="plan-capturas-browse">
-                    <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
-                    <span class="plan-capturas-browse-text">
-                      <strong>Examinar imágenes</strong>
-                      <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
-                    </span>
-                  </button>
-                  <input id="ref-legal-capt-input" type="file" accept="image/*" multiple class="hidden"/>
-                </div>
-                <div id="ref-legal-capt-chips" class="plan-capturas-thumbs"></div>
-                <p id="ref-legal-capt-estado" class="plan-capturas-estado"></p>
-              </div>
               <p class="plan-ref-title">Información del cliente</p>
               <div class="plan-well-box">
                 <div class="plan-form-grid">
