@@ -141,12 +141,8 @@ public sealed class ReferralIdService
 
     public static string? ValidateCapturasLinks(ReferralIdCase caso)
     {
-        if (caso.Sistema == PlanillasSistema.BejermanSql && caso.Adjuntos.Pantallas && caso.CapturasEnlaces.Count == 0)
-            return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
-
-        if (caso.Sistema == PlanillasSistema.OnvioWeb && caso.Onvio.AdjuntaPantallas && caso.CapturasEnlaces.Count == 0)
-            return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
-
+        // Bejerman / Onvio: si marcaron capturas sin subir, el TXT indica "en comentarios".
+        // LEGAL sigue exigiendo links cuando se marca pantallas.
         if (caso.Sistema == PlanillasSistema.Legal && caso.Legal.AdjuntaPantallas && caso.CapturasEnlaces.Count == 0)
             return "Marcaste capturas pero no hay links de imágenes. Subí las imágenes en el panel de capturas.";
 

@@ -236,25 +236,36 @@ public static class ReferralIdTextBuilder
         {
             var a = c.Adjuntos;
             hay = a.Pantallas || a.TrazaSql || a.BackupBases;
+            var enComentarios = new List<string>();
+            var pantallasConLinks = a.Pantallas && c.CapturasEnlaces.Count > 0;
+
             if (a.Pantallas)
             {
                 partes.Add("- Captura / imágenes");
-                CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
+                if (pantallasConLinks)
+                    CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
+                else
+                    enComentarios.Add("Imágenes");
             }
+
             if (a.TrazaSql)
             {
                 partes.Add("- Traza SQL");
-                partes.Add("  La traza SQL se adjunta en comentarios.");
+                enComentarios.Add("Traza");
             }
+
             if (a.BackupBases)
             {
                 partes.Add("- Backup Bases");
-                partes.Add("  Se adjuntan en comentarios.");
+                enComentarios.Add("Bases");
                 if (a.BackupManager) partes.Add("  * Manager");
                 if (a.BackupSbda) partes.Add("  * SBDA");
                 if (a.BackupCg) partes.Add("  * CG");
                 if (a.BackupSj) partes.Add("  * SJ");
             }
+
+            if (enComentarios.Count > 0)
+                partes.Add(BuildAdjuntosEnComentarios(enComentarios));
         }
         else if (c.Sistema == PlanillasSistema.OnvioWeb)
         {
@@ -262,7 +273,10 @@ public static class ReferralIdTextBuilder
             if (c.Onvio.AdjuntaPantallas)
             {
                 partes.Add("- Captura / imágenes");
-                CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
+                if (c.CapturasEnlaces.Count > 0)
+                    CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
+                else
+                    partes.Add(BuildAdjuntosEnComentarios(["Imágenes"]));
             }
         }
         else if (c.Sistema == PlanillasSistema.Legal)
@@ -282,6 +296,19 @@ public static class ReferralIdTextBuilder
 
         if (!hay)
             partes.Add("- No se adjuntan capturas");
+    }
+
+    /// <summary>
+    /// Une en una sola línea lo que va por comentarios: Imágenes, Traza y/o Bases.
+    /// </summary>
+    private static string BuildAdjuntosEnComentarios(IReadOnlyList<string> items)
+    {
+        if (items.Count == 1)
+            return $"Se adjuntan {items[0]} en comentarios.";
+        if (items.Count == 2)
+            return $"Se adjuntan {items[0]} y {items[1]} en comentarios.";
+
+        return $"Se adjuntan {string.Join(", ", items.Take(items.Count - 1))} y {items[^1]} en comentarios.";
     }
 
     private static bool IsRealText(string? text, string placeholder) =>
