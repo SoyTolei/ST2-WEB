@@ -77,9 +77,11 @@ function syncPerfilUi() {
 
   const hint = document.getElementById("ref-perfil-hint");
   if (hint) {
+    hint.classList.toggle("is-tecnico", esTecnico);
+    hint.classList.toggle("is-otra", !esTecnico);
     hint.innerHTML = esTecnico
-      ? "Como técnico, MAM y SDK son obligatorios. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar."
-      : "<strong>Flex, SaaS o SJ.</strong> MAM y SDK son opcionales. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.";
+      ? 'Si el referral es para la mesa <strong>Técnico</strong>. MAM y SDK son <strong>obligatorios</strong>. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.'
+      : 'Si el referral es para la mesa <strong>Flex, SaaS o SJ</strong>. MAM y SDK son <strong>opcionales</strong>. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.';
   }
 
   const mamBadge = document.getElementById("ref-mam-badge");
