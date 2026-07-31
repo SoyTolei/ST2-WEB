@@ -315,21 +315,39 @@ function styleCapturasCard(selected) {
   mark.textContent = selected ? "✓" : "○";
 }
 
+function revokeCapturaThumbUrls(container) {
+  if (!container) return;
+  container.querySelectorAll("img[data-object-url]").forEach((img) => {
+    const url = img.getAttribute("data-object-url");
+    if (url) URL.revokeObjectURL(url);
+  });
+}
+
 function refreshCapturasUi() {
   const chips = els.capturasChips();
   const estado = els.capturasEstado();
   if (!chips) return;
 
+  revokeCapturaThumbUrls(chips);
   chips.innerHTML = "";
   capturaFiles.forEach((f, index) => {
-    const chip = document.createElement("span");
-    chip.className = "plan-chip";
+    const card = document.createElement("div");
+    card.className = "plan-captura-thumb";
+
+    const img = document.createElement("img");
+    const url = URL.createObjectURL(f);
+    img.src = url;
+    img.alt = f.name;
+    img.setAttribute("data-object-url", url);
+
     const name = document.createElement("span");
-    name.className = "plan-chip-name";
+    name.className = "plan-captura-thumb-name";
     name.textContent = f.name;
+    name.title = f.name;
+
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "plan-chip-remove";
+    btn.className = "plan-captura-thumb-remove";
     btn.setAttribute("aria-label", `Quitar ${f.name}`);
     btn.textContent = "×";
     btn.addEventListener("click", (e) => {
@@ -338,18 +356,16 @@ function refreshCapturasUi() {
       capturaFiles.splice(index, 1);
       refreshCapturasUi();
     });
-    chip.append(name, btn);
-    chips.appendChild(chip);
+
+    card.append(img, name, btn);
+    chips.appendChild(card);
   });
 
   if (estado) {
-    const hosting = planillasConfig?.capturaHosting?.configured;
     if (capturaFiles.length === 0) {
-      estado.textContent = hosting
-        ? "Agregá imágenes; se subirán al generar la planilla."
-        : "Hosting de capturas no configurado: el texto indicará adjunto en comentarios.";
+      estado.textContent = "";
     } else {
-      estado.textContent = `${capturaFiles.length} imagen(es) lista(s) para subir.`;
+      estado.textContent = `${capturaFiles.length} imagen(es) lista(s) para subir al generar el texto.`;
     }
   }
 
@@ -376,26 +392,10 @@ function addCapturaFiles(fileList) {
       added++;
     }
   }
-  if (added > 0) refreshCapturasUi();
-}
-
-async function pegarCaptura() {
-  try {
-    const items = await navigator.clipboard.read();
-    for (const item of items) {
-      const imageType = item.types.find((t) => t.startsWith("image/"));
-      if (!imageType) continue;
-      const blob = await item.getType(imageType);
-      const ext = imageType.split("/")[1]?.replace("jpeg", "jpg") || "png";
-      const file = new File([blob], `captura_${Date.now()}.${ext}`, { type: imageType });
-      capturaFiles.push(file);
-      refreshCapturasUi();
-      return;
-    }
-    alert("No hay imagen en el portapapeles.");
-  } catch {
-    alert("No se pudo leer el portapapeles. Probá «Agregar imágenes».");
+  if (added === 0 && fileList?.length > 0) {
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP).");
   }
+  if (added > 0) refreshCapturasUi();
 }
 
 function transferIaFieldDefs() {
@@ -795,8 +795,6 @@ function bindEvents() {
   document.getElementById("plan-capturas-agregar")?.addEventListener("click", () => {
     els.capturasInput()?.click();
   });
-
-  document.getElementById("plan-capturas-pegar")?.addEventListener("click", pegarCaptura);
 
   document.getElementById("plan-ticket-card")?.addEventListener("click", () => {
     const c = els.ticketCheck();

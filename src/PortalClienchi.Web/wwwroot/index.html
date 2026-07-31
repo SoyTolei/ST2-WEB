@@ -200,12 +200,19 @@
                   </label>
                 </div>
                 <div id="plan-capturas-panel" class="plan-capturas-panel hidden">
+                  <p class="plan-capturas-title">Capturas / imágenes</p>
+                  <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
                   <div class="plan-capturas-actions">
-                    <button type="button" id="plan-capturas-agregar" class="btn btn-secondary">Agregar imágenes</button>
-                    <button type="button" id="plan-capturas-pegar" class="btn btn-secondary">Pegar captura</button>
+                    <button type="button" id="plan-capturas-agregar" class="plan-capturas-browse">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                      <span class="plan-capturas-browse-text">
+                        <strong>Examinar imágenes</strong>
+                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                      </span>
+                    </button>
                     <input id="plan-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
                   </div>
-                  <div id="plan-capturas-chips" class="plan-capturas-chips"></div>
+                  <div id="plan-capturas-chips" class="plan-capturas-thumbs"></div>
                   <p id="plan-capturas-estado" class="plan-capturas-estado"></p>
                 </div>
               </div>

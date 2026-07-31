@@ -1243,17 +1243,17 @@
 .plan-check-cards {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 7px;
   margin-bottom: 18px;
 }
 .plan-check-wrap {
   position: relative;
   border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
+  border-radius: 10px;
+  padding: 5px 6px 5px 8px;
   display: flex;
-  align-items: flex-start;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
 }
 .plan-check-badge {
   position: absolute;
@@ -1304,26 +1304,31 @@
   margin: 0;
 }
 .plan-check-mark {
-  font-size: 1.1rem;
+  order: 2;
+  font-size: 1rem;
   line-height: 1;
   color: #94a3b8;
   flex-shrink: 0;
-  margin-top: 4px;
+  margin: 0 4px 0 0;
+  width: 1.1em;
+  text-align: center;
 }
 .plan-check-btn {
+  order: 1;
   flex: 1;
   border: none;
-  border-radius: 10px;
-  min-height: 56px;
-  padding: 10px 12px;
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 7px 10px;
   color: #fff;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 1px;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
-  text-align: center;
+  text-align: left;
   transition: opacity 0.12s;
 }
 .plan-check-btn:hover { opacity: 0.92; }
@@ -1331,16 +1336,28 @@
 .plan-check-btn.mam { background: #2563eb; }
 .plan-check-btn.sdk { background: #d97706; }
 .plan-check-btn-icon {
-  width: 22px;
-  height: 22px;
+  grid-row: 1 / -1;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2px;
+  margin: 0;
 }
-.plan-check-btn-icon svg { width: 20px; height: 20px; stroke: #fff; }
-.plan-check-btn strong { font-size: 0.88rem; font-weight: 700; line-height: 1.2; }
-.plan-check-btn small { font-size: 0.68rem; font-weight: 500; opacity: 0.92; line-height: 1.25; }
+.plan-check-btn-icon svg { width: 16px; height: 16px; stroke: #fff; }
+.plan-check-btn strong {
+  grid-column: 2;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+.plan-check-btn small {
+  grid-column: 2;
+  font-size: 0.64rem;
+  font-weight: 500;
+  opacity: 0.9;
+  line-height: 1.2;
+}
 
 .plan-inline-icon {
   width: 18px;

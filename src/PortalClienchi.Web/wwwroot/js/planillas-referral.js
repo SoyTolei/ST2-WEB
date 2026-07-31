@@ -780,7 +780,7 @@ async function generarReferral(copiar) {
 
   // LEGAL: si marcó capturas tiene que subirlas. Bejerman/Onvio permiten generar sin subir (van en comentarios).
   if (isLegal() && quierePantallas && files.length === 0) {
-    alert("Marcaste capturas pero no hay imágenes cargadas. Usá «Examinar…» o «Pegar del portapapeles» en el panel de capturas.");
+    alert("Marcaste capturas pero no hay imágenes cargadas. Usá «Examinar imágenes» en el panel de capturas.");
     status.textContent = "Faltan imágenes para adjuntar.";
     return;
   }
