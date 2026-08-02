@@ -1448,80 +1448,58 @@
 .plan-onvio-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 7px;
-  margin-bottom: 12px;
-}
-.plan-onvio-group-title {
-  margin: 4px 0 8px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: #64748b;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 .plan-onvio-grid .plan-capturas-panel,
 .plan-onvio-grid .plan-onvio-ticket-detail {
   margin: 0;
 }
 .plan-onvio-card {
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
   padding: 10px 12px;
-  min-height: 48px;
+  min-height: 40px;
   background: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   text-align: left;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--dark);
-  transition: border-color 0.12s, background 0.12s, box-shadow 0.12s;
+  transition: border-color 0.12s, background 0.12s;
 }
-/* Neutralizar tonos: el color no debe sugerir “ya marcado” ni confundir validación. */
-.plan-onvio-card.tone-green,
-.plan-onvio-card.tone-orange,
-.plan-onvio-card.tone-blue,
-.plan-onvio-card.tone-purple {
-  border-color: #e2e8f0;
-  background: #fff;
-}
+/* Mismo lenguaje visual que adjuntos Bejerman SQL */
+.plan-onvio-card.tone-green { border-color: #86efac; background: #f0fdf4; }
+.plan-onvio-card.tone-orange { border-color: #fdba74; background: #fff7ed; }
+.plan-onvio-card.tone-blue { border-color: #93c5fd; background: #eff6ff; }
+.plan-onvio-card.tone-purple { border-color: #c4b5fd; background: #f5f3ff; }
 .plan-onvio-card:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+  filter: brightness(0.985);
 }
-.plan-onvio-card.selected,
-.plan-onvio-card.tone-green.selected,
-.plan-onvio-card.tone-orange.selected,
-.plan-onvio-card.tone-blue.selected,
+.plan-onvio-card.selected {
+  border: 2px solid #d64000;
+  background: #fff4ed;
+  padding: 9px 11px;
+}
+.plan-onvio-card.tone-green.selected {
+  border-color: #059669;
+  background: #ecfdf5;
+}
+.plan-onvio-card.tone-orange.selected {
+  border-color: #c2410c;
+  background: #ffedd5;
+}
+.plan-onvio-card.tone-blue.selected {
+  border-color: #2563eb;
+  background: #dbeafe;
+}
 .plan-onvio-card.tone-purple.selected {
-  border-width: 1.5px;
-  border-color: #22c55e;
-  background: #f0fdf4;
-  box-shadow: inset 3px 0 0 #16a34a;
-  padding: 10px 12px;
-}
-.plan-onvio-card .plan-inline-icon,
-.plan-onvio-card .plan-inline-icon.green,
-.plan-onvio-card .plan-inline-icon.orange,
-.plan-onvio-card .plan-inline-icon.blue,
-.plan-onvio-card .plan-inline-icon.purple,
-.plan-onvio-card .plan-inline-icon.primary {
-  background: #f1f5f9;
-  color: #64748b;
-  border-color: #e2e8f0;
-}
-.plan-onvio-card.selected .plan-inline-icon,
-.plan-onvio-card.selected .plan-inline-icon.green,
-.plan-onvio-card.selected .plan-inline-icon.orange,
-.plan-onvio-card.selected .plan-inline-icon.blue,
-.plan-onvio-card.selected .plan-inline-icon.purple,
-.plan-onvio-card.selected .plan-inline-icon.primary {
-  background: #dcfce7;
-  color: #15803d;
-  border-color: #86efac;
+  border-color: #7c3aed;
+  background: #ede9fe;
 }
 .plan-onvio-body {
   display: flex;
@@ -1538,19 +1516,20 @@
   color: #6b7280;
   margin-top: 1px;
 }
+/* Sí/No: estado claro sin pelear con el color del card */
 .plan-onvio-card .card-mark,
 .plan-onvio-state {
   flex-shrink: 0;
-  min-width: 2.7rem;
-  padding: 0.28rem 0.55rem;
+  min-width: 2.6rem;
+  padding: 0.22rem 0.5rem;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-align: center;
   color: #64748b;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.45);
   line-height: 1.1;
 }
 .plan-onvio-card.selected .card-mark,
