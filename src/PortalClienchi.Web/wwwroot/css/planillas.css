@@ -1747,16 +1747,14 @@
   color: var(--dark);
   background: #fff;
 }
+.plan-backup-onedrive input::placeholder {
+  font-style: italic;
+  color: #94a3b8;
+}
 .plan-backup-onedrive input:focus {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-.plan-backup-onedrive-hint {
-  margin: 6px 0 0;
-  font-size: 0.72rem;
-  line-height: 1.35;
-  color: #64748b;
 }
 .plan-backup-base-card {
   border: 1px solid var(--border);
