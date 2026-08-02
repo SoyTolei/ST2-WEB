@@ -215,10 +215,9 @@ function buildReferralPills() {
 }
 
 function updateSqlPanel() {
-  const backup = document.getElementById("ref-adj-backup")?.checked;
-  const anyBase = ["ref-backup-manager", "ref-backup-sbda", "ref-backup-cg", "ref-backup-sj"]
-    .some((id) => document.getElementById(id)?.checked);
-  document.getElementById("ref-sql-panel")?.classList.toggle("hidden", !(backup && anyBase));
+  // Collation/SQL se muestra con el panel de backup (ya no depende de elegir una base).
+  const backup = !!document.getElementById("ref-adj-backup")?.checked;
+  document.getElementById("ref-sql-panel")?.classList.toggle("hidden", !backup);
 }
 
 function updateCheckStatuses() {

@@ -455,6 +455,14 @@
                 </button>
                 <input type="checkbox" id="ref-adj-backup" class="hidden"/>
                 <div id="ref-backup-panel" class="plan-backup-detail hidden">
+                  <div id="ref-sql-panel" class="plan-backup-sql">
+                    <p class="plan-backup-detail-title">Collation y SQL Server</p>
+                    <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si tomaste el backup con <strong>ST2 → Herramientas SQL</strong>, podés ver la collation y la versión de SQL Server en el nombre del archivo <strong>.zip</strong>.</p>
+                    <div class="plan-form-2col plan-form-2col-tight">
+                      <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
+                      <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
+                    </div>
+                  </div>
                   <p class="plan-backup-detail-title">Bases incluidas en el backup</p>
                   <div class="plan-backup-bases-grid">
                     <button type="button" class="plan-backup-base-card" id="ref-card-backup-manager"><span>Manager</span><span class="card-mark" id="ref-mark-backup-manager">○</span></button>
@@ -470,14 +478,6 @@
                     <label for="ref-backup-onedrive">OneDrive</label>
                     <input id="ref-backup-onedrive" type="url" placeholder="Si subiste las bases a OneDrive, pegá el link acá" autocomplete="off"/>
                     <p class="plan-backup-onedrive-hint">Si pegás el link, el TXT lo incluye. Si no, indica que las bases van en comentarios.</p>
-                  </div>
-                  <div id="ref-sql-panel" class="plan-backup-sql hidden">
-                    <p class="plan-backup-detail-title">Collation y SQL Server</p>
-                    <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si tomaste el backup con <strong>ST2 → Herramientas SQL</strong>, podés ver la collation y la versión de SQL Server en el nombre del archivo <strong>.zip</strong>.</p>
-                    <div class="plan-form-2col plan-form-2col-tight">
-                      <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
-                      <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
-                    </div>
                   </div>
                 </div>
               </div>
