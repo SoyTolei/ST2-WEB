@@ -1896,7 +1896,7 @@ function needsEmbedReload(frame, url) {
 function getEmbedZoom(kind) {
   const zoom = kind === "thom" ? appConfig?.thomZoomFactor : appConfig?.aiPlatformZoomFactor;
   if (typeof zoom === "number" && zoom > 0.25 && zoom < 2) return zoom;
-  return 0.78;
+  return 0.9;
 }
 
 function applyEmbedZoom(kind) {
@@ -2046,7 +2046,15 @@ function clearEmbedHint(kind) {
 
 function setEmbedHint(kind, message) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
-  if (el) el.textContent = message;
+  if (!el) return;
+  // El hint de THOM queda oculto a propósito: el aviso de ZScaler vive en el panel central.
+  if (kind === "thom") {
+    el.classList.add("hidden");
+    el.setAttribute("aria-hidden", "true");
+    el.textContent = "";
+    return;
+  }
+  el.textContent = message;
 }
 
 function goHome() {

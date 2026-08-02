@@ -13,7 +13,7 @@ internal sealed class EmbedSiteProxy
     public EmbedSiteProxy(AppSettings settings)
     {
         _autoCloseThomHelpPanel = settings.ThomAutoCloseHelpPanel;
-        _thomZoomFactor = settings.ThomZoomFactor is > 0.25 and < 2 ? settings.ThomZoomFactor : 0.78;
+        _thomZoomFactor = settings.ThomZoomFactor is > 0.25 and < 2 ? settings.ThomZoomFactor : 0.9;
     }
 
     private static readonly HttpClient Http = CreateClient();
