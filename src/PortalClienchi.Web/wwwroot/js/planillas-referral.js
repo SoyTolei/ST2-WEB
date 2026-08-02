@@ -297,6 +297,53 @@ function clearBackupBases() {
   updateSqlPanel();
 }
 
+/** Windows/Explorer a veces pega el nombre de la carpeta; priorizamos la URL del clipboard. */
+function extractUrlFromClipboardData(data) {
+  if (!data) return "";
+
+  const uriList = data.getData("text/uri-list")?.trim();
+  if (uriList) {
+    const line = uriList.split(/\r?\n/).find((l) => l && !l.startsWith("#"));
+    if (line && /^https?:\/\//i.test(line)) return line.trim();
+  }
+
+  const html = data.getData("text/html") || "";
+  if (html) {
+    const hrefMatch = html.match(/href\s*=\s*["']([^"']+)["']/i);
+    if (hrefMatch?.[1]) {
+      const href = hrefMatch[1].trim().replace(/&amp;/g, "&");
+      if (/^https?:\/\//i.test(href)) return href;
+    }
+  }
+
+  const plain = (data.getData("text/plain") || "").trim();
+  if (!plain) return "";
+
+  if (/^https?:\/\//i.test(plain)) return plain.split(/\s+/)[0];
+
+  const embedded = plain.match(/https?:\/\/[^\s<>"']+/i);
+  return embedded ? embedded[0] : "";
+}
+
+function setupBackupOnedrivePaste() {
+  const input = document.getElementById("ref-backup-onedrive");
+  if (!input || input.dataset.pasteBound === "1") return;
+  input.dataset.pasteBound = "1";
+
+  input.addEventListener("paste", (e) => {
+    const url = extractUrlFromClipboardData(e.clipboardData);
+    if (!url) return;
+
+    e.preventDefault();
+    const start = input.selectionStart ?? input.value.length;
+    const end = input.selectionEnd ?? input.value.length;
+    input.value = `${input.value.slice(0, start)}${url}${input.value.slice(end)}`;
+    const caret = start + url.length;
+    input.setSelectionRange(caret, caret);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
 function syncReferralCards() {
   [
     ["ref-card-pantallas", "ref-adj-pantallas", "ref-mark-pantallas"],
@@ -422,6 +469,7 @@ function bindReferralEvents() {
   bindAdjCard("ref-card-backup-sbda", "ref-backup-sbda", "ref-mark-backup-sbda", updateSqlPanel);
   bindAdjCard("ref-card-backup-cg", "ref-backup-cg", "ref-mark-backup-cg", updateSqlPanel);
   bindAdjCard("ref-card-backup-sj", "ref-backup-sj", "ref-mark-backup-sj", updateSqlPanel);
+  setupBackupOnedrivePaste();
 
   bindOnvioCard("ref-card-onvio-proceso", "ref-onvio-proceso");
   bindOnvioCard("ref-card-onvio-reproduce", "ref-onvio-reproduce");
