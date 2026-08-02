@@ -317,11 +317,26 @@ function styleCapturasCard(selected) {
 
 function revokeCapturaThumbUrls(container) {
   if (!container) return;
-  container.querySelectorAll("img[data-object-url]").forEach((img) => {
-    const url = img.getAttribute("data-object-url");
+  container.querySelectorAll("img[data-object-url], video[data-object-url]").forEach((el) => {
+    const url = el.getAttribute("data-object-url");
     if (url) URL.revokeObjectURL(url);
   });
 }
+
+function isPlanVideoFile(file) {
+  if (/\.(mp4|webm)$/i.test(file.name || "")) return true;
+  const t = file.type || "";
+  return t === "video/mp4" || t === "video/webm";
+}
+
+function isPlanCapturaFile(file) {
+  if (isPlanVideoFile(file)) return true;
+  if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
+  return (file.type || "").startsWith("image/");
+}
+
+const MAX_PLAN_VIDEOS = 2;
+const MAX_PLAN_VIDEO_BYTES = 25 * 1024 * 1024;
 
 function refreshCapturasUi() {
   const chips = els.capturasChips();
@@ -331,17 +346,26 @@ function refreshCapturasUi() {
   revokeCapturaThumbUrls(chips);
   chips.innerHTML = "";
   capturaFiles.forEach((f, index) => {
+    const isVideo = isPlanVideoFile(f);
     const card = document.createElement("div");
-    card.className = "plan-captura-thumb";
+    card.className = isVideo ? "plan-traza-chip plan-video-chip" : "plan-captura-thumb";
 
-    const img = document.createElement("img");
-    const url = URL.createObjectURL(f);
-    img.src = url;
-    img.alt = f.name;
-    img.setAttribute("data-object-url", url);
+    let preview;
+    if (isVideo) {
+      preview = document.createElement("span");
+      preview.className = "plan-traza-chip-ext";
+      const match = /\.([^.]+)$/.exec(f.name || "");
+      preview.textContent = (match?.[1] || "mp4").toUpperCase();
+    } else {
+      preview = document.createElement("img");
+      const url = URL.createObjectURL(f);
+      preview.src = url;
+      preview.alt = f.name;
+      preview.setAttribute("data-object-url", url);
+    }
 
     const name = document.createElement("span");
-    name.className = "plan-captura-thumb-name";
+    name.className = isVideo ? "plan-traza-chip-name" : "plan-captura-thumb-name";
     name.textContent = f.name;
     name.title = f.name;
 
@@ -357,7 +381,7 @@ function refreshCapturasUi() {
       refreshCapturasUi();
     });
 
-    card.append(img, name, btn);
+    card.append(preview, name, btn);
     chips.appendChild(card);
   });
 
@@ -365,7 +389,12 @@ function refreshCapturasUi() {
     if (capturaFiles.length === 0) {
       estado.textContent = "";
     } else {
-      estado.textContent = `${capturaFiles.length} imagen(es) lista(s) para subir al generar el texto.`;
+      const videos = capturaFiles.filter(isPlanVideoFile).length;
+      const imgs = capturaFiles.length - videos;
+      const parts = [];
+      if (imgs > 0) parts.push(`${imgs} imagen(es)`);
+      if (videos > 0) parts.push(`${videos} video(s)`);
+      estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
     }
   }
 
@@ -377,25 +406,50 @@ function onCapturasToggle() {
   els.capturasPanel()?.classList.toggle("hidden", !on);
   if (!on) {
     capturaFiles = [];
+    const ext = document.getElementById("plan-capturas-externo");
+    if (ext) ext.value = "";
     refreshCapturasUi();
   }
   styleCapturasCard(on);
 }
 
 function addCapturaFiles(fileList) {
-  const allowed = /\.(png|jpe?g|gif|bmp|webp)$/i;
   let added = 0;
+  let rejectedVideo = false;
+  let rejectedFormat = false;
   for (const file of fileList) {
-    if (!allowed.test(file.name)) continue;
+    if (!isPlanCapturaFile(file)) {
+      rejectedFormat = true;
+      continue;
+    }
+    if (isPlanVideoFile(file)) {
+      if (file.size > MAX_PLAN_VIDEO_BYTES) {
+        rejectedVideo = true;
+        continue;
+      }
+      if (capturaFiles.filter(isPlanVideoFile).length >= MAX_PLAN_VIDEOS) {
+        rejectedVideo = true;
+        continue;
+      }
+    }
     if (!capturaFiles.some((f) => f.name === file.name && f.size === file.size)) {
       capturaFiles.push(file);
       added++;
     }
   }
-  if (added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP).");
+  if (rejectedVideo) {
+    alert("Videos: solo MP4/WEBM, máx. 25 MB y hasta 2. Si es más pesado, pegá un link externo.");
+  } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP) o video MP4/WEBM.");
   }
-  if (added > 0) refreshCapturasUi();
+  if (added > 0) {
+    const check = els.capturasCheck();
+    if (check && !check.checked) {
+      check.checked = true;
+      onCapturasToggle();
+    }
+    refreshCapturasUi();
+  }
 }
 
 function transferIaFieldDefs() {
@@ -479,6 +533,8 @@ function limpiarTransferencia() {
 
   els.capturasCheck().checked = false;
   els.capturasPanel()?.classList.add("hidden");
+  const captExt = document.getElementById("plan-capturas-externo");
+  if (captExt) captExt.value = "";
   els.ticketCheck().checked = false;
   els.ticketPanel()?.classList.add("hidden");
   els.ticketNumero().value = "";
@@ -620,6 +676,12 @@ async function generarTexto() {
   if (!preguntarTicketLegal() || !preguntarTicketSiSaasSueldos()) return null;
 
   const payload = buildPayload();
+  const externo = document.getElementById("plan-capturas-externo")?.value.trim() || "";
+  if (externo) {
+    payload.capturas = true;
+    payload.capturasEnlaces = [{ fileName: "video-externo", url: externo }];
+  }
+
   const form = new FormData();
   form.append("payload", JSON.stringify(payload));
 
@@ -795,6 +857,45 @@ function bindEvents() {
   document.getElementById("plan-capturas-agregar")?.addEventListener("click", () => {
     els.capturasInput()?.click();
   });
+
+  const planExt = document.getElementById("plan-capturas-externo");
+  if (planExt && planExt.dataset.pasteBound !== "1") {
+    planExt.dataset.pasteBound = "1";
+    planExt.addEventListener("paste", (e) => {
+      const data = e.clipboardData;
+      if (!data) return;
+      const uriList = data.getData("text/uri-list")?.trim();
+      let url = "";
+      if (uriList) {
+        const line = uriList.split(/\r?\n/).find((l) => l && !l.startsWith("#"));
+        if (line && /^https?:\/\//i.test(line)) url = line.trim();
+      }
+      if (!url) {
+        const html = data.getData("text/html") || "";
+        const hrefMatch = html.match(/href\s*=\s*["']([^"']+)["']/i);
+        if (hrefMatch?.[1]) {
+          const href = hrefMatch[1].trim().replace(/&amp;/g, "&");
+          if (/^https?:\/\//i.test(href)) url = href;
+        }
+      }
+      if (!url) {
+        const plain = (data.getData("text/plain") || "").trim();
+        if (/^https?:\/\//i.test(plain)) url = plain.split(/\s+/)[0];
+        else {
+          const embedded = plain.match(/https?:\/\/[^\s<>"']+/i);
+          if (embedded) url = embedded[0];
+        }
+      }
+      if (!url) return;
+      e.preventDefault();
+      planExt.value = url;
+      const check = els.capturasCheck();
+      if (check && !check.checked) {
+        check.checked = true;
+        onCapturasToggle();
+      }
+    });
+  }
 
   document.getElementById("plan-ticket-card")?.addEventListener("click", () => {
     const c = els.ticketCheck();

@@ -10,6 +10,11 @@ public static class PlanillasEndpoints
         ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp",
     };
 
+    private static readonly HashSet<string> VideoExtensiones = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp4", ".webm",
+    };
+
     private static readonly HashSet<string> TrazaExtensiones = new(StringComparer.OrdinalIgnoreCase)
     {
         ".trc", ".csv", ".txt",
@@ -96,6 +101,7 @@ public static class PlanillasEndpoints
                 return Results.BadRequest(new { error = "No se recibieron archivos." });
 
             var archivos = new List<(string FileName, Stream Content)>();
+            var videos = 0;
             foreach (var file in files)
             {
                 if (file.Length == 0)
@@ -105,14 +111,24 @@ public static class PlanillasEndpoints
                 var contentType = file.ContentType ?? "";
                 var esImagen = ImagenExtensiones.Contains(ext)
                     || contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
-                if (!esImagen)
-                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}" });
+                var esVideo = VideoExtensiones.Contains(ext)
+                    || contentType.Equals("video/mp4", StringComparison.OrdinalIgnoreCase)
+                    || contentType.Equals("video/webm", StringComparison.OrdinalIgnoreCase);
+
+                if (!esImagen && !esVideo)
+                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen o video mp4/webm." });
+
+                if (esVideo)
+                    videos++;
 
                 archivos.Add((file.FileName, file.OpenReadStream()));
             }
 
             if (archivos.Count == 0)
-                return Results.BadRequest(new { error = "No hay imágenes válidas." });
+                return Results.BadRequest(new { error = "No hay archivos válidos." });
+
+            if (videos > 2)
+                return Results.BadRequest(new { error = "Máximo 2 videos por subida." });
 
             try
             {

@@ -25,12 +25,18 @@ public sealed class LocalCapturaStore
     private static readonly string[] StoredExts =
     [
         ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp",
+        ".mp4", ".webm",
         ".trc", ".csv", ".txt",
     ];
 
     private static readonly HashSet<string> AllowedExt = new(StringComparer.OrdinalIgnoreCase)
     {
         ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp",
+    };
+
+    private static readonly HashSet<string> AllowedVideoExt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".mp4", ".webm",
     };
 
     private static readonly HashSet<string> AllowedDownloadExt = new(StringComparer.OrdinalIgnoreCase)
@@ -76,13 +82,19 @@ public sealed class LocalCapturaStore
 
         var maxFiles = Math.Clamp(_settings.MaxFilesPerRequest, 1, 50);
         if (archivos.Count > maxFiles)
-            throw new InvalidOperationException($"Máximo {maxFiles} imágenes por subida.");
+            throw new InvalidOperationException($"Máximo {maxFiles} archivos por subida.");
+
+        var maxVideos = Math.Clamp(_settings.MaxVideosPerRequest, 1, 5);
+        var videoCount = archivos.Count(a => AllowedVideoExt.Contains(Path.GetExtension(a.FileName)));
+        if (videoCount > maxVideos)
+            throw new InvalidOperationException($"Máximo {maxVideos} video(s) por subida.");
 
         var baseUrl = NormalizeBaseUrl(publicBaseUrl, _settings.PublicBaseUrl);
         if (string.IsNullOrWhiteSpace(baseUrl))
             throw new InvalidOperationException("No se pudo determinar la URL pública de las capturas.");
 
-        var maxBytes = Math.Clamp(_settings.MaxFileBytes, 256 * 1024, 25 * 1024 * 1024);
+        var maxImageBytes = Math.Clamp(_settings.MaxFileBytes, 256 * 1024, 25 * 1024 * 1024);
+        var maxVideoBytes = Math.Clamp(_settings.MaxVideoFileBytes, 1024 * 1024, 50 * 1024 * 1024);
         var results = new List<CapturaSubidaResult>(archivos.Count);
 
         foreach (var (fileName, content) in archivos)
@@ -104,19 +116,44 @@ public sealed class LocalCapturaStore
                     continue;
                 }
 
-                if (raw.Length > maxBytes)
+                var ext = Path.GetExtension(safeName);
+                var isVideo = AllowedVideoExt.Contains(ext);
+
+                if (isVideo)
+                {
+                    if (raw.Length > maxVideoBytes)
+                    {
+                        results.Add(new CapturaSubidaResult(
+                            safeName,
+                            null,
+                            $"El video supera el máximo de {maxVideoBytes / (1024 * 1024.0):0.#} MB. Usá un clip más corto o pegá un link externo."));
+                        continue;
+                    }
+
+                    var videoExt = ext.ToLowerInvariant();
+                    EnsureRoot();
+                    var videoId = NewShortId();
+                    await File.WriteAllBytesAsync(Path.Combine(_root, videoId + videoExt), raw, ct)
+                        .ConfigureAwait(false);
+
+                    var videoUrl = $"{baseUrl}/c/{videoId}";
+                    _logger.LogInformation("Video guardado {Id} ({Bytes} bytes) → {Url}", videoId, raw.Length, videoUrl);
+                    results.Add(new CapturaSubidaResult(safeName, videoUrl, null));
+                    continue;
+                }
+
+                if (raw.Length > maxImageBytes)
                 {
                     results.Add(new CapturaSubidaResult(
                         safeName,
                         null,
-                        $"Supera el máximo de {maxBytes / (1024 * 1024.0):0.#} MB."));
+                        $"Supera el máximo de {maxImageBytes / (1024 * 1024.0):0.#} MB."));
                     continue;
                 }
 
-                var ext = Path.GetExtension(safeName);
                 if (!AllowedExt.Contains(ext) && !LooksLikeImage(raw))
                 {
-                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido."));
+                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes o video mp4/webm."));
                     continue;
                 }
 
@@ -448,6 +485,8 @@ public sealed class LocalCapturaStore
         ".png" => "image/png",
         ".gif" => "image/gif",
         ".bmp" => "image/bmp",
+        ".mp4" => "video/mp4",
+        ".webm" => "video/webm",
         ".csv" => "text/csv",
         ".txt" => "text/plain",
         ".trc" => "application/octet-stream",

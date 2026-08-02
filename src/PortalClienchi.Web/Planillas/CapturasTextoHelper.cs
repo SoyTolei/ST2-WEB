@@ -26,7 +26,7 @@ public static class CapturasTextoHelper
             return;
         }
 
-        partes.Add("  La captura / imágenes se adjunta en comentarios.");
+        partes.Add("  La captura / imágenes / video se adjunta en comentarios.");
     }
 
     public static void AppendDetalleCapturasBajoLinea(
@@ -50,11 +50,11 @@ public static class CapturasTextoHelper
             return;
         }
 
-        partes.Add($"{pad}La captura / imágenes se adjunta en comentarios.");
+        partes.Add($"{pad}La captura / imágenes / video se adjunta en comentarios.");
     }
 
     private static string BuildEnlacesIntro(int count) =>
         count == 1
-            ? "Se adjunta la imagen en el siguiente link:"
-            : "Se adjuntan las imágenes en los siguientes links:";
+            ? "Se adjunta en el siguiente link:"
+            : "Se adjuntan en los siguientes links:";
 }

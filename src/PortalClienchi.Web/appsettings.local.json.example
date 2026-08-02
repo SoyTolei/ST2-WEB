@@ -16,7 +16,9 @@
     "Provider": "Local",
     "TtlDays": 45,
     "MaxFileBytes": 5242880,
+    "MaxVideoFileBytes": 26214400,
     "MaxFilesPerRequest": 20,
+    "MaxVideosPerRequest": 2,
     "PublicBaseUrl": ""
   },
   "RedaccionIa": {

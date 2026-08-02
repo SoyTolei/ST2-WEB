@@ -200,19 +200,22 @@
                   </label>
                 </div>
                 <div id="plan-capturas-panel" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-title">Capturas / imágenes</p>
-                  <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
+                  <p class="plan-capturas-hint">Imágenes o videos cortos. Si no cargás nada, el TXT indica que van en comentarios.</p>
                   <div class="plan-capturas-actions">
                     <button type="button" id="plan-capturas-agregar" class="plan-capturas-browse">
                       <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes</strong>
-                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                        <strong>Examinar imágenes o video</strong>
+                        <small>PNG, JPG, GIF, WEBP · MP4/WEBM máx. 25 MB · hasta 2 videos</small>
                       </span>
                     </button>
-                    <input id="plan-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
+                    <input id="plan-capturas-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm" multiple class="hidden"/>
                   </div>
                   <div id="plan-capturas-chips" class="plan-capturas-thumbs"></div>
+                  <div class="plan-capturas-externo">
+                    <label for="plan-capturas-externo">Link externo (si el video es más pesado)</label>
+                    <input id="plan-capturas-externo" type="url" placeholder="Pegá el link de OneDrive, Drive o Loom" autocomplete="off"/>
+                  </div>
                   <p id="plan-capturas-estado" class="plan-capturas-estado"></p>
                 </div>
               </div>
@@ -407,18 +410,22 @@
                 </button>
                 <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
                 <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
+                  <p class="plan-capturas-hint">Imágenes o videos cortos. Si no cargás nada, el TXT indica que van en comentarios.</p>
                   <div class="plan-capturas-actions">
                     <button type="button" id="ref-capturas-agregar" class="plan-capturas-browse">
                       <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes</strong>
-                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                        <strong>Examinar imágenes o video</strong>
+                        <small>PNG, JPG, GIF, WEBP · MP4/WEBM máx. 25 MB · hasta 2 videos</small>
                       </span>
                     </button>
-                    <input id="ref-capturas-input" type="file" accept="image/*" multiple class="hidden"/>
+                    <input id="ref-capturas-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm" multiple class="hidden"/>
                   </div>
                   <div id="ref-capturas-chips" class="plan-capturas-thumbs"></div>
+                  <div class="plan-capturas-externo">
+                    <label for="ref-capturas-externo">Link externo (si el video es más pesado)</label>
+                    <input id="ref-capturas-externo" type="url" placeholder="Pegá el link de OneDrive, Drive o Loom" autocomplete="off"/>
+                  </div>
                   <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
                 </div>
 
@@ -513,18 +520,22 @@
                 </button>
                 <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
                 <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Si las cargás acá, el texto incluye los links. Si no, el TXT indica que van en comentarios.</p>
+                  <p class="plan-capturas-hint">Imágenes o videos cortos. Si no cargás nada, el TXT indica que van en comentarios.</p>
                   <div class="plan-capturas-actions">
                     <button type="button" id="ref-onvio-capt-agregar" class="plan-capturas-browse">
                       <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes</strong>
-                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                        <strong>Examinar imágenes o video</strong>
+                        <small>PNG, JPG, GIF, WEBP · MP4/WEBM máx. 25 MB · hasta 2 videos</small>
                       </span>
                     </button>
-                    <input id="ref-onvio-capt-input" type="file" accept="image/*" multiple class="hidden"/>
+                    <input id="ref-onvio-capt-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm" multiple class="hidden"/>
                   </div>
                   <div id="ref-onvio-capt-chips" class="plan-capturas-thumbs"></div>
+                  <div class="plan-capturas-externo">
+                    <label for="ref-onvio-capt-externo">Link externo (si el video es más pesado)</label>
+                    <input id="ref-onvio-capt-externo" type="url" placeholder="Pegá el link de OneDrive, Drive o Loom" autocomplete="off"/>
+                  </div>
                   <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
                 </div>
                 <button type="button" class="plan-onvio-card tone-blue" id="ref-card-onvio-ticket" data-onvio="ticket">
@@ -602,18 +613,22 @@
                 </button>
                 <input type="checkbox" id="ref-legal-pantallas" class="hidden"/>
                 <div id="ref-legal-capturas" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Cargá acá las imágenes para que el texto generado incluya los links.</p>
+                  <p class="plan-capturas-hint">Cargá imágenes o un video corto para que el texto incluya los links.</p>
                   <div class="plan-capturas-actions">
                     <button type="button" id="ref-legal-capt-agregar" class="plan-capturas-browse">
                       <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes</strong>
-                        <small>PNG, JPG, GIF, WEBP · podés elegir varias</small>
+                        <strong>Examinar imágenes o video</strong>
+                        <small>PNG, JPG, GIF, WEBP · MP4/WEBM máx. 25 MB · hasta 2 videos</small>
                       </span>
                     </button>
-                    <input id="ref-legal-capt-input" type="file" accept="image/*" multiple class="hidden"/>
+                    <input id="ref-legal-capt-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm" multiple class="hidden"/>
                   </div>
                   <div id="ref-legal-capt-chips" class="plan-capturas-thumbs"></div>
+                  <div class="plan-capturas-externo">
+                    <label for="ref-legal-capt-externo">Link externo (si el video es más pesado)</label>
+                    <input id="ref-legal-capt-externo" type="url" placeholder="Pegá el link de OneDrive, Drive o Loom" autocomplete="off"/>
+                  </div>
                   <p id="ref-legal-capt-estado" class="plan-capturas-estado"></p>
                 </div>
                 <button type="button" class="plan-onvio-card tone-blue" id="ref-card-legal-ticket" data-legal="ticket">

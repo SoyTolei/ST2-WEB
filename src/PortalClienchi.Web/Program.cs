@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using PortalClienchi.Core.Configuration;
 using PortalClienchi.Core.Models;
@@ -11,7 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Limits.MaxRequestBodySize = 40 * 1024 * 1024;
+    // Imágenes + hasta 2 videos de 25 MB.
+    options.Limits.MaxRequestBodySize = 60 * 1024 * 1024;
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 60 * 1024 * 1024;
 });
 
 PlanillasFeatureFlags.LegalEnabled = builder.Configuration.GetValue("Planillas:LegalEnabled", false);

@@ -613,19 +613,53 @@ function setReferralPantallasUi(checked) {
   document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !checked);
 }
 
+function isReferralVideoFile(file) {
+  if (/\.(mp4|webm)$/i.test(file.name || "")) return true;
+  const t = file.type || "";
+  return t === "video/mp4" || t === "video/webm";
+}
+
 function isReferralCapturaFile(file) {
+  if (isReferralVideoFile(file)) return true;
   if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
   return (file.type || "").startsWith("image/");
 }
 
+const MAX_REFERRAL_VIDEOS = 2;
+const MAX_REFERRAL_VIDEO_BYTES = 25 * 1024 * 1024;
+
 function addReferralCapturaFiles(fileList, targetList) {
   let added = 0;
+  let rejectedVideo = false;
+  let rejectedFormat = false;
+
   for (const file of fileList) {
-    if (!isReferralCapturaFile(file)) continue;
+    if (!isReferralCapturaFile(file)) {
+      rejectedFormat = true;
+      continue;
+    }
+
+    if (isReferralVideoFile(file)) {
+      if (file.size > MAX_REFERRAL_VIDEO_BYTES) {
+        rejectedVideo = true;
+        continue;
+      }
+      if (targetList.filter(isReferralVideoFile).length >= MAX_REFERRAL_VIDEOS) {
+        rejectedVideo = true;
+        continue;
+      }
+    }
+
     if (!targetList.some((f) => f.name === file.name && f.size === file.size)) {
       targetList.push(file);
       added++;
     }
+  }
+
+  if (rejectedVideo) {
+    alert("Videos: solo MP4/WEBM, máx. 25 MB y hasta 2. Si es más pesado, pegá un link externo.");
+  } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP) o video MP4/WEBM.");
   }
   if (added > 0) setReferralPantallasUi(true);
   return added;
@@ -643,13 +677,18 @@ function refreshCapturasEstadoReferral(prefix, fileList) {
     estado.textContent = "";
     return;
   }
-  estado.textContent = `${fileList.length} imagen(es) lista(s) para subir al generar el texto.`;
+  const videos = fileList.filter(isReferralVideoFile).length;
+  const imgs = fileList.length - videos;
+  const parts = [];
+  if (imgs > 0) parts.push(`${imgs} imagen(es)`);
+  if (videos > 0) parts.push(`${videos} video(s)`);
+  estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
 }
 
 function revokeCapturaThumbUrls(container) {
   if (!container) return;
-  container.querySelectorAll("img[data-object-url]").forEach((img) => {
-    const url = img.getAttribute("data-object-url");
+  container.querySelectorAll("img[data-object-url], video[data-object-url]").forEach((el) => {
+    const url = el.getAttribute("data-object-url");
     if (url) URL.revokeObjectURL(url);
   });
 }
@@ -661,11 +700,39 @@ function setupCapturas(prefix, fileList) {
   document.getElementById(`${prefix}-input`)?.addEventListener("change", (e) => {
     const added = addReferralCapturaFiles(e.target.files, fileList);
     if (added === 0 && e.target.files?.length > 0) {
-      alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP).");
+      // alert ya se mostró en addReferralCapturaFiles si corresponde
     }
     refreshChips(`${prefix}-chips`, fileList, prefix, fileList);
     refreshCapturasEstadoReferral(prefix, fileList);
     e.target.value = "";
+  });
+  setupCapturasExternoPaste(`${prefix}-externo`);
+}
+
+function getReferralCapturaExternoId() {
+  if (isBejerman()) return "ref-capturas-externo";
+  if (isLegal()) return "ref-legal-capt-externo";
+  return "ref-onvio-capt-externo";
+}
+
+function getReferralCapturaExternoUrl() {
+  return document.getElementById(getReferralCapturaExternoId())?.value.trim() || "";
+}
+
+function setupCapturasExternoPaste(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input || input.dataset.pasteBound === "1") return;
+  input.dataset.pasteBound = "1";
+  input.addEventListener("paste", (e) => {
+    const url = extractUrlFromClipboardData(e.clipboardData);
+    if (!url) return;
+    e.preventDefault();
+    input.value = url;
+    setReferralPantallasUi(true);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  input.addEventListener("input", () => {
+    if (input.value.trim()) setReferralPantallasUi(true);
   });
 }
 
@@ -767,17 +834,26 @@ function refreshChips(id, files, prefix, fileList) {
   revokeCapturaThumbUrls(el);
   el.innerHTML = "";
   files.forEach((f, index) => {
+    const isVideo = isReferralVideoFile(f);
     const card = document.createElement("div");
-    card.className = "plan-captura-thumb";
+    card.className = isVideo ? "plan-traza-chip plan-video-chip" : "plan-captura-thumb";
 
-    const img = document.createElement("img");
-    const url = URL.createObjectURL(f);
-    img.src = url;
-    img.alt = f.name;
-    img.setAttribute("data-object-url", url);
+    let preview;
+    if (isVideo) {
+      preview = document.createElement("span");
+      preview.className = "plan-traza-chip-ext";
+      const match = /\.([^.]+)$/.exec(f.name || "");
+      preview.textContent = (match?.[1] || "mp4").toUpperCase();
+    } else {
+      preview = document.createElement("img");
+      const url = URL.createObjectURL(f);
+      preview.src = url;
+      preview.alt = f.name;
+      preview.setAttribute("data-object-url", url);
+    }
 
     const name = document.createElement("span");
-    name.className = "plan-captura-thumb-name";
+    name.className = isVideo ? "plan-traza-chip-name" : "plan-captura-thumb-name";
     name.textContent = f.name;
     name.title = f.name;
 
@@ -794,7 +870,7 @@ function refreshChips(id, files, prefix, fileList) {
       refreshCapturasEstadoReferral(prefix, fileList);
     });
 
-    card.append(img, name, btn);
+    card.append(preview, name, btn);
     el.appendChild(card);
   });
 }
@@ -880,7 +956,8 @@ function buildPayload() {
 
 function pickReferralCapturaFiles(payload) {
   const files = getReferralCapturaFiles();
-  if (files.length > 0) {
+  const externo = getReferralCapturaExternoUrl();
+  if (files.length > 0 || externo) {
     if (isBejerman()) {
       if (!payload.adjuntos) payload.adjuntos = {};
       payload.adjuntos.pantallas = true;
@@ -931,6 +1008,7 @@ async function generarReferral(copiar) {
   const autoPlanilla = isBejerman() && isPlanillaEmpty();
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
+  const externoUrl = getReferralCapturaExternoUrl();
   const trazas = isBejerman() ? [...trazaFiles] : [];
   if (trazas.length > 0) {
     if (!payload.adjuntos) payload.adjuntos = {};
@@ -942,22 +1020,26 @@ async function generarReferral(copiar) {
       ? !!payload.legal?.adjuntaPantallas
       : !!payload.onvio?.adjuntaPantallas;
 
-  // LEGAL: si marcó capturas tiene que subirlas. Bejerman/Onvio permiten generar sin subir (van en comentarios).
-  if (isLegal() && quierePantallas && files.length === 0) {
-    alert("Marcaste capturas pero no hay imágenes cargadas. Usá «Examinar imágenes» en el panel de capturas.");
-    status.textContent = "Faltan imágenes para adjuntar.";
+  // LEGAL: si marcó capturas tiene que subirlas o pegar link. Bejerman/Onvio permiten generar sin subir (van en comentarios).
+  if (isLegal() && quierePantallas && files.length === 0 && !externoUrl) {
+    alert("Marcaste capturas pero no hay archivos ni link. Usá «Examinar imágenes o video» o pegá un link externo.");
+    status.textContent = "Faltan capturas para adjuntar.";
     return;
   }
 
   try {
     if (btnCopiar) btnCopiar.disabled = true;
     if (btnVer) btnVer.disabled = true;
+    payload.capturasEnlaces = [];
     if (files.length > 0) {
       status.textContent = "Subiendo capturas…";
       payload.capturasEnlaces = await subirCapturasReferral(files);
       if (payload.capturasEnlaces.length === 0) {
         throw new Error("No se obtuvieron links de las capturas subidas.");
       }
+    }
+    if (externoUrl) {
+      payload.capturasEnlaces.push({ fileName: "video-externo", url: externoUrl });
     }
 
     if (trazas.length > 0) {
@@ -1101,6 +1183,10 @@ function resetReferralForm() {
   document.getElementById("ref-traza-estado").textContent = "";
   document.getElementById("ref-onvio-capt-estado").textContent = "";
   document.getElementById("ref-legal-capt-estado").textContent = "";
+  ["ref-capturas-externo", "ref-onvio-capt-externo", "ref-legal-capt-externo"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
   document.getElementById("ref-status").textContent = "";
   clearPlanTextPreview("ref-text-preview");
   updateReferralPanels();
