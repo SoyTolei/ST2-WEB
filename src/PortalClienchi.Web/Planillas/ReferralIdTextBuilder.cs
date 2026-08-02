@@ -241,7 +241,7 @@ public static class ReferralIdTextBuilder
 
             if (a.Pantallas)
             {
-                partes.Add("- Captura / imágenes");
+                partes.Add("- Capturas / Imágenes / Video");
                 if (pantallasConLinks)
                     CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
                 else
@@ -284,7 +284,7 @@ public static class ReferralIdTextBuilder
             hay = c.Onvio.AdjuntaPantallas;
             if (c.Onvio.AdjuntaPantallas)
             {
-                partes.Add("- Captura / imágenes");
+                partes.Add("- Capturas / Imágenes / Video");
                 if (c.CapturasEnlaces.Count > 0)
                     CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
                 else
@@ -297,7 +297,7 @@ public static class ReferralIdTextBuilder
             hay = l.AdjuntaPantallas || l.AdjuntaPlanilhaImport || l.AdjuntaLogIntegracao;
             if (l.AdjuntaPantallas)
             {
-                partes.Add("- Captura / imágenes");
+                partes.Add("- Capturas / Imágenes / Video");
                 CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
             }
             if (l.AdjuntaPlanilhaImport)
