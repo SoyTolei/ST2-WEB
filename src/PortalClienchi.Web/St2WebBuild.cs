@@ -44,7 +44,10 @@ public static class St2WebBuild
             return "";
 
         var culture = new CultureInfo("es-AR");
-        var local = updated.Value.ToLocalTime();
+        var argentina = TimeZoneInfo.FindSystemTimeZoneById(
+            OperatingSystem.IsWindows() ? "Argentina Standard Time" : "America/Argentina/Buenos_Aires");
+        var utc = DateTime.SpecifyKind(updated.Value, DateTimeKind.Utc);
+        var local = TimeZoneInfo.ConvertTimeFromUtc(utc, argentina);
         var date = local.ToString("d 'de' MMMM yyyy", culture);
 
         return $"Última actualización: {date}";
