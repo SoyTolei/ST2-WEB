@@ -110,7 +110,7 @@ public static class PlanillasEndpoints
 
             try
             {
-                var enlaces = await svc.SubirCapturasAsync(archivos, ct).ConfigureAwait(false);
+                var enlaces = await svc.SubirCapturasAsync(archivos, PublicBaseUrl(request), ct).ConfigureAwait(false);
                 return Results.Ok(new
                 {
                     enlaces = enlaces.Select(e => new CapturaEnlaceDto(e.FileName, e.Url)),
@@ -120,6 +120,14 @@ public static class PlanillasEndpoints
             {
                 return Results.Problem(detail: ex.Message, title: "Error al subir capturas");
             }
+        });
+
+        app.MapGet("/media/capturas/{fileName}", (string fileName, LocalCapturaStore store) =>
+        {
+            if (!store.TryOpen(fileName, out var path, out var contentType))
+                return Results.NotFound();
+
+            return Results.File(path, contentType, enableRangeProcessing: false);
         });
 
         app.MapPost("/api/planillas/transferencia/generar", async (
@@ -169,7 +177,7 @@ public static class PlanillasEndpoints
                         .Select(f => (f.FileName, (Stream)f.OpenReadStream()))
                         .ToList();
 
-                    var subidos = await svc.SubirCapturasAsync(archivos, ct).ConfigureAwait(false);
+                    var subidos = await svc.SubirCapturasAsync(archivos, PublicBaseUrl(request), ct).ConfigureAwait(false);
                     enlaces.AddRange(subidos);
                 }
 
@@ -245,7 +253,7 @@ public static class PlanillasEndpoints
             try
             {
                 var caso = svc.FromRequest(payload);
-                caso = await svc.ApplyCapturasUploadAsync(caso, files, ct).ConfigureAwait(false);
+                caso = await svc.ApplyCapturasUploadAsync(caso, files, PublicBaseUrl(request), ct).ConfigureAwait(false);
 
                 var capturasError = ReferralIdService.ValidateCapturasLinks(caso);
                 if (capturasError is not null)
@@ -566,6 +574,17 @@ public static class PlanillasEndpoints
 
             return Results.Ok(new { ok = true });
         });
+    }
+
+    internal static string PublicBaseUrl(HttpRequest request)
+    {
+        var proto = request.Headers["X-Forwarded-Proto"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(proto))
+            proto = request.Scheme;
+        var host = request.Headers["X-Forwarded-Host"].FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(host))
+            host = request.Host.Value;
+        return $"{proto}://{host}".TrimEnd('/');
     }
 
     private static async Task<(ReferralGenerateRequest? Payload, IReadOnlyList<IFormFile> Files)> ReadReferralPayloadAsync(

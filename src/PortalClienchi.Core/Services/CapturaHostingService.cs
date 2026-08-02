@@ -72,7 +72,9 @@ public sealed class CapturaHostingService : IDisposable
                 return _settings.ProveedorEfectivo switch
                 {
                     "ImgBB" => await SubirImgBbAsync(filePath, ct).ConfigureAwait(false),
-                    _ => await SubirCatboxAsync(filePath, ct).ConfigureAwait(false),
+                    "Catbox" => await SubirCatboxAsync(filePath, ct).ConfigureAwait(false),
+                    _ => throw new InvalidOperationException(
+                        "El proveedor Local se maneja en LocalCapturaStore (Volume ST2), no en CapturaHostingService."),
                 };
             }
             catch (Exception ex) when (intento < 2)

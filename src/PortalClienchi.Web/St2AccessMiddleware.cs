@@ -28,7 +28,12 @@ public static class St2AccessMiddleware
         if (IsSessionExempt(path, method))
             return true;
 
-        return path.Equals("/api/health", StringComparison.OrdinalIgnoreCase)
+        if (path.Equals("/api/health", StringComparison.OrdinalIgnoreCase) && HttpMethods.IsGet(method))
+            return true;
+
+        // Capturas públicas (links en TXT de planillas); token opaco.
+        var value = path.Value ?? "";
+        return value.StartsWith("/media/capturas/", StringComparison.OrdinalIgnoreCase)
             && HttpMethods.IsGet(method);
     }
 

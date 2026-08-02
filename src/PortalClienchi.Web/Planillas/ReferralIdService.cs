@@ -152,7 +152,8 @@ public sealed class ReferralIdService
     public async Task<ReferralIdCase> ApplyCapturasUploadAsync(
         ReferralIdCase caso,
         IReadOnlyList<IFormFile> files,
-        CancellationToken ct)
+        string? publicBaseUrl = null,
+        CancellationToken ct = default)
     {
         var enlaces = caso.CapturasEnlaces.ToList();
         if (files.Count == 0)
@@ -179,7 +180,7 @@ public sealed class ReferralIdService
             }
 
             var archivos = buffers.Select(b => (b.FileName, (Stream)b.Content)).ToList();
-            var subidos = await _capturas.SubirCapturasAsync(archivos, ct).ConfigureAwait(false);
+            var subidos = await _capturas.SubirCapturasAsync(archivos, publicBaseUrl, ct).ConfigureAwait(false);
             enlaces.AddRange(subidos);
 
             if (enlaces.Count == 0)

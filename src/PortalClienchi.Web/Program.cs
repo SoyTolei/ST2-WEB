@@ -9,6 +9,11 @@ using PortalClienchi.Web.Planillas;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 40 * 1024 * 1024;
+});
+
 PlanillasFeatureFlags.LegalEnabled = builder.Configuration.GetValue("Planillas:LegalEnabled", false);
 
 var appSettings = WebSettingsLoader.Load(builder.Configuration, builder.Environment.ContentRootPath);
@@ -18,6 +23,7 @@ builder.Services.AddSingleton(appSettings);
 builder.Services.AddSingleton(thomEmbedConfig);
 builder.Services.AddSingleton<PortalRegistry>();
 builder.Services.AddSingleton<EmbedSiteProxy>();
+builder.Services.AddSingleton<LocalCapturaStore>();
 builder.Services.AddSingleton<TransferenciaService>();
 builder.Services.AddSingleton<ReferralIdService>();
 builder.Services.AddSingleton<OportunidadRepository>();
@@ -26,9 +32,16 @@ builder.Services.AddSingleton<AppAccessRepository>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
+});
+
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 40 * 1024 * 1024; // 40 MB (capturas comprimidas en servidor)
+    options.ValueLengthLimit = 40 * 1024 * 1024;
+    options.MultipartHeadersLengthLimit = 64 * 1024;
 });
 
 builder.Services.ConfigureHttpJsonOptions(options =>
@@ -38,6 +51,15 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 var app = builder.Build();
+
+try
+{
+    app.Services.GetRequiredService<LocalCapturaStore>().PurgeExpired();
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "No se pudo purgar capturas vencidas al iniciar");
+}
 
 app.UseForwardedHeaders();
 

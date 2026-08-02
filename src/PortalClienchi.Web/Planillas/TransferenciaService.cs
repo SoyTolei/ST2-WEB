@@ -7,8 +7,13 @@ namespace PortalClienchi.Web.Planillas;
 public sealed class TransferenciaService
 {
     private readonly AppSettings _settings;
+    private readonly LocalCapturaStore _localCapturas;
 
-    public TransferenciaService(AppSettings settings) => _settings = settings;
+    public TransferenciaService(AppSettings settings, LocalCapturaStore localCapturas)
+    {
+        _settings = settings;
+        _localCapturas = localCapturas;
+    }
 
     public bool IaConfigured
     {
@@ -26,6 +31,7 @@ public sealed class TransferenciaService
 
     public async Task<IReadOnlyList<TransferenciaCapturaEnlace>> SubirCapturasAsync(
         IReadOnlyList<(string FileName, Stream Content)> archivos,
+        string? publicBaseUrl = null,
         CancellationToken ct = default)
     {
         if (!_settings.CapturaHosting.IsActive)
@@ -34,6 +40,25 @@ public sealed class TransferenciaService
         if (archivos.Count == 0)
             return Array.Empty<TransferenciaCapturaEnlace>();
 
+        if (_settings.CapturaHosting.IsLocal)
+            return await SubirLocalAsync(archivos, publicBaseUrl, ct).ConfigureAwait(false);
+
+        return await SubirExternoAsync(archivos, ct).ConfigureAwait(false);
+    }
+
+    private async Task<IReadOnlyList<TransferenciaCapturaEnlace>> SubirLocalAsync(
+        IReadOnlyList<(string FileName, Stream Content)> archivos,
+        string? publicBaseUrl,
+        CancellationToken ct)
+    {
+        var results = await _localCapturas.GuardarAsync(archivos, publicBaseUrl ?? "", ct).ConfigureAwait(false);
+        return MapResults(results);
+    }
+
+    private async Task<IReadOnlyList<TransferenciaCapturaEnlace>> SubirExternoAsync(
+        IReadOnlyList<(string FileName, Stream Content)> archivos,
+        CancellationToken ct)
+    {
         var tempDir = Path.Combine(Path.GetTempPath(), $"st2_capturas_{Guid.NewGuid():N}");
         Directory.CreateDirectory(tempDir);
 
@@ -54,21 +79,7 @@ public sealed class TransferenciaService
 
             using var hosting = new CapturaHostingService(_settings.CapturaHosting);
             var results = await hosting.SubirArchivosAsync(paths, progress: null, ct).ConfigureAwait(false);
-
-            var enlaces = new List<TransferenciaCapturaEnlace>();
-            var errores = new List<string>();
-            foreach (var r in results)
-            {
-                if (!string.IsNullOrWhiteSpace(r.Url))
-                    enlaces.Add(new TransferenciaCapturaEnlace(r.FileName, r.Url!));
-                else if (!string.IsNullOrWhiteSpace(r.Error))
-                    errores.Add($"{r.FileName}: {r.Error}");
-            }
-
-            if (enlaces.Count == 0 && errores.Count > 0)
-                throw new InvalidOperationException(string.Join(Environment.NewLine, errores));
-
-            return enlaces;
+            return MapResults(results);
         }
         finally
         {
@@ -82,6 +93,24 @@ public sealed class TransferenciaService
                 // ignorar limpieza de temporales
             }
         }
+    }
+
+    private static IReadOnlyList<TransferenciaCapturaEnlace> MapResults(IReadOnlyList<CapturaSubidaResult> results)
+    {
+        var enlaces = new List<TransferenciaCapturaEnlace>();
+        var errores = new List<string>();
+        foreach (var r in results)
+        {
+            if (!string.IsNullOrWhiteSpace(r.Url))
+                enlaces.Add(new TransferenciaCapturaEnlace(r.FileName, r.Url!));
+            else if (!string.IsNullOrWhiteSpace(r.Error))
+                errores.Add($"{r.FileName}: {r.Error}");
+        }
+
+        if (enlaces.Count == 0 && errores.Count > 0)
+            throw new InvalidOperationException(string.Join(Environment.NewLine, errores));
+
+        return enlaces;
     }
 
     public Task<string> GenerarTextoAsync(TransferenciaCase caso, CancellationToken ct = default) =>

@@ -13,8 +13,11 @@
   },
   "CapturaHosting": {
     "Enabled": true,
-    "Provider": "Auto",
-    "ImgBbApiKey": "opcional-clave-gratis-de-https://api.imgbb.com/"
+    "Provider": "Local",
+    "TtlDays": 45,
+    "MaxFileBytes": 5242880,
+    "MaxFilesPerRequest": 20,
+    "PublicBaseUrl": ""
   },
   "RedaccionIa": {
     "Enabled": true,
