@@ -848,8 +848,8 @@
 }
 
 .plan-onvio-ticket-detail {
-  background: #fff4ed;
-  border: 2px solid #fdba74;
+  background: #eff6ff;
+  border: 2px solid #93c5fd;
   border-radius: 10px;
   padding: 14px 16px;
   margin-bottom: 12px;
@@ -1444,6 +1444,11 @@
   color: #7c3aed;
   border-color: #ddd6fe;
 }
+.plan-inline-icon.slate {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
 
 .plan-onvio-grid {
   display: grid;
@@ -1473,6 +1478,7 @@
   transition: border-color 0.12s, background 0.12s;
 }
 /* Mismo lenguaje visual que adjuntos Bejerman SQL */
+.plan-onvio-card.tone-slate { border-color: #cbd5e1; background: #f8fafc; }
 .plan-onvio-card.tone-green { border-color: #86efac; background: #f0fdf4; }
 .plan-onvio-card.tone-orange { border-color: #fdba74; background: #fff7ed; }
 .plan-onvio-card.tone-blue { border-color: #93c5fd; background: #eff6ff; }
@@ -1484,6 +1490,10 @@
   border: 2px solid #d64000;
   background: #fff4ed;
   padding: 9px 11px;
+}
+.plan-onvio-card.tone-slate.selected {
+  border-color: #64748b;
+  background: #f1f5f9;
 }
 .plan-onvio-card.tone-green.selected {
   border-color: #059669;
