@@ -397,8 +397,9 @@ app.MapWhen(
 
 app.MapPlanillasEndpoints();
 
-// Capturas públicas: registrar ANTES del fallback SPA y sin tocar Content-Disposition
-// (esa cabecera malformada provocaba HTTP 500 al abrir el link).
+// Capturas públicas (ANTES del fallback SPA).
+// Importante: /c/ también está en EmbedSiteProxy.St2ReservedPrefixes para que
+// el mirror de THOM no robe la ruta (eso causaba HTTP 500).
 app.MapGet("/c/{id}", (string id, LocalCapturaStore store) =>
 {
     try
@@ -453,25 +454,6 @@ app.MapGet("/api/capturas/status", (LocalCapturaStore store) =>
     }
 });
 
-// Fallback SPA: no interceptar /c, /api, /media, /embed
-app.MapFallback(async (HttpContext ctx, IWebHostEnvironment env) =>
-{
-    var path = ctx.Request.Path.Value ?? "";
-    if (path.StartsWith("/api", StringComparison.OrdinalIgnoreCase)
-        || path.StartsWith("/c/", StringComparison.OrdinalIgnoreCase)
-        || path.StartsWith("/media/", StringComparison.OrdinalIgnoreCase)
-        || path.StartsWith("/embed", StringComparison.OrdinalIgnoreCase))
-    {
-        ctx.Response.StatusCode = StatusCodes.Status404NotFound;
-        ctx.Response.ContentType = "text/plain; charset=utf-8";
-        await ctx.Response.WriteAsync("Not found").ConfigureAwait(false);
-        return;
-    }
-
-    var html = await St2IndexHtml.LoadAsync(env, ctx.RequestAborted).ConfigureAwait(false);
-    ctx.Response.ContentType = "text/html; charset=utf-8";
-    ctx.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
-    await ctx.Response.WriteAsync(html, ctx.RequestAborted).ConfigureAwait(false);
-});
+app.MapFallbackToFile("index.html");
 
 app.Run();
