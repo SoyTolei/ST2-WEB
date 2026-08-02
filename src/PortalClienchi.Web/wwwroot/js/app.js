@@ -2037,24 +2037,19 @@ function loadEmbedFrame(kind, { force = false } = {}) {
 
 function clearEmbedHint(kind) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
-  if (el) el.textContent = kind === "thom"
-    ? (isThomEmbeddedProxy()
-      ? "THOM embebido · ZScaler activado · el login SSO puede demorar unos segundos"
-      : "Necesitas tener ZScaler activado.")
-    : "Sesión corporativa · si no carga, «Abrir en navegador»";
+  if (!el) return;
+  el.classList.add("hidden");
+  el.setAttribute("aria-hidden", "true");
+  el.textContent = "";
 }
 
 function setEmbedHint(kind, message) {
   const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
   if (!el) return;
-  // El hint de THOM queda oculto a propósito: el aviso de ZScaler vive en el panel central.
-  if (kind === "thom") {
-    el.classList.add("hidden");
-    el.setAttribute("aria-hidden", "true");
-    el.textContent = "";
-    return;
-  }
-  el.textContent = message;
+  // Hints de THOM / AI ocultos: el toolbar ya tiene «Abrir en navegador».
+  el.classList.add("hidden");
+  el.setAttribute("aria-hidden", "true");
+  el.textContent = "";
 }
 
 function goHome() {
