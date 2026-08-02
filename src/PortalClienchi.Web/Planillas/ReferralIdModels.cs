@@ -17,6 +17,7 @@ public sealed class ReferralIdCase
     public LegalReferralState Legal { get; } = new();
     public AdjuntosState Adjuntos { get; } = new();
     public IReadOnlyList<TransferenciaCapturaEnlace> CapturasEnlaces { get; set; } = Array.Empty<TransferenciaCapturaEnlace>();
+    public IReadOnlyList<TransferenciaCapturaEnlace> TrazaEnlaces { get; set; } = Array.Empty<TransferenciaCapturaEnlace>();
     public bool EsTecnico { get; set; }
     public bool MamConfigured => Mam.HasSelection;
     public bool SdkConfigured => Sdk.HasSelection;
@@ -148,6 +149,7 @@ public sealed class ReferralGenerateRequest
     public LegalReferralDto? Legal { get; set; }
     public AdjuntosDto? Adjuntos { get; set; }
     public List<CapturaEnlaceDto>? CapturasEnlaces { get; set; }
+    public List<CapturaEnlaceDto>? TrazaEnlaces { get; set; }
     public bool TicketAvisoOmitido { get; set; }
     public bool EsTecnico { get; set; }
 }

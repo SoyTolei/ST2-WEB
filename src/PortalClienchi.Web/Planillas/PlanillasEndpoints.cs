@@ -10,6 +10,11 @@ public static class PlanillasEndpoints
         ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp",
     };
 
+    private static readonly HashSet<string> TrazaExtensiones = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".trc", ".csv", ".txt",
+    };
+
     public static void MapPlanillasEndpoints(this WebApplication app)
     {
         app.MapGet("/api/planillas/config", (TransferenciaService svc, ReferralIdService referral) => Results.Ok(new
@@ -120,6 +125,59 @@ public static class PlanillasEndpoints
             catch (Exception ex)
             {
                 return Results.Problem(detail: ex.Message, title: "Error al subir capturas");
+            }
+        });
+
+        app.MapPost("/api/planillas/trazas/upload", async (
+            HttpRequest request,
+            LocalCapturaStore store,
+            CancellationToken ct) =>
+        {
+            if (!request.HasFormContentType)
+                return Results.BadRequest(new { error = "Se esperaba multipart/form-data." });
+
+            var form = await request.ReadFormAsync(ct).ConfigureAwait(false);
+            var files = form.Files;
+            if (files.Count == 0)
+                return Results.BadRequest(new { error = "No se recibieron archivos." });
+
+            var archivos = new List<(string FileName, Stream Content)>();
+            foreach (var file in files)
+            {
+                if (file.Length == 0)
+                    continue;
+
+                var ext = Path.GetExtension(file.FileName);
+                if (!TrazaExtensiones.Contains(ext))
+                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Solo .trc, .csv o .txt." });
+
+                archivos.Add((file.FileName, file.OpenReadStream()));
+            }
+
+            if (archivos.Count == 0)
+                return Results.BadRequest(new { error = "No hay archivos válidos." });
+
+            try
+            {
+                var resultados = await store.GuardarDescargasAsync(archivos, PublicBaseUrl(request), ct)
+                    .ConfigureAwait(false);
+                var enlaces = resultados
+                    .Where(r => !string.IsNullOrWhiteSpace(r.Url))
+                    .Select(r => new CapturaEnlaceDto(r.FileName, r.Url!))
+                    .ToList();
+
+                if (enlaces.Count == 0)
+                {
+                    var err = resultados.FirstOrDefault(r => !string.IsNullOrWhiteSpace(r.Error))?.Error
+                        ?? "No se pudo guardar la traza.";
+                    return Results.BadRequest(new { error = err });
+                }
+
+                return Results.Ok(new { enlaces });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Error al subir traza");
             }
         });
 

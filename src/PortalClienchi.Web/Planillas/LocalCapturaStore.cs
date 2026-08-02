@@ -22,11 +22,20 @@ public sealed class LocalCapturaStore
         @"^[a-f0-9]{32}\.(webp|jpg|jpeg|png|gif|bmp)$",
         RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-    private static readonly string[] StoredExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
+    private static readonly string[] StoredExts =
+    [
+        ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp",
+        ".trc", ".csv", ".txt",
+    ];
 
     private static readonly HashSet<string> AllowedExt = new(StringComparer.OrdinalIgnoreCase)
     {
         ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp",
+    };
+
+    private static readonly HashSet<string> AllowedDownloadExt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".trc", ".csv", ".txt",
     };
 
     private readonly CapturaHostingSettings _settings;
@@ -141,10 +150,90 @@ public sealed class LocalCapturaStore
         return results;
     }
 
-    public bool TryOpenById(string id, out string fullPath, out string contentType)
+    /// <summary>Guarda trazas / archivos descargables (.trc, .csv, .txt). Misma URL corta /c/{id} con Content-Disposition: attachment.</summary>
+    public async Task<IReadOnlyList<CapturaSubidaResult>> GuardarDescargasAsync(
+        IReadOnlyList<(string FileName, Stream Content)> archivos,
+        string publicBaseUrl,
+        CancellationToken ct = default)
     {
-        fullPath = "";
-        contentType = "application/octet-stream";
+        EnsureRoot();
+        PurgeExpired();
+
+        var maxFiles = Math.Clamp(_settings.MaxFilesPerRequest, 1, 50);
+        if (archivos.Count > maxFiles)
+            throw new InvalidOperationException($"Máximo {maxFiles} archivos por subida.");
+
+        var baseUrl = NormalizeBaseUrl(publicBaseUrl, _settings.PublicBaseUrl);
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            throw new InvalidOperationException("No se pudo determinar la URL pública de las trazas.");
+
+        var maxBytes = Math.Clamp(_settings.MaxFileBytes, 256 * 1024, 25 * 1024 * 1024);
+        var results = new List<CapturaSubidaResult>(archivos.Count);
+
+        foreach (var (fileName, content) in archivos)
+        {
+            ct.ThrowIfCancellationRequested();
+            var safeName = Path.GetFileName(fileName);
+            if (string.IsNullOrWhiteSpace(safeName))
+                safeName = "traza.trc";
+
+            try
+            {
+                await using var ms = new MemoryStream();
+                await content.CopyToAsync(ms, ct).ConfigureAwait(false);
+                var raw = ms.ToArray();
+
+                if (raw.Length == 0)
+                {
+                    results.Add(new CapturaSubidaResult(safeName, null, "Archivo vacío."));
+                    continue;
+                }
+
+                if (raw.Length > maxBytes)
+                {
+                    results.Add(new CapturaSubidaResult(
+                        safeName,
+                        null,
+                        $"Supera el máximo de {maxBytes / (1024 * 1024.0):0.#} MB."));
+                    continue;
+                }
+
+                var ext = Path.GetExtension(safeName);
+                if (!AllowedDownloadExt.Contains(ext))
+                {
+                    results.Add(new CapturaSubidaResult(safeName, null, "Solo .trc, .csv o .txt."));
+                    continue;
+                }
+
+                ext = ext.ToLowerInvariant();
+                EnsureRoot();
+                var id = NewShortId();
+                var path = Path.Combine(_root, id + ext);
+                await File.WriteAllBytesAsync(path, raw, ct).ConfigureAwait(false);
+
+                var downloadName = SanitizeDownloadName(safeName, ext);
+                await File.WriteAllTextAsync(
+                    Path.Combine(_root, id + ".meta"),
+                    downloadName,
+                    ct).ConfigureAwait(false);
+
+                var url = $"{baseUrl}/c/{id}";
+                _logger.LogInformation("Descarga guardada {Id} ({Bytes} bytes) → {Url}", id, raw.Length, url);
+                results.Add(new CapturaSubidaResult(safeName, url, null));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error al guardar descarga {File}", safeName);
+                results.Add(new CapturaSubidaResult(safeName, null, ex.Message));
+            }
+        }
+
+        return results;
+    }
+
+    public bool TryOpenById(string id, out LocalMediaOpen? open)
+    {
+        open = null;
 
         if (string.IsNullOrWhiteSpace(id))
             return false;
@@ -159,26 +248,39 @@ public sealed class LocalCapturaStore
             if (!File.Exists(path))
                 continue;
 
-            fullPath = path;
-            contentType = MimeForExt(ext);
+            var forceDownload = AllowedDownloadExt.Contains(ext);
+            string? downloadName = null;
+            if (forceDownload)
+            {
+                var metaPath = Path.Combine(_root, id + ".meta");
+                if (File.Exists(metaPath))
+                {
+                    try { downloadName = File.ReadAllText(metaPath).Trim(); }
+                    catch { /* ignore */ }
+                }
+
+                if (string.IsNullOrWhiteSpace(downloadName))
+                    downloadName = "traza" + ext;
+            }
+
+            open = new LocalMediaOpen(path, MimeForExt(ext), downloadName, forceDownload);
             return true;
         }
 
-        _logger.LogWarning("Captura no encontrada: {Id} en {Root}", id, _root);
+        _logger.LogWarning("Archivo no encontrado: {Id} en {Root}", id, _root);
         return false;
     }
 
-    public bool TryOpen(string tokenWithExt, out string fullPath, out string contentType)
+    public bool TryOpen(string tokenWithExt, out LocalMediaOpen? open)
     {
-        fullPath = "";
-        contentType = "application/octet-stream";
+        open = null;
 
         if (string.IsNullOrWhiteSpace(tokenWithExt))
             return false;
 
         var name = Path.GetFileName(tokenWithExt.Trim());
         if (ShortIdRegex.IsMatch(name))
-            return TryOpenById(name, out fullPath, out contentType);
+            return TryOpenById(name, out open);
 
         if (!LegacyTokenFileRegex.IsMatch(name))
             return false;
@@ -187,8 +289,37 @@ public sealed class LocalCapturaStore
         if (!File.Exists(path))
             return false;
 
-        fullPath = path;
-        contentType = MimeForExt(Path.GetExtension(name));
+        var ext = Path.GetExtension(name);
+        open = new LocalMediaOpen(path, MimeForExt(ext), null, AllowedDownloadExt.Contains(ext));
+        return true;
+    }
+
+    /// <summary>Compat: API anterior que solo devolvía path + content-type.</summary>
+    public bool TryOpenById(string id, out string fullPath, out string contentType)
+    {
+        if (!TryOpenById(id, out LocalMediaOpen? open) || open is null)
+        {
+            fullPath = "";
+            contentType = "application/octet-stream";
+            return false;
+        }
+
+        fullPath = open.FullPath;
+        contentType = open.ContentType;
+        return true;
+    }
+
+    public bool TryOpen(string tokenWithExt, out string fullPath, out string contentType)
+    {
+        if (!TryOpen(tokenWithExt, out LocalMediaOpen? open) || open is null)
+        {
+            fullPath = "";
+            contentType = "application/octet-stream";
+            return false;
+        }
+
+        fullPath = open.FullPath;
+        contentType = open.ContentType;
         return true;
     }
 
@@ -246,6 +377,18 @@ public sealed class LocalCapturaStore
                     {
                         File.Delete(file);
                         removed++;
+
+                        if (!Path.GetExtension(file).Equals(".meta", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var meta = Path.Combine(
+                                Path.GetDirectoryName(file)!,
+                                Path.GetFileNameWithoutExtension(file) + ".meta");
+                            if (File.Exists(meta))
+                            {
+                                try { File.Delete(meta); }
+                                catch { /* ignore */ }
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -305,8 +448,31 @@ public sealed class LocalCapturaStore
         ".png" => "image/png",
         ".gif" => "image/gif",
         ".bmp" => "image/bmp",
+        ".csv" => "text/csv",
+        ".txt" => "text/plain",
+        ".trc" => "application/octet-stream",
         _ => "application/octet-stream",
     };
+
+    private static string SanitizeDownloadName(string original, string ext)
+    {
+        var baseName = Path.GetFileNameWithoutExtension(original);
+        if (string.IsNullOrWhiteSpace(baseName))
+            baseName = "traza";
+
+        var cleaned = new string(baseName
+            .Where(ch => char.IsLetterOrDigit(ch) || ch is '-' or '_' or '.' or ' ')
+            .ToArray())
+            .Trim();
+
+        if (string.IsNullOrWhiteSpace(cleaned))
+            cleaned = "traza";
+
+        if (cleaned.Length > 80)
+            cleaned = cleaned[..80];
+
+        return cleaned + ext;
+    }
 
     private static string NormalizeBaseUrl(string? fromRequest, string fromSettings)
     {
@@ -325,3 +491,9 @@ public sealed class LocalCapturaStore
         return candidate;
     }
 }
+
+public sealed record LocalMediaOpen(
+    string FullPath,
+    string ContentType,
+    string? DownloadFileName,
+    bool ForceDownload);

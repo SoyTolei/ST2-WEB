@@ -429,6 +429,22 @@
                   <span class="card-mark" id="ref-mark-traza">○</span>
                 </button>
                 <input type="checkbox" id="ref-adj-traza" class="hidden"/>
+                <div id="ref-traza-panel" class="plan-capturas-panel hidden">
+                  <p class="plan-capturas-title">Traza SQL</p>
+                  <p class="plan-capturas-hint">Si la cargás acá, el texto incluye el link de descarga. Si no, el TXT indica que va en comentarios.</p>
+                  <div class="plan-capturas-actions">
+                    <button type="button" id="ref-traza-agregar" class="plan-capturas-browse">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">📄</span>
+                      <span class="plan-capturas-browse-text">
+                        <strong>Examinar traza</strong>
+                        <small>TRC, CSV o TXT · podés elegir varias</small>
+                      </span>
+                    </button>
+                    <input id="ref-traza-input" type="file" accept=".trc,.csv,.txt,text/csv,text/plain" multiple class="hidden"/>
+                  </div>
+                  <div id="ref-traza-chips" class="plan-capturas-thumbs"></div>
+                  <p id="ref-traza-estado" class="plan-capturas-estado"></p>
+                </div>
 
                 <button type="button" class="plan-adj-card plan-adj-backup tone-blue" id="ref-card-backup" data-adj="backup">
                   <span class="plan-adj-label">
@@ -455,6 +471,7 @@
                   <input type="checkbox" id="ref-backup-sj" class="hidden"/>
                   <div id="ref-sql-panel" class="plan-backup-sql hidden">
                     <p class="plan-backup-detail-title">Collation y SQL Server</p>
+                    <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si tomaste el backup con <strong>ST2 → Herramientas SQL</strong>, podés ver la collation y la versión de SQL Server en el nombre del archivo <strong>.zip</strong>.</p>
                     <div class="plan-form-2col plan-form-2col-tight">
                       <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
                       <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
@@ -466,28 +483,34 @@
 
             <div id="ref-onvio-panel" class="plan-ref-block hidden">
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
-              <p class="plan-ref-hint">Tocá para marcar cada ítem. Ticket y usuario se completan al activarlos.</p>
+              <p class="plan-ref-hint">Tocá cada ítem para confirmarlo. <strong>Sí</strong> = marcado · <strong>No</strong> = sin marcar. El TXT del referral usa ese valor.</p>
+
+              <p class="plan-onvio-group-title">Confirmaciones</p>
               <div class="plan-onvio-grid">
-                <button type="button" class="plan-onvio-card tone-green" id="ref-card-onvio-proceso" data-onvio="proceso">
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-proceso" data-onvio="proceso">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon green" data-plan-icon="checkOk"></span>
+                    <span class="plan-inline-icon" data-plan-icon="checkOk"></span>
                     <span>El proceso funcionaba correctamente</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
-                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-onvio-reproduce" data-onvio="reproduce">
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-reproduce" data-onvio="reproduce">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon orange" data-plan-icon="repeat"></span>
+                    <span class="plan-inline-icon" data-plan-icon="repeat"></span>
                     <span>El error se reproduce sistemáticamente</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
-                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-onvio-pantallas" data-onvio="pantallas">
+              </div>
+
+              <p class="plan-onvio-group-title">Adjuntos (opcionales)</p>
+              <div class="plan-onvio-grid">
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-pantallas" data-onvio="pantallas">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon primary" data-plan-icon="camera"></span>
+                    <span class="plan-inline-icon" data-plan-icon="camera"></span>
                     <span>Captura / imágenes</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
                 <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
                 <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
@@ -506,12 +529,12 @@
                   <div id="ref-onvio-capt-chips" class="plan-capturas-thumbs"></div>
                   <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
                 </div>
-                <button type="button" class="plan-onvio-card tone-blue" id="ref-card-onvio-ticket" data-onvio="ticket">
+                <button type="button" class="plan-onvio-card" id="ref-card-onvio-ticket" data-onvio="ticket">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon blue" data-plan-icon="ticket"></span>
+                    <span class="plan-inline-icon" data-plan-icon="ticket"></span>
                     <span>Ticket de servicio<small>N° y técnico</small></span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
                 <input type="checkbox" id="ref-onvio-ticket" class="hidden"/>
                 <div id="ref-onvio-ticket-panel" class="plan-onvio-ticket-detail hidden">
@@ -547,28 +570,34 @@
 
             <div id="ref-legal-panel" class="plan-ref-block hidden">
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
-              <p class="plan-ref-hint">Tocá para marcar cada ítem. Ticket y usuario se completan al activarlos.</p>
+              <p class="plan-ref-hint">Tocá cada ítem para confirmarlo. <strong>Sí</strong> = marcado · <strong>No</strong> = sin marcar. El TXT del referral usa ese valor.</p>
+
+              <p class="plan-onvio-group-title">Confirmaciones</p>
               <div class="plan-onvio-grid">
-                <button type="button" class="plan-onvio-card tone-green" id="ref-card-legal-proceso" data-legal="proceso">
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-proceso" data-legal="proceso">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon green" data-plan-icon="checkOk"></span>
+                    <span class="plan-inline-icon" data-plan-icon="checkOk"></span>
                     <span>El proceso funcionaba correctamente</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
-                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-legal-reproduce" data-legal="reproduce">
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-reproduce" data-legal="reproduce">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon orange" data-plan-icon="repeat"></span>
+                    <span class="plan-inline-icon" data-plan-icon="repeat"></span>
                     <span>El error se reproduce sistemáticamente</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
-                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-legal-pantallas" data-legal="pantallas">
+              </div>
+
+              <p class="plan-onvio-group-title">Adjuntos (opcionales)</p>
+              <div class="plan-onvio-grid">
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-pantallas" data-legal="pantallas">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon primary" data-plan-icon="camera"></span>
+                    <span class="plan-inline-icon" data-plan-icon="camera"></span>
                     <span>Captura / imágenes</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
                 <input type="checkbox" id="ref-legal-pantallas" class="hidden"/>
                 <div id="ref-legal-capturas" class="plan-capturas-panel hidden">
@@ -587,12 +616,12 @@
                   <div id="ref-legal-capt-chips" class="plan-capturas-thumbs"></div>
                   <p id="ref-legal-capt-estado" class="plan-capturas-estado"></p>
                 </div>
-                <button type="button" class="plan-onvio-card tone-blue" id="ref-card-legal-ticket" data-legal="ticket">
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-ticket" data-legal="ticket">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon blue" data-plan-icon="ticket"></span>
+                    <span class="plan-inline-icon" data-plan-icon="ticket"></span>
                     <span>Ticket de servicio<small>N° y técnico</small></span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
                 <input type="checkbox" id="ref-legal-ticket" class="hidden"/>
                 <div id="ref-legal-ticket-panel" class="plan-onvio-ticket-detail hidden">
@@ -619,19 +648,19 @@
                   <input type="checkbox" id="ref-legal-rep-homolog" class="hidden"/>
                   <input type="checkbox" id="ref-legal-rep-usuario" class="hidden"/>
                 </div>
-                <button type="button" class="plan-onvio-card tone-purple" id="ref-card-legal-planilha" data-legal="planilha">
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-planilha" data-legal="planilha">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon purple" data-plan-icon="planilla"></span>
+                    <span class="plan-inline-icon" data-plan-icon="planilla"></span>
                     <span>Planilla de importación</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
-                <button type="button" class="plan-onvio-card tone-green" id="ref-card-legal-log" data-legal="log">
+                <button type="button" class="plan-onvio-card" id="ref-card-legal-log" data-legal="log">
                   <span class="plan-onvio-body">
-                    <span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>
+                    <span class="plan-inline-icon" data-plan-icon="sqlTrace"></span>
                     <span>Log de integración</span>
                   </span>
-                  <span class="card-mark">○</span>
+                  <span class="card-mark plan-onvio-state">No</span>
                 </button>
               </div>
               <input type="checkbox" id="ref-legal-proceso" class="hidden"/>

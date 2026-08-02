@@ -406,15 +406,18 @@ app.MapGet("/c/{id}", (string id, LocalCapturaStore store) =>
 {
     try
     {
-        if (!store.TryOpenById(id, out var path, out var contentType))
-            return Results.NotFound(new { error = "Captura no encontrada.", id });
+        if (!store.TryOpenById(id, out LocalMediaOpen? open) || open is null)
+            return Results.NotFound(new { error = "Archivo no encontrado.", id });
 
-        var bytes = File.ReadAllBytes(path);
-        return Results.File(bytes, contentType);
+        var bytes = File.ReadAllBytes(open.FullPath);
+        if (open.ForceDownload)
+            return Results.File(bytes, open.ContentType, fileDownloadName: open.DownloadFileName ?? "traza");
+
+        return Results.File(bytes, open.ContentType);
     }
     catch (Exception ex)
     {
-        return Results.Problem(detail: ex.Message, title: "Error al abrir captura", statusCode: 500);
+        return Results.Problem(detail: ex.Message, title: "Error al abrir archivo", statusCode: 500);
     }
 });
 
@@ -422,15 +425,18 @@ app.MapGet("/media/capturas/{fileName}", (string fileName, LocalCapturaStore sto
 {
     try
     {
-        if (!store.TryOpen(fileName, out var path, out var contentType))
-            return Results.NotFound(new { error = "Captura no encontrada.", fileName });
+        if (!store.TryOpen(fileName, out LocalMediaOpen? open) || open is null)
+            return Results.NotFound(new { error = "Archivo no encontrado.", fileName });
 
-        var bytes = File.ReadAllBytes(path);
-        return Results.File(bytes, contentType);
+        var bytes = File.ReadAllBytes(open.FullPath);
+        if (open.ForceDownload)
+            return Results.File(bytes, open.ContentType, fileDownloadName: open.DownloadFileName ?? "traza");
+
+        return Results.File(bytes, open.ContentType);
     }
     catch (Exception ex)
     {
-        return Results.Problem(detail: ex.Message, title: "Error al abrir captura", statusCode: 500);
+        return Results.Problem(detail: ex.Message, title: "Error al abrir archivo", statusCode: 500);
     }
 });
 

@@ -127,6 +127,11 @@ public sealed class ReferralIdService
             .Select(e => new TransferenciaCapturaEnlace(e.FileName, e.Url))
             .ToList();
 
+        caso.TrazaEnlaces = (req.TrazaEnlaces ?? [])
+            .Where(e => !string.IsNullOrWhiteSpace(e.Url))
+            .Select(e => new TransferenciaCapturaEnlace(e.FileName, e.Url))
+            .ToList();
+
         return caso;
     }
 

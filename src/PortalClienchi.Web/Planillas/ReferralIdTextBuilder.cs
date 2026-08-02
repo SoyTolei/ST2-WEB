@@ -251,7 +251,10 @@ public static class ReferralIdTextBuilder
             if (a.TrazaSql)
             {
                 partes.Add("- Traza SQL");
-                enComentarios.Add("Traza");
+                if (c.TrazaEnlaces.Count > 0)
+                    AppendEnlacesTraza(partes, c.TrazaEnlaces);
+                else
+                    enComentarios.Add("Traza");
             }
 
             if (a.BackupBases)
@@ -309,6 +312,15 @@ public static class ReferralIdTextBuilder
             return $"Se adjuntan {items[0]} y {items[1]} en comentarios.";
 
         return $"Se adjuntan {string.Join(", ", items.Take(items.Count - 1))} y {items[^1]} en comentarios.";
+    }
+
+    private static void AppendEnlacesTraza(List<string> partes, IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
+    {
+        partes.Add(enlaces.Count == 1
+            ? "Se adjunta la traza en el siguiente link (descarga):"
+            : "Se adjuntan las trazas en los siguientes links (descarga):");
+        foreach (var enlace in enlaces)
+            partes.Add(enlace.Url);
     }
 
     private static bool IsRealText(string? text, string placeholder) =>

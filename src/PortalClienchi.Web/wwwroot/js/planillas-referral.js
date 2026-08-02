@@ -9,6 +9,7 @@ let ctx = null;
 let versionSel = null;
 let moduloSel = null;
 let capturaFiles = [];
+let trazaFiles = [];
 let onvioCapturaFiles = [];
 let legalCapturaFiles = [];
 let legalProdutoSel = null;
@@ -98,6 +99,12 @@ function syncPerfilUi() {
   }
   document.getElementById("ref-wrap-mam")?.classList.toggle("is-optional-card", !esTecnico);
   document.getElementById("ref-wrap-sdk")?.classList.toggle("is-optional-card", !esTecnico);
+  updateSqlHint();
+}
+
+function updateSqlHint() {
+  // Solo para "Otra mesa": orientar dónde mirar collation/SQL en el zip de ST2.
+  document.getElementById("ref-sql-hint")?.classList.toggle("hidden", esTecnico);
 }
 
 function loadReferralDialogs() {
@@ -254,10 +261,20 @@ function syncCardVisual(cardId, checkId, markId, markEl) {
   const mark = markEl || (markId ? document.getElementById(markId) : card?.querySelector(".card-mark"));
   if (!card || !check) return;
   card.classList.toggle("selected", check.checked);
-  if (mark) {
-    mark.textContent = check.checked ? "✓" : "○";
-    mark.style.color = check.checked ? "#16a34a" : "#94a3b8";
+  if (mark) applyCardMark(mark, check.checked);
+}
+
+function applyCardMark(mark, checked) {
+  if (!mark) return;
+  const isOnvioState = mark.classList.contains("plan-onvio-state")
+    || mark.closest(".plan-onvio-card");
+  if (isOnvioState) {
+    mark.textContent = checked ? "Sí" : "No";
+    mark.style.color = "";
+    return;
   }
+  mark.textContent = checked ? "✓" : "○";
+  mark.style.color = checked ? "#16a34a" : "#94a3b8";
 }
 
 function clearBackupBases() {
@@ -356,10 +373,7 @@ function bindOnvioCard(cardId, checkId, onChange) {
   const sync = () => {
     check.checked = !check.checked;
     card.classList.toggle("selected", check.checked);
-    if (mark) {
-      mark.textContent = check.checked ? "✓" : "○";
-      mark.style.color = check.checked ? "#16a34a" : "#94a3b8";
-    }
+    applyCardMark(mark, check.checked);
     onChange?.();
   };
   card.addEventListener("click", sync);
@@ -392,7 +406,9 @@ function bindReferralEvents() {
   bindAdjCard("ref-card-pantallas", "ref-adj-pantallas", "ref-mark-pantallas", () => {
     document.getElementById("ref-capturas-panel")?.classList.toggle("hidden", !document.getElementById("ref-adj-pantallas").checked);
   });
-  bindAdjCard("ref-card-traza", "ref-adj-traza", "ref-mark-traza");
+  bindAdjCard("ref-card-traza", "ref-adj-traza", "ref-mark-traza", () => {
+    document.getElementById("ref-traza-panel")?.classList.toggle("hidden", !document.getElementById("ref-adj-traza").checked);
+  });
   bindAdjCard("ref-card-backup", "ref-adj-backup", "ref-mark-backup", () => {
     const on = document.getElementById("ref-adj-backup")?.checked;
     document.getElementById("ref-backup-panel")?.classList.toggle("hidden", !on);
@@ -455,6 +471,7 @@ function bindReferralEvents() {
   setupCapturas("ref-capturas", capturaFiles);
   setupCapturas("ref-onvio-capt", onvioCapturaFiles);
   setupCapturas("ref-legal-capt", legalCapturaFiles);
+  setupTraza();
 
   document.getElementById("ref-btn-copiar")?.addEventListener("click", () => generarReferral(true));
   document.getElementById("ref-btn-ver-planilla")?.addEventListener("click", () => generarReferral(false));
@@ -532,10 +549,7 @@ function setReferralPantallasUi(checked) {
     const card = document.getElementById("ref-card-legal-pantallas");
     const mark = card?.querySelector(".card-mark");
     card?.classList.toggle("selected", checked);
-    if (mark) {
-      mark.textContent = checked ? "✓" : "○";
-      mark.style.color = checked ? "#16a34a" : "#94a3b8";
-    }
+    applyCardMark(mark, checked);
     document.getElementById("ref-legal-capturas")?.classList.toggle("hidden", !checked);
     return;
   }
@@ -545,10 +559,8 @@ function setReferralPantallasUi(checked) {
   check.checked = checked;
   const card = document.getElementById("ref-card-onvio-pantallas");
   const mark = card?.querySelector(".card-mark");
-  if (mark) {
-    mark.textContent = checked ? "✓" : "○";
-    mark.style.color = checked ? "#16a34a" : "#94a3b8";
-  }
+  card?.classList.toggle("selected", checked);
+  applyCardMark(mark, checked);
   document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !checked);
 }
 
@@ -612,6 +624,92 @@ function getReferralCapturaFiles() {
   if (isBejerman()) return capturaFiles;
   if (isLegal()) return legalCapturaFiles;
   return onvioCapturaFiles;
+}
+
+function isTrazaFile(file) {
+  return /\.(trc|csv|txt)$/i.test(file.name || "");
+}
+
+function setReferralTrazaUi(checked) {
+  const check = document.getElementById("ref-adj-traza");
+  if (!check) return;
+  check.checked = checked;
+  const mark = document.getElementById("ref-mark-traza");
+  if (mark) {
+    mark.textContent = checked ? "✓" : "○";
+    mark.style.color = checked ? "#16a34a" : "#94a3b8";
+  }
+  document.getElementById("ref-card-traza")?.classList.toggle("selected", checked);
+  document.getElementById("ref-traza-panel")?.classList.toggle("hidden", !checked);
+}
+
+function addTrazaFiles(fileList) {
+  let added = 0;
+  for (const file of fileList) {
+    if (!isTrazaFile(file)) continue;
+    if (!trazaFiles.some((f) => f.name === file.name && f.size === file.size)) {
+      trazaFiles.push(file);
+      added++;
+    }
+  }
+  if (added > 0) setReferralTrazaUi(true);
+  return added;
+}
+
+function refreshTrazaChips() {
+  const el = document.getElementById("ref-traza-chips");
+  const estado = document.getElementById("ref-traza-estado");
+  if (!el) return;
+  el.innerHTML = "";
+  trazaFiles.forEach((f, index) => {
+    const card = document.createElement("div");
+    card.className = "plan-traza-chip";
+
+    const ext = document.createElement("span");
+    ext.className = "plan-traza-chip-ext";
+    const match = /\.([^.]+)$/.exec(f.name || "");
+    ext.textContent = (match?.[1] || "file").toUpperCase();
+
+    const name = document.createElement("span");
+    name.className = "plan-traza-chip-name";
+    name.textContent = f.name;
+    name.title = f.name;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "plan-captura-thumb-remove";
+    btn.setAttribute("aria-label", `Quitar ${f.name}`);
+    btn.textContent = "×";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      trazaFiles.splice(index, 1);
+      refreshTrazaChips();
+    });
+
+    card.append(ext, name, btn);
+    el.appendChild(card);
+  });
+
+  if (estado) {
+    estado.textContent = trazaFiles.length === 0
+      ? ""
+      : `${trazaFiles.length} archivo(s) listo(s) para subir al generar el texto.`;
+  }
+}
+
+function setupTraza() {
+  document.getElementById("ref-traza-agregar")?.addEventListener("click", () => {
+    document.getElementById("ref-traza-input")?.click();
+  });
+  document.getElementById("ref-traza-input")?.addEventListener("change", (e) => {
+    const added = addTrazaFiles(e.target.files || []);
+    if (added === 0 && e.target.files?.length > 0) {
+      alert("Solo se admiten archivos .trc, .csv o .txt.");
+    }
+    refreshTrazaChips();
+    e.target.value = "";
+  });
 }
 
 function refreshChips(id, files, prefix, fileList) {
@@ -765,6 +863,17 @@ async function subirCapturasReferral(files) {
   return (data.enlaces || []).filter((e) => e?.url);
 }
 
+async function subirTrazasReferral(files) {
+  const form = new FormData();
+  files.forEach((f) => form.append("trazas", f, f.name || "traza.trc"));
+  const response = await fetch("/api/planillas/trazas/upload", { method: "POST", body: form });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.detail || data.error || data.title || "Error al subir traza");
+  }
+  return (data.enlaces || []).filter((e) => e?.url);
+}
+
 async function generarReferral(copiar) {
   const status = document.getElementById("ref-status");
   const btnCopiar = document.getElementById("ref-btn-copiar");
@@ -772,6 +881,11 @@ async function generarReferral(copiar) {
   const autoPlanilla = isBejerman() && isPlanillaEmpty();
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
+  const trazas = isBejerman() ? [...trazaFiles] : [];
+  if (trazas.length > 0) {
+    if (!payload.adjuntos) payload.adjuntos = {};
+    payload.adjuntos.trazaSql = true;
+  }
   const quierePantallas = isBejerman()
     ? !!payload.adjuntos?.pantallas
     : isLegal()
@@ -793,6 +907,14 @@ async function generarReferral(copiar) {
       payload.capturasEnlaces = await subirCapturasReferral(files);
       if (payload.capturasEnlaces.length === 0) {
         throw new Error("No se obtuvieron links de las capturas subidas.");
+      }
+    }
+
+    if (trazas.length > 0) {
+      status.textContent = "Subiendo traza…";
+      payload.trazaEnlaces = await subirTrazasReferral(trazas);
+      if (payload.trazaEnlaces.length === 0) {
+        throw new Error("No se obtuvieron links de la traza subida.");
       }
     }
 
@@ -825,14 +947,17 @@ async function generarReferral(copiar) {
     const capturasMsg = data.capturasSubidas > 0
       ? ` (${data.capturasSubidas} captura(s) con link en el texto)`
       : "";
+    const trazasMsg = (payload.trazaEnlaces?.length || 0) > 0
+      ? ` (${payload.trazaEnlaces.length} traza(s) con link de descarga)`
+      : "";
     const autoMsg = autoPlanilla ? " Se marcaron los ítems obligatorios de planilla técnica." : "";
 
     if (copiar) {
       await navigator.clipboard.writeText(data.texto);
-      status.textContent = `Texto copiado al portapapeles.${capturasMsg}${autoMsg}`;
+      status.textContent = `Texto copiado al portapapeles.${capturasMsg}${trazasMsg}${autoMsg}`;
     } else {
       showPlanTextPreview("ref-text-preview", data.texto);
-      status.textContent = `Planilla lista.${capturasMsg}${autoMsg} Podés copiar desde el panel de vista previa.`;
+      status.textContent = `Planilla lista.${capturasMsg}${trazasMsg}${autoMsg} Podés copiar desde el panel de vista previa.`;
     }
   } catch (ex) {
     status.textContent = ex.message || "Error";
@@ -887,6 +1012,7 @@ function resetReferralForm() {
   legalModuloSel = null;
   legalAmbienteSel = null;
   capturaFiles.length = 0;
+  trazaFiles.length = 0;
   onvioCapturaFiles.length = 0;
   legalCapturaFiles.length = 0;
   ticketAvisoOmitido = false;
@@ -903,6 +1029,7 @@ function resetReferralForm() {
   });
   document.querySelectorAll("#ref-bejerman-post input[type=checkbox], #ref-onvio-panel input[type=checkbox], #ref-legal-panel input[type=checkbox]").forEach((c) => { c.checked = false; });
   document.querySelectorAll(".plan-adj-card, .plan-backup-base-card, .plan-onvio-card").forEach((el) => el.classList.remove("selected"));
+  document.querySelectorAll(".plan-onvio-card .card-mark").forEach((mark) => applyCardMark(mark, false));
   clearBackupBases();
   clearOnvioTicketFields();
   clearLegalTicketFields();
@@ -910,16 +1037,18 @@ function resetReferralForm() {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
-  ["ref-capturas-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel"].forEach((id) => {
+  ["ref-capturas-panel", "ref-traza-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel"].forEach((id) => {
     document.getElementById(id)?.classList.add("hidden");
   });
   revokeCapturaThumbUrls(document.getElementById("ref-capturas-chips"));
   revokeCapturaThumbUrls(document.getElementById("ref-onvio-capt-chips"));
   revokeCapturaThumbUrls(document.getElementById("ref-legal-capt-chips"));
   document.getElementById("ref-capturas-chips").innerHTML = "";
+  document.getElementById("ref-traza-chips").innerHTML = "";
   document.getElementById("ref-onvio-capt-chips").innerHTML = "";
   document.getElementById("ref-legal-capt-chips").innerHTML = "";
   document.getElementById("ref-capturas-estado").textContent = "";
+  document.getElementById("ref-traza-estado").textContent = "";
   document.getElementById("ref-onvio-capt-estado").textContent = "";
   document.getElementById("ref-legal-capt-estado").textContent = "";
   document.getElementById("ref-status").textContent = "";
