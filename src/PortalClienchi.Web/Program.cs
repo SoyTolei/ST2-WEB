@@ -397,6 +397,81 @@ app.MapWhen(
 
 app.MapPlanillasEndpoints();
 
-app.MapFallbackToFile("index.html");
+// Capturas públicas: registrar ANTES del fallback SPA y sin tocar Content-Disposition
+// (esa cabecera malformada provocaba HTTP 500 al abrir el link).
+app.MapGet("/c/{id}", (string id, LocalCapturaStore store) =>
+{
+    try
+    {
+        if (!store.TryOpenById(id, out var path, out var contentType))
+            return Results.NotFound(new { error = "Captura no encontrada.", id });
+
+        var bytes = File.ReadAllBytes(path);
+        return Results.File(bytes, contentType);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, title: "Error al abrir captura", statusCode: 500);
+    }
+});
+
+app.MapGet("/media/capturas/{fileName}", (string fileName, LocalCapturaStore store) =>
+{
+    try
+    {
+        if (!store.TryOpen(fileName, out var path, out var contentType))
+            return Results.NotFound(new { error = "Captura no encontrada.", fileName });
+
+        var bytes = File.ReadAllBytes(path);
+        return Results.File(bytes, contentType);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, title: "Error al abrir captura", statusCode: 500);
+    }
+});
+
+app.MapGet("/api/capturas/status", (LocalCapturaStore store) =>
+{
+    try
+    {
+        var root = store.RootPath;
+        var exists = Directory.Exists(root);
+        var count = exists ? Directory.GetFiles(root).Length : 0;
+        return Results.Ok(new
+        {
+            ok = true,
+            root,
+            exists,
+            files = count,
+            provider = "Local",
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(detail: ex.Message, title: "capturas status");
+    }
+});
+
+// Fallback SPA: no interceptar /c, /api, /media, /embed
+app.MapFallback(async (HttpContext ctx, IWebHostEnvironment env) =>
+{
+    var path = ctx.Request.Path.Value ?? "";
+    if (path.StartsWith("/api", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/c/", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/media/", StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith("/embed", StringComparison.OrdinalIgnoreCase))
+    {
+        ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+        ctx.Response.ContentType = "text/plain; charset=utf-8";
+        await ctx.Response.WriteAsync("Not found").ConfigureAwait(false);
+        return;
+    }
+
+    var html = await St2IndexHtml.LoadAsync(env, ctx.RequestAborted).ConfigureAwait(false);
+    ctx.Response.ContentType = "text/html; charset=utf-8";
+    ctx.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+    await ctx.Response.WriteAsync(html, ctx.RequestAborted).ConfigureAwait(false);
+});
 
 app.Run();

@@ -36,7 +36,9 @@ public static class St2AccessMiddleware
         if (!HttpMethods.IsGet(method))
             return false;
 
-        return value.StartsWith("/c/", StringComparison.OrdinalIgnoreCase)
+        return value.StartsWith("/api/health", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("/api/capturas/status", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("/c/", StringComparison.OrdinalIgnoreCase)
             || value.StartsWith("/media/capturas/", StringComparison.OrdinalIgnoreCase);
     }
 

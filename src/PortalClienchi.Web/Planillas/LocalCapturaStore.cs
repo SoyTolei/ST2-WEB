@@ -9,10 +9,18 @@ namespace PortalClienchi.Web.Planillas;
 /// Guarda capturas en el Volume ST2 (/data/st2/capturas) sin recomprimir (calidad original)
 /// y las sirve por id corto (/c/{id}).
 /// </summary>
-public sealed partial class LocalCapturaStore
+public sealed class LocalCapturaStore
 {
     /// <summary>Alfabeto sin caracteres ambiguos (0/O, 1/l/I).</summary>
     private const string ShortAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+    private static readonly Regex ShortIdRegex = new(
+        @"^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{8}$",
+        RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
+    private static readonly Regex LegacyTokenFileRegex = new(
+        @"^[a-f0-9]{32}\.(webp|jpg|jpeg|png|gif|bmp)$",
+        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     private static readonly string[] StoredExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
 
@@ -31,17 +39,30 @@ public sealed partial class LocalCapturaStore
         _settings = settings.CapturaHosting;
         _logger = logger;
         _root = Path.Combine(St2Paths.GetDataDirectory(), "capturas");
-        Directory.CreateDirectory(_root);
+        EnsureRoot();
         _logger.LogInformation("Capturas locales en {Root}", _root);
     }
 
     public string RootPath => _root;
+
+    private void EnsureRoot()
+    {
+        try
+        {
+            Directory.CreateDirectory(_root);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "No se pudo crear el directorio de capturas {Root}", _root);
+        }
+    }
 
     public async Task<IReadOnlyList<CapturaSubidaResult>> GuardarAsync(
         IReadOnlyList<(string FileName, Stream Content)> archivos,
         string publicBaseUrl,
         CancellationToken ct = default)
     {
+        EnsureRoot();
         PurgeExpired();
 
         var maxFiles = Math.Clamp(_settings.MaxFilesPerRequest, 1, 50);
@@ -52,7 +73,6 @@ public sealed partial class LocalCapturaStore
         if (string.IsNullOrWhiteSpace(baseUrl))
             throw new InvalidOperationException("No se pudo determinar la URL pública de las capturas.");
 
-        // Sin recomprimir: subimos un poco el techo para PNGs de pantalla completa.
         var maxBytes = Math.Clamp(_settings.MaxFileBytes, 256 * 1024, 25 * 1024 * 1024);
         var results = new List<CapturaSubidaResult>(archivos.Count);
 
@@ -91,7 +111,6 @@ public sealed partial class LocalCapturaStore
                     continue;
                 }
 
-                // Calidad original: no reencodear. Solo normalizar extensión por magic bytes.
                 var outExt = GuessExt(raw);
                 if (outExt == ".bin" && AllowedExt.Contains(ext))
                     outExt = ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ? ".jpg" : ext.ToLowerInvariant();
@@ -102,6 +121,7 @@ public sealed partial class LocalCapturaStore
                     continue;
                 }
 
+                EnsureRoot();
                 var id = NewShortId();
                 var storedName = id + outExt;
                 var path = Path.Combine(_root, storedName);
@@ -121,7 +141,6 @@ public sealed partial class LocalCapturaStore
         return results;
     }
 
-    /// <summary>Abre por id corto (/c/{id}).</summary>
     public bool TryOpenById(string id, out string fullPath, out string contentType)
     {
         fullPath = "";
@@ -131,11 +150,8 @@ public sealed partial class LocalCapturaStore
             return false;
 
         id = id.Trim();
-        if (!ShortIdRegex().IsMatch(id))
-        {
-            _logger.LogWarning("Id de captura inválido: {Id}", id);
+        if (!ShortIdRegex.IsMatch(id))
             return false;
-        }
 
         foreach (var ext in StoredExts)
         {
@@ -152,7 +168,6 @@ public sealed partial class LocalCapturaStore
         return false;
     }
 
-    /// <summary>Compat: formato largo /media/capturas/{token}.ext</summary>
     public bool TryOpen(string tokenWithExt, out string fullPath, out string contentType)
     {
         fullPath = "";
@@ -162,10 +177,10 @@ public sealed partial class LocalCapturaStore
             return false;
 
         var name = Path.GetFileName(tokenWithExt.Trim());
-        if (ShortIdRegex().IsMatch(name))
+        if (ShortIdRegex.IsMatch(name))
             return TryOpenById(name, out fullPath, out contentType);
 
-        if (!LegacyTokenFileRegex().IsMatch(name))
+        if (!LegacyTokenFileRegex.IsMatch(name))
             return false;
 
         var path = Path.Combine(_root, name);
@@ -204,6 +219,10 @@ public sealed partial class LocalCapturaStore
 
         lock (_purgeLock)
         {
+            EnsureRoot();
+            if (!Directory.Exists(_root))
+                return 0;
+
             var cutoff = DateTime.UtcNow.AddDays(-ttl);
             var removed = 0;
             try
@@ -297,7 +316,6 @@ public sealed partial class LocalCapturaStore
 
         candidate = candidate.Trim().TrimEnd('/');
 
-        // Evitar links http rotos detrás del proxy de Railway.
         if (candidate.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
             && candidate.Contains("tolei.dev", StringComparison.OrdinalIgnoreCase))
         {
@@ -306,10 +324,4 @@ public sealed partial class LocalCapturaStore
 
         return candidate;
     }
-
-    [GeneratedRegex(@"^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{8}$", RegexOptions.CultureInvariant)]
-    private static partial Regex ShortIdRegex();
-
-    [GeneratedRegex(@"^[a-f0-9]{32}\.(webp|jpg|jpeg|png|gif|bmp)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
-    private static partial Regex LegacyTokenFileRegex();
 }

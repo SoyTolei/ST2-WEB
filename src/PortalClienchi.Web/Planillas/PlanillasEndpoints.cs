@@ -123,28 +123,7 @@ public static class PlanillasEndpoints
             }
         });
 
-        app.MapGet("/c/{id}", (string id, LocalCapturaStore store, HttpContext ctx) =>
-        {
-            if (!store.TryOpenById(id, out var path, out var contentType))
-                return Results.NotFound();
-
-            ctx.Response.Headers.CacheControl = "public, max-age=604800";
-            ctx.Response.Headers.ContentDisposition = "inline";
-            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return Results.File(stream, contentType, enableRangeProcessing: true);
-        });
-
-        // Compat con links largos generados en el deploy anterior
-        app.MapGet("/media/capturas/{fileName}", (string fileName, LocalCapturaStore store, HttpContext ctx) =>
-        {
-            if (!store.TryOpen(fileName, out var path, out var contentType))
-                return Results.NotFound();
-
-            ctx.Response.Headers.CacheControl = "public, max-age=604800";
-            ctx.Response.Headers.ContentDisposition = "inline";
-            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return Results.File(stream, contentType, enableRangeProcessing: true);
-        });
+        // Las rutas GET /c/{id} y /media/capturas se registran en Program.cs (antes del fallback SPA).
 
         app.MapPost("/api/planillas/transferencia/generar", async (
             HttpRequest request,
