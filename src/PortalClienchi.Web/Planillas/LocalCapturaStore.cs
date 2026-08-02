@@ -11,6 +11,11 @@ namespace PortalClienchi.Web.Planillas;
 /// </summary>
 public sealed partial class LocalCapturaStore
 {
+    /// <summary>Alfabeto sin caracteres ambiguos (0/O, 1/l/I).</summary>
+    private const string ShortAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+    private static readonly string[] StoredExts = [".webp", ".jpg", ".jpeg", ".png", ".gif"];
+
     private static readonly HashSet<string> AllowedExt = new(StringComparer.OrdinalIgnoreCase)
     {
         ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp",
@@ -85,13 +90,13 @@ public sealed partial class LocalCapturaStore
                     continue;
                 }
 
-                var (bytes, outExt, contentType) = CompressImage(raw);
-                var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant();
-                var storedName = token + outExt;
+                var (bytes, outExt, _) = CompressImage(raw);
+                var id = NewShortId();
+                var storedName = id + outExt;
                 var path = Path.Combine(_root, storedName);
                 await File.WriteAllBytesAsync(path, bytes, ct).ConfigureAwait(false);
 
-                var url = $"{baseUrl}/media/capturas/{storedName}";
+                var url = $"{baseUrl}/c/{id}";
                 results.Add(new CapturaSubidaResult(safeName, url, null));
             }
             catch (Exception ex)
@@ -104,6 +109,34 @@ public sealed partial class LocalCapturaStore
         return results;
     }
 
+    /// <summary>Abre por id corto (/c/{id}).</summary>
+    public bool TryOpenById(string id, out string fullPath, out string contentType)
+    {
+        fullPath = "";
+        contentType = "application/octet-stream";
+
+        if (string.IsNullOrWhiteSpace(id))
+            return false;
+
+        id = id.Trim();
+        if (!ShortIdRegex().IsMatch(id))
+            return false;
+
+        foreach (var ext in StoredExts)
+        {
+            var path = Path.Combine(_root, id + ext);
+            if (!File.Exists(path))
+                continue;
+
+            fullPath = path;
+            contentType = MimeForExt(ext);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Compat: formato largo /media/capturas/{token}.ext</summary>
     public bool TryOpen(string tokenWithExt, out string fullPath, out string contentType)
     {
         fullPath = "";
@@ -113,7 +146,10 @@ public sealed partial class LocalCapturaStore
             return false;
 
         var name = Path.GetFileName(tokenWithExt.Trim());
-        if (!TokenFileRegex().IsMatch(name))
+        if (ShortIdRegex().IsMatch(name))
+            return TryOpenById(name, out fullPath, out contentType);
+
+        if (!LegacyTokenFileRegex().IsMatch(name))
             return false;
 
         var path = Path.Combine(_root, name);
@@ -121,15 +157,28 @@ public sealed partial class LocalCapturaStore
             return false;
 
         fullPath = path;
-        contentType = Path.GetExtension(name).ToLowerInvariant() switch
-        {
-            ".webp" => "image/webp",
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".png" => "image/png",
-            ".gif" => "image/gif",
-            _ => "application/octet-stream",
-        };
+        contentType = MimeForExt(Path.GetExtension(name));
         return true;
+    }
+
+    private string NewShortId()
+    {
+        Span<byte> bytes = stackalloc byte[8];
+        for (var attempt = 0; attempt < 8; attempt++)
+        {
+            RandomNumberGenerator.Fill(bytes);
+            var chars = new char[8];
+            for (var i = 0; i < 8; i++)
+                chars[i] = ShortAlphabet[bytes[i] % ShortAlphabet.Length];
+
+            var id = new string(chars);
+            var taken = StoredExts.Any(ext => File.Exists(Path.Combine(_root, id + ext)));
+            if (!taken)
+                return id;
+        }
+
+        // Fallback ultra-improbable
+        return Convert.ToHexString(RandomNumberGenerator.GetBytes(4)).ToLowerInvariant();
     }
 
     public int PurgeExpired()
@@ -287,6 +336,9 @@ public sealed partial class LocalCapturaStore
         return candidate.Trim().TrimEnd('/');
     }
 
+    [GeneratedRegex(@"^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{8}$", RegexOptions.CultureInvariant)]
+    private static partial Regex ShortIdRegex();
+
     [GeneratedRegex(@"^[a-f0-9]{32}\.(webp|jpg|jpeg|png|gif)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
-    private static partial Regex TokenFileRegex();
+    private static partial Regex LegacyTokenFileRegex();
 }

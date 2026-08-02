@@ -33,8 +33,11 @@ public static class St2AccessMiddleware
 
         // Capturas públicas (links en TXT de planillas); token opaco.
         var value = path.Value ?? "";
-        return value.StartsWith("/media/capturas/", StringComparison.OrdinalIgnoreCase)
-            && HttpMethods.IsGet(method);
+        if (!HttpMethods.IsGet(method))
+            return false;
+
+        return value.StartsWith("/c/", StringComparison.OrdinalIgnoreCase)
+            || value.StartsWith("/media/capturas/", StringComparison.OrdinalIgnoreCase);
     }
 
     public static bool RequiresAuthenticatedUser(PathString path, string method)

@@ -122,6 +122,15 @@ public static class PlanillasEndpoints
             }
         });
 
+        app.MapGet("/c/{id}", (string id, LocalCapturaStore store) =>
+        {
+            if (!store.TryOpenById(id, out var path, out var contentType))
+                return Results.NotFound();
+
+            return Results.File(path, contentType, enableRangeProcessing: false);
+        });
+
+        // Compat con links largos generados en el deploy anterior
         app.MapGet("/media/capturas/{fileName}", (string fileName, LocalCapturaStore store) =>
         {
             if (!store.TryOpen(fileName, out var path, out var contentType))
