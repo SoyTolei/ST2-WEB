@@ -127,6 +127,7 @@ public sealed class AdjuntosState
     public bool BackupSbda { get; set; }
     public bool BackupCg { get; set; }
     public bool BackupSj { get; set; }
+    public string BackupOnedriveUrl { get; set; } = "";
 }
 
 public sealed class ReferralGenerateRequest
@@ -210,6 +211,7 @@ public sealed class AdjuntosDto
     public bool BackupSbda { get; set; }
     public bool BackupCg { get; set; }
     public bool BackupSj { get; set; }
+    public string? BackupOnedriveUrl { get; set; }
 }
 
 public sealed class ReferralMejorarRequest

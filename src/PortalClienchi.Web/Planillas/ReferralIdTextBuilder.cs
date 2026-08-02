@@ -260,11 +260,20 @@ public static class ReferralIdTextBuilder
             if (a.BackupBases)
             {
                 partes.Add("- Backup Bases");
-                enComentarios.Add("Bases");
                 if (a.BackupManager) partes.Add("  * Manager");
                 if (a.BackupSbda) partes.Add("  * SBDA");
                 if (a.BackupCg) partes.Add("  * CG");
                 if (a.BackupSj) partes.Add("  * SJ");
+
+                if (!string.IsNullOrWhiteSpace(a.BackupOnedriveUrl))
+                {
+                    partes.Add("Se adjunta el backup en el siguiente link (OneDrive):");
+                    partes.Add(a.BackupOnedriveUrl.Trim());
+                }
+                else
+                {
+                    enComentarios.Add("Bases");
+                }
             }
 
             if (enComentarios.Count > 0)

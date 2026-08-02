@@ -1718,6 +1718,38 @@
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+.plan-backup-onedrive {
+  margin-top: 12px;
+}
+.plan-backup-onedrive label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+.plan-backup-onedrive input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--dark);
+  background: #fff;
+}
+.plan-backup-onedrive input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.plan-backup-onedrive-hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #64748b;
+}
 .plan-backup-base-card {
   border: 1px solid var(--border);
   border-radius: 8px;

@@ -292,6 +292,8 @@ function clearBackupBases() {
     const mark = document.getElementById(markId);
     if (mark) { mark.textContent = "○"; mark.style.color = "#94a3b8"; }
   });
+  const od = document.getElementById("ref-backup-onedrive");
+  if (od) od.value = "";
   updateSqlPanel();
 }
 
@@ -790,6 +792,7 @@ function buildPayload() {
       backupSbda: document.getElementById("ref-backup-sbda")?.checked,
       backupCg: document.getElementById("ref-backup-cg")?.checked,
       backupSj: document.getElementById("ref-backup-sj")?.checked,
+      backupOnedriveUrl: document.getElementById("ref-backup-onedrive")?.value.trim() || null,
     };
   } else if (isLegal()) {
     payload.legal = {

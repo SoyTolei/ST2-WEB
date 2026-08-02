@@ -120,6 +120,7 @@ public sealed class ReferralIdService
             caso.Adjuntos.BackupSbda = req.Adjuntos.BackupSbda;
             caso.Adjuntos.BackupCg = req.Adjuntos.BackupCg;
             caso.Adjuntos.BackupSj = req.Adjuntos.BackupSj;
+            caso.Adjuntos.BackupOnedriveUrl = req.Adjuntos.BackupOnedriveUrl?.Trim() ?? "";
         }
 
         caso.CapturasEnlaces = (req.CapturasEnlaces ?? [])
