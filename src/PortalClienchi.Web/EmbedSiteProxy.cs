@@ -57,6 +57,8 @@ internal sealed class EmbedSiteProxy
         "/js/",
         "/img/",
         "/data/",
+        "/c/",
+        "/media/",
     ];
 
     private static readonly string[] St2ApiPrefixes =
@@ -70,6 +72,7 @@ internal sealed class EmbedSiteProxy
         "/api/knowledge/",
         "/api/planillas/",
         "/api/access/",
+        "/api/capturas/",
     ];
 
     private static readonly string[] St2ReservedExact =
