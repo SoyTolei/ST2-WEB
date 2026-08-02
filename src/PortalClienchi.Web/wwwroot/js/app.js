@@ -1625,27 +1625,48 @@ function measureThomPopupChrome(popup = thomPopup) {
   return THOM_POPUP_CHROME_WITH_URL;
 }
 
-/** Offset definitivo del popup THOM respecto al borde de .tab-bar (calibrado en Edge). */
-const THOM_POPUP_TOP_OFFSET = 75;
+/** Holgura mínima debajo de las pestañas ST2 (el ancla real es el panel). */
+const THOM_POPUP_TAB_GAP = 4;
 
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   const tabBar = document.querySelector(".tab-bar");
+  const frameWrap = document.querySelector("#panel-thom .embed-frame-wrap");
   const tabRect = tabBar?.getBoundingClientRect();
-  if (!tabRect) {
+  const wrapRect = frameWrap?.getBoundingClientRect();
+
+  let viewportTop;
+  if (wrapRect && wrapRect.height > 60) {
+    // Encaja en el hueco del panel: deja header + pestañas + hint visibles.
+    viewportTop = Math.round(wrapRect.top);
+  } else if (tabRect) {
+    viewportTop = Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP);
+  } else {
     return { top: 160, left: 0, width: 1100, height: 720 };
   }
 
-  const viewportTop = Math.round(tabRect.bottom + THOM_POPUP_TOP_OFFSET);
-  const viewportHeight = Math.max(420, Math.round(window.innerHeight - viewportTop + 4));
-  const chromeTop = window.outerHeight - window.innerHeight;
-  const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
+  // Nunca tapar la barra de pestañas (por si el panel aún no midió bien).
+  if (tabRect) {
+    viewportTop = Math.max(viewportTop, Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP));
+  }
 
-  return {
-    top: Math.round(window.screenY + chromeTop + viewportTop),
-    left: Math.round(window.screenX + chromeLeft),
-    width: Math.max(480, Math.round(window.innerWidth)),
-    height: viewportHeight + popupChrome,
-  };
+  const viewportHeight = Math.max(360, Math.round(window.innerHeight - viewportTop - 4));
+  const chromeTop = Math.max(0, window.outerHeight - window.innerHeight);
+  const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
+  const screenTop = Number.isFinite(window.screenTop) ? window.screenTop : window.screenY;
+  const screenLeft = Number.isFinite(window.screenLeft) ? window.screenLeft : window.screenX;
+
+  let top = Math.round(screenTop + chromeTop + viewportTop);
+  const left = Math.round(screenLeft + chromeLeft);
+  const width = Math.max(480, Math.round(window.innerWidth));
+  let height = viewportHeight + popupChrome;
+
+  const availTop = window.screen?.availTop ?? 0;
+  const availBottom = availTop + (window.screen?.availHeight ?? window.screen?.height ?? top + height);
+  if (top + height > availBottom) {
+    height = Math.max(360 + popupChrome, availBottom - top);
+  }
+
+  return { top, left, width, height };
 }
 
 function buildThomPopupFeatures(rect) {
@@ -1670,6 +1691,18 @@ function repositionThomPopup() {
   try {
     thomPopup.moveTo(rect.left, rect.top);
     thomPopup.resizeTo(rect.width, rect.height);
+
+    // Edge a veces coloca el popup más arriba de lo pedido y tapa las pestañas ST2.
+    const actualTop = Number.isFinite(thomPopup.screenTop) ? thomPopup.screenTop : thomPopup.screenY;
+    const driftY = rect.top - actualTop;
+    if (Number.isFinite(driftY) && Math.abs(driftY) > 2 && Math.abs(driftY) < 220) {
+      thomPopup.moveBy(0, driftY);
+    }
+
+    const actualH = thomPopup.outerHeight;
+    if (Number.isFinite(actualH) && actualH > rect.height + 4) {
+      thomPopup.resizeTo(rect.width, rect.height);
+    }
   } catch {
     // El navegador puede bloquear moveTo/resizeTo en ventanas no propias.
   }
