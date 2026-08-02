@@ -64,6 +64,7 @@ internal sealed class EmbedSiteProxy
     private static readonly string[] St2ApiPrefixes =
     [
         "/api/health",
+        "/api/live",
         "/api/app-config",
         "/api/types",
         "/api/organize",

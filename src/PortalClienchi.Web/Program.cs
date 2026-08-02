@@ -128,6 +128,8 @@ static IResult CredentialsMissing(string? portalId = null)
         statusCode: StatusCodes.Status503ServiceUnavailable);
 }
 
+app.MapGet("/api/live", () => Results.Ok(new { ok = true, service = "st2-web" }));
+
 app.MapGet("/api/health", async (PortalRegistry registry, string? portal, CancellationToken ct) =>
 {
     async Task<object> CheckOne(string id)
