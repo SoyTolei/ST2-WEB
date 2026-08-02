@@ -15,20 +15,23 @@ public sealed class CapturaHostingSettings
 
     public int TimeoutSeconds { get; set; } = 90;
 
-    /// <summary>Días de retención en disco Local (0 = no borrar).</summary>
-    public int TtlDays { get; set; } = 45;
+    /// <summary>Días de retención en disco Local (0 = no borrar). Aplica a imágenes y trazas.</summary>
+    public int TtlDays { get; set; } = 60;
+
+    /// <summary>Días de retención para videos mp4/webm (0 = usar TtlDays).</summary>
+    public int VideoTtlDays { get; set; } = 30;
 
     /// <summary>Tamaño máximo por archivo de imagen (bytes). Se guarda sin recomprimir.</summary>
     public int MaxFileBytes { get; set; } = 12 * 1024 * 1024;
 
     /// <summary>Tamaño máximo por video mp4/webm (bytes). Se guarda sin recomprimir.</summary>
-    public int MaxVideoFileBytes { get; set; } = 25 * 1024 * 1024;
+    public int MaxVideoFileBytes { get; set; } = 100 * 1024 * 1024;
 
     /// <summary>Máximo de archivos por request.</summary>
     public int MaxFilesPerRequest { get; set; } = 20;
 
     /// <summary>Máximo de videos por request (además de imágenes).</summary>
-    public int MaxVideosPerRequest { get; set; } = 2;
+    public int MaxVideosPerRequest { get; set; } = 1;
 
     /// <summary>Reservado (ya no se reescala; se conserva calidad original).</summary>
     public int MaxWidthPx { get; set; } = 0;

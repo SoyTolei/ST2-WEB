@@ -611,36 +611,6 @@
   color: var(--text-muted);
 }
 
-.plan-capturas-externo {
-  margin-top: 10px;
-}
-
-.plan-capturas-externo label {
-  display: block;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 4px;
-}
-
-.plan-capturas-externo input {
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 9px 11px;
-  font: inherit;
-  font-size: 0.82rem;
-  color: var(--dark);
-  background: #fff;
-}
-
-.plan-capturas-externo input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
 .plan-video-chip {
   border-color: #c7d2fe;
   background: #eef2ff;

@@ -87,14 +87,17 @@ public sealed class LocalCapturaStore
         var maxVideos = Math.Clamp(_settings.MaxVideosPerRequest, 1, 5);
         var videoCount = archivos.Count(a => AllowedVideoExt.Contains(Path.GetExtension(a.FileName)));
         if (videoCount > maxVideos)
-            throw new InvalidOperationException($"Máximo {maxVideos} video(s) por subida.");
+            throw new InvalidOperationException(
+                maxVideos == 1
+                    ? "Solo se permite 1 video por subida."
+                    : $"Máximo {maxVideos} video(s) por subida.");
 
         var baseUrl = NormalizeBaseUrl(publicBaseUrl, _settings.PublicBaseUrl);
         if (string.IsNullOrWhiteSpace(baseUrl))
             throw new InvalidOperationException("No se pudo determinar la URL pública de las capturas.");
 
         var maxImageBytes = Math.Clamp(_settings.MaxFileBytes, 256 * 1024, 25 * 1024 * 1024);
-        var maxVideoBytes = Math.Clamp(_settings.MaxVideoFileBytes, 1024 * 1024, 50 * 1024 * 1024);
+        var maxVideoBytes = Math.Clamp(_settings.MaxVideoFileBytes, 1024 * 1024, 120 * 1024 * 1024);
         var results = new List<CapturaSubidaResult>(archivos.Count);
 
         foreach (var (fileName, content) in archivos)
@@ -126,7 +129,7 @@ public sealed class LocalCapturaStore
                         results.Add(new CapturaSubidaResult(
                             safeName,
                             null,
-                            $"El video supera el máximo de {maxVideoBytes / (1024 * 1024.0):0.#} MB. Usá un clip más corto o pegá un link externo."));
+                            $"El video supera el máximo de {maxVideoBytes / (1024 * 1024.0):0.#} MB. Recomendamos subirlo en los comentarios del caso."));
                         continue;
                     }
 
@@ -381,8 +384,9 @@ public sealed class LocalCapturaStore
 
     public int PurgeExpired()
     {
-        var ttl = _settings.TtlDays;
-        if (ttl <= 0)
+        var ttlImages = _settings.TtlDays;
+        var ttlVideos = _settings.VideoTtlDays > 0 ? _settings.VideoTtlDays : ttlImages;
+        if (ttlImages <= 0 && ttlVideos <= 0)
             return 0;
 
         lock (_purgeLock)
@@ -391,7 +395,9 @@ public sealed class LocalCapturaStore
             if (!Directory.Exists(_root))
                 return 0;
 
-            var cutoff = DateTime.UtcNow.AddDays(-ttl);
+            var now = DateTime.UtcNow;
+            var cutoffImages = ttlImages > 0 ? now.AddDays(-ttlImages) : DateTime.MinValue;
+            var cutoffVideos = ttlVideos > 0 ? now.AddDays(-ttlVideos) : DateTime.MinValue;
             var removed = 0;
             try
             {
@@ -407,6 +413,13 @@ public sealed class LocalCapturaStore
                         continue;
                     }
 
+                    var ext = Path.GetExtension(file);
+                    var isVideo = AllowedVideoExt.Contains(ext);
+                    var cutoff = isVideo ? cutoffVideos : cutoffImages;
+                    if (ttlImages <= 0 && !isVideo)
+                        continue;
+                    if (ttlVideos <= 0 && isVideo)
+                        continue;
                     if (stamp >= cutoff)
                         continue;
 
@@ -415,7 +428,7 @@ public sealed class LocalCapturaStore
                         File.Delete(file);
                         removed++;
 
-                        if (!Path.GetExtension(file).Equals(".meta", StringComparison.OrdinalIgnoreCase))
+                        if (!ext.Equals(".meta", StringComparison.OrdinalIgnoreCase))
                         {
                             var meta = Path.Combine(
                                 Path.GetDirectoryName(file)!,
@@ -439,7 +452,11 @@ public sealed class LocalCapturaStore
             }
 
             if (removed > 0)
-                _logger.LogInformation("Purgadas {Count} capturas con más de {Days} días", removed, ttl);
+                _logger.LogInformation(
+                    "Purgados {Count} archivos (imágenes {ImgDays}d / videos {VidDays}d)",
+                    removed,
+                    ttlImages,
+                    ttlVideos);
 
             return removed;
         }

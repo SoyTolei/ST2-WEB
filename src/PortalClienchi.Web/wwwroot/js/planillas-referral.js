@@ -625,11 +625,12 @@ function isReferralCapturaFile(file) {
   return (file.type || "").startsWith("image/");
 }
 
-const MAX_REFERRAL_VIDEOS = 2;
-const MAX_REFERRAL_VIDEO_BYTES = 25 * 1024 * 1024;
+const MAX_REFERRAL_VIDEOS = 1;
+const MAX_REFERRAL_VIDEO_BYTES = 100 * 1024 * 1024;
 
 function addReferralCapturaFiles(fileList, targetList) {
   let added = 0;
+  let rejectedHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
 
@@ -641,7 +642,7 @@ function addReferralCapturaFiles(fileList, targetList) {
 
     if (isReferralVideoFile(file)) {
       if (file.size > MAX_REFERRAL_VIDEO_BYTES) {
-        rejectedVideo = true;
+        rejectedHeavy = true;
         continue;
       }
       if (targetList.filter(isReferralVideoFile).length >= MAX_REFERRAL_VIDEOS) {
@@ -656,8 +657,10 @@ function addReferralCapturaFiles(fileList, targetList) {
     }
   }
 
-  if (rejectedVideo) {
-    alert("Videos: solo MP4/WEBM, máx. 25 MB y hasta 2. Si es más pesado, pegá un link externo.");
+  if (rejectedHeavy) {
+    alert("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedVideo) {
+    alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
     alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP) o video MP4/WEBM.");
   }
@@ -705,34 +708,6 @@ function setupCapturas(prefix, fileList) {
     refreshChips(`${prefix}-chips`, fileList, prefix, fileList);
     refreshCapturasEstadoReferral(prefix, fileList);
     e.target.value = "";
-  });
-  setupCapturasExternoPaste(`${prefix}-externo`);
-}
-
-function getReferralCapturaExternoId() {
-  if (isBejerman()) return "ref-capturas-externo";
-  if (isLegal()) return "ref-legal-capt-externo";
-  return "ref-onvio-capt-externo";
-}
-
-function getReferralCapturaExternoUrl() {
-  return document.getElementById(getReferralCapturaExternoId())?.value.trim() || "";
-}
-
-function setupCapturasExternoPaste(inputId) {
-  const input = document.getElementById(inputId);
-  if (!input || input.dataset.pasteBound === "1") return;
-  input.dataset.pasteBound = "1";
-  input.addEventListener("paste", (e) => {
-    const url = extractUrlFromClipboardData(e.clipboardData);
-    if (!url) return;
-    e.preventDefault();
-    input.value = url;
-    setReferralPantallasUi(true);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-  });
-  input.addEventListener("input", () => {
-    if (input.value.trim()) setReferralPantallasUi(true);
   });
 }
 
@@ -956,8 +931,7 @@ function buildPayload() {
 
 function pickReferralCapturaFiles(payload) {
   const files = getReferralCapturaFiles();
-  const externo = getReferralCapturaExternoUrl();
-  if (files.length > 0 || externo) {
+  if (files.length > 0) {
     if (isBejerman()) {
       if (!payload.adjuntos) payload.adjuntos = {};
       payload.adjuntos.pantallas = true;
@@ -1008,7 +982,6 @@ async function generarReferral(copiar) {
   const autoPlanilla = isBejerman() && isPlanillaEmpty();
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
-  const externoUrl = getReferralCapturaExternoUrl();
   const trazas = isBejerman() ? [...trazaFiles] : [];
   if (trazas.length > 0) {
     if (!payload.adjuntos) payload.adjuntos = {};
@@ -1020,9 +993,9 @@ async function generarReferral(copiar) {
       ? !!payload.legal?.adjuntaPantallas
       : !!payload.onvio?.adjuntaPantallas;
 
-  // LEGAL: si marcó capturas tiene que subirlas o pegar link. Bejerman/Onvio permiten generar sin subir (van en comentarios).
-  if (isLegal() && quierePantallas && files.length === 0 && !externoUrl) {
-    alert("Marcaste capturas pero no hay archivos ni link. Usá «Examinar imágenes o video» o pegá un link externo.");
+  // LEGAL: si marcó capturas tiene que subirlas. Bejerman/Onvio permiten generar sin subir (van en comentarios).
+  if (isLegal() && quierePantallas && files.length === 0) {
+    alert("Marcaste capturas pero no hay archivos. Usá «Examinar imágenes o video».");
     status.textContent = "Faltan capturas para adjuntar.";
     return;
   }
@@ -1037,9 +1010,6 @@ async function generarReferral(copiar) {
       if (payload.capturasEnlaces.length === 0) {
         throw new Error("No se obtuvieron links de las capturas subidas.");
       }
-    }
-    if (externoUrl) {
-      payload.capturasEnlaces.push({ fileName: "video-externo", url: externoUrl });
     }
 
     if (trazas.length > 0) {
@@ -1183,10 +1153,6 @@ function resetReferralForm() {
   document.getElementById("ref-traza-estado").textContent = "";
   document.getElementById("ref-onvio-capt-estado").textContent = "";
   document.getElementById("ref-legal-capt-estado").textContent = "";
-  ["ref-capturas-externo", "ref-onvio-capt-externo", "ref-legal-capt-externo"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.value = "";
-  });
   document.getElementById("ref-status").textContent = "";
   clearPlanTextPreview("ref-text-preview");
   updateReferralPanels();

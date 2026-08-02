@@ -335,8 +335,8 @@ function isPlanCapturaFile(file) {
   return (file.type || "").startsWith("image/");
 }
 
-const MAX_PLAN_VIDEOS = 2;
-const MAX_PLAN_VIDEO_BYTES = 25 * 1024 * 1024;
+const MAX_PLAN_VIDEOS = 1;
+const MAX_PLAN_VIDEO_BYTES = 100 * 1024 * 1024;
 
 function refreshCapturasUi() {
   const chips = els.capturasChips();
@@ -406,8 +406,6 @@ function onCapturasToggle() {
   els.capturasPanel()?.classList.toggle("hidden", !on);
   if (!on) {
     capturaFiles = [];
-    const ext = document.getElementById("plan-capturas-externo");
-    if (ext) ext.value = "";
     refreshCapturasUi();
   }
   styleCapturasCard(on);
@@ -415,6 +413,7 @@ function onCapturasToggle() {
 
 function addCapturaFiles(fileList) {
   let added = 0;
+  let rejectedHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
   for (const file of fileList) {
@@ -424,7 +423,7 @@ function addCapturaFiles(fileList) {
     }
     if (isPlanVideoFile(file)) {
       if (file.size > MAX_PLAN_VIDEO_BYTES) {
-        rejectedVideo = true;
+        rejectedHeavy = true;
         continue;
       }
       if (capturaFiles.filter(isPlanVideoFile).length >= MAX_PLAN_VIDEOS) {
@@ -437,8 +436,10 @@ function addCapturaFiles(fileList) {
       added++;
     }
   }
-  if (rejectedVideo) {
-    alert("Videos: solo MP4/WEBM, máx. 25 MB y hasta 2. Si es más pesado, pegá un link externo.");
+  if (rejectedHeavy) {
+    alert("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedVideo) {
+    alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
     alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP) o video MP4/WEBM.");
   }
@@ -533,8 +534,6 @@ function limpiarTransferencia() {
 
   els.capturasCheck().checked = false;
   els.capturasPanel()?.classList.add("hidden");
-  const captExt = document.getElementById("plan-capturas-externo");
-  if (captExt) captExt.value = "";
   els.ticketCheck().checked = false;
   els.ticketPanel()?.classList.add("hidden");
   els.ticketNumero().value = "";
@@ -676,11 +675,6 @@ async function generarTexto() {
   if (!preguntarTicketLegal() || !preguntarTicketSiSaasSueldos()) return null;
 
   const payload = buildPayload();
-  const externo = document.getElementById("plan-capturas-externo")?.value.trim() || "";
-  if (externo) {
-    payload.capturas = true;
-    payload.capturasEnlaces = [{ fileName: "video-externo", url: externo }];
-  }
 
   const form = new FormData();
   form.append("payload", JSON.stringify(payload));
@@ -857,45 +851,6 @@ function bindEvents() {
   document.getElementById("plan-capturas-agregar")?.addEventListener("click", () => {
     els.capturasInput()?.click();
   });
-
-  const planExt = document.getElementById("plan-capturas-externo");
-  if (planExt && planExt.dataset.pasteBound !== "1") {
-    planExt.dataset.pasteBound = "1";
-    planExt.addEventListener("paste", (e) => {
-      const data = e.clipboardData;
-      if (!data) return;
-      const uriList = data.getData("text/uri-list")?.trim();
-      let url = "";
-      if (uriList) {
-        const line = uriList.split(/\r?\n/).find((l) => l && !l.startsWith("#"));
-        if (line && /^https?:\/\//i.test(line)) url = line.trim();
-      }
-      if (!url) {
-        const html = data.getData("text/html") || "";
-        const hrefMatch = html.match(/href\s*=\s*["']([^"']+)["']/i);
-        if (hrefMatch?.[1]) {
-          const href = hrefMatch[1].trim().replace(/&amp;/g, "&");
-          if (/^https?:\/\//i.test(href)) url = href;
-        }
-      }
-      if (!url) {
-        const plain = (data.getData("text/plain") || "").trim();
-        if (/^https?:\/\//i.test(plain)) url = plain.split(/\s+/)[0];
-        else {
-          const embedded = plain.match(/https?:\/\/[^\s<>"']+/i);
-          if (embedded) url = embedded[0];
-        }
-      }
-      if (!url) return;
-      e.preventDefault();
-      planExt.value = url;
-      const check = els.capturasCheck();
-      if (check && !check.checked) {
-        check.checked = true;
-        onCapturasToggle();
-      }
-    });
-  }
 
   document.getElementById("plan-ticket-card")?.addEventListener("click", () => {
     const c = els.ticketCheck();

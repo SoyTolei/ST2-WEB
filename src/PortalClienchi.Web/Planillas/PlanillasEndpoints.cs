@@ -127,8 +127,8 @@ public static class PlanillasEndpoints
             if (archivos.Count == 0)
                 return Results.BadRequest(new { error = "No hay archivos válidos." });
 
-            if (videos > 2)
-                return Results.BadRequest(new { error = "Máximo 2 videos por subida." });
+            if (videos > 1)
+                return Results.BadRequest(new { error = "Solo se permite 1 video por subida (máx. 100 MB). Si pesa más, subilo en los comentarios del caso." });
 
             try
             {

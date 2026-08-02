@@ -12,13 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    // Imágenes + hasta 2 videos de 25 MB.
-    options.Limits.MaxRequestBodySize = 60 * 1024 * 1024;
+    // Imágenes + 1 video de hasta 100 MB.
+    options.Limits.MaxRequestBodySize = 120 * 1024 * 1024;
 });
 
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 60 * 1024 * 1024;
+    options.MultipartBodyLengthLimit = 120 * 1024 * 1024;
 });
 
 PlanillasFeatureFlags.LegalEnabled = builder.Configuration.GetValue("Planillas:LegalEnabled", false);
