@@ -1,4 +1,5 @@
 using System.Text.Json;
+using PortalClienchi.Core.Configuration;
 
 namespace PortalClienchi.Web.Planillas;
 
@@ -122,21 +123,27 @@ public static class PlanillasEndpoints
             }
         });
 
-        app.MapGet("/c/{id}", (string id, LocalCapturaStore store) =>
+        app.MapGet("/c/{id}", (string id, LocalCapturaStore store, HttpContext ctx) =>
         {
             if (!store.TryOpenById(id, out var path, out var contentType))
                 return Results.NotFound();
 
-            return Results.File(path, contentType, enableRangeProcessing: false);
+            ctx.Response.Headers.CacheControl = "public, max-age=604800";
+            ctx.Response.Headers.ContentDisposition = "inline";
+            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            return Results.File(stream, contentType, enableRangeProcessing: true);
         });
 
         // Compat con links largos generados en el deploy anterior
-        app.MapGet("/media/capturas/{fileName}", (string fileName, LocalCapturaStore store) =>
+        app.MapGet("/media/capturas/{fileName}", (string fileName, LocalCapturaStore store, HttpContext ctx) =>
         {
             if (!store.TryOpen(fileName, out var path, out var contentType))
                 return Results.NotFound();
 
-            return Results.File(path, contentType, enableRangeProcessing: false);
+            ctx.Response.Headers.CacheControl = "public, max-age=604800";
+            ctx.Response.Headers.ContentDisposition = "inline";
+            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            return Results.File(stream, contentType, enableRangeProcessing: true);
         });
 
         app.MapPost("/api/planillas/transferencia/generar", async (
@@ -587,13 +594,23 @@ public static class PlanillasEndpoints
 
     internal static string PublicBaseUrl(HttpRequest request)
     {
+        // Preferir la base configurada (evita hosts internos de Railway en el TXT).
+        var configured = request.HttpContext.RequestServices.GetService<AppSettings>();
+        var fromSettings = configured?.CapturaHosting.PublicBaseUrl?.Trim();
+        if (!string.IsNullOrWhiteSpace(fromSettings))
+            return fromSettings.TrimEnd('/');
+
         var proto = request.Headers["X-Forwarded-Proto"].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(proto))
             proto = request.Scheme;
         var host = request.Headers["X-Forwarded-Host"].FirstOrDefault();
         if (string.IsNullOrWhiteSpace(host))
             host = request.Host.Value;
-        return $"{proto}://{host}".TrimEnd('/');
+        var url = $"{proto}://{host}".TrimEnd('/');
+        if (url.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            && url.Contains("tolei.dev", StringComparison.OrdinalIgnoreCase))
+            url = "https://" + url["http://".Length..];
+        return url;
     }
 
     private static async Task<(ReferralGenerateRequest? Payload, IReadOnlyList<IFormFile> Files)> ReadReferralPayloadAsync(

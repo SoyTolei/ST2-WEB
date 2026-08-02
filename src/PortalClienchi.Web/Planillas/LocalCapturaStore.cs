@@ -2,19 +2,19 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using PortalClienchi.Core.Configuration;
 using PortalClienchi.Core.Models;
-using SkiaSharp;
 
 namespace PortalClienchi.Web.Planillas;
 
 /// <summary>
-/// Guarda capturas comprimidas en el Volume ST2 (/data/st2/capturas) y las sirve por token opaco.
+/// Guarda capturas en el Volume ST2 (/data/st2/capturas) sin recomprimir (calidad original)
+/// y las sirve por id corto (/c/{id}).
 /// </summary>
 public sealed partial class LocalCapturaStore
 {
     /// <summary>Alfabeto sin caracteres ambiguos (0/O, 1/l/I).</summary>
     private const string ShortAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-    private static readonly string[] StoredExts = [".webp", ".jpg", ".jpeg", ".png", ".gif"];
+    private static readonly string[] StoredExts = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"];
 
     private static readonly HashSet<string> AllowedExt = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -52,7 +52,8 @@ public sealed partial class LocalCapturaStore
         if (string.IsNullOrWhiteSpace(baseUrl))
             throw new InvalidOperationException("No se pudo determinar la URL pública de las capturas.");
 
-        var maxBytes = Math.Clamp(_settings.MaxFileBytes, 256 * 1024, 20 * 1024 * 1024);
+        // Sin recomprimir: subimos un poco el techo para PNGs de pantalla completa.
+        var maxBytes = Math.Clamp(_settings.MaxFileBytes, 256 * 1024, 25 * 1024 * 1024);
         var results = new List<CapturaSubidaResult>(archivos.Count);
 
         foreach (var (fileName, content) in archivos)
@@ -90,13 +91,24 @@ public sealed partial class LocalCapturaStore
                     continue;
                 }
 
-                var (bytes, outExt, _) = CompressImage(raw);
+                // Calidad original: no reencodear. Solo normalizar extensión por magic bytes.
+                var outExt = GuessExt(raw);
+                if (outExt == ".bin" && AllowedExt.Contains(ext))
+                    outExt = ext.Equals(".jpeg", StringComparison.OrdinalIgnoreCase) ? ".jpg" : ext.ToLowerInvariant();
+
+                if (outExt == ".bin")
+                {
+                    results.Add(new CapturaSubidaResult(safeName, null, "No se reconoció la imagen."));
+                    continue;
+                }
+
                 var id = NewShortId();
                 var storedName = id + outExt;
                 var path = Path.Combine(_root, storedName);
-                await File.WriteAllBytesAsync(path, bytes, ct).ConfigureAwait(false);
+                await File.WriteAllBytesAsync(path, raw, ct).ConfigureAwait(false);
 
                 var url = $"{baseUrl}/c/{id}";
+                _logger.LogInformation("Captura guardada {Id} ({Bytes} bytes) → {Url}", id, raw.Length, url);
                 results.Add(new CapturaSubidaResult(safeName, url, null));
             }
             catch (Exception ex)
@@ -120,7 +132,10 @@ public sealed partial class LocalCapturaStore
 
         id = id.Trim();
         if (!ShortIdRegex().IsMatch(id))
+        {
+            _logger.LogWarning("Id de captura inválido: {Id}", id);
             return false;
+        }
 
         foreach (var ext in StoredExts)
         {
@@ -133,6 +148,7 @@ public sealed partial class LocalCapturaStore
             return true;
         }
 
+        _logger.LogWarning("Captura no encontrada: {Id} en {Root}", id, _root);
         return false;
     }
 
@@ -164,7 +180,7 @@ public sealed partial class LocalCapturaStore
     private string NewShortId()
     {
         Span<byte> bytes = stackalloc byte[8];
-        for (var attempt = 0; attempt < 8; attempt++)
+        for (var attempt = 0; attempt < 12; attempt++)
         {
             RandomNumberGenerator.Fill(bytes);
             var chars = new char[8];
@@ -177,8 +193,7 @@ public sealed partial class LocalCapturaStore
                 return id;
         }
 
-        // Fallback ultra-improbable
-        return Convert.ToHexString(RandomNumberGenerator.GetBytes(4)).ToLowerInvariant();
+        throw new InvalidOperationException("No se pudo generar un id único para la captura.");
     }
 
     public int PurgeExpired()
@@ -231,76 +246,19 @@ public sealed partial class LocalCapturaStore
         }
     }
 
-    private (byte[] Bytes, string Ext, string ContentType) CompressImage(byte[] raw)
-    {
-        var maxWidth = Math.Clamp(_settings.MaxWidthPx, 640, 4096);
-        var quality = Math.Clamp(_settings.JpegQuality, 40, 95);
-
-        using var bitmap = SKBitmap.Decode(raw);
-        if (bitmap is null)
-        {
-            // No se pudo decodificar: guardar original si la extensión es conocida
-            var fallbackExt = GuessExt(raw);
-            return (raw, fallbackExt, MimeForExt(fallbackExt));
-        }
-
-        SKBitmap working = bitmap;
-        SKBitmap? scaled = null;
-        try
-        {
-            if (bitmap.Width > maxWidth)
-            {
-                var h = (int)Math.Round(bitmap.Height * (maxWidth / (double)bitmap.Width));
-                scaled = bitmap.Resize(new SKImageInfo(maxWidth, Math.Max(1, h)), SKFilterQuality.Medium);
-                if (scaled is not null)
-                    working = scaled;
-            }
-
-            using var image = SKImage.FromBitmap(working);
-            using var webp = image.Encode(SKEncodedImageFormat.Webp, quality);
-            if (webp is not null)
-            {
-                var compressed = webp.ToArray();
-                // Si la original ya era chica y comprimida sale peor, conservar original
-                if (compressed.Length < raw.Length || raw.Length > 400_000)
-                    return (compressed, ".webp", "image/webp");
-            }
-
-            using var jpeg = image.Encode(SKEncodedImageFormat.Jpeg, quality);
-            if (jpeg is not null)
-            {
-                var compressed = jpeg.ToArray();
-                if (compressed.Length < raw.Length || raw.Length > 400_000)
-                    return (compressed, ".jpg", "image/jpeg");
-            }
-
-            var ext = GuessExt(raw);
-            return (raw, ext, MimeForExt(ext));
-        }
-        finally
-        {
-            scaled?.Dispose();
-        }
-    }
-
     private static bool LooksLikeImage(byte[] raw)
     {
         if (raw.Length < 12)
             return false;
-        // PNG
         if (raw[0] == 0x89 && raw[1] == 0x50 && raw[2] == 0x4E && raw[3] == 0x47)
             return true;
-        // JPEG
         if (raw[0] == 0xFF && raw[1] == 0xD8)
             return true;
-        // GIF
         if (raw[0] == 0x47 && raw[1] == 0x49 && raw[2] == 0x46)
             return true;
-        // WEBP
         if (raw[0] == 0x52 && raw[1] == 0x49 && raw[2] == 0x46 && raw[3] == 0x46
             && raw[8] == 0x57 && raw[9] == 0x45 && raw[10] == 0x42 && raw[11] == 0x50)
             return true;
-        // BMP
         if (raw[0] == 0x42 && raw[1] == 0x4D)
             return true;
         return false;
@@ -316,6 +274,8 @@ public sealed partial class LocalCapturaStore
             return ".gif";
         if (raw.Length >= 12 && raw[8] == 0x57 && raw[9] == 0x45)
             return ".webp";
+        if (raw.Length >= 2 && raw[0] == 0x42 && raw[1] == 0x4D)
+            return ".bmp";
         return ".bin";
     }
 
@@ -325,6 +285,7 @@ public sealed partial class LocalCapturaStore
         ".jpg" or ".jpeg" => "image/jpeg",
         ".png" => "image/png",
         ".gif" => "image/gif",
+        ".bmp" => "image/bmp",
         _ => "application/octet-stream",
     };
 
@@ -333,12 +294,22 @@ public sealed partial class LocalCapturaStore
         var candidate = !string.IsNullOrWhiteSpace(fromSettings) ? fromSettings : fromRequest;
         if (string.IsNullOrWhiteSpace(candidate))
             return "";
-        return candidate.Trim().TrimEnd('/');
+
+        candidate = candidate.Trim().TrimEnd('/');
+
+        // Evitar links http rotos detrás del proxy de Railway.
+        if (candidate.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            && candidate.Contains("tolei.dev", StringComparison.OrdinalIgnoreCase))
+        {
+            candidate = "https://" + candidate["http://".Length..];
+        }
+
+        return candidate;
     }
 
     [GeneratedRegex(@"^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{8}$", RegexOptions.CultureInvariant)]
     private static partial Regex ShortIdRegex();
 
-    [GeneratedRegex(@"^[a-f0-9]{32}\.(webp|jpg|jpeg|png|gif)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^[a-f0-9]{32}\.(webp|jpg|jpeg|png|gif|bmp)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex LegacyTokenFileRegex();
 }
