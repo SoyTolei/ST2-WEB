@@ -158,10 +158,10 @@ public static class ReferralIdTextBuilder
             partes.Add("────────────────────────");
             partes.Add("- Planilla Técnica 🔧:");
             var p = c.Planilla;
-            partes.Add($"  * ¿Se relevó planilla técnica?: {(p.Relevada ? "SÍ" : "NO")}");
             partes.Add($"  * El proceso funcionaba correctamente: {(p.ProcesoFuncionaba ? "SÍ" : "NO")}");
             partes.Add($"  * Se pudo reproducir el error: {(p.ReproduceError ? "SÍ" : "NO")}");
             partes.Add($"  * Última actualización aplicada correctamente: {(p.UltimaActualizOk ? "SÍ" : "NO")}");
+            partes.Add($"  * ¿Se relevó planilla técnica?: {(p.Relevada ? "SÍ" : "NO")}");
             partes.Add($"  * Se actualizaron vínculos: {(p.OptVinculos ? "SÍ" : "NO")}");
             partes.Add($"  * Se pudo reproducir en la base MODELO: {(p.OptBaseModelo ? "SÍ" : "NO")}");
             partes.Add($"  * Solo ocurre en la base del cliente: {(p.OptSoloCliente ? "SÍ" : "NO")}");

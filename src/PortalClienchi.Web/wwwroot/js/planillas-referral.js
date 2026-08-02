@@ -61,7 +61,7 @@ function ensurePlanillaDefaults() {
   if (!isBejerman() || !isPlanillaEmpty()) return false;
   planillaState = {
     ...planillaState,
-    relevada: true,
+    procesoFuncionaba: true,
     reproduceError: true,
     ultimaActualizOk: true,
   };
@@ -217,7 +217,7 @@ function updateSqlPanel() {
 function updateCheckStatuses() {
   const mamOk = Object.values(mamState).some(Boolean);
   const sdkOk = Object.values(sdkState).some(Boolean);
-  const planOk = planillaState.relevada && planillaState.reproduceError && planillaState.ultimaActualizOk;
+  const planOk = planillaState.procesoFuncionaba && planillaState.reproduceError && planillaState.ultimaActualizOk;
   setStatus("ref-mam-status", mamOk);
   setStatus("ref-sdk-status", sdkOk);
   setStatus("ref-planilla-status", planOk);

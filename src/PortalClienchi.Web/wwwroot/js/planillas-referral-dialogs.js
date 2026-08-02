@@ -473,12 +473,12 @@ export async function runSdkDialog(referralCfg, { sdkState, sdkApp }) {
 export async function runPlanillaDialog(planillaState) {
   const s = planillaState;
   const required = [
-    ["pl-relevada", "¿Se relevó planilla técnica?", s.relevada],
+    ["pl-proceso", "El proceso funcionaba correctamente", s.procesoFuncionaba],
     ["pl-reproduce", "Se pudo reproducir el error", s.reproduceError],
     ["pl-ultima", "Última actualización aplicada correctamente", s.ultimaActualizOk],
   ];
   const optional = [
-    ["pl-proceso", "El proceso funcionaba correctamente", s.procesoFuncionaba],
+    ["pl-relevada", "¿Se relevó planilla técnica?", s.relevada],
     ["pl-vinculos", "Se actualizaron vínculos", s.optVinculos],
     ["pl-modelo", "Se pudo reproducir en la base MODELO", s.optBaseModelo],
     ["pl-solo", "Solo ocurre en la base del cliente", s.optSoloCliente],

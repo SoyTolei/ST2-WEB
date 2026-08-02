@@ -54,7 +54,7 @@ public sealed class PlanillaTecnicaState
     public bool OptBaseModelo { get; set; }
     public bool OptSoloCliente { get; set; }
     public bool OptReproduceSistematicamente { get; set; }
-    public bool IsComplete => Relevada && ReproduceError && UltimaActualizOk;
+    public bool IsComplete => ProcesoFuncionaba && ReproduceError && UltimaActualizOk;
 
     public bool IsEmpty =>
         !Relevada
@@ -74,7 +74,7 @@ public sealed class PlanillaTecnicaState
         if (!IsEmpty)
             return;
 
-        Relevada = true;
+        ProcesoFuncionaba = true;
         ReproduceError = true;
         UltimaActualizOk = true;
     }
