@@ -81,7 +81,7 @@ function syncPerfilUi() {
     hint.classList.toggle("is-tecnico", esTecnico);
     hint.classList.toggle("is-otra", !esTecnico);
     hint.innerHTML = esTecnico
-      ? 'Si el referral es para la mesa <strong>Técnico</strong>. MAM y SDK son <strong>obligatorios</strong>. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.'
+      ? 'Si el referral es para la mesa <strong>técnica</strong>. MAM y SDK son <strong>obligatorios</strong>. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.'
       : 'Si el referral es para la mesa <strong>Flex, SaaS o SJ</strong>. MAM y SDK son <strong>opcionales</strong>. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.';
   }
 
