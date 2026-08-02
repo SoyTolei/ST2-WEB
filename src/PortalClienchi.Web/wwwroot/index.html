@@ -126,19 +126,19 @@
 
             <div id="plan-trans-standard-fields">
               <div class="plan-field">
-                <label for="plan-numero-cliente">N° de Cliente</label>
-                <input id="plan-numero-cliente" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej: 123456"/>
-              </div>
-
-              <div class="plan-field">
                 <label>Deriva a mesa</label>
-                <div class="plan-mesas">
-                  <button type="button" class="plan-mesa-btn" data-mesa="TECNICO">TÉCNICO</button>
-                  <button type="button" class="plan-mesa-btn" data-mesa="FLEX">FLEX</button>
+                <div class="plan-mesas" role="group" aria-label="Mesa de destino">
+                  <button type="button" class="plan-mesa-btn" data-mesa="TECNICO">Técnico</button>
+                  <button type="button" class="plan-mesa-btn" data-mesa="FLEX">Flex</button>
                   <button type="button" class="plan-mesa-btn" data-mesa="SAAS">SaaS</button>
                   <button type="button" class="plan-mesa-btn" data-mesa="SUELDOS">Sueldos</button>
                 </div>
                 <p id="plan-mesa-hint" class="plan-mesa-hint">Elegí la mesa de destino para continuar.</p>
+              </div>
+
+              <div class="plan-field">
+                <label for="plan-numero-cliente">N° de Cliente</label>
+                <input id="plan-numero-cliente" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej: 123456"/>
               </div>
             </div>
 
@@ -159,13 +159,13 @@
               </div>
               <div class="plan-form-grid">
                 <div class="plan-field">
-                  <label for="plan-legal-chave">Clave de registro</label>
-                  <input id="plan-legal-chave" type="text" autocomplete="off" placeholder="Identificador del cliente"/>
+                  <label>Deriva a mesa</label>
+                  <div class="plan-mesas" id="plan-legal-mesas" role="group" aria-label="Mesa de destino"></div>
+                  <p id="plan-legal-mesa-hint" class="plan-mesa-hint">Elegí la mesa de destino para continuar.</p>
                 </div>
                 <div class="plan-field">
-                  <label>Deriva a mesa</label>
-                  <div class="plan-mesas" id="plan-legal-mesas"></div>
-                  <p id="plan-legal-mesa-hint" class="plan-mesa-hint">Elegí la mesa de destino para continuar.</p>
+                  <label for="plan-legal-chave">Clave de registro</label>
+                  <input id="plan-legal-chave" type="text" autocomplete="off" placeholder="Identificador del cliente"/>
                 </div>
                 <div class="plan-form-2col plan-form-2col-tight">
                   <div class="plan-field">

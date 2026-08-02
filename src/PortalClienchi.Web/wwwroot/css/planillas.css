@@ -532,29 +532,48 @@
 
 .plan-mesas {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  padding: 4px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 }
 
 .plan-mesa-btn {
-  border: 1.5px solid;
-  border-radius: 10px;
-  padding: 10px 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  appearance: none;
+  border: 0;
+  border-radius: 7px;
+  padding: 11px 10px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: #64748b;
+  background: transparent;
   cursor: pointer;
-  transition: all 0.12s;
+  transition: color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
 }
 
-.plan-mesa-btn[data-mesa="TECNICO"] { background: #dcfce7; color: #166534; border-color: #86efac; }
-.plan-mesa-btn[data-mesa="FLEX"] { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
-.plan-mesa-btn[data-mesa="SAAS"] { background: #fffbeb; color: #b45309; border-color: #fdba74; }
-.plan-mesa-btn[data-mesa="SUELDOS"] { background: #faf5ff; color: #6d28d9; border-color: #c4b5fd; }
+.plan-mesa-btn:hover {
+  color: #334155;
+  background: rgba(255, 255, 255, 0.7);
+}
 
-.plan-mesa-btn[data-mesa="TECNICO"].active { background: #16a34a; color: #fff; border-color: #16a34a; }
-.plan-mesa-btn[data-mesa="FLEX"].active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
-.plan-mesa-btn[data-mesa="SAAS"].active { background: #d97706; color: #fff; border-color: #d97706; }
-.plan-mesa-btn[data-mesa="SUELDOS"].active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+.plan-mesa-btn:focus-visible {
+  outline: 2px solid rgba(214, 64, 0, 0.35);
+  outline-offset: 1px;
+}
+
+.plan-mesa-btn.active {
+  color: #0f172a;
+  font-weight: 700;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    inset 0 -2px 0 #d64000;
+}
 
 .plan-mesa-hint {
   font-size: 0.82rem;
@@ -3171,7 +3190,10 @@
   .plan-sistema-grid,
   .plan-modulos-grid { grid-template-columns: 1fr; }
   .plan-sistema-indicator { display: none; }
-  .plan-mesas { grid-template-columns: repeat(2, 1fr); }
+  .plan-mesas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
   .plan-check-cards, .plan-onvio-grid, .plan-adj-grid, .plan-op-submenu, .plan-legal-cards, .plan-form-2col { grid-template-columns: 1fr; }
   .plan-check-wrap.mam, .plan-check-wrap.sdk { margin: 0; }
   .plan-ref-actions { grid-template-columns: 1fr; }
