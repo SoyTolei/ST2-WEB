@@ -409,7 +409,7 @@ function clearOnvioTicketFields() {
     const card = document.getElementById(cardId);
     const mark = card?.querySelector(".card-mark");
     card?.classList.remove("selected");
-    if (mark) { mark.textContent = "○"; mark.style.color = "#94a3b8"; }
+    applyCardMark(mark, false);
   });
 }
 
@@ -480,8 +480,8 @@ function bindReferralEvents() {
     document.getElementById("ref-onvio-ticket-panel")?.classList.toggle("hidden", !on);
     if (!on) clearOnvioTicketFields();
   });
-  bindAdjCard("ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket", null);
-  bindAdjCard("ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba", null);
+  bindOnvioCard("ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket");
+  bindOnvioCard("ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba");
 
   bindOnvioCard("ref-card-legal-proceso", "ref-legal-proceso");
   bindOnvioCard("ref-card-legal-reproduce", "ref-legal-reproduce");

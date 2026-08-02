@@ -858,12 +858,11 @@
 .plan-onvio-ticket-options {
   display: grid;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 10px;
 }
 
-.plan-onvio-ticket-options .plan-backup-base-card {
+.plan-onvio-ticket-options .plan-onvio-card {
   width: 100%;
-  text-align: left;
 }
 
 .plan-actions {
