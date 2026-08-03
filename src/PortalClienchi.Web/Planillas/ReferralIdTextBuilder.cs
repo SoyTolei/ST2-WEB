@@ -80,7 +80,7 @@ public static class ReferralIdTextBuilder
             partes.Add($"  * Se pudo reproducir con empresa de prueba: {(o.ReproduceEmpresaPrueba ? "SÍ" : "NO")}");
         }
 
-        partes.Add($"- Se adjuntan capturas / imágenes: {(o.AdjuntaPantallas ? "SÍ" : "NO")}");
+        partes.Add($"- Se adjuntan {CapturasTextoHelper.BuildSiNoLabel(c.CapturasEnlaces, o.AdjuntaPantallas)}: {(o.AdjuntaPantallas ? "SÍ" : "NO")}");
 
         if (!string.IsNullOrWhiteSpace(o.UsuarioContador) || !string.IsNullOrWhiteSpace(o.Empresa))
         {
@@ -115,7 +115,7 @@ public static class ReferralIdTextBuilder
             partes.Add($"  * Se pudo reproducir con otro usuario OnePass: {(l.ReproduceOutroUsuario ? "SÍ" : "NO")}");
         }
 
-        partes.Add($"- Se adjuntan capturas / imágenes: {(l.AdjuntaPantallas ? "SÍ" : "NO")}");
+        partes.Add($"- Se adjuntan {CapturasTextoHelper.BuildSiNoLabel(c.CapturasEnlaces, l.AdjuntaPantallas)}: {(l.AdjuntaPantallas ? "SÍ" : "NO")}");
         partes.Add($"- Se adjunta planilla de importación: {(l.AdjuntaPlanilhaImport ? "SÍ" : "NO")}");
         partes.Add($"- Se adjunta log de integración: {(l.AdjuntaLogIntegracao ? "SÍ" : "NO")}");
 
@@ -241,11 +241,11 @@ public static class ReferralIdTextBuilder
 
             if (a.Pantallas)
             {
-                partes.Add("- Capturas / Imágenes / Video");
+                partes.Add(CapturasTextoHelper.BuildSeccionTitulo(c.CapturasEnlaces));
                 if (pantallasConLinks)
                     CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
                 else
-                    enComentarios.Add("Imágenes");
+                    enComentarios.Add(CapturasTextoHelper.BuildComentariosItemLabel(c.CapturasEnlaces));
             }
 
             if (a.TrazaSql)
@@ -284,11 +284,11 @@ public static class ReferralIdTextBuilder
             hay = c.Onvio.AdjuntaPantallas;
             if (c.Onvio.AdjuntaPantallas)
             {
-                partes.Add("- Capturas / Imágenes / Video");
+                partes.Add(CapturasTextoHelper.BuildSeccionTitulo(c.CapturasEnlaces));
                 if (c.CapturasEnlaces.Count > 0)
                     CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
                 else
-                    partes.Add(BuildAdjuntosEnComentarios(["Imágenes"]));
+                    partes.Add(BuildAdjuntosEnComentarios([CapturasTextoHelper.BuildComentariosItemLabel(c.CapturasEnlaces)]));
             }
         }
         else if (c.Sistema == PlanillasSistema.Legal)
@@ -297,7 +297,7 @@ public static class ReferralIdTextBuilder
             hay = l.AdjuntaPantallas || l.AdjuntaPlanilhaImport || l.AdjuntaLogIntegracao;
             if (l.AdjuntaPantallas)
             {
-                partes.Add("- Capturas / Imágenes / Video");
+                partes.Add(CapturasTextoHelper.BuildSeccionTitulo(c.CapturasEnlaces));
                 CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
             }
             if (l.AdjuntaPlanilhaImport)
@@ -307,7 +307,7 @@ public static class ReferralIdTextBuilder
         }
 
         if (!hay)
-            partes.Add("- No se adjuntan capturas");
+            partes.Add("- No se adjuntan capturas / video");
     }
 
     /// <summary>
