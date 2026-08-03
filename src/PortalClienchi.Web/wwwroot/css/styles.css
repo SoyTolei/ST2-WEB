@@ -1550,21 +1550,33 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-admin-edit {
+  width: 24px;
+  height: 24px;
   border: 0;
   background: transparent;
-  color: #475569;
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 2px 6px;
+  color: #64748b;
+  padding: 0;
   cursor: pointer;
   border-radius: 4px;
   margin-right: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  opacity: 0.7;
+}
+
+.st2-access-admin-edit-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .st2-access-admin-edit:hover,
 .st2-access-admin-edit.is-custom {
   background: #e2e8f0;
   color: #0f172a;
+  opacity: 1;
 }
 
 .st2-access-admin-delete {
