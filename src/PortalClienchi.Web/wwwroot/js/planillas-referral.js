@@ -82,33 +82,45 @@ function syncPerfilUi() {
     hint.classList.toggle("is-otra", !esTecnico);
     hint.innerHTML = esTecnico
       ? 'Si el referral es de la mesa <strong>técnica</strong>. MAM y SDK son <strong>obligatorios</strong>. Si no abrís la planilla técnica, al generar se autocompletan los checks obligatorios.'
-      : 'Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar las comprobaciones es <strong>opcional</strong>: si no las abrís, al generar se autocompletan los checks obligatorios.';
+      : 'Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar la planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompletan los checks obligatorios.';
   }
 
-  const mamBadge = document.getElementById("ref-mam-badge");
-  const sdkBadge = document.getElementById("ref-sdk-badge");
   const planBadge = document.getElementById("ref-planilla-badge");
-  const trazaBadge = document.getElementById("ref-traza-badge");
   if (planBadge) {
     planBadge.textContent = "Auto si vacía";
     planBadge.className = "plan-check-badge is-auto";
   }
+
+  const mamBadge = document.getElementById("ref-mam-badge");
+  const sdkBadge = document.getElementById("ref-sdk-badge");
   for (const badge of [mamBadge, sdkBadge]) {
     if (!badge) continue;
-    badge.textContent = esTecnico ? "Obligatorio" : "Opcional";
-    badge.className = `plan-check-badge ${esTecnico ? "is-required" : "is-optional"}`;
+    badge.textContent = "Obligatorio";
+    badge.className = "plan-check-badge is-required";
   }
-  if (trazaBadge) {
-    // Traza SQL es más de mesa técnica: en «Otra mesa» queda marcada como opcional.
-    trazaBadge.classList.toggle("hidden", esTecnico);
-    trazaBadge.textContent = "Opcional";
-    trazaBadge.className = esTecnico
-      ? "plan-check-badge is-optional hidden"
-      : "plan-check-badge is-optional";
+
+  // MAM, SDK y Traza SQL solo aplican a mesa técnica.
+  document.getElementById("ref-wrap-mam")?.classList.toggle("hidden", !esTecnico);
+  document.getElementById("ref-wrap-sdk")?.classList.toggle("hidden", !esTecnico);
+  document.getElementById("ref-wrap-mam")?.classList.remove("is-optional-card");
+  document.getElementById("ref-wrap-sdk")?.classList.remove("is-optional-card");
+
+  const trazaCard = document.getElementById("ref-card-traza");
+  const trazaPanel = document.getElementById("ref-traza-panel");
+  const trazaCheck = document.getElementById("ref-adj-traza");
+  trazaCard?.classList.toggle("hidden", !esTecnico);
+  if (!esTecnico) {
+    if (trazaCheck?.checked) {
+      trazaCheck.checked = false;
+      setReferralTrazaUi(false);
+      trazaFiles.length = 0;
+      refreshTrazaChips();
+    } else {
+      trazaPanel?.classList.add("hidden");
+    }
+    trazaCard?.classList.remove("is-optional-adj", "selected");
   }
-  document.getElementById("ref-wrap-mam")?.classList.toggle("is-optional-card", !esTecnico);
-  document.getElementById("ref-wrap-sdk")?.classList.toggle("is-optional-card", !esTecnico);
-  document.getElementById("ref-card-traza")?.classList.toggle("is-optional-adj", !esTecnico);
+
   updateSqlHint();
 }
 
@@ -877,11 +889,11 @@ function buildPayload() {
     payload.collation = document.getElementById("ref-collation")?.value || "";
     payload.sqlServer = document.getElementById("ref-sql-server")?.value || "";
     payload.esTecnico = esTecnico;
-    payload.mamSelections = { ...mamState };
-    payload.mamPersActuNombre = mamPersActu;
-    payload.mamTriggersDesactivados = mamTriggers;
-    payload.sdkSelections = { ...sdkState };
-    payload.sdkAplicacionIntegracion = sdkApp;
+    payload.mamSelections = esTecnico ? { ...mamState } : {};
+    payload.mamPersActuNombre = esTecnico ? mamPersActu : "";
+    payload.mamTriggersDesactivados = esTecnico ? mamTriggers : "";
+    payload.sdkSelections = esTecnico ? { ...sdkState } : {};
+    payload.sdkAplicacionIntegracion = esTecnico ? sdkApp : "";
     payload.planilla = {
       relevada: planillaState.relevada,
       procesoFuncionaba: planillaState.procesoFuncionaba,
@@ -894,7 +906,7 @@ function buildPayload() {
     };
     payload.adjuntos = {
       pantallas: document.getElementById("ref-adj-pantallas")?.checked,
-      trazaSql: document.getElementById("ref-adj-traza")?.checked,
+      trazaSql: esTecnico && !!document.getElementById("ref-adj-traza")?.checked,
       backupBases: document.getElementById("ref-adj-backup")?.checked,
       backupManager: document.getElementById("ref-backup-manager")?.checked,
       backupSbda: document.getElementById("ref-backup-sbda")?.checked,
@@ -992,7 +1004,7 @@ async function generarReferral(copiar) {
   const autoPlanilla = isBejerman() && isPlanillaEmpty();
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
-  const trazas = isBejerman() ? [...trazaFiles] : [];
+  const trazas = isBejerman() && esTecnico ? [...trazaFiles] : [];
   if (trazas.length > 0) {
     if (!payload.adjuntos) payload.adjuntos = {};
     payload.adjuntos.trazaSql = true;

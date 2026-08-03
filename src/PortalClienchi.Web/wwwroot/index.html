@@ -368,7 +368,7 @@
                   <button type="button" class="plan-segment-btn" id="ref-perfil-tecnico" data-perfil="tecnico">Técnico</button>
                 </div>
               </div>
-              <p class="plan-ref-hint plan-ref-perfil-hint is-otra" id="ref-perfil-hint">Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar las comprobaciones es <strong>opcional</strong>: si no las abrís, al generar se autocompletan los checks obligatorios.</p>
+              <p class="plan-ref-hint plan-ref-perfil-hint is-otra" id="ref-perfil-hint">Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar la planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompletan los checks obligatorios.</p>
               <div class="plan-check-cards">
                 <div class="plan-check-wrap planilla">
                   <span class="plan-check-badge" id="ref-planilla-badge">Auto si vacía</span>
@@ -379,8 +379,8 @@
                     <small>Datos para el equipo técnico</small>
                   </button>
                 </div>
-                <div class="plan-check-wrap mam" id="ref-wrap-mam">
-                  <span class="plan-check-badge" id="ref-mam-badge">Opcional</span>
+                <div class="plan-check-wrap mam hidden" id="ref-wrap-mam">
+                  <span class="plan-check-badge is-required" id="ref-mam-badge">Obligatorio</span>
                   <span class="plan-check-mark" id="ref-mam-status">○</span>
                   <button type="button" class="plan-check-btn mam" id="ref-btn-mam">
                     <span class="plan-check-btn-icon" data-plan-icon="mam"></span>
@@ -388,8 +388,8 @@
                     <small>Modificaciones a Medida</small>
                   </button>
                 </div>
-                <div class="plan-check-wrap sdk" id="ref-wrap-sdk">
-                  <span class="plan-check-badge" id="ref-sdk-badge">Opcional</span>
+                <div class="plan-check-wrap sdk hidden" id="ref-wrap-sdk">
+                  <span class="plan-check-badge is-required" id="ref-sdk-badge">Obligatorio</span>
                   <span class="plan-check-mark" id="ref-sdk-status">○</span>
                   <button type="button" class="plan-check-btn sdk" id="ref-btn-sdk">
                     <span class="plan-check-btn-icon" data-plan-icon="sdk"></span>
@@ -421,8 +421,7 @@
                   <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
                 </div>
 
-                <button type="button" class="plan-adj-card tone-green" id="ref-card-traza" data-adj="traza">
-                  <span class="plan-check-badge is-optional" id="ref-traza-badge">Opcional</span>
+                <button type="button" class="plan-adj-card tone-green hidden" id="ref-card-traza" data-adj="traza">
                   <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>Traza SQL</span>
                   <span class="card-mark" id="ref-mark-traza">○</span>
                 </button>
