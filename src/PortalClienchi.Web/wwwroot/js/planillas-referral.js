@@ -81,13 +81,14 @@ function syncPerfilUi() {
     hint.classList.toggle("is-tecnico", esTecnico);
     hint.classList.toggle("is-otra", !esTecnico);
     hint.innerHTML = esTecnico
-      ? 'Si el referral es para la mesa <strong>técnica</strong>. MAM y SDK son <strong>obligatorios</strong>. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.'
-      : 'Si el referral es para la mesa <strong>Flex, SaaS o SJ</strong>. MAM y SDK son <strong>opcionales</strong>. Si no abrís la planilla técnica, se completan solos los ítems obligatorios al generar.';
+      ? 'Si el referral es de la mesa <strong>técnica</strong>. MAM y SDK son <strong>obligatorios</strong>. Si no abrís la planilla técnica, al generar se autocompletan los checks obligatorios.'
+      : 'Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar las comprobaciones es <strong>opcional</strong>: si no las abrís, al generar se autocompletan los checks obligatorios.';
   }
 
   const mamBadge = document.getElementById("ref-mam-badge");
   const sdkBadge = document.getElementById("ref-sdk-badge");
   const planBadge = document.getElementById("ref-planilla-badge");
+  const trazaBadge = document.getElementById("ref-traza-badge");
   if (planBadge) {
     planBadge.textContent = "Auto si vacía";
     planBadge.className = "plan-check-badge is-auto";
@@ -97,8 +98,17 @@ function syncPerfilUi() {
     badge.textContent = esTecnico ? "Obligatorio" : "Opcional";
     badge.className = `plan-check-badge ${esTecnico ? "is-required" : "is-optional"}`;
   }
+  if (trazaBadge) {
+    // Traza SQL es más de mesa técnica: en «Otra mesa» queda marcada como opcional.
+    trazaBadge.classList.toggle("hidden", esTecnico);
+    trazaBadge.textContent = "Opcional";
+    trazaBadge.className = esTecnico
+      ? "plan-check-badge is-optional hidden"
+      : "plan-check-badge is-optional";
+  }
   document.getElementById("ref-wrap-mam")?.classList.toggle("is-optional-card", !esTecnico);
   document.getElementById("ref-wrap-sdk")?.classList.toggle("is-optional-card", !esTecnico);
+  document.getElementById("ref-card-traza")?.classList.toggle("is-optional-adj", !esTecnico);
   updateSqlHint();
 }
 

@@ -1681,6 +1681,7 @@
   margin: 0;
 }
 .plan-adj-card {
+  position: relative;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   padding: 10px 12px;
@@ -1695,6 +1696,12 @@
   gap: 8px;
   color: var(--dark);
   transition: border-color 0.12s, background 0.12s;
+}
+.plan-adj-card .plan-check-badge {
+  right: 36px;
+}
+.plan-adj-card.is-optional-adj {
+  opacity: 0.94;
 }
 .plan-adj-card.tone-green { border-color: #86efac; background: #f0fdf4; }
 .plan-adj-card.tone-orange { border-color: #fdba74; background: #fff7ed; }
