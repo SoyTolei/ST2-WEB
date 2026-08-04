@@ -1680,18 +1680,22 @@ function syncThomPortalUi() {
 }
 
 function onThomPortalChange(id) {
-  if (!THOM_PORTALS[id] || id === thomPortalId) return;
-  const wasOpen = !!(thomPopup && !thomPopup.closed);
-  if (wasOpen) closeThomPopup();
-  setThomPortalId(id);
-  if (document.querySelector('.tab-btn.active[data-tab="thom"]')) {
-    if (isThomWindowMode()) {
-      showThomPanelPlaceholder();
-      if (wasOpen) openThomWindow({ reload: true });
-    } else {
-      resetThomDirectFrame();
-      activateThomTab();
-    }
+  if (!THOM_PORTALS[id]) return;
+  const same = id === thomPortalId;
+  if (!same) setThomPortalId(id);
+
+  // Las pastillas siempre abren/reabren THOM (no dejar al usuario en el gate).
+  if (!document.querySelector('.tab-btn.active[data-tab="thom"]')) return;
+
+  if (isThomWindowMode()) {
+    showThomPanelPlaceholder();
+    openThomWindow({ reload: !same });
+    return;
+  }
+
+  if (!same) {
+    resetThomDirectFrame();
+    activateThomTab();
   }
 }
 
@@ -2013,6 +2017,35 @@ function openThomWindow({ reload = false } = {}) {
     startThomPopupWatch();
     updateThomDirectUi();
     return thomPopup;
+  }
+
+  // Si ya hay popup abierto y solo cambiamos portal, reutilizarlo (sin close+open).
+  if (reload && thomPopup && !thomPopup.closed) {
+    try {
+      thomPopup.location.replace(url);
+    } catch {
+      try {
+        thomPopup.location.href = url;
+      } catch {
+        // Cross-origin: forzar reopen más abajo.
+        safeCloseWindow(thomPopup);
+        thomPopup = null;
+      }
+    }
+
+    if (thomPopup && !thomPopup.closed) {
+      try {
+        thomPopup.focus();
+      } catch {
+        // ignore
+      }
+      showThomPanelPlaceholder();
+      startThomPopupWatch();
+      updateThomDirectUi();
+      alignThomPopupAfterOpen({ afterNavigate: true });
+      scheduleThomHelpCollapse(thomPopup);
+      return thomPopup;
+    }
   }
 
   if (thomPopup?.closed) thomPopup = null;
