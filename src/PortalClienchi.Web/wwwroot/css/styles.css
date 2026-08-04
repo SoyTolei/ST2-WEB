@@ -334,9 +334,9 @@ body.portal-tab-active .tab-bar {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(920px 340px at 8% -10%, rgba(214, 64, 0, 0.14), transparent 58%),
-    radial-gradient(720px 280px at 92% 0%, rgba(28, 36, 51, 0.08), transparent 55%),
-    linear-gradient(180deg, #f7f3ef 0%, var(--panel) 42%, #eef1f6 100%);
+    radial-gradient(920px 340px at 8% -10%, rgba(214, 64, 0, 0.2), transparent 58%),
+    radial-gradient(720px 280px at 92% 0%, rgba(28, 36, 51, 0.12), transparent 55%),
+    linear-gradient(180deg, #f3ebe4 0%, #ebe7e1 38%, #e4e8ef 100%);
   border-radius: 16px;
 }
 
@@ -451,14 +451,14 @@ body.portal-tab-active .tab-bar {
 .search-column,
 .preview-column {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 252, 249, 0.98) 100%);
-  border: 1px solid rgba(214, 64, 0, 0.12);
+    linear-gradient(180deg, #ffffff 0%, #fffaf6 100%);
+  border: 1px solid rgba(214, 64, 0, 0.2);
   border-radius: 14px;
   min-height: 0;
   min-width: 0;
   box-shadow:
-    0 1px 2px rgba(26, 31, 46, 0.04),
-    0 14px 32px rgba(26, 31, 46, 0.05);
+    0 1px 2px rgba(26, 31, 46, 0.05),
+    0 16px 36px rgba(26, 31, 46, 0.08);
 }
 
 .search-column {
@@ -474,8 +474,8 @@ body.portal-tab-active .tab-bar {
   padding: 10px 12px 12px;
   border-radius: 12px;
   background:
-    linear-gradient(135deg, rgba(214, 64, 0, 0.1) 0%, rgba(255, 255, 255, 0.55) 48%, rgba(28, 36, 51, 0.04) 100%);
-  border: 1px solid rgba(214, 64, 0, 0.1);
+    linear-gradient(135deg, rgba(214, 64, 0, 0.14) 0%, rgba(255, 255, 255, 0.7) 48%, rgba(28, 36, 51, 0.06) 100%);
+  border: 1px solid rgba(214, 64, 0, 0.16);
 }
 
 .portal-kicker {
@@ -690,27 +690,29 @@ body.portal-tab-active .combo-box {
   flex-wrap: wrap;
   justify-content: center;
   gap: 6px;
-  margin-top: 8px;
-  max-width: 300px;
+  margin-top: 10px;
+  max-width: 340px;
 }
 
 .portal-suggest-chip {
   appearance: none;
-  border: 1px solid rgba(214, 64, 0, 0.18);
+  border: 1px solid rgba(214, 64, 0, 0.28);
   background: #fff;
-  color: #b83d00;
+  color: #a33a0a;
   font: inherit;
   font-size: 11.5px;
-  font-weight: 600;
-  padding: 5px 10px;
+  font-weight: 650;
+  padding: 6px 11px;
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+  box-shadow: 0 1px 2px rgba(214, 64, 0, 0.06);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
 }
 
 .portal-suggest-chip:hover {
   background: #fff3ed;
-  border-color: rgba(214, 64, 0, 0.32);
+  border-color: rgba(214, 64, 0, 0.45);
+  box-shadow: 0 3px 10px rgba(214, 64, 0, 0.12);
 }
 
 .portal-suggest-chip:active {
@@ -793,8 +795,8 @@ body.portal-tab-active .combo-box {
   margin: 4px 0;
   cursor: pointer;
   background: #fff;
-  border: 1px solid rgba(226, 230, 239, 0.95);
-  box-shadow: 0 1px 2px rgba(26, 31, 46, 0.03);
+  border: 1px solid rgba(180, 188, 204, 0.85);
+  box-shadow: 0 1px 3px rgba(26, 31, 46, 0.05);
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
@@ -804,16 +806,16 @@ body.portal-tab-active .combo-box {
 
 .result-item:hover {
   background: #fffaf7;
-  border-color: rgba(214, 64, 0, 0.22);
-  box-shadow: 0 4px 14px rgba(214, 64, 0, 0.08);
+  border-color: rgba(214, 64, 0, 0.35);
+  box-shadow: 0 5px 16px rgba(214, 64, 0, 0.12);
 }
 
 .result-item.selected {
   border-color: var(--primary);
-  background: linear-gradient(180deg, #fff7f3 0%, #fff 100%);
+  background: linear-gradient(180deg, #fff3eb 0%, #fff 100%);
   box-shadow:
-    0 0 0 1px rgba(214, 64, 0, 0.12),
-    0 6px 16px rgba(214, 64, 0, 0.1);
+    0 0 0 1px rgba(214, 64, 0, 0.18),
+    0 8px 18px rgba(214, 64, 0, 0.14);
 }
 
 .result-item.indented {
@@ -922,10 +924,10 @@ body.portal-tab-active .combo-box {
   position: relative;
   flex: 1 1 auto;
   min-height: 240px;
-  border: 1px solid rgba(214, 64, 0, 0.12);
+  border: 1px solid rgba(214, 64, 0, 0.2);
   border-radius: 12px;
   background:
-    linear-gradient(180deg, #fffdfb 0%, #f7f3ef 100%);
+    linear-gradient(180deg, #fffdfb 0%, #f3ebe4 100%);
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }

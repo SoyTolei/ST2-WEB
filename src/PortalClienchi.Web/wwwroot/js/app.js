@@ -154,7 +154,10 @@ function setResultsSummary(text) {
 }
 
 function setResultsEmpty(title, hint = "", mode = "message") {
-  if (resultsEmptyTitle) resultsEmptyTitle.textContent = title;
+  if (resultsEmptyTitle) {
+    resultsEmptyTitle.textContent = title || "";
+    resultsEmptyTitle.classList.toggle("hidden", !title);
+  }
   if (resultsEmptyHint) {
     resultsEmptyHint.textContent = hint;
     resultsEmptyHint.classList.toggle("hidden", !hint);
@@ -172,8 +175,8 @@ function hideResultsEmpty() {
 function showIdleResultsState() {
   setResultsSummary("");
   setResultsEmpty(
-    "Escribí al menos 2 letras para buscar instructivos.",
-    "Podés filtrar por tipo de contenido y por año.",
+    "",
+    "Probá una sugerencia o escribí en el buscador.",
     "idle",
   );
 }
