@@ -1702,7 +1702,13 @@ function initThomPortalSelector() {
   });
 }
 
+const THOM_POPUP_NAME = "st2ThomPanel";
+const THOM_TAB_NAME = "st2ThomBrowserTab";
+
 let thomPopup = null;
+let thomBrowserTab = null;
+/** Invalida aperturas programadas con rAF si el usuario ya salió de THOM. */
+let thomOpenGeneration = 0;
 let thomPopupResizeTimer = null;
 
 /** Fallback si no se puede medir el chrome del popup hijo. */
@@ -1924,19 +1930,40 @@ function scheduleThomHelpCollapse(targetWindow = thomPopup) {
   tick();
 }
 
-function closeThomPopup() {
-  stopThomPopupWatch();
-  if (!thomPopup || thomPopup.closed) {
-    thomPopup = null;
-    updateThomDirectUi();
-    return;
-  }
+function safeCloseWindow(win) {
+  if (!win || win.closed || win === window) return;
   try {
-    thomPopup.close();
+    win.close();
+  } catch {
+    // El navegador puede bloquear close() en ventanas no propias.
+  }
+}
+
+function reclaimNamedWindow(name) {
+  try {
+    const win = window.open("", name);
+    if (win && win !== window && !win.closed) return win;
   } catch {
     // ignore
   }
+  return null;
+}
+
+function closeThomPopup() {
+  // Cancela cualquier openThomWindow pendiente (doble rAF).
+  thomOpenGeneration += 1;
+  stopThomPopupWatch();
+
+  safeCloseWindow(thomPopup);
   thomPopup = null;
+
+  // Por si perdimos la referencia tras navegar a css-latam (cross-origin).
+  safeCloseWindow(reclaimNamedWindow(THOM_POPUP_NAME));
+
+  safeCloseWindow(thomBrowserTab);
+  thomBrowserTab = null;
+  safeCloseWindow(reclaimNamedWindow(THOM_TAB_NAME));
+
   updateThomDirectUi();
 }
 
@@ -1974,7 +2001,7 @@ function hideThomDirectGate() {
 
 function openThomWindow({ reload = false } = {}) {
   const url = getThomTapUrl();
-  const popupName = "st2ThomPanel";
+  const generation = ++thomOpenGeneration;
 
   if (!reload && thomPopup && !thomPopup.closed) {
     thomPopup.focus();
@@ -1987,13 +2014,24 @@ function openThomWindow({ reload = false } = {}) {
   if (thomPopup?.closed) thomPopup = null;
 
   const openPopup = () => {
+    // El usuario ya salió de THOM (u otra apertura canceló esta).
+    if (generation !== thomOpenGeneration) return null;
+
     const rect = getThomPanelRect();
     const features = buildThomPopupFeatures(rect);
 
-    thomPopup = window.open("about:blank", popupName, features);
+    thomPopup = window.open("about:blank", THOM_POPUP_NAME, features);
     if (!thomPopup) {
-      window.open(url, "_blank", "noopener");
+      // Sin noopener: si el bloqueador obliga a pestaña, igual la podemos cerrar después.
+      thomBrowserTab = window.open(url, THOM_TAB_NAME);
       setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
+      updateThomDirectUi();
+      return null;
+    }
+
+    if (generation !== thomOpenGeneration) {
+      safeCloseWindow(thomPopup);
+      thomPopup = null;
       return null;
     }
 
@@ -2021,7 +2059,21 @@ function openThomWindow({ reload = false } = {}) {
 }
 
 function openThomBrowserTab() {
-  window.open(getThomTapUrl(), "_blank", "noopener");
+  const url = getThomTapUrl();
+  // Misma pestaña nombrada: no acumula una nueva cada vez, y ST2 la cierra al salir de THOM.
+  if (thomBrowserTab && !thomBrowserTab.closed) {
+    try {
+      thomBrowserTab.location.href = url;
+      thomBrowserTab.focus();
+      return thomBrowserTab;
+    } catch {
+      safeCloseWindow(thomBrowserTab);
+      thomBrowserTab = null;
+    }
+  }
+
+  thomBrowserTab = window.open(url, THOM_TAB_NAME);
+  return thomBrowserTab;
 }
 
 function resetThomDirectFrame() {
@@ -2243,7 +2295,7 @@ function switchTab(tabId) {
   document.body.classList.toggle("thom-tab-active", tabId === "thom");
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
 
-  if (tabId !== "thom" && isThomWindowMode()) {
+  if (tabId !== "thom") {
     closeThomPopup();
   }
 
