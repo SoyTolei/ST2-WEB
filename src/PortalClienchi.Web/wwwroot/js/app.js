@@ -101,8 +101,8 @@ const thomPortalBar = document.getElementById("thomPortalBar");
 const portalSistemaPills = document.getElementById("portalSistemaPills");
 
 const placeholderHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
-body{font-family:Segoe UI,sans-serif;padding:24px;color:#6b7280;background:#fff;margin:0}
-</style></head><body><p>Elegí un resultado de la lista para ver el instructivo acá.</p></body></html>`;
+html,body{margin:0;height:100%;background:transparent}
+</style></head><body></body></html>`;
 
 const previewLoadingHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
 body{font-family:Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center;min-height:200px;margin:0;color:#6b7280;background:#fff}
@@ -153,12 +153,13 @@ function setResultsSummary(text) {
   resultsSummary.classList.remove("hidden");
 }
 
-function setResultsEmpty(title, hint = "") {
+function setResultsEmpty(title, hint = "", mode = "message") {
   if (resultsEmptyTitle) resultsEmptyTitle.textContent = title;
   if (resultsEmptyHint) {
     resultsEmptyHint.textContent = hint;
     resultsEmptyHint.classList.toggle("hidden", !hint);
   }
+  resultsEmpty?.setAttribute("data-mode", mode);
   resultsEmpty?.classList.remove("hidden");
   resultsList?.classList.add("hidden");
 }
@@ -173,6 +174,7 @@ function showIdleResultsState() {
   setResultsEmpty(
     "Escribí al menos 2 letras para buscar instructivos.",
     "Podés filtrar por tipo de contenido y por año.",
+    "idle",
   );
 }
 
@@ -238,6 +240,10 @@ function setPreviewActionsVisible(visible) {
   previewActions?.classList.toggle("hidden", !visible);
 }
 
+function setPreviewIdle(idle) {
+  document.getElementById("previewFrameWrap")?.setAttribute("data-idle", idle ? "true" : "false");
+}
+
 function resetPreviewToPlaceholder() {
   detailAbort?.abort();
   hidePreviewLoading();
@@ -247,6 +253,7 @@ function resetPreviewToPlaceholder() {
   previewFrame.removeAttribute("src");
   previewFrame.srcdoc = placeholderHtml;
   setPreviewActionsVisible(false);
+  setPreviewIdle(true);
 }
 
 async function apiGet(url, signal) {
@@ -553,6 +560,7 @@ async function selectResult(id, type) {
   previewTypeBadge.textContent = result?.typeLabel ?? "";
   previewTypeBadge.classList.toggle("hidden", !result?.typeLabel);
 
+  setPreviewIdle(false);
   setPreviewActionsVisible(true);
 
   copyLinkBtn.disabled = !result?.portalUrl;
@@ -2394,6 +2402,20 @@ document.getElementById("aiOpenBtn").addEventListener("click", () => {
 
 searchInput.addEventListener("input", scheduleSearch);
 typeFilter.addEventListener("change", runSearch);
+
+document.querySelectorAll("[data-portal-suggest]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const q = btn.getAttribute("data-portal-suggest") || "";
+    if (!searchInput || !q) return;
+    searchInput.value = q;
+    searchInput.focus();
+    scheduleSearch();
+  });
+});
+
+// Estado vacío inicial con sugerencias visibles.
+resultsEmpty?.setAttribute("data-mode", "idle");
+setPreviewIdle(true);
 
 async function bootstrapApp() {
   await ensureAppAccess();

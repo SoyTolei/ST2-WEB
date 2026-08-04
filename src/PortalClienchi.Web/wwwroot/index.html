@@ -6,6 +6,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <title>ST2</title>
   <link rel="icon" href="/st2.ico" type="image/x-icon"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/styles.css"/>
   <link rel="stylesheet" href="/css/planillas.css"/>
 </head>
@@ -924,8 +927,15 @@
     <section id="panel-portal" class="tab-panel hidden" role="tabpanel">
       <div class="portal-layout">
         <aside class="search-column">
-          <h2 class="panel-title">Buscar instructivos</h2>
-          <input id="searchInput" type="search" class="search-box" placeholder="Ej: factura electrónica, OnePass, Estados Contables…" autocomplete="off" spellcheck="false"/>
+          <header class="portal-search-head">
+            <p class="portal-kicker">Portal Cliente</p>
+            <h2 class="panel-title">Buscar instructivos</h2>
+            <p class="portal-search-lead">Encontrá guías, videos y procedimientos del catálogo.</p>
+          </header>
+          <div class="portal-search-field">
+            <svg class="portal-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+            <input id="searchInput" type="search" class="search-box" placeholder="Ej: factura electrónica, OnePass, Estados Contables…" autocomplete="off" spellcheck="false"/>
+          </div>
           <label class="field-label" for="typeFilter">Tipo de contenido</label>
           <select id="typeFilter" class="combo-box"></select>
           <div id="yearFilterPanel" class="year-filter hidden">
@@ -938,21 +948,37 @@
               <div class="preview-loading-spinner" aria-hidden="true"></div>
               <p>Buscando instructivos…</p>
             </div>
-            <div id="resultsEmpty" class="results-empty">
+            <div id="resultsEmpty" class="results-empty" data-mode="idle">
+              <div class="results-empty-visual" aria-hidden="true">
+                <span class="results-empty-orb"></span>
+                <svg class="results-empty-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+              </div>
               <p id="resultsEmptyTitle">Escribí al menos 2 letras para buscar instructivos.</p>
               <small id="resultsEmptyHint">Podés filtrar por tipo de contenido y por año.</small>
+              <div class="portal-suggest" aria-label="Sugerencias rápidas">
+                <button type="button" class="portal-suggest-chip" data-portal-suggest="factura electrónica">Factura electrónica</button>
+                <button type="button" class="portal-suggest-chip" data-portal-suggest="OnePass">OnePass</button>
+                <button type="button" class="portal-suggest-chip" data-portal-suggest="Estados Contables">Estados Contables</button>
+              </div>
             </div>
             <ul id="resultsList" class="results-list hidden" aria-live="polite"></ul>
           </div>
         </aside>
 
         <section class="preview-column">
-          <h2 id="previewTitle" class="preview-title">Seleccioná un resultado</h2>
-          <div class="preview-badges">
-            <span id="previewTypeBadge" class="type-badge hidden"></span>
-            <span id="previewProduct" class="preview-product"></span>
+          <div class="preview-column-head">
+            <h2 id="previewTitle" class="preview-title">Seleccioná un resultado</h2>
+            <div class="preview-badges">
+              <span id="previewTypeBadge" class="type-badge hidden"></span>
+              <span id="previewProduct" class="preview-product"></span>
+            </div>
           </div>
-          <div class="preview-frame-wrap">
+          <div class="preview-frame-wrap" id="previewFrameWrap" data-idle="true">
+            <div id="previewIdle" class="preview-idle" aria-hidden="true">
+              <div class="preview-idle-glow" aria-hidden="true"></div>
+              <p class="preview-idle-title">Vista previa</p>
+              <p class="preview-idle-text">Elegí un instructivo de la izquierda para verlo acá.</p>
+            </div>
             <div id="previewLoading" class="preview-loading hidden" aria-live="polite">
               <div class="preview-loading-spinner" aria-hidden="true"></div>
               <p>Cargando instructivo…</p>
