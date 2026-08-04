@@ -4,8 +4,12 @@ public sealed class AppSettings
 {
     public string ApiBaseUrl { get; set; } = "https://clientes.thomsonreuters.com.ar:3333";
     public string PortalBaseUrl { get; set; } = "https://clientes.thomsonreuters.com.ar";
-    /// <summary>THOM / CSS-TAP (requiere VPN o red corporativa y Authy).</summary>
+    /// <summary>THOM / CSS-TAP Bejerman (requiere VPN o red corporativa y Authy).</summary>
     public string ThomTapUrl { get; set; } = "https://css-latam.int.thomsonreuters.com/css-tap";
+    /// <summary>THOM LEGAL Argentina.</summary>
+    public string ThomLegalUrl { get; set; } = "https://css-latam.int.thomsonreuters.com/legal_ar";
+    /// <summary>THOM Chile.</summary>
+    public string ThomChileUrl { get; set; } = "https://css-latam.int.thomsonreuters.com/tap_chile";
     /// <summary>Zoom del visor THOM (0.9 = 90%).</summary>
     public double ThomZoomFactor { get; set; } = 0.9;
     /// <summary>Intentar cerrar el panel de ayuda al cargar CSS-TAP.</summary>

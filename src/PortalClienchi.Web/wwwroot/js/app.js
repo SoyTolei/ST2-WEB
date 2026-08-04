@@ -1565,8 +1565,12 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 
 function getEmbedFrameUrl(kind) {
   if (kind === "thom") {
-    if (appConfig?.thomFrameUrl) return appConfig.thomFrameUrl;
-    const tap = appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
+    const tap = getThomExternalUrl();
+    // Solo el portal Bejerman usa el proxy embebido cuando está disponible.
+    if (thomPortalId === "bejerman" && appConfig?.thomFrameUrl && isThomEmbeddedProxy()) {
+      return appConfig.thomFrameUrl;
+    }
+    if (isThomWindowMode() || thomPortalId !== "bejerman") return tap;
     if (appConfig?.thomEmbedMode === "direct") return tap;
     try {
       const u = new URL(tap);
@@ -1585,7 +1589,7 @@ function isThomWindowMode() {
 }
 
 function isThomEmbeddedProxy() {
-  return appConfig?.thomEmbedMode === "proxy";
+  return appConfig?.thomEmbedMode === "proxy" && thomPortalId === "bejerman";
 }
 
 /** @deprecated use isThomWindowMode */
@@ -1593,9 +1597,64 @@ function isThomDirectEmbed() {
   return isThomWindowMode();
 }
 
+const THOM_PORTAL_KEY = "st2-thom-portal";
+const THOM_PORTALS = {
+  bejerman: {
+    label: "Bejerman",
+    fallback: "https://css-latam.int.thomsonreuters.com/css-tap",
+    configKey: "thomTapUrl",
+  },
+  legal: {
+    label: "LEGAL",
+    fallback: "https://css-latam.int.thomsonreuters.com/legal_ar",
+    configKey: "thomLegalUrl",
+  },
+  chile: {
+    label: "Chile",
+    fallback: "https://css-latam.int.thomsonreuters.com/tap_chile",
+    configKey: "thomChileUrl",
+  },
+};
+
+let thomPortalId = loadThomPortalId();
+
+function loadThomPortalId() {
+  try {
+    const saved = localStorage.getItem(THOM_PORTAL_KEY);
+    if (saved && THOM_PORTALS[saved]) return saved;
+  } catch {
+    // ignore
+  }
+  return "bejerman";
+}
+
+function setThomPortalId(id) {
+  if (!THOM_PORTALS[id]) return;
+  thomPortalId = id;
+  try {
+    localStorage.setItem(THOM_PORTAL_KEY, id);
+  } catch {
+    // ignore
+  }
+  syncThomPortalUi();
+}
+
+function getThomPortalMeta() {
+  return THOM_PORTALS[thomPortalId] || THOM_PORTALS.bejerman;
+}
+
+function getThomExternalUrl() {
+  const meta = getThomPortalMeta();
+  const fromConfig = appConfig?.[meta.configKey];
+  return (typeof fromConfig === "string" && fromConfig.trim())
+    ? fromConfig.trim()
+    : meta.fallback;
+}
+
 function getThomTapUrl() {
-  const external = appConfig?.thomTapUrl ?? "https://css-latam.int.thomsonreuters.com/css-tap";
-  if (appConfig?.thomProxyReachable) {
+  const external = getThomExternalUrl();
+  // Proxy local solo para Bejerman (css-tap). LEGAL/Chile van directo.
+  if (thomPortalId === "bejerman" && appConfig?.thomProxyReachable) {
     try {
       const u = new URL(external);
       return `${window.location.origin}${u.pathname}${u.search}`;
@@ -1604,6 +1663,42 @@ function getThomTapUrl() {
     }
   }
   return external;
+}
+
+function syncThomPortalUi() {
+  const meta = getThomPortalMeta();
+  document.querySelectorAll("[data-thom-portal]").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.thomPortal === thomPortalId);
+  });
+  const title = document.getElementById("thomGateTitle");
+  if (title) title.textContent = `THOM · ${meta.label}`;
+  const loading = document.getElementById("thomEmbedLoadingText");
+  if (loading) loading.textContent = `Cargando THOM · ${meta.label}…`;
+  if (thomFrame) thomFrame.title = `THOM · ${meta.label}`;
+  updateThomDirectUi();
+}
+
+function onThomPortalChange(id) {
+  if (!THOM_PORTALS[id] || id === thomPortalId) return;
+  const wasOpen = !!(thomPopup && !thomPopup.closed);
+  if (wasOpen) closeThomPopup();
+  setThomPortalId(id);
+  if (document.querySelector('.tab-btn.active[data-tab="thom"]')) {
+    if (isThomWindowMode()) {
+      showThomPanelPlaceholder();
+      if (wasOpen) openThomWindow({ reload: true });
+    } else {
+      resetThomDirectFrame();
+      activateThomTab();
+    }
+  }
+}
+
+function initThomPortalSelector() {
+  syncThomPortalUi();
+  document.querySelectorAll("[data-thom-portal]").forEach((btn) => {
+    btn.addEventListener("click", () => onThomPortalChange(btn.dataset.thomPortal));
+  });
 }
 
 let thomPopup = null;
@@ -2107,6 +2202,7 @@ function initEmbedReminders() {
     scheduleThomBlankCheck();
   });
   window.addEventListener("resize", scheduleThomPopupReposition);
+  initThomPortalSelector();
   initDailyTabReminders();
 }
 

@@ -195,6 +195,8 @@ app.MapGet("/api/health", async (PortalRegistry registry, string? portal, Cancel
 app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, ThomEmbedConfig thomEmbed) => Results.Ok(new
 {
     settings.ThomTapUrl,
+    settings.ThomLegalUrl,
+    settings.ThomChileUrl,
     settings.AiPlatformUrl,
     settings.PortalBaseUrl,
     defaultPortalId = registry.DefaultId,

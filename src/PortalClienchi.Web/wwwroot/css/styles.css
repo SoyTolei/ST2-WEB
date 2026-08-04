@@ -953,6 +953,56 @@ body.portal-tab-active .combo-box {
   box-shadow: 0 2px 8px rgba(26, 31, 46, 0.08);
 }
 
+.thom-portal-bar {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 0 0 8px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+.thom-portal-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+.thom-portal-seg {
+  display: inline-flex;
+  gap: 0;
+  padding: 2px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+}
+.thom-portal-btn {
+  appearance: none;
+  border: 0;
+  border-radius: 5px;
+  min-height: 28px;
+  padding: 5px 11px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+}
+.thom-portal-btn:hover {
+  color: #334155;
+  background: #f1f5f9;
+}
+.thom-portal-btn.active {
+  background: #0f172a;
+  color: #fff;
+  font-weight: 700;
+}
+
 .thom-proxy-open {
   display: flex;
   justify-content: flex-end;

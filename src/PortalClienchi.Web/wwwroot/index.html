@@ -963,6 +963,14 @@
     </section>
 
     <section id="panel-thom" class="tab-panel hidden" role="tabpanel">
+      <div class="thom-portal-bar" role="group" aria-label="Portal THOM">
+        <span class="thom-portal-label">Portal</span>
+        <div class="thom-portal-seg">
+          <button type="button" class="thom-portal-btn active" data-thom-portal="bejerman">Bejerman</button>
+          <button type="button" class="thom-portal-btn" data-thom-portal="legal">LEGAL</button>
+          <button type="button" class="thom-portal-btn" data-thom-portal="chile">Chile</button>
+        </div>
+      </div>
       <p class="embed-hint hidden" id="thomEmbedHint" aria-hidden="true"></p>
       <div id="thomProxyOpenWrap" class="thom-proxy-open hidden">
         <button type="button" id="thomProxyOpenBtn" class="btn btn-gate-alt">Abrir en otra pestaña del navegador</button>
@@ -970,7 +978,7 @@
       <div class="embed-frame-wrap">
         <div id="thomDirectGate" class="embed-direct-gate hidden" aria-live="polite">
           <div class="embed-panel-placeholder" aria-hidden="true"></div>
-          <p><strong>THOM</strong></p>
+          <p><strong id="thomGateTitle">THOM · Bejerman</strong></p>
           <p>Necesitas tener <strong>ZScaler activado</strong>.</p>
           <p class="embed-direct-gate-note">(Si no aparece, permití «ventanas emergentes» en la configuración del navegador.)</p>
           <div class="embed-direct-gate-actions">
@@ -980,7 +988,7 @@
         </div>
         <div id="thomEmbedLoading" class="embed-loading hidden" aria-live="polite">
           <div class="preview-loading-spinner" aria-hidden="true"></div>
-          <p>Cargando THOM…</p>
+          <p id="thomEmbedLoadingText">Cargando THOM…</p>
         </div>
         <iframe id="thomFrame" class="embed-frame" name="thomEmbedFrame" title="THOM"
           allow="clipboard-read; clipboard-write; fullscreen; autoplay"></iframe>
@@ -1030,7 +1038,7 @@
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">THOM</h3>
             <p class="st2-about-module-text">Open Arena / CSS-TAP en ventana integrada.</p>
-            <p class="st2-about-module-meta">Embebido en ST2 · ZScaler</p>
+            <p class="st2-about-module-meta">Bejerman · LEGAL · Chile · ZScaler</p>
           </article>
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">AI Platform</h3>

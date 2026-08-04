@@ -197,6 +197,8 @@ internal static class PortalSettingsNormalizer
             Email = profile.Email,
             Password = profile.Password,
             ThomTapUrl = root.ThomTapUrl,
+            ThomLegalUrl = root.ThomLegalUrl,
+            ThomChileUrl = root.ThomChileUrl,
             AiPlatformUrl = root.AiPlatformUrl,
             ThomZoomFactor = root.ThomZoomFactor,
             AiPlatformZoomFactor = root.AiPlatformZoomFactor,
