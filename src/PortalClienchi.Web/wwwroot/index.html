@@ -411,21 +411,21 @@
               <p class="plan-ref-title">Adjuntos</p>
               <div class="plan-adj-stack">
                 <button type="button" class="plan-adj-card tone-orange" id="ref-card-pantallas" data-adj="pantallas">
-                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Capturas / Imágenes / Video</span>
+                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Capturas / Imágenes / Video / PDF</span>
                   <span class="card-mark" id="ref-mark-pantallas">○</span>
                 </button>
                 <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
                 <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Imágenes o videos cortos. Si no cargás nada, el TXT indica que van en comentarios.</p>
+                  <p class="plan-capturas-hint">Imágenes, videos cortos o PDF. Si no cargás nada, el TXT indica que van en comentarios.</p>
                   <div class="plan-capturas-actions">
                     <button type="button" id="ref-capturas-agregar" class="plan-capturas-browse">
                       <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes o video</strong>
-                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM</small>
+                        <strong>Examinar imágenes, video o PDF</strong>
+                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM · PDF</small>
                       </span>
                     </button>
-                    <input id="ref-capturas-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm" multiple class="hidden"/>
+                    <input id="ref-capturas-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf" multiple class="hidden"/>
                   </div>
                   <div id="ref-capturas-chips" class="plan-capturas-thumbs"></div>
                   <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
@@ -515,22 +515,22 @@
                 <button type="button" class="plan-onvio-card tone-orange" id="ref-card-onvio-pantallas" data-onvio="pantallas">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon orange" data-plan-icon="camera"></span>
-                    <span>Capturas / Imágenes / Video</span>
+                    <span>Capturas / Imágenes / Video / PDF</span>
                   </span>
                   <span class="card-mark plan-onvio-state">No</span>
                 </button>
                 <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
                 <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Imágenes o videos cortos. Si no cargás nada, el TXT indica que van en comentarios.</p>
+                  <p class="plan-capturas-hint">Imágenes, videos cortos o PDF. Si no cargás nada, el TXT indica que van en comentarios.</p>
                   <div class="plan-capturas-actions">
                     <button type="button" id="ref-onvio-capt-agregar" class="plan-capturas-browse">
                       <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes o video</strong>
-                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM</small>
+                        <strong>Examinar imágenes, video o PDF</strong>
+                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM · PDF</small>
                       </span>
                     </button>
-                    <input id="ref-onvio-capt-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm" multiple class="hidden"/>
+                    <input id="ref-onvio-capt-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf" multiple class="hidden"/>
                   </div>
                   <div id="ref-onvio-capt-chips" class="plan-capturas-thumbs"></div>
                   <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
@@ -604,22 +604,22 @@
                 <button type="button" class="plan-onvio-card tone-orange" id="ref-card-legal-pantallas" data-legal="pantallas">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon orange" data-plan-icon="camera"></span>
-                    <span>Capturas / Imágenes / Video</span>
+                    <span>Capturas / Imágenes / Video / PDF</span>
                   </span>
                   <span class="card-mark plan-onvio-state">No</span>
                 </button>
                 <input type="checkbox" id="ref-legal-pantallas" class="hidden"/>
                 <div id="ref-legal-capturas" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Cargá imágenes o un video corto para que el texto incluya los links.</p>
+                  <p class="plan-capturas-hint">Cargá imágenes, un video corto o PDF para que el texto incluya los links.</p>
                   <div class="plan-capturas-actions">
                     <button type="button" id="ref-legal-capt-agregar" class="plan-capturas-browse">
                       <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes o video</strong>
-                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM</small>
+                        <strong>Examinar imágenes, video o PDF</strong>
+                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM · PDF</small>
                       </span>
                     </button>
-                    <input id="ref-legal-capt-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm" multiple class="hidden"/>
+                    <input id="ref-legal-capt-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf" multiple class="hidden"/>
                   </div>
                   <div id="ref-legal-capt-chips" class="plan-capturas-thumbs"></div>
                   <p id="ref-legal-capt-estado" class="plan-capturas-estado"></p>
@@ -1031,7 +1031,7 @@
         <div class="st2-about-modules">
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">Sistema de Planillas</h3>
-            <p class="st2-about-module-text">Transferencia entre mesas, Referral I+D y Oportunidad de Venta. Adjuntos con links de capturas, video y traza SQL.</p>
+            <p class="st2-about-module-text">Transferencia entre mesas, Referral I+D y Oportunidad de Venta. Adjuntos con links de capturas, video, PDF y traza SQL.</p>
             <p class="st2-about-module-meta">Bejerman SQL · ONVIO/WEB · LEGAL · Chile (beta)</p>
           </article>
           <article class="st2-about-module">

@@ -639,6 +639,15 @@
   background: #4f46e5;
 }
 
+.plan-pdf-chip {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.plan-pdf-chip .plan-traza-chip-ext {
+  background: #dc2626;
+}
+
 .plan-capturas-actions {
   display: flex;
   flex-wrap: wrap;

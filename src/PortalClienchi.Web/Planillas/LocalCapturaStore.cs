@@ -26,6 +26,7 @@ public sealed class LocalCapturaStore
     [
         ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp",
         ".mp4", ".webm",
+        ".pdf",
         ".trc", ".csv", ".txt",
     ];
 
@@ -37,6 +38,11 @@ public sealed class LocalCapturaStore
     private static readonly HashSet<string> AllowedVideoExt = new(StringComparer.OrdinalIgnoreCase)
     {
         ".mp4", ".webm",
+    };
+
+    private static readonly HashSet<string> AllowedPdfExt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".pdf",
     };
 
     private static readonly HashSet<string> AllowedDownloadExt = new(StringComparer.OrdinalIgnoreCase)
@@ -121,6 +127,7 @@ public sealed class LocalCapturaStore
 
                 var ext = Path.GetExtension(safeName);
                 var isVideo = AllowedVideoExt.Contains(ext);
+                var isPdf = AllowedPdfExt.Contains(ext) || LooksLikePdf(raw);
 
                 if (isVideo)
                 {
@@ -145,6 +152,34 @@ public sealed class LocalCapturaStore
                     continue;
                 }
 
+                if (isPdf)
+                {
+                    if (raw.Length > maxImageBytes)
+                    {
+                        results.Add(new CapturaSubidaResult(
+                            safeName,
+                            null,
+                            $"El PDF supera el máximo de {maxImageBytes / (1024 * 1024.0):0.#} MB."));
+                        continue;
+                    }
+
+                    if (!LooksLikePdf(raw))
+                    {
+                        results.Add(new CapturaSubidaResult(safeName, null, "El archivo no parece un PDF válido."));
+                        continue;
+                    }
+
+                    EnsureRoot();
+                    var pdfId = NewShortId();
+                    await File.WriteAllBytesAsync(Path.Combine(_root, pdfId + ".pdf"), raw, ct)
+                        .ConfigureAwait(false);
+
+                    var pdfUrl = $"{baseUrl}/c/{pdfId}";
+                    _logger.LogInformation("PDF guardado {Id} ({Bytes} bytes) → {Url}", pdfId, raw.Length, pdfUrl);
+                    results.Add(new CapturaSubidaResult(safeName, pdfUrl, null));
+                    continue;
+                }
+
                 if (raw.Length > maxImageBytes)
                 {
                     results.Add(new CapturaSubidaResult(
@@ -156,7 +191,7 @@ public sealed class LocalCapturaStore
 
                 if (!AllowedExt.Contains(ext) && !LooksLikeImage(raw))
                 {
-                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes o video mp4/webm."));
+                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes, PDF o video mp4/webm."));
                     continue;
                 }
 
@@ -480,6 +515,14 @@ public sealed class LocalCapturaStore
         return false;
     }
 
+    private static bool LooksLikePdf(byte[] raw) =>
+        raw.Length >= 5
+        && raw[0] == (byte)'%'
+        && raw[1] == (byte)'P'
+        && raw[2] == (byte)'D'
+        && raw[3] == (byte)'F'
+        && raw[4] == (byte)'-';
+
     private static string GuessExt(byte[] raw)
     {
         if (raw.Length >= 3 && raw[0] == 0xFF && raw[1] == 0xD8)
@@ -504,6 +547,7 @@ public sealed class LocalCapturaStore
         ".bmp" => "image/bmp",
         ".mp4" => "video/mp4",
         ".webm" => "video/webm",
+        ".pdf" => "application/pdf",
         ".csv" => "text/csv",
         ".txt" => "text/plain",
         ".trc" => "application/octet-stream",

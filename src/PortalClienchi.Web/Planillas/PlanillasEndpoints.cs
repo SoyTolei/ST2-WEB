@@ -15,6 +15,11 @@ public static class PlanillasEndpoints
         ".mp4", ".webm",
     };
 
+    private static readonly HashSet<string> PdfExtensiones = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".pdf",
+    };
+
     private static readonly HashSet<string> TrazaExtensiones = new(StringComparer.OrdinalIgnoreCase)
     {
         ".trc", ".csv", ".txt",
@@ -114,9 +119,11 @@ public static class PlanillasEndpoints
                 var esVideo = VideoExtensiones.Contains(ext)
                     || contentType.Equals("video/mp4", StringComparison.OrdinalIgnoreCase)
                     || contentType.Equals("video/webm", StringComparison.OrdinalIgnoreCase);
+                var esPdf = PdfExtensiones.Contains(ext)
+                    || contentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase);
 
-                if (!esImagen && !esVideo)
-                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen o video mp4/webm." });
+                if (!esImagen && !esVideo && !esPdf)
+                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen, PDF o video mp4/webm." });
 
                 if (esVideo)
                     videos++;

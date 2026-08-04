@@ -7,33 +7,38 @@ public static class CapturasTextoHelper
         ".mp4", ".webm",
     };
 
+    private static readonly HashSet<string> PdfExt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".pdf",
+    };
+
     public static void AppendBloqueCapturas(
         List<string> partes,
         bool hayCapturas,
         IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
     {
-        var tipo = Classify(enlaces);
-        partes.Add($"¿SE ADJUNTAN {LabelMayus(tipo, hayCapturas)}?: {(hayCapturas ? "SÍ" : "NO")}");
+        var flags = Classify(enlaces);
+        partes.Add($"¿SE ADJUNTAN {LabelMayus(flags, hayCapturas)}?: {(hayCapturas ? "SÍ" : "NO")}");
         if (!hayCapturas)
             return;
 
-        AppendEnlacesOComentarios(partes, enlaces, tipo);
+        AppendEnlacesOComentarios(partes, enlaces, flags);
     }
 
     private static void AppendEnlacesOComentarios(
         List<string> partes,
         IReadOnlyList<TransferenciaCapturaEnlace> enlaces,
-        MediaKind tipo)
+        MediaFlags flags)
     {
         if (enlaces.Count > 0)
         {
-            partes.Add(BuildEnlacesIntro(enlaces, tipo));
+            partes.Add(BuildEnlacesIntro(enlaces, flags));
             foreach (var enlace in enlaces)
                 partes.Add(enlace.Url);
             return;
         }
 
-        partes.Add($"  {BuildComentariosLine(tipo)}");
+        partes.Add($"  {BuildComentariosLine(flags)}");
     }
 
     public static void AppendDetalleCapturasBajoLinea(
@@ -49,116 +54,164 @@ public static class CapturasTextoHelper
         bool indentar = false)
     {
         var pad = indentar ? "  " : "";
-        var tipo = Classify(enlaces);
+        var flags = Classify(enlaces);
         if (enlaces.Count > 0)
         {
-            partes.Add($"{pad}{BuildEnlacesIntro(enlaces, tipo)}");
+            partes.Add($"{pad}{BuildEnlacesIntro(enlaces, flags)}");
             foreach (var enlace in enlaces)
                 partes.Add(indentar ? $"  {enlace.Url}" : enlace.Url);
             return;
         }
 
-        partes.Add($"{pad}{BuildComentariosLine(tipo)}");
+        partes.Add($"{pad}{BuildComentariosLine(flags)}");
     }
 
     /// <summary>Título de sección para Referral según lo subido.</summary>
     public static string BuildSeccionTitulo(IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
     {
-        var tipo = Classify(enlaces);
-        return tipo switch
-        {
-            MediaKind.SoloVideo => "- Video",
-            MediaKind.Mixto => "- Capturas y video",
-            MediaKind.SoloImagenes when enlaces.Count == 1 => "- Captura",
-            MediaKind.SoloImagenes => "- Capturas",
-            _ => "- Capturas / video",
-        };
+        var flags = Classify(enlaces);
+        var label = BuildPhrase(flags, Style.Titulo, enlaces.Count == 1);
+        return string.IsNullOrEmpty(label) ? "- Capturas / video / PDF" : $"- {label}";
     }
 
     /// <summary>Etiqueta corta para ítems «en comentarios» (Referral).</summary>
     public static string BuildComentariosItemLabel(IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
     {
-        var tipo = Classify(enlaces);
-        return tipo switch
-        {
-            MediaKind.SoloVideo => "Video",
-            MediaKind.Mixto => "Capturas y video",
-            MediaKind.SoloImagenes => "Capturas",
-            _ => "Capturas / video",
-        };
+        var flags = Classify(enlaces);
+        var label = BuildPhrase(flags, Style.Titulo, singular: false);
+        return string.IsNullOrEmpty(label) ? "Capturas / video / PDF" : label;
     }
 
     public static string BuildSiNoLabel(IReadOnlyList<TransferenciaCapturaEnlace> enlaces, bool marcado)
     {
         if (!marcado)
-            return "capturas / video";
-        var tipo = Classify(enlaces);
-        return tipo switch
-        {
-            MediaKind.SoloVideo => "video",
-            MediaKind.Mixto => "capturas y video",
-            MediaKind.SoloImagenes => "capturas",
-            _ => "capturas / video",
-        };
+            return "capturas / video / PDF";
+        var flags = Classify(enlaces);
+        var label = BuildPhrase(flags, Style.Minuscula, singular: false);
+        return string.IsNullOrEmpty(label) ? "capturas / video / PDF" : label;
     }
 
     private static string BuildEnlacesIntro(
         IReadOnlyList<TransferenciaCapturaEnlace> enlaces,
-        MediaKind tipo)
+        MediaFlags flags)
     {
         var uno = enlaces.Count == 1;
-        return tipo switch
-        {
-            MediaKind.SoloVideo when uno => "Se adjunta el video en el siguiente link:",
-            MediaKind.SoloVideo => "Se adjuntan los videos en los siguientes links:",
-            MediaKind.Mixto => "Se adjuntan capturas y video en los siguientes links:",
-            MediaKind.SoloImagenes when uno => "Se adjunta la captura en el siguiente link:",
-            MediaKind.SoloImagenes => "Se adjuntan las capturas en los siguientes links:",
-            _ when uno => "Se adjunta captura / video en el siguiente link:",
-            _ => "Se adjuntan capturas / video en los siguientes links:",
-        };
+        var phrase = BuildPhrase(flags, Style.Minuscula, uno);
+        if (string.IsNullOrEmpty(phrase))
+            phrase = uno ? "captura / video / PDF" : "capturas / video / PDF";
+
+        if (uno)
+            return $"Se adjunta {ArticleFor(flags)} {phrase} en el siguiente link:";
+
+        return $"Se adjuntan {phrase} en los siguientes links:";
     }
 
-    private static string BuildComentariosLine(MediaKind tipo) =>
-        tipo switch
+    private static string ArticleFor(MediaFlags flags)
+    {
+        // "el video", "el PDF", "la captura"
+        if (flags.Video && !flags.Images && !flags.Pdf) return "el";
+        if (flags.Pdf && !flags.Images && !flags.Video) return "el";
+        if (flags.Images && !flags.Video && !flags.Pdf) return "la";
+        return "el";
+    }
+
+    private static string BuildComentariosLine(MediaFlags flags)
+    {
+        var phrase = BuildPhrase(flags, Style.Minuscula, singular: false);
+        if (string.IsNullOrEmpty(phrase))
+            phrase = "capturas / video / PDF";
+
+        var sujeto = flags switch
         {
-            MediaKind.SoloVideo => "El video se adjunta en comentarios.",
-            MediaKind.Mixto => "Las capturas y el video se adjuntan en comentarios.",
-            MediaKind.SoloImagenes => "Las capturas se adjuntan en comentarios.",
-            _ => "Las capturas / video se adjuntan en comentarios.",
+            { Images: false, Video: true, Pdf: false } => "El video se adjunta",
+            { Images: false, Video: false, Pdf: true } => "El PDF se adjunta",
+            { Images: true, Video: false, Pdf: false } => "Las capturas se adjuntan",
+            _ => $"{char.ToUpperInvariant(phrase[0])}{phrase[1..]} se adjuntan",
         };
 
-    private static string LabelMayus(MediaKind tipo, bool hayCapturas)
+        return $"{sujeto} en comentarios.";
+    }
+
+    private static string LabelMayus(MediaFlags flags, bool hayCapturas)
     {
         if (!hayCapturas)
-            return "CAPTURAS / VIDEO";
-        return tipo switch
-        {
-            MediaKind.SoloVideo => "VIDEO",
-            MediaKind.Mixto => "CAPTURAS Y VIDEO",
-            MediaKind.SoloImagenes => "CAPTURAS",
-            _ => "CAPTURAS / VIDEO",
-        };
+            return "CAPTURAS / VIDEO / PDF";
+        var phrase = BuildPhrase(flags, Style.Mayuscula, singular: false);
+        return string.IsNullOrEmpty(phrase) ? "CAPTURAS / VIDEO / PDF" : phrase;
     }
 
-    private static MediaKind Classify(IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
+    private enum Style
     {
-        if (enlaces.Count == 0)
-            return MediaKind.Desconocido;
+        Minuscula,
+        Titulo,
+        Mayuscula,
+    }
 
-        var videos = 0;
-        var imgs = 0;
+    private static string BuildPhrase(MediaFlags flags, Style style, bool singular)
+    {
+        var parts = new List<string>(3);
+        if (flags.Images)
+        {
+            parts.Add(style switch
+            {
+                Style.Mayuscula => singular ? "CAPTURA" : "CAPTURAS",
+                Style.Titulo => singular ? "Captura" : "Capturas",
+                _ => singular ? "captura" : "capturas",
+            });
+        }
+
+        if (flags.Video)
+        {
+            parts.Add(style switch
+            {
+                Style.Mayuscula => singular && parts.Count == 0 ? "VIDEO" : "VIDEO",
+                Style.Titulo => "Video",
+                _ => "video",
+            });
+        }
+
+        if (flags.Pdf)
+        {
+            parts.Add(style switch
+            {
+                Style.Mayuscula => "PDF",
+                Style.Titulo => "PDF",
+                _ => "PDF",
+            });
+        }
+
+        if (parts.Count == 0)
+            return "";
+
+        if (parts.Count == 1)
+            return parts[0];
+
+        if (parts.Count == 2)
+            return style == Style.Mayuscula
+                ? $"{parts[0]} Y {parts[1]}"
+                : $"{parts[0]} y {parts[1]}";
+
+        return style == Style.Mayuscula
+            ? $"{parts[0]}, {parts[1]} Y {parts[2]}"
+            : $"{parts[0]}, {parts[1]} y {parts[2]}";
+    }
+
+    private static MediaFlags Classify(IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
+    {
+        var images = false;
+        var video = false;
+        var pdf = false;
         foreach (var e in enlaces)
         {
             if (IsVideoFileName(e.FileName))
-                videos++;
+                video = true;
+            else if (IsPdfFileName(e.FileName))
+                pdf = true;
             else
-                imgs++;
+                images = true;
         }
 
-        if (videos > 0 && imgs > 0) return MediaKind.Mixto;
-        if (videos > 0) return MediaKind.SoloVideo;
-        return MediaKind.SoloImagenes;
+        return new MediaFlags(images, video, pdf);
     }
 
     private static bool IsVideoFileName(string? fileName)
@@ -168,11 +221,12 @@ public static class CapturasTextoHelper
         return VideoExt.Contains(Path.GetExtension(fileName));
     }
 
-    private enum MediaKind
+    private static bool IsPdfFileName(string? fileName)
     {
-        Desconocido,
-        SoloImagenes,
-        SoloVideo,
-        Mixto,
+        if (string.IsNullOrWhiteSpace(fileName))
+            return false;
+        return PdfExt.Contains(Path.GetExtension(fileName));
     }
+
+    private readonly record struct MediaFlags(bool Images, bool Video, bool Pdf);
 }
