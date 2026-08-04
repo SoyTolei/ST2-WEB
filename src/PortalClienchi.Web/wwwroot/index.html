@@ -42,11 +42,21 @@
           <div id="portalSistemaPills" class="portal-sistema-pills" role="tablist" aria-label="Catálogo del Portal Cliente"></div>
         </div>
       </div>
-      <button type="button" class="tab-btn" data-tab="thom" role="tab">
-        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 2v8l-2.5-1.5L6 12V4h5zm7 16H6v-6h12v6z"/></svg>
-        THOM
-        <span class="tab-reminder-badge hidden" data-reminder="thom" aria-hidden="true">1</span>
-      </button>
+      <div class="tab-portal-wrap">
+        <button type="button" class="tab-btn" data-tab="thom" role="tab">
+          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 2v8l-2.5-1.5L6 12V4h5zm7 16H6v-6h12v6z"/></svg>
+          THOM
+          <span class="tab-reminder-badge hidden" data-reminder="thom" aria-hidden="true">1</span>
+        </button>
+        <div id="thomPortalBar" class="thom-portal-bar hidden" role="group" aria-label="Portal THOM">
+          <span class="thom-portal-label">Portal</span>
+          <div class="thom-portal-seg">
+            <button type="button" class="thom-portal-btn active" data-thom-portal="bejerman">SQL/ONVIO-SAAS</button>
+            <button type="button" class="thom-portal-btn" data-thom-portal="legal">LEGAL</button>
+            <button type="button" class="thom-portal-btn" data-thom-portal="chile">CHILE</button>
+          </div>
+        </div>
+      </div>
       <button type="button" class="tab-btn" data-tab="ai" role="tab">
         <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
         AI Platform
@@ -963,14 +973,6 @@
     </section>
 
     <section id="panel-thom" class="tab-panel hidden" role="tabpanel">
-      <div class="thom-portal-bar" role="group" aria-label="Portal THOM">
-        <span class="thom-portal-label">Portal</span>
-        <div class="thom-portal-seg">
-          <button type="button" class="thom-portal-btn active" data-thom-portal="bejerman">Bejerman</button>
-          <button type="button" class="thom-portal-btn" data-thom-portal="legal">LEGAL</button>
-          <button type="button" class="thom-portal-btn" data-thom-portal="chile">Chile</button>
-        </div>
-      </div>
       <p class="embed-hint hidden" id="thomEmbedHint" aria-hidden="true"></p>
       <div id="thomProxyOpenWrap" class="thom-proxy-open hidden">
         <button type="button" id="thomProxyOpenBtn" class="btn btn-gate-alt">Abrir en otra pestaña del navegador</button>
@@ -978,7 +980,7 @@
       <div class="embed-frame-wrap">
         <div id="thomDirectGate" class="embed-direct-gate hidden" aria-live="polite">
           <div class="embed-panel-placeholder" aria-hidden="true"></div>
-          <p><strong id="thomGateTitle">THOM · Bejerman</strong></p>
+          <p><strong id="thomGateTitle">THOM · SQL/ONVIO-SAAS</strong></p>
           <p id="thomGateStatus" class="embed-direct-gate-status hidden"><span class="embed-direct-gate-dot" aria-hidden="true"></span>Abierto sobre este panel</p>
           <p id="thomGateZscaler">Necesitas tener <strong>ZScaler activado</strong>.</p>
           <p id="thomGateNote" class="embed-direct-gate-note">(Si no aparece, permití «ventanas emergentes» en la configuración del navegador.)</p>
@@ -1040,7 +1042,7 @@
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">THOM</h3>
             <p class="st2-about-module-text">Open Arena / CSS-TAP en ventana integrada.</p>
-            <p class="st2-about-module-meta">Bejerman · LEGAL · Chile · ZScaler</p>
+            <p class="st2-about-module-meta">SQL/ONVIO-SAAS · LEGAL · CHILE · ZScaler</p>
           </article>
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">AI Platform</h3>

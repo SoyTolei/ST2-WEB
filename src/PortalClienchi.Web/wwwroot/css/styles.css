@@ -954,16 +954,33 @@ body.portal-tab-active .combo-box {
 }
 
 .thom-portal-bar {
-  display: inline-flex;
-  flex-wrap: wrap;
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px 10px;
-  margin: 0 0 8px;
+  margin: 0;
   padding: 6px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #f8fafc;
-  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow:
+    0 2px 6px rgba(26, 31, 46, 0.05),
+    0 8px 20px rgba(26, 31, 46, 0.06);
+}
+
+.thom-portal-bar.hidden {
+  display: none;
+}
+
+/* El selector flota debajo de la pestaña: hay que dejarle el hueco. */
+body.thom-tab-active .tab-bar,
+body.embed-active.thom-tab-active .tab-bar {
+  margin-bottom: 50px;
 }
 .thom-portal-label {
   font-size: 0.72rem;
@@ -986,6 +1003,7 @@ body.portal-tab-active .combo-box {
   border-radius: 5px;
   min-height: 28px;
   padding: 5px 11px;
+  white-space: nowrap;
   font: inherit;
   font-size: 0.78rem;
   font-weight: 600;

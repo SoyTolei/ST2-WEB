@@ -97,6 +97,7 @@ let appConfig = null;
 let activePortalId = "bejerman";
 
 const portalSistemaBar = document.getElementById("portalSistemaBar");
+const thomPortalBar = document.getElementById("thomPortalBar");
 const portalSistemaPills = document.getElementById("portalSistemaPills");
 
 const placeholderHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
@@ -1600,7 +1601,7 @@ function isThomDirectEmbed() {
 const THOM_PORTAL_KEY = "st2-thom-portal";
 const THOM_PORTALS = {
   bejerman: {
-    label: "Bejerman",
+    label: "SQL/ONVIO-SAAS",
     fallback: "https://css-latam.int.thomsonreuters.com/css-tap",
     configKey: "thomTapUrl",
   },
@@ -1610,7 +1611,7 @@ const THOM_PORTALS = {
     configKey: "thomLegalUrl",
   },
   chile: {
-    label: "Chile",
+    label: "CHILE",
     fallback: "https://css-latam.int.thomsonreuters.com/tap_chile",
     configKey: "thomChileUrl",
   },
@@ -1739,9 +1740,15 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
     return { top: 160, left: 0, width: 1100, height: 720 };
   }
 
-  // Nunca tapar la barra de pestañas (por si el panel aún no midió bien).
+  // Nunca tapar la barra de pestañas ni el selector de portal, que flota debajo.
   if (tabRect) {
     viewportTop = Math.max(viewportTop, Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP));
+  }
+  if (thomPortalBar && !thomPortalBar.classList.contains("hidden")) {
+    const barRect = thomPortalBar.getBoundingClientRect();
+    if (barRect.height > 0) {
+      viewportTop = Math.max(viewportTop, Math.round(barRect.bottom + THOM_POPUP_TAB_GAP));
+    }
   }
 
   const viewportHeight = Math.max(360, Math.round(window.innerHeight - viewportTop - 4));
@@ -2231,7 +2238,9 @@ function switchTab(tabId) {
 
   statusBar.classList.toggle("hidden", tabId !== "portal");
   portalSistemaBar?.classList.toggle("hidden", tabId !== "portal");
+  thomPortalBar?.classList.toggle("hidden", tabId !== "thom");
   document.body.classList.toggle("portal-tab-active", tabId === "portal");
+  document.body.classList.toggle("thom-tab-active", tabId === "thom");
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
 
   if (tabId !== "thom" && isThomWindowMode()) {
