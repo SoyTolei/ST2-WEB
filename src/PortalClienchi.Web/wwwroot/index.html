@@ -33,18 +33,8 @@
         Sistema de Planillas
       </button>
       <div class="tab-portal-wrap">
-        <button type="button" class="tab-btn" data-tab="portal" role="tab" id="tabPortalBtn">
-          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-          Portal Cliente
-        </button>
-        <div id="portalSistemaBar" class="portal-sistema-bar hidden">
-          <span class="portal-sistema-label">Buscar en:</span>
-          <div id="portalSistemaPills" class="portal-sistema-pills" role="tablist" aria-label="Catálogo del Portal Cliente"></div>
-        </div>
-      </div>
-      <div class="tab-portal-wrap">
         <button type="button" class="tab-btn" data-tab="thom" role="tab">
-          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 2v8l-2.5-1.5L6 12V4h5zm7 16H6v-6h12v6z"/></svg>
+          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3zM7.5 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5zM16 13c-.83 0-1.5-.67-1.5-1.5S15.17 10 16 10s1.5.67 1.5 1.5S16.83 13 16 13z"/></svg>
           THOM
           <span class="tab-reminder-badge hidden" data-reminder="thom" aria-hidden="true">1</span>
         </button>
@@ -61,6 +51,16 @@
         AI Platform
         <span class="tab-reminder-badge hidden" data-reminder="ai" aria-hidden="true">1</span>
       </button>
+      <div class="tab-portal-wrap">
+        <button type="button" class="tab-btn" data-tab="portal" role="tab" id="tabPortalBtn">
+          <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+          Portal Cliente
+        </button>
+        <div id="portalSistemaBar" class="portal-sistema-bar hidden">
+          <span class="portal-sistema-label">Buscar en:</span>
+          <div id="portalSistemaPills" class="portal-sistema-pills" role="tablist" aria-label="Catálogo del Portal Cliente"></div>
+        </div>
+      </div>
     </nav>
 
     <section id="panel-planillas" class="tab-panel active" role="tabpanel">
@@ -1034,11 +1034,6 @@
             <p class="st2-about-module-meta">Bejerman SQL · ONVIO/WEB · LEGAL · Chile (beta)</p>
           </article>
           <article class="st2-about-module">
-            <h3 class="st2-about-module-title">Portal Cliente</h3>
-            <p class="st2-about-module-text">Búsqueda de instructivos, vista previa y enlaces al portal.</p>
-            <p class="st2-about-module-meta">Bejerman SQL/WEB – ONVIO · LEGAL</p>
-          </article>
-          <article class="st2-about-module">
             <h3 class="st2-about-module-title">THOM</h3>
             <p class="st2-about-module-text">Open Arena / CSS-TAP en ventana integrada.</p>
             <p class="st2-about-module-meta">SQL/ONVIO-SAAS · LEGAL · CHILE · ZScaler</p>
@@ -1047,6 +1042,11 @@
             <h3 class="st2-about-module-title">AI Platform</h3>
             <p class="st2-about-module-text">Plataforma de IA corporativa en ventana integrada.</p>
             <p class="st2-about-module-meta">Embebido en ST2</p>
+          </article>
+          <article class="st2-about-module">
+            <h3 class="st2-about-module-title">Portal Cliente</h3>
+            <p class="st2-about-module-text">Búsqueda de instructivos, vista previa y enlaces al portal.</p>
+            <p class="st2-about-module-meta">Bejerman SQL/WEB – ONVIO · LEGAL</p>
           </article>
         </div>
         <p id="st2-about-updated" class="st2-about-updated hidden" aria-live="polite"></p>
