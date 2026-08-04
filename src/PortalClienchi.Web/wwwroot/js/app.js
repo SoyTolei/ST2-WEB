@@ -1808,6 +1808,59 @@ function scheduleThomPopupReposition() {
   thomPopupResizeTimer = setTimeout(repositionThomPopup, 120);
 }
 
+/**
+ * El popup debe comportarse como parte del panel: sigue a la ventana ST2 cuando
+ * se mueve o cambia de tamaño, y el gate vuelve a su estado inicial si el
+ * usuario lo cierra desde la barra del navegador.
+ */
+let thomPopupWatchTimer = null;
+let thomPopupAnchor = null;
+
+function readThomAnchor() {
+  return [
+    Number.isFinite(window.screenX) ? window.screenX : window.screenLeft,
+    Number.isFinite(window.screenY) ? window.screenY : window.screenTop,
+    window.innerWidth,
+    window.innerHeight,
+  ].join(":");
+}
+
+function stopThomPopupWatch() {
+  clearInterval(thomPopupWatchTimer);
+  thomPopupWatchTimer = null;
+  thomPopupAnchor = null;
+}
+
+function startThomPopupWatch() {
+  stopThomPopupWatch();
+  thomPopupAnchor = readThomAnchor();
+  thomPopupWatchTimer = setInterval(() => {
+    if (!thomPopup || thomPopup.closed) {
+      thomPopup = null;
+      stopThomPopupWatch();
+      updateThomDirectUi();
+      return;
+    }
+    const anchor = readThomAnchor();
+    if (anchor === thomPopupAnchor) return;
+    thomPopupAnchor = anchor;
+    repositionThomPopup();
+  }, 400);
+}
+
+function focusThomPopup() {
+  if (!thomPopup || thomPopup.closed) {
+    openThomWindow();
+    return;
+  }
+  repositionThomPopup();
+  try {
+    thomPopup.focus();
+  } catch {
+    // El navegador puede bloquear focus() en ventanas no propias.
+  }
+}
+
 function alignThomPopupAfterOpen({ afterNavigate = false } = {}) {
   repositionThomPopup();
   scheduleThomPopupReposition();
@@ -1865,6 +1918,7 @@ function scheduleThomHelpCollapse(targetWindow = thomPopup) {
 }
 
 function closeThomPopup() {
+  stopThomPopupWatch();
   if (!thomPopup || thomPopup.closed) {
     thomPopup = null;
     updateThomDirectUi();
@@ -1882,6 +1936,7 @@ function closeThomPopup() {
 function updateThomDirectUi() {
   const windowMode = isThomWindowMode();
   const embedded = isThomEmbeddedProxy();
+  const active = windowMode && !!(thomPopup && !thomPopup.closed);
   const openLabel = windowMode ? "Abrir en otra pestaña del navegador" : "Abrir en navegador";
   const openBtn = document.getElementById("thomOpenBtn");
   const proxyOpenBtn = document.getElementById("thomProxyOpenBtn");
@@ -1890,7 +1945,14 @@ function updateThomDirectUi() {
   document.getElementById("thomProxyOpenWrap")?.classList.toggle("hidden", !embedded);
   thomFrame?.classList.toggle("hidden", windowMode);
   thomDirectGate?.classList.toggle("hidden", embedded || !windowMode);
-  thomDirectGate?.classList.toggle("embed-panel-active", windowMode && !!(thomPopup && !thomPopup.closed));
+  thomDirectGate?.classList.toggle("embed-panel-active", active);
+
+  const gateOpenBtn = document.getElementById("thomGateOpenBtn");
+  if (gateOpenBtn) gateOpenBtn.textContent = active ? "Enfocar THOM" : "Abrir THOM aquí";
+  document.getElementById("thomGateCloseBtn")?.classList.toggle("hidden", !active);
+  document.getElementById("thomGateStatus")?.classList.toggle("hidden", !active);
+  document.getElementById("thomGateZscaler")?.classList.toggle("hidden", active);
+  document.getElementById("thomGateNote")?.classList.toggle("hidden", active);
 }
 
 function showThomPanelPlaceholder() {
@@ -1910,8 +1972,8 @@ function openThomWindow({ reload = false } = {}) {
   if (!reload && thomPopup && !thomPopup.closed) {
     thomPopup.focus();
     alignThomPopupAfterOpen();
+    startThomPopupWatch();
     updateThomDirectUi();
-    setEmbedHint("thom", "THOM activo sobre el panel. Usá «Enfocar THOM» si quedó detrás.");
     return thomPopup;
   }
 
@@ -1939,10 +2001,10 @@ function openThomWindow({ reload = false } = {}) {
 
     thomPopup.focus();
     showThomPanelPlaceholder();
+    startThomPopupWatch();
     updateThomDirectUi();
     alignThomPopupAfterOpen({ afterNavigate: true });
     scheduleThomHelpCollapse(thomPopup);
-    setEmbedHint("thom", "THOM abierto en este espacio. Necesitas tener ZScaler activado.");
     return thomPopup;
   };
 
@@ -2202,11 +2264,18 @@ function initEmbedReminders() {
     scheduleThomBlankCheck();
   });
   window.addEventListener("resize", scheduleThomPopupReposition);
+  window.addEventListener("scroll", scheduleThomPopupReposition, { passive: true });
+  // Sin esto quedan ventanas THOM huérfanas al cerrar o recargar ST2.
+  window.addEventListener("pagehide", () => closeThomPopup());
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) scheduleThomPopupReposition();
+  });
   initThomPortalSelector();
   initDailyTabReminders();
 }
 
-document.getElementById("thomGateOpenBtn")?.addEventListener("click", openThomWindow);
+document.getElementById("thomGateOpenBtn")?.addEventListener("click", () => focusThomPopup());
+document.getElementById("thomGateCloseBtn")?.addEventListener("click", () => closeThomPopup());
 document.getElementById("thomOpenBtn")?.addEventListener("click", openThomBrowserTab);
 document.getElementById("thomProxyOpenBtn")?.addEventListener("click", openThomBrowserTab);
 document.getElementById("aiReloadBtn").addEventListener("click", () => {
