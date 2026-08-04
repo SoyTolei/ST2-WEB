@@ -2004,7 +2004,11 @@ function openThomWindow({ reload = false } = {}) {
   const generation = ++thomOpenGeneration;
 
   if (!reload && thomPopup && !thomPopup.closed) {
-    thomPopup.focus();
+    try {
+      thomPopup.focus();
+    } catch {
+      // ignore
+    }
     alignThomPopupAfterOpen();
     startThomPopupWatch();
     updateThomDirectUi();
@@ -2013,48 +2017,56 @@ function openThomWindow({ reload = false } = {}) {
 
   if (thomPopup?.closed) thomPopup = null;
 
-  const openPopup = () => {
-    // El usuario ya salió de THOM (u otra apertura canceló esta).
-    if (generation !== thomOpenGeneration) return null;
+  // Forzar layout con embed-active ya aplicado, sin perder el gesto de clic.
+  // Si diferimos window.open a un rAF, Edge/Chrome suelen abrir minimizado o bloquear.
+  void document.body.offsetHeight;
+  const rect = getThomPanelRect();
+  const features = buildThomPopupFeatures(rect);
 
-    const rect = getThomPanelRect();
-    const features = buildThomPopupFeatures(rect);
-
-    thomPopup = window.open("about:blank", THOM_POPUP_NAME, features);
-    if (!thomPopup) {
-      // Sin noopener: si el bloqueador obliga a pestaña, igual la podemos cerrar después.
-      thomBrowserTab = window.open(url, THOM_TAB_NAME);
-      setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
-      updateThomDirectUi();
-      return null;
-    }
-
-    if (generation !== thomOpenGeneration) {
-      safeCloseWindow(thomPopup);
-      thomPopup = null;
-      return null;
-    }
-
-    watchThomPopupLoad(thomPopup);
-    alignThomPopupAfterOpen();
-
-    try {
-      thomPopup.location.replace(url);
-    } catch {
-      thomPopup.location.href = url;
-    }
-
-    thomPopup.focus();
-    showThomPanelPlaceholder();
-    startThomPopupWatch();
+  thomPopup = window.open("about:blank", THOM_POPUP_NAME, features);
+  if (!thomPopup) {
+    thomBrowserTab = window.open(url, THOM_TAB_NAME);
+    setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
     updateThomDirectUi();
-    alignThomPopupAfterOpen({ afterNavigate: true });
-    scheduleThomHelpCollapse(thomPopup);
-    return thomPopup;
-  };
+    return null;
+  }
 
-  // Esperar un frame para que el layout de pestañas (embed-active) esté medido.
-  requestAnimationFrame(() => requestAnimationFrame(openPopup));
+  if (generation !== thomOpenGeneration) {
+    safeCloseWindow(thomPopup);
+    thomPopup = null;
+    return null;
+  }
+
+  watchThomPopupLoad(thomPopup);
+
+  try {
+    thomPopup.location.replace(url);
+  } catch {
+    thomPopup.location.href = url;
+  }
+
+  try {
+    thomPopup.focus();
+  } catch {
+    // ignore
+  }
+
+  showThomPanelPlaceholder();
+  startThomPopupWatch();
+  updateThomDirectUi();
+  scheduleThomHelpCollapse(thomPopup);
+
+  // Reacomodar cuando el layout del panel termine de estabilizarse.
+  requestAnimationFrame(() => {
+    if (generation !== thomOpenGeneration || !thomPopup || thomPopup.closed) return;
+    alignThomPopupAfterOpen({ afterNavigate: true });
+    try {
+      thomPopup.focus();
+    } catch {
+      // ignore
+    }
+  });
+
   return thomPopup;
 }
 
