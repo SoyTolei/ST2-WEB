@@ -920,19 +920,19 @@
             <div class="pdf-portal-app">
               <div class="pdf-portal-hero">
                 <h2>Generador de PDFS para Portal</h2>
-                <p>Pegá desde Word/Docs o editá acá: negrita, cursiva, colores, tamaños, alineación e hipervínculos se conservan en el PDF.</p>
                 <div class="accent-bar"></div>
               </div>
 
               <div class="pdf-portal-grid">
                 <div class="pdf-portal-editor">
-                  <label class="pdf-portal-label" for="pdf-portal-brand">Marca izquierda (opcional)</label>
-                  <input id="pdf-portal-brand" type="text" class="pdf-portal-input" placeholder="Ej. BEJERMAN — vacío = sin caja" autocomplete="off" spellcheck="false"/>
+                  <label class="pdf-portal-label" for="pdf-portal-brand">Marca / título izquierda (opcional)</label>
+                  <input id="pdf-portal-brand" type="text" class="pdf-portal-input" placeholder="Ej. BEJERMAN · título · fecha — vacío = sin texto" autocomplete="off" spellcheck="false"/>
 
                   <div class="pdf-portal-toolbar">
-                    <button type="button" id="pdf-portal-load-txt" class="btn btn-secondary">Cargar .txt</button>
+                    <button type="button" id="pdf-portal-load-txt" class="btn btn-primary pdf-portal-load-txt">
+                      Cargar archivo .TXT
+                    </button>
                     <input id="pdf-portal-file" type="file" accept=".txt,text/plain" class="hidden" aria-hidden="true"/>
-                    <button type="button" id="pdf-portal-clear" class="btn btn-secondary">Limpiar</button>
                   </div>
 
                   <div class="pdf-portal-formatbar" role="toolbar" aria-label="Formato de texto">
@@ -964,15 +964,15 @@
                     <span class="pdf-fmt-sep" aria-hidden="true"></span>
                     <button type="button" class="pdf-fmt-btn" id="pdf-portal-link" title="Hipervínculo">🔗</button>
                   </div>
-                  <p class="pdf-portal-hint">Copiá desde Word/Docs y pegá: se conservan negrita, cursiva, colores, tamaños, alineación y links.</p>
 
                   <label class="pdf-portal-label" for="pdf-portal-editor">Contenido</label>
                   <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Pegá aquí el texto del portal…"></div>
 
                   <p id="pdf-portal-status" class="pdf-portal-status" role="status"></p>
 
-                  <div class="pdf-portal-actions">
+                  <div class="pdf-portal-actions plan-actions">
                     <button type="button" id="pdf-portal-generate" class="btn btn-primary">Generar PDF</button>
+                    <button type="button" id="pdf-portal-clear" class="btn btn-secondary">Limpiar</button>
                   </div>
                 </div>
 

@@ -66,7 +66,7 @@ export function initPdfPortalGenerator() {
     const brand = (brandInput?.value || "").trim();
     if (previewBrand) {
       if (brand) {
-        previewBrand.textContent = brand.toUpperCase();
+        previewBrand.textContent = brand;
         previewBrand.classList.remove("hidden");
       } else {
         previewBrand.textContent = "";

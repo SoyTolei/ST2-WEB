@@ -10,12 +10,8 @@
   color: var(--dark, #0f172a);
 }
 
-.pdf-portal-hero p {
-  margin: 0 0 10px;
-  color: #64748b;
-  font-size: 0.9rem;
-  line-height: 1.45;
-  max-width: 62ch;
+.pdf-portal-hero .accent-bar {
+  margin-bottom: 4px;
 }
 
 .pdf-portal-grid {
@@ -60,7 +56,12 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.pdf-portal-load-txt {
+  min-width: 200px;
+  font-weight: 600;
 }
 
 .pdf-portal-formatbar {
@@ -68,7 +69,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   padding: 8px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -128,12 +129,6 @@
   cursor: pointer;
 }
 
-.pdf-portal-hint {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  margin: 0 0 10px;
-}
-
 .pdf-portal-rich {
   min-height: 220px;
   max-height: 420px;
@@ -151,16 +146,6 @@
 .pdf-portal-rich a {
   color: #2563eb;
   text-decoration: underline;
-}
-
-.pdf-portal-preview-body a {
-  color: #7dd3fc;
-  text-decoration: underline;
-}
-
-.pdf-portal-preview-body [style*="text-align:center"],
-.pdf-portal-preview-body [style*="text-align: center"] {
-  text-align: center;
 }
 
 .pdf-portal-rich:focus {
@@ -187,9 +172,16 @@
 }
 
 .pdf-portal-actions {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border, #e2e8f0);
+}
+
+.pdf-portal-actions .btn {
+  min-width: 140px;
 }
 
 .pdf-portal-preview-wrap {
@@ -207,21 +199,23 @@
 
 .pdf-portal-preview-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 22px;
 }
 
 .pdf-portal-preview-brand {
-  background: #fff;
-  color: #b8b8b8;
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 10px 16px;
-  line-height: 1.1;
+  background: transparent;
+  color: #f2f2f2;
+  font-weight: 600;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 0 0 8px;
+  line-height: 1.25;
+  border-bottom: 3px solid #f36c00;
+  max-width: 55%;
 }
 
 .pdf-portal-preview-brand.hidden {
@@ -229,9 +223,9 @@
 }
 
 .pdf-portal-preview-logo {
-  height: 58px;
+  height: 68px;
   width: auto;
-  max-width: 300px;
+  max-width: 340px;
   object-fit: contain;
   flex: 0 0 auto;
 }
@@ -242,6 +236,11 @@
   line-height: 1.55;
   min-height: 120px;
   word-break: break-word;
+}
+
+.pdf-portal-preview-body a {
+  color: #7dd3fc;
+  text-decoration: underline;
 }
 
 .pdf-portal-preview-body:empty::before {

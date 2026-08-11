@@ -11,8 +11,8 @@ namespace PortalClienchi.Web.PortalPdf;
 public static class PortalPdfService
 {
     private static readonly Color PageBg = Color.FromHex("#1A1A1A");
-    private static readonly Color BrandBoxBg = Colors.White;
-    private static readonly Color BrandText = Color.FromHex("#B8B8B8");
+    private static readonly Color BrandText = Color.FromHex("#F2F2F2");
+    private static readonly Color BrandAccent = Color.FromHex("#F36C00");
     private static readonly Color BodyText = Color.FromHex("#F2F2F2");
     private static readonly Color LinkText = Color.FromHex("#7DD3FC");
 
@@ -42,15 +42,16 @@ public static class PortalPdfService
                     {
                         if (!string.IsNullOrWhiteSpace(brand))
                         {
-                            row.RelativeItem().AlignLeft()
-                                .Background(BrandBoxBg)
-                                .PaddingHorizontal(18)
-                                .PaddingVertical(10)
-                                .Text(brand.ToUpperInvariant())
-                                .FontSize(16f)
-                                .Bold()
-                                .FontColor(BrandText)
-                                .FontFamily(Fonts.Arial);
+                            row.RelativeItem().AlignLeft().AlignMiddle().Column(brandCol =>
+                            {
+                                brandCol.Item()
+                                    .Text(brand)
+                                    .FontSize(20f)
+                                    .SemiBold()
+                                    .FontColor(BrandText)
+                                    .FontFamily(Fonts.Arial);
+                                brandCol.Item().PaddingTop(6).Width(56).Height(3).Background(BrandAccent);
+                            });
                         }
                         else
                         {
@@ -61,13 +62,13 @@ public static class PortalPdfService
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(300).AlignRight().AlignMiddle().Height(64).Image(logo).FitHeight();
+                            row.ConstantItem(340).AlignRight().AlignMiddle().Height(74).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(300).AlignRight().AlignMiddle()
+                            row.ConstantItem(340).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(13f)
+                                .FontSize(14f)
                                 .FontColor(Colors.White)
                                 .FontFamily(Fonts.Arial);
                         }
