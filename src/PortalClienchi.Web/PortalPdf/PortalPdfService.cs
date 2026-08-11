@@ -10,19 +10,18 @@ public static class PortalPdfService
     private static readonly Color BrandBoxBg = Colors.White;
     private static readonly Color BrandText = Color.FromHex("#B8B8B8");
     private static readonly Color BodyText = Color.FromHex("#F2F2F2");
-    private static readonly object FontLock = new();
-    private static bool _fontsReady;
-    private static string _fontFamily = Fonts.Arial;
+
+    /// <summary>Lato viene embebida en QuestPDF: funciona en Railway/Linux sin fuentes del sistema.</summary>
+    private const string FontFamilyName = "Lato";
 
     public static byte[] GeneratePdfBytes(PortalPdfGenerateRequest request, string? contentRoot = null)
     {
         QuestPDF.Settings.License = LicenseType.Community;
-        EnsureFonts();
 
         var brand = (request.Brand ?? "").Trim();
         var blocks = PortalPdfHtmlParser.Parse(request.Html, request.Text);
         var logo = FindThomsonLogoBytes(contentRoot);
-        var font = _fontFamily;
+        const string font = FontFamilyName;
 
         return Document.Create(container =>
         {
@@ -114,17 +113,22 @@ public static class PortalPdfService
                                     var content = Sanitize(run.Text);
                                     if (content.Length == 0) continue;
 
-                                    var span = text.Span(content)
+                                    var size = run.FontSize ?? 12f;
+                                    var color = ResolveRunColor(run.Color);
+
+                                    TextSpanDescriptor span = !string.IsNullOrWhiteSpace(run.LinkUrl)
+                                        ? text.Hyperlink(content, run.LinkUrl!)
+                                        : text.Span(content);
+
+                                    span = span
                                         .FontFamily(font)
-                                        .FontColor(ResolveRunColor(run.Color))
-                                        .FontSize(run.FontSize ?? 12f);
+                                        .FontColor(color)
+                                        .FontSize(size);
 
                                     if (run.Bold) span.Bold();
                                     if (run.Italic) span.Italic();
                                     if (run.Underline) span.Underline();
                                     if (run.Strike) span.Strikethrough();
-                                    if (!string.IsNullOrWhiteSpace(run.LinkUrl))
-                                        span.Hyperlink(run.LinkUrl!);
                                 }
                             });
                         });
@@ -136,62 +140,12 @@ public static class PortalPdfService
         }).GeneratePdf();
     }
 
-    private static void EnsureFonts()
-    {
-        if (_fontsReady) return;
-        lock (FontLock)
-        {
-            if (_fontsReady) return;
-
-            const string customName = "ST2PortalSans";
-            var registered = false;
-            foreach (var path in FontCandidates())
-            {
-                if (!File.Exists(path)) continue;
-                try
-                {
-                    using var fs = File.OpenRead(path);
-                    FontManager.RegisterFontWithCustomName(customName, fs);
-                    registered = true;
-                    _fontFamily = customName;
-                    break;
-                }
-                catch
-                {
-                    /* try next */
-                }
-            }
-
-            if (!registered)
-            {
-                // Windows / entornos con Arial del sistema.
-                _fontFamily = Fonts.Arial;
-            }
-
-            _fontsReady = true;
-        }
-    }
-
-    private static IEnumerable<string> FontCandidates()
-    {
-        // Empaquetadas con la app (fallback garantizado en Railway/Windows).
-        yield return Path.Combine(AppContext.BaseDirectory, "Fonts", "LiberationSans-Regular.ttf");
-        yield return Path.Combine(AppContext.BaseDirectory, "wwwroot", "Fonts", "LiberationSans-Regular.ttf");
-        // Linux (Docker: fonts-liberation / fonts-dejavu-core).
-        yield return "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf";
-        yield return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-        yield return "/usr/share/fonts/truetype/freefont/FreeSans.ttf";
-        // Windows.
-        yield return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf");
-        yield return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "ARIAL.TTF");
-    }
     private static Color ResolveRunColor(string? cssColor)
     {
         var normalized = PortalPdfHtmlParser.NormalizeColor(cssColor);
         if (string.IsNullOrEmpty(normalized))
             return BodyText;
 
-        // Fondo del PDF es oscuro: negro/casi negro se ve invisible → usar color cuerpo.
         if (IsNearBlack(normalized))
             return BodyText;
 
@@ -205,7 +159,6 @@ public static class PortalPdfService
         if (!int.TryParse(hex.AsSpan(1, 2), System.Globalization.NumberStyles.HexNumber, null, out var r)) return false;
         if (!int.TryParse(hex.AsSpan(3, 2), System.Globalization.NumberStyles.HexNumber, null, out var g)) return false;
         if (!int.TryParse(hex.AsSpan(5, 2), System.Globalization.NumberStyles.HexNumber, null, out var b)) return false;
-        // luminancia relativa simple
         var lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
         return lum < 0.18;
     }
