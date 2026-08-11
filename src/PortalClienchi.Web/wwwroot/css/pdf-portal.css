@@ -191,7 +191,9 @@
 .pdf-portal-preview {
   background: #1a1a1a;
   border-radius: 10px;
-  min-height: 320px;
+  min-height: 420px;
+  aspect-ratio: 210 / 297;
+  max-height: 640px;
   padding: 18px 20px 22px;
   box-sizing: border-box;
   border: 1px solid #111;
@@ -209,7 +211,7 @@
   background: transparent;
   color: #f2f2f2;
   font-weight: 600;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   letter-spacing: 0.01em;
   text-transform: none;
   padding: 0 0 8px;
@@ -223,9 +225,9 @@
 }
 
 .pdf-portal-preview-logo {
-  height: 68px;
+  height: 48px;
   width: auto;
-  max-width: 340px;
+  max-width: 200px;
   object-fit: contain;
   flex: 0 0 auto;
 }

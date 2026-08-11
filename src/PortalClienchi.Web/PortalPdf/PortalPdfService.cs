@@ -29,8 +29,8 @@ public static class PortalPdfService
         {
             container.Page(page =>
             {
-                page.Size(PageSizes.A4.Landscape());
-                page.Margin(28);
+                page.Size(PageSizes.A4); // Vertical (210×297 mm): menos vacío a los costados que el apaisado
+                page.Margin(24);
                 page.PageColor(PageBg);
                 // Igual que Oportunidad: Arial (fonts-liberation en Docker / sistema en Windows).
                 page.DefaultTextStyle(x => x.FontSize(11f).FontFamily(Fonts.Arial).FontColor(BodyText));
@@ -38,7 +38,7 @@ public static class PortalPdfService
                 page.Content().Column(col =>
                 {
                     // Header como filas de Content (evita Header/elementos vacíos).
-                    col.Item().PaddingBottom(18).Row(row =>
+                    col.Item().PaddingBottom(16).Row(row =>
                     {
                         if (!string.IsNullOrWhiteSpace(brand))
                         {
@@ -46,11 +46,11 @@ public static class PortalPdfService
                             {
                                 brandCol.Item()
                                     .Text(brand)
-                                    .FontSize(20f)
+                                    .FontSize(18f)
                                     .SemiBold()
                                     .FontColor(BrandText)
                                     .FontFamily(Fonts.Arial);
-                                brandCol.Item().PaddingTop(6).Width(56).Height(3).Background(BrandAccent);
+                                brandCol.Item().PaddingTop(6).Width(48).Height(3).Background(BrandAccent);
                             });
                         }
                         else
@@ -58,17 +58,17 @@ public static class PortalPdfService
                             row.RelativeItem();
                         }
 
-                        row.ConstantItem(12);
+                        row.ConstantItem(10);
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(340).AlignRight().AlignMiddle().Height(74).Image(logo).FitHeight();
+                            row.ConstantItem(200).AlignRight().AlignMiddle().Height(52).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(340).AlignRight().AlignMiddle()
+                            row.ConstantItem(200).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(14f)
+                                .FontSize(11f)
                                 .FontColor(Colors.White)
                                 .FontFamily(Fonts.Arial);
                         }
