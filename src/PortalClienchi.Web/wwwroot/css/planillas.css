@@ -262,6 +262,7 @@
 .plan-modulo-btn.transfer { background: #16a34a; }
 .plan-modulo-btn.referral { background: #1a1f2e; }
 .plan-modulo-btn.oportunidad { background: #7c3aed; }
+.plan-modulo-btn.pdf-portal { background: #0f766e; }
 
 .plan-modulo-btn.hidden {
   display: none;

@@ -15,3 +15,19 @@ appsettings.local.json
 # OS
 Thumbs.db
 Desktop.ini
+
+# Scripts / scrapes locales (no van al deploy)
+scripts/__pycache__/
+scripts/_scrape_*.py
+scripts/debug-*
+scripts/dl_*
+scripts/lo-*
+scripts/scrape_*
+scripts/template-catalog-*.json
+scripts/test-*
+scripts/upload-result.json
+scripts/*.wasm
+scripts/blazor.boot.json
+scripts/legalone-templates.html
+scripts/_read-op-db.csx
+test.pdf

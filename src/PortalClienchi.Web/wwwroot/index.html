@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/css/styles.css"/>
   <link rel="stylesheet" href="/css/planillas.css"/>
+  <link rel="stylesheet" href="/css/pdf-portal.css"/>
 </head>
 <body class="st2-access-pending">
   <div id="st2-app-root" class="st2-app-root">
@@ -114,6 +115,10 @@
                   <span class="plan-modulo-na-title">Oportunidad de Venta</span>
                   <span class="plan-modulo-na-hint">No corresponde a LEGAL</span>
                 </div>
+                <button type="button" class="plan-modulo-btn pdf-portal hidden" data-plan-modulo="pdf-portal" id="plan-modulo-pdf-portal" aria-hidden="true">
+                  <span class="plan-modulo-icon" data-plan-icon="pdf-portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
+                  Generador de PDFS para Portal
+                </button>
               </div>
             </div>
           </div>
@@ -901,6 +906,58 @@
               <button type="button" data-ctx="eliminar">🗑️ Eliminar</button>
             </div>
             <p id="op-gestor-status" class="plan-status-bar hidden"></p>
+          </div>
+        </div>
+
+        <div id="planillas-pdf-portal" class="planillas-view hidden">
+          <div class="planillas-card">
+            <div class="plan-module-sticky-head">
+              <div class="plan-module-header-bar">
+                <button type="button" class="planillas-back" data-plan-back>← Volver al menú</button>
+              </div>
+            </div>
+
+            <div class="pdf-portal-app">
+              <div class="pdf-portal-hero">
+                <h2>Generador de PDFS para Portal</h2>
+                <p>Pegá el texto con formato (cursiva, alineación) o cargá un .txt. El PDF usa el header predefinido con logo Thomson Reuters.</p>
+                <div class="accent-bar"></div>
+              </div>
+
+              <div class="pdf-portal-grid">
+                <div class="pdf-portal-editor">
+                  <label class="pdf-portal-label" for="pdf-portal-brand">Marca izquierda (opcional)</label>
+                  <input id="pdf-portal-brand" type="text" class="pdf-portal-input" placeholder="Ej. BEJERMAN — vacío = sin caja" autocomplete="off" spellcheck="false"/>
+
+                  <div class="pdf-portal-toolbar">
+                    <button type="button" id="pdf-portal-load-txt" class="btn btn-secondary">Cargar .txt</button>
+                    <input id="pdf-portal-file" type="file" accept=".txt,text/plain" class="hidden" aria-hidden="true"/>
+                    <button type="button" id="pdf-portal-clear" class="btn btn-secondary">Limpiar</button>
+                    <span class="pdf-portal-hint">Copiá desde Word/Docs y pegá abajo: se conservan cursiva y alineación.</span>
+                  </div>
+
+                  <label class="pdf-portal-label" for="pdf-portal-editor">Contenido</label>
+                  <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Pegá aquí el texto del portal…"></div>
+
+                  <p id="pdf-portal-status" class="pdf-portal-status" role="status"></p>
+
+                  <div class="pdf-portal-actions">
+                    <button type="button" id="pdf-portal-generate" class="btn btn-primary">Generar PDF</button>
+                  </div>
+                </div>
+
+                <div class="pdf-portal-preview-wrap">
+                  <p class="pdf-portal-label">Vista previa</p>
+                  <div id="pdf-portal-preview" class="pdf-portal-preview" aria-live="polite">
+                    <div class="pdf-portal-preview-header">
+                      <div id="pdf-portal-preview-brand" class="pdf-portal-preview-brand hidden"></div>
+                      <img src="/img/thomson-reuters-logo.png" alt="Thomson Reuters" class="pdf-portal-preview-logo"/>
+                    </div>
+                    <div id="pdf-portal-preview-body" class="pdf-portal-preview-body"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -88,6 +89,7 @@ const views = {
   oportunidadMenu: document.getElementById("planillas-oportunidad-menu"),
   oportunidadCargar: document.getElementById("planillas-oportunidad-cargar"),
   oportunidadGestor: document.getElementById("planillas-oportunidad-gestor"),
+  pdfPortal: document.getElementById("planillas-pdf-portal"),
 };
 
 const els = {
@@ -174,6 +176,7 @@ function updateSistemaUi() {
     oportunidadNa.classList.toggle("hidden", !legalSelected);
     oportunidadNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
   }
+  syncPdfPortalModuleVisibility();
   updateSistemaBetaUi();
 }
 
@@ -803,6 +806,12 @@ function bindEvents() {
     mod.openOportunidadMenu();
   });
 
+  document.querySelector('[data-plan-modulo="pdf-portal"]')?.addEventListener("click", () => {
+    if (!canSeePdfPortalModule()) return;
+    initPdfPortalGenerator();
+    showView("pdfPortal");
+  });
+
   document.querySelectorAll("[data-plan-back]").forEach((btn) => {
     btn.addEventListener("click", () => showView("menu"));
   });
@@ -983,6 +992,8 @@ export function initPlanillas() {
   bindSistemaIndicatorLayout();
   selectSistema("BejermanSql");
   initSecretRunnerTrigger();
+  initPdfPortalGenerator();
+  syncPdfPortalModuleVisibility();
   showView("menu");
 
   void loadConfig().then(() => {

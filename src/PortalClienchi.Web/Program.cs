@@ -7,6 +7,7 @@ using PortalClienchi.Core.Services;
 using PortalClienchi.Core.Utilities;
 using PortalClienchi.Web;
 using PortalClienchi.Web.Planillas;
+using PortalClienchi.Web.PortalPdf;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -407,6 +408,7 @@ app.MapWhen(
     }));
 
 app.MapPlanillasEndpoints();
+app.MapPortalPdfEndpoints();
 
 // Capturas públicas (ANTES del fallback SPA).
 // Importante: /c/ también está en EmbedSiteProxy.St2ReservedPrefixes para que
