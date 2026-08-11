@@ -53,42 +53,29 @@
   box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
 }
 
-.pdf-portal-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.pdf-portal-load-txt {
-  min-width: 200px;
-  font-weight: 600;
-}
-
 .pdf-portal-formatbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 12px;
-  padding: 8px;
+  gap: 5px;
+  margin-bottom: 10px;
+  padding: 5px 6px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 7px;
   background: #f8fafc;
 }
 
 .pdf-fmt-btn {
-  min-width: 32px;
-  height: 30px;
+  min-width: 26px;
+  height: 24px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border-radius: 5px;
   background: #fff;
   color: #0f172a;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   line-height: 1;
-  padding: 0 8px;
+  padding: 0 6px;
 }
 
 .pdf-fmt-btn:hover {
@@ -98,36 +85,36 @@
 
 .pdf-fmt-sep {
   width: 1px;
-  height: 22px;
+  height: 16px;
   background: #cbd5e1;
-  margin: 0 4px;
+  margin: 0 2px;
 }
 
 .pdf-fmt-field {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.72rem;
+  gap: 3px;
+  font-size: 0.65rem;
   color: #64748b;
-  margin: 0 2px;
+  margin: 0 1px;
 }
 
 .pdf-fmt-field select,
 .pdf-fmt-field input[type="color"] {
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border-radius: 5px;
   background: #fff;
-  height: 30px;
+  height: 24px;
 }
 
 .pdf-fmt-field select {
-  padding: 0 6px;
-  font-size: 0.78rem;
+  padding: 0 4px;
+  font-size: 0.7rem;
 }
 
 .pdf-fmt-field input[type="color"] {
-  width: 36px;
-  padding: 2px;
+  width: 28px;
+  padding: 1px;
   cursor: pointer;
 }
 

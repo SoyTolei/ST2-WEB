@@ -47,8 +47,6 @@ export function initPdfPortalGenerator() {
   const statusEl = document.getElementById("pdf-portal-status");
   const generateBtn = document.getElementById("pdf-portal-generate");
   const clearBtn = document.getElementById("pdf-portal-clear");
-  const loadTxtBtn = document.getElementById("pdf-portal-load-txt");
-  const fileInput = document.getElementById("pdf-portal-file");
   const fontSizeSel = document.getElementById("pdf-portal-font-size");
   const fontColorInp = document.getElementById("pdf-portal-font-color");
   const linkBtn = document.getElementById("pdf-portal-link");
@@ -133,24 +131,6 @@ export function initPdfPortalGenerator() {
     setStatus("");
     refreshPreview();
     editor.focus();
-  });
-
-  loadTxtBtn?.addEventListener("click", () => fileInput?.click());
-  fileInput?.addEventListener("change", async () => {
-    const file = fileInput.files?.[0];
-    if (!file) return;
-    try {
-      const raw = await file.text();
-      const { brand, body } = parseTxtPayload(raw);
-      if (brandInput && brand) brandInput.value = brand;
-      editor.innerText = body;
-      setStatus(`TXT cargado: ${file.name}`);
-      refreshPreview();
-    } catch {
-      setStatus("No se pudo leer el archivo .txt.", true);
-    } finally {
-      fileInput.value = "";
-    }
   });
 
   generateBtn?.addEventListener("click", () => {
@@ -484,32 +464,4 @@ function isSafeHref(href) {
   } catch {
     return false;
   }
-}
-
-function parseTxtPayload(raw) {
-  const lines = String(raw || "").replace(/\r\n/g, "\n").split("\n");
-  let brand = "";
-  let bodyStart = 0;
-
-  for (let i = 0; i < Math.min(lines.length, 5); i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    const kv = /^(?:MARCA|BRAND|LOGO)\s*[:=]\s*(.+)$/i.exec(line);
-    if (kv) {
-      brand = kv[1].trim();
-      bodyStart = i + 1;
-      break;
-    }
-    if (line.startsWith("#")) {
-      brand = line.replace(/^#+\s*/, "").trim();
-      bodyStart = i + 1;
-      break;
-    }
-    break;
-  }
-
-  return {
-    brand,
-    body: lines.slice(bodyStart).join("\n").trim(),
-  };
 }
