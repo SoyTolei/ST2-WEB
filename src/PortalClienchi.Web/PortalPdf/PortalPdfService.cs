@@ -24,12 +24,14 @@ public static class PortalPdfService
         var blocks = PortalPdfHtmlParser.Parse(request.Html, request.Text);
         var logo = FindThomsonLogoBytes(contentRoot);
         var lines = GroupLines(blocks).ToList();
+        var pageSize = BuildAdaptivePageSize(lines);
 
         return Document.Create(container =>
         {
             container.Page(page =>
             {
-                page.Size(PageSizes.A4); // Vertical (210×297 mm): menos vacío a los costados que el apaisado
+                // Ancho A4; alto ajustado al contenido para no dejar vacío abajo.
+                page.Size(pageSize);
                 page.Margin(24);
                 page.PageColor(PageBg);
                 // Igual que Oportunidad: Arial (fonts-liberation en Docker / sistema en Windows).
@@ -62,13 +64,13 @@ public static class PortalPdfService
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(200).AlignRight().AlignMiddle().Height(52).Image(logo).FitHeight();
+                            row.ConstantItem(240).AlignRight().AlignMiddle().Height(62).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(200).AlignRight().AlignMiddle()
+                            row.ConstantItem(240).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(11f)
+                                .FontSize(12f)
                                 .FontColor(Colors.White)
                                 .FontFamily(Fonts.Arial);
                         }
@@ -136,6 +138,48 @@ public static class PortalPdfService
                 });
             });
         }).GeneratePdf();
+    }
+
+    private static PageSize BuildAdaptivePageSize(IReadOnlyList<List<PortalPdfBlock>> lines)
+    {
+        var width = PageSizes.A4.Width;
+        var maxHeight = PageSizes.A4.Height;
+        const float minHeight = 340f;
+        const float margins = 48f;
+        const float header = 86f;
+
+        float body = 0f;
+        foreach (var line in lines)
+        {
+            if (line.Count == 0 || (line.Count == 1 && line[0].Text == "\n"))
+            {
+                body += 14f;
+                continue;
+            }
+
+            var textLen = 0;
+            var fontSize = 12f;
+            foreach (var run in line)
+            {
+                if (run.Text == "\n") continue;
+                textLen += run.Text?.Length ?? 0;
+                if (run.FontSize is > 0)
+                    fontSize = Math.Max(fontSize, run.FontSize.Value);
+            }
+
+            // ~90 caracteres por línea a 12pt en ancho útil A4.
+            var charsPerLine = Math.Max(36, (int)(90f * (12f / fontSize)));
+            var wrapped = Math.Max(1, (int)Math.Ceiling(Math.Max(1, textLen) / (double)charsPerLine));
+            body += (wrapped * (fontSize * 1.4f)) + 8f;
+        }
+
+        if (body <= 0)
+            body = 40f;
+
+        var estimated = margins + header + body + 20f;
+        // Si supera A4, usamos A4 completo (QuestPDF paginará el resto).
+        var height = estimated >= maxHeight ? maxHeight : Math.Max(minHeight, estimated);
+        return new PageSize(width, height);
     }
 
     private static string NormalizeAlign(string? align)
