@@ -4,15 +4,17 @@ using QuestPDF.Infrastructure;
 
 namespace PortalClienchi.Web.PortalPdf;
 
+/// <summary>
+/// Misma base que <see cref="Planillas.OportunidadPdfService"/>:
+/// QuestPDF + Fonts.Arial (probado en Railway) + layout en Content sin elementos vacíos.
+/// </summary>
 public static class PortalPdfService
 {
     private static readonly Color PageBg = Color.FromHex("#1A1A1A");
     private static readonly Color BrandBoxBg = Colors.White;
     private static readonly Color BrandText = Color.FromHex("#B8B8B8");
     private static readonly Color BodyText = Color.FromHex("#F2F2F2");
-
-    /// <summary>Lato viene embebida en QuestPDF: funciona en Railway/Linux sin fuentes del sistema.</summary>
-    private const string FontFamilyName = "Lato";
+    private static readonly Color LinkText = Color.FromHex("#7DD3FC");
 
     public static byte[] GeneratePdfBytes(PortalPdfGenerateRequest request, string? contentRoot = null)
     {
@@ -21,7 +23,7 @@ public static class PortalPdfService
         var brand = (request.Brand ?? "").Trim();
         var blocks = PortalPdfHtmlParser.Parse(request.Html, request.Text);
         var logo = FindThomsonLogoBytes(contentRoot);
-        const string font = FontFamilyName;
+        var lines = GroupLines(blocks).ToList();
 
         return Document.Create(container =>
         {
@@ -30,55 +32,54 @@ public static class PortalPdfService
                 page.Size(PageSizes.A4.Landscape());
                 page.Margin(28);
                 page.PageColor(PageBg);
-                page.DefaultTextStyle(x => x.FontSize(11).FontFamily(font).FontColor(BodyText));
-
-                page.Header().PaddingBottom(18).Row(row =>
-                {
-                    row.RelativeItem().AlignLeft().Element(e =>
-                    {
-                        if (string.IsNullOrWhiteSpace(brand))
-                            return;
-
-                        e.Background(BrandBoxBg)
-                            .PaddingHorizontal(18)
-                            .PaddingVertical(10)
-                            .Text(brand.ToUpperInvariant())
-                            .FontSize(16)
-                            .Bold()
-                            .FontColor(BrandText)
-                            .FontFamily(font);
-                    });
-
-                    row.ConstantItem(12);
-
-                    row.ConstantItem(210).AlignRight().AlignMiddle().Element(e =>
-                    {
-                        if (logo is null || logo.Length == 0)
-                        {
-                            e.Text("THOMSON REUTERS").FontSize(10).FontColor(Colors.White).FontFamily(font);
-                            return;
-                        }
-
-                        try
-                        {
-                            e.Height(42).Image(logo).FitHeight();
-                        }
-                        catch
-                        {
-                            e.Text("THOMSON REUTERS").FontSize(10).FontColor(Colors.White).FontFamily(font);
-                        }
-                    });
-                });
+                // Igual que Oportunidad: Arial (fonts-liberation en Docker / sistema en Windows).
+                page.DefaultTextStyle(x => x.FontSize(11f).FontFamily(Fonts.Arial).FontColor(BodyText));
 
                 page.Content().Column(col =>
                 {
-                    if (blocks.Count == 0)
+                    // Header como filas de Content (evita Header/elementos vacíos).
+                    col.Item().PaddingBottom(18).Row(row =>
                     {
-                        col.Item().Text("").FontSize(11);
+                        if (!string.IsNullOrWhiteSpace(brand))
+                        {
+                            row.RelativeItem().AlignLeft()
+                                .Background(BrandBoxBg)
+                                .PaddingHorizontal(18)
+                                .PaddingVertical(10)
+                                .Text(brand.ToUpperInvariant())
+                                .FontSize(16f)
+                                .Bold()
+                                .FontColor(BrandText)
+                                .FontFamily(Fonts.Arial);
+                        }
+                        else
+                        {
+                            row.RelativeItem();
+                        }
+
+                        row.ConstantItem(12);
+
+                        if (logo is { Length: > 0 })
+                        {
+                            row.ConstantItem(210).AlignRight().AlignMiddle().Height(42).Image(logo).FitHeight();
+                        }
+                        else
+                        {
+                            row.ConstantItem(210).AlignRight().AlignMiddle()
+                                .Text("THOMSON REUTERS")
+                                .FontSize(10f)
+                                .FontColor(Colors.White)
+                                .FontFamily(Fonts.Arial);
+                        }
+                    });
+
+                    if (lines.Count == 0)
+                    {
+                        col.Item().Text(" ").FontSize(11f);
                         return;
                     }
 
-                    foreach (var line in GroupLines(blocks))
+                    foreach (var line in lines)
                     {
                         if (line.Count == 0 || (line.Count == 1 && line[0].Text == "\n"))
                         {
@@ -86,7 +87,7 @@ public static class PortalPdfService
                             continue;
                         }
 
-                        var align = line[0].Align;
+                        var align = NormalizeAlign(line[0].Align);
                         col.Item().Element(item =>
                         {
                             item = align switch
@@ -98,9 +99,8 @@ public static class PortalPdfService
 
                             item.Text(text =>
                             {
-                                if (align == "justify")
-                                    text.Justify();
-                                else if (align == "center")
+                                // Sin Justify(): en algunos hosts Skia falla; left/center/right bastan.
+                                if (align == "center")
                                     text.AlignCenter();
                                 else if (align == "right")
                                     text.AlignRight();
@@ -113,23 +113,16 @@ public static class PortalPdfService
                                     var content = Sanitize(run.Text);
                                     if (content.Length == 0) continue;
 
-                                    var size = run.FontSize ?? 12f;
-                                    var color = ResolveRunColor(run.Color);
-
-                                    TextSpanDescriptor span;
-                                    if (!string.IsNullOrWhiteSpace(run.LinkUrl) && IsSafePdfLink(run.LinkUrl))
-                                        span = text.Hyperlink(content, run.LinkUrl!);
-                                    else
-                                        span = text.Span(content);
-
-                                    span = span
-                                        .FontFamily(font)
-                                        .FontColor(color)
-                                        .FontSize(size);
+                                    // Links: subrayado + color (sin API Hyperlink, más estable en Linux).
+                                    var isLink = !string.IsNullOrWhiteSpace(run.LinkUrl) && IsSafePdfLink(run.LinkUrl!);
+                                    var span = text.Span(content)
+                                        .FontFamily(Fonts.Arial)
+                                        .FontColor(isLink ? LinkText : ResolveRunColor(run.Color))
+                                        .FontSize(run.FontSize ?? 12f);
 
                                     if (run.Bold) span.Bold();
                                     if (run.Italic) span.Italic();
-                                    if (run.Underline || !string.IsNullOrWhiteSpace(run.LinkUrl)) span.Underline();
+                                    if (run.Underline || isLink) span.Underline();
                                     if (run.Strike) span.Strikethrough();
                                 }
                             });
@@ -140,6 +133,12 @@ public static class PortalPdfService
                 });
             });
         }).GeneratePdf();
+    }
+
+    private static string NormalizeAlign(string? align)
+    {
+        var a = (align ?? "left").Trim().ToLowerInvariant();
+        return a is "center" or "right" ? a : "left";
     }
 
     private static bool IsSafePdfLink(string href)
@@ -231,10 +230,15 @@ public static class PortalPdfService
         {
             candidates.Add(Path.Combine(contentRoot, "wwwroot", "img", "thomson-reuters-logo.png"));
             candidates.Add(Path.Combine(contentRoot, "img", "thomson-reuters-logo.png"));
+            // Mismos nombres que Oportunidad, por si existen en el root publicado.
+            candidates.Add(Path.Combine(contentRoot, "wwwroot", "logo.png"));
+            candidates.Add(Path.Combine(contentRoot, "logo.png"));
         }
 
         candidates.Add(Path.Combine(AppContext.BaseDirectory, "wwwroot", "img", "thomson-reuters-logo.png"));
         candidates.Add(Path.Combine(AppContext.BaseDirectory, "img", "thomson-reuters-logo.png"));
+        candidates.Add(Path.Combine(AppContext.BaseDirectory, "wwwroot", "logo.png"));
+        candidates.Add(Path.Combine(AppContext.BaseDirectory, "logo.png"));
 
         foreach (var path in candidates.Distinct(StringComparer.OrdinalIgnoreCase))
         {
