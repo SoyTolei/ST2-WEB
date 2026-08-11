@@ -32,7 +32,11 @@ public static class PortalPdfService
             {
                 // Ancho A4; alto ajustado al contenido para no dejar vacío abajo.
                 page.Size(pageSize);
-                page.Margin(24);
+                // Márgenes asimétricos: logo más cerca de la esquina superior derecha.
+                page.MarginLeft(24);
+                page.MarginRight(12);
+                page.MarginTop(12);
+                page.MarginBottom(24);
                 page.PageColor(PageBg);
                 // Igual que Oportunidad: Arial (fonts-liberation en Docker / sistema en Windows).
                 page.DefaultTextStyle(x => x.FontSize(11f).FontFamily(Fonts.Arial).FontColor(BodyText));
@@ -44,7 +48,7 @@ public static class PortalPdfService
                     {
                         if (!string.IsNullOrWhiteSpace(brand))
                         {
-                            row.RelativeItem().AlignLeft().AlignMiddle().Column(brandCol =>
+                            row.RelativeItem().AlignLeft().AlignTop().Column(brandCol =>
                             {
                                 brandCol.Item()
                                     .Text(brand)
@@ -60,17 +64,17 @@ public static class PortalPdfService
                             row.RelativeItem();
                         }
 
-                        row.ConstantItem(10);
+                        row.ConstantItem(6);
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(240).AlignRight().AlignMiddle().Height(62).Image(logo).FitHeight();
+                            row.ConstantItem(270).AlignRight().AlignTop().Height(72).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(240).AlignRight().AlignMiddle()
+                            row.ConstantItem(270).AlignRight().AlignTop()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(12f)
+                                .FontSize(13f)
                                 .FontColor(Colors.White)
                                 .FontFamily(Fonts.Arial);
                         }
@@ -145,8 +149,8 @@ public static class PortalPdfService
         var width = PageSizes.A4.Width;
         var maxHeight = PageSizes.A4.Height;
         const float minHeight = 340f;
-        const float margins = 48f;
-        const float header = 86f;
+        const float margins = 36f; // top 12 + bottom 24
+        const float header = 96f;
 
         float body = 0f;
         foreach (var line in lines)
