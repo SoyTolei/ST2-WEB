@@ -109,7 +109,18 @@ public static partial class PortalPdfHtmlParser
                 // closing
                 if (name is "p" or "div" or "li" or "h1" or "h2" or "h3" or "h4" or "h5" or "h6" or "blockquote" or "section" or "article" or "td" or "th")
                 {
-                    blocks.Add(MakeBreak(stack.Peek()));
+                    var trailing = CountTrailingBreaks(blocks);
+                    if (trailing == 0)
+                    {
+                        // Bloque con texto → cerrar párrafo.
+                        blocks.Add(MakeBreak(stack.Peek()));
+                    }
+                    else if (trailing == 1)
+                    {
+                        // Bloque vacío (<br> / &nbsp;) → línea en blanco.
+                        blocks.Add(MakeBreak(stack.Peek()));
+                    }
+
                     if (stack.Count > 1)
                         stack.Pop();
                     continue;
@@ -159,6 +170,14 @@ public static partial class PortalPdfHtmlParser
         Align = st.Align,
     };
 
+    private static int CountTrailingBreaks(List<PortalPdfBlock> blocks)
+    {
+        var n = 0;
+        for (var i = blocks.Count - 1; i >= 0 && blocks[i].Text == "\n"; i--)
+            n++;
+        return n;
+    }
+
     private static void ApplyBlockStyles(StyleState st, string name, string attrs)
     {
         st.Align = ResolveAlign(attrs, st.Align);
@@ -179,6 +198,9 @@ public static partial class PortalPdfHtmlParser
 
     private static void ApplyInlineStyles(StyleState st, string name, string attrs)
     {
+        // CSS primero; las etiquetas semánticas mandan después (Word a veces pone font-weight:normal en <b>).
+        ApplyCssStyles(st, attrs);
+
         if (name is "i" or "em") st.Italic = true;
         if (name is "b" or "strong") st.Bold = true;
         if (name == "u") st.Underline = true;
@@ -198,14 +220,12 @@ public static partial class PortalPdfHtmlParser
         {
             var color = AttrValue(attrs, "color");
             if (!string.IsNullOrWhiteSpace(color))
-                st.Color = NormalizeColor(color);
+                st.Color = NormalizeColor(color) ?? st.Color;
 
             var size = AttrValue(attrs, "size");
             if (int.TryParse(size, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n))
                 st.FontSize = MapHtmlFontSize(n);
         }
-
-        ApplyCssStyles(st, attrs);
     }
 
     private static void ApplyCssStyles(StyleState st, string attrs)
@@ -261,8 +281,9 @@ public static partial class PortalPdfHtmlParser
 
     private static bool IsBoldWeight(string val)
     {
-        if (val.Contains("bold", StringComparison.OrdinalIgnoreCase)) return true;
-        if (int.TryParse(val, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n))
+        var clean = val.Replace("!important", "", StringComparison.OrdinalIgnoreCase).Trim();
+        if (clean.Contains("bold", StringComparison.OrdinalIgnoreCase)) return true;
+        if (int.TryParse(clean, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n))
             return n >= 600;
         return false;
     }
@@ -388,8 +409,27 @@ public static partial class PortalPdfHtmlParser
             if (b.Text == "\n")
             {
                 if (result.Count == 0) continue;
-                if (result[^1].Text == "\n") continue;
+                // Permitir hasta 2 saltos seguidos (= una línea en blanco entre párrafos).
+                var trailing = 0;
+                for (var i = result.Count - 1; i >= 0 && result[i].Text == "\n"; i--)
+                    trailing++;
+                if (trailing >= 2)
+                    continue;
                 result.Add(b);
+                continue;
+            }
+
+            // Espacios solos de &nbsp; en párrafo vacío → tratar como línea en blanco.
+            if (string.IsNullOrWhiteSpace(b.Text))
+            {
+                if (result.Count == 0) continue;
+                var trailing = 0;
+                for (var i = result.Count - 1; i >= 0 && result[i].Text == "\n"; i--)
+                    trailing++;
+                if (trailing == 0)
+                    result.Add(new PortalPdfBlock { Text = "\n", Align = b.Align });
+                if (trailing < 2)
+                    result.Add(new PortalPdfBlock { Text = "\n", Align = b.Align });
                 continue;
             }
 

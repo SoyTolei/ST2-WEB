@@ -166,7 +166,7 @@ export function initPdfPortalGenerator() {
       fixInvisibleEditorColors(editor);
       const payload = {
         brand: (brandInput?.value || "").trim(),
-        html: editor.innerHTML || "",
+        html: normalizeEditorHtmlForPdf(editor),
         text: editor.innerText || "",
       };
       const response = await fetch("/api/portal-pdf/generate", {
@@ -225,6 +225,24 @@ function handleRichPaste(e, editor) {
   }
   fixInvisibleEditorColors(editor);
   editor.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+/** Normaliza el HTML del editor a párrafos/br simples para el PDF. */
+function normalizeEditorHtmlForPdf(root) {
+  const clone = root.cloneNode(true);
+  // Chrome suele usar DIV por línea → P para el parser.
+  clone.querySelectorAll("div").forEach((div) => {
+    if (div.closest("ul,ol,li,table")) return;
+    const p = document.createElement("p");
+    const align = div.style.textAlign || div.getAttribute("align") || "";
+    if (align) p.style.textAlign = align;
+    while (div.firstChild) p.appendChild(div.firstChild);
+    if (!p.textContent?.trim() && !p.querySelector("img,br")) {
+      p.appendChild(document.createElement("br"));
+    }
+    div.replaceWith(p);
+  });
+  return clone.innerHTML || "";
 }
 
 /** Colores claros sobre fondo blanco del editor → se fuerzan a oscuro. */

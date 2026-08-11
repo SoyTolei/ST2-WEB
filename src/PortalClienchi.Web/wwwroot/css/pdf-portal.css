@@ -16,14 +16,16 @@
 
 .pdf-portal-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr);
+  gap: 28px;
   margin-top: 8px;
+  align-items: start;
 }
 
 @media (max-width: 960px) {
   .pdf-portal-grid {
     grid-template-columns: 1fr;
+    gap: 18px;
   }
 }
 
@@ -129,18 +131,39 @@
   cursor: pointer;
 }
 
+.pdf-portal-editor-shell {
+  position: relative;
+}
+
 .pdf-portal-rich {
-  min-height: 220px;
-  max-height: 420px;
+  min-height: 260px;
+  max-height: none;
+  height: 320px;
   overflow: auto;
+  resize: vertical;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 12px 14px;
   font-size: 0.92rem;
-  line-height: 1.5;
+  line-height: 1.55;
   background: #fff;
   color: #0f172a;
   caret-color: #0f172a;
+  box-sizing: border-box;
+}
+
+.pdf-portal-editor-resize-hint {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, transparent 45%, #94a3b8 45%, #94a3b8 50%, transparent 50%),
+    linear-gradient(135deg, transparent 60%, #94a3b8 60%, #94a3b8 65%, transparent 65%),
+    linear-gradient(135deg, transparent 75%, #94a3b8 75%, #94a3b8 80%, transparent 80%);
+  opacity: 0.85;
 }
 
 .pdf-portal-rich a {
@@ -186,6 +209,21 @@
 
 .pdf-portal-preview-wrap {
   min-width: 0;
+  margin-left: 18px;
+  padding-left: 6px;
+}
+
+.pdf-portal-preview-brand {
+  background: transparent;
+  color: #f2f2f2;
+  font-weight: 600;
+  font-size: 0.98rem;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 0 0 8px;
+  line-height: 1.25;
+  border-bottom: 3px solid #f36c00;
+  max-width: 55%;
 }
 
 .pdf-portal-preview {
@@ -208,19 +246,6 @@
   gap: 16px;
   margin-bottom: 22px;
   flex-shrink: 0;
-}
-
-.pdf-portal-preview-brand {
-  background: transparent;
-  color: #f2f2f2;
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: 0.01em;
-  text-transform: none;
-  padding: 0 0 8px;
-  line-height: 1.25;
-  border-bottom: 3px solid #f36c00;
-  max-width: 55%;
 }
 
 .pdf-portal-preview-brand.hidden {

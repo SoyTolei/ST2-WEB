@@ -46,7 +46,7 @@ public static class PortalPdfService
                             {
                                 brandCol.Item()
                                     .Text(brand)
-                                    .FontSize(18f)
+                                    .FontSize(16f)
                                     .SemiBold()
                                     .FontColor(BrandText)
                                     .FontFamily(Fonts.Arial);
@@ -84,7 +84,7 @@ public static class PortalPdfService
                     {
                         if (line.Count == 0 || (line.Count == 1 && line[0].Text == "\n"))
                         {
-                            col.Item().Height(10);
+                            col.Item().Height(14);
                             continue;
                         }
 
@@ -108,6 +108,8 @@ public static class PortalPdfService
                                 else
                                     text.AlignLeft();
 
+                                text.ParagraphSpacing(2);
+
                                 foreach (var run in line)
                                 {
                                     if (run.Text == "\n") continue;
@@ -129,7 +131,7 @@ public static class PortalPdfService
                             });
                         });
 
-                        col.Item().Height(4);
+                        col.Item().Height(8);
                     }
                 });
             });

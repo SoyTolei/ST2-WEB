@@ -966,7 +966,10 @@
                   </div>
 
                   <label class="pdf-portal-label" for="pdf-portal-editor">Contenido</label>
-                  <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Pegá aquí el texto del portal…"></div>
+                  <div class="pdf-portal-editor-shell">
+                    <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Pegá aquí el texto del portal…"></div>
+                    <span class="pdf-portal-editor-resize-hint" title="Arrastrá la esquina para agrandar" aria-hidden="true"></span>
+                  </div>
 
                   <p id="pdf-portal-status" class="pdf-portal-status" role="status"></p>
 
