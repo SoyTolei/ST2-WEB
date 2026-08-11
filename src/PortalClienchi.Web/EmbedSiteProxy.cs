@@ -72,6 +72,7 @@ internal sealed class EmbedSiteProxy
         "/api/search",
         "/api/knowledge/",
         "/api/planillas/",
+        "/api/portal-pdf/",
         "/api/access/",
         "/api/capturas/",
     ];

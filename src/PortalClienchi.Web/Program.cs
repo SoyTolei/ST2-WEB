@@ -399,6 +399,9 @@ app.MapMethods("/embed/{site}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE",
     async (HttpContext ctx, string site, EmbedSiteProxy proxy, CancellationToken ct) =>
         await proxy.HandleAsync(ctx, site, "", ct));
 
+app.MapPlanillasEndpoints();
+app.MapPortalPdfEndpoints();
+
 app.MapWhen(
     ctx => EmbedSiteProxy.ShouldMirrorThomPath(ctx.Request.Path),
     branch => branch.Run(async ctx =>
@@ -407,12 +410,9 @@ app.MapWhen(
         await proxy.HandleMirrorAsync(ctx, ctx.RequestAborted);
     }));
 
-app.MapPlanillasEndpoints();
-app.MapPortalPdfEndpoints();
-
 // Capturas públicas (ANTES del fallback SPA).
-// Importante: /c/ también está en EmbedSiteProxy.St2ReservedPrefixes para que
-// el mirror de THOM no robe la ruta (eso causaba HTTP 500).
+// Importante: /c/ y /api/portal-pdf/ también están en EmbedSiteProxy (rutas ST2)
+// para que el mirror de THOM no robe la ruta (eso causaba HTTP 500).
 app.MapGet("/c/{id}", (string id, LocalCapturaStore store) =>
 {
     try
