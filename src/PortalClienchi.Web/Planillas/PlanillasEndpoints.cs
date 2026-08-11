@@ -20,6 +20,11 @@ public static class PlanillasEndpoints
         ".pdf",
     };
 
+    private static readonly HashSet<string> TxtExtensiones = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".txt",
+    };
+
     private static readonly HashSet<string> TrazaExtensiones = new(StringComparer.OrdinalIgnoreCase)
     {
         ".trc", ".csv", ".txt",
@@ -121,19 +126,29 @@ public static class PlanillasEndpoints
                     || contentType.Equals("video/webm", StringComparison.OrdinalIgnoreCase);
                 var esPdf = PdfExtensiones.Contains(ext)
                     || contentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase);
+                var esTxt = TxtExtensiones.Contains(ext)
+                    || (string.IsNullOrEmpty(ext)
+                        && contentType.Equals("text/plain", StringComparison.OrdinalIgnoreCase));
 
-                if (!esImagen && !esVideo && !esPdf)
-                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen, PDF o video mp4/webm." });
+                if (!esImagen && !esVideo && !esPdf && !esTxt)
+                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen, PDF, TXT o video mp4/webm." });
 
                 if (esVideo)
                     videos++;
 
-                archivos.Add((file.FileName, file.OpenReadStream()));
+                var uploadName = file.FileName;
+                if (esTxt && !TxtExtensiones.Contains(ext))
+                    uploadName = Path.ChangeExtension(
+                        string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(file.FileName))
+                            ? "adjunto"
+                            : Path.GetFileNameWithoutExtension(file.FileName),
+                        ".txt");
+
+                archivos.Add((uploadName, file.OpenReadStream()));
             }
 
             if (archivos.Count == 0)
                 return Results.BadRequest(new { error = "No hay archivos válidos." });
-
             if (videos > 1)
                 return Results.BadRequest(new { error = "Solo se permite 1 video por subida (máx. 100 MB). Si pesa más, subilo en los comentarios del caso." });
 

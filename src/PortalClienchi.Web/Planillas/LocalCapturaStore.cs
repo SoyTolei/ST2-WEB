@@ -128,6 +128,7 @@ public sealed class LocalCapturaStore
                 var ext = Path.GetExtension(safeName);
                 var isVideo = AllowedVideoExt.Contains(ext);
                 var isPdf = AllowedPdfExt.Contains(ext) || LooksLikePdf(raw);
+                var isTxt = ext.Equals(".txt", StringComparison.OrdinalIgnoreCase);
 
                 if (isVideo)
                 {
@@ -180,6 +181,33 @@ public sealed class LocalCapturaStore
                     continue;
                 }
 
+                if (isTxt)
+                {
+                    if (raw.Length > maxImageBytes)
+                    {
+                        results.Add(new CapturaSubidaResult(
+                            safeName,
+                            null,
+                            $"El TXT supera el máximo de {maxImageBytes / (1024 * 1024.0):0.#} MB."));
+                        continue;
+                    }
+
+                    EnsureRoot();
+                    var txtId = NewShortId();
+                    await File.WriteAllBytesAsync(Path.Combine(_root, txtId + ".txt"), raw, ct)
+                        .ConfigureAwait(false);
+                    var downloadName = SanitizeDownloadName(safeName, ".txt");
+                    await File.WriteAllTextAsync(
+                        Path.Combine(_root, txtId + ".meta"),
+                        downloadName,
+                        ct).ConfigureAwait(false);
+
+                    var txtUrl = $"{baseUrl}/c/{txtId}";
+                    _logger.LogInformation("TXT guardado {Id} ({Bytes} bytes) → {Url}", txtId, raw.Length, txtUrl);
+                    results.Add(new CapturaSubidaResult(safeName, txtUrl, null));
+                    continue;
+                }
+
                 if (raw.Length > maxImageBytes)
                 {
                     results.Add(new CapturaSubidaResult(
@@ -191,7 +219,7 @@ public sealed class LocalCapturaStore
 
                 if (!AllowedExt.Contains(ext) && !LooksLikeImage(raw))
                 {
-                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes, PDF o video mp4/webm."));
+                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes, PDF, TXT o video mp4/webm."));
                     continue;
                 }
 

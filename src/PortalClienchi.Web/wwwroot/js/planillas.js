@@ -332,14 +332,27 @@ function isPlanVideoFile(file) {
   return t === "video/mp4" || t === "video/webm";
 }
 
+function isPlanPdfFile(file) {
+  if (/\.pdf$/i.test(file.name || "")) return true;
+  return (file.type || "") === "application/pdf";
+}
+
+function isPlanTxtFile(file) {
+  return /\.txt$/i.test(file.name || "");
+}
+
 function isPlanCapturaFile(file) {
   if (isPlanVideoFile(file)) return true;
+  if (isPlanPdfFile(file)) return true;
+  if (isPlanTxtFile(file)) return true;
   if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
   return (file.type || "").startsWith("image/");
 }
 
 const MAX_PLAN_VIDEOS = 1;
 const MAX_PLAN_VIDEO_BYTES = 100 * 1024 * 1024;
+const MAX_PLAN_PDF_BYTES = 12 * 1024 * 1024;
+const MAX_PLAN_TXT_BYTES = 12 * 1024 * 1024;
 
 function refreshCapturasUi() {
   const chips = els.capturasChips();
@@ -350,15 +363,20 @@ function refreshCapturasUi() {
   chips.innerHTML = "";
   capturaFiles.forEach((f, index) => {
     const isVideo = isPlanVideoFile(f);
+    const isPdf = isPlanPdfFile(f);
+    const isTxt = isPlanTxtFile(f);
+    const isChip = isVideo || isPdf || isTxt;
     const card = document.createElement("div");
-    card.className = isVideo ? "plan-traza-chip plan-video-chip" : "plan-captura-thumb";
+    card.className = isChip
+      ? `plan-traza-chip ${isVideo ? "plan-video-chip" : isTxt ? "plan-txt-chip" : "plan-pdf-chip"}`
+      : "plan-captura-thumb";
 
     let preview;
-    if (isVideo) {
+    if (isChip) {
       preview = document.createElement("span");
       preview.className = "plan-traza-chip-ext";
       const match = /\.([^.]+)$/.exec(f.name || "");
-      preview.textContent = (match?.[1] || "mp4").toUpperCase();
+      preview.textContent = (match?.[1] || (isPdf ? "pdf" : isTxt ? "txt" : "mp4")).toUpperCase();
     } else {
       preview = document.createElement("img");
       const url = URL.createObjectURL(f);
@@ -368,7 +386,7 @@ function refreshCapturasUi() {
     }
 
     const name = document.createElement("span");
-    name.className = isVideo ? "plan-traza-chip-name" : "plan-captura-thumb-name";
+    name.className = isChip ? "plan-traza-chip-name" : "plan-captura-thumb-name";
     name.textContent = f.name;
     name.title = f.name;
 
@@ -393,10 +411,14 @@ function refreshCapturasUi() {
       estado.textContent = "";
     } else {
       const videos = capturaFiles.filter(isPlanVideoFile).length;
-      const imgs = capturaFiles.length - videos;
+      const pdfs = capturaFiles.filter(isPlanPdfFile).length;
+      const txts = capturaFiles.filter(isPlanTxtFile).length;
+      const imgs = capturaFiles.length - videos - pdfs - txts;
       const parts = [];
       if (imgs > 0) parts.push(`${imgs} imagen(es)`);
       if (videos > 0) parts.push(`${videos} video(s)`);
+      if (pdfs > 0) parts.push(`${pdfs} PDF`);
+      if (txts > 0) parts.push(`${txts} TXT`);
       estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
     }
   }
@@ -417,6 +439,8 @@ function onCapturasToggle() {
 function addCapturaFiles(fileList) {
   let added = 0;
   let rejectedHeavy = false;
+  let rejectedPdfHeavy = false;
+  let rejectedTxtHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
   for (const file of fileList) {
@@ -433,6 +457,16 @@ function addCapturaFiles(fileList) {
         rejectedVideo = true;
         continue;
       }
+    } else if (isPlanPdfFile(file)) {
+      if (file.size > MAX_PLAN_PDF_BYTES) {
+        rejectedPdfHeavy = true;
+        continue;
+      }
+    } else if (isPlanTxtFile(file)) {
+      if (file.size > MAX_PLAN_TXT_BYTES) {
+        rejectedTxtHeavy = true;
+        continue;
+      }
     }
     if (!capturaFiles.some((f) => f.name === file.name && f.size === file.size)) {
       capturaFiles.push(file);
@@ -441,10 +475,14 @@ function addCapturaFiles(fileList) {
   }
   if (rejectedHeavy) {
     alert("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedPdfHeavy) {
+    alert("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedTxtHeavy) {
+    alert("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
     alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP) o video MP4/WEBM.");
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT o video MP4/WEBM.");
   }
   if (added > 0) {
     const check = els.capturasCheck();

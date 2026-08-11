@@ -646,9 +646,14 @@ function isReferralPdfFile(file) {
   return (file.type || "") === "application/pdf";
 }
 
+function isReferralTxtFile(file) {
+  return /\.txt$/i.test(file.name || "");
+}
+
 function isReferralCapturaFile(file) {
   if (isReferralVideoFile(file)) return true;
   if (isReferralPdfFile(file)) return true;
+  if (isReferralTxtFile(file)) return true;
   if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
   return (file.type || "").startsWith("image/");
 }
@@ -656,11 +661,13 @@ function isReferralCapturaFile(file) {
 const MAX_REFERRAL_VIDEOS = 1;
 const MAX_REFERRAL_VIDEO_BYTES = 100 * 1024 * 1024;
 const MAX_REFERRAL_PDF_BYTES = 12 * 1024 * 1024;
+const MAX_REFERRAL_TXT_BYTES = 12 * 1024 * 1024;
 
 function addReferralCapturaFiles(fileList, targetList) {
   let added = 0;
   let rejectedHeavy = false;
   let rejectedPdfHeavy = false;
+  let rejectedTxtHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
 
@@ -684,6 +691,11 @@ function addReferralCapturaFiles(fileList, targetList) {
         rejectedPdfHeavy = true;
         continue;
       }
+    } else if (isReferralTxtFile(file)) {
+      if (file.size > MAX_REFERRAL_TXT_BYTES) {
+        rejectedTxtHeavy = true;
+        continue;
+      }
     }
 
     if (!targetList.some((f) => f.name === file.name && f.size === file.size)) {
@@ -696,10 +708,12 @@ function addReferralCapturaFiles(fileList, targetList) {
     alert("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedPdfHeavy) {
     alert("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedTxtHeavy) {
+    alert("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
     alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF o video MP4/WEBM.");
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT o video MP4/WEBM.");
   }
   if (added > 0) setReferralPantallasUi(true);
   return added;
@@ -719,11 +733,13 @@ function refreshCapturasEstadoReferral(prefix, fileList) {
   }
   const videos = fileList.filter(isReferralVideoFile).length;
   const pdfs = fileList.filter(isReferralPdfFile).length;
-  const imgs = fileList.length - videos - pdfs;
+  const txts = fileList.filter(isReferralTxtFile).length;
+  const imgs = fileList.length - videos - pdfs - txts;
   const parts = [];
   if (imgs > 0) parts.push(`${imgs} imagen(es)`);
   if (videos > 0) parts.push(`${videos} video(s)`);
   if (pdfs > 0) parts.push(`${pdfs} PDF`);
+  if (txts > 0) parts.push(`${txts} TXT`);
   estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
 }
 
@@ -850,10 +866,11 @@ function refreshChips(id, files, prefix, fileList) {
   files.forEach((f, index) => {
     const isVideo = isReferralVideoFile(f);
     const isPdf = isReferralPdfFile(f);
-    const isChip = isVideo || isPdf;
+    const isTxt = isReferralTxtFile(f);
+    const isChip = isVideo || isPdf || isTxt;
     const card = document.createElement("div");
     card.className = isChip
-      ? `plan-traza-chip ${isVideo ? "plan-video-chip" : "plan-pdf-chip"}`
+      ? `plan-traza-chip ${isVideo ? "plan-video-chip" : isTxt ? "plan-txt-chip" : "plan-pdf-chip"}`
       : "plan-captura-thumb";
 
     let preview;
@@ -861,7 +878,7 @@ function refreshChips(id, files, prefix, fileList) {
       preview = document.createElement("span");
       preview.className = "plan-traza-chip-ext";
       const match = /\.([^.]+)$/.exec(f.name || "");
-      preview.textContent = (match?.[1] || (isPdf ? "pdf" : "mp4")).toUpperCase();
+      preview.textContent = (match?.[1] || (isPdf ? "pdf" : isTxt ? "txt" : "mp4")).toUpperCase();
     } else {
       preview = document.createElement("img");
       const url = URL.createObjectURL(f);
@@ -1038,7 +1055,7 @@ async function generarReferral(copiar) {
 
   // LEGAL: si marcó capturas tiene que subirlas. Bejerman/Onvio permiten generar sin subir (van en comentarios).
   if (isLegal() && quierePantallas && files.length === 0) {
-    alert("Marcaste capturas pero no hay archivos. Usá «Examinar imágenes o video».");
+    alert("Marcaste capturas pero no hay archivos. Usá «Examinar imágenes, video, PDF o TXT».");
     status.textContent = "Faltan capturas para adjuntar.";
     return;
   }

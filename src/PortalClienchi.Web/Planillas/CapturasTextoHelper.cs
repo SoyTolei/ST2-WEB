@@ -12,6 +12,11 @@ public static class CapturasTextoHelper
         ".pdf",
     };
 
+    private static readonly HashSet<string> TxtExt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".txt",
+    };
+
     public static void AppendBloqueCapturas(
         List<string> partes,
         bool hayCapturas,
@@ -71,7 +76,7 @@ public static class CapturasTextoHelper
     {
         var flags = Classify(enlaces);
         var label = BuildPhrase(flags, Style.Titulo, enlaces.Count == 1);
-        return string.IsNullOrEmpty(label) ? "- Capturas / video / PDF" : $"- {label}";
+        return string.IsNullOrEmpty(label) ? "- Capturas / video / PDF / TXT" : $"- {label}";
     }
 
     /// <summary>Etiqueta corta para ítems «en comentarios» (Referral).</summary>
@@ -79,16 +84,16 @@ public static class CapturasTextoHelper
     {
         var flags = Classify(enlaces);
         var label = BuildPhrase(flags, Style.Titulo, singular: false);
-        return string.IsNullOrEmpty(label) ? "Capturas / video / PDF" : label;
+        return string.IsNullOrEmpty(label) ? "Capturas / video / PDF / TXT" : label;
     }
 
     public static string BuildSiNoLabel(IReadOnlyList<TransferenciaCapturaEnlace> enlaces, bool marcado)
     {
         if (!marcado)
-            return "capturas / video / PDF";
+            return "capturas / video / PDF / TXT";
         var flags = Classify(enlaces);
         var label = BuildPhrase(flags, Style.Minuscula, singular: false);
-        return string.IsNullOrEmpty(label) ? "capturas / video / PDF" : label;
+        return string.IsNullOrEmpty(label) ? "capturas / video / PDF / TXT" : label;
     }
 
     private static string BuildEnlacesIntro(
@@ -98,7 +103,7 @@ public static class CapturasTextoHelper
         var uno = enlaces.Count == 1;
         var phrase = BuildPhrase(flags, Style.Minuscula, uno);
         if (string.IsNullOrEmpty(phrase))
-            phrase = uno ? "captura / video / PDF" : "capturas / video / PDF";
+            phrase = uno ? "captura / video / PDF / TXT" : "capturas / video / PDF / TXT";
 
         if (uno)
             return $"Se adjunta {ArticleFor(flags)} {phrase} en el siguiente link:";
@@ -108,10 +113,11 @@ public static class CapturasTextoHelper
 
     private static string ArticleFor(MediaFlags flags)
     {
-        // "el video", "el PDF", "la captura"
-        if (flags.Video && !flags.Images && !flags.Pdf) return "el";
-        if (flags.Pdf && !flags.Images && !flags.Video) return "el";
-        if (flags.Images && !flags.Video && !flags.Pdf) return "la";
+        // "el video", "el PDF", "el TXT", "la captura"
+        if (flags.Video && !flags.Images && !flags.Pdf && !flags.Txt) return "el";
+        if (flags.Pdf && !flags.Images && !flags.Video && !flags.Txt) return "el";
+        if (flags.Txt && !flags.Images && !flags.Video && !flags.Pdf) return "el";
+        if (flags.Images && !flags.Video && !flags.Pdf && !flags.Txt) return "la";
         return "el";
     }
 
@@ -119,13 +125,14 @@ public static class CapturasTextoHelper
     {
         var phrase = BuildPhrase(flags, Style.Minuscula, singular: false);
         if (string.IsNullOrEmpty(phrase))
-            phrase = "capturas / video / PDF";
+            phrase = "capturas / video / PDF / TXT";
 
         var sujeto = flags switch
         {
-            { Images: false, Video: true, Pdf: false } => "El video se adjunta",
-            { Images: false, Video: false, Pdf: true } => "El PDF se adjunta",
-            { Images: true, Video: false, Pdf: false } => "Las capturas se adjuntan",
+            { Images: false, Video: true, Pdf: false, Txt: false } => "El video se adjunta",
+            { Images: false, Video: false, Pdf: true, Txt: false } => "El PDF se adjunta",
+            { Images: false, Video: false, Pdf: false, Txt: true } => "El TXT se adjunta",
+            { Images: true, Video: false, Pdf: false, Txt: false } => "Las capturas se adjuntan",
             _ => $"{char.ToUpperInvariant(phrase[0])}{phrase[1..]} se adjuntan",
         };
 
@@ -135,9 +142,9 @@ public static class CapturasTextoHelper
     private static string LabelMayus(MediaFlags flags, bool hayCapturas)
     {
         if (!hayCapturas)
-            return "CAPTURAS / VIDEO / PDF";
+            return "CAPTURAS / VIDEO / PDF / TXT";
         var phrase = BuildPhrase(flags, Style.Mayuscula, singular: false);
-        return string.IsNullOrEmpty(phrase) ? "CAPTURAS / VIDEO / PDF" : phrase;
+        return string.IsNullOrEmpty(phrase) ? "CAPTURAS / VIDEO / PDF / TXT" : phrase;
     }
 
     private enum Style
@@ -149,7 +156,7 @@ public static class CapturasTextoHelper
 
     private static string BuildPhrase(MediaFlags flags, Style style, bool singular)
     {
-        var parts = new List<string>(3);
+        var parts = new List<string>(4);
         if (flags.Images)
         {
             parts.Add(style switch
@@ -164,7 +171,7 @@ public static class CapturasTextoHelper
         {
             parts.Add(style switch
             {
-                Style.Mayuscula => singular && parts.Count == 0 ? "VIDEO" : "VIDEO",
+                Style.Mayuscula => "VIDEO",
                 Style.Titulo => "Video",
                 _ => "video",
             });
@@ -180,6 +187,16 @@ public static class CapturasTextoHelper
             });
         }
 
+        if (flags.Txt)
+        {
+            parts.Add(style switch
+            {
+                Style.Mayuscula => "TXT",
+                Style.Titulo => "TXT",
+                _ => "TXT",
+            });
+        }
+
         if (parts.Count == 0)
             return "";
 
@@ -191,9 +208,11 @@ public static class CapturasTextoHelper
                 ? $"{parts[0]} Y {parts[1]}"
                 : $"{parts[0]} y {parts[1]}";
 
+        var last = parts[^1];
+        var head = string.Join(", ", parts.Take(parts.Count - 1));
         return style == Style.Mayuscula
-            ? $"{parts[0]}, {parts[1]} Y {parts[2]}"
-            : $"{parts[0]}, {parts[1]} y {parts[2]}";
+            ? $"{head} Y {last}"
+            : $"{head} y {last}";
     }
 
     private static MediaFlags Classify(IReadOnlyList<TransferenciaCapturaEnlace> enlaces)
@@ -201,17 +220,20 @@ public static class CapturasTextoHelper
         var images = false;
         var video = false;
         var pdf = false;
+        var txt = false;
         foreach (var e in enlaces)
         {
             if (IsVideoFileName(e.FileName))
                 video = true;
             else if (IsPdfFileName(e.FileName))
                 pdf = true;
+            else if (IsTxtFileName(e.FileName))
+                txt = true;
             else
                 images = true;
         }
 
-        return new MediaFlags(images, video, pdf);
+        return new MediaFlags(images, video, pdf, txt);
     }
 
     private static bool IsVideoFileName(string? fileName)
@@ -228,5 +250,12 @@ public static class CapturasTextoHelper
         return PdfExt.Contains(Path.GetExtension(fileName));
     }
 
-    private readonly record struct MediaFlags(bool Images, bool Video, bool Pdf);
+    private static bool IsTxtFileName(string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return false;
+        return TxtExt.Contains(Path.GetExtension(fileName));
+    }
+
+    private readonly record struct MediaFlags(bool Images, bool Video, bool Pdf, bool Txt);
 }

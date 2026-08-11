@@ -649,6 +649,15 @@
   background: #dc2626;
 }
 
+.plan-txt-chip {
+  border-color: #a5f3fc;
+  background: #ecfeff;
+}
+
+.plan-txt-chip .plan-traza-chip-ext {
+  background: #0e7490;
+}
+
 .plan-capturas-actions {
   display: flex;
   flex-wrap: wrap;
