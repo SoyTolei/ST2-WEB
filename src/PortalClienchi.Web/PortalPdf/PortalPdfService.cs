@@ -116,9 +116,11 @@ public static class PortalPdfService
                                     var size = run.FontSize ?? 12f;
                                     var color = ResolveRunColor(run.Color);
 
-                                    TextSpanDescriptor span = !string.IsNullOrWhiteSpace(run.LinkUrl)
-                                        ? text.Hyperlink(content, run.LinkUrl!)
-                                        : text.Span(content);
+                                    TextSpanDescriptor span;
+                                    if (!string.IsNullOrWhiteSpace(run.LinkUrl) && IsSafePdfLink(run.LinkUrl))
+                                        span = text.Hyperlink(content, run.LinkUrl!);
+                                    else
+                                        span = text.Span(content);
 
                                     span = span
                                         .FontFamily(font)
@@ -127,7 +129,7 @@ public static class PortalPdfService
 
                                     if (run.Bold) span.Bold();
                                     if (run.Italic) span.Italic();
-                                    if (run.Underline) span.Underline();
+                                    if (run.Underline || !string.IsNullOrWhiteSpace(run.LinkUrl)) span.Underline();
                                     if (run.Strike) span.Strikethrough();
                                 }
                             });
@@ -138,6 +140,15 @@ public static class PortalPdfService
                 });
             });
         }).GeneratePdf();
+    }
+
+    private static bool IsSafePdfLink(string href)
+    {
+        var h = href.Trim();
+        if (h.Length == 0) return false;
+        if (!Uri.TryCreate(h, UriKind.Absolute, out var uri))
+            return false;
+        return uri.Scheme is "http" or "https" or "mailto";
     }
 
     private static Color ResolveRunColor(string? cssColor)
