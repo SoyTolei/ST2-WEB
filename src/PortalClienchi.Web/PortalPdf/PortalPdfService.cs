@@ -32,10 +32,10 @@ public static class PortalPdfService
             {
                 // Ancho A4; alto ajustado al contenido para no dejar vacío abajo.
                 page.Size(pageSize);
-                // Márgenes asimétricos: logo más cerca de la esquina superior derecha.
+                // Márgenes asimétricos: logo bien pegado a la esquina superior derecha.
                 page.MarginLeft(24);
-                page.MarginRight(12);
-                page.MarginTop(12);
+                page.MarginRight(8);
+                page.MarginTop(8);
                 page.MarginBottom(24);
                 page.PageColor(PageBg);
                 // Igual que Oportunidad: Arial (fonts-liberation en Docker / sistema en Windows).
@@ -43,12 +43,12 @@ public static class PortalPdfService
 
                 page.Content().Column(col =>
                 {
-                    // Header como filas de Content (evita Header/elementos vacíos).
+                    // Header: título y logo centrados a la misma altura.
                     col.Item().PaddingBottom(16).Row(row =>
                     {
                         if (!string.IsNullOrWhiteSpace(brand))
                         {
-                            row.RelativeItem().AlignLeft().AlignTop().Column(brandCol =>
+                            row.RelativeItem().AlignLeft().AlignMiddle().Column(brandCol =>
                             {
                                 brandCol.Item()
                                     .Text(brand)
@@ -64,15 +64,15 @@ public static class PortalPdfService
                             row.RelativeItem();
                         }
 
-                        row.ConstantItem(6);
+                        row.ConstantItem(4);
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(270).AlignRight().AlignTop().Height(72).Image(logo).FitHeight();
+                            row.ConstantItem(290).AlignRight().AlignMiddle().Height(80).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(270).AlignRight().AlignTop()
+                            row.ConstantItem(290).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
                                 .FontSize(13f)
                                 .FontColor(Colors.White)
@@ -149,8 +149,8 @@ public static class PortalPdfService
         var width = PageSizes.A4.Width;
         var maxHeight = PageSizes.A4.Height;
         const float minHeight = 340f;
-        const float margins = 36f; // top 12 + bottom 24
-        const float header = 96f;
+        const float margins = 32f; // top 8 + bottom 24
+        const float header = 104f;
 
         float body = 0f;
         foreach (var line in lines)
