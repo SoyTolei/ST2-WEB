@@ -6,8 +6,10 @@ public static class PortalPdfEndpoints
     {
         app.MapPost("/api/portal-pdf/generate", (
             PortalPdfGenerateRequest body,
-            IWebHostEnvironment env) =>
+            IWebHostEnvironment env,
+            ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("PortalPdf");
             try
             {
                 var brand = (body.Brand ?? "").Trim();
@@ -27,7 +29,12 @@ public static class PortalPdfEndpoints
             }
             catch (Exception ex)
             {
-                return Results.Problem(detail: ex.Message, title: "Error al generar PDF del portal");
+                logger.LogError(ex, "Error al generar PDF del portal");
+                return Results.Json(new
+                {
+                    error = "Error al generar PDF del portal",
+                    detail = ex.Message,
+                }, statusCode: 500);
             }
         });
     }

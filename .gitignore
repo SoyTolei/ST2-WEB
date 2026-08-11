@@ -31,3 +31,6 @@ scripts/blazor.boot.json
 scripts/legalone-templates.html
 scripts/_read-op-db.csx
 test.pdf
+
+# Fuentes locales (se usan las del sistema / Docker)
+src/PortalClienchi.Web/Fonts/

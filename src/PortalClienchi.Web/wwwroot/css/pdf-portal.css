@@ -60,13 +60,78 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+
+.pdf-portal-formatbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.pdf-fmt-btn {
+  min-width: 32px;
+  height: 30px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0 8px;
+}
+
+.pdf-fmt-btn:hover {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+.pdf-fmt-sep {
+  width: 1px;
+  height: 22px;
+  background: #cbd5e1;
+  margin: 0 4px;
+}
+
+.pdf-fmt-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin: 0 2px;
+}
+
+.pdf-fmt-field select,
+.pdf-fmt-field input[type="color"] {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  height: 30px;
+}
+
+.pdf-fmt-field select {
+  padding: 0 6px;
+  font-size: 0.78rem;
+}
+
+.pdf-fmt-field input[type="color"] {
+  width: 36px;
+  padding: 2px;
+  cursor: pointer;
 }
 
 .pdf-portal-hint {
   font-size: 0.75rem;
   color: #94a3b8;
-  flex: 1 1 180px;
+  margin: 0 0 10px;
 }
 
 .pdf-portal-rich {
@@ -80,6 +145,21 @@
   line-height: 1.5;
   background: #fff;
   color: #0f172a;
+}
+
+.pdf-portal-rich a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.pdf-portal-preview-body a {
+  color: #7dd3fc;
+  text-decoration: underline;
+}
+
+.pdf-portal-preview-body [style*="text-align:center"],
+.pdf-portal-preview-body [style*="text-align: center"] {
+  text-align: center;
 }
 
 .pdf-portal-rich:focus {

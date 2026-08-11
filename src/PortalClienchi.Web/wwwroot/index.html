@@ -920,7 +920,7 @@
             <div class="pdf-portal-app">
               <div class="pdf-portal-hero">
                 <h2>Generador de PDFS para Portal</h2>
-                <p>Pegá el texto con formato (cursiva, alineación) o cargá un .txt. El PDF usa el header predefinido con logo Thomson Reuters.</p>
+                <p>Pegá desde Word/Docs o editá acá: negrita, cursiva, colores, tamaños, alineación e hipervínculos se conservan en el PDF.</p>
                 <div class="accent-bar"></div>
               </div>
 
@@ -933,8 +933,39 @@
                     <button type="button" id="pdf-portal-load-txt" class="btn btn-secondary">Cargar .txt</button>
                     <input id="pdf-portal-file" type="file" accept=".txt,text/plain" class="hidden" aria-hidden="true"/>
                     <button type="button" id="pdf-portal-clear" class="btn btn-secondary">Limpiar</button>
-                    <span class="pdf-portal-hint">Copiá desde Word/Docs y pegá abajo: se conservan cursiva y alineación.</span>
                   </div>
+
+                  <div class="pdf-portal-formatbar" role="toolbar" aria-label="Formato de texto">
+                    <button type="button" class="pdf-fmt-btn" data-cmd="bold" title="Negrita"><b>B</b></button>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="italic" title="Cursiva"><i>I</i></button>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="underline" title="Subrayado"><u>U</u></button>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="strikeThrough" title="Tachado"><s>S</s></button>
+                    <span class="pdf-fmt-sep" aria-hidden="true"></span>
+                    <label class="pdf-fmt-field" title="Tamaño">
+                      <span>Tam.</span>
+                      <select id="pdf-portal-font-size" aria-label="Tamaño de fuente">
+                        <option value="">—</option>
+                        <option value="2">Pequeño</option>
+                        <option value="3" selected>Normal</option>
+                        <option value="4">Mediano</option>
+                        <option value="5">Grande</option>
+                        <option value="6">Muy grande</option>
+                      </select>
+                    </label>
+                    <label class="pdf-fmt-field" title="Color">
+                      <span>Color</span>
+                      <input id="pdf-portal-font-color" type="color" value="#f2f2f2" aria-label="Color de texto"/>
+                    </label>
+                    <span class="pdf-fmt-sep" aria-hidden="true"></span>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="justifyLeft" title="Izquierda">☰</button>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="justifyCenter" title="Centrar">≡</button>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="justifyRight" title="Derecha">☰</button>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="justifyFull" title="Justificar">≣</button>
+                    <span class="pdf-fmt-sep" aria-hidden="true"></span>
+                    <button type="button" class="pdf-fmt-btn" id="pdf-portal-link" title="Hipervínculo">🔗</button>
+                    <button type="button" class="pdf-fmt-btn" data-cmd="unlink" title="Quitar vínculo">⛓</button>
+                  </div>
+                  <p class="pdf-portal-hint">Copiá desde Word/Docs y pegá: se conservan negrita, cursiva, colores, tamaños, alineación y links.</p>
 
                   <label class="pdf-portal-label" for="pdf-portal-editor">Contenido</label>
                   <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Pegá aquí el texto del portal…"></div>

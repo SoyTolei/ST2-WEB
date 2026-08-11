@@ -15,7 +15,7 @@ ENV ST2_DATA_DIR=/data/st2
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends fontconfig fonts-liberation \
+    && apt-get install -y --no-install-recommends fontconfig fonts-liberation fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/* \
     && fc-cache -f -v
 
