@@ -61,13 +61,13 @@ public static class PortalPdfService
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(210).AlignRight().AlignMiddle().Height(42).Image(logo).FitHeight();
+                            row.ConstantItem(300).AlignRight().AlignMiddle().Height(64).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(210).AlignRight().AlignMiddle()
+                            row.ConstantItem(300).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(10f)
+                                .FontSize(13f)
                                 .FontColor(Colors.White)
                                 .FontFamily(Fonts.Arial);
                         }
