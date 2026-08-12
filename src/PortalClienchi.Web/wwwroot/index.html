@@ -1258,8 +1258,18 @@
         <div class="st2-about-modules">
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">Sistema de Planillas</h3>
-            <p class="st2-about-module-text">Transferencia entre mesas, Referral I+D y Oportunidad de Venta. Adjuntos con links de capturas, video, PDF, TXT y traza SQL.</p>
+            <p class="st2-about-module-text">Transferencia entre mesas y Referral I+D para todos. Oportunidad de Venta con acceso configurable. Adjuntos con capturas, video, PDF, TXT y traza SQL.</p>
             <p class="st2-about-module-meta">Bejerman SQL · ONVIO/WEB · LEGAL · Chile (beta)</p>
+          </article>
+          <article class="st2-about-module">
+            <h3 class="st2-about-module-title">Generador de PDFs para Portal</h3>
+            <p class="st2-about-module-text">Armá y descargá PDFs A4 adaptativos con logo TR para publicar en el portal. Visibilidad por usuario.</p>
+            <p class="st2-about-module-meta">QuestPDF · acceso configurable</p>
+          </article>
+          <article class="st2-about-module">
+            <h3 class="st2-about-module-title">Blanqueo OnBalance y Portal Cliente</h3>
+            <p class="st2-about-module-text">Cargas de blanqueo / blanqueo+MFA por plataforma, filtros por mes y correo, marcado listo y aclaraciones. Ver y confirmar se asignan por usuario.</p>
+            <p class="st2-about-module-meta">On Balance · Portal Cliente</p>
           </article>
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">THOM</h3>
@@ -1416,7 +1426,9 @@
   <div id="st2-access-admin-overlay" class="st2-access-admin-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-admin-title">
     <div class="st2-access-admin-dialog">
       <div id="st2-access-admin-login">
+        <p class="st2-access-admin-kicker">Panel</p>
         <h3 id="st2-access-admin-title" class="st2-access-admin-title">Accesos</h3>
+        <p class="st2-access-admin-login-hint">Ingresá para ver registrados y módulos visibles.</p>
         <label class="st2-access-admin-label" for="st2-access-admin-user">Usuario</label>
         <input id="st2-access-admin-user" type="text" class="st2-access-admin-input" autocomplete="username" spellcheck="false"/>
         <label class="st2-access-admin-label" for="st2-access-admin-pass">Contraseña</label>
@@ -1428,12 +1440,20 @@
         </div>
       </div>
       <div id="st2-access-admin-panel" class="st2-access-admin-panel hidden">
-        <div class="st2-access-admin-panel-head">
-          <h3 class="st2-access-admin-title">Accesos registrados</h3>
-          <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
+        <div class="st2-access-admin-panel-top">
+          <div class="st2-access-admin-panel-head">
+            <div class="st2-access-admin-panel-titles">
+              <p class="st2-access-admin-kicker">Panel</p>
+              <h3 class="st2-access-admin-title">Accesos registrados</h3>
+            </div>
+            <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
+          </div>
+          <div class="st2-access-admin-stats">
+            <p id="st2-access-admin-summary" class="st2-access-admin-summary hidden"></p>
+            <p id="st2-access-admin-updated" class="st2-access-admin-updated hidden"></p>
+          </div>
         </div>
         <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
-        <p id="st2-access-admin-summary" class="st2-access-admin-summary hidden"></p>
         <div id="st2-access-admin-toolbar" class="st2-access-admin-toolbar hidden">
           <div class="st2-access-admin-filters" role="tablist" aria-label="Filtro de accesos">
             <button type="button" class="st2-access-admin-filter is-active" data-filter="all">Todos</button>
@@ -1441,22 +1461,25 @@
           </div>
           <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
         </div>
-        <p id="st2-access-admin-updated" class="st2-access-admin-updated hidden"></p>
         <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
           <table class="st2-access-admin-table">
             <thead>
               <tr>
                 <th>Nombre</th>
+                <th title="Op = Oportunidad · PDF = Generador · Blanq = Blanqueo · Blanq✓ = puede confirmar">Módulos extra</th>
                 <th>Último acceso</th>
                 <th title="Veces que ingresó a la web (login / reingreso)">Ingresos</th>
-                <th></th>
+                <th class="st2-access-admin-th-actions">Acciones</th>
               </tr>
             </thead>
             <tbody id="st2-access-admin-body"></tbody>
           </table>
         </div>
-        <div class="st2-access-admin-actions st2-access-admin-actions-panel">
-          <button type="button" id="st2-access-admin-close-panel" class="st2-access-admin-cancel">Cerrar</button>
+        <div class="st2-access-admin-panel-foot">
+          <p class="st2-access-admin-legend">Referral I+D y Transferencia: todos · Op / PDF / Blanqueo: ☰ por usuario</p>
+          <div class="st2-access-admin-actions st2-access-admin-actions-panel">
+            <button type="button" id="st2-access-admin-close-panel" class="st2-access-admin-cancel">Cerrar</button>
+          </div>
         </div>
       </div>
     </div>

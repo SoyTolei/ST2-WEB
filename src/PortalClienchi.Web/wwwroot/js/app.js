@@ -1166,21 +1166,28 @@ function renderAccessAdminTable() {
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
     const mods = item.modules || {};
     const modBadges = [];
-    if (mods.oportunidad) modBadges.push("Op");
-    if (mods.pdfPortal) modBadges.push("PDF");
-    if (mods.blanqueoConfirm) modBadges.push("Blanq✓");
-    else if (mods.blanqueo) modBadges.push("Blanq");
+    if (mods.oportunidad) {
+      modBadges.push({ label: "Op", title: "Oportunidad de Venta" });
+    }
+    if (mods.pdfPortal) {
+      modBadges.push({ label: "PDF", title: "Generador de PDFS para Portal" });
+    }
+    if (mods.blanqueoConfirm) {
+      modBadges.push({ label: "Blanq✓", title: "Blanqueo + puede confirmar" });
+    } else if (mods.blanqueo) {
+      modBadges.push({ label: "Blanq", title: "Blanqueo OnBalance y Portal Cliente" });
+    }
     const modHtml = modBadges.length
-      ? `<span class="st2-access-admin-mod-badges" title="Módulos extra">${modBadges.map((b) => `<span class="st2-access-admin-mod">${escapeHtml(b)}</span>`).join("")}</span>`
-      : "";
+      ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
+      : `<span class="st2-access-admin-mod-empty" title="Sin módulos extra">—</span>`;
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
           <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
-          ${modHtml}
         </div>
       </td>
+      <td class="st2-access-admin-mods-cell">${modHtml}</td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Ingresos a la web: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">

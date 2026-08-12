@@ -1460,8 +1460,8 @@ body.portal-tab-active .tab-icon {
 
 .st2-about-dialog {
   position: relative;
-  width: min(100%, 440px);
-  max-height: min(90vh, 680px);
+  width: min(100%, 560px);
+  max-height: min(90vh, 760px);
   overflow: auto;
   background: var(--white);
   border-radius: 16px;
@@ -1618,16 +1618,29 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-admin-dialog {
   position: relative;
-  width: min(980px, 98vw);
+  width: min(1080px, 98vw);
   max-height: min(94vh, 900px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 14px;
-  padding: 20px 22px 18px;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 22px 56px rgba(15, 23, 42, 0.3);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.st2-access-admin-dialog::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary) 0%, #f97316 55%, #fb923c 100%);
+  flex-shrink: 0;
+}
+
+#st2-access-admin-login,
+.st2-access-admin-panel {
+  padding: 18px 22px 16px;
 }
 
 .st2-access-admin-panel {
@@ -1637,9 +1650,25 @@ body.portal-tab-active .tab-icon {
   flex: 1;
 }
 
+.st2-access-admin-kicker {
+  margin: 0 0 2px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.st2-access-admin-login-hint {
+  margin: -6px 0 14px;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
 .st2-access-admin-title {
   margin: 0 0 14px;
-  font-size: 1.05rem;
+  font-size: 1.12rem;
   font-weight: 700;
   color: var(--dark);
 }
@@ -1661,6 +1690,7 @@ body.portal-tab-active .tab-icon {
   font-size: 0.92rem;
   color: var(--dark);
   margin-bottom: 12px;
+  background: #fff;
 }
 
 .st2-access-admin-input:focus {
@@ -1694,7 +1724,13 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-admin-actions-panel {
-  margin-top: 14px;
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+.st2-access-admin-actions-panel .st2-access-admin-cancel {
+  flex: 0 0 auto;
+  min-width: 96px;
 }
 
 .st2-access-admin-cancel {
@@ -1710,7 +1746,7 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-admin-cancel:hover {
-  background: #f8fafc;
+  background: #f1f5f9;
 }
 
 .st2-access-admin-submit:disabled {
@@ -1722,23 +1758,29 @@ body.portal-tab-active .tab-icon {
   display: none !important;
 }
 
+.st2-access-admin-panel-top {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
 .st2-access-admin-panel-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 8px;
 }
 
-.st2-access-admin-panel-head .st2-access-admin-title {
+.st2-access-admin-panel-titles .st2-access-admin-title {
   margin: 0;
 }
 
 .st2-access-admin-refresh {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border: 1px solid #cbd5e1;
-  border-radius: 999px;
+  border-radius: 8px;
   background: #fff;
   color: #475569;
   font-size: 1rem;
@@ -1748,10 +1790,11 @@ body.portal-tab-active .tab-icon {
   align-items: center;
   justify-content: center;
   transition: background 0.15s ease, transform 0.2s ease;
+  flex-shrink: 0;
 }
 
 .st2-access-admin-refresh:hover {
-  background: #f8fafc;
+  background: #f1f5f9;
 }
 
 .st2-access-admin-refresh.is-loading {
@@ -1765,8 +1808,15 @@ body.portal-tab-active .tab-icon {
   to { transform: rotate(360deg); }
 }
 
+.st2-access-admin-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 14px;
+}
+
 .st2-access-admin-updated {
-  margin: -4px 0 8px;
+  margin: 0;
   font-size: 0.72rem;
   color: #64748b;
 }
@@ -1776,17 +1826,23 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-admin-status {
-  margin: 0 0 4px;
+  margin: 0 0 8px;
   font-size: 0.76rem;
   color: var(--text-muted);
   min-height: 1.1em;
 }
 
 .st2-access-admin-summary {
-  margin: 0 0 10px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #334155;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 4px 10px;
 }
 
 .st2-access-admin-summary.hidden {
@@ -1798,7 +1854,11 @@ body.portal-tab-active .tab-icon {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 }
 
 .st2-access-admin-toolbar.hidden {
@@ -1817,8 +1877,8 @@ body.portal-tab-active .tab-icon {
   color: #475569;
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
   cursor: pointer;
   line-height: 1.2;
 }
@@ -1834,19 +1894,20 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-admin-search {
-  flex: 1 1 160px;
-  min-width: 140px;
+  flex: 1 1 180px;
+  min-width: 150px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 0.76rem;
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 0.78rem;
   color: var(--dark);
-  background: #fff;
+  background: #f8fafc;
 }
 
 .st2-access-admin-search:focus {
   outline: none;
   border-color: #94a3b8;
+  background: #fff;
   box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
 }
 
@@ -1855,8 +1916,9 @@ body.portal-tab-active .tab-icon {
   min-height: 0;
   max-height: none;
   overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
 }
 
 .st2-access-admin-table-wrap.hidden {
@@ -1865,46 +1927,95 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-admin-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 0.8rem;
   table-layout: fixed;
 }
 
 .st2-access-admin-table th,
 .st2-access-admin-table td {
-  padding: 9px 10px;
+  padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid #eef2f7;
   vertical-align: middle;
 }
 
+.st2-access-admin-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #eef2f7;
+  color: #334155;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .st2-access-admin-table th:nth-child(1),
 .st2-access-admin-table td:nth-child(1) {
-  width: auto;
+  width: 28%;
 }
 
 .st2-access-admin-table th:nth-child(2),
 .st2-access-admin-table td:nth-child(2) {
-  width: 110px;
+  width: 26%;
 }
 
 .st2-access-admin-table th:nth-child(3),
 .st2-access-admin-table td:nth-child(3) {
-  width: 64px;
-  text-align: center;
+  width: 16%;
 }
 
 .st2-access-admin-table th:nth-child(4),
 .st2-access-admin-table td:nth-child(4) {
-  width: 108px;
+  width: 10%;
+  text-align: center;
+}
+
+.st2-access-admin-table th:nth-child(5),
+.st2-access-admin-table td:nth-child(5) {
+  width: 120px;
   text-align: right;
+}
+
+.st2-access-admin-th-actions {
+  text-align: right !important;
 }
 
 .st2-access-admin-actions-cell {
-  text-align: right;
   white-space: nowrap;
+  text-align: right;
 }
 
+.st2-access-admin-mods-cell {
+  vertical-align: middle;
+}
+
+.st2-access-admin-mod-empty {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.st2-access-admin-panel-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.st2-access-admin-legend {
+  margin: 0;
+  flex: 1 1 220px;
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.35;
+}
 .st2-access-admin-edit {
   width: 24px;
   height: 24px;
@@ -1950,16 +2061,16 @@ body.portal-tab-active .tab-icon {
 .st2-access-admin-mod-badges {
   display: inline-flex;
   gap: 4px;
-  margin-left: 6px;
+  margin-left: 0;
   flex-wrap: wrap;
 }
 
 .st2-access-admin-mod {
   display: inline-block;
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  padding: 1px 5px;
+  padding: 2px 7px;
   border-radius: 999px;
   background: #e2e8f0;
   color: #334155;
@@ -2031,10 +2142,11 @@ body.portal-tab-active .tab-icon {
 .st2-access-admin-table th {
   position: sticky;
   top: 0;
-  background: #f8fafc;
+  z-index: 1;
+  background: #eef2f7;
   font-weight: 700;
-  color: #475569;
-  font-size: 0.72rem;
+  color: #334155;
+  font-size: 0.7rem;
 }
 
 .st2-access-admin-table tr:last-child td {
