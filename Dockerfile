@@ -16,11 +16,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Reintentos por si apt del builder de Railway falla por red/transitorio.
 RUN set -eux; \
-    for i in 1 2 3; do \
-      apt-get update && \
-      apt-get install -y --no-install-recommends fontconfig fonts-liberation fonts-dejavu-core && \
-      break || sleep 5; \
+    for i in 1 2 3 4 5; do \
+      apt-get -o Acquire::Retries=5 update && \
+      apt-get -o Acquire::Retries=5 install -y --no-install-recommends \
+        fontconfig fonts-liberation fonts-dejavu-core && \
+      break; \
+      echo "apt attempt $i failed; retrying..."; \
+      sleep $((i * 8)); \
+      apt-get clean || true; \
+      rm -rf /var/lib/apt/lists/* || true; \
     done; \
+    command -v fc-cache >/dev/null; \
     rm -rf /var/lib/apt/lists/*; \
     fc-cache -f; \
     mkdir -p /data/st2 && chmod 777 /data/st2
