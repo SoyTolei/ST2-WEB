@@ -82,7 +82,16 @@ public static class BlanqueoEndpoints
             if (validation is not null)
                 return Results.BadRequest(new { error = validation });
 
-            var updated = repo.UpdateOwnerFields(id, body);
+            var normalized = new BlanqueoUpdateRequest
+            {
+                Portal = NormalizePortal(body.Portal),
+                NroCaso = body.NroCaso.Trim(),
+                NroCliente = body.NroCliente.Trim(),
+                Correo = body.Correo.Trim(),
+                TipoSolicitud = body.TipoSolicitud.Trim(),
+            };
+
+            var updated = repo.UpdateOwnerFields(id, normalized);
             return updated is null
                 ? Results.NotFound(new { error = "Solicitud no encontrada." })
                 : Results.Ok(updated);
@@ -166,10 +175,9 @@ public static class BlanqueoEndpoints
 
     private static string? ValidateCreate(BlanqueoCreateRequest body)
     {
-        if (string.IsNullOrWhiteSpace(body.Portal) || !PortalesPermitidos.Contains(body.Portal.Trim()))
-            return "Elegí OnBalance o Portal Cliente.";
         return ValidateUpdate(new BlanqueoUpdateRequest
         {
+            Portal = body.Portal,
             NroCaso = body.NroCaso,
             NroCliente = body.NroCliente,
             Correo = body.Correo,
@@ -179,6 +187,8 @@ public static class BlanqueoEndpoints
 
     private static string? ValidateUpdate(BlanqueoUpdateRequest body)
     {
+        if (string.IsNullOrWhiteSpace(body.Portal) || !PortalesPermitidos.Contains(body.Portal.Trim()))
+            return "Elegí On Balance o Portal Cliente.";
         if (string.IsNullOrWhiteSpace(body.NroCaso))
             return "Ingresá el N° de caso.";
         if (string.IsNullOrWhiteSpace(body.NroCliente))

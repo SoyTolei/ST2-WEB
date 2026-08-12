@@ -20,7 +20,6 @@ const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "
 let blanqueoInited = false;
 let items = [];
 let selectedId = null;
-let activePortal = "PortalCliente";
 let canConfirm = false;
 let editingId = null;
 
@@ -56,17 +55,6 @@ export function initBlanqueoModule() {
   if (blanqueoInited) return;
   blanqueoInited = true;
 
-  document.querySelectorAll("[data-blanqueo-portal]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const portal = btn.getAttribute("data-blanqueo-portal");
-      if (!portal || portal === activePortal) return;
-      activePortal = portal;
-      syncPortalTabs();
-      clearForm();
-      applyFilters();
-    });
-  });
-
   document.getElementById("blanqueo-add")?.addEventListener("click", () => {
     void createSolicitud();
   });
@@ -81,6 +69,7 @@ export function initBlanqueoModule() {
   });
 
   document.getElementById("blanqueo-filter-month")?.addEventListener("change", () => applyFilters());
+  document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
 
   document.getElementById("blanqueo-edit-save")?.addEventListener("click", () => {
@@ -105,7 +94,6 @@ export function initBlanqueoModule() {
   document.addEventListener("scroll", () => hideCtx(), true);
 
   syncSolicitanteBadge();
-  syncPortalTabs();
 }
 
 export async function openBlanqueoModule() {
@@ -113,21 +101,8 @@ export async function openBlanqueoModule() {
   initBlanqueoModule();
   canConfirm = canConfirmBlanqueo();
   syncSolicitanteBadge();
-  syncPortalTabs();
   clearForm();
   await reloadList();
-}
-
-function syncPortalTabs() {
-  document.querySelectorAll("[data-blanqueo-portal]").forEach((btn) => {
-    const on = btn.getAttribute("data-blanqueo-portal") === activePortal;
-    btn.classList.toggle("active", on);
-    btn.setAttribute("aria-selected", on ? "true" : "false");
-  });
-  const label = document.getElementById("blanqueo-portal-label");
-  if (label) {
-    label.textContent = activePortal === "OnBalance" ? "OnBalance (portal empleado)" : "Portal Cliente";
-  }
 }
 
 function syncSolicitanteBadge() {
@@ -169,10 +144,12 @@ function setStatus(msg, isError = false) {
 }
 
 function clearForm() {
+  const portal = document.getElementById("blanqueo-portal");
   const caso = document.getElementById("blanqueo-caso");
   const cliente = document.getElementById("blanqueo-cliente");
   const correo = document.getElementById("blanqueo-correo");
   const tipo = document.getElementById("blanqueo-tipo");
+  if (portal) portal.value = "PortalCliente";
   if (caso) caso.value = "";
   if (cliente) cliente.value = "";
   if (correo) correo.value = "";
@@ -180,6 +157,7 @@ function clearForm() {
 }
 
 async function createSolicitud() {
+  const portal = document.getElementById("blanqueo-portal")?.value.trim() || "PortalCliente";
   const nroCaso = document.getElementById("blanqueo-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-cliente")?.value.trim() || "";
   const correo = document.getElementById("blanqueo-correo")?.value.trim() || "";
@@ -200,7 +178,7 @@ async function createSolicitud() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        portal: activePortal,
+        portal,
         nroCaso,
         nroCliente,
         correo,
@@ -271,10 +249,11 @@ function monthKeyFromIso(iso) {
 
 function getFilteredItems() {
   const month = document.getElementById("blanqueo-filter-month")?.value || "all";
+  const portal = document.getElementById("blanqueo-filter-portal")?.value || "all";
   const q = String(document.getElementById("blanqueo-search")?.value || "").trim().toLowerCase();
 
   return items.filter((item) => {
-    if ((item.portal || "PortalCliente") !== activePortal) return false;
+    if (portal !== "all" && (item.portal || "PortalCliente") !== portal) return false;
     if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) return false;
     if (q) {
       const hay = [
@@ -283,6 +262,7 @@ function getFilteredItems() {
         item.nroCliente,
         item.solicitadoPorNombre,
         item.aclaracion,
+        portalLabel(item.portal),
       ].map((x) => String(x || "").toLowerCase()).join(" ");
       if (!hay.includes(q)) return false;
     }
@@ -297,12 +277,7 @@ function applyFilters() {
   if (count) count.textContent = filtered.length ? `(${filtered.length})` : "";
   const statusEl = document.getElementById("blanqueo-status");
   if (statusEl && !statusEl.classList.contains("is-error")) {
-    const portalLabel = activePortal === "OnBalance" ? "OnBalance" : "Portal Cliente";
-    setStatus(
-      filtered.length
-        ? `${filtered.length} en ${portalLabel}.`
-        : `Sin solicitudes en ${portalLabel} con ese filtro.`
-    );
+    setStatus(filtered.length ? `${filtered.length} solicitud(es).` : "Sin solicitudes con ese filtro.");
   }
 }
 
@@ -314,7 +289,7 @@ function renderTable(filtered) {
   if (!filtered.length) {
     const row = document.createElement("tr");
     row.className = "plan-gestor-empty-row";
-    row.innerHTML = `<td colspan="8">No hay solicitudes con ese filtro.</td>`;
+    row.innerHTML = `<td colspan="9">No hay solicitudes con ese filtro.</td>`;
     tbody.appendChild(row);
     return;
   }
@@ -331,6 +306,7 @@ function buildRow(item) {
   if (item.aclaracion) row.classList.add("blanqueo-row-aclaracion");
 
   row.innerHTML = `
+    <td>${escapeHtml(portalLabel(item.portal))}</td>
     <td>${escapeHtml(item.nroCaso)}</td>
     <td>${escapeHtml(item.nroCliente)}</td>
     <td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>
@@ -355,6 +331,10 @@ function buildRow(item) {
   });
 
   return row;
+}
+
+function portalLabel(portal) {
+  return portal === "OnBalance" ? "On Balance" : "Portal Cliente";
 }
 
 function showCtx(x, y, item) {
@@ -446,10 +426,12 @@ async function handleCtxAction(action) {
 function openEditModal(item) {
   editingId = item.id;
   const overlay = document.getElementById("blanqueo-edit-overlay");
+  const portal = document.getElementById("blanqueo-edit-portal");
   const caso = document.getElementById("blanqueo-edit-caso");
   const cliente = document.getElementById("blanqueo-edit-cliente");
   const correo = document.getElementById("blanqueo-edit-correo");
   const tipo = document.getElementById("blanqueo-edit-tipo");
+  if (portal) portal.value = item.portal === "OnBalance" ? "OnBalance" : "PortalCliente";
   if (caso) caso.value = item.nroCaso || "";
   if (cliente) cliente.value = item.nroCliente || "";
   if (correo) correo.value = item.correo || "";
@@ -464,6 +446,7 @@ function hideEditModal() {
 
 async function saveEdit() {
   if (!editingId) return;
+  const portal = document.getElementById("blanqueo-edit-portal")?.value.trim() || "PortalCliente";
   const nroCaso = document.getElementById("blanqueo-edit-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-edit-cliente")?.value.trim() || "";
   const correo = document.getElementById("blanqueo-edit-correo")?.value.trim() || "";
@@ -473,7 +456,7 @@ async function saveEdit() {
     const res = await planUserFetch(`/api/planillas/blanqueo/${editingId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nroCaso, nroCliente, correo, tipoSolicitud }),
+      body: JSON.stringify({ portal, nroCaso, nroCliente, correo, tipoSolicitud }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);

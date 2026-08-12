@@ -26,6 +26,7 @@ public sealed class BlanqueoCreateRequest
 
 public sealed class BlanqueoUpdateRequest
 {
+    public string Portal { get; set; } = "";
     public string NroCaso { get; set; } = "";
     public string NroCliente { get; set; } = "";
     public string Correo { get; set; } = "";

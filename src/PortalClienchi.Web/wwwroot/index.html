@@ -311,15 +311,17 @@
             </div>
 
             <div class="blanqueo-app">
-              <div class="blanqueo-tabs" role="tablist" aria-label="Tipo de portal">
-                <button type="button" class="plan-segment-btn" data-blanqueo-portal="OnBalance" role="tab" aria-selected="false">OnBalance (portal empleado)</button>
-                <button type="button" class="plan-segment-btn active" data-blanqueo-portal="PortalCliente" role="tab" aria-selected="true">Portal Cliente</button>
-              </div>
-
               <div class="plan-gestor-panel blanqueo-form-panel">
                 <div class="plan-gestor-panel-accent blanqueo-accent-form"></div>
-                <h3 class="plan-gestor-panel-title">Nueva solicitud · <span id="blanqueo-portal-label">Portal Cliente</span></h3>
+                <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
                 <div class="blanqueo-form-grid">
+                  <div class="blanqueo-field blanqueo-field-portal">
+                    <label for="blanqueo-portal">Portal</label>
+                    <select id="blanqueo-portal">
+                      <option value="OnBalance">On Balance</option>
+                      <option value="PortalCliente" selected>Portal Cliente</option>
+                    </select>
+                  </div>
                   <div class="blanqueo-field">
                     <label for="blanqueo-caso">N° de caso</label>
                     <input id="blanqueo-caso" type="text" autocomplete="off" spellcheck="false"/>
@@ -353,6 +355,14 @@
                     Mes
                     <select id="blanqueo-filter-month"></select>
                   </label>
+                  <label class="blanqueo-filter-portal">
+                    Portal
+                    <select id="blanqueo-filter-portal">
+                      <option value="all" selected>Todos</option>
+                      <option value="OnBalance">On Balance</option>
+                      <option value="PortalCliente">Portal Cliente</option>
+                    </select>
+                  </label>
                   <label class="blanqueo-filter-search">
                     Buscar correo
                     <input id="blanqueo-search" type="search" placeholder="correo, caso, cliente…" autocomplete="off" spellcheck="false"/>
@@ -362,6 +372,7 @@
                   <table class="plan-gestor-table blanqueo-table">
                     <thead>
                       <tr>
+                        <th>Portal</th>
                         <th>N° de caso</th>
                         <th>N° de cliente</th>
                         <th>Correo</th>
@@ -395,6 +406,13 @@
                 <div class="plan-modal blanqueo-edit-modal" role="dialog" aria-labelledby="blanqueo-edit-title">
                   <h3 id="blanqueo-edit-title">Editar solicitud</h3>
                   <div class="blanqueo-form-grid">
+                    <div class="blanqueo-field blanqueo-field-portal">
+                      <label for="blanqueo-edit-portal">Portal</label>
+                      <select id="blanqueo-edit-portal">
+                        <option value="OnBalance">On Balance</option>
+                        <option value="PortalCliente">Portal Cliente</option>
+                      </select>
+                    </div>
                     <div class="blanqueo-field">
                       <label for="blanqueo-edit-caso">N° de caso</label>
                       <input id="blanqueo-edit-caso" type="text" autocomplete="off" spellcheck="false"/>

@@ -8,13 +8,6 @@
   padding: 4px 2px 12px;
 }
 
-.blanqueo-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 0 0 14px;
-}
-
 .blanqueo-accent-form {
   background: #0369a1;
 }
@@ -32,6 +25,11 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px 14px;
   align-items: end;
+}
+
+.blanqueo-field-portal {
+  grid-column: 1 / -1;
+  max-width: 280px;
 }
 
 @media (max-width: 720px) {
@@ -85,6 +83,7 @@
 }
 
 .blanqueo-filter-month,
+.blanqueo-filter-portal,
 .blanqueo-filter-search {
   display: flex;
   flex-direction: column;
@@ -95,6 +94,7 @@
 }
 
 .blanqueo-filter-month select,
+.blanqueo-filter-portal select,
 .blanqueo-filter-search input {
   border: 1px solid #cbd5e1;
   border-radius: 8px;

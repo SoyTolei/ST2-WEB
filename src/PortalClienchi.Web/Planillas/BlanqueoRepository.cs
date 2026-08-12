@@ -99,10 +99,11 @@ public sealed class BlanqueoRepository
         using var upd = conn.CreateCommand();
         upd.CommandText = """
             UPDATE blanqueo_solicitudes
-            SET nro_caso = $caso, nro_cliente = $cliente, correo = $correo, tipo_solicitud = $tipo
+            SET portal = $portal, nro_caso = $caso, nro_cliente = $cliente, correo = $correo, tipo_solicitud = $tipo
             WHERE id = $id
             """;
         upd.Parameters.AddWithValue("$id", id);
+        upd.Parameters.AddWithValue("$portal", req.Portal.Trim());
         upd.Parameters.AddWithValue("$caso", req.NroCaso.Trim());
         upd.Parameters.AddWithValue("$cliente", req.NroCliente.Trim());
         upd.Parameters.AddWithValue("$correo", req.Correo.Trim());
