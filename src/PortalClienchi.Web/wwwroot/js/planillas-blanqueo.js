@@ -684,12 +684,15 @@ async function saveNoteModal() {
   try {
     if (!text) {
       await patchItem(selectedId, { clearAclaracion: true });
+    } else if (isNoRegistrado(text)) {
+      await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
     } else {
       await patchItem(selectedId, { aclaracion: text });
     }
     hideNoteModal();
     setStatus("Aclaración guardada.");
     await reloadList();
+    void refreshBlanqueoAlerts();
   } catch (err) {
     setStatus(err?.message || "No se pudo guardar la aclaración.", true);
   }
