@@ -79,6 +79,20 @@
   flex-shrink: 0;
 }
 
+.blanqueo-ready-toast-count {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #059669;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
 .blanqueo-ready-toast-text {
   margin: 0;
   font-size: 0.86rem;
@@ -197,6 +211,32 @@
   font-size: 0.72rem;
   font-weight: 600;
   color: #64748b;
+}
+
+.blanqueo-filter-mine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  margin: 0 0 2px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.blanqueo-filter-mine.hidden {
+  display: none !important;
+}
+
+.blanqueo-filter-mine input {
+  margin: 0;
+  accent-color: #0c4a6e;
 }
 
 .blanqueo-filter-month select,

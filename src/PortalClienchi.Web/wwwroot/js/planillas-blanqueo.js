@@ -77,6 +77,7 @@ export function initBlanqueoModule() {
   });
   document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
+  document.getElementById("blanqueo-filter-mine")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-th-fecha")?.addEventListener("click", () => {
     fechaSortDir = fechaSortDir === "desc" ? "asc" : "desc";
     syncFechaSortHeader();
@@ -134,6 +135,7 @@ export async function openBlanqueoModule() {
   await refreshModuleFlags();
   canConfirm = canConfirmBlanqueo();
   syncSolicitanteBadge();
+  syncMineFilterVisibility();
   clearForm();
   monthFilterTouched = false;
   await reloadList();
@@ -150,6 +152,16 @@ function syncSolicitanteBadge() {
   }
   badge.textContent = displayNameFromEmail(email);
   badge.classList.remove("hidden");
+}
+
+function syncMineFilterVisibility() {
+  const wrap = document.getElementById("blanqueo-filter-mine-wrap");
+  const check = document.getElementById("blanqueo-filter-mine");
+  if (!wrap) return;
+  // Quien confirma (admin de blanqueo) siempre ve el listado completo.
+  const show = !canConfirm;
+  wrap.classList.toggle("hidden", !show);
+  if (!show && check) check.checked = false;
 }
 
 function displayNameFromEmail(email) {
@@ -237,6 +249,7 @@ async function reloadList() {
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = Array.isArray(data.items) ? data.items : [];
     canConfirm = !!data.canConfirm || canConfirmBlanqueo();
+    syncMineFilterVisibility();
     syncClaveUi(data.claveBlanqueo);
     rebuildMonthOptions();
     applyFilters();
@@ -322,8 +335,11 @@ function getFilteredItems() {
   const month = document.getElementById("blanqueo-filter-month")?.value || "all";
   const portal = document.getElementById("blanqueo-filter-portal")?.value || "all";
   const q = String(document.getElementById("blanqueo-search")?.value || "").trim().toLowerCase();
+  const onlyMine = !canConfirm && !!document.getElementById("blanqueo-filter-mine")?.checked;
+  const me = currentEmail();
 
   const filtered = items.filter((item) => {
+    if (onlyMine && String(item.solicitadoPorEmail || "").trim().toLowerCase() !== me) return false;
     if (portal !== "all" && (item.portal || "PortalCliente") !== portal) return false;
     if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) return false;
     if (q) {

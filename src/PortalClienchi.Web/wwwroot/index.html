@@ -82,6 +82,7 @@
             <div id="blanqueo-ready-toast" class="blanqueo-ready-toast hidden" role="status" aria-live="polite" aria-hidden="true">
               <div class="blanqueo-ready-toast-main">
                 <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
+                <span id="blanqueo-ready-toast-count" class="blanqueo-ready-toast-count" aria-hidden="true">1</span>
                 <p id="blanqueo-ready-toast-text" class="blanqueo-ready-toast-text">Blanqueo listo</p>
               </div>
               <div class="blanqueo-ready-toast-actions">
@@ -385,6 +386,10 @@
                   <label class="blanqueo-filter-search">
                     Buscar correo
                     <input id="blanqueo-search" type="search" placeholder="correo, caso, cliente…" autocomplete="off" spellcheck="false"/>
+                  </label>
+                  <label id="blanqueo-filter-mine-wrap" class="blanqueo-filter-mine hidden">
+                    <input id="blanqueo-filter-mine" type="checkbox"/>
+                    <span>Solo mis solicitudes</span>
                   </label>
                 </div>
                 <div class="plan-gestor-table-wrap blanqueo-table-wrap">

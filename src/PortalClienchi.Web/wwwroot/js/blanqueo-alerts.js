@@ -69,8 +69,8 @@ export function renderBlanqueoAlertUi() {
     tabBadge.classList.toggle("hidden", count === 0);
     tabBadge.title = count
       ? (count === 1
-        ? "Tenés 1 blanqueo listo"
-        : `Tenés ${count} blanqueos listos`)
+        ? "Tenés 1 solicitud de blanqueo lista"
+        : `Tenés ${count} solicitudes de blanqueo listas`)
       : "";
     tabBadge.setAttribute("aria-hidden", count ? "false" : "true");
   }
@@ -84,16 +84,19 @@ export function renderBlanqueoAlertUi() {
 
   const toast = document.getElementById("blanqueo-ready-toast");
   const toastText = document.getElementById("blanqueo-ready-toast-text");
+  const toastCount = document.getElementById("blanqueo-ready-toast-count");
   if (toast && toastText) {
     if (count === 0) {
       toast.classList.add("hidden");
       toast.setAttribute("aria-hidden", "true");
     } else {
-      const first = cachedAlerts[0];
-      const more = count > 1 ? ` (+${count - 1})` : "";
+      if (toastCount) {
+        toastCount.textContent = label;
+        toastCount.setAttribute("aria-hidden", "false");
+      }
       toastText.textContent = count === 1
-        ? `Blanqueo listo: ${first.correo || first.nroCaso || "solicitud"}${more}`
-        : `${count} solicitudes de blanqueo listas`;
+        ? "Tenés 1 solicitud lista para usar"
+        : `Tenés ${count} solicitudes listas para usar`;
       toast.classList.remove("hidden");
       toast.setAttribute("aria-hidden", "false");
     }
