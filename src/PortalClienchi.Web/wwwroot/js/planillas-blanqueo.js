@@ -22,6 +22,7 @@ let editingId = null;
 /** @type {"desc" | "asc"} */
 let fechaSortDir = "desc";
 let monthFilterTouched = false;
+let listLoadGen = 0;
 
 export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
   try {
@@ -124,6 +125,19 @@ export function initBlanqueoModule() {
 
   document.getElementById("blanqueo-clave-copy")?.addEventListener("click", () => {
     void copyClaveBlanqueo();
+  });
+
+  document.addEventListener("st2:planillas-home", () => {
+    listLoadGen += 1;
+    hideCtx();
+    hideEditModal();
+    hideDeleteModal();
+    hideNoteModal();
+    const status = document.getElementById("blanqueo-status");
+    if (status) {
+      status.classList.add("hidden");
+      status.textContent = "";
+    }
   });
 
   syncSolicitanteBadge();
@@ -243,9 +257,12 @@ async function createSolicitud() {
 }
 
 async function reloadList() {
+  const gen = ++listLoadGen;
   try {
     const res = await planUserFetch("/api/planillas/blanqueo");
+    if (gen !== listLoadGen) return;
     const data = await res.json().catch(() => ({}));
+    if (gen !== listLoadGen) return;
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = (Array.isArray(data.items) ? data.items : []).map(normalizeBlanqueoItem);
     canConfirm = !!data.canConfirm || canConfirmBlanqueo();
@@ -254,8 +271,9 @@ async function reloadList() {
     rebuildMonthOptions();
     applyFilters();
   } catch (err) {
-    items = [];
-    applyFilters();
+    if (gen !== listLoadGen) return;
+    // No vaciar el listado si falló un refresh en background; solo avisar.
+    if (!items.length) applyFilters();
     setStatus(err?.message || "No se pudo cargar el listado.", true);
   }
 }
@@ -428,6 +446,7 @@ function buildRow(item) {
   if (selectedId === item.id) row.classList.add("selected");
   if (item.listo) row.classList.add("blanqueo-row-listo");
   if (item.aclaracion) row.classList.add("blanqueo-row-aclaracion");
+  if (isNoRegistrado(item.aclaracion) && !item.listo) row.classList.add("blanqueo-row-noreg");
 
   row.innerHTML = `
     <td>${escapeHtml(portalLabel(item.portal))}</td>
@@ -438,7 +457,7 @@ function buildRow(item) {
     <td>${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td>${escapeHtml(item.tipoSolicitud)}</td>
     <td class="blanqueo-col-listo">${item.listo ? '<span class="blanqueo-pill ok">Listo</span>' : "—"}</td>
-    <td class="blanqueo-col-aclaracion">${item.aclaracion ? `<span class="blanqueo-pill note">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
+    <td class="blanqueo-col-aclaracion">${item.aclaracion ? `<span class="blanqueo-pill ${isNoRegistrado(item.aclaracion) ? "bad" : "note"}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
   `;
 
   row.addEventListener("click", (e) => {
@@ -688,6 +707,10 @@ function formatFecha(iso) {
   const day = Number(m[3]);
   const month = MONTHS[Number(m[2]) - 1] || m[2];
   return `${day}-${month}`;
+}
+
+function isNoRegistrado(value) {
+  return String(value || "").trim().toLowerCase() === "no registrado";
 }
 
 function escapeHtml(value) {

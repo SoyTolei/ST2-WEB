@@ -127,6 +127,7 @@ public sealed class BlanqueoRepository
             aclaracion = string.IsNullOrWhiteSpace(req.Aclaracion) ? null : req.Aclaracion.Trim();
 
         var wasListo = current.Listo;
+        var prevAclaracion = current.Aclaracion;
 
         using var conn = Open();
         using var upd = conn.CreateCommand();
@@ -143,10 +144,7 @@ public sealed class BlanqueoRepository
         current.Listo = listo;
         current.Aclaracion = aclaracion;
 
-        if (!wasListo && listo)
-            UpsertReadyAlert(conn, current);
-        else if (wasListo && !listo)
-            DeleteAlertBySolicitud(conn, id);
+        SyncRequesterAlert(conn, current, wasListo, prevAclaracion);
 
         return current;
     }
@@ -161,7 +159,7 @@ public sealed class BlanqueoRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT id, solicitud_id, portal, nro_caso, correo, tipo_solicitud, created_at
+            SELECT id, solicitud_id, portal, nro_caso, correo, tipo_solicitud, created_at, kind
             FROM blanqueo_alerts
             WHERE lower(email) = lower($email) AND seen = 0
             ORDER BY id DESC
@@ -179,6 +177,9 @@ public sealed class BlanqueoRepository
                 Correo = r.GetString(4),
                 TipoSolicitud = r.GetString(5),
                 CreatedAt = r.GetString(6),
+                Kind = r.IsDBNull(7) || string.IsNullOrWhiteSpace(r.GetString(7))
+                    ? BlanqueoAlertKinds.Ready
+                    : r.GetString(7),
             });
         }
 
@@ -217,7 +218,39 @@ public sealed class BlanqueoRepository
         return cmd.ExecuteNonQuery();
     }
 
-    private static void UpsertReadyAlert(SqliteConnection conn, BlanqueoRecordDto item)
+    private static void SyncRequesterAlert(
+        SqliteConnection conn,
+        BlanqueoRecordDto item,
+        bool wasListo,
+        string? prevAclaracion)
+    {
+        string? kind = null;
+        if (item.Listo)
+            kind = BlanqueoAlertKinds.Ready;
+        else if (!string.IsNullOrWhiteSpace(item.Aclaracion))
+            kind = BlanqueoAlertKinds.FromAclaracion(item.Aclaracion);
+
+        var listoChanged = wasListo != item.Listo;
+        var aclaracionChanged = !string.Equals(
+            (prevAclaracion ?? "").Trim(),
+            (item.Aclaracion ?? "").Trim(),
+            StringComparison.Ordinal);
+
+        if (kind is null)
+        {
+            if (listoChanged || aclaracionChanged)
+                DeleteAlertBySolicitud(conn, item.Id);
+            return;
+        }
+
+        // Solo re-notificar cuando cambia el estado relevante.
+        if (!listoChanged && !aclaracionChanged)
+            return;
+
+        UpsertAlert(conn, item, kind);
+    }
+
+    private static void UpsertAlert(SqliteConnection conn, BlanqueoRecordDto item, string kind)
     {
         var email = PlanUserIdentity.ValidateAndNormalize(item.SolicitadoPorEmail);
         if (email is null)
@@ -226,15 +259,16 @@ public sealed class BlanqueoRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT INTO blanqueo_alerts
-                (solicitud_id, email, portal, nro_caso, correo, tipo_solicitud, created_at, seen)
+                (solicitud_id, email, portal, nro_caso, correo, tipo_solicitud, kind, created_at, seen)
             VALUES
-                ($solicitud, $email, $portal, $caso, $correo, $tipo, $created, 0)
+                ($solicitud, $email, $portal, $caso, $correo, $tipo, $kind, $created, 0)
             ON CONFLICT(solicitud_id) DO UPDATE SET
                 email = excluded.email,
                 portal = excluded.portal,
                 nro_caso = excluded.nro_caso,
                 correo = excluded.correo,
                 tipo_solicitud = excluded.tipo_solicitud,
+                kind = excluded.kind,
                 created_at = excluded.created_at,
                 seen = 0
             """;
@@ -244,6 +278,7 @@ public sealed class BlanqueoRepository
         cmd.Parameters.AddWithValue("$caso", item.NroCaso);
         cmd.Parameters.AddWithValue("$correo", item.Correo);
         cmd.Parameters.AddWithValue("$tipo", item.TipoSolicitud);
+        cmd.Parameters.AddWithValue("$kind", kind);
         cmd.Parameters.AddWithValue("$created", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
         cmd.ExecuteNonQuery();
     }
@@ -303,6 +338,7 @@ public sealed class BlanqueoRepository
                 nro_caso TEXT NOT NULL,
                 correo TEXT NOT NULL,
                 tipo_solicitud TEXT NOT NULL,
+                kind TEXT NOT NULL DEFAULT 'ready',
                 created_at TEXT NOT NULL,
                 seen INTEGER NOT NULL DEFAULT 0
             );
@@ -310,6 +346,23 @@ public sealed class BlanqueoRepository
                 ON blanqueo_alerts (email, seen);
             """;
         cmd.ExecuteNonQuery();
+        EnsureAlertKindColumn(conn);
+    }
+
+    private static void EnsureAlertKindColumn(SqliteConnection conn)
+    {
+        using var info = conn.CreateCommand();
+        info.CommandText = "PRAGMA table_info(blanqueo_alerts)";
+        using var r = info.ExecuteReader();
+        while (r.Read())
+        {
+            if (r.GetString(1).Equals("kind", StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        using var alter = conn.CreateCommand();
+        alter.CommandText = "ALTER TABLE blanqueo_alerts ADD COLUMN kind TEXT NOT NULL DEFAULT 'ready'";
+        alter.ExecuteNonQuery();
     }
 
     private static void EnsurePortalColumn(SqliteConnection conn)

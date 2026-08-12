@@ -881,7 +881,11 @@ function bindEvents() {
   });
 
   document.querySelectorAll("[data-plan-back]").forEach((btn) => {
-    btn.addEventListener("click", () => showView("menu"));
+    btn.addEventListener("click", () => {
+      document.dispatchEvent(new CustomEvent("st2:planillas-home"));
+      showView("menu");
+      void refreshModuleFlags().then(() => updateSistemaUi());
+    });
   });
 
   els.mesaBtns().forEach((btn) => {
@@ -1047,8 +1051,13 @@ function initSecretRunnerTrigger() {
 
 export function goPlanillasHome() {
   if (!views.menu) return;
+  // Invalidar cargas en vuelo del módulo abierto (evita errores fantasma al volver).
+  document.dispatchEvent(new CustomEvent("st2:planillas-home"));
   showView("menu");
   selectSistema("BejermanSql");
+  void refreshModuleFlags({ force: true }).then(() => {
+    updateSistemaUi();
+  });
 }
 
 export function initPlanillas() {

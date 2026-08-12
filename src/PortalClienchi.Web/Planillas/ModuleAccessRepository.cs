@@ -39,6 +39,9 @@ public sealed class ModuleAccessRepository
         if (normalized is null)
             return new ModuleAccessFlagsDto();
 
+        if (St2SuperAdmin.Is(normalized))
+            return St2SuperAdmin.FullFlags();
+
         using var conn = Open();
         return ReadFlags(conn, normalized);
     }
@@ -58,7 +61,7 @@ public sealed class ModuleAccessRepository
 
         using var conn = Open();
         foreach (var email in list)
-            map[email] = ReadFlags(conn, email);
+            map[email] = St2SuperAdmin.Is(email) ? St2SuperAdmin.FullFlags() : ReadFlags(conn, email);
         return map;
     }
 

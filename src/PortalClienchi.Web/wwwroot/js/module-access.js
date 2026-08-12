@@ -1,12 +1,24 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 
 const FORCE_KEY = "st2-modules-force-all";
+/** Acceso total permanente (coincide con backend St2SuperAdmin). */
+const SUPER_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 
 let cachedFlags = null;
 let loadPromise = null;
+let lastLoadedAt = 0;
 
-export function getCachedModuleFlags() {
-  return cachedFlags || {
+function fullFlags() {
+  return {
+    oportunidad: true,
+    pdfPortal: true,
+    blanqueo: true,
+    blanqueoConfirm: true,
+  };
+}
+
+function emptyFlags() {
+  return {
     oportunidad: false,
     pdfPortal: false,
     blanqueo: false,
@@ -14,30 +26,38 @@ export function getCachedModuleFlags() {
   };
 }
 
-export async function refreshModuleFlags() {
+export function isSt2SuperAdmin(email = getPlanUserEmail()) {
+  return String(email || "").trim().toLowerCase() === SUPER_ADMIN_EMAIL;
+}
+
+export function getCachedModuleFlags() {
+  if (isSt2SuperAdmin()) return fullFlags();
+  return cachedFlags || emptyFlags();
+}
+
+export async function refreshModuleFlags({ force = false } = {}) {
   try {
-    if (localStorage.getItem(FORCE_KEY) === "1") {
-      cachedFlags = {
-        oportunidad: true,
-        pdfPortal: true,
-        blanqueo: true,
-        blanqueoConfirm: true,
-      };
+    if (localStorage.getItem(FORCE_KEY) === "1" || isSt2SuperAdmin()) {
+      cachedFlags = fullFlags();
+      lastLoadedAt = Date.now();
       return cachedFlags;
     }
-  } catch { /* ignore */ }
+  } catch {
+    if (isSt2SuperAdmin()) {
+      cachedFlags = fullFlags();
+      return cachedFlags;
+    }
+  }
 
   if (!getPlanUserEmail()) {
-    cachedFlags = {
-      oportunidad: false,
-      pdfPortal: false,
-      blanqueo: false,
-      blanqueoConfirm: false,
-    };
+    cachedFlags = emptyFlags();
     return cachedFlags;
   }
 
-  if (loadPromise) return loadPromise;
+  if (!force && loadPromise) return loadPromise;
+  if (!force && cachedFlags && Date.now() - lastLoadedAt < 8000) {
+    return cachedFlags;
+  }
 
   loadPromise = (async () => {
     try {
@@ -51,17 +71,14 @@ export async function refreshModuleFlags() {
         blanqueo: !!m.blanqueo,
         blanqueoConfirm: !!m.blanqueoConfirm,
       };
+      lastLoadedAt = Date.now();
     } catch {
-      cachedFlags = {
-        oportunidad: false,
-        pdfPortal: false,
-        blanqueo: false,
-        blanqueoConfirm: false,
-      };
+      // No pisar flags buenos por un fallo momentáneo de red.
+      if (!cachedFlags) cachedFlags = emptyFlags();
     } finally {
       loadPromise = null;
     }
-    return cachedFlags;
+    return getCachedModuleFlags();
   })();
 
   return loadPromise;

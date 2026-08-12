@@ -40,6 +40,23 @@ public sealed class BlanqueoPatchRequest
     public bool ClearAclaracion { get; set; }
 }
 
+public static class BlanqueoAlertKinds
+{
+    public const string Ready = "ready";
+    public const string Note = "note";
+    public const string NoRegistrado = "no_registrado";
+
+    public static string FromAclaracion(string? aclaracion)
+    {
+        var text = (aclaracion ?? "").Trim();
+        if (text.Length == 0)
+            return Note;
+        if (text.Equals("No registrado", StringComparison.OrdinalIgnoreCase))
+            return NoRegistrado;
+        return Note;
+    }
+}
+
 public sealed class BlanqueoAlertDto
 {
     public int Id { get; set; }
@@ -48,6 +65,7 @@ public sealed class BlanqueoAlertDto
     public string NroCaso { get; set; } = "";
     public string Correo { get; set; } = "";
     public string TipoSolicitud { get; set; } = "";
+    public string Kind { get; set; } = BlanqueoAlertKinds.Ready;
     public string CreatedAt { get; set; } = "";
 }
 

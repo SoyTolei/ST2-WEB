@@ -1,10 +1,16 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { canSeeBlanqueoModule } from "./module-access.js";
 
-const POLL_MS = 45000;
+const POLL_MS = 60000;
 let pollTimer = null;
 let cachedAlerts = [];
 let toastBound = false;
+let refreshInFlight = null;
+let lastRefreshAt = 0;
+
+const KIND_READY = "ready";
+const KIND_NOTE = "note";
+const KIND_NO_REG = "no_registrado";
 
 export function getBlanqueoAlertCount() {
   return cachedAlerts.length;
@@ -14,7 +20,7 @@ export function getBlanqueoAlerts() {
   return cachedAlerts.slice();
 }
 
-export async function refreshBlanqueoAlerts() {
+export async function refreshBlanqueoAlerts({ force = false } = {}) {
   const email = getPlanUserEmail();
   if (!email || !canSeeBlanqueoModule(email)) {
     cachedAlerts = [];
@@ -22,21 +28,54 @@ export async function refreshBlanqueoAlerts() {
     return cachedAlerts;
   }
 
-  try {
-    const res = await planUserFetch("/api/planillas/blanqueo/alerts");
-    if (res.status === 401 || res.status === 403) {
-      cachedAlerts = [];
-      renderBlanqueoAlertUi();
-      return cachedAlerts;
-    }
-    const data = await res.json().catch(() => ({}));
-    cachedAlerts = Array.isArray(data.items) ? data.items : [];
-  } catch {
-    // mantener cache anterior
+  const now = Date.now();
+  if (!force && refreshInFlight) return refreshInFlight;
+  if (!force && now - lastRefreshAt < 4000 && cachedAlerts) {
+    renderBlanqueoAlertUi();
+    return cachedAlerts;
   }
 
-  renderBlanqueoAlertUi();
-  return cachedAlerts;
+  refreshInFlight = (async () => {
+    try {
+      const res = await planUserFetch("/api/planillas/blanqueo/alerts");
+      if (res.status === 401 || res.status === 403) {
+        cachedAlerts = [];
+        renderBlanqueoAlertUi();
+        return cachedAlerts;
+      }
+      const data = await res.json().catch(() => ({}));
+      cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
+      lastRefreshAt = Date.now();
+    } catch {
+      // mantener cache anterior
+    } finally {
+      refreshInFlight = null;
+    }
+
+    renderBlanqueoAlertUi();
+    return cachedAlerts;
+  })();
+
+  return refreshInFlight;
+}
+
+function normalizeAlert(raw) {
+  const src = raw || {};
+  const kindRaw = String(src.kind ?? src.Kind ?? KIND_READY).trim().toLowerCase();
+  let kind = KIND_READY;
+  if (kindRaw === KIND_NO_REG || kindRaw === "no-registrado") kind = KIND_NO_REG;
+  else if (kindRaw === KIND_NOTE || kindRaw === "aclaracion" || kindRaw === "observacion") kind = KIND_NOTE;
+
+  return {
+    id: src.id ?? src.Id ?? 0,
+    solicitudId: src.solicitudId ?? src.SolicitudId ?? 0,
+    portal: src.portal ?? src.Portal ?? "",
+    nroCaso: src.nroCaso ?? src.NroCaso ?? "",
+    correo: src.correo ?? src.Correo ?? "",
+    tipoSolicitud: src.tipoSolicitud ?? src.TipoSolicitud ?? "",
+    kind,
+    createdAt: src.createdAt ?? src.CreatedAt ?? "",
+  };
 }
 
 export async function markBlanqueoAlertsSeen(ids = null) {
@@ -59,19 +98,47 @@ export async function markBlanqueoAlertsSeen(ids = null) {
   renderBlanqueoAlertUi();
 }
 
+function summarizeAlerts(alerts) {
+  const counts = { ready: 0, note: 0, no_registrado: 0 };
+  for (const a of alerts) {
+    if (a.kind === KIND_NO_REG) counts.no_registrado += 1;
+    else if (a.kind === KIND_NOTE) counts.note += 1;
+    else counts.ready += 1;
+  }
+
+  // Prioridad visual: rojo > amarillo > verde
+  let tone = "ok";
+  let text = "";
+  if (counts.no_registrado > 0) {
+    tone = "bad";
+    text = counts.no_registrado === 1
+      ? "Tenés 1 blanqueo no registrado"
+      : `Tenés ${counts.no_registrado} blanqueos no registrados`;
+  } else if (counts.note > 0) {
+    tone = "warn";
+    text = counts.note === 1
+      ? "Tenés 1 blanqueo con una observación"
+      : `Tenés ${counts.note} blanqueos con observación`;
+  } else {
+    tone = "ok";
+    text = counts.ready === 1
+      ? "Tenés un blanqueo de clave confirmado"
+      : `Tenés ${counts.ready} blanqueos de clave confirmados`;
+  }
+
+  return { tone, text, counts };
+}
+
 export function renderBlanqueoAlertUi() {
   const count = cachedAlerts.length;
   const label = count > 99 ? "99+" : String(count);
+  const summary = count ? summarizeAlerts(cachedAlerts) : null;
 
   const tabBadge = document.querySelector('.tab-reminder-badge[data-reminder="planillas-blanqueo"]');
   if (tabBadge) {
     tabBadge.textContent = label;
     tabBadge.classList.toggle("hidden", count === 0);
-    tabBadge.title = count
-      ? (count === 1
-        ? "Tenés 1 solicitud de blanqueo lista"
-        : `Tenés ${count} solicitudes de blanqueo listas`)
-      : "";
+    tabBadge.title = summary?.text || "";
     tabBadge.setAttribute("aria-hidden", count ? "false" : "true");
   }
 
@@ -86,7 +153,8 @@ export function renderBlanqueoAlertUi() {
   const toastText = document.getElementById("blanqueo-ready-toast-text");
   const toastCount = document.getElementById("blanqueo-ready-toast-count");
   if (toast && toastText) {
-    if (count === 0) {
+    toast.classList.remove("is-ok", "is-warn", "is-bad");
+    if (count === 0 || !summary) {
       toast.classList.add("hidden");
       toast.setAttribute("aria-hidden", "true");
     } else {
@@ -94,9 +162,8 @@ export function renderBlanqueoAlertUi() {
         toastCount.textContent = label;
         toastCount.setAttribute("aria-hidden", "false");
       }
-      toastText.textContent = count === 1
-        ? "Tenés 1 solicitud lista para usar"
-        : `Tenés ${count} solicitudes listas para usar`;
+      toastText.textContent = summary.text;
+      toast.classList.add(summary.tone === "bad" ? "is-bad" : summary.tone === "warn" ? "is-warn" : "is-ok");
       toast.classList.remove("hidden");
       toast.setAttribute("aria-hidden", "false");
     }
@@ -105,7 +172,7 @@ export function renderBlanqueoAlertUi() {
 
 export function startBlanqueoAlertsPolling() {
   stopBlanqueoAlertsPolling();
-  void refreshBlanqueoAlerts();
+  void refreshBlanqueoAlerts({ force: true });
   pollTimer = setInterval(() => {
     void refreshBlanqueoAlerts();
   }, POLL_MS);
@@ -124,7 +191,7 @@ export function stopBlanqueoAlertsPolling() {
 
 function onVisibility() {
   if (document.visibilityState === "visible") {
-    void refreshBlanqueoAlerts();
+    void refreshBlanqueoAlerts({ force: true });
   }
 }
 
