@@ -264,25 +264,38 @@ async function copyClaveBlanqueo() {
 function rebuildMonthOptions() {
   const sel = document.getElementById("blanqueo-filter-month");
   if (!sel) return;
-  const keep = sel.value || currentMonthKey();
+
+  const previous = String(sel.value || "").trim();
   const keys = new Set();
   for (const item of items) {
     const key = monthKeyFromIso(item.fechaSolicitud);
     if (key) keys.add(key);
   }
-  keys.add(currentMonthKey());
+  const current = currentMonthKey();
+  keys.add(current);
 
   const sorted = [...keys].sort((a, b) => b.localeCompare(a));
   sel.innerHTML = `<option value="all">Todos los meses</option>` +
     sorted.map((key) => {
       const [y, m] = key.split("-");
-      const label = `${MONTHS[Number(m) - 1] || m} ${y}`;
-      return `<option value="${key}">${label}</option>`;
+      const monthIdx = Number(m) - 1;
+      const label = `${MONTHS[monthIdx] || m} ${y}`;
+      return `<option value="${key}">${escapeHtml(label)}</option>`;
     }).join("");
 
-  sel.value = sorted.includes(keep) || keep === "all" ? keep : currentMonthKey();
+  let next = previous;
+  if (next !== "all" && !sorted.includes(next)) {
+    // Si el mes actual no tiene filas, mostrar el más reciente con datos.
+    const withData = sorted.filter((key) =>
+      items.some((item) => monthKeyFromIso(item.fechaSolicitud) === key)
+    );
+    next = withData[0] || current;
+  }
+  if (!next) next = current;
+
+  sel.value = next;
   if (![...sel.options].some((o) => o.value === sel.value)) {
-    sel.value = currentMonthKey();
+    sel.value = "all";
   }
 }
 
@@ -292,8 +305,16 @@ function currentMonthKey() {
 }
 
 function monthKeyFromIso(iso) {
-  const m = /^(\d{4})-(\d{2})/.exec(String(iso || "").trim());
-  return m ? `${m[1]}-${m[2]}` : "";
+  const raw = String(iso || "").trim();
+  const isoMatch = /^(\d{4})-(\d{1,2})(?:[T\s].*)?$/.exec(raw);
+  if (isoMatch) {
+    return `${isoMatch[1]}-${String(Number(isoMatch[2])).padStart(2, "0")}`;
+  }
+  const dmy = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/.exec(raw);
+  if (dmy) {
+    return `${dmy[3]}-${String(Number(dmy[2])).padStart(2, "0")}`;
+  }
+  return "";
 }
 
 function getFilteredItems() {

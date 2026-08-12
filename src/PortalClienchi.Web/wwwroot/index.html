@@ -327,11 +327,6 @@
               <div class="plan-gestor-panel blanqueo-form-panel">
                 <div class="plan-gestor-panel-accent blanqueo-accent-form"></div>
                 <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
-                <p class="blanqueo-clave-hint">
-                  Clave generada vigente:
-                  <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code" title="Clic para copiar">Sueldo.2026</button>
-                  <span class="blanqueo-clave-note">(puede cambiar)</span>
-                </p>
                 <div class="blanqueo-form-grid">
                   <div class="blanqueo-field blanqueo-field-portal">
                     <label for="blanqueo-portal">Plataforma</label>
@@ -368,10 +363,16 @@
               <div class="plan-gestor-panel plan-gestor-panel-list">
                 <div class="plan-gestor-panel-accent blanqueo-accent-list"></div>
                 <h3 class="plan-gestor-panel-title">Listado <span id="blanqueo-count" class="plan-gestor-count"></span></h3>
+                <p class="blanqueo-clave-hint">
+                  Clave generada vigente:
+                  <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code" title="Clic para copiar">Sueldo.2026</button>
+                </p>
                 <div class="blanqueo-filter-bar">
                   <label class="blanqueo-filter-month">
                     Mes
-                    <select id="blanqueo-filter-month"></select>
+                    <select id="blanqueo-filter-month">
+                      <option value="all">Todos los meses</option>
+                    </select>
                   </label>
                   <label class="blanqueo-filter-portal">
                     Plataforma
