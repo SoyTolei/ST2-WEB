@@ -9,11 +9,15 @@ public static class BlanqueoEndpoints
     {
         "leonel.gallo@thomsonreuters.com",
         "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
+        "alexis.ruiz@thomsonreuters.com",
+        "yohanaelizabeth.orellana@thomsonreuters.com",
     };
 
     private static readonly HashSet<string> ConfirmerEmails = new(StringComparer.OrdinalIgnoreCase)
     {
         "leonel.gallo@thomsonreuters.com",
+        "alexis.ruiz@thomsonreuters.com",
+        "yohanaelizabeth.orellana@thomsonreuters.com",
     };
 
     private static readonly HashSet<string> PortalesPermitidos = new(StringComparer.OrdinalIgnoreCase)

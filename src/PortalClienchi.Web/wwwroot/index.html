@@ -386,7 +386,7 @@
                     <tbody id="blanqueo-table-body"></tbody>
                   </table>
                 </div>
-                <p class="blanqueo-hint">Clic derecho: editar/eliminar tus cargas. Quien confirma puede marcar listo o aclarar.</p>
+                <p class="blanqueo-hint">Clic derecho: editar/eliminar tus cargas. Quien confirma puede marcar listo (también con doble clic) o aclarar.</p>
               </div>
 
               <div id="blanqueo-ctx" class="plan-gestor-ctx blanqueo-ctx hidden" role="menu">
@@ -397,8 +397,7 @@
                 <button type="button" data-blanqueo-ctx="unlisto">Quitar listo</button>
                 <hr/>
                 <button type="button" data-blanqueo-ctx="aclaracion-no-registrado">Aclaración: No registrado</button>
-                <button type="button" data-blanqueo-ctx="aclaracion-duplicado">Aclaración: Duplicado</button>
-                <button type="button" data-blanqueo-ctx="aclaracion-manual">Aclaración a mano…</button>
+                <button type="button" data-blanqueo-ctx="aclaracion-manual">Otra observación…</button>
                 <button type="button" data-blanqueo-ctx="clear-aclaracion">Quitar aclaración</button>
               </div>
 
@@ -1385,13 +1384,13 @@
 
   <div id="blanqueo-note-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-note-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
-      <h3 id="blanqueo-note-title">Aclaración</h3>
-      <p class="plan-user-hint">Escribí un comentario específico sobre esta solicitud.</p>
-      <label class="plan-user-label" for="blanqueo-note-text">Texto</label>
+      <h3 id="blanqueo-note-title">Observación</h3>
+      <p class="plan-user-hint">Dejá un comentario breve sobre esta solicitud (por ejemplo, por qué no se pudo completar).</p>
+      <label class="plan-user-label" for="blanqueo-note-text">Detalle</label>
       <textarea id="blanqueo-note-text" class="blanqueo-note-textarea" rows="4" maxlength="280" placeholder="Ej. el correo no figura en el cliente…"></textarea>
       <div class="plan-user-actions">
         <button type="button" id="blanqueo-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
-        <button type="button" id="blanqueo-note-save" class="plan-gestor-btn-add">Guardar aclaración</button>
+        <button type="button" id="blanqueo-note-save" class="plan-gestor-btn-add">Guardar</button>
       </div>
     </div>
   </div>

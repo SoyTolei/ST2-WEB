@@ -7,10 +7,14 @@ import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 const BLANQUEO_ALLOWED_EMAILS = [
   "leonel.gallo@thomsonreuters.com",
   "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
+  "alexis.ruiz@thomsonreuters.com",
+  "yohanaelizabeth.orellana@thomsonreuters.com",
 ];
 
 const BLANQUEO_CONFIRMER_EMAILS = [
   "leonel.gallo@thomsonreuters.com",
+  "alexis.ruiz@thomsonreuters.com",
+  "yohanaelizabeth.orellana@thomsonreuters.com",
 ];
 
 const FORCE_KEY = "st2-blanqueo-force";
@@ -339,6 +343,14 @@ function buildRow(item) {
     applyFilters();
   });
 
+  row.addEventListener("dblclick", (e) => {
+    e.preventDefault();
+    selectedId = item.id;
+    applyFilters();
+    if (!canConfirm) return;
+    void toggleListoByDoubleClick(item);
+  });
+
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     selectedId = item.id;
@@ -347,6 +359,16 @@ function buildRow(item) {
   });
 
   return row;
+}
+
+async function toggleListoByDoubleClick(item) {
+  try {
+    await patchItem(item.id, { listo: !item.listo });
+    setStatus(item.listo ? "Se quitó el listo." : "Marcado como listo.");
+    await reloadList();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo actualizar.", true);
+  }
 }
 
 function portalLabel(portal) {
@@ -364,7 +386,7 @@ function showCtx(x, y, item) {
     const action = btn.getAttribute("data-blanqueo-ctx");
     let show = false;
     if (action === "editar" || action === "eliminar") show = owner || confirm;
-    else if (["listo", "unlisto", "aclaracion-no-registrado", "aclaracion-duplicado", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
+    else if (["listo", "unlisto", "aclaracion-no-registrado", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
       show = confirm;
     }
     btn.classList.toggle("hidden", !show);
@@ -409,8 +431,6 @@ async function handleCtxAction(action) {
       await patchItem(selectedId, { listo: false });
     } else if (action === "aclaracion-no-registrado") {
       await patchItem(selectedId, { aclaracion: "No registrado" });
-    } else if (action === "aclaracion-duplicado") {
-      await patchItem(selectedId, { aclaracion: "Duplicado" });
     } else if (action === "aclaracion-manual") {
       openNoteModal(item);
       return;
