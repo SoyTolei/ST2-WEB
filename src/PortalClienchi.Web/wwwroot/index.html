@@ -122,7 +122,7 @@
                 </button>
                 <button type="button" class="plan-modulo-btn blanqueo hidden" data-plan-modulo="blanqueo" id="plan-modulo-blanqueo" aria-hidden="true">
                   <span class="plan-modulo-icon" data-plan-icon="blanqueo"></span>
-                  Solicitudes de blanqueo OnBalance y Portal Cliente
+                  Blanqueo OnBalance y Portal Cliente
                 </button>
               </div>
             </div>
@@ -304,7 +304,7 @@
                 <button type="button" class="planillas-back" data-plan-back>← Volver al menú</button>
                 <div class="plan-module-title-row">
                   <span class="plan-module-icon-badge blanqueo" data-plan-icon="blanqueo"></span>
-                  <h2 class="plan-module-title">Solicitudes de blanqueo OnBalance y Portal Cliente</h2>
+                  <h2 class="plan-module-title">Blanqueo OnBalance y Portal Cliente</h2>
                 </div>
                 <span id="blanqueo-user-badge" class="plan-gestor-user-badge hidden"></span>
               </div>
@@ -1480,6 +1480,38 @@
           <button type="button" id="st2-access-name-edit-cancel" class="st2-access-admin-cancel">Cancelar</button>
           <button type="button" id="st2-access-name-edit-save" class="st2-access-admin-submit">Guardar</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="st2-access-modules-overlay" class="st2-access-name-edit-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-modules-title">
+    <div class="st2-access-name-edit-dialog st2-access-modules-dialog">
+      <div class="st2-access-name-edit-head">
+        <h3 id="st2-access-modules-title" class="st2-access-name-edit-title">Módulos visibles</h3>
+        <button type="button" id="st2-access-modules-close" class="st2-access-name-edit-x" aria-label="Cerrar">×</button>
+      </div>
+      <p id="st2-access-modules-email" class="st2-access-name-edit-email"></p>
+      <p class="st2-access-modules-hint">Referral I+D y Transferencia son para todos. Acá elegís el resto.</p>
+      <label class="st2-access-modules-check">
+        <input id="st2-mod-oportunidad" type="checkbox"/>
+        <span>Oportunidad de Venta</span>
+      </label>
+      <label class="st2-access-modules-check">
+        <input id="st2-mod-pdf" type="checkbox"/>
+        <span>Generador de PDFS para Portal</span>
+      </label>
+      <label class="st2-access-modules-check">
+        <input id="st2-mod-blanqueo" type="checkbox"/>
+        <span>Blanqueo OnBalance y Portal Cliente</span>
+      </label>
+      <label class="st2-access-modules-check st2-access-modules-check-sub">
+        <input id="st2-mod-blanqueo-confirm" type="checkbox"/>
+        <span>Puede confirmar blanqueo (listo / observaciones)</span>
+      </label>
+      <p id="st2-access-modules-error" class="st2-access-admin-error" role="alert"></p>
+      <div class="st2-access-modules-actions">
+        <button type="button" id="st2-access-modules-cancel" class="st2-access-admin-cancel">Cancelar</button>
+        <button type="button" id="st2-access-modules-save" class="st2-access-admin-submit">Guardar</button>
       </div>
     </div>
   </div>

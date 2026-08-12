@@ -479,6 +479,26 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true });
         });
 
+        app.MapGet("/api/planillas/modules", (HttpContext ctx, ModuleAccessRepository modules) =>
+        {
+            var email = PlanUserIdentity.GetFromRequest(ctx);
+            if (email is null)
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            var flags = modules.GetFlags(email);
+            return Results.Ok(new
+            {
+                email,
+                modules = new
+                {
+                    oportunidad = flags.Oportunidad,
+                    pdfPortal = flags.PdfPortal,
+                    blanqueo = flags.Blanqueo,
+                    blanqueoConfirm = flags.BlanqueoConfirm,
+                },
+            });
+        });
+
         app.MapGet("/api/access/admin/session", (HttpContext ctx, IConfiguration config) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
@@ -511,7 +531,7 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true });
         });
 
-        app.MapGet("/api/access/registrations", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo) =>
+        app.MapGet("/api/access/registrations", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo, ModuleAccessRepository modules) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
                 return Results.NotFound();
@@ -522,16 +542,29 @@ public static class PlanillasEndpoints
             var items = accessRepo.ListAll();
             const int activeMinutes = 5;
             var activeWindow = TimeSpan.FromMinutes(activeMinutes);
-            var mapped = items.Select(item => new
+            var flagsMap = modules.GetFlagsForEmails(items.Select(i => i.Email));
+            var mapped = items.Select(item =>
             {
-                item.Email,
-                item.FirstSeenAt,
-                item.LastSeenAt,
-                item.LoginCount,
-                item.DisplayName,
-                isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
-                isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
-                isReturning = item.LoginCount > 1,
+                flagsMap.TryGetValue(item.Email, out var flags);
+                flags ??= new ModuleAccessFlagsDto();
+                return new
+                {
+                    item.Email,
+                    item.FirstSeenAt,
+                    item.LastSeenAt,
+                    item.LoginCount,
+                    item.DisplayName,
+                    isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
+                    isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
+                    isReturning = item.LoginCount > 1,
+                    modules = new
+                    {
+                        oportunidad = flags.Oportunidad,
+                        pdfPortal = flags.PdfPortal,
+                        blanqueo = flags.Blanqueo,
+                        blanqueoConfirm = flags.BlanqueoConfirm,
+                    },
+                };
             }).ToList();
 
             var summary = accessRepo.BuildSummary(items, activeWindow);
@@ -550,6 +583,7 @@ public static class PlanillasEndpoints
             HttpContext ctx,
             IConfiguration config,
             AppAccessRepository accessRepo,
+            ModuleAccessRepository modules,
             string? email) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
@@ -562,10 +596,41 @@ public static class PlanillasEndpoints
                 return Results.BadRequest(new { error = "Falta el correo." });
 
             var removed = accessRepo.DeleteByEmail(email);
+            modules.DeleteByEmail(email);
             if (removed <= 0)
                 return Results.NotFound(new { error = "No se encontró ese acceso." });
 
             return Results.Ok(new { ok = true, email = email.Trim().ToLowerInvariant(), removed });
+        });
+
+        app.MapPut("/api/access/registrations/modules", (HttpContext ctx, IConfiguration config, ModuleAccessRepository modules, ModuleAccessUpdateRequest body) =>
+        {
+            if (!St2AccessAdminAuth.IsConfigured(config))
+                return Results.NotFound();
+
+            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
+                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            try
+            {
+                var flags = modules.Upsert(body);
+                return Results.Ok(new
+                {
+                    ok = true,
+                    email = PlanUserIdentity.ValidateAndNormalize(body.Email),
+                    modules = new
+                    {
+                        oportunidad = flags.Oportunidad,
+                        pdfPortal = flags.PdfPortal,
+                        blanqueo = flags.Blanqueo,
+                        blanqueoConfirm = flags.BlanqueoConfirm,
+                    },
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
         });
 
         app.MapPatch("/api/access/registrations", async (

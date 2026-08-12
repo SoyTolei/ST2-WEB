@@ -1,15 +1,10 @@
 import { getPlanUserEmail } from "./plan-user.js";
+import { canSeePdfPortalModule as canSeeFromAccess, refreshModuleFlags } from "./module-access.js";
 
 /**
- * Quién ve la opción en Sistema de Planillas.
- * Lista vacía = oculto para todos.
  * Override de prueba: localStorage.setItem("st2-pdf-portal-force", "1")
+ * o localStorage.setItem("st2-modules-force-all", "1")
  */
-const PDF_PORTAL_ALLOWED_EMAILS = [
-  "franco.zanna@thomsonreuters.com",
-  "leonel.gallo@thomsonreuters.com",
-];
-
 const FORCE_KEY = "st2-pdf-portal-force";
 const DEFAULT_EDITOR_COLOR = "#0f172a";
 const DEFAULT_PREVIEW_COLOR = "#f2f2f2";
@@ -21,14 +16,8 @@ export function canSeePdfPortalModule(email = getPlanUserEmail()) {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
 
-  const list = PDF_PORTAL_ALLOWED_EMAILS
-    .map((e) => String(e || "").trim().toLowerCase())
-    .filter(Boolean);
-
-  if (list.length === 0) return false;
-
-  const current = String(email || "").trim().toLowerCase();
-  return !!current && list.includes(current);
+  if (!String(email || "").trim()) return false;
+  return canSeeFromAccess();
 }
 
 export function syncPdfPortalModuleVisibility() {
@@ -40,6 +29,7 @@ export function syncPdfPortalModuleVisibility() {
 }
 
 export function initPdfPortalGenerator() {
+  void refreshModuleFlags().then(() => syncPdfPortalModuleVisibility());
   const brandInput = document.getElementById("pdf-portal-brand");
   const editor = document.getElementById("pdf-portal-editor");
   const previewBrand = document.getElementById("pdf-portal-preview-brand");

@@ -38,6 +38,7 @@ builder.Services.AddSingleton<OportunidadRepository>();
 builder.Services.AddSingleton<OportunidadService>();
 builder.Services.AddSingleton<BlanqueoRepository>();
 builder.Services.AddSingleton<AppAccessRepository>();
+builder.Services.AddSingleton<ModuleAccessRepository>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

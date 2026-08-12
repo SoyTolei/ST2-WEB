@@ -74,6 +74,18 @@ const accessNameEditSave = document.getElementById("st2-access-name-edit-save");
 let accessNameEditEmailValue = "";
 let accessNameEditAutoValue = "";
 let accessNameEditSaving = false;
+const accessModulesOverlay = document.getElementById("st2-access-modules-overlay");
+const accessModulesEmail = document.getElementById("st2-access-modules-email");
+const accessModulesError = document.getElementById("st2-access-modules-error");
+const accessModulesClose = document.getElementById("st2-access-modules-close");
+const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
+const accessModulesSave = document.getElementById("st2-access-modules-save");
+const accessModOportunidad = document.getElementById("st2-mod-oportunidad");
+const accessModPdf = document.getElementById("st2-mod-pdf");
+const accessModBlanqueo = document.getElementById("st2-mod-blanqueo");
+const accessModBlanqueoConfirm = document.getElementById("st2-mod-blanqueo-confirm");
+let accessModulesEmailValue = "";
+let accessModulesSaving = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
 const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
 const thomFrame = document.getElementById("thomFrame");
@@ -1003,6 +1015,7 @@ function normalizeAccessAdminItems(items) {
     const email = item.email || item.Email || "";
     const isNewToday = !!(item.isNewToday ?? item.IsNewToday);
     const displayNameOverride = (item.displayName ?? item.DisplayName ?? "").trim() || null;
+    const modules = item.modules || item.Modules || {};
     return {
       email,
       displayNameOverride,
@@ -1013,6 +1026,12 @@ function normalizeAccessAdminItems(items) {
       isNewToday,
       isUnseenNew: isNewToday && !hasAdminSeenAccessEmail(email),
       isReturning: !!(item.isReturning ?? item.IsReturning),
+      modules: {
+        oportunidad: !!(modules.oportunidad ?? modules.Oportunidad),
+        pdfPortal: !!(modules.pdfPortal ?? modules.PdfPortal),
+        blanqueo: !!(modules.blanqueo ?? modules.Blanqueo),
+        blanqueoConfirm: !!(modules.blanqueoConfirm ?? modules.BlanqueoConfirm),
+      },
     };
   });
 }
@@ -1145,16 +1164,27 @@ function renderAccessAdminTable() {
       item.isUnseenNew ? "is-new" : "",
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
+    const mods = item.modules || {};
+    const modBadges = [];
+    if (mods.oportunidad) modBadges.push("Op");
+    if (mods.pdfPortal) modBadges.push("PDF");
+    if (mods.blanqueoConfirm) modBadges.push("Blanq✓");
+    else if (mods.blanqueo) modBadges.push("Blanq");
+    const modHtml = modBadges.length
+      ? `<span class="st2-access-admin-mod-badges" title="Módulos extra">${modBadges.map((b) => `<span class="st2-access-admin-mod">${escapeHtml(b)}</span>`).join("")}</span>`
+      : "";
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
           <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
+          ${modHtml}
         </div>
       </td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Ingresos a la web: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">
+        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos visibles" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
         <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
         <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>
       </td>
@@ -1522,6 +1552,11 @@ accessAdminSearch?.addEventListener("input", () => {
 accessAdminBody?.addEventListener("click", (e) => {
   const target = e.target;
   if (!(target instanceof HTMLElement)) return;
+  const modulesBtn = target.closest("[data-modules-email]");
+  if (modulesBtn instanceof HTMLElement) {
+    openAccessModulesModal(modulesBtn.dataset.modulesEmail || "");
+    return;
+  }
   const editBtn = target.closest("[data-edit-email]");
   if (editBtn instanceof HTMLElement) {
     editAccessAdminDisplayName(editBtn.dataset.editEmail || "");
@@ -1532,6 +1567,89 @@ accessAdminBody?.addEventListener("click", (e) => {
     void deleteAccessAdminEmail(deleteBtn.dataset.deleteEmail || "");
   }
 });
+
+function closeAccessModulesModal() {
+  accessModulesOverlay?.classList.add("hidden");
+  accessModulesEmailValue = "";
+  if (accessModulesError) accessModulesError.textContent = "";
+}
+
+function openAccessModulesModal(email) {
+  if (!accessModulesOverlay || !email) return;
+  const current = accessAdminItemsCache.find((item) => item.email === email);
+  const mods = current?.modules || {};
+  accessModulesEmailValue = email;
+  if (accessModulesEmail) accessModulesEmail.textContent = email;
+  if (accessModOportunidad) accessModOportunidad.checked = !!mods.oportunidad;
+  if (accessModPdf) accessModPdf.checked = !!mods.pdfPortal;
+  if (accessModBlanqueo) accessModBlanqueo.checked = !!mods.blanqueo;
+  if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = !!mods.blanqueoConfirm;
+  if (accessModulesError) accessModulesError.textContent = "";
+  accessModulesOverlay.classList.remove("hidden");
+}
+
+accessModBlanqueoConfirm?.addEventListener("change", () => {
+  if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
+    accessModBlanqueo.checked = true;
+  }
+});
+accessModBlanqueo?.addEventListener("change", () => {
+  if (!accessModBlanqueo.checked && accessModBlanqueoConfirm) {
+    accessModBlanqueoConfirm.checked = false;
+  }
+});
+
+async function saveAccessModules() {
+  if (!accessModulesEmailValue || accessModulesSaving) return;
+  accessModulesSaving = true;
+  if (accessModulesSave) accessModulesSave.disabled = true;
+  if (accessModulesError) accessModulesError.textContent = "";
+  try {
+    const response = await fetch("/api/access/registrations/modules", {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: accessModulesEmailValue,
+        oportunidad: !!accessModOportunidad?.checked,
+        pdfPortal: !!accessModPdf?.checked,
+        blanqueo: !!accessModBlanqueo?.checked,
+        blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
+    const mods = data.modules || {};
+    accessAdminItemsCache = accessAdminItemsCache.map((item) =>
+      item.email === accessModulesEmailValue
+        ? {
+            ...item,
+            modules: {
+              oportunidad: !!mods.oportunidad,
+              pdfPortal: !!mods.pdfPortal,
+              blanqueo: !!mods.blanqueo,
+              blanqueoConfirm: !!mods.blanqueoConfirm,
+            },
+          }
+        : item
+    );
+    closeAccessModulesModal();
+    renderAccessAdminTable();
+  } catch (err) {
+    if (accessModulesError) accessModulesError.textContent = err?.message || "No se pudo guardar.";
+  } finally {
+    accessModulesSaving = false;
+    if (accessModulesSave) accessModulesSave.disabled = false;
+  }
+}
+
+accessModulesClose?.addEventListener("click", closeAccessModulesModal);
+accessModulesCancel?.addEventListener("click", closeAccessModulesModal);
+accessModulesSave?.addEventListener("click", () => { void saveAccessModules(); });
+accessModulesOverlay?.addEventListener("click", (e) => {
+  if (e.target === accessModulesOverlay) closeAccessModulesModal();
+});
+
 accessNameEditClose?.addEventListener("click", closeAccessNameEditModal);
 accessNameEditCancel?.addEventListener("click", closeAccessNameEditModal);
 accessNameEditSuggest?.addEventListener("click", () => {

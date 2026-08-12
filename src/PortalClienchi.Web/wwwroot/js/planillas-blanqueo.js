@@ -1,22 +1,14 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
+import {
+  canSeeBlanqueoModule as canSeeFromAccess,
+  canConfirmBlanqueoModule as canConfirmFromAccess,
+  refreshModuleFlags,
+} from "./module-access.js";
 
 /**
- * Quién ve el módulo.
  * Override: localStorage.setItem("st2-blanqueo-force", "1")
+ * o localStorage.setItem("st2-modules-force-all", "1")
  */
-const BLANQUEO_ALLOWED_EMAILS = [
-  "leonel.gallo@thomsonreuters.com",
-  "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
-  "alexis.ruiz@thomsonreuters.com",
-  "yohanaelizabeth.orellana@thomsonreuters.com",
-];
-
-const BLANQUEO_CONFIRMER_EMAILS = [
-  "leonel.gallo@thomsonreuters.com",
-  "alexis.ruiz@thomsonreuters.com",
-  "yohanaelizabeth.orellana@thomsonreuters.com",
-];
-
 const FORCE_KEY = "st2-blanqueo-force";
 const TIPOS = ["Blanqueo", "Blanqueo + MFA"];
 const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
@@ -32,18 +24,17 @@ export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
 
-  const list = BLANQUEO_ALLOWED_EMAILS
-    .map((e) => String(e || "").trim().toLowerCase())
-    .filter(Boolean);
-
-  if (list.length === 0) return false;
-  const current = String(email || "").trim().toLowerCase();
-  return !!current && list.includes(current);
+  if (!String(email || "").trim()) return false;
+  return canSeeFromAccess();
 }
 
 function canConfirmBlanqueo(email = getPlanUserEmail()) {
-  const current = String(email || "").trim().toLowerCase();
-  return !!current && BLANQUEO_CONFIRMER_EMAILS.includes(current);
+  try {
+    if (localStorage.getItem(FORCE_KEY) === "1") return true;
+  } catch { /* ignore */ }
+
+  if (!String(email || "").trim()) return false;
+  return canConfirmFromAccess();
 }
 
 export function syncBlanqueoModuleVisibility() {
@@ -55,6 +46,10 @@ export function syncBlanqueoModuleVisibility() {
 }
 
 export function initBlanqueoModule() {
+  void refreshModuleFlags().then(() => {
+    canConfirm = canConfirmBlanqueo();
+    syncBlanqueoModuleVisibility();
+  });
   syncBlanqueoModuleVisibility();
   if (blanqueoInited) return;
   blanqueoInited = true;
@@ -119,6 +114,7 @@ export function initBlanqueoModule() {
 export async function openBlanqueoModule() {
   if (!canSeeBlanqueoModule()) return;
   initBlanqueoModule();
+  await refreshModuleFlags();
   canConfirm = canConfirmBlanqueo();
   syncSolicitanteBadge();
   clearForm();

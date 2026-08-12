@@ -4,6 +4,7 @@ import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule } from "./planillas-blanqueo.js";
+import { refreshModuleFlags, canSeeOportunidadModule } from "./module-access.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -171,12 +172,15 @@ function updateSistemaUi() {
   if (referralBtn) referralBtn.disabled = placeholderBlocked;
 
   if (oportunidadBtn) {
-    oportunidadBtn.classList.toggle("hidden", legalSelected);
-    oportunidadBtn.disabled = placeholderBlocked;
+    const allowedOp = canSeeOportunidadModule();
+    oportunidadBtn.classList.toggle("hidden", legalSelected || !allowedOp);
+    oportunidadBtn.disabled = placeholderBlocked || !allowedOp;
   }
   if (oportunidadNa) {
-    oportunidadNa.classList.toggle("hidden", !legalSelected);
-    oportunidadNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
+    // Solo mostrar "no corresponde" en LEGAL cuando la persona sí tiene permiso de oportunidad.
+    const showNa = legalSelected && canSeeOportunidadModule();
+    oportunidadNa.classList.toggle("hidden", !showNa);
+    oportunidadNa.setAttribute("aria-hidden", showNa ? "false" : "true");
   }
   syncPdfPortalModuleVisibility();
   syncBlanqueoModuleVisibility();
@@ -843,6 +847,7 @@ function bindEvents() {
 
   document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", async () => {
     if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
+    if (!canSeeOportunidadModule()) return;
     const mod = await loadOportunidadModule();
     mod.openOportunidadMenu();
   });
@@ -1044,6 +1049,8 @@ export function initPlanillas() {
   initBlanqueoModule();
   syncBlanqueoModuleVisibility();
   showView("menu");
+
+  void refreshModuleFlags().then(() => updateSistemaUi());
 
   void loadConfig().then(() => {
     updatePlanBuildBadge(planillasConfig?.webBuild);

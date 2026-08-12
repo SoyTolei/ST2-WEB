@@ -5,21 +5,6 @@ namespace PortalClienchi.Web.Planillas;
 
 public static class BlanqueoEndpoints
 {
-    private static readonly HashSet<string> AllowedEmails = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "leonel.gallo@thomsonreuters.com",
-        "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
-        "alexis.ruiz@thomsonreuters.com",
-        "yohanaelizabeth.orellana@thomsonreuters.com",
-    };
-
-    private static readonly HashSet<string> ConfirmerEmails = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "leonel.gallo@thomsonreuters.com",
-        "alexis.ruiz@thomsonreuters.com",
-        "yohanaelizabeth.orellana@thomsonreuters.com",
-    };
-
     private static readonly HashSet<string> PortalesPermitidos = new(StringComparer.OrdinalIgnoreCase)
     {
         "OnBalance",
@@ -34,23 +19,23 @@ public static class BlanqueoEndpoints
 
     public static void MapBlanqueoEndpoints(this WebApplication app)
     {
-        app.MapGet("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoRepository repo) =>
+        app.MapGet("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, out var email, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
             return Results.Ok(new
             {
                 items = repo.LoadAll(),
                 usuario = email,
-                canConfirm = ConfirmerEmails.Contains(email!),
+                canConfirm = flags.BlanqueoConfirm,
                 storage = new { ready = repo.StorageReady, path = repo.DatabasePath },
             });
         });
 
-        app.MapPost("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoCreateRequest body, BlanqueoRepository repo) =>
+        app.MapPost("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoCreateRequest body, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, out var email, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out _, out var error))
                 return error!;
 
             var validation = ValidateCreate(body);
@@ -70,16 +55,16 @@ public static class BlanqueoEndpoints
             }
         });
 
-        app.MapPut("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoUpdateRequest body, BlanqueoRepository repo) =>
+        app.MapPut("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoUpdateRequest body, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, out var email, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
             var current = repo.GetById(id);
             if (current is null)
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
 
-            if (!IsOwner(current, email!) && !ConfirmerEmails.Contains(email!))
+            if (!IsOwner(current, email!) && !flags.BlanqueoConfirm)
                 return Results.Json(new { error = "Solo podés editar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
             var validation = ValidateUpdate(body);
@@ -101,13 +86,10 @@ public static class BlanqueoEndpoints
                 : Results.Ok(updated);
         });
 
-        app.MapPatch("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoPatchRequest body, BlanqueoRepository repo) =>
+        app.MapPatch("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoPatchRequest body, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, out var email, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
                 return error!;
-
-            if (!ConfirmerEmails.Contains(email!))
-                return Results.Json(new { error = "No tenés permiso para confirmar o aclarar." }, statusCode: StatusCodes.Status403Forbidden);
 
             if (body.Aclaracion is not null && body.Aclaracion.Trim().Length > 280)
                 return Results.BadRequest(new { error = "La aclaración es demasiado larga (máx. 280)." });
@@ -119,16 +101,16 @@ public static class BlanqueoEndpoints
             return Results.Ok(updated);
         });
 
-        app.MapDelete("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoRepository repo) =>
+        app.MapDelete("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, out var email, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
             var current = repo.GetById(id);
             if (current is null)
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
 
-            if (!IsOwner(current, email!) && !ConfirmerEmails.Contains(email!))
+            if (!IsOwner(current, email!) && !flags.BlanqueoConfirm)
                 return Results.Json(new { error = "Solo podés eliminar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
             if (!repo.Delete(id))
@@ -141,9 +123,16 @@ public static class BlanqueoEndpoints
     private static bool IsOwner(BlanqueoRecordDto item, string email) =>
         string.Equals(item.SolicitadoPorEmail, email, StringComparison.OrdinalIgnoreCase);
 
-    private static bool TryAuthorize(HttpContext ctx, out string? email, out IResult? error)
+    private static bool TryAuthorize(
+        HttpContext ctx,
+        ModuleAccessRepository modules,
+        bool requireConfirm,
+        out string? email,
+        out ModuleAccessFlagsDto flags,
+        out IResult? error)
     {
         email = PlanUserIdentity.GetFromRequest(ctx);
+        flags = new ModuleAccessFlagsDto();
         error = null;
         if (email is null)
         {
@@ -151,9 +140,16 @@ public static class BlanqueoEndpoints
             return false;
         }
 
-        if (!AllowedEmails.Contains(email))
+        flags = modules.GetFlags(email);
+        if (!flags.Blanqueo)
         {
             error = Results.Json(new { error = "No tenés acceso a este módulo." }, statusCode: StatusCodes.Status403Forbidden);
+            return false;
+        }
+
+        if (requireConfirm && !flags.BlanqueoConfirm)
+        {
+            error = Results.Json(new { error = "No tenés permiso para confirmar o aclarar." }, statusCode: StatusCodes.Status403Forbidden);
             return false;
         }
 
