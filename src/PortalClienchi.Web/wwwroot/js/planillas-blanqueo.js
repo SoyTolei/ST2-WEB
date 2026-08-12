@@ -247,7 +247,7 @@ async function reloadList() {
     const res = await planUserFetch("/api/planillas/blanqueo");
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
-    items = Array.isArray(data.items) ? data.items : [];
+    items = (Array.isArray(data.items) ? data.items : []).map(normalizeBlanqueoItem);
     canConfirm = !!data.canConfirm || canConfirmBlanqueo();
     syncMineFilterVisibility();
     syncClaveUi(data.claveBlanqueo);
@@ -320,7 +320,8 @@ function currentMonthKey() {
 
 function monthKeyFromIso(iso) {
   const raw = String(iso || "").trim();
-  const isoMatch = /^(\d{4})-(\d{1,2})(?:[T\s].*)?$/.exec(raw);
+  // Acepta yyyy-MM, yyyy-MM-dd y variantes con hora.
+  const isoMatch = /^(\d{4})-(\d{1,2})(?:-\d{1,2})?(?:[T\s].*)?/.exec(raw);
   if (isoMatch) {
     return `${isoMatch[1]}-${String(Number(isoMatch[2])).padStart(2, "0")}`;
   }
@@ -329,6 +330,23 @@ function monthKeyFromIso(iso) {
     return `${dmy[3]}-${String(Number(dmy[2])).padStart(2, "0")}`;
   }
   return "";
+}
+
+function normalizeBlanqueoItem(raw) {
+  const src = raw || {};
+  return {
+    id: src.id ?? src.Id ?? 0,
+    portal: src.portal ?? src.Portal ?? "PortalCliente",
+    nroCaso: src.nroCaso ?? src.NroCaso ?? "",
+    nroCliente: src.nroCliente ?? src.NroCliente ?? "",
+    correo: src.correo ?? src.Correo ?? "",
+    fechaSolicitud: src.fechaSolicitud ?? src.FechaSolicitud ?? "",
+    solicitadoPorEmail: src.solicitadoPorEmail ?? src.SolicitadoPorEmail ?? "",
+    solicitadoPorNombre: src.solicitadoPorNombre ?? src.SolicitadoPorNombre ?? "",
+    tipoSolicitud: src.tipoSolicitud ?? src.TipoSolicitud ?? "",
+    listo: !!(src.listo ?? src.Listo),
+    aclaracion: src.aclaracion ?? src.Aclaracion ?? null,
+  };
 }
 
 function getFilteredItems() {
