@@ -118,7 +118,8 @@
 
 .blanqueo-table-wrap {
   overflow: auto;
-  max-height: min(72vh, 720px);
+  min-height: min(52vh, 520px);
+  max-height: min(78vh, 820px);
   border: 1px solid #e2e8f0;
   border-radius: 8px;
 }
@@ -126,6 +127,24 @@
 .blanqueo-table th,
 .blanqueo-table td {
   white-space: nowrap;
+}
+
+.blanqueo-table th.blanqueo-th-fecha {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.blanqueo-table th.blanqueo-th-fecha:hover {
+  background: #dce4f0;
+}
+
+.blanqueo-table th.blanqueo-th-fecha .blanqueo-sort-mark {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.72em;
+  opacity: 0.85;
+  vertical-align: middle;
 }
 
 .blanqueo-table td.blanqueo-col-correo {

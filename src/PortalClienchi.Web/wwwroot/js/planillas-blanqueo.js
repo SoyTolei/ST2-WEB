@@ -18,6 +18,8 @@ let items = [];
 let selectedId = null;
 let canConfirm = false;
 let editingId = null;
+/** @type {"desc" | "asc"} */
+let fechaSortDir = "desc";
 
 export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
   try {
@@ -70,6 +72,12 @@ export function initBlanqueoModule() {
   document.getElementById("blanqueo-filter-month")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
+  document.getElementById("blanqueo-th-fecha")?.addEventListener("click", () => {
+    fechaSortDir = fechaSortDir === "desc" ? "asc" : "desc";
+    syncFechaSortHeader();
+    applyFilters();
+  });
+  syncFechaSortHeader();
 
   document.getElementById("blanqueo-edit-save")?.addEventListener("click", () => {
     void saveEdit();
@@ -268,7 +276,7 @@ function getFilteredItems() {
   const portal = document.getElementById("blanqueo-filter-portal")?.value || "all";
   const q = String(document.getElementById("blanqueo-search")?.value || "").trim().toLowerCase();
 
-  return items.filter((item) => {
+  const filtered = items.filter((item) => {
     if (portal !== "all" && (item.portal || "PortalCliente") !== portal) return false;
     if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) return false;
     if (q) {
@@ -284,6 +292,25 @@ function getFilteredItems() {
     }
     return true;
   });
+
+  const dir = fechaSortDir === "asc" ? 1 : -1;
+  filtered.sort((a, b) => {
+    const fa = String(a.fechaSolicitud || "");
+    const fb = String(b.fechaSolicitud || "");
+    if (fa !== fb) return fa < fb ? -dir : dir;
+    return (a.id || 0) - (b.id || 0);
+  });
+  return filtered;
+}
+
+function syncFechaSortHeader() {
+  const th = document.getElementById("blanqueo-th-fecha");
+  if (!th) return;
+  const mark = th.querySelector(".blanqueo-sort-mark");
+  const desc = fechaSortDir === "desc";
+  th.setAttribute("aria-sort", desc ? "descending" : "ascending");
+  th.title = desc ? "Más recientes primero — clic para invertir" : "Más antiguas primero — clic para invertir";
+  if (mark) mark.textContent = desc ? "↓" : "↑";
 }
 
 function applyFilters() {
