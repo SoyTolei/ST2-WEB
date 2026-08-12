@@ -389,7 +389,7 @@
                 <p class="blanqueo-hint">Clic derecho: editar/eliminar tus cargas. Quien confirma puede marcar listo o aclarar.</p>
               </div>
 
-              <div id="blanqueo-ctx" class="plan-gestor-ctx hidden" role="menu">
+              <div id="blanqueo-ctx" class="plan-gestor-ctx blanqueo-ctx hidden" role="menu">
                 <button type="button" data-blanqueo-ctx="editar">Editar</button>
                 <button type="button" data-blanqueo-ctx="eliminar">Eliminar</button>
                 <hr/>
@@ -400,44 +400,6 @@
                 <button type="button" data-blanqueo-ctx="aclaracion-duplicado">Aclaración: Duplicado</button>
                 <button type="button" data-blanqueo-ctx="aclaracion-manual">Aclaración a mano…</button>
                 <button type="button" data-blanqueo-ctx="clear-aclaracion">Quitar aclaración</button>
-              </div>
-
-              <div id="blanqueo-edit-overlay" class="plan-modal-overlay hidden" aria-hidden="true">
-                <div class="plan-modal blanqueo-edit-modal" role="dialog" aria-labelledby="blanqueo-edit-title">
-                  <h3 id="blanqueo-edit-title">Editar solicitud</h3>
-                  <div class="blanqueo-form-grid">
-                    <div class="blanqueo-field blanqueo-field-portal">
-                      <label for="blanqueo-edit-portal">Portal</label>
-                      <select id="blanqueo-edit-portal">
-                        <option value="OnBalance">On Balance</option>
-                        <option value="PortalCliente">Portal Cliente</option>
-                      </select>
-                    </div>
-                    <div class="blanqueo-field">
-                      <label for="blanqueo-edit-caso">N° de caso</label>
-                      <input id="blanqueo-edit-caso" type="text" autocomplete="off" spellcheck="false"/>
-                    </div>
-                    <div class="blanqueo-field">
-                      <label for="blanqueo-edit-cliente">N° de cliente</label>
-                      <input id="blanqueo-edit-cliente" type="text" autocomplete="off" spellcheck="false"/>
-                    </div>
-                    <div class="blanqueo-field">
-                      <label for="blanqueo-edit-correo">Correo</label>
-                      <input id="blanqueo-edit-correo" type="email" autocomplete="off" spellcheck="false"/>
-                    </div>
-                    <div class="blanqueo-field">
-                      <label for="blanqueo-edit-tipo">Solicitud</label>
-                      <select id="blanqueo-edit-tipo">
-                        <option value="Blanqueo">Blanqueo</option>
-                        <option value="Blanqueo + MFA">Blanqueo + MFA</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="plan-modal-actions">
-                    <button type="button" id="blanqueo-edit-cancel" class="plan-gestor-btn-tool">Cancelar</button>
-                    <button type="button" id="blanqueo-edit-save" class="plan-gestor-btn-add">Guardar</button>
-                  </div>
-                </div>
               </div>
 
               <p id="blanqueo-status" class="plan-status-bar hidden" role="status"></p>
@@ -1376,6 +1338,60 @@
       <div class="plan-user-actions">
         <button type="button" id="op-delete-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="op-delete-confirm" class="plan-gestor-btn-red">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blanqueo-edit-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-edit-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="blanqueo-edit-title">Editar solicitud</h3>
+      <p class="plan-user-hint">Modificá los datos y guardá los cambios.</p>
+      <div class="blanqueo-edit-grid">
+        <label class="plan-user-label" for="blanqueo-edit-portal">Portal</label>
+        <select id="blanqueo-edit-portal" class="plan-user-input">
+          <option value="OnBalance">On Balance</option>
+          <option value="PortalCliente">Portal Cliente</option>
+        </select>
+        <label class="plan-user-label" for="blanqueo-edit-caso">N° de caso</label>
+        <input id="blanqueo-edit-caso" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <label class="plan-user-label" for="blanqueo-edit-cliente">N° de cliente</label>
+        <input id="blanqueo-edit-cliente" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <label class="plan-user-label" for="blanqueo-edit-correo">Correo</label>
+        <input id="blanqueo-edit-correo" type="email" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <label class="plan-user-label" for="blanqueo-edit-tipo">Solicitud</label>
+        <select id="blanqueo-edit-tipo" class="plan-user-input">
+          <option value="Blanqueo">Blanqueo</option>
+          <option value="Blanqueo + MFA">Blanqueo + MFA</option>
+        </select>
+      </div>
+      <div class="plan-user-actions">
+        <button type="button" id="blanqueo-edit-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="blanqueo-edit-save" class="plan-gestor-btn-add">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blanqueo-delete-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-delete-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="blanqueo-delete-title">Eliminar solicitud</h3>
+      <p class="plan-user-hint">¿Seguro que querés eliminar esta solicitud? Esta acción no se puede deshacer.</p>
+      <p id="blanqueo-delete-desc" class="op-delete-desc"></p>
+      <div class="plan-user-actions">
+        <button type="button" id="blanqueo-delete-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="blanqueo-delete-confirm" class="plan-gestor-btn-red">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blanqueo-note-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-note-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="blanqueo-note-title">Aclaración</h3>
+      <p class="plan-user-hint">Escribí un comentario específico sobre esta solicitud.</p>
+      <label class="plan-user-label" for="blanqueo-note-text">Texto</label>
+      <textarea id="blanqueo-note-text" class="blanqueo-note-textarea" rows="4" maxlength="280" placeholder="Ej. el correo no figura en el cliente…"></textarea>
+      <div class="plan-user-actions">
+        <button type="button" id="blanqueo-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="blanqueo-note-save" class="plan-gestor-btn-add">Guardar aclaración</button>
       </div>
     </div>
   </div>

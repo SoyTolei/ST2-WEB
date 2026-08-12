@@ -179,21 +179,68 @@
   color: #64748b;
 }
 
-.blanqueo-edit-modal {
-  max-width: 520px;
-  width: calc(100% - 32px);
+.blanqueo-dialog {
+  width: min(480px, 96vw);
 }
 
-.blanqueo-edit-modal h3 {
-  margin: 0 0 14px;
-  font-size: 1.05rem;
+.blanqueo-edit-grid {
+  display: grid;
+  gap: 6px 0;
+  margin-bottom: 8px;
 }
 
-.blanqueo-edit-modal .plan-modal-actions {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+.blanqueo-edit-grid .plan-user-input,
+.blanqueo-edit-grid select.plan-user-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.blanqueo-note-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 96px;
+  margin-bottom: 8px;
+}
+
+.blanqueo-note-textarea:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
+}
+
+.blanqueo-ctx {
+  min-width: 240px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
+  padding: 6px;
+}
+
+.blanqueo-ctx button {
+  border-radius: 7px;
+  padding: 9px 12px;
+  font-size: 0.84rem;
+  color: #0f172a;
+}
+
+.blanqueo-ctx button:hover {
+  background: #f1f5f9;
+}
+
+.blanqueo-ctx hr {
+  margin: 5px 4px;
+}
+
+.plan-gestor-ctx.blanqueo-ctx button.hidden,
+.plan-gestor-ctx.blanqueo-ctx hr.hidden {
+  display: none !important;
 }
 
 .plan-gestor-ctx button.hidden,

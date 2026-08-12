@@ -80,6 +80,22 @@ export function initBlanqueoModule() {
     if (e.target === e.currentTarget) hideEditModal();
   });
 
+  document.getElementById("blanqueo-delete-cancel")?.addEventListener("click", () => hideDeleteModal());
+  document.getElementById("blanqueo-delete-confirm")?.addEventListener("click", () => {
+    void confirmDeleteModal();
+  });
+  document.getElementById("blanqueo-delete-overlay")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) hideDeleteModal();
+  });
+
+  document.getElementById("blanqueo-note-cancel")?.addEventListener("click", () => hideNoteModal());
+  document.getElementById("blanqueo-note-save")?.addEventListener("click", () => {
+    void saveNoteModal();
+  });
+  document.getElementById("blanqueo-note-overlay")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) hideNoteModal();
+  });
+
   const ctx = document.getElementById("blanqueo-ctx");
   ctx?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -396,24 +412,12 @@ async function handleCtxAction(action) {
     } else if (action === "aclaracion-duplicado") {
       await patchItem(selectedId, { aclaracion: "Duplicado" });
     } else if (action === "aclaracion-manual") {
-      const text = window.prompt("Aclaración (texto libre):", item.aclaracion || "");
-      if (text === null) return;
-      const trimmed = text.trim();
-      if (!trimmed) {
-        await patchItem(selectedId, { clearAclaracion: true });
-      } else {
-        await patchItem(selectedId, { aclaracion: trimmed });
-      }
+      openNoteModal(item);
+      return;
     } else if (action === "clear-aclaracion") {
       await patchItem(selectedId, { clearAclaracion: true });
     } else if (action === "eliminar") {
-      if (!window.confirm("¿Eliminar esta solicitud?")) return;
-      const res = await planUserFetch(`/api/planillas/blanqueo/${selectedId}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
-      selectedId = null;
-      setStatus("Solicitud eliminada.");
-      await reloadList();
+      openDeleteModal(item);
       return;
     }
     setStatus("Actualizado.");
@@ -437,11 +441,15 @@ function openEditModal(item) {
   if (correo) correo.value = item.correo || "";
   if (tipo) tipo.value = TIPOS.includes(item.tipoSolicitud) ? item.tipoSolicitud : "Blanqueo";
   overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  caso?.focus();
 }
 
 function hideEditModal() {
   editingId = null;
-  document.getElementById("blanqueo-edit-overlay")?.classList.add("hidden");
+  const overlay = document.getElementById("blanqueo-edit-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
 }
 
 async function saveEdit() {
@@ -465,6 +473,72 @@ async function saveEdit() {
     await reloadList();
   } catch (err) {
     setStatus(err?.message || "No se pudo editar.", true);
+  }
+}
+
+function openDeleteModal(item) {
+  selectedId = item.id;
+  const overlay = document.getElementById("blanqueo-delete-overlay");
+  const desc = document.getElementById("blanqueo-delete-desc");
+  if (desc) {
+    desc.textContent = `${portalLabel(item.portal)} · ${item.nroCaso || "—"} · ${item.correo || "—"}`;
+  }
+  overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  document.getElementById("blanqueo-delete-cancel")?.focus();
+}
+
+function hideDeleteModal() {
+  const overlay = document.getElementById("blanqueo-delete-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+}
+
+async function confirmDeleteModal() {
+  if (!selectedId) return;
+  try {
+    const res = await planUserFetch(`/api/planillas/blanqueo/${selectedId}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+    selectedId = null;
+    hideDeleteModal();
+    setStatus("Solicitud eliminada.");
+    await reloadList();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo eliminar.", true);
+  }
+}
+
+function openNoteModal(item) {
+  selectedId = item.id;
+  const overlay = document.getElementById("blanqueo-note-overlay");
+  const text = document.getElementById("blanqueo-note-text");
+  if (text) text.value = item.aclaracion || "";
+  overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  text?.focus();
+}
+
+function hideNoteModal() {
+  const overlay = document.getElementById("blanqueo-note-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+}
+
+async function saveNoteModal() {
+  if (!selectedId) return;
+  const text = String(document.getElementById("blanqueo-note-text")?.value || "").trim();
+  try {
+    if (!text) {
+      await patchItem(selectedId, { clearAclaracion: true });
+    } else {
+      await patchItem(selectedId, { aclaracion: text });
+    }
+    hideNoteModal();
+    setStatus("Aclaración guardada.");
+    await reloadList();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo guardar la aclaración.", true);
   }
 }
 
