@@ -36,12 +36,26 @@ public static class BlanqueoEndpoints
 
         app.MapGet("/api/planillas/blanqueo/alerts", (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out _, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
+
+            // Quien confirma ve la cola de pendientes; el resto, avisos personales.
+            if (flags.BlanqueoConfirm)
+            {
+                var pending = repo.ListPendingForConfirm();
+                return Results.Ok(new
+                {
+                    mode = "confirm",
+                    count = pending.Count,
+                    items = pending,
+                    claveBlanqueo = BlanqueoClave.Actual,
+                });
+            }
 
             var alerts = repo.ListUnseenAlerts(email!);
             return Results.Ok(new
             {
+                mode = "requester",
                 count = alerts.Count,
                 items = alerts,
                 claveBlanqueo = BlanqueoClave.Actual,
@@ -50,8 +64,12 @@ public static class BlanqueoEndpoints
 
         app.MapPost("/api/planillas/blanqueo/alerts/seen", async (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules, CancellationToken ct) =>
         {
-            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out _, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
+
+            // Para confirmadores el "visto" es solo UI (toast); la cola sigue en badge hasta marcar listo.
+            if (flags.BlanqueoConfirm)
+                return Results.Ok(new { ok = true, marked = 0, mode = "confirm" });
 
             int[]? ids = null;
             try
@@ -65,7 +83,7 @@ public static class BlanqueoEndpoints
             }
 
             var marked = repo.MarkAlertsSeen(email!, ids);
-            return Results.Ok(new { ok = true, marked });
+            return Results.Ok(new { ok = true, marked, mode = "requester" });
         });
 
         app.MapPost("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoCreateRequest body, BlanqueoRepository repo, ModuleAccessRepository modules) =>

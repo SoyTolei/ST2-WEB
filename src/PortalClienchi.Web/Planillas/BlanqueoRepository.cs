@@ -149,6 +149,37 @@ public sealed class BlanqueoRepository
         return current;
     }
 
+    /// <summary>Solicitudes aún sin marcar listo (cola para quien confirma).</summary>
+    public IReadOnlyList<BlanqueoAlertDto> ListPendingForConfirm()
+    {
+        var list = new List<BlanqueoAlertDto>();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, portal, nro_caso, correo, tipo_solicitud, fecha_solicitud
+            FROM blanqueo_solicitudes
+            WHERE listo = 0
+            ORDER BY fecha_solicitud DESC, id DESC
+            """;
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            list.Add(new BlanqueoAlertDto
+            {
+                Id = r.GetInt32(0),
+                SolicitudId = r.GetInt32(0),
+                Portal = r.IsDBNull(1) ? "PortalCliente" : r.GetString(1),
+                NroCaso = r.GetString(2),
+                Correo = r.GetString(3),
+                TipoSolicitud = r.GetString(4),
+                CreatedAt = r.IsDBNull(5) ? "" : r.GetString(5),
+                Kind = BlanqueoAlertKinds.Pending,
+            });
+        }
+
+        return list;
+    }
+
     public IReadOnlyList<BlanqueoAlertDto> ListUnseenAlerts(string email)
     {
         var normalized = PlanUserIdentity.ValidateAndNormalize(email);

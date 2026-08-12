@@ -45,6 +45,7 @@ public static class BlanqueoAlertKinds
     public const string Ready = "ready";
     public const string Note = "note";
     public const string NoRegistrado = "no_registrado";
+    public const string Pending = "pending";
 
     public static string FromAclaracion(string? aclaracion)
     {
