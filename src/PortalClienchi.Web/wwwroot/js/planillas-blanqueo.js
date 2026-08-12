@@ -21,6 +21,7 @@ let canConfirm = false;
 let editingId = null;
 /** @type {"desc" | "asc"} */
 let fechaSortDir = "desc";
+let monthFilterTouched = false;
 
 export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
   try {
@@ -70,7 +71,10 @@ export function initBlanqueoModule() {
     });
   });
 
-  document.getElementById("blanqueo-filter-month")?.addEventListener("change", () => applyFilters());
+  document.getElementById("blanqueo-filter-month")?.addEventListener("change", () => {
+    monthFilterTouched = true;
+    applyFilters();
+  });
   document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
   document.getElementById("blanqueo-th-fecha")?.addEventListener("click", () => {
@@ -131,6 +135,7 @@ export async function openBlanqueoModule() {
   canConfirm = canConfirmBlanqueo();
   syncSolicitanteBadge();
   clearForm();
+  monthFilterTouched = false;
   await reloadList();
 }
 
@@ -266,12 +271,12 @@ function rebuildMonthOptions() {
   if (!sel) return;
 
   const previous = String(sel.value || "").trim();
+  const current = currentMonthKey();
   const keys = new Set();
   for (const item of items) {
     const key = monthKeyFromIso(item.fechaSolicitud);
     if (key) keys.add(key);
   }
-  const current = currentMonthKey();
   keys.add(current);
 
   const sorted = [...keys].sort((a, b) => b.localeCompare(a));
@@ -283,19 +288,15 @@ function rebuildMonthOptions() {
       return `<option value="${key}">${escapeHtml(label)}</option>`;
     }).join("");
 
-  let next = previous;
-  if (next !== "all" && !sorted.includes(next)) {
-    // Si el mes actual no tiene filas, mostrar el más reciente con datos.
-    const withData = sorted.filter((key) =>
-      items.some((item) => monthKeyFromIso(item.fechaSolicitud) === key)
-    );
-    next = withData[0] || current;
+  let next = current;
+  if (monthFilterTouched) {
+    next = previous || current;
+    if (next !== "all" && !sorted.includes(next)) next = current;
   }
-  if (!next) next = current;
 
   sel.value = next;
   if (![...sel.options].some((o) => o.value === sel.value)) {
-    sel.value = "all";
+    sel.value = current;
   }
 }
 
