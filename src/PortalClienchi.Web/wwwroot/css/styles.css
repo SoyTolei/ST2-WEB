@@ -2474,10 +2474,11 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-about-signature-bike-track {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  width: 1.15rem;
+  width: 1.85rem;
   height: 1.15rem;
   overflow: visible;
   margin-left: 1px;
@@ -2489,6 +2490,22 @@ body.portal-tab-active .tab-icon {
   animation: st2AboutBikeRide 5s ease-in-out infinite;
   filter: drop-shadow(0 2px 4px rgba(214, 64, 0, 0.28));
   will-change: transform;
+}
+
+.st2-about-signature-bike--rear {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  opacity: 0.72;
+  filter: drop-shadow(0 1px 2px rgba(214, 64, 0, 0.2));
+  animation-delay: -0.28s;
+}
+
+.st2-about-signature-bike--front {
+  position: relative;
+  z-index: 1;
+  margin-left: 0.55rem;
 }
 
 @keyframes st2AboutCrestPulse {
