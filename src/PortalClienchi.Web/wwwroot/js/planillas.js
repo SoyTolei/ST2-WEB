@@ -3,6 +3,7 @@ import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from 
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
+import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule } from "./planillas-blanqueo.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -90,6 +91,7 @@ const views = {
   oportunidadCargar: document.getElementById("planillas-oportunidad-cargar"),
   oportunidadGestor: document.getElementById("planillas-oportunidad-gestor"),
   pdfPortal: document.getElementById("planillas-pdf-portal"),
+  blanqueo: document.getElementById("planillas-blanqueo"),
 };
 
 const els = {
@@ -177,6 +179,7 @@ function updateSistemaUi() {
     oportunidadNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
   }
   syncPdfPortalModuleVisibility();
+  syncBlanqueoModuleVisibility();
   updateSistemaBetaUi();
 }
 
@@ -850,6 +853,12 @@ function bindEvents() {
     showView("pdfPortal");
   });
 
+  document.querySelector('[data-plan-modulo="blanqueo"]')?.addEventListener("click", async () => {
+    if (!canSeeBlanqueoModule()) return;
+    showView("blanqueo");
+    await openBlanqueoModule();
+  });
+
   document.querySelectorAll("[data-plan-back]").forEach((btn) => {
     btn.addEventListener("click", () => showView("menu"));
   });
@@ -1032,6 +1041,8 @@ export function initPlanillas() {
   initSecretRunnerTrigger();
   initPdfPortalGenerator();
   syncPdfPortalModuleVisibility();
+  initBlanqueoModule();
+  syncBlanqueoModuleVisibility();
   showView("menu");
 
   void loadConfig().then(() => {

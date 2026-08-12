@@ -36,6 +36,7 @@ builder.Services.AddSingleton<TransferenciaService>();
 builder.Services.AddSingleton<ReferralIdService>();
 builder.Services.AddSingleton<OportunidadRepository>();
 builder.Services.AddSingleton<OportunidadService>();
+builder.Services.AddSingleton<BlanqueoRepository>();
 builder.Services.AddSingleton<AppAccessRepository>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -400,6 +401,7 @@ app.MapMethods("/embed/{site}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE",
         await proxy.HandleAsync(ctx, site, "", ct));
 
 app.MapPlanillasEndpoints();
+app.MapBlanqueoEndpoints();
 app.MapPortalPdfEndpoints();
 
 app.MapWhen(

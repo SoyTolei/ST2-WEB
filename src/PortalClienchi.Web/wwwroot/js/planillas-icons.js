@@ -20,6 +20,7 @@ export const PLAN_ICONS = {
   previewDoc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>`,
   ia: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.1 3.4L16.5 8l-3.4 1.1L12 12.5 10.9 9.1 7.5 8l3.4-1.1L12 3z"/><path d="M19 13l.9 2.8L22.7 17l-2.8.9L19 20.7l-.9-2.8-2.8-.9 2.8-.9L19 13z"/><path d="M5 15l.7 2.1L7.8 18l-2.1.7L5 21.4l-.7-2.1L2.2 18l2.1-.7L5 15z"/></svg>`,
   pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h6M8 17h4"/></svg>`,
+  blanqueo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="16" r="1.2"/></svg>`,
 };
 
 export function injectModuleHeaders() {

@@ -1,0 +1,152 @@
+/* Solicitudes de blanqueo Portal Cliente/Empresa */
+
+.plan-modulo-btn.blanqueo {
+  background: #0c4a6e;
+}
+
+.blanqueo-app {
+  padding: 4px 2px 12px;
+}
+
+.blanqueo-hero h2 {
+  margin: 0 0 6px;
+  font-size: 1.12rem;
+  color: var(--dark, #0f172a);
+}
+
+.blanqueo-hero .accent-bar {
+  margin-bottom: 10px;
+  width: 56px;
+  height: 3px;
+  border-radius: 2px;
+  background: #0369a1;
+}
+
+.blanqueo-accent-form {
+  background: #0369a1;
+}
+
+.blanqueo-accent-list {
+  background: #0f766e;
+}
+
+.blanqueo-form-panel {
+  margin-bottom: 16px;
+}
+
+.blanqueo-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  align-items: end;
+}
+
+@media (max-width: 720px) {
+  .blanqueo-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blanqueo-field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.blanqueo-field input,
+.blanqueo-field select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.blanqueo-field input:focus,
+.blanqueo-field select:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
+}
+
+.blanqueo-field-actions {
+  display: flex;
+  align-items: end;
+}
+
+.blanqueo-field-actions .btn {
+  min-width: 120px;
+}
+
+.blanqueo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.blanqueo-meta strong {
+  color: #334155;
+  font-weight: 600;
+}
+
+.blanqueo-table-wrap {
+  overflow-x: auto;
+}
+
+.blanqueo-table th,
+.blanqueo-table td {
+  white-space: nowrap;
+}
+
+.blanqueo-table td.blanqueo-col-aclaracion {
+  white-space: normal;
+  min-width: 120px;
+}
+
+.blanqueo-row-listo td {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.blanqueo-row-aclaracion:not(.blanqueo-row-listo) td {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.blanqueo-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.blanqueo-pill.ok {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.blanqueo-pill.note {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+#blanqueo-status.is-error {
+  color: #b91c1c;
+}
+
+.blanqueo-hint {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
