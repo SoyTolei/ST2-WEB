@@ -1507,9 +1507,14 @@ body.portal-tab-active .tab-icon {
 .st2-about-head {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 14px;
-  padding-right: 28px;
+  padding-right: 36px;
+}
+
+.st2-about-head-text {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .st2-about-icon {
@@ -2375,22 +2380,24 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-about-signature {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 4px;
   text-align: right;
-  width: 100%;
+  width: auto;
+  max-width: 42%;
   box-sizing: border-box;
-  align-self: stretch;
-  flex-shrink: 0;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
+  flex: 0 1 auto;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border-top: 0;
+  align-self: center;
 }
 
 .st2-about-signature-by {
-  font-size: 0.92rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #94a3b8;
   font-style: normal;
@@ -2402,11 +2409,11 @@ body.portal-tab-active .tab-icon {
 .st2-about-signature-name {
   display: inline-flex;
   align-items: baseline;
-  gap: 3px;
+  gap: 2px;
 }
 
 .st2-about-signature-handle {
-  font-size: 0.98rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.02em;
   text-decoration: none;
@@ -2433,8 +2440,8 @@ body.portal-tab-active .tab-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.15rem;
+  height: 1.15rem;
   flex-shrink: 0;
 }
 
@@ -2458,8 +2465,8 @@ body.portal-tab-active .tab-icon {
 .st2-about-signature-crest {
   position: relative;
   z-index: 1;
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.05rem;
+  height: 1.05rem;
   object-fit: contain;
   display: block;
   animation: st2AboutCrestPulse 4.2s ease-in-out infinite;
@@ -2470,14 +2477,14 @@ body.portal-tab-active .tab-icon {
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.15rem;
+  height: 1.15rem;
   overflow: visible;
-  margin-left: 2px;
+  margin-left: 1px;
 }
 
 .st2-about-signature-bike {
-  font-size: 1.25rem;
+  font-size: 0.92rem;
   display: inline-block;
   animation: st2AboutBikeRide 5s ease-in-out infinite;
   filter: drop-shadow(0 2px 4px rgba(214, 64, 0, 0.28));
