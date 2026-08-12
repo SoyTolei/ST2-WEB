@@ -1618,8 +1618,8 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-admin-dialog {
   position: relative;
-  width: min(680px, 96vw);
-  max-height: min(88vh, 560px);
+  width: min(980px, 98vw);
+  max-height: min(94vh, 900px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1866,13 +1866,13 @@ body.portal-tab-active .tab-icon {
 .st2-access-admin-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   table-layout: fixed;
 }
 
 .st2-access-admin-table th,
 .st2-access-admin-table td {
-  padding: 6px 8px;
+  padding: 9px 10px;
   text-align: left;
   border-bottom: 1px solid #eef2f7;
   vertical-align: middle;

@@ -1404,15 +1404,24 @@ async function submitAccessAdminLogin() {
       body: JSON.stringify({ username, password }),
       credentials: "include",
     });
-    const data = await response.json().catch(() => ({}));
-    const contentType = response.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-      if (accessAdminError) accessAdminError.textContent = "Respuesta inválida del servidor.";
-      return;
+    const raw = await response.text();
+    let data = {};
+    if (raw.trim()) {
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        if (accessAdminError) {
+          accessAdminError.textContent = response.status === 404
+            ? "Panel no configurado en el servidor (faltan variables de admin)."
+            : `Respuesta inválida del servidor (${response.status}).`;
+        }
+        return;
+      }
     }
     if (response.status === 404) {
       if (accessAdminError) {
-        accessAdminError.textContent = "Panel no configurado en el servidor (faltan variables de admin).";
+        accessAdminError.textContent = data.error
+          || "Panel no configurado en el servidor (faltan variables de admin).";
       }
       return;
     }

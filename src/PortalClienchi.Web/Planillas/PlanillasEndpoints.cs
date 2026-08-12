@@ -502,7 +502,7 @@ public static class PlanillasEndpoints
         app.MapGet("/api/access/admin/session", (HttpContext ctx, IConfiguration config) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.NotFound();
+                return Results.Json(new { error = "Panel no configurado.", authenticated = false }, statusCode: StatusCodes.Status404NotFound);
 
             return Results.Ok(new { authenticated = St2AccessAdminAuth.IsAuthenticated(config, ctx) });
         });
@@ -510,9 +510,18 @@ public static class PlanillasEndpoints
         app.MapPost("/api/access/admin/session", async (HttpContext ctx, IConfiguration config, CancellationToken ct) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.NotFound();
+                return Results.Json(new { error = "Panel no configurado en el servidor (faltan variables de admin)." }, statusCode: StatusCodes.Status404NotFound);
 
-            var body = await ctx.Request.ReadFromJsonAsync<St2AccessAdminLoginRequest>(cancellationToken: ct).ConfigureAwait(false);
+            St2AccessAdminLoginRequest? body;
+            try
+            {
+                body = await ctx.Request.ReadFromJsonAsync<St2AccessAdminLoginRequest>(cancellationToken: ct).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                return Results.BadRequest(new { error = "Datos inválidos." });
+            }
+
             if (body is null)
                 return Results.BadRequest(new { error = "Datos inválidos." });
 
@@ -539,44 +548,60 @@ public static class PlanillasEndpoints
             if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
                 return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
 
-            var items = accessRepo.ListAll();
-            const int activeMinutes = 5;
-            var activeWindow = TimeSpan.FromMinutes(activeMinutes);
-            var flagsMap = modules.GetFlagsForEmails(items.Select(i => i.Email));
-            var mapped = items.Select(item =>
+            try
             {
-                flagsMap.TryGetValue(item.Email, out var flags);
-                flags ??= new ModuleAccessFlagsDto();
-                return new
+                var items = accessRepo.ListAll();
+                const int activeMinutes = 5;
+                var activeWindow = TimeSpan.FromMinutes(activeMinutes);
+                IReadOnlyDictionary<string, ModuleAccessFlagsDto> flagsMap;
+                try
                 {
-                    item.Email,
-                    item.FirstSeenAt,
-                    item.LastSeenAt,
-                    item.LoginCount,
-                    item.DisplayName,
-                    isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
-                    isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
-                    isReturning = item.LoginCount > 1,
-                    modules = new
+                    flagsMap = modules.GetFlagsForEmails(items.Select(i => i.Email));
+                }
+                catch
+                {
+                    flagsMap = new Dictionary<string, ModuleAccessFlagsDto>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                var mapped = items.Select(item =>
+                {
+                    flagsMap.TryGetValue(item.Email, out var flags);
+                    flags ??= new ModuleAccessFlagsDto();
+                    return new
                     {
-                        oportunidad = flags.Oportunidad,
-                        pdfPortal = flags.PdfPortal,
-                        blanqueo = flags.Blanqueo,
-                        blanqueoConfirm = flags.BlanqueoConfirm,
-                    },
-                };
-            }).ToList();
+                        item.Email,
+                        item.FirstSeenAt,
+                        item.LastSeenAt,
+                        item.LoginCount,
+                        item.DisplayName,
+                        isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
+                        isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
+                        isReturning = item.LoginCount > 1,
+                        modules = new
+                        {
+                            oportunidad = flags.Oportunidad,
+                            pdfPortal = flags.PdfPortal,
+                            blanqueo = flags.Blanqueo,
+                            blanqueoConfirm = flags.BlanqueoConfirm,
+                        },
+                    };
+                }).ToList();
 
-            var summary = accessRepo.BuildSummary(items, activeWindow);
+                var summary = accessRepo.BuildSummary(items, activeWindow);
 
-            return Results.Ok(new
+                return Results.Ok(new
+                {
+                    items = mapped,
+                    total = summary.Total,
+                    activeCount = summary.ActiveCount,
+                    newTodayCount = summary.NewTodayCount,
+                    activeWindowMinutes = summary.ActiveWindowMinutes,
+                });
+            }
+            catch (Exception ex)
             {
-                items = mapped,
-                total = summary.Total,
-                activeCount = summary.ActiveCount,
-                newTodayCount = summary.NewTodayCount,
-                activeWindowMinutes = summary.ActiveWindowMinutes,
-            });
+                return Results.Json(new { error = "No se pudo cargar la lista de accesos.", detail = ex.Message }, statusCode: StatusCodes.Status500InternalServerError);
+            }
         });
 
         app.MapDelete("/api/access/registrations", (

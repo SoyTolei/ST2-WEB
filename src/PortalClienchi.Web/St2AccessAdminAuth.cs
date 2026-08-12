@@ -65,9 +65,12 @@ public static class St2AccessAdminAuth
         if (expected.Length == 0 || string.IsNullOrEmpty(token))
             return false;
 
-        return CryptographicOperations.FixedTimeEquals(
-            Encoding.UTF8.GetBytes(token),
-            Encoding.UTF8.GetBytes(expected));
+        var tokenBytes = Encoding.UTF8.GetBytes(token);
+        var expectedBytes = Encoding.UTF8.GetBytes(expected);
+        if (tokenBytes.Length != expectedBytes.Length)
+            return false;
+
+        return CryptographicOperations.FixedTimeEquals(tokenBytes, expectedBytes);
     }
 
     public static void SetCookie(HttpContext ctx, IConfiguration configuration)

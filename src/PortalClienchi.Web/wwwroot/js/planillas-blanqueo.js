@@ -165,7 +165,7 @@ function clearForm() {
   const cliente = document.getElementById("blanqueo-cliente");
   const correo = document.getElementById("blanqueo-correo");
   const tipo = document.getElementById("blanqueo-tipo");
-  if (portal) portal.value = "PortalCliente";
+  if (portal) portal.value = "OnBalance";
   if (caso) caso.value = "";
   if (cliente) cliente.value = "";
   if (correo) correo.value = "";
@@ -173,7 +173,7 @@ function clearForm() {
 }
 
 async function createSolicitud() {
-  const portal = document.getElementById("blanqueo-portal")?.value.trim() || "PortalCliente";
+  const portal = document.getElementById("blanqueo-portal")?.value.trim() || "OnBalance";
   const nroCaso = document.getElementById("blanqueo-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-cliente")?.value.trim() || "";
   const correo = document.getElementById("blanqueo-correo")?.value.trim() || "";
@@ -470,7 +470,7 @@ function hideEditModal() {
 
 async function saveEdit() {
   if (!editingId) return;
-  const portal = document.getElementById("blanqueo-edit-portal")?.value.trim() || "PortalCliente";
+  const portal = document.getElementById("blanqueo-edit-portal")?.value.trim() || "OnBalance";
   const nroCaso = document.getElementById("blanqueo-edit-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-edit-cliente")?.value.trim() || "";
   const correo = document.getElementById("blanqueo-edit-correo")?.value.trim() || "";

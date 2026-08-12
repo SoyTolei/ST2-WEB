@@ -118,7 +118,7 @@
 
 .blanqueo-table-wrap {
   overflow: auto;
-  max-height: min(62vh, 560px);
+  max-height: min(72vh, 720px);
   border: 1px solid #e2e8f0;
   border-radius: 8px;
 }
@@ -129,7 +129,7 @@
 }
 
 .blanqueo-table td.blanqueo-col-correo {
-  max-width: 240px;
+  max-width: 420px;
   overflow: hidden;
   text-overflow: ellipsis;
 }

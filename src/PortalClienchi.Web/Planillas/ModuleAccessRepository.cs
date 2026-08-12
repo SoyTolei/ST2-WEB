@@ -17,8 +17,17 @@ public sealed class ModuleAccessRepository
         // Misma DB que accesos: un solo volume en Railway.
         _dbPath = Path.Combine(st2Dir, "app_access.db");
         EnsureWritable(st2Dir);
-        EnsureSchema();
-        SeedDefaults();
+        try
+        {
+            EnsureSchema();
+            SeedDefaults();
+        }
+        catch (Exception ex)
+        {
+            StorageReady = false;
+            _logger.LogError(ex, "No se pudo inicializar permisos de módulos en {DbPath}", _dbPath);
+        }
+
         _logger.LogInformation("Permisos de módulos en {DbPath}", _dbPath);
     }
 
