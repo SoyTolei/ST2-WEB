@@ -52,10 +52,13 @@ public static class BlanqueoAlertKinds
         var text = (aclaracion ?? "").Trim();
         if (text.Length == 0)
             return Note;
-        if (text.Equals("No registrado", StringComparison.OrdinalIgnoreCase))
+        if (IsNoRegistrado(text))
             return NoRegistrado;
         return Note;
     }
+
+    public static bool IsNoRegistrado(string? aclaracion) =>
+        string.Equals((aclaracion ?? "").Trim(), "No registrado", StringComparison.OrdinalIgnoreCase);
 }
 
 public sealed class BlanqueoAlertDto

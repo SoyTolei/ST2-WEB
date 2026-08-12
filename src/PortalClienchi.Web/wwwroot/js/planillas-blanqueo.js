@@ -486,8 +486,12 @@ function buildRow(item) {
 
 async function toggleListoByDoubleClick(item) {
   try {
-    await patchItem(item.id, { listo: !item.listo });
-    setStatus(item.listo ? "Se quitó el listo." : "Marcado como listo.");
+    const nextListo = !item.listo;
+    const body = nextListo
+      ? { listo: true, ...(isNoRegistrado(item.aclaracion) ? { clearAclaracion: true } : {}) }
+      : { listo: false };
+    await patchItem(item.id, body);
+    setStatus(nextListo ? "Marcado como listo." : "Se quitó el listo.");
     await reloadList();
     void refreshBlanqueoAlerts();
   } catch (err) {
@@ -550,11 +554,13 @@ async function handleCtxAction(action) {
       return;
     }
     if (action === "listo") {
-      await patchItem(selectedId, { listo: true });
+      const body = { listo: true };
+      if (isNoRegistrado(item.aclaracion)) body.clearAclaracion = true;
+      await patchItem(selectedId, body);
     } else if (action === "unlisto") {
       await patchItem(selectedId, { listo: false });
     } else if (action === "aclaracion-no-registrado") {
-      await patchItem(selectedId, { aclaracion: "No registrado" });
+      await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
     } else if (action === "aclaracion-manual") {
       openNoteModal(item);
       return;

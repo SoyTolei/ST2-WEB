@@ -126,6 +126,19 @@ public sealed class BlanqueoRepository
         else if (req.Aclaracion is not null)
             aclaracion = string.IsNullOrWhiteSpace(req.Aclaracion) ? null : req.Aclaracion.Trim();
 
+        // "No registrado" y "Listo" se anulan; otras observaciones pueden convivir con listo.
+        if (req.Listo == true)
+        {
+            listo = true;
+            if (BlanqueoAlertKinds.IsNoRegistrado(aclaracion))
+                aclaracion = null;
+        }
+        else if (BlanqueoAlertKinds.IsNoRegistrado(aclaracion))
+        {
+            listo = false;
+            aclaracion = "No registrado";
+        }
+
         var wasListo = current.Listo;
         var prevAclaracion = current.Aclaracion;
 
