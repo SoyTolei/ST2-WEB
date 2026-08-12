@@ -126,6 +126,8 @@ public sealed class BlanqueoRepository
         else if (req.Aclaracion is not null)
             aclaracion = string.IsNullOrWhiteSpace(req.Aclaracion) ? null : req.Aclaracion.Trim();
 
+        var wasListo = current.Listo;
+
         using var conn = Open();
         using var upd = conn.CreateCommand();
         upd.CommandText = """
@@ -140,12 +142,124 @@ public sealed class BlanqueoRepository
 
         current.Listo = listo;
         current.Aclaracion = aclaracion;
+
+        if (!wasListo && listo)
+            UpsertReadyAlert(conn, current);
+        else if (wasListo && !listo)
+            DeleteAlertBySolicitud(conn, id);
+
         return current;
+    }
+
+    public IReadOnlyList<BlanqueoAlertDto> ListUnseenAlerts(string email)
+    {
+        var normalized = PlanUserIdentity.ValidateAndNormalize(email);
+        if (normalized is null)
+            return [];
+
+        var list = new List<BlanqueoAlertDto>();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, solicitud_id, portal, nro_caso, correo, tipo_solicitud, created_at
+            FROM blanqueo_alerts
+            WHERE lower(email) = lower($email) AND seen = 0
+            ORDER BY id DESC
+            """;
+        cmd.Parameters.AddWithValue("$email", normalized);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            list.Add(new BlanqueoAlertDto
+            {
+                Id = r.GetInt32(0),
+                SolicitudId = r.GetInt32(1),
+                Portal = r.GetString(2),
+                NroCaso = r.GetString(3),
+                Correo = r.GetString(4),
+                TipoSolicitud = r.GetString(5),
+                CreatedAt = r.GetString(6),
+            });
+        }
+
+        return list;
+    }
+
+    public int MarkAlertsSeen(string email, IEnumerable<int>? ids = null)
+    {
+        var normalized = PlanUserIdentity.ValidateAndNormalize(email);
+        if (normalized is null)
+            return 0;
+
+        var idList = ids?.Where(i => i > 0).Distinct().ToList() ?? [];
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        if (idList.Count == 0)
+        {
+            cmd.CommandText = """
+                UPDATE blanqueo_alerts
+                SET seen = 1
+                WHERE lower(email) = lower($email) AND seen = 0
+                """;
+            cmd.Parameters.AddWithValue("$email", normalized);
+            return cmd.ExecuteNonQuery();
+        }
+
+        var placeholders = string.Join(",", idList.Select((_, i) => $"$id{i}"));
+        cmd.CommandText = $"""
+            UPDATE blanqueo_alerts
+            SET seen = 1
+            WHERE lower(email) = lower($email) AND seen = 0 AND id IN ({placeholders})
+            """;
+        cmd.Parameters.AddWithValue("$email", normalized);
+        for (var i = 0; i < idList.Count; i++)
+            cmd.Parameters.AddWithValue($"$id{i}", idList[i]);
+        return cmd.ExecuteNonQuery();
+    }
+
+    private static void UpsertReadyAlert(SqliteConnection conn, BlanqueoRecordDto item)
+    {
+        var email = PlanUserIdentity.ValidateAndNormalize(item.SolicitadoPorEmail);
+        if (email is null)
+            return;
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO blanqueo_alerts
+                (solicitud_id, email, portal, nro_caso, correo, tipo_solicitud, created_at, seen)
+            VALUES
+                ($solicitud, $email, $portal, $caso, $correo, $tipo, $created, 0)
+            ON CONFLICT(solicitud_id) DO UPDATE SET
+                email = excluded.email,
+                portal = excluded.portal,
+                nro_caso = excluded.nro_caso,
+                correo = excluded.correo,
+                tipo_solicitud = excluded.tipo_solicitud,
+                created_at = excluded.created_at,
+                seen = 0
+            """;
+        cmd.Parameters.AddWithValue("$solicitud", item.Id);
+        cmd.Parameters.AddWithValue("$email", email);
+        cmd.Parameters.AddWithValue("$portal", item.Portal);
+        cmd.Parameters.AddWithValue("$caso", item.NroCaso);
+        cmd.Parameters.AddWithValue("$correo", item.Correo);
+        cmd.Parameters.AddWithValue("$tipo", item.TipoSolicitud);
+        cmd.Parameters.AddWithValue("$created", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void DeleteAlertBySolicitud(SqliteConnection conn, int solicitudId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM blanqueo_alerts WHERE solicitud_id = $id";
+        cmd.Parameters.AddWithValue("$id", solicitudId);
+        cmd.ExecuteNonQuery();
     }
 
     public bool Delete(int id)
     {
         using var conn = Open();
+        DeleteAlertBySolicitud(conn, id);
         using var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM blanqueo_solicitudes WHERE id = $id";
         cmd.Parameters.AddWithValue("$id", id);
@@ -174,6 +288,28 @@ public sealed class BlanqueoRepository
             """;
         cmd.ExecuteNonQuery();
         EnsurePortalColumn(conn);
+        EnsureAlertsTable(conn);
+    }
+
+    private static void EnsureAlertsTable(SqliteConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS blanqueo_alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                solicitud_id INTEGER NOT NULL UNIQUE,
+                email TEXT NOT NULL COLLATE NOCASE,
+                portal TEXT NOT NULL,
+                nro_caso TEXT NOT NULL,
+                correo TEXT NOT NULL,
+                tipo_solicitud TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                seen INTEGER NOT NULL DEFAULT 0
+            );
+            CREATE INDEX IF NOT EXISTS idx_blanqueo_alerts_email_seen
+                ON blanqueo_alerts (email, seen);
+            """;
+        cmd.ExecuteNonQuery();
     }
 
     private static void EnsurePortalColumn(SqliteConnection conn)

@@ -29,8 +29,43 @@ public static class BlanqueoEndpoints
                 items = repo.LoadAll(),
                 usuario = email,
                 canConfirm = flags.BlanqueoConfirm,
+                claveBlanqueo = BlanqueoClave.Actual,
                 storage = new { ready = repo.StorageReady, path = repo.DatabasePath },
             });
+        });
+
+        app.MapGet("/api/planillas/blanqueo/alerts", (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out _, out var error))
+                return error!;
+
+            var alerts = repo.ListUnseenAlerts(email!);
+            return Results.Ok(new
+            {
+                count = alerts.Count,
+                items = alerts,
+                claveBlanqueo = BlanqueoClave.Actual,
+            });
+        });
+
+        app.MapPost("/api/planillas/blanqueo/alerts/seen", async (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules, CancellationToken ct) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out _, out var error))
+                return error!;
+
+            int[]? ids = null;
+            try
+            {
+                var body = await ctx.Request.ReadFromJsonAsync<BlanqueoAlertsSeenRequest>(cancellationToken: ct).ConfigureAwait(false);
+                ids = body?.Ids;
+            }
+            catch
+            {
+                // body opcional: sin ids marca todas
+            }
+
+            var marked = repo.MarkAlertsSeen(email!, ids);
+            return Results.Ok(new { ok = true, marked });
         });
 
         app.MapPost("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoCreateRequest body, BlanqueoRepository repo, ModuleAccessRepository modules) =>

@@ -20,6 +20,117 @@
   margin-bottom: 16px;
 }
 
+.blanqueo-clave-hint {
+  margin: -6px 0 12px;
+  font-size: 0.82rem;
+  color: #475569;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.blanqueo-clave-code {
+  border: 1px dashed #94a3b8;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.86rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.blanqueo-clave-code:hover {
+  background: #e2e8f0;
+}
+
+.blanqueo-clave-note {
+  font-size: 0.74rem;
+  color: #94a3b8;
+}
+
+.blanqueo-ready-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #a7f3d0;
+  background: linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 100%);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+}
+
+.blanqueo-ready-toast.hidden {
+  display: none !important;
+}
+
+.blanqueo-ready-toast-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.blanqueo-ready-toast-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #059669;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.22);
+  flex-shrink: 0;
+}
+
+.blanqueo-ready-toast-text {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: #065f46;
+  line-height: 1.35;
+}
+
+.blanqueo-ready-toast-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.blanqueo-ready-toast-btn {
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 11px;
+  background: #047857;
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.blanqueo-ready-toast-btn:hover {
+  background: #065f46;
+}
+
+.blanqueo-ready-toast-x {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #047857;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.blanqueo-ready-toast-x:hover {
+  background: rgba(4, 120, 87, 0.1);
+}
+
 .blanqueo-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

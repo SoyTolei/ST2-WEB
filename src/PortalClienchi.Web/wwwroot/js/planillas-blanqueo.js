@@ -4,6 +4,7 @@ import {
   canConfirmBlanqueoModule as canConfirmFromAccess,
   refreshModuleFlags,
 } from "./module-access.js";
+import { refreshBlanqueoAlerts } from "./blanqueo-alerts.js";
 
 /**
  * Override: localStorage.setItem("st2-blanqueo-force", "1")
@@ -116,6 +117,10 @@ export function initBlanqueoModule() {
   document.addEventListener("click", () => hideCtx());
   document.addEventListener("scroll", () => hideCtx(), true);
 
+  document.getElementById("blanqueo-clave-copy")?.addEventListener("click", () => {
+    void copyClaveBlanqueo();
+  });
+
   syncSolicitanteBadge();
 }
 
@@ -227,12 +232,32 @@ async function reloadList() {
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = Array.isArray(data.items) ? data.items : [];
     canConfirm = !!data.canConfirm || canConfirmBlanqueo();
+    syncClaveUi(data.claveBlanqueo);
     rebuildMonthOptions();
     applyFilters();
   } catch (err) {
     items = [];
     applyFilters();
     setStatus(err?.message || "No se pudo cargar el listado.", true);
+  }
+}
+
+function syncClaveUi(clave) {
+  const btn = document.getElementById("blanqueo-clave-copy");
+  if (!btn) return;
+  const value = String(clave || btn.textContent || "Sueldo.2026").trim() || "Sueldo.2026";
+  btn.textContent = value;
+  btn.dataset.clave = value;
+}
+
+async function copyClaveBlanqueo() {
+  const btn = document.getElementById("blanqueo-clave-copy");
+  const value = btn?.dataset.clave || btn?.textContent?.trim() || "Sueldo.2026";
+  try {
+    await navigator.clipboard.writeText(value);
+    setStatus(`Clave copiada: ${value}`);
+  } catch {
+    setStatus(`Clave: ${value}`);
   }
 }
 
@@ -389,6 +414,7 @@ async function toggleListoByDoubleClick(item) {
     await patchItem(item.id, { listo: !item.listo });
     setStatus(item.listo ? "Se quitó el listo." : "Marcado como listo.");
     await reloadList();
+    void refreshBlanqueoAlerts();
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }
@@ -465,6 +491,9 @@ async function handleCtxAction(action) {
     }
     setStatus("Actualizado.");
     await reloadList();
+    if (action === "listo" || action === "unlisto") {
+      void refreshBlanqueoAlerts();
+    }
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }

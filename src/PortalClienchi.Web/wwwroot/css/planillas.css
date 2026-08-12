@@ -232,6 +232,7 @@
 }
 
 .plan-modulo-btn {
+  position: relative;
   border: none;
   border-radius: 12px;
   min-height: 108px;
@@ -264,6 +265,30 @@
 .plan-modulo-btn.oportunidad { background: #7c3aed; }
 .plan-modulo-btn.pdf-portal { background: #0f766e; }
 .plan-modulo-btn.blanqueo { background: #0c4a6e; }
+
+.plan-modulo-alert-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  min-width: 20px;
+  min-height: 18px;
+  padding: 2px 7px;
+  border-radius: 11px;
+  background: #e53935;
+  border: 1px solid #b71c1c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.plan-modulo-alert-badge.hidden {
+  display: none !important;
+}
 
 .plan-modulo-btn.hidden {
   display: none;
