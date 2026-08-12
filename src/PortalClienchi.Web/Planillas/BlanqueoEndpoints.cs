@@ -5,23 +5,27 @@ namespace PortalClienchi.Web.Planillas;
 
 public static class BlanqueoEndpoints
 {
-    /// <summary>Por ahora solo Leo. Ampliar cuando haya más confirmadores/solicitantes.</summary>
     private static readonly HashSet<string> AllowedEmails = new(StringComparer.OrdinalIgnoreCase)
     {
         "leonel.gallo@thomsonreuters.com",
+        "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
+    };
+
+    private static readonly HashSet<string> ConfirmerEmails = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "leonel.gallo@thomsonreuters.com",
+    };
+
+    private static readonly HashSet<string> PortalesPermitidos = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "OnBalance",
+        "PortalCliente",
     };
 
     private static readonly HashSet<string> TiposPermitidos = new(StringComparer.OrdinalIgnoreCase)
     {
         "Blanqueo",
         "Blanqueo + MFA",
-    };
-
-    private static readonly HashSet<string> AclaracionesPermitidas = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "No registrado",
-        "Duplicado",
-        "Perfil inexistente",
     };
 
     public static void MapBlanqueoEndpoints(this WebApplication app)
@@ -35,6 +39,7 @@ public static class BlanqueoEndpoints
             {
                 items = repo.LoadAll(),
                 usuario = email,
+                canConfirm = ConfirmerEmails.Contains(email!),
                 storage = new { ready = repo.StorageReady, path = repo.DatabasePath },
             });
         });
@@ -52,7 +57,7 @@ public static class BlanqueoEndpoints
             {
                 var fecha = DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                 var nombre = DisplayNameFromEmail(email!);
-                var item = repo.Insert(body, email!, nombre, fecha);
+                var item = repo.Insert(NormalizeCreate(body), email!, nombre, fecha);
                 return Results.Ok(item);
             }
             catch (Exception ex)
@@ -61,19 +66,40 @@ public static class BlanqueoEndpoints
             }
         });
 
-        app.MapPatch("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoPatchRequest body, BlanqueoRepository repo) =>
+        app.MapPut("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoUpdateRequest body, BlanqueoRepository repo) =>
         {
-            if (!TryAuthorize(ctx, out _, out var error))
+            if (!TryAuthorize(ctx, out var email, out var error))
                 return error!;
 
-            if (body.Aclaracion is not null
-                && !string.IsNullOrWhiteSpace(body.Aclaracion)
-                && !AclaracionesPermitidas.Contains(body.Aclaracion.Trim()))
-            {
-                return Results.BadRequest(new { error = "Aclaración no válida." });
-            }
+            var current = repo.GetById(id);
+            if (current is null)
+                return Results.NotFound(new { error = "Solicitud no encontrada." });
 
-            var updated = repo.Patch(id, body);
+            if (!IsOwner(current, email!) && !ConfirmerEmails.Contains(email!))
+                return Results.Json(new { error = "Solo podés editar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
+
+            var validation = ValidateUpdate(body);
+            if (validation is not null)
+                return Results.BadRequest(new { error = validation });
+
+            var updated = repo.UpdateOwnerFields(id, body);
+            return updated is null
+                ? Results.NotFound(new { error = "Solicitud no encontrada." })
+                : Results.Ok(updated);
+        });
+
+        app.MapPatch("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoPatchRequest body, BlanqueoRepository repo) =>
+        {
+            if (!TryAuthorize(ctx, out var email, out var error))
+                return error!;
+
+            if (!ConfirmerEmails.Contains(email!))
+                return Results.Json(new { error = "No tenés permiso para confirmar o aclarar." }, statusCode: StatusCodes.Status403Forbidden);
+
+            if (body.Aclaracion is not null && body.Aclaracion.Trim().Length > 280)
+                return Results.BadRequest(new { error = "La aclaración es demasiado larga (máx. 280)." });
+
+            var updated = repo.PatchConfirm(id, body);
             if (updated is null)
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
 
@@ -82,8 +108,15 @@ public static class BlanqueoEndpoints
 
         app.MapDelete("/api/planillas/blanqueo/{id:int}", (HttpContext ctx, int id, BlanqueoRepository repo) =>
         {
-            if (!TryAuthorize(ctx, out _, out var error))
+            if (!TryAuthorize(ctx, out var email, out var error))
                 return error!;
+
+            var current = repo.GetById(id);
+            if (current is null)
+                return Results.NotFound(new { error = "Solicitud no encontrada." });
+
+            if (!IsOwner(current, email!) && !ConfirmerEmails.Contains(email!))
+                return Results.Json(new { error = "Solo podés eliminar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
             if (!repo.Delete(id))
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
@@ -91,6 +124,9 @@ public static class BlanqueoEndpoints
             return Results.Ok(new { ok = true });
         });
     }
+
+    private static bool IsOwner(BlanqueoRecordDto item, string email) =>
+        string.Equals(item.SolicitadoPorEmail, email, StringComparison.OrdinalIgnoreCase);
 
     private static bool TryAuthorize(HttpContext ctx, out string? email, out IResult? error)
     {
@@ -111,7 +147,37 @@ public static class BlanqueoEndpoints
         return true;
     }
 
+    private static BlanqueoCreateRequest NormalizeCreate(BlanqueoCreateRequest body) => new()
+    {
+        Portal = NormalizePortal(body.Portal),
+        NroCaso = body.NroCaso.Trim(),
+        NroCliente = body.NroCliente.Trim(),
+        Correo = body.Correo.Trim(),
+        TipoSolicitud = body.TipoSolicitud.Trim(),
+    };
+
+    private static string NormalizePortal(string? portal)
+    {
+        var value = (portal ?? "").Trim();
+        if (value.Equals("OnBalance", StringComparison.OrdinalIgnoreCase))
+            return "OnBalance";
+        return "PortalCliente";
+    }
+
     private static string? ValidateCreate(BlanqueoCreateRequest body)
+    {
+        if (string.IsNullOrWhiteSpace(body.Portal) || !PortalesPermitidos.Contains(body.Portal.Trim()))
+            return "Elegí OnBalance o Portal Cliente.";
+        return ValidateUpdate(new BlanqueoUpdateRequest
+        {
+            NroCaso = body.NroCaso,
+            NroCliente = body.NroCliente,
+            Correo = body.Correo,
+            TipoSolicitud = body.TipoSolicitud,
+        });
+    }
+
+    private static string? ValidateUpdate(BlanqueoUpdateRequest body)
     {
         if (string.IsNullOrWhiteSpace(body.NroCaso))
             return "Ingresá el N° de caso.";

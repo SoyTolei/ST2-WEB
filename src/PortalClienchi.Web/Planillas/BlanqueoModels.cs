@@ -3,6 +3,7 @@ namespace PortalClienchi.Web.Planillas;
 public sealed class BlanqueoRecordDto
 {
     public int Id { get; set; }
+    public string Portal { get; set; } = "";
     public string NroCaso { get; set; } = "";
     public string NroCliente { get; set; } = "";
     public string Correo { get; set; } = "";
@@ -15,6 +16,15 @@ public sealed class BlanqueoRecordDto
 }
 
 public sealed class BlanqueoCreateRequest
+{
+    public string Portal { get; set; } = "";
+    public string NroCaso { get; set; } = "";
+    public string NroCliente { get; set; } = "";
+    public string Correo { get; set; } = "";
+    public string TipoSolicitud { get; set; } = "";
+}
+
+public sealed class BlanqueoUpdateRequest
 {
     public string NroCaso { get; set; } = "";
     public string NroCliente { get; set; } = "";

@@ -1,20 +1,28 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 
 /**
- * Quién ve "Solicitudes de blanqueo…".
- * Lista vacía = oculto para todos.
+ * Quién ve el módulo.
  * Override: localStorage.setItem("st2-blanqueo-force", "1")
  */
 const BLANQUEO_ALLOWED_EMAILS = [
+  "leonel.gallo@thomsonreuters.com",
+  "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
+];
+
+const BLANQUEO_CONFIRMER_EMAILS = [
   "leonel.gallo@thomsonreuters.com",
 ];
 
 const FORCE_KEY = "st2-blanqueo-force";
 const TIPOS = ["Blanqueo", "Blanqueo + MFA"];
+const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
 let blanqueoInited = false;
 let items = [];
 let selectedId = null;
+let activePortal = "PortalCliente";
+let canConfirm = false;
+let editingId = null;
 
 export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
   try {
@@ -30,6 +38,11 @@ export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
   return !!current && list.includes(current);
 }
 
+function canConfirmBlanqueo(email = getPlanUserEmail()) {
+  const current = String(email || "").trim().toLowerCase();
+  return !!current && BLANQUEO_CONFIRMER_EMAILS.includes(current);
+}
+
 export function syncBlanqueoModuleVisibility() {
   const btn = document.getElementById("plan-modulo-blanqueo");
   if (!btn) return;
@@ -42,6 +55,17 @@ export function initBlanqueoModule() {
   syncBlanqueoModuleVisibility();
   if (blanqueoInited) return;
   blanqueoInited = true;
+
+  document.querySelectorAll("[data-blanqueo-portal]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const portal = btn.getAttribute("data-blanqueo-portal");
+      if (!portal || portal === activePortal) return;
+      activePortal = portal;
+      syncPortalTabs();
+      clearForm();
+      applyFilters();
+    });
+  });
 
   document.getElementById("blanqueo-add")?.addEventListener("click", () => {
     void createSolicitud();
@@ -56,11 +80,22 @@ export function initBlanqueoModule() {
     });
   });
 
+  document.getElementById("blanqueo-filter-month")?.addEventListener("change", () => applyFilters());
+  document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
+
+  document.getElementById("blanqueo-edit-save")?.addEventListener("click", () => {
+    void saveEdit();
+  });
+  document.getElementById("blanqueo-edit-cancel")?.addEventListener("click", () => hideEditModal());
+  document.getElementById("blanqueo-edit-overlay")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) hideEditModal();
+  });
+
   const ctx = document.getElementById("blanqueo-ctx");
   ctx?.addEventListener("click", (e) => {
     e.stopPropagation();
     const btn = e.target.closest("[data-blanqueo-ctx]");
-    if (!btn) return;
+    if (!btn || btn.classList.contains("hidden")) return;
     const action = btn.getAttribute("data-blanqueo-ctx");
     hideCtx();
     void handleCtxAction(action);
@@ -70,14 +105,29 @@ export function initBlanqueoModule() {
   document.addEventListener("scroll", () => hideCtx(), true);
 
   syncSolicitanteBadge();
+  syncPortalTabs();
 }
 
 export async function openBlanqueoModule() {
   if (!canSeeBlanqueoModule()) return;
   initBlanqueoModule();
+  canConfirm = canConfirmBlanqueo();
   syncSolicitanteBadge();
+  syncPortalTabs();
   clearForm();
   await reloadList();
+}
+
+function syncPortalTabs() {
+  document.querySelectorAll("[data-blanqueo-portal]").forEach((btn) => {
+    const on = btn.getAttribute("data-blanqueo-portal") === activePortal;
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+  });
+  const label = document.getElementById("blanqueo-portal-label");
+  if (label) {
+    label.textContent = activePortal === "OnBalance" ? "OnBalance (portal empleado)" : "Portal Cliente";
+  }
 }
 
 function syncSolicitanteBadge() {
@@ -100,6 +150,14 @@ function displayNameFromEmail(email) {
   return parts
     .map((p) => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
     .join(" ");
+}
+
+function currentEmail() {
+  return String(getPlanUserEmail() || "").trim().toLowerCase();
+}
+
+function isOwner(item) {
+  return String(item?.solicitadoPorEmail || "").trim().toLowerCase() === currentEmail();
 }
 
 function setStatus(msg, isError = false) {
@@ -141,7 +199,13 @@ async function createSolicitud() {
     const res = await planUserFetch("/api/planillas/blanqueo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nroCaso, nroCliente, correo, tipoSolicitud }),
+      body: JSON.stringify({
+        portal: activePortal,
+        nroCaso,
+        nroCliente,
+        correo,
+        tipoSolicitud,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
@@ -160,33 +224,102 @@ async function reloadList() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = Array.isArray(data.items) ? data.items : [];
-    renderTable();
-    const count = document.getElementById("blanqueo-count");
-    if (count) count.textContent = items.length ? `(${items.length})` : "";
-    if (!document.getElementById("blanqueo-status")?.textContent) {
-      setStatus(items.length ? `${items.length} solicitud(es).` : "Sin solicitudes todavía.");
-    }
+    canConfirm = !!data.canConfirm || canConfirmBlanqueo();
+    rebuildMonthOptions();
+    applyFilters();
   } catch (err) {
     items = [];
-    renderTable();
+    applyFilters();
     setStatus(err?.message || "No se pudo cargar el listado.", true);
   }
 }
 
-function renderTable() {
+function rebuildMonthOptions() {
+  const sel = document.getElementById("blanqueo-filter-month");
+  if (!sel) return;
+  const keep = sel.value || currentMonthKey();
+  const keys = new Set();
+  for (const item of items) {
+    const key = monthKeyFromIso(item.fechaSolicitud);
+    if (key) keys.add(key);
+  }
+  keys.add(currentMonthKey());
+
+  const sorted = [...keys].sort((a, b) => b.localeCompare(a));
+  sel.innerHTML = `<option value="all">Todos los meses</option>` +
+    sorted.map((key) => {
+      const [y, m] = key.split("-");
+      const label = `${MONTHS[Number(m) - 1] || m} ${y}`;
+      return `<option value="${key}">${label}</option>`;
+    }).join("");
+
+  sel.value = sorted.includes(keep) || keep === "all" ? keep : currentMonthKey();
+  if (![...sel.options].some((o) => o.value === sel.value)) {
+    sel.value = currentMonthKey();
+  }
+}
+
+function currentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function monthKeyFromIso(iso) {
+  const m = /^(\d{4})-(\d{2})/.exec(String(iso || "").trim());
+  return m ? `${m[1]}-${m[2]}` : "";
+}
+
+function getFilteredItems() {
+  const month = document.getElementById("blanqueo-filter-month")?.value || "all";
+  const q = String(document.getElementById("blanqueo-search")?.value || "").trim().toLowerCase();
+
+  return items.filter((item) => {
+    if ((item.portal || "PortalCliente") !== activePortal) return false;
+    if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) return false;
+    if (q) {
+      const hay = [
+        item.correo,
+        item.nroCaso,
+        item.nroCliente,
+        item.solicitadoPorNombre,
+        item.aclaracion,
+      ].map((x) => String(x || "").toLowerCase()).join(" ");
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function applyFilters() {
+  const filtered = getFilteredItems();
+  renderTable(filtered);
+  const count = document.getElementById("blanqueo-count");
+  if (count) count.textContent = filtered.length ? `(${filtered.length})` : "";
+  const statusEl = document.getElementById("blanqueo-status");
+  if (statusEl && !statusEl.classList.contains("is-error")) {
+    const portalLabel = activePortal === "OnBalance" ? "OnBalance" : "Portal Cliente";
+    setStatus(
+      filtered.length
+        ? `${filtered.length} en ${portalLabel}.`
+        : `Sin solicitudes en ${portalLabel} con ese filtro.`
+    );
+  }
+}
+
+function renderTable(filtered) {
   const tbody = document.getElementById("blanqueo-table-body");
   if (!tbody) return;
   tbody.innerHTML = "";
 
-  if (!items.length) {
+  if (!filtered.length) {
     const row = document.createElement("tr");
     row.className = "plan-gestor-empty-row";
-    row.innerHTML = `<td colspan="8">No hay solicitudes cargadas.</td>`;
+    row.innerHTML = `<td colspan="8">No hay solicitudes con ese filtro.</td>`;
     tbody.appendChild(row);
     return;
   }
 
-  for (const item of items) {
+  for (const item of filtered) {
     tbody.appendChild(buildRow(item));
   }
 }
@@ -200,7 +333,7 @@ function buildRow(item) {
   row.innerHTML = `
     <td>${escapeHtml(item.nroCaso)}</td>
     <td>${escapeHtml(item.nroCliente)}</td>
-    <td>${escapeHtml(item.correo)}</td>
+    <td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>
     <td>${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td>${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td>${escapeHtml(item.tipoSolicitud)}</td>
@@ -211,32 +344,49 @@ function buildRow(item) {
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
     selectedId = item.id;
-    highlightSelected();
+    applyFilters();
   });
 
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
     selectedId = item.id;
-    highlightSelected();
-    showCtx(e.clientX, e.clientY);
+    applyFilters();
+    showCtx(e.clientX, e.clientY, item);
   });
 
   return row;
 }
 
-function highlightSelected() {
-  document.querySelectorAll("#blanqueo-table-body tr").forEach((tr) => tr.classList.remove("selected"));
-  // Re-render keeps data attributes simple; selection is reapplied in buildRow.
-  renderTable();
-}
-
-function showCtx(x, y) {
+function showCtx(x, y, item) {
   const menu = document.getElementById("blanqueo-ctx");
   if (!menu) return;
+
+  const owner = isOwner(item);
+  const confirm = canConfirm;
+
+  menu.querySelectorAll("[data-blanqueo-ctx]").forEach((btn) => {
+    const action = btn.getAttribute("data-blanqueo-ctx");
+    let show = false;
+    if (action === "editar" || action === "eliminar") show = owner || confirm;
+    else if (["listo", "unlisto", "aclaracion-no-registrado", "aclaracion-duplicado", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
+      show = confirm;
+    }
+    btn.classList.toggle("hidden", !show);
+  });
+
+  const hrs = menu.querySelectorAll("hr");
+  hrs.forEach((hr) => hr.classList.toggle("hidden", !confirm));
+
+  const anyVisible = [...menu.querySelectorAll("[data-blanqueo-ctx]")].some((b) => !b.classList.contains("hidden"));
+  if (!anyVisible) {
+    menu.classList.add("hidden");
+    return;
+  }
+
   menu.classList.remove("hidden");
   const pad = 8;
-  const w = menu.offsetWidth || 240;
-  const h = menu.offsetHeight || 220;
+  const w = menu.offsetWidth || 260;
+  const h = menu.offsetHeight || 240;
   const left = Math.min(x, window.innerWidth - w - pad);
   const top = Math.min(y, window.innerHeight - h - pad);
   menu.style.left = `${Math.max(pad, left)}px`;
@@ -253,6 +403,10 @@ async function handleCtxAction(action) {
   if (!item) return;
 
   try {
+    if (action === "editar") {
+      openEditModal(item);
+      return;
+    }
     if (action === "listo") {
       await patchItem(selectedId, { listo: true });
     } else if (action === "unlisto") {
@@ -261,8 +415,15 @@ async function handleCtxAction(action) {
       await patchItem(selectedId, { aclaracion: "No registrado" });
     } else if (action === "aclaracion-duplicado") {
       await patchItem(selectedId, { aclaracion: "Duplicado" });
-    } else if (action === "aclaracion-inexistente") {
-      await patchItem(selectedId, { aclaracion: "Perfil inexistente" });
+    } else if (action === "aclaracion-manual") {
+      const text = window.prompt("Aclaración (texto libre):", item.aclaracion || "");
+      if (text === null) return;
+      const trimmed = text.trim();
+      if (!trimmed) {
+        await patchItem(selectedId, { clearAclaracion: true });
+      } else {
+        await patchItem(selectedId, { aclaracion: trimmed });
+      }
     } else if (action === "clear-aclaracion") {
       await patchItem(selectedId, { clearAclaracion: true });
     } else if (action === "eliminar") {
@@ -282,6 +443,48 @@ async function handleCtxAction(action) {
   }
 }
 
+function openEditModal(item) {
+  editingId = item.id;
+  const overlay = document.getElementById("blanqueo-edit-overlay");
+  const caso = document.getElementById("blanqueo-edit-caso");
+  const cliente = document.getElementById("blanqueo-edit-cliente");
+  const correo = document.getElementById("blanqueo-edit-correo");
+  const tipo = document.getElementById("blanqueo-edit-tipo");
+  if (caso) caso.value = item.nroCaso || "";
+  if (cliente) cliente.value = item.nroCliente || "";
+  if (correo) correo.value = item.correo || "";
+  if (tipo) tipo.value = TIPOS.includes(item.tipoSolicitud) ? item.tipoSolicitud : "Blanqueo";
+  overlay?.classList.remove("hidden");
+}
+
+function hideEditModal() {
+  editingId = null;
+  document.getElementById("blanqueo-edit-overlay")?.classList.add("hidden");
+}
+
+async function saveEdit() {
+  if (!editingId) return;
+  const nroCaso = document.getElementById("blanqueo-edit-caso")?.value.trim() || "";
+  const nroCliente = document.getElementById("blanqueo-edit-cliente")?.value.trim() || "";
+  const correo = document.getElementById("blanqueo-edit-correo")?.value.trim() || "";
+  const tipoSolicitud = document.getElementById("blanqueo-edit-tipo")?.value.trim() || "";
+
+  try {
+    const res = await planUserFetch(`/api/planillas/blanqueo/${editingId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nroCaso, nroCliente, correo, tipoSolicitud }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
+    hideEditModal();
+    setStatus("Solicitud editada.");
+    await reloadList();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo editar.", true);
+  }
+}
+
 async function patchItem(id, body) {
   const res = await planUserFetch(`/api/planillas/blanqueo/${id}`, {
     method: "PATCH",
@@ -297,9 +500,8 @@ function formatFecha(iso) {
   const raw = String(iso || "").trim();
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
   if (!m) return raw;
-  const months = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const day = Number(m[3]);
-  const month = months[Number(m[2]) - 1] || m[2];
+  const month = MONTHS[Number(m[2]) - 1] || m[2];
   return `${day}-${month}`;
 }
 
