@@ -306,7 +306,12 @@
 }
 
 .blanqueo-row-listo td {
-  background: rgba(16, 185, 129, 0.08);
+  background: rgba(16, 185, 129, 0.12);
+  color: #14532d;
+}
+
+.blanqueo-row-listo td:first-child {
+  box-shadow: inset 3px 0 0 #059669;
 }
 
 .blanqueo-row-aclaracion:not(.blanqueo-row-listo) td {
@@ -323,9 +328,11 @@
 }
 
 .blanqueo-pill.ok {
-  background: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+  background: #059669;
+  color: #fff;
+  border: 1px solid #047857;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 .blanqueo-pill.note {
@@ -397,6 +404,16 @@
 
 .blanqueo-ctx button:hover {
   background: #f1f5f9;
+}
+
+.blanqueo-ctx button.blanqueo-ctx-listo {
+  color: #047857;
+  font-weight: 700;
+}
+
+.blanqueo-ctx button.blanqueo-ctx-listo:hover {
+  background: #ecfdf5;
+  color: #065f46;
 }
 
 .blanqueo-ctx hr {
