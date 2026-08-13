@@ -137,6 +137,19 @@ export function initBlanqueoModule() {
     syncTipoOptions("blanqueo-edit-tipo", getEditPortal());
   });
 
+  document.getElementById("blanqueo-export")?.addEventListener("click", () => {
+    void exportExcel();
+  });
+  document.getElementById("blanqueo-import-template")?.addEventListener("click", () => {
+    void downloadImportTemplate();
+  });
+  document.getElementById("blanqueo-import-file")?.addEventListener("change", (e) => {
+    const input = e.target;
+    const file = input?.files?.[0];
+    if (file) void importExcel(file);
+    if (input) input.value = "";
+  });
+
   document.addEventListener("st2:planillas-home", () => {
     listLoadGen += 1;
     hideCtx();
@@ -192,6 +205,13 @@ function syncMineFilterVisibility() {
   const show = !canConfirm;
   wrap.classList.toggle("hidden", !show);
   if (!show && check) check.checked = false;
+  syncConfirmToolsVisibility();
+}
+
+function syncConfirmToolsVisibility() {
+  const tools = document.getElementById("blanqueo-confirm-tools");
+  if (!tools) return;
+  tools.classList.toggle("hidden", !canConfirm);
 }
 
 function displayNameFromEmail(email) {
@@ -348,11 +368,84 @@ function syncClaveUi(clave) {
 async function copyClaveBlanqueo() {
   const btn = document.getElementById("blanqueo-clave-copy");
   const value = btn?.dataset.clave || btn?.textContent?.trim() || "Sueldo.2026";
+  await copyText(value, `Clave copiada: ${value}`);
+}
+
+async function copyText(value, okMsg) {
   try {
     await navigator.clipboard.writeText(value);
-    setStatus(`Clave copiada: ${value}`);
+    setStatus(okMsg || "Copiado.");
   } catch {
-    setStatus(`Clave: ${value}`);
+    setStatus(String(value || ""), false);
+  }
+}
+
+async function exportExcel() {
+  if (!canConfirm) return;
+  setStatus("Generando Excel…");
+  try {
+    const res = await planUserFetch("/api/planillas/blanqueo/export");
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || data.detail || `Error ${res.status}`);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `blanqueo-export-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setStatus("Excel exportado (solicitudes + resumen mensual).");
+  } catch (err) {
+    setStatus(err?.message || "No se pudo exportar.", true);
+  }
+}
+
+async function downloadImportTemplate() {
+  if (!canConfirm) return;
+  try {
+    const res = await planUserFetch("/api/planillas/blanqueo/import-template");
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "blanqueo-plantilla-import.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setStatus("Plantilla descargada.");
+  } catch (err) {
+    setStatus(err?.message || "No se pudo descargar la plantilla.", true);
+  }
+}
+
+async function importExcel(file) {
+  if (!canConfirm || !file) return;
+  setStatus(`Importando ${file.name}…`);
+  try {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await planUserFetch("/api/planillas/blanqueo/import", {
+      method: "POST",
+      body: form,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const details = Array.isArray(data.details) && data.details.length
+        ? ` ${data.details.slice(0, 3).join(" · ")}`
+        : "";
+      throw new Error((data.error || data.detail || `Error ${res.status}`) + details);
+    }
+    await reloadList();
+    const warn = data.skippedErrors ? ` (${data.skippedErrors} fila(s) con aviso)` : "";
+    setStatus(`Importadas ${data.inserted || 0} solicitud(es)${warn}.`);
+  } catch (err) {
+    setStatus(err?.message || "No se pudo importar.", true);
   }
 }
 
@@ -476,10 +569,31 @@ function applyFilters() {
   renderTable(filtered);
   const count = document.getElementById("blanqueo-count");
   if (count) count.textContent = filtered.length ? `(${filtered.length})` : "";
+  syncMonthStat();
   const statusEl = document.getElementById("blanqueo-status");
   if (statusEl && !statusEl.classList.contains("is-error")) {
     setStatus(filtered.length ? `${filtered.length} solicitud(es).` : "Sin solicitudes con ese filtro.");
   }
+}
+
+function syncMonthStat() {
+  const el = document.getElementById("blanqueo-month-stat");
+  if (!el) return;
+  const monthSel = document.getElementById("blanqueo-filter-month")?.value || "all";
+  const key = monthSel === "all" ? currentMonthKey() : monthSel;
+  const n = items.filter((item) => monthKeyFromIso(item.fechaSolicitud) === key).length;
+  const label = monthLabelFromKey(key);
+  el.textContent = n === 1 ? `${label}: 1 blanqueo` : `${label}: ${n} blanqueos`;
+  el.title = monthSel === "all"
+    ? `Cantidad del mes actual (${label}), aunque el filtro muestre todos`
+    : `Cantidad en ${label}`;
+}
+
+function monthLabelFromKey(key) {
+  const m = /^(\d{4})-(\d{2})$/.exec(String(key || ""));
+  if (!m) return key;
+  const idx = Number(m[2]) - 1;
+  return `${MONTHS[idx] || m[2]} ${m[1]}`;
 }
 
 function renderTable(filtered) {
@@ -507,11 +621,20 @@ function buildRow(item) {
   if (item.aclaracion) row.classList.add("blanqueo-row-aclaracion");
   if (isNoRegistrado(item.aclaracion) && !item.listo) row.classList.add("blanqueo-row-noreg");
 
+  const mailCell = canConfirm
+    ? `<td class="blanqueo-col-correo">
+        <button type="button" class="blanqueo-mail-copy" data-blanqueo-copy-mail="${escapeHtml(item.correo)}" title="Copiar correo">
+          <span class="blanqueo-mail-copy-icon" aria-hidden="true">📋</span>
+          <span class="blanqueo-mail-copy-text">${escapeHtml(item.correo)}</span>
+        </button>
+      </td>`
+    : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
+
   row.innerHTML = `
     <td>${escapeHtml(portalLabel(item.portal))}</td>
     <td>${escapeHtml(item.nroCaso)}</td>
     <td>${escapeHtml(item.nroCliente)}</td>
-    <td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>
+    ${mailCell}
     <td>${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td>${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td>${escapeHtml(item.tipoSolicitud)}</td>
@@ -519,8 +642,16 @@ function buildRow(item) {
     <td class="blanqueo-col-aclaracion">${item.aclaracion ? `<span class="blanqueo-pill ${isNoRegistrado(item.aclaracion) ? "bad" : "note"}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
   `;
 
+  row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const mail = e.currentTarget.getAttribute("data-blanqueo-copy-mail") || item.correo;
+    void copyText(mail, `Correo copiado: ${mail}`);
+  });
+
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
+    if (e.target.closest("[data-blanqueo-copy-mail]")) return;
     selectedId = item.id;
     applyFilters();
   });

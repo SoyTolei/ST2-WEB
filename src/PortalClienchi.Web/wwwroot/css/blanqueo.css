@@ -34,6 +34,75 @@
   display: none !important;
 }
 
+.blanqueo-month-stat {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  vertical-align: middle;
+}
+
+.blanqueo-month-stat:empty {
+  display: none;
+}
+
+.blanqueo-confirm-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.blanqueo-confirm-tools.hidden {
+  display: none !important;
+}
+
+.blanqueo-import-btn {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+}
+
+.blanqueo-mail-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: #0f766e;
+  cursor: pointer;
+  text-align: left;
+}
+
+.blanqueo-mail-copy:hover {
+  color: #115e59;
+  text-decoration: underline;
+}
+
+.blanqueo-mail-copy-icon {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.blanqueo-mail-copy-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .blanqueo-clave-code {
   border: 1px dashed #94a3b8;
   background: #f8fafc;

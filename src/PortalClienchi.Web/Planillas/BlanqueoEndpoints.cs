@@ -36,6 +36,76 @@ public static class BlanqueoEndpoints
             });
         });
 
+        app.MapGet("/api/planillas/blanqueo/export", (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
+                return error!;
+
+            var bytes = BlanqueoExcel.BuildExportWorkbook(repo.LoadAll());
+            var name = $"blanqueo-export-{DateTime.Now:yyyyMMdd-HHmm}.xlsx";
+            return Results.File(
+                bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                name);
+        });
+
+        app.MapGet("/api/planillas/blanqueo/import-template", (HttpContext ctx, ModuleAccessRepository modules) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
+                return error!;
+
+            var bytes = BlanqueoExcel.BuildImportTemplate();
+            return Results.File(
+                bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "blanqueo-plantilla-import.xlsx");
+        });
+
+        app.MapPost("/api/planillas/blanqueo/import", async (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules, CancellationToken ct) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
+                return error!;
+
+            if (!ctx.Request.HasFormContentType)
+                return Results.BadRequest(new { error = "Se esperaba multipart/form-data con el Excel." });
+
+            var form = await ctx.Request.ReadFormAsync(ct).ConfigureAwait(false);
+            var file = form.Files.FirstOrDefault();
+            if (file is null || file.Length == 0)
+                return Results.BadRequest(new { error = "Subí un archivo Excel (.xlsx)." });
+
+            var ext = Path.GetExtension(file.FileName);
+            if (!ext.Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
+                return Results.BadRequest(new { error = "Solo se acepta .xlsx. Descargá la plantilla o guardá el Excel anterior como .xlsx." });
+
+            try
+            {
+                await using var stream = file.OpenReadStream();
+                var (rows, parseErrors) = BlanqueoExcel.ParseImport(stream, file.FileName);
+                if (rows.Count == 0)
+                {
+                    return Results.BadRequest(new
+                    {
+                        error = "No se importó ninguna fila.",
+                        details = parseErrors.Take(20).ToArray(),
+                    });
+                }
+
+                var inserted = repo.InsertHistoricalBatch(rows);
+                return Results.Ok(new
+                {
+                    ok = true,
+                    inserted,
+                    skippedErrors = parseErrors.Count,
+                    details = parseErrors.Take(30).ToArray(),
+                });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "No se pudo importar el Excel");
+            }
+        });
+
         app.MapGet("/api/planillas/blanqueo/alerts", (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))

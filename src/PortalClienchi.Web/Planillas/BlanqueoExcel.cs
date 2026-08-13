@@ -1,0 +1,406 @@
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
+using ClosedXML.Excel;
+
+namespace PortalClienchi.Web.Planillas;
+
+public static class BlanqueoExcel
+{
+    private static readonly string[] DetailHeaders =
+    [
+        "Fecha",
+        "Plataforma",
+        "NroCaso",
+        "NroCliente",
+        "Correo",
+        "Solicitud",
+        "SolicitadoPorNombre",
+        "SolicitadoPorEmail",
+        "Listo",
+        "Aclaracion",
+    ];
+
+    public static byte[] BuildExportWorkbook(IReadOnlyList<BlanqueoRecordDto> items)
+    {
+        using var wb = new XLWorkbook();
+        var detalle = wb.Worksheets.Add("Solicitudes");
+        for (var i = 0; i < DetailHeaders.Length; i++)
+            detalle.Cell(1, i + 1).Value = DetailHeaders[i];
+
+        var row = 2;
+        foreach (var item in items.OrderByDescending(x => x.FechaSolicitud).ThenByDescending(x => x.Id))
+        {
+            detalle.Cell(row, 1).Value = item.FechaSolicitud;
+            detalle.Cell(row, 2).Value = PortalLabel(item.Portal);
+            detalle.Cell(row, 3).Value = item.NroCaso;
+            detalle.Cell(row, 4).Value = item.NroCliente;
+            detalle.Cell(row, 5).Value = item.Correo;
+            detalle.Cell(row, 6).Value = item.TipoSolicitud;
+            detalle.Cell(row, 7).Value = item.SolicitadoPorNombre;
+            detalle.Cell(row, 8).Value = item.SolicitadoPorEmail;
+            detalle.Cell(row, 9).Value = item.Listo ? "Sí" : "No";
+            detalle.Cell(row, 10).Value = item.Aclaracion ?? "";
+            row++;
+        }
+
+        detalle.Row(1).Style.Font.Bold = true;
+        detalle.SheetView.FreezeRows(1);
+        detalle.Columns().AdjustToContents(1, 40);
+
+        var resumen = wb.Worksheets.Add("Resumen mensual");
+        resumen.Cell(1, 1).Value = "Año";
+        resumen.Cell(1, 2).Value = "Mes";
+        resumen.Cell(1, 3).Value = "MesLabel";
+        resumen.Cell(1, 4).Value = "Cantidad";
+        resumen.Cell(1, 5).Value = "Listos";
+        resumen.Cell(1, 6).Value = "Pendientes";
+        resumen.Row(1).Style.Font.Bold = true;
+
+        var groups = items
+            .Select(x => new { Item = x, Key = MonthKey(x.FechaSolicitud) })
+            .Where(x => !string.IsNullOrEmpty(x.Key))
+            .GroupBy(x => x.Key!)
+            .OrderByDescending(g => g.Key)
+            .ToList();
+
+        var r = 2;
+        foreach (var g in groups)
+        {
+            var parts = g.Key.Split('-');
+            var year = parts[0];
+            var month = parts.Length > 1 ? parts[1] : "";
+            resumen.Cell(r, 1).Value = year;
+            resumen.Cell(r, 2).Value = month;
+            resumen.Cell(r, 3).Value = MonthLabel(g.Key);
+            resumen.Cell(r, 4).Value = g.Count();
+            resumen.Cell(r, 5).Value = g.Count(x => x.Item.Listo);
+            resumen.Cell(r, 6).Value = g.Count(x => !x.Item.Listo);
+            r++;
+        }
+
+        resumen.SheetView.FreezeRows(1);
+        resumen.Columns().AdjustToContents(1, 24);
+
+        using var ms = new MemoryStream();
+        wb.SaveAs(ms);
+        return ms.ToArray();
+    }
+
+    public static byte[] BuildImportTemplate()
+    {
+        using var wb = new XLWorkbook();
+        var ws = wb.Worksheets.Add("Importar");
+        for (var i = 0; i < DetailHeaders.Length; i++)
+            ws.Cell(1, i + 1).Value = DetailHeaders[i];
+
+        ws.Cell(2, 1).Value = "2026-07-15";
+        ws.Cell(2, 2).Value = "On Balance";
+        ws.Cell(2, 3).Value = "123456";
+        ws.Cell(2, 4).Value = "7890";
+        ws.Cell(2, 5).Value = "cliente@ejemplo.com";
+        ws.Cell(2, 6).Value = "Blanqueo";
+        ws.Cell(2, 7).Value = "Leonel Gallo";
+        ws.Cell(2, 8).Value = "leonel.gallo@thomsonreuters.com";
+        ws.Cell(2, 9).Value = "Sí";
+        ws.Cell(2, 10).Value = "";
+
+        ws.Row(1).Style.Font.Bold = true;
+        ws.Columns().AdjustToContents(1, 36);
+
+        var help = wb.Worksheets.Add("Ayuda");
+        help.Cell(1, 1).Value = "Columnas reconocidas (flexible)";
+        help.Cell(2, 1).Value = "Fecha / FechaSolicitud";
+        help.Cell(3, 1).Value = "Plataforma / Portal (On Balance, ONVIO, Portal Cliente)";
+        help.Cell(4, 1).Value = "NroCaso / Caso";
+        help.Cell(5, 1).Value = "NroCliente / Cliente";
+        help.Cell(6, 1).Value = "Correo / Email";
+        help.Cell(7, 1).Value = "Solicitud / Tipo";
+        help.Cell(8, 1).Value = "SolicitadoPorNombre / Solicitante / Nombre";
+        help.Cell(9, 1).Value = "SolicitadoPorEmail / EmailSolicitante (si falta, se arma desde el nombre)";
+        help.Cell(10, 1).Value = "Listo (Sí/No, 1/0, true/false)";
+        help.Cell(11, 1).Value = "Aclaracion / Observacion";
+        help.Columns().AdjustToContents();
+
+        using var ms = new MemoryStream();
+        wb.SaveAs(ms);
+        return ms.ToArray();
+    }
+
+    public static (List<BlanqueoHistoricalRow> Rows, List<string> Errors) ParseImport(Stream stream, string fileName)
+    {
+        var errors = new List<string>();
+        var rows = new List<BlanqueoHistoricalRow>();
+        using var wb = new XLWorkbook(stream);
+        var ws = wb.Worksheets.FirstOrDefault(w => !w.Name.Equals("Ayuda", StringComparison.OrdinalIgnoreCase))
+                 ?? wb.Worksheets.First();
+
+        var headerMap = MapHeaders(ws);
+        if (!headerMap.ContainsKey("correo") || !headerMap.ContainsKey("nrocaso") || !headerMap.ContainsKey("nrocliente"))
+        {
+            errors.Add("Faltan columnas obligatorias: Correo, NroCaso y NroCliente (o equivalentes).");
+            return (rows, errors);
+        }
+
+        var last = ws.LastRowUsed()?.RowNumber() ?? 1;
+        for (var r = 2; r <= last; r++)
+        {
+            string Cell(string key)
+            {
+                if (!headerMap.TryGetValue(key, out var col)) return "";
+                return ws.Cell(r, col).GetFormattedString().Trim();
+            }
+
+            var correo = Cell("correo");
+            var caso = Cell("nrocaso");
+            var cliente = Cell("nrocliente");
+            if (string.IsNullOrWhiteSpace(correo) && string.IsNullOrWhiteSpace(caso) && string.IsNullOrWhiteSpace(cliente))
+                continue;
+
+            if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(caso) || string.IsNullOrWhiteSpace(cliente))
+            {
+                errors.Add($"Fila {r}: incompleta (correo/caso/cliente).");
+                continue;
+            }
+
+            var portalRaw = Cell("plataforma");
+            var tipoRaw = Cell("solicitud");
+            var portal = NormalizePortal(portalRaw);
+            if (portal is null)
+            {
+                errors.Add($"Fila {r}: plataforma inválida '{portalRaw}'.");
+                continue;
+            }
+
+            var tipo = NormalizeTipo(tipoRaw, portal);
+            if (tipo is null)
+            {
+                errors.Add($"Fila {r}: solicitud inválida '{tipoRaw}' para {portal}.");
+                continue;
+            }
+
+            var fecha = NormalizeFecha(Cell("fecha"));
+            if (fecha is null)
+            {
+                errors.Add($"Fila {r}: fecha inválida.");
+                continue;
+            }
+
+            var emailSol = Cell("solicitadoemail");
+            var nombreSol = Cell("solicitadonombre");
+            ResolveRequester(ref emailSol, ref nombreSol);
+
+            if (string.IsNullOrWhiteSpace(emailSol))
+            {
+                errors.Add($"Fila {r}: no se pudo identificar solicitante (nombre/email).");
+                continue;
+            }
+
+            rows.Add(new BlanqueoHistoricalRow
+            {
+                Portal = portal,
+                NroCaso = caso,
+                NroCliente = cliente,
+                Correo = correo,
+                FechaSolicitud = fecha,
+                TipoSolicitud = tipo,
+                SolicitadoPorEmail = emailSol.Trim().ToLowerInvariant(),
+                SolicitadoPorNombre = string.IsNullOrWhiteSpace(nombreSol)
+                    ? BlanqueoEndpoints.DisplayNameFromEmail(emailSol)
+                    : nombreSol.Trim(),
+                Listo = ParseBool(Cell("listo")),
+                Aclaracion = NullIfEmpty(Cell("aclaracion")),
+            });
+        }
+
+        return (rows, errors);
+    }
+
+    private static Dictionary<string, int> MapHeaders(IXLWorksheet ws)
+    {
+        var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var lastCol = ws.LastColumnUsed()?.ColumnNumber() ?? 0;
+        for (var c = 1; c <= lastCol; c++)
+        {
+            var raw = NormalizeHeader(ws.Cell(1, c).GetFormattedString());
+            if (string.IsNullOrEmpty(raw)) continue;
+
+            if (Matches(raw, "fecha", "fechasolicitud", "date"))
+                map["fecha"] = c;
+            else if (Matches(raw, "plataforma", "portal"))
+                map["plataforma"] = c;
+            else if (Matches(raw, "nrocaso", "numerocaso", "caso", "ncaso"))
+                map["nrocaso"] = c;
+            else if (Matches(raw, "nrocliente", "numerocliente", "cliente", "ncliente"))
+                map["nrocliente"] = c;
+            else if (Matches(raw, "correo", "email", "mail", "e-mail"))
+                map["correo"] = c;
+            else if (Matches(raw, "solicitud", "tipo", "tiposolicitud"))
+                map["solicitud"] = c;
+            else if (Matches(raw, "solicitadaporemail", "emailsolicitante", "correosolicitante"))
+                map["solicitadoemail"] = c;
+            else if (Matches(raw, "solicitadopornombre", "solicitante", "nombre", "solicitadopor"))
+                map["solicitadonombre"] = c;
+            else if (Matches(raw, "listo", "estado", "confirmado"))
+                map["listo"] = c;
+            else if (Matches(raw, "aclaracion", "observacion", "nota", "comentario"))
+                map["aclaracion"] = c;
+        }
+
+        return map;
+    }
+
+    private static bool Matches(string normalized, params string[] keys) =>
+        keys.Any(k => normalized == k || normalized.Contains(k));
+
+    private static string NormalizeHeader(string value)
+    {
+        var sb = new StringBuilder();
+        foreach (var ch in value.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD))
+        {
+            var cat = CharUnicodeInfo.GetUnicodeCategory(ch);
+            if (cat == UnicodeCategory.NonSpacingMark) continue;
+            if (char.IsLetterOrDigit(ch)) sb.Append(ch);
+        }
+
+        return sb.ToString();
+    }
+
+    private static string? NormalizePortal(string raw)
+    {
+        var v = raw.Trim();
+        if (string.IsNullOrEmpty(v)) return "OnBalance";
+        if (v.Equals("OnBalance", StringComparison.OrdinalIgnoreCase) || v.Equals("On Balance", StringComparison.OrdinalIgnoreCase))
+            return "OnBalance";
+        if (v.Equals("Onvio", StringComparison.OrdinalIgnoreCase) || v.Equals("ONVIO", StringComparison.OrdinalIgnoreCase))
+            return "Onvio";
+        if (v.Equals("PortalCliente", StringComparison.OrdinalIgnoreCase) || v.Equals("Portal Cliente", StringComparison.OrdinalIgnoreCase))
+            return "PortalCliente";
+        return null;
+    }
+
+    private static string? NormalizeTipo(string raw, string portal)
+    {
+        var v = raw.Trim();
+        if (string.IsNullOrEmpty(v))
+        {
+            return portal switch
+            {
+                "OnBalance" => "Blanqueo",
+                "Onvio" => "Blanqueo MFA",
+                "PortalCliente" => "Activación",
+                _ => null,
+            };
+        }
+
+        if (v.Equals("Blanqueo + MFA", StringComparison.OrdinalIgnoreCase)) return "Blanqueo + MFA";
+        if (v.Equals("Blanqueo MFA", StringComparison.OrdinalIgnoreCase) || v.Equals("Blanqueo+MFA", StringComparison.OrdinalIgnoreCase))
+            return portal == "OnBalance" ? "Blanqueo + MFA" : "Blanqueo MFA";
+        if (v.Equals("Blanqueo", StringComparison.OrdinalIgnoreCase)) return "Blanqueo";
+        if (v.Equals("Activación", StringComparison.OrdinalIgnoreCase) || v.Equals("Activacion", StringComparison.OrdinalIgnoreCase))
+            return "Activación";
+        if (v.Equals("Cambio de contraseña", StringComparison.OrdinalIgnoreCase)
+            || v.Equals("Cambio de password", StringComparison.OrdinalIgnoreCase)
+            || v.Contains("contrase", StringComparison.OrdinalIgnoreCase))
+            return "Cambio de contraseña";
+
+        return null;
+    }
+
+    private static string? NormalizeFecha(string raw)
+    {
+        var v = raw.Trim();
+        if (string.IsNullOrEmpty(v))
+            return DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+        if (DateTime.TryParse(v, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var d)
+            || DateTime.TryParse(v, new CultureInfo("es-AR"), DateTimeStyles.AssumeLocal, out d)
+            || DateTime.TryParse(v, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out d))
+            return d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+        var m = Regex.Match(v, @"^(\d{4})-(\d{1,2})-(\d{1,2})");
+        if (m.Success)
+            return $"{m.Groups[1].Value}-{int.Parse(m.Groups[2].Value):00}-{int.Parse(m.Groups[3].Value):00}";
+
+        return null;
+    }
+
+    private static void ResolveRequester(ref string email, ref string nombre)
+    {
+        email = email.Trim();
+        nombre = nombre.Trim();
+        if (!string.IsNullOrWhiteSpace(email) && email.Contains('@'))
+        {
+            if (string.IsNullOrWhiteSpace(nombre))
+                nombre = BlanqueoEndpoints.DisplayNameFromEmail(email);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(nombre))
+            return;
+
+        // "Leonel Gallo" -> leonel.gallo@thomsonreuters.com
+        var parts = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 0) return;
+        var local = string.Join('.', parts.Select(p =>
+        {
+            var sb = new StringBuilder();
+            foreach (var ch in p.Normalize(NormalizationForm.FormD).ToLowerInvariant())
+            {
+                var cat = CharUnicodeInfo.GetUnicodeCategory(ch);
+                if (cat == UnicodeCategory.NonSpacingMark) continue;
+                if (char.IsLetterOrDigit(ch)) sb.Append(ch);
+            }
+
+            return sb.ToString();
+        }).Where(p => p.Length > 0));
+
+        if (local.Length > 0)
+            email = $"{local}@thomsonreuters.com";
+    }
+
+    private static bool ParseBool(string raw)
+    {
+        var v = raw.Trim().ToLowerInvariant();
+        return v is "1" or "true" or "si" or "sí" or "yes" or "listo" or "ok" or "x";
+    }
+
+    private static string? NullIfEmpty(string value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string PortalLabel(string portal) => portal switch
+    {
+        "OnBalance" => "On Balance",
+        "Onvio" => "ONVIO",
+        _ => "Portal Cliente",
+    };
+
+    private static string? MonthKey(string fecha)
+    {
+        var m = Regex.Match(fecha ?? "", @"^(\d{4})-(\d{2})");
+        return m.Success ? $"{m.Groups[1].Value}-{m.Groups[2].Value}" : null;
+    }
+
+    private static string MonthLabel(string key)
+    {
+        var parts = key.Split('-');
+        if (parts.Length != 2 || !int.TryParse(parts[1], out var month) || month is < 1 or > 12)
+            return key;
+        var names = new[] { "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic" };
+        return $"{names[month - 1]} {parts[0]}";
+    }
+}
+
+public sealed class BlanqueoHistoricalRow
+{
+    public string Portal { get; set; } = "";
+    public string NroCaso { get; set; } = "";
+    public string NroCliente { get; set; } = "";
+    public string Correo { get; set; } = "";
+    public string FechaSolicitud { get; set; } = "";
+    public string TipoSolicitud { get; set; } = "";
+    public string SolicitadoPorEmail { get; set; } = "";
+    public string SolicitadoPorNombre { get; set; } = "";
+    public bool Listo { get; set; }
+    public string? Aclaracion { get; set; }
+}

@@ -93,6 +93,41 @@ public sealed class BlanqueoRepository
         };
     }
 
+    public int InsertHistoricalBatch(IReadOnlyList<BlanqueoHistoricalRow> rows)
+    {
+        if (rows.Count == 0) return 0;
+        using var conn = Open();
+        using var tx = conn.BeginTransaction();
+        var inserted = 0;
+        foreach (var row in rows)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = """
+                INSERT INTO blanqueo_solicitudes
+                    (portal, nro_caso, nro_cliente, correo, fecha_solicitud,
+                     solicitado_por_email, solicitado_por_nombre, tipo_solicitud, listo, aclaracion)
+                VALUES
+                    ($portal, $caso, $cliente, $correo, $fecha, $email, $nombre, $tipo, $listo, $aclaracion)
+                """;
+            cmd.Parameters.AddWithValue("$portal", row.Portal);
+            cmd.Parameters.AddWithValue("$caso", row.NroCaso);
+            cmd.Parameters.AddWithValue("$cliente", row.NroCliente);
+            cmd.Parameters.AddWithValue("$correo", row.Correo);
+            cmd.Parameters.AddWithValue("$fecha", row.FechaSolicitud);
+            cmd.Parameters.AddWithValue("$email", row.SolicitadoPorEmail);
+            cmd.Parameters.AddWithValue("$nombre", row.SolicitadoPorNombre);
+            cmd.Parameters.AddWithValue("$tipo", row.TipoSolicitud);
+            cmd.Parameters.AddWithValue("$listo", row.Listo ? 1 : 0);
+            cmd.Parameters.AddWithValue("$aclaracion", (object?)row.Aclaracion ?? DBNull.Value);
+            cmd.ExecuteNonQuery();
+            inserted++;
+        }
+
+        tx.Commit();
+        return inserted;
+    }
+
     public BlanqueoRecordDto? UpdateOwnerFields(int id, BlanqueoUpdateRequest req)
     {
         using var conn = Open();

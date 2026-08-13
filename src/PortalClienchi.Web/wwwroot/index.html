@@ -377,11 +377,22 @@
 
               <div class="plan-gestor-panel plan-gestor-panel-list">
                 <div class="plan-gestor-panel-accent blanqueo-accent-list"></div>
-                <h3 class="plan-gestor-panel-title">Listado <span id="blanqueo-count" class="plan-gestor-count"></span></h3>
+                <h3 class="plan-gestor-panel-title">
+                  Listado <span id="blanqueo-count" class="plan-gestor-count"></span>
+                  <span id="blanqueo-month-stat" class="blanqueo-month-stat" aria-live="polite"></span>
+                </h3>
                 <p id="blanqueo-clave-hint" class="blanqueo-clave-hint">
                   Clave generada:
                   <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code" title="Clic para copiar">Sueldo.2026</button>
                 </p>
+                <div id="blanqueo-confirm-tools" class="blanqueo-confirm-tools hidden">
+                  <button type="button" id="blanqueo-export" class="plan-gestor-btn-tool">Exportar Excel</button>
+                  <button type="button" id="blanqueo-import-template" class="plan-gestor-btn-tool">Plantilla import</button>
+                  <label class="blanqueo-import-btn plan-gestor-btn-tool">
+                    Importar histórico
+                    <input id="blanqueo-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden/>
+                  </label>
+                </div>
                 <div class="blanqueo-filter-bar">
                   <label class="blanqueo-filter-month">
                     Mes
