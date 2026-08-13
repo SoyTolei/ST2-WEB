@@ -718,8 +718,8 @@ function buildRow(item) {
     <td class="blanqueo-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
     <td class="blanqueo-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>
     ${mailCell}
-    <td class="blanqueo-col-solicitante" title="${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
-    <td class="blanqueo-col-tipo" title="${escapeHtml(item.tipoSolicitud)}">${escapeHtml(tipoShort(item.tipoSolicitud))}</td>
+    <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
+    <td class="blanqueo-col-tipo">${escapeHtml(item.tipoSolicitud)}</td>
     <td class="blanqueo-col-listo">${item.listo ? '<span class="blanqueo-pill ok">Listo</span>' : "—"}</td>
     <td class="blanqueo-col-aclaracion">${item.aclaracion ? `<span class="blanqueo-pill ${isNoRegistrado(item.aclaracion) ? "bad" : "note"}" title="${escapeHtml(item.aclaracion)}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
   `;
@@ -778,19 +778,9 @@ function portalLabel(portal) {
 }
 
 function portalShort(portal) {
-  if (portal === "OnBalance") return "On Bal.";
+  if (portal === "OnBalance") return "OB";
   if (portal === "Onvio") return "ONVIO";
   return "Portal";
-}
-
-function tipoShort(tipo) {
-  const t = String(tipo || "").trim();
-  if (t === "Blanqueo + MFA") return "Blanq.+MFA";
-  if (t === "Blanqueo MFA") return "Blanq.MFA";
-  if (t === "Cambio de contraseña") return "Cambio clave";
-  if (t === "Activación") return "Activación";
-  if (t === "Blanqueo") return "Blanqueo";
-  return t;
 }
 
 function formatFecha(iso) {
