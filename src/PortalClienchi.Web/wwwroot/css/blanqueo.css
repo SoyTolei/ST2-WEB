@@ -34,8 +34,19 @@
   display: none !important;
 }
 
+.blanqueo-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
 .blanqueo-month-stat {
-  margin: 8px 0 0;
+  margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -44,21 +55,18 @@
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.35;
+  min-height: 1.2em;
 }
 
 .blanqueo-month-stat:empty {
   display: none;
 }
 
-.blanqueo-confirm-tools {
-  display: flex;
-  flex-wrap: wrap;
+.blanqueo-list-footer-actions {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
-  margin: 0 0 12px;
-}
-
-.blanqueo-confirm-tools.hidden {
-  display: none !important;
+  margin-left: auto;
 }
 
 .blanqueo-export-btn {
@@ -71,11 +79,15 @@
   background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
   color: #fff;
   font: inherit;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(22, 163, 74, 0.25);
+  box-shadow: 0 1px 2px rgba(22, 163, 74, 0.22);
+}
+
+.blanqueo-export-btn.hidden {
+  display: none !important;
 }
 
 .blanqueo-export-btn:hover {
@@ -87,33 +99,28 @@
   line-height: 0;
 }
 
-.blanqueo-import-wrap {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-start;
-}
-
-.blanqueo-import-wrap.hidden {
-  display: none !important;
-}
-
 .blanqueo-import-btn {
   display: inline-flex;
   align-items: center;
   margin: 0;
-  border: 1px dashed #94a3b8;
+  border: 1px dashed #cbd5e1;
   border-radius: 7px;
-  padding: 5px 10px;
+  padding: 4px 9px;
   background: #f8fafc;
-  color: #475569;
-  font-size: 0.75rem;
+  color: #64748b;
+  font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
 }
 
+.blanqueo-import-btn.hidden {
+  display: none !important;
+}
+
 .blanqueo-import-btn:hover {
   background: #f1f5f9;
-  border-color: #64748b;
+  border-color: #94a3b8;
+  color: #475569;
 }
 
 .blanqueo-mail-copy {

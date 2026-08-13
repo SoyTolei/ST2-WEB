@@ -384,14 +384,6 @@
                   Clave generada:
                   <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code" title="Clic para copiar">Sueldo.2026</button>
                 </p>
-                <div id="blanqueo-confirm-tools" class="blanqueo-confirm-tools hidden">
-                  <button type="button" id="blanqueo-export" class="blanqueo-export-btn" title="Exportar Excel">
-                    <span class="blanqueo-export-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm1 13H9v-2h6v2zm0-3H9v-2h6v2zm-1-6V3.5L18.5 8H14z"/></svg>
-                    </span>
-                    Excel
-                  </button>
-                </div>
                 <div class="blanqueo-filter-bar">
                   <label class="blanqueo-filter-month">
                     Mes
@@ -437,13 +429,20 @@
                     <tbody id="blanqueo-table-body"></tbody>
                   </table>
                 </div>
-                <p class="blanqueo-hint">Clic derecho: editar/eliminar tus cargas. Quien confirma puede marcar listo (también con doble clic) o aclarar.</p>
-                <p id="blanqueo-month-stat" class="blanqueo-month-stat" aria-live="polite"></p>
-                <div id="blanqueo-import-wrap" class="blanqueo-import-wrap hidden">
-                  <label class="blanqueo-import-btn" title="Solo admin · migrar Excel histórico">
-                    Importar histórico
-                    <input id="blanqueo-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden/>
-                  </label>
+                <div class="blanqueo-list-footer">
+                  <p id="blanqueo-month-stat" class="blanqueo-month-stat" aria-live="polite"></p>
+                  <div class="blanqueo-list-footer-actions">
+                    <button type="button" id="blanqueo-export" class="blanqueo-export-btn hidden" title="Exportar Excel">
+                      <span class="blanqueo-export-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm1 13H9v-2h6v2zm0-3H9v-2h6v2zm-1-6V3.5L18.5 8H14z"/></svg>
+                      </span>
+                      Excel
+                    </button>
+                    <label id="blanqueo-import-wrap" class="blanqueo-import-btn hidden" title="Solo admin · migrar Excel histórico">
+                      Importar histórico
+                      <input id="blanqueo-import-file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden/>
+                    </label>
+                  </div>
                 </div>
               </div>
 

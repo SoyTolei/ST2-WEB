@@ -207,8 +207,8 @@ function syncMineFilterVisibility() {
 }
 
 function syncConfirmToolsVisibility() {
-  const tools = document.getElementById("blanqueo-confirm-tools");
-  if (tools) tools.classList.toggle("hidden", !canConfirm);
+  const exportBtn = document.getElementById("blanqueo-export");
+  if (exportBtn) exportBtn.classList.toggle("hidden", !canConfirm);
 
   const importWrap = document.getElementById("blanqueo-import-wrap");
   if (importWrap) importWrap.classList.toggle("hidden", !isSt2SuperAdmin());
