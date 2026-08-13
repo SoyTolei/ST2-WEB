@@ -200,6 +200,18 @@ public static class BlanqueoExcel
                 continue;
             }
 
+            var listoRaw = Cell("listo");
+            var listo = ParseBool(listoRaw);
+            var aclaracion = NullIfEmpty(Cell("aclaracion"));
+
+            // Misma semántica que en vivo: Listo (verde) y No registrado (rojo) se respetan;
+            // si vienen juntos, gana No registrado.
+            if (LooksLikeNoRegistrado(aclaracion) || LooksLikeNoRegistrado(listoRaw))
+            {
+                listo = false;
+                aclaracion = "No registrado";
+            }
+
             rows.Add(new BlanqueoHistoricalRow
             {
                 Portal = portal,
@@ -210,12 +222,20 @@ public static class BlanqueoExcel
                 TipoSolicitud = tipo,
                 SolicitadoPorEmail = emailSol.Trim().ToLowerInvariant(),
                 SolicitadoPorNombre = nombreSol.Trim(),
-                Listo = ParseBool(Cell("listo")),
-                Aclaracion = NullIfEmpty(Cell("aclaracion")),
+                Listo = listo,
+                Aclaracion = aclaracion,
             });
         }
 
         return (rows, errors);
+    }
+
+    private static bool LooksLikeNoRegistrado(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return false;
+        if (BlanqueoAlertKinds.IsNoRegistrado(value)) return true;
+        var n = NormalizeHeader(value);
+        return n is "noregistrado" or "noinscrito" or "sinregistro";
     }
 
     private static Dictionary<string, int> MapHeaders(IXLWorksheet ws)
@@ -444,7 +464,11 @@ public static class BlanqueoExcel
     private static bool ParseBool(string raw)
     {
         var v = raw.Trim().ToLowerInvariant();
-        return v is "1" or "true" or "si" or "sí" or "yes" or "listo" or "ok" or "x";
+        if (v is "1" or "true" or "si" or "sí" or "yes" or "listo" or "ok" or "x" or "verdadero")
+            return true;
+        // Excel a veces formatea "Sí" sin acento raro; también aceptar "s".
+        var n = NormalizeHeader(raw);
+        return n is "1" or "true" or "si" or "yes" or "listo" or "ok" or "x" or "verdadero";
     }
 
     private static string? NullIfEmpty(string value) =>
