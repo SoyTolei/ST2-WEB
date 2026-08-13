@@ -250,6 +250,35 @@ public sealed class AppAccessRepository
         return list;
     }
 
+    public IReadOnlyList<AppAccessRecordDto> ListDirectory()
+    {
+        var list = new List<AppAccessRecordDto>();
+        if (!StorageReady)
+            return list;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name
+            FROM app_access
+            ORDER BY email COLLATE NOCASE
+            """;
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new AppAccessRecordDto
+            {
+                Email = reader.GetString(0),
+                FirstSeenAt = reader.GetString(1),
+                LastSeenAt = reader.GetString(2),
+                LoginCount = reader.GetInt32(3),
+                DisplayName = reader.IsDBNull(4) ? null : reader.GetString(4),
+            });
+        }
+
+        return list;
+    }
+
     private void EnsureSchema()
     {
         using var conn = Open();

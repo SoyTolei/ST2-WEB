@@ -63,7 +63,12 @@ public static class BlanqueoEndpoints
                 "blanqueo-plantilla-import.xlsx");
         });
 
-        app.MapPost("/api/planillas/blanqueo/import", async (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules, CancellationToken ct) =>
+        app.MapPost("/api/planillas/blanqueo/import", async (
+            HttpContext ctx,
+            BlanqueoRepository repo,
+            ModuleAccessRepository modules,
+            AppAccessRepository accessRepo,
+            CancellationToken ct) =>
         {
             if (!TryAuthorize(ctx, modules, requireConfirm: true, out var email, out _, out var error))
                 return error!;
@@ -85,7 +90,8 @@ public static class BlanqueoEndpoints
             try
             {
                 await using var stream = file.OpenReadStream();
-                var (rows, parseErrors) = BlanqueoExcel.ParseImport(stream, file.FileName);
+                var directory = accessRepo.ListDirectory();
+                var (rows, parseErrors) = BlanqueoExcel.ParseImport(stream, file.FileName, directory);
                 if (rows.Count == 0)
                 {
                     return Results.BadRequest(new

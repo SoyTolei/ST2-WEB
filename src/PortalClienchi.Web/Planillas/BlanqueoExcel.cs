@@ -116,10 +116,11 @@ public static class BlanqueoExcel
         help.Cell(5, 1).Value = "NroCliente / Cliente";
         help.Cell(6, 1).Value = "Correo / Email";
         help.Cell(7, 1).Value = "Solicitud / Tipo";
-        help.Cell(8, 1).Value = "SolicitadoPorNombre / Solicitante / Nombre";
-        help.Cell(9, 1).Value = "SolicitadoPorEmail / EmailSolicitante (si falta, se arma desde el nombre)";
+        help.Cell(8, 1).Value = "SolicitadoPorNombre / Agente / Solicitante (nombre y apellido como en la plataforma)";
+        help.Cell(9, 1).Value = "SolicitadoPorEmail opcional: si falta, se busca el usuario por nombre exacto en Accesos";
         help.Cell(10, 1).Value = "Listo (Sí/No, 1/0, true/false)";
         help.Cell(11, 1).Value = "Aclaracion / Observacion";
+        help.Cell(13, 1).Value = "Tip: poné el nombre tal cual figura en Accesos para que el histórico quede a nombre de esa persona.";
         help.Columns().AdjustToContents();
 
         using var ms = new MemoryStream();
@@ -127,10 +128,14 @@ public static class BlanqueoExcel
         return ms.ToArray();
     }
 
-    public static (List<BlanqueoHistoricalRow> Rows, List<string> Errors) ParseImport(Stream stream, string fileName)
+    public static (List<BlanqueoHistoricalRow> Rows, List<string> Errors) ParseImport(
+        Stream stream,
+        string fileName,
+        IReadOnlyList<AppAccessRecordDto>? directory = null)
     {
         var errors = new List<string>();
         var rows = new List<BlanqueoHistoricalRow>();
+        var users = BuildUserIndex(directory ?? []);
         using var wb = new XLWorkbook(stream);
         var ws = wb.Worksheets.FirstOrDefault(w => !w.Name.Equals("Ayuda", StringComparison.OrdinalIgnoreCase))
                  ?? wb.Worksheets.First();
@@ -188,11 +193,9 @@ public static class BlanqueoExcel
 
             var emailSol = Cell("solicitadoemail");
             var nombreSol = Cell("solicitadonombre");
-            ResolveRequester(ref emailSol, ref nombreSol);
-
-            if (string.IsNullOrWhiteSpace(emailSol))
+            if (!ResolveRequester(ref emailSol, ref nombreSol, users))
             {
-                errors.Add($"Fila {r}: no se pudo identificar solicitante (nombre/email).");
+                errors.Add($"Fila {r}: no se encontró el agente '{nombreSol || emailSol}' entre los usuarios de la plataforma.");
                 continue;
             }
 
@@ -205,9 +208,7 @@ public static class BlanqueoExcel
                 FechaSolicitud = fecha,
                 TipoSolicitud = tipo,
                 SolicitadoPorEmail = emailSol.Trim().ToLowerInvariant(),
-                SolicitadoPorNombre = string.IsNullOrWhiteSpace(nombreSol)
-                    ? BlanqueoEndpoints.DisplayNameFromEmail(emailSol)
-                    : nombreSol.Trim(),
+                SolicitadoPorNombre = nombreSol.Trim(),
                 Listo = ParseBool(Cell("listo")),
                 Aclaracion = NullIfEmpty(Cell("aclaracion")),
             });
@@ -239,7 +240,7 @@ public static class BlanqueoExcel
                 map["solicitud"] = c;
             else if (Matches(raw, "solicitadaporemail", "emailsolicitante", "correosolicitante"))
                 map["solicitadoemail"] = c;
-            else if (Matches(raw, "solicitadopornombre", "solicitante", "nombre", "solicitadopor"))
+            else if (Matches(raw, "solicitadopornombre", "solicitante", "nombre", "solicitadopor", "agente", "agent"))
                 map["solicitadonombre"] = c;
             else if (Matches(raw, "listo", "estado", "confirmado"))
                 map["listo"] = c;
@@ -325,23 +326,104 @@ public static class BlanqueoExcel
         return null;
     }
 
-    private static void ResolveRequester(ref string email, ref string nombre)
+    private static List<(string Email, string DisplayName, string Key)> BuildUserIndex(IReadOnlyList<AppAccessRecordDto> directory)
+    {
+        var list = new List<(string Email, string DisplayName, string Key)>();
+        foreach (var user in directory)
+        {
+            var email = (user.Email ?? "").Trim().ToLowerInvariant();
+            if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+                continue;
+
+            var display = string.IsNullOrWhiteSpace(user.DisplayName)
+                ? BlanqueoEndpoints.DisplayNameFromEmail(email)
+                : user.DisplayName.Trim();
+
+            list.Add((email, display, NormalizePersonKey(display)));
+
+            // También indexar por el nombre derivado del mail (por si el display custom difiere).
+            var fromEmail = BlanqueoEndpoints.DisplayNameFromEmail(email);
+            var fromEmailKey = NormalizePersonKey(fromEmail);
+            if (!string.Equals(fromEmailKey, NormalizePersonKey(display), StringComparison.Ordinal))
+                list.Add((email, display, fromEmailKey));
+        }
+
+        return list;
+    }
+
+    private static bool ResolveRequester(
+        ref string email,
+        ref string nombre,
+        IReadOnlyList<(string Email, string DisplayName, string Key)> users)
     {
         email = email.Trim();
         nombre = nombre.Trim();
+
         if (!string.IsNullOrWhiteSpace(email) && email.Contains('@'))
         {
+            var normalizedEmail = email.ToLowerInvariant();
+            var byEmail = users.FirstOrDefault(u => u.Email.Equals(normalizedEmail, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(byEmail.Email))
+            {
+                email = byEmail.Email;
+                nombre = byEmail.DisplayName;
+                return true;
+            }
+
             if (string.IsNullOrWhiteSpace(nombre))
                 nombre = BlanqueoEndpoints.DisplayNameFromEmail(email);
-            return;
+            return true;
         }
 
         if (string.IsNullOrWhiteSpace(nombre))
-            return;
+            return false;
 
-        // "Leonel Gallo" -> leonel.gallo@thomsonreuters.com
+        var key = NormalizePersonKey(nombre);
+        var match = users.FirstOrDefault(u => u.Key == key);
+        if (string.IsNullOrEmpty(match.Email))
+        {
+            // Fallback: armar mail típico solo si no hay match de plataforma.
+            var guessed = GuessEmailFromName(nombre);
+            if (guessed is null) return false;
+            var guessMatch = users.FirstOrDefault(u => u.Email.Equals(guessed, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrEmpty(guessMatch.Email)) return false;
+            email = guessMatch.Email;
+            nombre = guessMatch.DisplayName;
+            return true;
+        }
+
+        email = match.Email;
+        nombre = match.DisplayName;
+        return true;
+    }
+
+    private static string NormalizePersonKey(string value)
+    {
+        var sb = new StringBuilder();
+        var prevSpace = false;
+        foreach (var ch in value.Trim().Normalize(NormalizationForm.FormD).ToLowerInvariant())
+        {
+            var cat = CharUnicodeInfo.GetUnicodeCategory(ch);
+            if (cat == UnicodeCategory.NonSpacingMark) continue;
+            if (char.IsLetterOrDigit(ch))
+            {
+                sb.Append(ch);
+                prevSpace = false;
+            }
+            else if (char.IsWhiteSpace(ch) && !prevSpace && sb.Length > 0)
+            {
+                sb.Append(' ');
+                prevSpace = true;
+            }
+        }
+
+        return sb.ToString().Trim();
+    }
+
+    private static string? GuessEmailFromName(string nombre)
+    {
         var parts = nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        if (parts.Length == 0) return;
+        if (parts.Length == 0) return null;
         var local = string.Join('.', parts.Select(p =>
         {
             var sb = new StringBuilder();
@@ -355,8 +437,7 @@ public static class BlanqueoExcel
             return sb.ToString();
         }).Where(p => p.Length > 0));
 
-        if (local.Length > 0)
-            email = $"{local}@thomsonreuters.com";
+        return local.Length > 0 ? $"{local}@thomsonreuters.com" : null;
     }
 
     private static bool ParseBool(string raw)
