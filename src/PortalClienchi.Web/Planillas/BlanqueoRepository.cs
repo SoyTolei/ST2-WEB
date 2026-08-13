@@ -94,14 +94,23 @@ public sealed class BlanqueoRepository
         };
     }
 
-    public int InsertHistoricalBatch(IReadOnlyList<BlanqueoHistoricalRow> rows)
+    public (int Inserted, int SkippedDuplicates) InsertHistoricalBatch(IReadOnlyList<BlanqueoHistoricalRow> rows)
     {
-        if (rows.Count == 0) return 0;
+        if (rows.Count == 0) return (0, 0);
         using var conn = Open();
+        var existing = LoadImportFingerprints(conn);
         using var tx = conn.BeginTransaction();
         var inserted = 0;
+        var skipped = 0;
         foreach (var row in rows)
         {
+            var fp = ImportFingerprint(row);
+            if (existing.Contains(fp))
+            {
+                skipped++;
+                continue;
+            }
+
             using var cmd = conn.CreateCommand();
             cmd.Transaction = tx;
             cmd.CommandText = """
@@ -116,17 +125,129 @@ public sealed class BlanqueoRepository
             cmd.Parameters.AddWithValue("$cliente", row.NroCliente);
             cmd.Parameters.AddWithValue("$correo", row.Correo);
             cmd.Parameters.AddWithValue("$fecha", row.FechaSolicitud);
-            cmd.Parameters.AddWithValue("$email", row.SolicitadoPorEmail);
+            cmd.Parameters.AddWithValue("$email", row.SolicitadoPorEmail ?? "");
             cmd.Parameters.AddWithValue("$nombre", row.SolicitadoPorNombre);
             cmd.Parameters.AddWithValue("$tipo", row.TipoSolicitud);
             cmd.Parameters.AddWithValue("$listo", row.Listo ? 1 : 0);
             cmd.Parameters.AddWithValue("$aclaracion", (object?)row.Aclaracion ?? DBNull.Value);
             cmd.ExecuteNonQuery();
+            existing.Add(fp);
             inserted++;
         }
 
         tx.Commit();
-        return inserted;
+        return (inserted, skipped);
+    }
+
+    /// <summary>
+    /// Vincula solicitudes históricas sin mail (agente aún no registrado) al usuario que acaba de ingresar.
+    /// </summary>
+    public int AssociatePendingRequester(string email, string? displayName = null)
+    {
+        var normalized = PlanUserIdentity.ValidateAndNormalize(email);
+        if (normalized is null)
+            return 0;
+
+        var fromEmail = BlanqueoEndpoints.DisplayNameFromEmail(normalized);
+        var preferredName = string.IsNullOrWhiteSpace(displayName) ? fromEmail : displayName.Trim();
+        var keys = new HashSet<string>(StringComparer.Ordinal)
+        {
+            BlanqueoExcel.PersonKey(fromEmail),
+            BlanqueoExcel.PersonKey(preferredName),
+        };
+
+        using var conn = Open();
+        using var listCmd = conn.CreateCommand();
+        listCmd.CommandText = """
+            SELECT id, solicitado_por_nombre
+            FROM blanqueo_solicitudes
+            WHERE solicitado_por_email IS NULL OR trim(solicitado_por_email) = ''
+            """;
+        var pending = new List<(int Id, string Nombre)>();
+        using (var r = listCmd.ExecuteReader())
+        {
+            while (r.Read())
+                pending.Add((r.GetInt32(0), r.IsDBNull(1) ? "" : r.GetString(1)));
+        }
+
+        var updated = 0;
+        foreach (var (id, nombre) in pending)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) continue;
+            var key = BlanqueoExcel.PersonKey(nombre);
+            if (!keys.Contains(key)) continue;
+
+            using var upd = conn.CreateCommand();
+            upd.CommandText = """
+                UPDATE blanqueo_solicitudes
+                SET solicitado_por_email = $email,
+                    solicitado_por_nombre = $nombre
+                WHERE id = $id
+                  AND (solicitado_por_email IS NULL OR trim(solicitado_por_email) = '')
+                """;
+            upd.Parameters.AddWithValue("$email", normalized);
+            upd.Parameters.AddWithValue("$nombre", preferredName);
+            upd.Parameters.AddWithValue("$id", id);
+            updated += upd.ExecuteNonQuery();
+        }
+
+        return updated;
+    }
+
+    private static HashSet<string> LoadImportFingerprints(SqliteConnection conn)
+    {
+        var set = new HashSet<string>(StringComparer.Ordinal);
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT portal, nro_caso, nro_cliente, correo, fecha_solicitud,
+                   tipo_solicitud, solicitado_por_nombre, listo, coalesce(aclaracion, '')
+            FROM blanqueo_solicitudes
+            """;
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            set.Add(ImportFingerprint(
+                portal: r.IsDBNull(0) ? "" : r.GetString(0),
+                caso: r.IsDBNull(1) ? "" : r.GetString(1),
+                cliente: r.IsDBNull(2) ? "" : r.GetString(2),
+                correo: r.IsDBNull(3) ? "" : r.GetString(3),
+                fecha: r.IsDBNull(4) ? "" : r.GetString(4),
+                tipo: r.IsDBNull(5) ? "" : r.GetString(5),
+                nombre: r.IsDBNull(6) ? "" : r.GetString(6),
+                listo: !r.IsDBNull(7) && r.GetInt32(7) != 0,
+                aclaracion: r.IsDBNull(8) ? "" : r.GetString(8)));
+        }
+
+        return set;
+    }
+
+    private static string ImportFingerprint(BlanqueoHistoricalRow row) =>
+        ImportFingerprint(
+            row.Portal,
+            row.NroCaso,
+            row.NroCliente,
+            row.Correo,
+            row.FechaSolicitud,
+            row.TipoSolicitud,
+            row.SolicitadoPorNombre,
+            row.Listo,
+            row.Aclaracion ?? "");
+
+    private static string ImportFingerprint(
+        string portal,
+        string caso,
+        string cliente,
+        string correo,
+        string fecha,
+        string tipo,
+        string nombre,
+        bool listo,
+        string aclaracion)
+    {
+        static string N(string? v) => (v ?? "").Trim().ToLowerInvariant();
+        return string.Join('\u001f',
+            N(portal), N(caso), N(cliente), N(correo), N(fecha), N(tipo),
+            BlanqueoExcel.PersonKey(nombre), listo ? "1" : "0", N(aclaracion));
     }
 
     public BlanqueoRecordDto? UpdateOwnerFields(int id, BlanqueoUpdateRequest req)

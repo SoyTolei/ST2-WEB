@@ -91,7 +91,7 @@ public static class BlanqueoEndpoints
             {
                 await using var stream = file.OpenReadStream();
                 var directory = accessRepo.ListDirectory();
-                var (rows, parseErrors) = BlanqueoExcel.ParseImport(stream, file.FileName, directory);
+                var (rows, parseErrors, pendingAgents) = BlanqueoExcel.ParseImport(stream, file.FileName, directory);
                 if (rows.Count == 0)
                 {
                     return Results.BadRequest(new
@@ -101,11 +101,13 @@ public static class BlanqueoEndpoints
                     });
                 }
 
-                var inserted = repo.InsertHistoricalBatch(rows);
+                var (inserted, skippedDuplicates) = repo.InsertHistoricalBatch(rows);
                 return Results.Ok(new
                 {
                     ok = true,
                     inserted,
+                    skippedDuplicates,
+                    pendingAgents,
                     skippedErrors = parseErrors.Count,
                     details = parseErrors.Take(30).ToArray(),
                 });

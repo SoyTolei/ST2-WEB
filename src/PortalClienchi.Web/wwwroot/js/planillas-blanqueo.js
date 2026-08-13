@@ -495,8 +495,15 @@ async function importExcel(file) {
       throw new Error((data.error || data.detail || `Error ${res.status}`) + details);
     }
     await reloadList();
-    const warn = data.skippedErrors ? ` (${data.skippedErrors} fila(s) con aviso)` : "";
-    setStatus(`Importadas ${data.inserted || 0} solicitud(es)${warn}.`);
+    const parts = [`Importadas ${data.inserted || 0}`];
+    if (data.skippedDuplicates) parts.push(`${data.skippedDuplicates} ya existían`);
+    if (Array.isArray(data.pendingAgents) && data.pendingAgents.length) {
+      const names = data.pendingAgents.slice(0, 3).join(", ");
+      const more = data.pendingAgents.length > 3 ? ` +${data.pendingAgents.length - 3}` : "";
+      parts.push(`${data.pendingAgents.length} sin registro aún (${names}${more})`);
+    }
+    if (data.skippedErrors) parts.push(`${data.skippedErrors} con error`);
+    setStatus(`${parts.join(" · ")}.`);
   } catch (err) {
     setStatus(err?.message || "No se pudo importar.", true);
   }

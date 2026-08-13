@@ -121,12 +121,13 @@ public static class BlanqueoExcel
         return ms.ToArray();
     }
 
-    public static (List<BlanqueoHistoricalRow> Rows, List<string> Errors) ParseImport(
+    public static (List<BlanqueoHistoricalRow> Rows, List<string> Errors, List<string> PendingAgents) ParseImport(
         Stream stream,
         string fileName,
         IReadOnlyList<AppAccessRecordDto>? directory = null)
     {
         var errors = new List<string>();
+        var pendingAgents = new List<string>();
         var rows = new List<BlanqueoHistoricalRow>();
         var users = BuildUserIndex(directory ?? []);
         using var wb = new XLWorkbook(stream);
@@ -141,7 +142,7 @@ public static class BlanqueoExcel
         if (!headerMap.ContainsKey("correo") || !headerMap.ContainsKey("solicitadonombre"))
         {
             errors.Add("Faltan columnas obligatorias: Correo y SolicitadoPorNombre.");
-            return (rows, errors);
+            return (rows, errors, pendingAgents);
         }
 
         var last = ws.LastRowUsed()?.RowNumber() ?? 1;
@@ -196,10 +197,18 @@ public static class BlanqueoExcel
 
             var nombreSol = Cell("solicitadonombre");
             var emailSol = "";
+            if (string.IsNullOrWhiteSpace(nombreSol))
+            {
+                errors.Add($"Fila {r}: falta SolicitadoPorNombre.");
+                continue;
+            }
+
             if (!ResolveRequesterByName(ref emailSol, ref nombreSol, users))
             {
-                errors.Add($"Fila {r}: no se encontró el agente '{nombreSol}' entre los usuarios de la plataforma.");
-                continue;
+                // Sin registro aún: importar igual con el nombre; se asocia al ingresar a ST2.
+                emailSol = "";
+                nombreSol = nombreSol.Trim();
+                pendingAgents.Add(nombreSol);
             }
 
             var listoRaw = Cell("listo");
@@ -229,7 +238,7 @@ public static class BlanqueoExcel
             });
         }
 
-        return (rows, errors);
+        return (rows, errors, pendingAgents.Distinct(StringComparer.OrdinalIgnoreCase).ToList());
     }
 
     private static bool LooksLikeNoRegistrado(string? value)
@@ -450,6 +459,14 @@ public static class BlanqueoExcel
         nombre = guessMatch.DisplayName;
         return true;
     }
+
+    /// <summary>Clave comparable de nombre (sin acentos, minúsculas, espacios normalizados).</summary>
+    public static string PersonKey(string value) => NormalizePersonKey(value);
+
+    public static bool NamesMatch(string a, string b) =>
+        !string.IsNullOrWhiteSpace(a)
+        && !string.IsNullOrWhiteSpace(b)
+        && string.Equals(NormalizePersonKey(a), NormalizePersonKey(b), StringComparison.Ordinal);
 
     private static string NormalizePersonKey(string value)
     {

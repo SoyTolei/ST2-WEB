@@ -438,26 +438,30 @@ public static class PlanillasEndpoints
             }
         });
 
-        app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo) =>
+        app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
             if (email is not null)
+            {
                 accessRepo.TouchActivity(email);
+                blanqueoRepo.AssociatePendingRequester(email);
+            }
 
             return Results.Ok(new { email });
         });
 
-        app.MapPost("/api/planillas/session/heartbeat", (HttpContext ctx, AppAccessRepository accessRepo) =>
+        app.MapPost("/api/planillas/session/heartbeat", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
             if (email is null)
                 return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             accessRepo.TouchActivity(email);
+            blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { ok = true });
         });
 
-        app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body, AppAccessRepository accessRepo) =>
+        app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
         {
             var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
             if (email is null)
@@ -470,6 +474,7 @@ public static class PlanillasEndpoints
 
             PlanUserIdentity.SetCookie(ctx, email);
             accessRepo.RecordAccess(email);
+            blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { email });
         });
 
@@ -662,6 +667,7 @@ public static class PlanillasEndpoints
             HttpContext ctx,
             IConfiguration config,
             AppAccessRepository accessRepo,
+            BlanqueoRepository blanqueoRepo,
             CancellationToken ct) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
@@ -678,11 +684,15 @@ public static class PlanillasEndpoints
             if (updated <= 0)
                 return Results.NotFound(new { error = "No se encontró ese acceso." });
 
+            var email = body.Email.Trim().ToLowerInvariant();
+            var displayName = string.IsNullOrWhiteSpace(body.DisplayName) ? null : body.DisplayName.Trim();
+            blanqueoRepo.AssociatePendingRequester(email, displayName);
+
             return Results.Ok(new
             {
                 ok = true,
-                email = body.Email.Trim().ToLowerInvariant(),
-                displayName = string.IsNullOrWhiteSpace(body.DisplayName) ? null : body.DisplayName.Trim(),
+                email,
+                displayName,
             });
         });
 
