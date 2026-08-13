@@ -187,7 +187,7 @@ public static class BlanqueoExcel
                 continue;
             }
 
-            var fecha = NormalizeFecha(Cell("fecha"));
+            var fecha = ReadFechaCell(ws, r, headerMap);
             if (fecha is null)
             {
                 errors.Add($"Fila {r}: fecha inválida.");
@@ -330,20 +330,69 @@ public static class BlanqueoExcel
         return null;
     }
 
+    /// <summary>
+    /// Lee la fecha de Excel (celda date, serial o texto) y la deja siempre como yyyy-MM-dd
+    /// para ordenar y filtrar por mes.
+    /// </summary>
+    private static string? ReadFechaCell(IXLWorksheet ws, int row, Dictionary<string, int> headerMap)
+    {
+        if (!headerMap.TryGetValue("fecha", out var col))
+            return NormalizeFecha("");
+
+        var cell = ws.Cell(row, col);
+        if (cell.TryGetValue(out DateTime dt))
+            return dt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+        if (cell.DataType == XLDataType.Number && cell.TryGetValue(out double serial))
+        {
+            try
+            {
+                return DateTime.FromOADate(serial).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                // seguir con texto
+            }
+        }
+
+        return NormalizeFecha(cell.GetFormattedString().Trim());
+    }
+
     private static string? NormalizeFecha(string raw)
     {
         var v = raw.Trim();
         if (string.IsNullOrEmpty(v))
             return DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-        if (DateTime.TryParse(v, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var d)
-            || DateTime.TryParse(v, new CultureInfo("es-AR"), DateTimeStyles.AssumeLocal, out d)
+        // Preferido / export: 2026-08-13 o 2026/08/13
+        var iso = Regex.Match(v, @"^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})");
+        if (iso.Success
+            && int.TryParse(iso.Groups[2].Value, out var im)
+            && int.TryParse(iso.Groups[3].Value, out var id)
+            && im is >= 1 and <= 12 && id is >= 1 and <= 31)
+            return $"{iso.Groups[1].Value}-{im:00}-{id:00}";
+
+        // AR / común: 13/08/2026 · 13-08-2026 · 13.08.2026
+        var dmy = Regex.Match(v, @"^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})$");
+        if (dmy.Success
+            && int.TryParse(dmy.Groups[1].Value, out var day)
+            && int.TryParse(dmy.Groups[2].Value, out var month)
+            && int.TryParse(dmy.Groups[3].Value, out var year)
+            && month is >= 1 and <= 12 && day is >= 1 and <= 31)
+            return $"{year:0000}-{month:00}-{day:00}";
+
+        // Solo mes/año: 08/2026 → día 01 (para agrupar por mes)
+        var my = Regex.Match(v, @"^(\d{1,2})[/\-.](\d{4})$");
+        if (my.Success
+            && int.TryParse(my.Groups[1].Value, out var mOnly)
+            && int.TryParse(my.Groups[2].Value, out var yOnly)
+            && mOnly is >= 1 and <= 12)
+            return $"{yOnly:0000}-{mOnly:00}-01";
+
+        if (DateTime.TryParse(v, new CultureInfo("es-AR"), DateTimeStyles.AssumeLocal, out var d)
+            || DateTime.TryParse(v, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out d)
             || DateTime.TryParse(v, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out d))
             return d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-        var m = Regex.Match(v, @"^(\d{4})-(\d{1,2})-(\d{1,2})");
-        if (m.Success)
-            return $"{m.Groups[1].Value}-{int.Parse(m.Groups[2].Value):00}-{int.Parse(m.Groups[3].Value):00}";
 
         return null;
     }
