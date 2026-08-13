@@ -40,15 +40,99 @@
 }
 
 .st2-suite-sig {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   text-align: center;
   max-width: 28rem;
+  padding-top: 10px;
+}
+
+.st2-suite-sig-stage {
+  position: absolute;
+  inset: -6px -28px auto;
+  height: 42px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.st2-suite-float {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.12));
+  will-change: transform, opacity;
+}
+
+.st2-suite-float--crest {
+  left: 8%;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  opacity: 0.88;
+  animation: st2SuiteBob 3.4s ease-in-out infinite;
+}
+
+.st2-suite-float--bike {
+  right: 10%;
+  top: 2px;
+  font-size: 0.95rem;
+  animation: st2SuiteBike 5.2s ease-in-out infinite;
+}
+
+.st2-suite-float--tree {
+  left: 22%;
+  top: 18px;
+  font-size: 0.78rem;
+  animation: st2SuiteSway 4.1s ease-in-out infinite;
+}
+
+.st2-suite-float--pine {
+  right: 24%;
+  top: 16px;
+  font-size: 0.78rem;
+  animation: st2SuiteSway 3.6s ease-in-out infinite reverse;
+}
+
+.st2-suite-float--clover {
+  left: 38%;
+  top: 0;
+  font-size: 0.72rem;
+  animation: st2SuiteBob 2.8s ease-in-out infinite 0.4s;
+}
+
+.st2-suite-float--leaf {
+  right: 38%;
+  top: 22px;
+  font-size: 0.7rem;
+  animation: st2SuiteSway 3.2s ease-in-out infinite 0.2s;
+}
+
+@keyframes st2SuiteBob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.06); }
+}
+
+@keyframes st2SuiteSway {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-3px) rotate(7deg); }
+}
+
+@keyframes st2SuiteBike {
+  0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+  25% { transform: translateX(6px) translateY(-2px) rotate(-8deg); }
+  50% { transform: translateX(10px) translateY(0) rotate(0deg); }
+  75% { transform: translateX(4px) translateY(-2px) rotate(6deg); }
 }
 
 .st2-suite-sig-mark {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
@@ -60,6 +144,20 @@
   font-weight: 800;
   letter-spacing: 0.1em;
   color: #1e293b;
+  animation: st2SuiteBrandPulse 4.8s ease-in-out infinite;
+}
+
+@keyframes st2SuiteBrandPulse {
+  0%, 100% {
+    color: #1e293b;
+    text-shadow: none;
+    letter-spacing: 0.1em;
+  }
+  50% {
+    color: #0f766e;
+    text-shadow: 0 0 10px rgba(15, 118, 110, 0.22);
+    letter-spacing: 0.14em;
+  }
 }
 
 .planillas-secret-emoji {
@@ -119,10 +217,15 @@
 
 .planillas-footer:hover .st2-suite-sig-brand {
   color: #0f172a;
+  animation-play-state: paused;
 }
 
 .planillas-footer:hover .st2-suite-sig-line {
   color: #475569;
+}
+
+.planillas-footer:hover .st2-suite-float {
+  animation-duration: 2.2s;
 }
 
 .planillas-card {

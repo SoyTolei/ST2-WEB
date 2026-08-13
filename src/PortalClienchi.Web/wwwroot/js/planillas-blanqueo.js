@@ -770,9 +770,10 @@ function buildRow(item) {
 
   const mailCell = canConfirm
     ? `<td class="blanqueo-col-correo">
-        <button type="button" class="blanqueo-mail-copy" data-blanqueo-copy-mail="${escapeHtml(item.correo)}" title="Copiar correo">
+        <button type="button" class="blanqueo-mail-copy" data-blanqueo-copy-mail="${escapeHtml(item.correo)}" title="Clic para copiar el correo">
           <span class="blanqueo-mail-copy-icon" aria-hidden="true">📋</span>
           <span class="blanqueo-mail-copy-text">${escapeHtml(item.correo)}</span>
+          <span class="blanqueo-mail-copy-hint" aria-hidden="true">copiar</span>
         </button>
       </td>`
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;

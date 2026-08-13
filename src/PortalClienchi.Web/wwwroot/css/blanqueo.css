@@ -144,6 +144,7 @@
 }
 
 .blanqueo-mail-copy {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -154,13 +155,69 @@
   margin: 0;
   font: inherit;
   color: #0f766e;
-  cursor: pointer;
+  cursor: copy;
   text-align: left;
 }
 
 .blanqueo-mail-copy:hover {
   color: #115e59;
   text-decoration: underline;
+}
+
+.blanqueo-mail-copy-hint {
+  flex-shrink: 0;
+  margin-left: 2px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  text-decoration: none;
+}
+
+.blanqueo-mail-copy:hover .blanqueo-mail-copy-hint,
+.blanqueo-mail-copy:focus-visible .blanqueo-mail-copy-hint {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.blanqueo-clave-code::after {
+  content: attr(data-copy-hint);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%) translateY(4px);
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+  z-index: 5;
+}
+
+.blanqueo-clave-code:hover::after,
+.blanqueo-clave-code:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 .blanqueo-mail-copy-icon {
@@ -173,9 +230,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .blanqueo-clave-code {
+  position: relative;
   border: 1px dashed #94a3b8;
   background: #f8fafc;
   color: #0f172a;
@@ -184,11 +243,12 @@
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: copy;
 }
 
 .blanqueo-clave-code:hover {
   background: #e2e8f0;
+  border-color: #64748b;
 }
 
 .blanqueo-ready-toast {
