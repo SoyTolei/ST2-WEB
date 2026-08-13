@@ -64,11 +64,59 @@
   display: none !important;
 }
 
+.blanqueo-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #15803d;
+  border-radius: 7px;
+  padding: 4px 9px;
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(22, 163, 74, 0.25);
+}
+
+.blanqueo-export-btn:hover {
+  background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+}
+
+.blanqueo-export-icon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.blanqueo-import-wrap {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.blanqueo-import-wrap.hidden {
+  display: none !important;
+}
+
 .blanqueo-import-btn {
   display: inline-flex;
   align-items: center;
-  cursor: pointer;
   margin: 0;
+  border: 1px dashed #94a3b8;
+  border-radius: 7px;
+  padding: 5px 10px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.blanqueo-import-btn:hover {
+  background: #f1f5f9;
+  border-color: #64748b;
 }
 
 .blanqueo-mail-copy {

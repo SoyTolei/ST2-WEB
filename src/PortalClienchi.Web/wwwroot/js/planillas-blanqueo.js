@@ -3,6 +3,7 @@ import {
   canSeeBlanqueoModule as canSeeFromAccess,
   canConfirmBlanqueoModule as canConfirmFromAccess,
   refreshModuleFlags,
+  isSt2SuperAdmin,
 } from "./module-access.js";
 import { refreshBlanqueoAlerts } from "./blanqueo-alerts.js";
 
@@ -140,9 +141,6 @@ export function initBlanqueoModule() {
   document.getElementById("blanqueo-export")?.addEventListener("click", () => {
     void exportExcel();
   });
-  document.getElementById("blanqueo-import-template")?.addEventListener("click", () => {
-    void downloadImportTemplate();
-  });
   document.getElementById("blanqueo-import-file")?.addEventListener("change", (e) => {
     const input = e.target;
     const file = input?.files?.[0];
@@ -210,8 +208,10 @@ function syncMineFilterVisibility() {
 
 function syncConfirmToolsVisibility() {
   const tools = document.getElementById("blanqueo-confirm-tools");
-  if (!tools) return;
-  tools.classList.toggle("hidden", !canConfirm);
+  if (tools) tools.classList.toggle("hidden", !canConfirm);
+
+  const importWrap = document.getElementById("blanqueo-import-wrap");
+  if (importWrap) importWrap.classList.toggle("hidden", !isSt2SuperAdmin());
 }
 
 function displayNameFromEmail(email) {
@@ -404,28 +404,8 @@ async function exportExcel() {
   }
 }
 
-async function downloadImportTemplate() {
-  if (!canConfirm) return;
-  try {
-    const res = await planUserFetch("/api/planillas/blanqueo/import-template");
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "blanqueo-plantilla-import.xlsx";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    setStatus("Plantilla descargada.");
-  } catch (err) {
-    setStatus(err?.message || "No se pudo descargar la plantilla.", true);
-  }
-}
-
 async function importExcel(file) {
-  if (!canConfirm || !file) return;
+  if (!isSt2SuperAdmin() || !file) return;
   setStatus(`Importando ${file.name}…`);
   try {
     const form = new FormData();

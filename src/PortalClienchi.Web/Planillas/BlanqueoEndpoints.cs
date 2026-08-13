@@ -51,8 +51,10 @@ public static class BlanqueoEndpoints
 
         app.MapGet("/api/planillas/blanqueo/import-template", (HttpContext ctx, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out var email, out _, out var error))
                 return error!;
+            if (!St2SuperAdmin.Is(email))
+                return Results.Json(new { error = "Solo el administrador puede descargar la plantilla." }, statusCode: StatusCodes.Status403Forbidden);
 
             var bytes = BlanqueoExcel.BuildImportTemplate();
             return Results.File(
@@ -63,8 +65,10 @@ public static class BlanqueoEndpoints
 
         app.MapPost("/api/planillas/blanqueo/import", async (HttpContext ctx, BlanqueoRepository repo, ModuleAccessRepository modules, CancellationToken ct) =>
         {
-            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out var email, out _, out var error))
                 return error!;
+            if (!St2SuperAdmin.Is(email))
+                return Results.Json(new { error = "Solo el administrador puede importar el histórico." }, statusCode: StatusCodes.Status403Forbidden);
 
             if (!ctx.Request.HasFormContentType)
                 return Results.BadRequest(new { error = "Se esperaba multipart/form-data con el Excel." });
