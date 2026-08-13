@@ -30,9 +30,9 @@ public sealed class BlanqueoRepository
         cmd.CommandText = """
             SELECT id, portal, nro_caso, nro_cliente, correo, fecha_solicitud,
                    solicitado_por_email, solicitado_por_nombre, tipo_solicitud,
-                   listo, aclaracion
+                   listo, aclaracion, fecha_creacion
             FROM blanqueo_solicitudes
-            ORDER BY fecha_solicitud DESC, id DESC
+            ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) ASC, id ASC
             """;
         using var r = cmd.ExecuteReader();
         while (r.Read())
@@ -47,7 +47,7 @@ public sealed class BlanqueoRepository
         cmd.CommandText = """
             SELECT id, portal, nro_caso, nro_cliente, correo, fecha_solicitud,
                    solicitado_por_email, solicitado_por_nombre, tipo_solicitud,
-                   listo, aclaracion
+                   listo, aclaracion, fecha_creacion
             FROM blanqueo_solicitudes WHERE id = $id
             """;
         cmd.Parameters.AddWithValue("$id", id);
@@ -90,6 +90,7 @@ public sealed class BlanqueoRepository
             TipoSolicitud = req.TipoSolicitud.Trim(),
             Listo = false,
             Aclaracion = null,
+            FechaCreacion = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
         };
     }
 
@@ -493,6 +494,7 @@ public sealed class BlanqueoRepository
         TipoSolicitud = r.GetString(8),
         Listo = r.GetInt32(9) != 0,
         Aclaracion = r.IsDBNull(10) ? null : r.GetString(10),
+        FechaCreacion = r.FieldCount > 11 && !r.IsDBNull(11) ? r.GetString(11) : "",
     };
 
     private SqliteConnection Open()

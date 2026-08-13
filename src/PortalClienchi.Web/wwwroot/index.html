@@ -358,9 +358,14 @@
                     <label for="blanqueo-cliente">N° de cliente</label>
                     <input id="blanqueo-cliente" type="text" autocomplete="off" spellcheck="false"/>
                   </div>
-                  <div class="blanqueo-field">
+                  <div class="blanqueo-field blanqueo-field-correos">
                     <label for="blanqueo-correo">Correo</label>
-                    <input id="blanqueo-correo" type="email" autocomplete="off" spellcheck="false"/>
+                    <div id="blanqueo-correos" class="blanqueo-correos">
+                      <div class="blanqueo-correo-row">
+                        <input id="blanqueo-correo" class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false"/>
+                        <button type="button" id="blanqueo-correo-add" class="blanqueo-correo-add" title="Agregar otro correo del mismo caso" aria-label="Agregar otro correo">+</button>
+                      </div>
+                    </div>
                   </div>
                   <div class="blanqueo-field">
                     <label for="blanqueo-tipo">Solicitud</label>
@@ -413,8 +418,8 @@
                   <table class="plan-gestor-table blanqueo-table">
                     <thead>
                       <tr>
-                        <th id="blanqueo-th-fecha" class="blanqueo-th-fecha" scope="col" title="Ordenar por fecha" aria-sort="descending">
-                          Fecha <span class="blanqueo-sort-mark" aria-hidden="true">↓</span>
+                        <th id="blanqueo-th-fecha" class="blanqueo-th-fecha" scope="col" title="Más antiguas primero — clic para invertir" aria-sort="ascending">
+                          Fecha <span class="blanqueo-sort-mark" aria-hidden="true">↑</span>
                         </th>
                         <th>Plataforma</th>
                         <th>N° de caso</th>

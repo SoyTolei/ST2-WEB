@@ -13,6 +13,8 @@ public sealed class BlanqueoRecordDto
     public string TipoSolicitud { get; set; } = "";
     public bool Listo { get; set; }
     public string? Aclaracion { get; set; }
+    /// <summary>UTC ISO de alta (para ordenar: lo más nuevo al final).</summary>
+    public string FechaCreacion { get; set; } = "";
 }
 
 public sealed class BlanqueoCreateRequest

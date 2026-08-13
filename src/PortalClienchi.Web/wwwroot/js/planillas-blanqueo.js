@@ -25,10 +25,11 @@ let items = [];
 let selectedId = null;
 let canConfirm = false;
 let editingId = null;
-/** @type {"desc" | "asc"} */
-let fechaSortDir = "desc";
+/** @type {"desc" | "asc"} — por defecto asc: lo más nuevo queda al final */
+let fechaSortDir = "asc";
 let monthFilterTouched = false;
 let listLoadGen = 0;
+let scrollListToEndOnce = false;
 
 export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
   try {
@@ -66,13 +67,27 @@ export function initBlanqueoModule() {
     void createSolicitud();
   });
 
-  ["blanqueo-caso", "blanqueo-cliente", "blanqueo-correo"].forEach((id) => {
+  ["blanqueo-caso", "blanqueo-cliente"].forEach((id) => {
     document.getElementById(id)?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
         void createSolicitud();
       }
     });
+  });
+  document.getElementById("blanqueo-correo-add")?.addEventListener("click", () => addCorreoRow());
+  document.getElementById("blanqueo-correos")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && e.target?.classList?.contains("blanqueo-correo-input")) {
+      e.preventDefault();
+      void createSolicitud();
+    }
+  });
+  document.getElementById("blanqueo-correos")?.addEventListener("click", (e) => {
+    const btn = e.target?.closest?.(".blanqueo-correo-remove");
+    if (!btn) return;
+    const row = btn.closest(".blanqueo-correo-row");
+    row?.remove();
+    syncCorreoRows();
   });
 
   document.getElementById("blanqueo-filter-month")?.addEventListener("change", () => {
@@ -239,17 +254,69 @@ function setStatus(msg, isError = false) {
   el.classList.toggle("is-error", !!isError && !!msg);
 }
 
-function clearForm() {
+function clearForm({ keepCaso = false } = {}) {
   const portal = document.getElementById("blanqueo-portal");
   const caso = document.getElementById("blanqueo-caso");
   const cliente = document.getElementById("blanqueo-cliente");
-  const correo = document.getElementById("blanqueo-correo");
-  if (portal) portal.value = "OnBalance";
-  if (caso) caso.value = "";
-  if (cliente) cliente.value = "";
-  if (correo) correo.value = "";
-  syncTipoOptions("blanqueo-tipo", "OnBalance");
+  if (!keepCaso) {
+    if (portal) portal.value = "OnBalance";
+    if (caso) caso.value = "";
+    if (cliente) cliente.value = "";
+    syncTipoOptions("blanqueo-tipo", "OnBalance");
+  }
+  resetCorreoRows();
   syncClaveVisibility();
+}
+
+function resetCorreoRows() {
+  const wrap = document.getElementById("blanqueo-correos");
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div class="blanqueo-correo-row">
+      <input id="blanqueo-correo" class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false"/>
+      <button type="button" id="blanqueo-correo-add" class="blanqueo-correo-add" title="Agregar otro correo del mismo caso" aria-label="Agregar otro correo">+</button>
+    </div>`;
+  document.getElementById("blanqueo-correo-add")?.addEventListener("click", () => addCorreoRow());
+}
+
+function addCorreoRow() {
+  const wrap = document.getElementById("blanqueo-correos");
+  if (!wrap) return;
+  const row = document.createElement("div");
+  row.className = "blanqueo-correo-row";
+  row.innerHTML = `
+    <input class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false" placeholder="otro correo…"/>
+    <button type="button" class="blanqueo-correo-remove" title="Quitar" aria-label="Quitar correo">−</button>`;
+  wrap.appendChild(row);
+  syncCorreoRows();
+  row.querySelector(".blanqueo-correo-input")?.focus();
+}
+
+function syncCorreoRows() {
+  const wrap = document.getElementById("blanqueo-correos");
+  if (!wrap) return;
+  const rows = [...wrap.querySelectorAll(".blanqueo-correo-row")];
+  rows.forEach((row, idx) => {
+    const input = row.querySelector(".blanqueo-correo-input");
+    if (input && idx === 0) input.id = "blanqueo-correo";
+    else if (input) input.removeAttribute("id");
+  });
+}
+
+function collectCorreos() {
+  const wrap = document.getElementById("blanqueo-correos");
+  const inputs = wrap
+    ? [...wrap.querySelectorAll(".blanqueo-correo-input")]
+    : [document.getElementById("blanqueo-correo")].filter(Boolean);
+  const seen = new Set();
+  const list = [];
+  for (const input of inputs) {
+    const v = String(input?.value || "").trim().toLowerCase();
+    if (!v || seen.has(v)) continue;
+    seen.add(v);
+    list.push(String(input.value || "").trim());
+  }
+  return list;
 }
 
 function getFormPortal() {
@@ -289,11 +356,11 @@ async function createSolicitud() {
   const portal = getFormPortal();
   const nroCaso = document.getElementById("blanqueo-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-cliente")?.value.trim() || "";
-  const correo = document.getElementById("blanqueo-correo")?.value.trim() || "";
+  const correos = collectCorreos();
   const tipoSolicitud = document.getElementById("blanqueo-tipo")?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente || !correo) {
-    setStatus("Completá caso, cliente y correo.", true);
+  if (!nroCaso || !nroCliente || !correos.length) {
+    setStatus("Completá caso, cliente y al menos un correo.", true);
     return;
   }
   if (!tiposForPortal(portal).includes(tipoSolicitud)) {
@@ -301,25 +368,31 @@ async function createSolicitud() {
     return;
   }
 
-  setStatus("Guardando…");
+  setStatus(correos.length > 1 ? `Guardando ${correos.length} correos…` : "Guardando…");
   try {
-    const res = await planUserFetch("/api/planillas/blanqueo", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        portal,
-        nroCaso,
-        nroCliente,
-        correo,
-        tipoSolicitud,
-      }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
-    clearForm();
-    setStatus("Solicitud agregada.");
+    let ok = 0;
+    for (const correo of correos) {
+      const res = await planUserFetch("/api/planillas/blanqueo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          portal,
+          nroCaso,
+          nroCliente,
+          correo,
+          tipoSolicitud,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
+      ok += 1;
+    }
+    // Mismo caso: limpio solo correos; dejo caso/cliente/plataforma/tipo.
+    clearForm({ keepCaso: true });
+    setStatus(ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`);
+    scrollListToEndOnce = true;
     await reloadList();
-    document.getElementById("blanqueo-caso")?.focus();
+    document.getElementById("blanqueo-correo")?.focus();
   } catch (err) {
     setStatus(err?.message || "No se pudo guardar.", true);
   }
@@ -491,6 +564,7 @@ function normalizeBlanqueoItem(raw) {
     nroCliente: src.nroCliente ?? src.NroCliente ?? "",
     correo: src.correo ?? src.Correo ?? "",
     fechaSolicitud: src.fechaSolicitud ?? src.FechaSolicitud ?? "",
+    fechaCreacion: src.fechaCreacion ?? src.FechaCreacion ?? "",
     solicitadoPorEmail: src.solicitadoPorEmail ?? src.SolicitadoPorEmail ?? "",
     solicitadoPorNombre: src.solicitadoPorNombre ?? src.SolicitadoPorNombre ?? "",
     tipoSolicitud: src.tipoSolicitud ?? src.TipoSolicitud ?? "",
@@ -529,7 +603,11 @@ function getFilteredItems() {
     const fa = String(a.fechaSolicitud || "");
     const fb = String(b.fechaSolicitud || "");
     if (fa !== fb) return fa < fb ? -dir : dir;
-    return (a.id || 0) - (b.id || 0);
+    // Dentro del mismo día: por hora de carga / id → lo más nuevo al final en asc.
+    const ca = String(a.fechaCreacion || "");
+    const cb = String(b.fechaCreacion || "");
+    if (ca && cb && ca !== cb) return ca < cb ? -dir : dir;
+    return ((a.id || 0) - (b.id || 0)) * dir;
   });
   return filtered;
 }
@@ -540,7 +618,9 @@ function syncFechaSortHeader() {
   const mark = th.querySelector(".blanqueo-sort-mark");
   const desc = fechaSortDir === "desc";
   th.setAttribute("aria-sort", desc ? "descending" : "ascending");
-  th.title = desc ? "Más recientes primero — clic para invertir" : "Más antiguas primero — clic para invertir";
+  th.title = desc
+    ? "Más recientes primero — clic para dejar lo nuevo al final"
+    : "Lo más nuevo al final — clic para invertir";
   if (mark) mark.textContent = desc ? "↓" : "↑";
 }
 
@@ -596,6 +676,12 @@ function renderTable(filtered) {
 
   for (const item of filtered) {
     tbody.appendChild(buildRow(item));
+  }
+
+  if (scrollListToEndOnce && fechaSortDir === "asc") {
+    scrollListToEndOnce = false;
+    const wrap = document.querySelector(".blanqueo-table-wrap");
+    if (wrap) requestAnimationFrame(() => { wrap.scrollTop = wrap.scrollHeight; });
   }
 }
 
