@@ -13,7 +13,8 @@
 }
 
 .planillas-card:has(#planillas-blanqueo:not(.hidden)) {
-  max-width: min(1560px, 99vw);
+  max-width: min(1840px, 99.5vw);
+  --plan-card-pad-x: 20px;
 }
 
 .blanqueo-accent-form {
@@ -542,7 +543,8 @@
 
 .blanqueo-table {
   width: 100%;
-  min-width: 980px;
+  min-width: 1100px;
+  table-layout: auto;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.84rem;
@@ -594,7 +596,7 @@
 }
 
 .blanqueo-table td.blanqueo-col-correo {
-  max-width: 280px;
+  max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;
   padding-right: 20px;
@@ -602,36 +604,27 @@
 
 .blanqueo-table th:last-child,
 .blanqueo-table td.blanqueo-col-aclaracion {
-  position: sticky;
-  right: 0;
-  z-index: 1;
-  min-width: 160px;
-  max-width: 280px;
+  min-width: 200px;
+  width: 22%;
+  max-width: 360px;
   white-space: normal;
   padding-right: 18px;
-  background: #fff;
-  box-shadow: -6px 0 10px -8px rgba(15, 23, 42, 0.18);
-}
-
-.blanqueo-table thead th:last-child {
-  z-index: 3;
-  background: #e8edf5;
 }
 
 .blanqueo-row-listo td.blanqueo-col-aclaracion {
-  background: rgba(236, 253, 245, 0.96);
+  background: transparent;
 }
 
 .blanqueo-row-aclaracion:not(.blanqueo-row-listo) td.blanqueo-col-aclaracion {
-  background: rgba(255, 251, 235, 0.97);
+  background: transparent;
 }
 
 .blanqueo-row-noreg:not(.blanqueo-row-listo) td.blanqueo-col-aclaracion {
-  background: rgba(254, 242, 242, 0.97);
+  background: transparent;
 }
 
 .blanqueo-table tbody tr.selected td.blanqueo-col-aclaracion {
-  background: #e8eef8;
+  background: transparent;
 }
 
 .blanqueo-row-listo td {

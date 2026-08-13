@@ -32,7 +32,7 @@ public sealed class BlanqueoRepository
                    solicitado_por_email, solicitado_por_nombre, tipo_solicitud,
                    listo, aclaracion, fecha_creacion
             FROM blanqueo_solicitudes
-            ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) ASC, id ASC
+            ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) DESC, id DESC
             """;
         using var r = cmd.ExecuteReader();
         while (r.Read())

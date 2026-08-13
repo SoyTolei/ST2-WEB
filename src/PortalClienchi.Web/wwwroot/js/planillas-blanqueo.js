@@ -25,8 +25,8 @@ let items = [];
 let selectedId = null;
 let canConfirm = false;
 let editingId = null;
-/** @type {"desc" | "asc"} — por defecto asc: lo más nuevo queda al final */
-let fechaSortDir = "asc";
+/** @type {"desc" | "asc"} — por defecto desc: lo más nuevo arriba */
+let fechaSortDir = "desc";
 let monthFilterTouched = false;
 let listLoadGen = 0;
 let scrollListToEndOnce = false;
@@ -619,8 +619,8 @@ function syncFechaSortHeader() {
   const desc = fechaSortDir === "desc";
   th.setAttribute("aria-sort", desc ? "descending" : "ascending");
   th.title = desc
-    ? "Más recientes primero — clic para dejar lo nuevo al final"
-    : "Lo más nuevo al final — clic para invertir";
+    ? "Lo más nuevo arriba — clic para invertir"
+    : "Lo más antiguo arriba — clic para invertir";
   if (mark) mark.textContent = desc ? "↓" : "↑";
 }
 
@@ -678,7 +678,11 @@ function renderTable(filtered) {
     tbody.appendChild(buildRow(item));
   }
 
-  if (scrollListToEndOnce && fechaSortDir === "asc") {
+  if (scrollListToEndOnce && fechaSortDir === "desc") {
+    scrollListToEndOnce = false;
+    const wrap = document.querySelector(".blanqueo-table-wrap");
+    if (wrap) requestAnimationFrame(() => { wrap.scrollTop = 0; });
+  } else if (scrollListToEndOnce) {
     scrollListToEndOnce = false;
     const wrap = document.querySelector(".blanqueo-table-wrap");
     if (wrap) requestAnimationFrame(() => { wrap.scrollTop = wrap.scrollHeight; });
