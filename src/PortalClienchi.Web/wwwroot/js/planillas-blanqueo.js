@@ -549,24 +549,29 @@ function applyFilters() {
   renderTable(filtered);
   const count = document.getElementById("blanqueo-count");
   if (count) count.textContent = filtered.length ? `(${filtered.length})` : "";
-  syncMonthStat();
+  syncMonthStat(filtered);
   const statusEl = document.getElementById("blanqueo-status");
   if (statusEl && !statusEl.classList.contains("is-error")) {
     setStatus(filtered.length ? `${filtered.length} solicitud(es).` : "Sin solicitudes con ese filtro.");
   }
 }
 
-function syncMonthStat() {
+function syncMonthStat(filtered) {
   const el = document.getElementById("blanqueo-month-stat");
   if (!el) return;
   const monthSel = document.getElementById("blanqueo-filter-month")?.value || "all";
-  const key = monthSel === "all" ? currentMonthKey() : monthSel;
+  if (monthSel === "all") {
+    const n = Array.isArray(filtered) ? filtered.length : getFilteredItems().length;
+    el.textContent = n === 1 ? "Todos los meses: 1 blanqueo" : `Todos los meses: ${n} blanqueos`;
+    el.title = "Total con el filtro actual (todos los meses)";
+    return;
+  }
+
+  const key = monthSel;
   const n = items.filter((item) => monthKeyFromIso(item.fechaSolicitud) === key).length;
   const label = monthLabelFromKey(key);
   el.textContent = n === 1 ? `${label}: 1 blanqueo` : `${label}: ${n} blanqueos`;
-  el.title = monthSel === "all"
-    ? `Cantidad del mes actual (${label}), aunque el filtro muestre todos`
-    : `Cantidad en ${label}`;
+  el.title = `Cantidad en ${label}`;
 }
 
 function monthLabelFromKey(key) {
@@ -611,11 +616,11 @@ function buildRow(item) {
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
 
   row.innerHTML = `
+    <td class="blanqueo-col-fecha">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td>${escapeHtml(portalLabel(item.portal))}</td>
-    <td>${escapeHtml(item.nroCaso)}</td>
-    <td>${escapeHtml(item.nroCliente)}</td>
+    <td>${escapeHtml(item.nroCaso || "—")}</td>
+    <td>${escapeHtml(item.nroCliente || "—")}</td>
     ${mailCell}
-    <td>${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td>${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td>${escapeHtml(item.tipoSolicitud)}</td>
     <td class="blanqueo-col-listo">${item.listo ? '<span class="blanqueo-pill ok">Listo</span>' : "—"}</td>
@@ -889,10 +894,10 @@ async function patchItem(id, body) {
 function formatFecha(iso) {
   const raw = String(iso || "").trim();
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
-  if (!m) return raw;
+  if (!m) return raw || "—";
   const day = Number(m[3]);
   const month = MONTHS[Number(m[2]) - 1] || m[2];
-  return `${day}-${month}`;
+  return `${day}-${month}-${m[1]}`;
 }
 
 function isNoRegistrado(value) {
