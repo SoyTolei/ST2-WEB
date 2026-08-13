@@ -1003,51 +1003,6 @@ function loadOportunidadModule() {
   return oportunidadModulePromise;
 }
 
-function initSecretRunnerTrigger() {
-  const trigger = document.getElementById("planillas-secret-trigger");
-  const emojiEl = document.getElementById("planillas-secret-emoji");
-  if (!trigger) return;
-
-  const secretUrl = "https://referralrunner.tolei.dev/";
-  const clicksNeeded = 8;
-  const resetMs = 4000;
-  const plantEmojis = ["🌱", "🌿", "🍀", "🪴", "🌳", "🌾", "☘️", "🌲"];
-  let count = 0;
-  let resetTimer = null;
-  let emojiIndex = 0;
-  let emojiTimer = null;
-  let isAnimating = false;
-
-  function rotateEmoji() {
-    if (!emojiEl || isAnimating) return;
-    isAnimating = true;
-    emojiEl.classList.add("is-changing");
-    setTimeout(() => {
-      emojiIndex = (emojiIndex + 1) % plantEmojis.length;
-      emojiEl.textContent = plantEmojis[emojiIndex];
-      emojiEl.classList.remove("is-changing");
-      isAnimating = false;
-    }, 220);
-  }
-
-  emojiTimer = setInterval(rotateEmoji, 2600);
-
-  trigger.addEventListener("click", () => {
-    count += 1;
-    clearTimeout(resetTimer);
-    rotateEmoji();
-    if (count >= clicksNeeded) {
-      count = 0;
-      clearInterval(emojiTimer);
-      window.location.href = secretUrl;
-      return;
-    }
-    resetTimer = setTimeout(() => {
-      count = 0;
-    }, resetMs);
-  });
-}
-
 export function goPlanillasHome() {
   if (!views.menu) return;
   // Invalidar cargas en vuelo del módulo abierto (evita errores fantasma al volver).
@@ -1067,7 +1022,6 @@ export function initPlanillas() {
   bindEvents();
   bindSistemaIndicatorLayout();
   selectSistema("BejermanSql");
-  initSecretRunnerTrigger();
   initPdfPortalGenerator();
   syncPdfPortalModuleVisibility();
   initBlanqueoModule();
