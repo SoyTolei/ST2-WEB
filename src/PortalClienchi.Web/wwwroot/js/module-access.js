@@ -55,7 +55,7 @@ export async function refreshModuleFlags({ force = false } = {}) {
   }
 
   if (!force && loadPromise) return loadPromise;
-  if (!force && cachedFlags && Date.now() - lastLoadedAt < 8000) {
+  if (!force && cachedFlags && Date.now() - lastLoadedAt < 60000) {
     return cachedFlags;
   }
 

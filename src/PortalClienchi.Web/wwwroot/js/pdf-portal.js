@@ -29,7 +29,8 @@ export function syncPdfPortalModuleVisibility() {
 }
 
 export function initPdfPortalGenerator() {
-  void refreshModuleFlags().then(() => syncPdfPortalModuleVisibility());
+  // Visibilidad: usa cache de módulos; no fuerza otro GET en el arranque.
+  syncPdfPortalModuleVisibility();
   const brandInput = document.getElementById("pdf-portal-brand");
   const editor = document.getElementById("pdf-portal-editor");
   const previewBrand = document.getElementById("pdf-portal-preview-brand");

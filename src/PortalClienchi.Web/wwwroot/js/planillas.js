@@ -1055,7 +1055,7 @@ export function goPlanillasHome() {
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
   showView("menu");
   selectSistema("BejermanSql");
-  void refreshModuleFlags({ force: true }).then(() => {
+  void refreshModuleFlags().then(() => {
     updateSistemaUi();
   });
 }
@@ -1077,8 +1077,11 @@ export function initPlanillas() {
 
   void refreshModuleFlags().then(() => {
     updateSistemaUi();
-    startBlanqueoAlertsPolling();
-    renderBlanqueoAlertUi();
+    // Retrasar polling para no sumar al pico de arranque (Cloudflare 1015/429).
+    setTimeout(() => {
+      startBlanqueoAlertsPolling();
+      renderBlanqueoAlertUi();
+    }, 12000);
   });
 
   void loadConfig().then(() => {
@@ -1087,8 +1090,10 @@ export function initPlanillas() {
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }
-    void loadReferralModule();
-    void loadOportunidadModule();
-    void refreshBlanqueoAlerts();
+    // Prefetch diferido: no competir con session/modules/config.
+    setTimeout(() => {
+      void loadReferralModule();
+      void loadOportunidadModule();
+    }, 2500);
   });
 }

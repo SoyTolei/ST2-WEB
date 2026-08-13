@@ -241,7 +241,44 @@ export async function clearPlanUserSession() {
 }
 
 export function planUserFetch(url, options = {}) {
-  return fetch(url, { ...options, credentials: "include" });
+  const method = String(options.method || "GET").toUpperCase();
+  const canCoalesce = method === "GET" && !options.body && !options.signal;
+  if (canCoalesce) {
+    const existing = inflightGets.get(url);
+    if (existing) return existing;
+  }
+
+  const run = fetchWithRetry(url, { ...options, credentials: "include" });
+  if (canCoalesce) {
+    inflightGets.set(url, run);
+    void run.finally(() => {
+      if (inflightGets.get(url) === run) inflightGets.delete(url);
+    });
+  }
+  return run;
+}
+
+const inflightGets = new Map();
+
+async function fetchWithRetry(url, options) {
+  const maxAttempts = 4;
+  let lastRes = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    lastRes = await fetch(url, options);
+    // Cloudflare 1015 llega como 429; también reintentamos 503 ocasionales.
+    if (lastRes.status !== 429 && lastRes.status !== 503) return lastRes;
+    if (attempt >= maxAttempts - 1) break;
+    const retryAfter = Number(lastRes.headers.get("retry-after"));
+    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+      ? Math.min(retryAfter * 1000, 12000)
+      : 700 * (2 ** attempt) + Math.floor(Math.random() * 350);
+    await sleep(waitMs);
+  }
+  return lastRes;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function showPlanUserModal(resolve) {

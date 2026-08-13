@@ -51,11 +51,8 @@ export function syncBlanqueoModuleVisibility() {
 }
 
 export function initBlanqueoModule() {
-  void refreshModuleFlags().then(() => {
-    canConfirm = canConfirmBlanqueo();
-    syncBlanqueoModuleVisibility();
-  });
   syncBlanqueoModuleVisibility();
+  canConfirm = canConfirmBlanqueo();
   if (blanqueoInited) return;
   blanqueoInited = true;
 
@@ -146,12 +143,14 @@ export function initBlanqueoModule() {
 export async function openBlanqueoModule() {
   if (!canSeeBlanqueoModule()) return;
   initBlanqueoModule();
+  // Usa cache de permisos (evita otro /modules al abrir).
   await refreshModuleFlags();
   canConfirm = canConfirmBlanqueo();
   syncSolicitanteBadge();
   syncMineFilterVisibility();
   clearForm();
   monthFilterTouched = false;
+  setStatus("Cargando solicitudes…");
   await reloadList();
 }
 
@@ -263,6 +262,9 @@ async function reloadList() {
     if (gen !== listLoadGen) return;
     const data = await res.json().catch(() => ({}));
     if (gen !== listLoadGen) return;
+    if (res.status === 429) {
+      throw new Error("Demasiadas solicitudes (429). Esperá unos segundos y reabrí Blanqueo.");
+    }
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = (Array.isArray(data.items) ? data.items : []).map(normalizeBlanqueoItem);
     canConfirm = !!data.canConfirm || canConfirmBlanqueo();
@@ -274,7 +276,13 @@ async function reloadList() {
     if (gen !== listLoadGen) return;
     // No vaciar el listado si falló un refresh en background; solo avisar.
     if (!items.length) applyFilters();
-    setStatus(err?.message || "No se pudo cargar el listado.", true);
+    const msg = String(err?.message || "");
+    setStatus(
+      msg.includes("429")
+        ? "Cloudflare limitó las peticiones. Esperá 20–40 s y volvé a entrar."
+        : (msg || "No se pudo cargar el listado."),
+      true,
+    );
   }
 }
 

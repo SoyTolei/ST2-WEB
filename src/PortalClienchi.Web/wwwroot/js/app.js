@@ -2556,10 +2556,15 @@ setPreviewIdle(true);
 
 async function bootstrapApp() {
   await ensureAppAccess();
-  startSessionHeartbeat();
-  initEmbedReminders();
   void initPlanillas();
-  void bootstrapPortal();
+  // Escalonar el resto para no saturar Cloudflare en el primer segundo.
+  setTimeout(() => {
+    void bootstrapPortal();
+  }, 900);
+  setTimeout(() => {
+    startSessionHeartbeat();
+  }, 60000);
+  initEmbedReminders();
 }
 
 void bootstrapApp();
@@ -2569,7 +2574,7 @@ function startSessionHeartbeat() {
     fetch("/api/planillas/session/heartbeat", { method: "POST", credentials: "include" }).catch(() => {});
   };
   ping();
-  setInterval(ping, 90000);
+  setInterval(ping, 180000);
 }
 
 async function bootstrapPortal() {

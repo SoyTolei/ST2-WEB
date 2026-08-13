@@ -1,7 +1,7 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { canSeeBlanqueoModule, canConfirmBlanqueoModule } from "./module-access.js";
 
-const POLL_MS = 60000;
+const POLL_MS = 120000;
 const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed";
 
 let pollTimer = null;
@@ -37,7 +37,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
 
   const now = Date.now();
   if (!force && refreshInFlight) return refreshInFlight;
-  if (!force && now - lastRefreshAt < 4000 && cachedAlerts) {
+  if (!force && now - lastRefreshAt < 15000 && cachedAlerts) {
     renderBlanqueoAlertUi();
     return cachedAlerts;
   }
