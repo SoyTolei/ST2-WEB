@@ -1585,6 +1585,12 @@ body.portal-tab-active .tab-icon {
   color: #4b5563;
 }
 
+.st2-about-module-emphasis {
+  font-style: italic;
+  font-weight: 650;
+  color: #0f172a;
+}
+
 .st2-about-module-meta {
   margin: 6px 0 0;
   font-size: 0.76rem;
@@ -2406,21 +2412,21 @@ body.portal-tab-active .tab-icon {
   transform: translateY(-0.5px);
 }
 
-.st2-about-signature-name {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.st2-about-signature-handle {
+.st2-about-signature-at {
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.02em;
-  text-decoration: none;
   background: linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.st2-about-signature-handle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  text-decoration: none;
   transition: opacity 0.15s ease, filter 0.15s ease;
 }
 
@@ -2440,8 +2446,8 @@ body.portal-tab-active .tab-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex-shrink: 0;
 }
 
@@ -2465,8 +2471,8 @@ body.portal-tab-active .tab-icon {
 .st2-about-signature-crest {
   position: relative;
   z-index: 1;
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.4rem;
+  height: 1.4rem;
   object-fit: contain;
   display: block;
   animation: st2AboutCrestPulse 4.2s ease-in-out infinite;
