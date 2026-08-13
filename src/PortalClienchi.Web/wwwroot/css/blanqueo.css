@@ -523,6 +523,36 @@
   accent-color: #0c4a6e;
 }
 
+.blanqueo-preview-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  margin: 0 0 2px auto;
+  padding: 8px 12px;
+  border: 1px dashed #7dd3fc;
+  border-radius: 8px;
+  background: #f0f9ff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #0369a1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.blanqueo-preview-confirm.hidden {
+  display: none !important;
+}
+
+.blanqueo-preview-confirm:hover {
+  background: #e0f2fe;
+}
+
+.blanqueo-preview-confirm input {
+  margin: 0;
+  accent-color: #0284c7;
+}
+
 .blanqueo-filter-month select,
 .blanqueo-filter-portal select,
 .blanqueo-filter-search input {

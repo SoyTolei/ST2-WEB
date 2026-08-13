@@ -24,6 +24,8 @@ const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "
 let blanqueoInited = false;
 let items = [];
 let selectedId = null;
+const PREVIEW_LIST_KEY = "st2-blanqueo-preview-list-only";
+
 let canConfirm = false;
 let canLoad = true;
 let editingId = null;
@@ -110,6 +112,17 @@ export function initBlanqueoModule() {
   document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
   document.getElementById("blanqueo-filter-mine")?.addEventListener("change", () => applyFilters());
+  document.getElementById("blanqueo-preview-confirm")?.addEventListener("change", (e) => {
+    const on = !!e.target?.checked;
+    try {
+      if (on) sessionStorage.setItem(PREVIEW_LIST_KEY, "1");
+      else sessionStorage.removeItem(PREVIEW_LIST_KEY);
+    } catch { /* ignore */ }
+    syncLoadFormVisibility();
+    setStatus(on
+      ? "Vista confirmador: solo listado ampliado (como lo ven ellos)."
+      : "Volviste a tu vista normal (con formulario).");
+  });
   document.getElementById("blanqueo-th-fecha")?.addEventListener("click", () => {
     fechaSortDir = fechaSortDir === "desc" ? "asc" : "desc";
     syncFechaSortHeader();
@@ -212,12 +225,33 @@ export async function openBlanqueoModule() {
   await reloadList();
 }
 
+function isPreviewConfirmListOnly() {
+  if (!isSt2SuperAdmin()) return false;
+  try {
+    return sessionStorage.getItem(PREVIEW_LIST_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function effectiveCanLoad() {
+  if (isPreviewConfirmListOnly()) return false;
+  return canLoad;
+}
+
 function syncLoadFormVisibility() {
+  const showForm = effectiveCanLoad();
   const formPanel = document.querySelector(".blanqueo-form-panel");
-  if (formPanel) formPanel.classList.toggle("hidden", !canLoad);
+  if (formPanel) formPanel.classList.toggle("hidden", !showForm);
 
   const app = document.querySelector(".blanqueo-app");
-  if (app) app.classList.toggle("blanqueo-list-only", !!canConfirm && !canLoad);
+  if (app) app.classList.toggle("blanqueo-list-only", (!!canConfirm && !showForm) || isPreviewConfirmListOnly());
+
+  const previewWrap = document.getElementById("blanqueo-preview-confirm-wrap");
+  const previewCheck = document.getElementById("blanqueo-preview-confirm");
+  const showPreview = isSt2SuperAdmin() && canLoad;
+  if (previewWrap) previewWrap.classList.toggle("hidden", !showPreview);
+  if (previewCheck && showPreview) previewCheck.checked = isPreviewConfirmListOnly();
 }
 
 function syncSolicitanteBadge() {
