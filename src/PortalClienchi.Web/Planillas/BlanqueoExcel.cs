@@ -138,10 +138,9 @@ public static class BlanqueoExcel
                  ?? wb.Worksheets.First();
 
         var headerMap = MapHeaders(ws);
-        if (!headerMap.ContainsKey("correo") || !headerMap.ContainsKey("nrocaso") || !headerMap.ContainsKey("nrocliente")
-            || !headerMap.ContainsKey("solicitadonombre"))
+        if (!headerMap.ContainsKey("correo") || !headerMap.ContainsKey("solicitadonombre"))
         {
-            errors.Add("Faltan columnas obligatorias: Correo, NroCaso, NroCliente y SolicitadoPorNombre.");
+            errors.Add("Faltan columnas obligatorias: Correo y SolicitadoPorNombre.");
             return (rows, errors);
         }
 
@@ -157,12 +156,18 @@ public static class BlanqueoExcel
             var correo = Cell("correo");
             var caso = Cell("nrocaso");
             var cliente = Cell("nrocliente");
-            if (string.IsNullOrWhiteSpace(correo) && string.IsNullOrWhiteSpace(caso) && string.IsNullOrWhiteSpace(cliente))
+            var nombrePeek = Cell("solicitadonombre");
+            // Fila vacía: sin correo ni datos útiles.
+            if (string.IsNullOrWhiteSpace(correo)
+                && string.IsNullOrWhiteSpace(caso)
+                && string.IsNullOrWhiteSpace(cliente)
+                && string.IsNullOrWhiteSpace(nombrePeek))
                 continue;
 
-            if (string.IsNullOrWhiteSpace(correo) || string.IsNullOrWhiteSpace(caso) || string.IsNullOrWhiteSpace(cliente))
+            // Histórico: caso/cliente pueden venir vacíos; el correo sí es obligatorio.
+            if (string.IsNullOrWhiteSpace(correo))
             {
-                errors.Add($"Fila {r}: incompleta (correo/caso/cliente).");
+                errors.Add($"Fila {r}: falta el correo.");
                 continue;
             }
 
@@ -212,8 +217,8 @@ public static class BlanqueoExcel
             rows.Add(new BlanqueoHistoricalRow
             {
                 Portal = portal,
-                NroCaso = caso,
-                NroCliente = cliente,
+                NroCaso = caso ?? "",
+                NroCliente = cliente ?? "",
                 Correo = correo,
                 FechaSolicitud = fecha,
                 TipoSolicitud = tipo,
