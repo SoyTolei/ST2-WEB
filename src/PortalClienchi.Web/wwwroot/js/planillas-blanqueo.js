@@ -713,15 +713,15 @@ function buildRow(item) {
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
 
   row.innerHTML = `
-    <td class="blanqueo-col-fecha">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
-    <td>${escapeHtml(portalLabel(item.portal))}</td>
-    <td>${escapeHtml(item.nroCaso || "—")}</td>
-    <td>${escapeHtml(item.nroCliente || "—")}</td>
+    <td class="blanqueo-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
+    <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">${escapeHtml(portalShort(item.portal))}</td>
+    <td class="blanqueo-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
+    <td class="blanqueo-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>
     ${mailCell}
-    <td>${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
-    <td>${escapeHtml(item.tipoSolicitud)}</td>
+    <td class="blanqueo-col-solicitante" title="${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
+    <td class="blanqueo-col-tipo" title="${escapeHtml(item.tipoSolicitud)}">${escapeHtml(tipoShort(item.tipoSolicitud))}</td>
     <td class="blanqueo-col-listo">${item.listo ? '<span class="blanqueo-pill ok">Listo</span>' : "—"}</td>
-    <td class="blanqueo-col-aclaracion">${item.aclaracion ? `<span class="blanqueo-pill ${isNoRegistrado(item.aclaracion) ? "bad" : "note"}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
+    <td class="blanqueo-col-aclaracion">${item.aclaracion ? `<span class="blanqueo-pill ${isNoRegistrado(item.aclaracion) ? "bad" : "note"}" title="${escapeHtml(item.aclaracion)}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
   `;
 
   row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
@@ -775,6 +775,35 @@ function portalLabel(portal) {
   if (portal === "OnBalance") return "On Balance";
   if (portal === "Onvio") return "ONVIO";
   return "Portal Cliente";
+}
+
+function portalShort(portal) {
+  if (portal === "OnBalance") return "On Bal.";
+  if (portal === "Onvio") return "ONVIO";
+  return "Portal";
+}
+
+function tipoShort(tipo) {
+  const t = String(tipo || "").trim();
+  if (t === "Blanqueo + MFA") return "Blanq.+MFA";
+  if (t === "Blanqueo MFA") return "Blanq.MFA";
+  if (t === "Cambio de contraseña") return "Cambio clave";
+  if (t === "Activación") return "Activación";
+  if (t === "Blanqueo") return "Blanqueo";
+  return t;
+}
+
+function formatFecha(iso) {
+  const raw = String(iso || "").trim();
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (!m) return raw || "—";
+  const day = Number(m[3]);
+  const month = MONTHS[Number(m[2]) - 1] || m[2];
+  const year = Number(m[1]);
+  const nowY = new Date().getFullYear();
+  // Compacto: 13-ago · si es otro año, 13-ago-25
+  if (year === nowY) return `${day}-${month}`;
+  return `${day}-${month}-${String(year).slice(-2)}`;
 }
 
 function showCtx(x, y, item) {
@@ -986,15 +1015,6 @@ async function patchItem(id, body) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
   return data;
-}
-
-function formatFecha(iso) {
-  const raw = String(iso || "").trim();
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
-  if (!m) return raw || "—";
-  const day = Number(m[3]);
-  const month = MONTHS[Number(m[2]) - 1] || m[2];
-  return `${day}-${month}-${m[1]}`;
 }
 
 function isNoRegistrado(value) {
