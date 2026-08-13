@@ -197,7 +197,10 @@ public sealed class BlanqueoRepository
         return current;
     }
 
-    /// <summary>Solicitudes aún sin marcar listo (cola para quien confirma).</summary>
+    /// <summary>
+    /// Cola para quien confirma: solo pendientes vivos (sin listo y sin aclaración).
+    /// Histórico ya gestionado (listo / No registrado / observación) no notifica.
+    /// </summary>
     public IReadOnlyList<BlanqueoAlertDto> ListPendingForConfirm()
     {
         var list = new List<BlanqueoAlertDto>();
@@ -207,6 +210,7 @@ public sealed class BlanqueoRepository
             SELECT id, portal, nro_caso, correo, tipo_solicitud, fecha_solicitud
             FROM blanqueo_solicitudes
             WHERE listo = 0
+              AND (aclaracion IS NULL OR trim(aclaracion) = '')
             ORDER BY fecha_solicitud DESC, id DESC
             """;
         using var r = cmd.ExecuteReader();
