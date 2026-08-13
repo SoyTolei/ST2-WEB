@@ -1570,12 +1570,45 @@ body.portal-tab-active .tab-icon {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
+.st2-about-module--restricted {
+  border-color: #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+}
+
+.st2-about-module-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-bottom: 4px;
+}
+
+.st2-about-module-head .st2-about-module-title {
+  margin: 0;
+}
+
 .st2-about-module-title {
   margin: 0 0 4px;
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--dark);
   letter-spacing: 0.01em;
+}
+
+.st2-about-module-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  white-space: nowrap;
 }
 
 .st2-about-module-text {
