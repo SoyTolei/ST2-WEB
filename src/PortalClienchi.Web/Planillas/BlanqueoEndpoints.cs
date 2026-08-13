@@ -8,13 +8,15 @@ public static class BlanqueoEndpoints
     private static readonly HashSet<string> PortalesPermitidos = new(StringComparer.OrdinalIgnoreCase)
     {
         "OnBalance",
+        "Onvio",
         "PortalCliente",
     };
 
-    private static readonly HashSet<string> TiposPermitidos = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, HashSet<string>> TiposPorPortal = new(StringComparer.OrdinalIgnoreCase)
     {
-        "Blanqueo",
-        "Blanqueo + MFA",
+        ["OnBalance"] = new(StringComparer.OrdinalIgnoreCase) { "Blanqueo", "Blanqueo + MFA" },
+        ["Onvio"] = new(StringComparer.OrdinalIgnoreCase) { "Blanqueo MFA" },
+        ["PortalCliente"] = new(StringComparer.OrdinalIgnoreCase) { "Activación", "Cambio de contraseña" },
     };
 
     public static void MapBlanqueoEndpoints(this WebApplication app)
@@ -130,7 +132,7 @@ public static class BlanqueoEndpoints
                 NroCaso = body.NroCaso.Trim(),
                 NroCliente = body.NroCliente.Trim(),
                 Correo = body.Correo.Trim(),
-                TipoSolicitud = body.TipoSolicitud.Trim(),
+                TipoSolicitud = NormalizeTipo(body.TipoSolicitud),
             };
 
             var updated = repo.UpdateOwnerFields(id, normalized);
@@ -215,15 +217,40 @@ public static class BlanqueoEndpoints
         NroCaso = body.NroCaso.Trim(),
         NroCliente = body.NroCliente.Trim(),
         Correo = body.Correo.Trim(),
-        TipoSolicitud = body.TipoSolicitud.Trim(),
+        TipoSolicitud = NormalizeTipo(body.TipoSolicitud),
     };
 
     private static string NormalizePortal(string? portal)
     {
         var value = (portal ?? "").Trim();
-        if (value.Equals("OnBalance", StringComparison.OrdinalIgnoreCase))
+        if (value.Equals("OnBalance", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("On Balance", StringComparison.OrdinalIgnoreCase))
             return "OnBalance";
-        return "PortalCliente";
+        if (value.Equals("Onvio", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("ONVIO", StringComparison.OrdinalIgnoreCase))
+            return "Onvio";
+        if (value.Equals("PortalCliente", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("Portal Cliente", StringComparison.OrdinalIgnoreCase))
+            return "PortalCliente";
+        return value;
+    }
+
+    private static string NormalizeTipo(string? tipo)
+    {
+        var value = (tipo ?? "").Trim();
+        if (value.Equals("Activacion", StringComparison.OrdinalIgnoreCase))
+            return "Activación";
+        if (value.Equals("Cambio de contraseña", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("Cambio de password", StringComparison.OrdinalIgnoreCase))
+            return "Cambio de contraseña";
+        if (value.Equals("Blanqueo MFA", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("Blanqueo+MFA", StringComparison.OrdinalIgnoreCase))
+            return "Blanqueo MFA";
+        if (value.Equals("Blanqueo + MFA", StringComparison.OrdinalIgnoreCase))
+            return "Blanqueo + MFA";
+        if (value.Equals("Blanqueo", StringComparison.OrdinalIgnoreCase))
+            return "Blanqueo";
+        return value;
     }
 
     private static string? ValidateCreate(BlanqueoCreateRequest body)
@@ -240,8 +267,9 @@ public static class BlanqueoEndpoints
 
     private static string? ValidateUpdate(BlanqueoUpdateRequest body)
     {
-        if (string.IsNullOrWhiteSpace(body.Portal) || !PortalesPermitidos.Contains(body.Portal.Trim()))
-            return "Elegí On Balance o Portal Cliente.";
+        var portal = NormalizePortal(body.Portal);
+        if (string.IsNullOrWhiteSpace(portal) || !PortalesPermitidos.Contains(portal))
+            return "Elegí On Balance, ONVIO o Portal Cliente.";
         if (string.IsNullOrWhiteSpace(body.NroCaso))
             return "Ingresá el N° de caso.";
         if (string.IsNullOrWhiteSpace(body.NroCliente))
@@ -250,8 +278,17 @@ public static class BlanqueoEndpoints
             return "Ingresá el correo.";
         if (!LooksLikeEmail(body.Correo.Trim()))
             return "El correo no parece válido.";
-        if (string.IsNullOrWhiteSpace(body.TipoSolicitud) || !TiposPermitidos.Contains(body.TipoSolicitud.Trim()))
-            return "Elegí Blanqueo o Blanqueo + MFA.";
+
+        var tipo = NormalizeTipo(body.TipoSolicitud);
+        if (!TiposPorPortal.TryGetValue(portal, out var tipos) || !tipos.Contains(tipo))
+            return portal switch
+            {
+                "OnBalance" => "En On Balance elegí Blanqueo o Blanqueo + MFA.",
+                "Onvio" => "En ONVIO elegí Blanqueo MFA.",
+                "PortalCliente" => "En Portal Cliente elegí Activación o Cambio de contraseña.",
+                _ => "Elegí un tipo de solicitud válido para la plataforma.",
+            };
+
         return null;
     }
 

@@ -11,7 +11,12 @@ import { refreshBlanqueoAlerts } from "./blanqueo-alerts.js";
  * o localStorage.setItem("st2-modules-force-all", "1")
  */
 const FORCE_KEY = "st2-blanqueo-force";
-const TIPOS = ["Blanqueo", "Blanqueo + MFA"];
+const TIPOS_POR_PORTAL = {
+  OnBalance: ["Blanqueo", "Blanqueo + MFA"],
+  Onvio: ["Blanqueo MFA"],
+  PortalCliente: ["Activación", "Cambio de contraseña"],
+};
+const PORTALES = ["OnBalance", "Onvio", "PortalCliente"];
 const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
 let blanqueoInited = false;
@@ -124,6 +129,14 @@ export function initBlanqueoModule() {
     void copyClaveBlanqueo();
   });
 
+  document.getElementById("blanqueo-portal")?.addEventListener("change", () => {
+    syncTipoOptions("blanqueo-tipo", getFormPortal());
+    syncClaveVisibility();
+  });
+  document.getElementById("blanqueo-edit-portal")?.addEventListener("change", () => {
+    syncTipoOptions("blanqueo-edit-tipo", getEditPortal());
+  });
+
   document.addEventListener("st2:planillas-home", () => {
     listLoadGen += 1;
     hideCtx();
@@ -138,6 +151,8 @@ export function initBlanqueoModule() {
   });
 
   syncSolicitanteBadge();
+  syncTipoOptions("blanqueo-tipo", getFormPortal());
+  syncClaveVisibility();
 }
 
 export async function openBlanqueoModule() {
@@ -150,6 +165,8 @@ export async function openBlanqueoModule() {
   syncMineFilterVisibility();
   clearForm();
   monthFilterTouched = false;
+  syncTipoOptions("blanqueo-tipo", getFormPortal());
+  syncClaveVisibility();
   setStatus("Cargando solicitudes…");
   await reloadList();
 }
@@ -207,16 +224,49 @@ function clearForm() {
   const caso = document.getElementById("blanqueo-caso");
   const cliente = document.getElementById("blanqueo-cliente");
   const correo = document.getElementById("blanqueo-correo");
-  const tipo = document.getElementById("blanqueo-tipo");
   if (portal) portal.value = "OnBalance";
   if (caso) caso.value = "";
   if (cliente) cliente.value = "";
   if (correo) correo.value = "";
-  if (tipo) tipo.value = "Blanqueo";
+  syncTipoOptions("blanqueo-tipo", "OnBalance");
+  syncClaveVisibility();
+}
+
+function getFormPortal() {
+  const value = document.getElementById("blanqueo-portal")?.value.trim() || "OnBalance";
+  return PORTALES.includes(value) ? value : "OnBalance";
+}
+
+function getEditPortal() {
+  const value = document.getElementById("blanqueo-edit-portal")?.value.trim() || "OnBalance";
+  return PORTALES.includes(value) ? value : "OnBalance";
+}
+
+function tiposForPortal(portal) {
+  return TIPOS_POR_PORTAL[portal] || TIPOS_POR_PORTAL.OnBalance;
+}
+
+function syncTipoOptions(selectId, portal, preferred = "") {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const tipos = tiposForPortal(portal);
+  const current = preferred || sel.value;
+  sel.innerHTML = tipos
+    .map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`)
+    .join("");
+  sel.value = tipos.includes(current) ? current : tipos[0];
+}
+
+function syncClaveVisibility() {
+  const hint = document.getElementById("blanqueo-clave-hint");
+  if (!hint) return;
+  const show = getFormPortal() === "OnBalance";
+  hint.classList.toggle("hidden", !show);
+  hint.setAttribute("aria-hidden", show ? "false" : "true");
 }
 
 async function createSolicitud() {
-  const portal = document.getElementById("blanqueo-portal")?.value.trim() || "OnBalance";
+  const portal = getFormPortal();
   const nroCaso = document.getElementById("blanqueo-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-cliente")?.value.trim() || "";
   const correo = document.getElementById("blanqueo-correo")?.value.trim() || "";
@@ -226,8 +276,8 @@ async function createSolicitud() {
     setStatus("Completá caso, cliente y correo.", true);
     return;
   }
-  if (!TIPOS.includes(tipoSolicitud)) {
-    setStatus("Elegí un tipo de solicitud válido.", true);
+  if (!tiposForPortal(portal).includes(tipoSolicitud)) {
+    setStatus("Elegí un tipo de solicitud válido para esa plataforma.", true);
     return;
   }
 
@@ -292,6 +342,7 @@ function syncClaveUi(clave) {
   const value = String(clave || btn.textContent || "Sueldo.2026").trim() || "Sueldo.2026";
   btn.textContent = value;
   btn.dataset.clave = value;
+  syncClaveVisibility();
 }
 
 async function copyClaveBlanqueo() {
@@ -508,7 +559,9 @@ async function toggleListoByDoubleClick(item) {
 }
 
 function portalLabel(portal) {
-  return portal === "OnBalance" ? "On Balance" : "Portal Cliente";
+  if (portal === "OnBalance") return "On Balance";
+  if (portal === "Onvio") return "ONVIO";
+  return "Portal Cliente";
 }
 
 function showCtx(x, y, item) {
@@ -595,12 +648,12 @@ function openEditModal(item) {
   const caso = document.getElementById("blanqueo-edit-caso");
   const cliente = document.getElementById("blanqueo-edit-cliente");
   const correo = document.getElementById("blanqueo-edit-correo");
-  const tipo = document.getElementById("blanqueo-edit-tipo");
-  if (portal) portal.value = item.portal === "OnBalance" ? "OnBalance" : "PortalCliente";
+  const portalValue = PORTALES.includes(item.portal) ? item.portal : "OnBalance";
+  if (portal) portal.value = portalValue;
   if (caso) caso.value = item.nroCaso || "";
   if (cliente) cliente.value = item.nroCliente || "";
   if (correo) correo.value = item.correo || "";
-  if (tipo) tipo.value = TIPOS.includes(item.tipoSolicitud) ? item.tipoSolicitud : "Blanqueo";
+  syncTipoOptions("blanqueo-edit-tipo", portalValue, item.tipoSolicitud || "");
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   caso?.focus();
@@ -615,11 +668,16 @@ function hideEditModal() {
 
 async function saveEdit() {
   if (!editingId) return;
-  const portal = document.getElementById("blanqueo-edit-portal")?.value.trim() || "OnBalance";
+  const portal = getEditPortal();
   const nroCaso = document.getElementById("blanqueo-edit-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-edit-cliente")?.value.trim() || "";
   const correo = document.getElementById("blanqueo-edit-correo")?.value.trim() || "";
   const tipoSolicitud = document.getElementById("blanqueo-edit-tipo")?.value.trim() || "";
+
+  if (!tiposForPortal(portal).includes(tipoSolicitud)) {
+    setStatus("Elegí un tipo de solicitud válido para esa plataforma.", true);
+    return;
+  }
 
   try {
     const res = await planUserFetch(`/api/planillas/blanqueo/${editingId}`, {
