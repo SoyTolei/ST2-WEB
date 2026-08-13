@@ -1995,6 +1995,30 @@ body.portal-tab-active .tab-icon {
   text-align: right !important;
 }
 
+.st2-access-admin-th-sort {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.st2-access-admin-th-sort:hover,
+.st2-access-admin-th-sort:focus-visible {
+  color: #0c4a6e;
+  outline: none;
+}
+
+.st2-access-admin-th-sort.is-sorted {
+  color: #0c4a6e;
+}
+
+.st2-access-admin-sort-mark {
+  display: inline-block;
+  min-width: 0.7em;
+  margin-left: 2px;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+
 .st2-access-admin-actions-cell {
   white-space: nowrap;
   text-align: right;

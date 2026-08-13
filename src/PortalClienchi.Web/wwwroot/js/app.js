@@ -934,14 +934,61 @@ function formatAccessDateCompact(iso) {
   return date.toLocaleString("es-AR", opts);
 }
 
+/** @type {"lastSeen" | "loginCount"} */
+let accessAdminSortKey = "lastSeen";
+/** @type {"desc" | "asc"} */
+let accessAdminSortDir = "desc";
+
 function sortAccessAdminItems(items) {
+  const dir = accessAdminSortDir === "asc" ? 1 : -1;
   return [...items].sort((a, b) => {
+    if (accessAdminSortKey === "loginCount") {
+      const cmp = (Number(a.loginCount) || 0) - (Number(b.loginCount) || 0);
+      if (cmp !== 0) return cmp * dir;
+      const aTime = new Date(a.lastSeenAt).getTime();
+      const bTime = new Date(b.lastSeenAt).getTime();
+      return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+    }
+
     if (a.isActive !== b.isActive) return a.isActive ? -1 : 1;
     if (a.isUnseenNew !== b.isUnseenNew) return a.isUnseenNew ? -1 : 1;
     const aTime = new Date(a.lastSeenAt).getTime();
     const bTime = new Date(b.lastSeenAt).getTime();
-    return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+    const cmp = (Number.isNaN(aTime) ? 0 : aTime) - (Number.isNaN(bTime) ? 0 : bTime);
+    return cmp * dir;
   });
+}
+
+function syncAccessAdminSortHeaders() {
+  const headers = document.querySelectorAll(".st2-access-admin-th-sort");
+  headers.forEach((th) => {
+    if (!(th instanceof HTMLElement)) return;
+    const key = th.dataset.sort || "";
+    const mark = th.querySelector(".st2-access-admin-sort-mark");
+    const active = key === accessAdminSortKey;
+    th.classList.toggle("is-sorted", active);
+    if (active) {
+      const desc = accessAdminSortDir === "desc";
+      th.setAttribute("aria-sort", desc ? "descending" : "ascending");
+      if (mark) mark.textContent = desc ? "↓" : "↑";
+    } else {
+      th.setAttribute("aria-sort", "none");
+      if (mark) mark.textContent = "";
+    }
+  });
+}
+
+function setAccessAdminSort(key) {
+  if (key !== "lastSeen" && key !== "loginCount") return;
+  if (accessAdminSortKey === key) {
+    accessAdminSortDir = accessAdminSortDir === "desc" ? "asc" : "desc";
+  } else {
+    accessAdminSortKey = key;
+    accessAdminSortDir = "desc";
+  }
+  accessAdminItemsCache = sortAccessAdminItems(accessAdminItemsCache);
+  syncAccessAdminSortHeaders();
+  renderAccessAdminTable();
 }
 
 const ADMIN_ICON_CLICKS = 5;
@@ -1195,7 +1242,7 @@ function renderAccessAdminTable() {
       </td>
       <td class="st2-access-admin-mods-cell">${modHtml}</td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
-      <td class="st2-access-admin-num" title="Ingresos a la web: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
+      <td class="st2-access-admin-num" title="Veces que abrió o refrescó la web: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">
         <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos visibles" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
         <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
@@ -1571,6 +1618,18 @@ accessAdminSearch?.addEventListener("input", () => {
   accessAdminQuery = accessAdminSearch.value || "";
   renderAccessAdminTable();
 });
+document.querySelectorAll(".st2-access-admin-th-sort").forEach((th) => {
+  th.addEventListener("click", () => {
+    setAccessAdminSort(th.dataset.sort || "");
+  });
+  th.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setAccessAdminSort(th.dataset.sort || "");
+    }
+  });
+});
+syncAccessAdminSortHeaders();
 accessAdminBody?.addEventListener("click", (e) => {
   const target = e.target;
   if (!(target instanceof HTMLElement)) return;

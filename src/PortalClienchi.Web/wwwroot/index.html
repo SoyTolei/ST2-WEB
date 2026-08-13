@@ -1530,8 +1530,12 @@
               <tr>
                 <th>Nombre</th>
                 <th title="Op = Oportunidad · PDF = Generador · Blanq = Blanqueo · Blanq✓ = puede confirmar">Módulos extra</th>
-                <th>Último acceso</th>
-                <th title="Veces que ingresó a la web (login / reingreso)">Ingresos</th>
+                <th id="st2-access-admin-th-last" class="st2-access-admin-th-sort" data-sort="lastSeen" title="Clic para ordenar por último acceso" aria-sort="descending" tabindex="0" role="columnheader">
+                  Último acceso <span class="st2-access-admin-sort-mark" aria-hidden="true">↓</span>
+                </th>
+                <th id="st2-access-admin-th-logins" class="st2-access-admin-th-sort" data-sort="loginCount" title="Veces que abrió o refrescó la web (cada carga de página). Clic para ordenar." aria-sort="none" tabindex="0" role="columnheader">
+                  Ingresos <span class="st2-access-admin-sort-mark" aria-hidden="true"></span>
+                </th>
                 <th class="st2-access-admin-th-actions">Acciones</th>
               </tr>
             </thead>
