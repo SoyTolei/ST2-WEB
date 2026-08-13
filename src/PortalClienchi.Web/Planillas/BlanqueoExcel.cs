@@ -16,7 +16,6 @@ public static class BlanqueoExcel
         "Correo",
         "Solicitud",
         "SolicitadoPorNombre",
-        "SolicitadoPorEmail",
         "Listo",
         "Aclaracion",
     ];
@@ -38,9 +37,8 @@ public static class BlanqueoExcel
             detalle.Cell(row, 5).Value = item.Correo;
             detalle.Cell(row, 6).Value = item.TipoSolicitud;
             detalle.Cell(row, 7).Value = item.SolicitadoPorNombre;
-            detalle.Cell(row, 8).Value = item.SolicitadoPorEmail;
-            detalle.Cell(row, 9).Value = item.Listo ? "Sí" : "No";
-            detalle.Cell(row, 10).Value = item.Aclaracion ?? "";
+            detalle.Cell(row, 8).Value = item.Listo ? "Sí" : "No";
+            detalle.Cell(row, 9).Value = item.Aclaracion ?? "";
             row++;
         }
 
@@ -102,9 +100,8 @@ public static class BlanqueoExcel
         ws.Cell(2, 5).Value = "cliente@ejemplo.com";
         ws.Cell(2, 6).Value = "Blanqueo";
         ws.Cell(2, 7).Value = "Leonel Gallo";
-        ws.Cell(2, 8).Value = "leonel.gallo@thomsonreuters.com";
-        ws.Cell(2, 9).Value = "Sí";
-        ws.Cell(2, 10).Value = "";
+        ws.Cell(2, 8).Value = "Sí";
+        ws.Cell(2, 9).Value = "";
 
         ws.Row(1).Style.Font.Bold = true;
         ws.SheetView.FreezeRows(1);
@@ -113,11 +110,10 @@ public static class BlanqueoExcel
         var help = wb.Worksheets.Add("Ayuda");
         help.Cell(1, 1).Value = "Usá el mismo modelo que Exportar Excel.";
         help.Cell(2, 1).Value = "Completá o pegá filas en la hoja Solicitudes (mismos encabezados).";
-        help.Cell(3, 1).Value = "SolicitadoPorNombre: nombre y apellido tal cual en Accesos.";
-        help.Cell(4, 1).Value = "SolicitadoPorEmail: opcional si el nombre matchea un usuario.";
-        help.Cell(5, 1).Value = "Plataforma: On Balance | ONVIO | Portal Cliente";
-        help.Cell(6, 1).Value = "Listo: Sí / No";
-        help.Cell(7, 1).Value = "La hoja Resumen mensual del export se ignora al importar.";
+        help.Cell(3, 1).Value = "SolicitadoPorNombre: nombre y apellido tal cual en Accesos (se asocia el mail solo).";
+        help.Cell(4, 1).Value = "Plataforma: On Balance | ONVIO | Portal Cliente";
+        help.Cell(5, 1).Value = "Listo: Sí / No · Aclaracion: vacío | No registrado | otra nota";
+        help.Cell(6, 1).Value = "La hoja Resumen mensual del export se ignora al importar.";
         help.Columns().AdjustToContents();
 
         using var ms = new MemoryStream();
@@ -142,9 +138,10 @@ public static class BlanqueoExcel
                  ?? wb.Worksheets.First();
 
         var headerMap = MapHeaders(ws);
-        if (!headerMap.ContainsKey("correo") || !headerMap.ContainsKey("nrocaso") || !headerMap.ContainsKey("nrocliente"))
+        if (!headerMap.ContainsKey("correo") || !headerMap.ContainsKey("nrocaso") || !headerMap.ContainsKey("nrocliente")
+            || !headerMap.ContainsKey("solicitadonombre"))
         {
-            errors.Add("Faltan columnas obligatorias: Correo, NroCaso y NroCliente (o equivalentes).");
+            errors.Add("Faltan columnas obligatorias: Correo, NroCaso, NroCliente y SolicitadoPorNombre.");
             return (rows, errors);
         }
 
@@ -192,11 +189,11 @@ public static class BlanqueoExcel
                 continue;
             }
 
-            var emailSol = Cell("solicitadoemail");
             var nombreSol = Cell("solicitadonombre");
-            if (!ResolveRequester(ref emailSol, ref nombreSol, users))
+            var emailSol = "";
+            if (!ResolveRequesterByName(ref emailSol, ref nombreSol, users))
             {
-                errors.Add($"Fila {r}: no se encontró el agente '{(string.IsNullOrWhiteSpace(nombreSol) ? emailSol : nombreSol)}' entre los usuarios de la plataforma.");
+                errors.Add($"Fila {r}: no se encontró el agente '{nombreSol}' entre los usuarios de la plataforma.");
                 continue;
             }
 
@@ -259,14 +256,13 @@ public static class BlanqueoExcel
                 map["correo"] = c;
             else if (Matches(raw, "solicitud", "tipo", "tiposolicitud"))
                 map["solicitud"] = c;
-            else if (Matches(raw, "solicitadaporemail", "emailsolicitante", "correosolicitante"))
-                map["solicitadoemail"] = c;
             else if (Matches(raw, "solicitadopornombre", "solicitante", "nombre", "solicitadopor", "agente", "agent"))
                 map["solicitadonombre"] = c;
             else if (Matches(raw, "listo", "estado", "confirmado"))
                 map["listo"] = c;
             else if (Matches(raw, "aclaracion", "observacion", "nota", "comentario"))
                 map["aclaracion"] = c;
+            // SolicitadoPorEmail se ignoró a propósito: la asociación es solo por nombre.
         }
 
         return map;
@@ -372,49 +368,32 @@ public static class BlanqueoExcel
         return list;
     }
 
-    private static bool ResolveRequester(
+    private static bool ResolveRequesterByName(
         ref string email,
         ref string nombre,
         IReadOnlyList<(string Email, string DisplayName, string Key)> users)
     {
-        email = email.Trim();
         nombre = nombre.Trim();
-
-        if (!string.IsNullOrWhiteSpace(email) && email.Contains('@'))
-        {
-            var normalizedEmail = email.ToLowerInvariant();
-            var byEmail = users.FirstOrDefault(u => u.Email.Equals(normalizedEmail, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrEmpty(byEmail.Email))
-            {
-                email = byEmail.Email;
-                nombre = byEmail.DisplayName;
-                return true;
-            }
-
-            if (string.IsNullOrWhiteSpace(nombre))
-                nombre = BlanqueoEndpoints.DisplayNameFromEmail(email);
-            return true;
-        }
-
+        email = "";
         if (string.IsNullOrWhiteSpace(nombre))
             return false;
 
         var key = NormalizePersonKey(nombre);
         var match = users.FirstOrDefault(u => u.Key == key);
-        if (string.IsNullOrEmpty(match.Email))
+        if (!string.IsNullOrEmpty(match.Email))
         {
-            // Fallback: armar mail típico solo si no hay match de plataforma.
-            var guessed = GuessEmailFromName(nombre);
-            if (guessed is null) return false;
-            var guessMatch = users.FirstOrDefault(u => u.Email.Equals(guessed, StringComparison.OrdinalIgnoreCase));
-            if (string.IsNullOrEmpty(guessMatch.Email)) return false;
-            email = guessMatch.Email;
-            nombre = guessMatch.DisplayName;
+            email = match.Email;
+            nombre = match.DisplayName;
             return true;
         }
 
-        email = match.Email;
-        nombre = match.DisplayName;
+        // Fallback: mail típico nombre.apellido@… solo si existe en Accesos.
+        var guessed = GuessEmailFromName(nombre);
+        if (guessed is null) return false;
+        var guessMatch = users.FirstOrDefault(u => u.Email.Equals(guessed, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrEmpty(guessMatch.Email)) return false;
+        email = guessMatch.Email;
+        nombre = guessMatch.DisplayName;
         return true;
     }
 
