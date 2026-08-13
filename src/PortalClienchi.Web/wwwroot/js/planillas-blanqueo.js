@@ -786,7 +786,7 @@ function buildRow(item) {
     ${mailCell}
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="blanqueo-col-tipo">${escapeHtml(item.tipoSolicitud)}</td>
-    <td class="blanqueo-col-listo">${item.listo ? '<span class="blanqueo-pill ok">Listo</span>' : "—"}</td>
+    <td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
     <td class="blanqueo-col-aclaracion">${item.aclaracion ? `<span class="blanqueo-pill ${isNoRegistrado(item.aclaracion) ? "bad" : "note"}" title="${escapeHtml(item.aclaracion)}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
   `;
 
@@ -860,6 +860,17 @@ function formatFecha(iso) {
   // Compacto: 13-ago · si es otro año, 13-ago-25
   if (year === nowY) return `${day}-${month}`;
   return `${day}-${month}-${String(year).slice(-2)}`;
+}
+
+function formatEstadoCell(item) {
+  if (item.listo) {
+    return '<span class="blanqueo-pill ok">Listo</span>';
+  }
+  // Pendiente: sin confirmar y sin observación / no registrado.
+  if (!String(item.aclaracion || "").trim()) {
+    return '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
+  }
+  return "—";
 }
 
 function showCtx(x, y, item) {

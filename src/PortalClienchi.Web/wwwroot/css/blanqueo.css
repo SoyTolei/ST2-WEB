@@ -748,9 +748,19 @@
 
 .blanqueo-table .blanqueo-th-listo,
 .blanqueo-table .blanqueo-col-listo {
-  width: 58px;
+  width: 64px;
   text-align: center;
   white-space: nowrap;
+}
+
+.blanqueo-estado-pending {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.9;
+  filter: grayscale(0.15);
 }
 
 .blanqueo-table .blanqueo-th-aclaracion,
