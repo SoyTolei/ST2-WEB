@@ -31,6 +31,7 @@ public static class BlanqueoEndpoints
                 items = repo.LoadAll(),
                 usuario = email,
                 canConfirm = flags.BlanqueoConfirm,
+                canLoad = flags.BlanqueoLoad,
                 claveBlanqueo = BlanqueoClave.Actual,
                 storage = new { ready = repo.StorageReady, path = repo.DatabasePath },
             });
@@ -172,8 +173,10 @@ public static class BlanqueoEndpoints
 
         app.MapPost("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoCreateRequest body, BlanqueoRepository repo, ModuleAccessRepository modules) =>
         {
-            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out _, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
+            if (!flags.BlanqueoLoad)
+                return Results.Json(new { error = "Tu perfil es solo listado: no podés cargar solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
             var validation = ValidateCreate(body);
             if (validation is not null)

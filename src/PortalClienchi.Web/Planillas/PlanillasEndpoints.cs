@@ -500,6 +500,7 @@ public static class PlanillasEndpoints
                     pdfPortal = flags.PdfPortal,
                     blanqueo = flags.Blanqueo,
                     blanqueoConfirm = flags.BlanqueoConfirm,
+                    blanqueoLoad = flags.BlanqueoLoad,
                 },
             });
         });
@@ -588,6 +589,7 @@ public static class PlanillasEndpoints
                             pdfPortal = flags.PdfPortal,
                             blanqueo = flags.Blanqueo,
                             blanqueoConfirm = flags.BlanqueoConfirm,
+                            blanqueoLoad = flags.BlanqueoLoad,
                         },
                     };
                 }).ToList();
@@ -654,6 +656,7 @@ public static class PlanillasEndpoints
                         pdfPortal = flags.PdfPortal,
                         blanqueo = flags.Blanqueo,
                         blanqueoConfirm = flags.BlanqueoConfirm,
+                        blanqueoLoad = flags.BlanqueoLoad,
                     },
                 });
             }

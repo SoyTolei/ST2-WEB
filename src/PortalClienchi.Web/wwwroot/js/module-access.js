@@ -14,6 +14,7 @@ function fullFlags() {
     pdfPortal: true,
     blanqueo: true,
     blanqueoConfirm: true,
+    blanqueoLoad: true,
   };
 }
 
@@ -23,6 +24,7 @@ function emptyFlags() {
     pdfPortal: false,
     blanqueo: false,
     blanqueoConfirm: false,
+    blanqueoLoad: false,
   };
 }
 
@@ -70,6 +72,7 @@ export async function refreshModuleFlags({ force = false } = {}) {
         pdfPortal: !!m.pdfPortal,
         blanqueo: !!m.blanqueo,
         blanqueoConfirm: !!m.blanqueoConfirm,
+        blanqueoLoad: m.blanqueoLoad == null ? !m.blanqueoConfirm : !!m.blanqueoLoad,
       };
       lastLoadedAt = Date.now();
     } catch {
@@ -98,4 +101,8 @@ export function canSeeBlanqueoModule() {
 
 export function canConfirmBlanqueoModule() {
   return !!getCachedModuleFlags().blanqueoConfirm;
+}
+
+export function canLoadBlanqueoModule() {
+  return !!getCachedModuleFlags().blanqueoLoad;
 }

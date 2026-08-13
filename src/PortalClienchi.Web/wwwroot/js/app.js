@@ -84,6 +84,7 @@ const accessModOportunidad = document.getElementById("st2-mod-oportunidad");
 const accessModPdf = document.getElementById("st2-mod-pdf");
 const accessModBlanqueo = document.getElementById("st2-mod-blanqueo");
 const accessModBlanqueoConfirm = document.getElementById("st2-mod-blanqueo-confirm");
+const accessModBlanqueoLoad = document.getElementById("st2-mod-blanqueo-load");
 let accessModulesEmailValue = "";
 let accessModulesSaving = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
@@ -1031,6 +1032,9 @@ function normalizeAccessAdminItems(items) {
         pdfPortal: !!(modules.pdfPortal ?? modules.PdfPortal),
         blanqueo: !!(modules.blanqueo ?? modules.Blanqueo),
         blanqueoConfirm: !!(modules.blanqueoConfirm ?? modules.BlanqueoConfirm),
+        blanqueoLoad: modules.blanqueoLoad == null && modules.BlanqueoLoad == null
+          ? !!(modules.blanqueo ?? modules.Blanqueo) && !(modules.blanqueoConfirm ?? modules.BlanqueoConfirm)
+          : !!(modules.blanqueoLoad ?? modules.BlanqueoLoad),
       },
     };
   });
@@ -1172,10 +1176,12 @@ function renderAccessAdminTable() {
     if (mods.pdfPortal) {
       modBadges.push({ label: "PDF", title: "Generador de PDFS para Portal" });
     }
-    if (mods.blanqueoConfirm) {
-      modBadges.push({ label: "Blanq✓", title: "Blanqueo + puede confirmar" });
+    if (mods.blanqueoConfirm && mods.blanqueoLoad) {
+      modBadges.push({ label: "Blanq✓+", title: "Blanqueo: confirma y carga" });
+    } else if (mods.blanqueoConfirm) {
+      modBadges.push({ label: "Blanq✓", title: "Blanqueo: solo listado / confirma" });
     } else if (mods.blanqueo) {
-      modBadges.push({ label: "Blanq", title: "Blanqueo OnBalance y Portal Cliente" });
+      modBadges.push({ label: "Blanq", title: "Blanqueo: puede cargar" });
     }
     const modHtml = modBadges.length
       ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
@@ -1596,10 +1602,16 @@ function openAccessModulesModal(email) {
   const mods = current?.modules || {};
   accessModulesEmailValue = email;
   if (accessModulesEmail) accessModulesEmail.textContent = email;
+  if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
   if (accessModOportunidad) accessModOportunidad.checked = !!mods.oportunidad;
   if (accessModPdf) accessModPdf.checked = !!mods.pdfPortal;
   if (accessModBlanqueo) accessModBlanqueo.checked = !!mods.blanqueo;
   if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = !!mods.blanqueoConfirm;
+  if (accessModBlanqueoLoad) {
+    accessModBlanqueoLoad.checked = mods.blanqueoLoad == null
+      ? !!mods.blanqueo && !mods.blanqueoConfirm
+      : !!mods.blanqueoLoad;
+  }
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
 }
@@ -1608,10 +1620,23 @@ accessModBlanqueoConfirm?.addEventListener("change", () => {
   if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
     accessModBlanqueo.checked = true;
   }
+  // Al marcar confirmador, por defecto solo listado (podés reactivar “cargar”).
+  if (accessModBlanqueoConfirm.checked && accessModBlanqueoLoad && !accessModBlanqueoLoad.dataset.userTouched) {
+    accessModBlanqueoLoad.checked = false;
+  }
+});
+accessModBlanqueoLoad?.addEventListener("change", () => {
+  if (accessModBlanqueoLoad) accessModBlanqueoLoad.dataset.userTouched = "1";
+  if (accessModBlanqueoLoad?.checked && accessModBlanqueo) {
+    accessModBlanqueo.checked = true;
+  }
 });
 accessModBlanqueo?.addEventListener("change", () => {
-  if (!accessModBlanqueo.checked && accessModBlanqueoConfirm) {
-    accessModBlanqueoConfirm.checked = false;
+  if (!accessModBlanqueo.checked) {
+    if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = false;
+    if (accessModBlanqueoLoad) accessModBlanqueoLoad.checked = false;
+  } else if (accessModBlanqueoLoad && !accessModBlanqueoConfirm?.checked) {
+    accessModBlanqueoLoad.checked = true;
   }
 });
 
@@ -1631,6 +1656,7 @@ async function saveAccessModules() {
         pdfPortal: !!accessModPdf?.checked,
         blanqueo: !!accessModBlanqueo?.checked,
         blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
+        blanqueoLoad: !!accessModBlanqueoLoad?.checked,
       }),
     });
     const data = await response.json().catch(() => ({}));
@@ -1645,6 +1671,7 @@ async function saveAccessModules() {
               pdfPortal: !!mods.pdfPortal,
               blanqueo: !!mods.blanqueo,
               blanqueoConfirm: !!mods.blanqueoConfirm,
+              blanqueoLoad: !!mods.blanqueoLoad,
             },
           }
         : item

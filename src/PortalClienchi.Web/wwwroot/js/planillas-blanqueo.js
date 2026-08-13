@@ -2,6 +2,7 @@ import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import {
   canSeeBlanqueoModule as canSeeFromAccess,
   canConfirmBlanqueoModule as canConfirmFromAccess,
+  canLoadBlanqueoModule as canLoadFromAccess,
   refreshModuleFlags,
   isSt2SuperAdmin,
 } from "./module-access.js";
@@ -24,6 +25,7 @@ let blanqueoInited = false;
 let items = [];
 let selectedId = null;
 let canConfirm = false;
+let canLoad = true;
 let editingId = null;
 /** @type {"desc" | "asc"} — por defecto desc: lo más nuevo arriba */
 let fechaSortDir = "desc";
@@ -49,6 +51,16 @@ function canConfirmBlanqueo(email = getPlanUserEmail()) {
   return canConfirmFromAccess();
 }
 
+function canLoadBlanqueo(email = getPlanUserEmail()) {
+  try {
+    if (localStorage.getItem(FORCE_KEY) === "1") return true;
+  } catch { /* ignore */ }
+
+  if (isSt2SuperAdmin(email)) return true;
+  if (!String(email || "").trim()) return false;
+  return canLoadFromAccess();
+}
+
 export function syncBlanqueoModuleVisibility() {
   const btn = document.getElementById("plan-modulo-blanqueo");
   if (!btn) return;
@@ -60,6 +72,7 @@ export function syncBlanqueoModuleVisibility() {
 export function initBlanqueoModule() {
   syncBlanqueoModuleVisibility();
   canConfirm = canConfirmBlanqueo();
+  canLoad = canLoadBlanqueo();
   if (blanqueoInited) return;
   blanqueoInited = true;
 
@@ -187,14 +200,24 @@ export async function openBlanqueoModule() {
   // Usa cache de permisos (evita otro /modules al abrir).
   await refreshModuleFlags();
   canConfirm = canConfirmBlanqueo();
+  canLoad = canLoadBlanqueo();
   syncSolicitanteBadge();
   syncMineFilterVisibility();
+  syncLoadFormVisibility();
   clearForm();
   monthFilterTouched = false;
   syncTipoOptions("blanqueo-tipo", getFormPortal());
   syncClaveVisibility();
   setStatus("Cargando solicitudes…");
   await reloadList();
+}
+
+function syncLoadFormVisibility() {
+  const formPanel = document.querySelector(".blanqueo-form-panel");
+  if (formPanel) formPanel.classList.toggle("hidden", !canLoad);
+
+  const app = document.querySelector(".blanqueo-app");
+  if (app) app.classList.toggle("blanqueo-list-only", !!canConfirm && !canLoad);
 }
 
 function syncSolicitanteBadge() {
@@ -227,6 +250,8 @@ function syncConfirmToolsVisibility() {
 
   const importWrap = document.getElementById("blanqueo-import-wrap");
   if (importWrap) importWrap.classList.toggle("hidden", !isSt2SuperAdmin());
+
+  syncLoadFormVisibility();
 }
 
 function displayNameFromEmail(email) {
@@ -353,6 +378,10 @@ function syncClaveVisibility() {
 }
 
 async function createSolicitud() {
+  if (!canLoad) {
+    setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
+    return;
+  }
   const portal = getFormPortal();
   const nroCaso = document.getElementById("blanqueo-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("blanqueo-cliente")?.value.trim() || "";
@@ -411,7 +440,9 @@ async function reloadList() {
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = (Array.isArray(data.items) ? data.items : []).map(normalizeBlanqueoItem);
     canConfirm = !!data.canConfirm || canConfirmBlanqueo();
+    canLoad = data.canLoad == null ? canLoadBlanqueo() : !!data.canLoad || isSt2SuperAdmin();
     syncMineFilterVisibility();
+    syncLoadFormVisibility();
     syncClaveUi(data.claveBlanqueo);
     rebuildMonthOptions();
     applyFilters();

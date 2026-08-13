@@ -2098,6 +2098,11 @@ body.portal-tab-active .tab-icon {
   line-height: 1.4;
 }
 
+.st2-access-modules-hint-sub {
+  margin: -2px 0 12px 22px;
+  font-size: 0.74rem;
+}
+
 .st2-access-modules-check {
   display: flex;
   align-items: flex-start;

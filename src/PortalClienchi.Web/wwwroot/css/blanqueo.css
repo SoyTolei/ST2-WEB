@@ -29,6 +29,19 @@
   margin-bottom: 16px;
 }
 
+.blanqueo-form-panel.hidden {
+  display: none !important;
+}
+
+.blanqueo-app.blanqueo-list-only .blanqueo-table-wrap {
+  min-height: min(72vh, 760px);
+  max-height: min(90vh, 1200px);
+}
+
+.blanqueo-app.blanqueo-list-only .plan-gestor-panel-list {
+  margin-top: 0;
+}
+
 .blanqueo-clave-hint {
   margin: 0 0 12px;
   font-size: 0.82rem;

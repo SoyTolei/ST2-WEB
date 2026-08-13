@@ -80,9 +80,24 @@ public sealed class ModuleAccessRepository
         if (blanqueoConfirm)
             blanqueo = true;
 
+        // Confirmadores: por defecto solo listado. Quien solo carga: formulario sí.
+        bool blanqueoLoad;
+        if (req.BlanqueoLoad is not null)
+            blanqueoLoad = req.BlanqueoLoad.Value;
+        else if (!blanqueo)
+            blanqueoLoad = false;
+        else if (blanqueoConfirm && req.BlanqueoConfirm == true)
+            blanqueoLoad = false;
+        else
+            blanqueoLoad = current.BlanqueoLoad || !blanqueoConfirm;
+
+        if (blanqueoLoad)
+            blanqueo = true;
+
         WriteModule(conn, email, PlanModuleIds.Oportunidad, oportunidad, false);
         WriteModule(conn, email, PlanModuleIds.PdfPortal, pdfPortal, false);
         WriteModule(conn, email, PlanModuleIds.Blanqueo, blanqueo, blanqueoConfirm);
+        WriteModule(conn, email, PlanModuleIds.BlanqueoLoad, blanqueoLoad, false);
 
         return ReadFlags(conn, email);
     }
@@ -103,6 +118,7 @@ public sealed class ModuleAccessRepository
     private ModuleAccessFlagsDto ReadFlags(SqliteConnection conn, string email)
     {
         var flags = new ModuleAccessFlagsDto();
+        var loadExplicit = false;
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT module, can_view, can_confirm
@@ -125,7 +141,19 @@ public sealed class ModuleAccessRepository
                 flags.Blanqueo = view || confirm;
                 flags.BlanqueoConfirm = confirm;
             }
+            else if (module.Equals(PlanModuleIds.BlanqueoLoad, StringComparison.OrdinalIgnoreCase))
+            {
+                loadExplicit = true;
+                flags.BlanqueoLoad = view;
+            }
         }
+
+        // Legacy: sin fila blanqueo_load → confirmador = solo listado; el resto puede cargar.
+        if (flags.Blanqueo && !loadExplicit)
+            flags.BlanqueoLoad = !flags.BlanqueoConfirm;
+
+        if (flags.BlanqueoLoad)
+            flags.Blanqueo = true;
 
         return flags;
     }
@@ -156,46 +184,114 @@ public sealed class ModuleAccessRepository
             {
                 check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'seeded_v1'";
                 var existing = check.ExecuteScalar() as string;
+                if (!string.Equals(existing, "1", StringComparison.Ordinal))
+                {
+                    var registered = LoadRegisteredEmails(conn);
+
+                    // Oportunidad: conservar comportamiento previo (todos los ya registrados).
+                    foreach (var email in registered)
+                        WriteModule(conn, email, PlanModuleIds.Oportunidad, true, false);
+
+                    foreach (var email in new[]
+                             {
+                                 "franco.zanna@thomsonreuters.com",
+                                 "leonel.gallo@thomsonreuters.com",
+                             })
+                    {
+                        WriteModule(conn, email, PlanModuleIds.PdfPortal, true, false);
+                    }
+
+                    foreach (var email in new[]
+                             {
+                                 "leonel.gallo@thomsonreuters.com",
+                                 "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
+                                 "alexis.ruiz@thomsonreuters.com",
+                                 "yohanaelizabeth.orellana@thomsonreuters.com",
+                             })
+                    {
+                        var confirm = email is "leonel.gallo@thomsonreuters.com"
+                            or "alexis.ruiz@thomsonreuters.com"
+                            or "yohanaelizabeth.orellana@thomsonreuters.com";
+                        // Leonel carga + confirma; otros confirmadores solo listado; Sabrina solo carga.
+                        var load = email is "leonel.gallo@thomsonreuters.com"
+                            or "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com";
+                        WriteModule(conn, email, PlanModuleIds.Blanqueo, true, confirm);
+                        WriteModule(conn, email, PlanModuleIds.BlanqueoLoad, load, false);
+                    }
+
+                    using var mark = conn.CreateCommand();
+                    mark.CommandText = """
+                        INSERT INTO module_access_meta (key, value) VALUES ('seeded_v1', '1')
+                        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                        """;
+                    mark.ExecuteNonQuery();
+                    _logger.LogInformation("Seed inicial de permisos de módulos aplicado");
+                }
+            }
+        }
+
+        EnsureBlanqueoLoadDefaults();
+    }
+
+    /// <summary>
+    /// Migra confirmadores existentes a "solo listado" si aún no tienen fila blanqueo_load.
+    /// </summary>
+    private void EnsureBlanqueoLoadDefaults()
+    {
+        lock (_gate)
+        {
+            using var conn = Open();
+            using (var check = conn.CreateCommand())
+            {
+                check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'seeded_blanqueo_load_v1'";
+                var existing = check.ExecuteScalar() as string;
                 if (string.Equals(existing, "1", StringComparison.Ordinal))
                     return;
             }
 
-            var registered = LoadRegisteredEmails(conn);
-
-            // Oportunidad: conservar comportamiento previo (todos los ya registrados).
-            foreach (var email in registered)
-                WriteModule(conn, email, PlanModuleIds.Oportunidad, true, false);
-
-            foreach (var email in new[]
-                     {
-                         "franco.zanna@thomsonreuters.com",
-                         "leonel.gallo@thomsonreuters.com",
-                     })
+            using var list = conn.CreateCommand();
+            list.CommandText = """
+                SELECT email, can_confirm FROM module_access
+                WHERE lower(module) = lower($mod)
+                """;
+            list.Parameters.AddWithValue("$mod", PlanModuleIds.Blanqueo);
+            var rows = new List<(string Email, bool Confirm)>();
+            using (var r = list.ExecuteReader())
             {
-                WriteModule(conn, email, PlanModuleIds.PdfPortal, true, false);
+                while (r.Read())
+                    rows.Add((r.GetString(0), r.GetInt32(1) != 0));
             }
 
-            foreach (var email in new[]
-                     {
-                         "leonel.gallo@thomsonreuters.com",
-                         "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
-                         "alexis.ruiz@thomsonreuters.com",
-                         "yohanaelizabeth.orellana@thomsonreuters.com",
-                     })
+            foreach (var (email, confirm) in rows)
             {
-                var confirm = email is "leonel.gallo@thomsonreuters.com"
-                    or "alexis.ruiz@thomsonreuters.com"
-                    or "yohanaelizabeth.orellana@thomsonreuters.com";
-                WriteModule(conn, email, PlanModuleIds.Blanqueo, true, confirm);
+                if (St2SuperAdmin.Is(email))
+                {
+                    WriteModule(conn, email, PlanModuleIds.BlanqueoLoad, true, false);
+                    continue;
+                }
+
+                using var hasLoad = conn.CreateCommand();
+                hasLoad.CommandText = """
+                    SELECT 1 FROM module_access
+                    WHERE lower(email) = lower($email) AND lower(module) = lower($mod)
+                    LIMIT 1
+                    """;
+                hasLoad.Parameters.AddWithValue("$email", email);
+                hasLoad.Parameters.AddWithValue("$mod", PlanModuleIds.BlanqueoLoad);
+                var exists = hasLoad.ExecuteScalar() is not null;
+                if (exists) continue;
+
+                // Confirmador → solo listado; el resto → puede cargar.
+                WriteModule(conn, email, PlanModuleIds.BlanqueoLoad, !confirm, false);
             }
 
             using var mark = conn.CreateCommand();
             mark.CommandText = """
-                INSERT INTO module_access_meta (key, value) VALUES ('seeded_v1', '1')
+                INSERT INTO module_access_meta (key, value) VALUES ('seeded_blanqueo_load_v1', '1')
                 ON CONFLICT(key) DO UPDATE SET value = excluded.value
                 """;
             mark.ExecuteNonQuery();
-            _logger.LogInformation("Seed inicial de permisos de módulos aplicado");
+            _logger.LogInformation("Defaults blanqueo_load aplicados (confirmadores = solo listado)");
         }
     }
 

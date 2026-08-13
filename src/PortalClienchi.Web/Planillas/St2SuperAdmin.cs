@@ -18,5 +18,6 @@ public static class St2SuperAdmin
         PdfPortal = true,
         Blanqueo = true,
         BlanqueoConfirm = true,
+        BlanqueoLoad = true,
     };
 }
