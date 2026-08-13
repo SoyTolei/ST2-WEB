@@ -1,5 +1,5 @@
 import { getPlanUserEmail } from "./plan-user.js";
-import { canSeePdfPortalModule as canSeeFromAccess, refreshModuleFlags } from "./module-access.js";
+import { canSeePdfPortalModule as canSeeFromAccess } from "./module-access.js";
 
 /**
  * Override de prueba: localStorage.setItem("st2-pdf-portal-force", "1")

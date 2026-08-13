@@ -7,7 +7,6 @@ import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule,
 import { refreshModuleFlags, canSeeOportunidadModule } from "./module-access.js";
 import {
   startBlanqueoAlertsPolling,
-  refreshBlanqueoAlerts,
   markBlanqueoAlertsSeen,
   renderBlanqueoAlertUi,
 } from "./blanqueo-alerts.js";
