@@ -89,8 +89,9 @@ public static class BlanqueoExcel
 
     public static byte[] BuildImportTemplate()
     {
+        // Misma estructura que el export (hoja Solicitudes + encabezados idénticos).
         using var wb = new XLWorkbook();
-        var ws = wb.Worksheets.Add("Importar");
+        var ws = wb.Worksheets.Add("Solicitudes");
         for (var i = 0; i < DetailHeaders.Length; i++)
             ws.Cell(1, i + 1).Value = DetailHeaders[i];
 
@@ -106,21 +107,17 @@ public static class BlanqueoExcel
         ws.Cell(2, 10).Value = "";
 
         ws.Row(1).Style.Font.Bold = true;
+        ws.SheetView.FreezeRows(1);
         ws.Columns().AdjustToContents(1, 36);
 
         var help = wb.Worksheets.Add("Ayuda");
-        help.Cell(1, 1).Value = "Columnas reconocidas (flexible)";
-        help.Cell(2, 1).Value = "Fecha / FechaSolicitud";
-        help.Cell(3, 1).Value = "Plataforma / Portal (On Balance, ONVIO, Portal Cliente)";
-        help.Cell(4, 1).Value = "NroCaso / Caso";
-        help.Cell(5, 1).Value = "NroCliente / Cliente";
-        help.Cell(6, 1).Value = "Correo / Email";
-        help.Cell(7, 1).Value = "Solicitud / Tipo";
-        help.Cell(8, 1).Value = "SolicitadoPorNombre / Agente / Solicitante (nombre y apellido como en la plataforma)";
-        help.Cell(9, 1).Value = "SolicitadoPorEmail opcional: si falta, se busca el usuario por nombre exacto en Accesos";
-        help.Cell(10, 1).Value = "Listo (Sí/No, 1/0, true/false)";
-        help.Cell(11, 1).Value = "Aclaracion / Observacion";
-        help.Cell(13, 1).Value = "Tip: poné el nombre tal cual figura en Accesos para que el histórico quede a nombre de esa persona.";
+        help.Cell(1, 1).Value = "Usá el mismo modelo que Exportar Excel.";
+        help.Cell(2, 1).Value = "Completá o pegá filas en la hoja Solicitudes (mismos encabezados).";
+        help.Cell(3, 1).Value = "SolicitadoPorNombre: nombre y apellido tal cual en Accesos.";
+        help.Cell(4, 1).Value = "SolicitadoPorEmail: opcional si el nombre matchea un usuario.";
+        help.Cell(5, 1).Value = "Plataforma: On Balance | ONVIO | Portal Cliente";
+        help.Cell(6, 1).Value = "Listo: Sí / No";
+        help.Cell(7, 1).Value = "La hoja Resumen mensual del export se ignora al importar.";
         help.Columns().AdjustToContents();
 
         using var ms = new MemoryStream();
@@ -137,7 +134,11 @@ public static class BlanqueoExcel
         var rows = new List<BlanqueoHistoricalRow>();
         var users = BuildUserIndex(directory ?? []);
         using var wb = new XLWorkbook(stream);
-        var ws = wb.Worksheets.FirstOrDefault(w => !w.Name.Equals("Ayuda", StringComparison.OrdinalIgnoreCase))
+        // Mismo modelo que el export: hoja "Solicitudes" (ignora Resumen/Ayuda).
+        var ws = wb.Worksheets.FirstOrDefault(w => w.Name.Equals("Solicitudes", StringComparison.OrdinalIgnoreCase))
+                 ?? wb.Worksheets.FirstOrDefault(w =>
+                        !w.Name.Equals("Ayuda", StringComparison.OrdinalIgnoreCase)
+                        && !w.Name.Equals("Resumen mensual", StringComparison.OrdinalIgnoreCase))
                  ?? wb.Worksheets.First();
 
         var headerMap = MapHeaders(ws);
