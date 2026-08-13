@@ -195,7 +195,7 @@ public static class BlanqueoExcel
             var nombreSol = Cell("solicitadonombre");
             if (!ResolveRequester(ref emailSol, ref nombreSol, users))
             {
-                errors.Add($"Fila {r}: no se encontró el agente '{nombreSol || emailSol}' entre los usuarios de la plataforma.");
+                errors.Add($"Fila {r}: no se encontró el agente '{(string.IsNullOrWhiteSpace(nombreSol) ? emailSol : nombreSol)}' entre los usuarios de la plataforma.");
                 continue;
             }
 
