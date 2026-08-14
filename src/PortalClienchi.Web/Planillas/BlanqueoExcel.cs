@@ -326,6 +326,8 @@ public static class BlanqueoExcel
         }
 
         if (v.Equals("Blanqueo + MFA", StringComparison.OrdinalIgnoreCase)) return "Blanqueo + MFA";
+        if (v.Equals("MFA", StringComparison.OrdinalIgnoreCase))
+            return portal == "OnBalance" ? "MFA" : null;
         if (v.Equals("Blanqueo MFA", StringComparison.OrdinalIgnoreCase) || v.Equals("Blanqueo+MFA", StringComparison.OrdinalIgnoreCase))
             return portal == "OnBalance" ? "Blanqueo + MFA" : "Blanqueo MFA";
         if (v.Equals("Blanqueo", StringComparison.OrdinalIgnoreCase)) return "Blanqueo";

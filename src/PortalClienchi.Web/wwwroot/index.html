@@ -374,7 +374,6 @@
                     <div id="blanqueo-correos" class="blanqueo-correos">
                       <div class="blanqueo-correo-row">
                         <input id="blanqueo-correo" class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false"/>
-                        <button type="button" id="blanqueo-correo-add" class="blanqueo-correo-add" title="Agregar otro correo del mismo caso" aria-label="Agregar otro correo">+</button>
                       </div>
                     </div>
                   </div>
@@ -382,6 +381,7 @@
                     <label for="blanqueo-tipo">Solicitud</label>
                     <select id="blanqueo-tipo">
                       <option value="Blanqueo" selected>Blanqueo</option>
+                      <option value="MFA">MFA</option>
                       <option value="Blanqueo + MFA">Blanqueo + MFA</option>
                     </select>
                   </div>
@@ -1455,6 +1455,7 @@
         <label class="plan-user-label" for="blanqueo-edit-tipo">Solicitud</label>
         <select id="blanqueo-edit-tipo" class="plan-user-input">
           <option value="Blanqueo">Blanqueo</option>
+          <option value="MFA">MFA</option>
           <option value="Blanqueo + MFA">Blanqueo + MFA</option>
         </select>
       </div>

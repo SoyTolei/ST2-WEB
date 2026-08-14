@@ -14,7 +14,7 @@ import { refreshBlanqueoAlerts } from "./blanqueo-alerts.js";
  */
 const FORCE_KEY = "st2-blanqueo-force";
 const TIPOS_POR_PORTAL = {
-  OnBalance: ["Blanqueo", "Blanqueo + MFA"],
+  OnBalance: ["Blanqueo", "MFA", "Blanqueo + MFA"],
   Onvio: ["Blanqueo MFA"],
   PortalCliente: ["Activación", "Cambio de contraseña"],
 };
@@ -90,7 +90,6 @@ export function initBlanqueoModule() {
       }
     });
   });
-  document.getElementById("blanqueo-correo-add")?.addEventListener("click", () => addCorreoRow());
   document.getElementById("blanqueo-correos")?.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && e.target?.classList?.contains("blanqueo-correo-input")) {
       e.preventDefault();
@@ -98,6 +97,11 @@ export function initBlanqueoModule() {
     }
   });
   document.getElementById("blanqueo-correos")?.addEventListener("click", (e) => {
+    if (e.target?.closest?.(".blanqueo-correo-add")) {
+      e.preventDefault();
+      addCorreoRow();
+      return;
+    }
     const btn = e.target?.closest?.(".blanqueo-correo-remove");
     if (!btn) return;
     const row = btn.closest(".blanqueo-correo-row");
@@ -205,6 +209,7 @@ export function initBlanqueoModule() {
   syncSolicitanteBadge();
   syncTipoOptions("blanqueo-tipo", getFormPortal());
   syncClaveVisibility();
+  syncCorreoRows();
 }
 
 export async function openBlanqueoModule() {
@@ -333,9 +338,8 @@ function resetCorreoRows() {
   wrap.innerHTML = `
     <div class="blanqueo-correo-row">
       <input id="blanqueo-correo" class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false"/>
-      <button type="button" id="blanqueo-correo-add" class="blanqueo-correo-add" title="Agregar otro correo del mismo caso" aria-label="Agregar otro correo">+</button>
     </div>`;
-  document.getElementById("blanqueo-correo-add")?.addEventListener("click", () => addCorreoRow());
+  syncCorreoRows();
 }
 
 function addCorreoRow() {
@@ -344,8 +348,7 @@ function addCorreoRow() {
   const row = document.createElement("div");
   row.className = "blanqueo-correo-row";
   row.innerHTML = `
-    <input class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false" placeholder="otro correo…"/>
-    <button type="button" class="blanqueo-correo-remove" title="Quitar" aria-label="Quitar correo">−</button>`;
+    <input class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false" placeholder="otro correo…"/>`;
   wrap.appendChild(row);
   syncCorreoRows();
   row.querySelector(".blanqueo-correo-input")?.focus();
@@ -359,6 +362,31 @@ function syncCorreoRows() {
     const input = row.querySelector(".blanqueo-correo-input");
     if (input && idx === 0) input.id = "blanqueo-correo";
     else if (input) input.removeAttribute("id");
+
+    row.querySelectorAll(".blanqueo-correo-add, .blanqueo-correo-remove").forEach((btn) => btn.remove());
+
+    const isLast = idx === rows.length - 1;
+    const canRemove = rows.length > 1;
+
+    if (canRemove) {
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "blanqueo-correo-remove";
+      removeBtn.title = "Quitar";
+      removeBtn.setAttribute("aria-label", "Quitar correo");
+      removeBtn.textContent = "−";
+      row.appendChild(removeBtn);
+    }
+
+    if (isLast) {
+      const addBtn = document.createElement("button");
+      addBtn.type = "button";
+      addBtn.className = "blanqueo-correo-add";
+      addBtn.title = "Agregar otro correo del mismo caso";
+      addBtn.setAttribute("aria-label", "Agregar otro correo");
+      addBtn.textContent = "+";
+      row.appendChild(addBtn);
+    }
   });
 }
 
