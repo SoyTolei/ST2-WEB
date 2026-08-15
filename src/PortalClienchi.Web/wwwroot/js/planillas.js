@@ -7,7 +7,6 @@ import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule,
 import { refreshModuleFlags, canSeeOportunidadModule } from "./module-access.js";
 import {
   startBlanqueoAlertsPolling,
-  markBlanqueoAlertsSeen,
   renderBlanqueoAlertUi,
 } from "./blanqueo-alerts.js";
 
@@ -287,6 +286,7 @@ function showView(name, { history = "push" } = {}) {
   injectModuleHeaders();
   document.title = titleForView(name);
   syncHistory(name, history);
+  if (name === "menu") renderBlanqueoAlertUi();
 }
 
 function setSistemaIndicator(index) {
@@ -1068,7 +1068,6 @@ async function revealView(name, historyMode = "push") {
     }
     showView("blanqueo", { history: historyMode });
     await openBlanqueoModule();
-    await markBlanqueoAlertsSeen();
   }
 }
 
@@ -1316,9 +1315,9 @@ export function initPlanillas() {
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }
-    await applyEntryRoute();
     startBlanqueoAlertsPolling();
     renderBlanqueoAlertUi();
+    await applyEntryRoute();
     setTimeout(() => {
       void loadReferralModule();
       void loadOportunidadModule();

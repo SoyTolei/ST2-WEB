@@ -2,9 +2,11 @@ import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { canSeeBlanqueoModule, canConfirmBlanqueoModule } from "./module-access.js";
 
 const POLL_MS = 30000;
-const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed";
+const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed-v2";
 
 let pollTimer = null;
+let retryTimer = null;
+let retryCount = 0;
 let cachedAlerts = [];
 let alertMode = "requester"; // "confirm" | "requester"
 let toastBound = false;
@@ -28,16 +30,19 @@ export function getBlanqueoAlerts() {
 
 export async function refreshBlanqueoAlerts({ force = false } = {}) {
   const email = getPlanUserEmail();
-  if (!email || !canSeeBlanqueoModule(email)) {
+  const canSee = canSeeBlanqueoModule() || canConfirmBlanqueoModule();
+  if (!email || !canSee) {
     cachedAlerts = [];
     alertMode = "requester";
     renderBlanqueoAlertUi();
+    if (!email) scheduleAlertsRetry();
     return cachedAlerts;
   }
 
+  retryCount = 0;
   const now = Date.now();
   if (!force && refreshInFlight) return refreshInFlight;
-  if (!force && now - lastRefreshAt < 15000 && cachedAlerts) {
+  if (!force && lastRefreshAt > 0 && now - lastRefreshAt < 15000) {
     renderBlanqueoAlertUi();
     return cachedAlerts;
   }
@@ -79,6 +84,15 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
   })();
 
   return refreshInFlight;
+}
+
+function scheduleAlertsRetry() {
+  if (retryCount >= 8 || retryTimer) return;
+  retryCount += 1;
+  retryTimer = window.setTimeout(() => {
+    retryTimer = null;
+    void refreshBlanqueoAlerts({ force: true });
+  }, 600 * retryCount);
 }
 
 function pendingSignature(alerts) {
@@ -256,6 +270,10 @@ export function stopBlanqueoAlertsPolling() {
   if (pollTimer) {
     clearInterval(pollTimer);
     pollTimer = null;
+  }
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
   }
   document.removeEventListener("visibilitychange", onVisibility);
 }
