@@ -1,7 +1,7 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { canSeeBlanqueoModule, canConfirmBlanqueoModule } from "./module-access.js";
 
-const POLL_MS = 120000;
+const POLL_MS = 30000;
 const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed";
 
 let pollTimer = null;

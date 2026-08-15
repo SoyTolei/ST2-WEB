@@ -1317,11 +1317,8 @@ export function initPlanillas() {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }
     await applyEntryRoute();
-    // Retrasar polling para no sumar al pico de arranque (Cloudflare 1015/429).
-    setTimeout(() => {
-      startBlanqueoAlertsPolling();
-      renderBlanqueoAlertUi();
-    }, 12000);
+    startBlanqueoAlertsPolling();
+    renderBlanqueoAlertUi();
     setTimeout(() => {
       void loadReferralModule();
       void loadOportunidadModule();
