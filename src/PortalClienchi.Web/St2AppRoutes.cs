@@ -19,7 +19,9 @@ public static class St2AppRoutes
             or "/pdf"
             or "/pdf-portal"
             or "/blanqueo"
-            || p.StartsWith("/oportunidad/", StringComparison.OrdinalIgnoreCase);
+            || p.StartsWith("/oportunidad/", StringComparison.OrdinalIgnoreCase)
+            || p.StartsWith("/transferencia/", StringComparison.OrdinalIgnoreCase)
+            || p.StartsWith("/referral/", StringComparison.OrdinalIgnoreCase);
     }
 
     public static string Normalize(string? path)

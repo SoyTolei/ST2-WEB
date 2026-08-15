@@ -81,6 +81,20 @@ function updateSistemaBetaUi() {
 let planillasConfig = null;
 let sistemaActual = null;
 let mesaActual = null;
+const SISTEMA_STORAGE_KEY = "st2-plan-sistema";
+const SISTEMA_BY_SLUG = {
+  sql: "BejermanSql",
+  bejerman: "BejermanSql",
+  onvio: "OnvioWeb",
+  legal: "Legal",
+  chile: "Chile",
+};
+const SLUG_BY_SISTEMA = {
+  BejermanSql: "sql",
+  OnvioWeb: "onvio",
+  Legal: "legal",
+  Chile: "chile",
+};
 let legalProdutoSel = null;
 let legalModuloSel = null;
 let legalAmbienteSel = null;
@@ -127,6 +141,34 @@ const els = {
   btnVerPlanilla: () => document.getElementById("plan-btn-ver-planilla"),
 };
 
+function slugForSistema(id) {
+  return SLUG_BY_SISTEMA[id] || "sql";
+}
+
+function sistemaFromSlug(slug) {
+  if (!slug) return null;
+  return SISTEMA_BY_SLUG[String(slug).toLowerCase()] || null;
+}
+
+function rememberSistema(id) {
+  if (!id || SISTEMA_INDEX[id] == null) return;
+  try {
+    localStorage.setItem(SISTEMA_STORAGE_KEY, id);
+  } catch {
+    /* ignore */
+  }
+}
+
+function readRememberedSistema() {
+  try {
+    const saved = localStorage.getItem(SISTEMA_STORAGE_KEY);
+    if (saved && SISTEMA_INDEX[saved] != null) return saved;
+  } catch {
+    /* ignore */
+  }
+  return "BejermanSql";
+}
+
 function normalizePath(pathname) {
   const raw = String(pathname || "/").split("?")[0].split("#")[0];
   if (!raw || raw === "/") return "/";
@@ -135,9 +177,9 @@ function normalizePath(pathname) {
 }
 
 function pathForView(name) {
+  if (name === "transferencia") return `/transferencia/${slugForSistema(sistemaActual)}`;
+  if (name === "referral") return `/referral/${slugForSistema(sistemaActual)}`;
   switch (name) {
-    case "transferencia": return "/transferencia";
-    case "referral": return "/referral";
     case "oportunidadMenu": return "/oportunidad";
     case "oportunidadCargar": return "/oportunidad/cargar";
     case "oportunidadGestor": return "/oportunidad/gestor";
@@ -147,14 +189,34 @@ function pathForView(name) {
   }
 }
 
+function parseSistemaRoute(pathname, prefix) {
+  const p = normalizePath(pathname);
+  if (p === prefix) return { view: prefix.slice(1), sistema: null };
+  if (p.startsWith(`${prefix}/`)) {
+    const slug = p.slice(prefix.length + 1).split("/")[0];
+    const sistema = sistemaFromSlug(slug);
+    if (!sistema) return { view: "menu", unknown: true };
+    return { view: prefix.slice(1), sistema };
+  }
+  return null;
+}
+
 function routeFromPath(pathname) {
   const p = normalizePath(pathname);
   if (p === "/pdf-portal") return { view: "pdfPortal", requires: "pdf" };
   if (p === "/planillas" || p === "/index.html") return { view: "menu" };
+
+  const transferencia = parseSistemaRoute(pathname, "/transferencia");
+  if (transferencia) {
+    return { ...transferencia, requires: "transferencia" };
+  }
+  const referral = parseSistemaRoute(pathname, "/referral");
+  if (referral) {
+    return { ...referral, requires: "referral" };
+  }
+
   switch (p) {
     case "/": return { view: "menu" };
-    case "/transferencia": return { view: "transferencia" };
-    case "/referral": return { view: "referral" };
     case "/oportunidad": return { view: "oportunidadMenu", requires: "oportunidad" };
     case "/oportunidad/cargar": return { view: "oportunidadCargar", requires: "oportunidad" };
     case "/oportunidad/gestor": return { view: "oportunidadGestor", requires: "oportunidad" };
@@ -169,6 +231,13 @@ function canOpenRoute(route) {
   if (route.requires === "oportunidad") return canSeeOportunidadModule();
   if (route.requires === "pdf") return canSeePdfPortalModule();
   if (route.requires === "blanqueo") return canSeeBlanqueoModule();
+  const sys = route.sistema || sistemaActual;
+  if (route.requires === "transferencia") {
+    return !!sys && !isSistemaPlaceholder(sys) && sys !== "Legal";
+  }
+  if (route.requires === "referral") {
+    return !!sys && !isSistemaPlaceholder(sys);
+  }
   return true;
 }
 
@@ -191,7 +260,7 @@ function syncHistory(name, mode = "push") {
   if (routeSyncing || mode === "none" || name === "placeholder") return;
   const path = pathForView(name);
   const current = normalizePath(window.location.pathname);
-  const state = { st2: name };
+  const state = { st2: name, sistema: sistemaActual };
   if (mode === "replace" || current === path) {
     window.history.replaceState(state, "", path);
   } else {
@@ -267,9 +336,14 @@ function updateSistemaUi() {
 }
 
 function selectSistema(id) {
+  if (!id || SISTEMA_INDEX[id] == null) return;
   sistemaActual = id;
+  rememberSistema(id);
   updateSistemaUi();
   updateTransferenciaPanels();
+  if (!routeSyncing && normalizePath(window.location.pathname) === "/") {
+    window.history.replaceState({ st2: "menu", sistema: id }, "", "/");
+  }
 }
 
 function buildLegalTransPills() {
@@ -989,13 +1063,19 @@ async function revealView(name, historyMode = "push") {
 
 async function applyEntryRoute() {
   const route = routeFromPath(window.location.pathname);
+  if (route.sistema) {
+    selectSistema(route.sistema);
+  } else if (route.view === "transferencia" || route.view === "referral") {
+    selectSistema(readRememberedSistema());
+  }
+
   if (route.unknown || route.view === "menu" || !canOpenRoute(route)) {
     showView("menu", { history: "replace" });
     return;
   }
 
   // Deja el menú debajo en el historial: atrás del navegador no sale de ST2.
-  window.history.replaceState({ st2: "menu" }, "", "/");
+  window.history.replaceState({ st2: "menu", sistema: sistemaActual }, "", "/");
   if (route.view === "oportunidadCargar" || route.view === "oportunidadGestor") {
     await revealView("oportunidadMenu", "push");
   }
@@ -1006,8 +1086,9 @@ function bindPlanillasRouting() {
   window.addEventListener("popstate", () => {
     const fromState = window.history.state?.st2;
     const route = fromState
-      ? { view: fromState, requires: routeFromPath(pathForView(fromState)).requires }
+      ? { view: fromState, requires: routeFromPath(pathForView(fromState)).requires, sistema: window.history.state?.sistema }
       : routeFromPath(window.location.pathname);
+    if (route.sistema) selectSistema(route.sistema);
     void (async () => {
       routeSyncing = true;
       try {
@@ -1195,7 +1276,7 @@ export function goPlanillasHome() {
   if (!views.menu) return;
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
   showView("menu", { history: "replace" });
-  selectSistema("BejermanSql");
+  selectSistema(sistemaActual || readRememberedSistema());
   void refreshModuleFlags().then(() => {
     updateSistemaUi();
   });
@@ -1209,30 +1290,25 @@ export function initPlanillas() {
   bindEvents();
   bindSistemaIndicatorLayout();
   bindPlanillasRouting();
-  selectSistema("BejermanSql");
+  selectSistema(readRememberedSistema());
   initPdfPortalGenerator();
   syncPdfPortalModuleVisibility();
   initBlanqueoModule();
   syncBlanqueoModuleVisibility();
   showView("menu", { history: "none" });
 
-  void refreshModuleFlags().then(async () => {
+  void Promise.all([refreshModuleFlags(), loadConfig()]).then(async () => {
+    updatePlanBuildBadge(planillasConfig?.webBuild);
     updateSistemaUi();
+    if (planillasConfig?.webBuild) {
+      console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
+    }
     await applyEntryRoute();
     // Retrasar polling para no sumar al pico de arranque (Cloudflare 1015/429).
     setTimeout(() => {
       startBlanqueoAlertsPolling();
       renderBlanqueoAlertUi();
     }, 12000);
-  });
-
-  void loadConfig().then(() => {
-    updatePlanBuildBadge(planillasConfig?.webBuild);
-    updateSistemaUi();
-    if (planillasConfig?.webBuild) {
-      console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
-    }
-    // Prefetch diferido: no competir con session/modules/config.
     setTimeout(() => {
       void loadReferralModule();
       void loadOportunidadModule();
