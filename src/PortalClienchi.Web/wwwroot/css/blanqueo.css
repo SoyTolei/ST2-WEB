@@ -184,9 +184,15 @@
 }
 
 .blanqueo-mail-copy:hover .blanqueo-mail-copy-hint,
-.blanqueo-mail-copy:focus-visible .blanqueo-mail-copy-hint {
+.blanqueo-mail-copy:focus-visible .blanqueo-mail-copy-hint,
+.blanqueo-mail-copy.is-copied .blanqueo-mail-copy-hint {
   opacity: 1;
   transform: translateX(0);
+}
+
+.blanqueo-mail-copy.is-copied .blanqueo-mail-copy-hint {
+  background: #047857;
+  color: #ecfdf5;
 }
 
 .blanqueo-clave-code::after {
@@ -208,16 +214,27 @@
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease, background 0.15s ease;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
   z-index: 5;
 }
 
 .blanqueo-clave-code:hover::after,
-.blanqueo-clave-code:focus-visible::after {
+.blanqueo-clave-code:focus-visible::after,
+.blanqueo-clave-code.is-copied::after {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
+}
+
+.blanqueo-clave-code.is-copied {
+  border-color: #059669;
+  background: #ecfdf5;
+}
+
+.blanqueo-clave-code.is-copied::after {
+  background: #047857;
+  color: #ecfdf5;
 }
 
 .blanqueo-mail-copy-icon {

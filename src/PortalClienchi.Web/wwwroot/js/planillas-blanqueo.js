@@ -534,13 +534,36 @@ function syncClaveUi(clave) {
 async function copyClaveBlanqueo() {
   const btn = document.getElementById("blanqueo-clave-copy");
   const value = btn?.dataset.clave || btn?.textContent?.trim() || "Sueldo.2026";
-  await copyText(value, `Clave copiada: ${value}`);
+  await copyText(value, {
+    el: btn,
+    attr: "data-copy-hint",
+    copiedText: "Copiado",
+    restoreText: "Clic para copiar",
+  });
 }
 
-async function copyText(value, okMsg) {
+function flashCopied(el, { hintSelector, copiedText = "Copiado", restoreText = "Copiar", attr } = {}) {
+  if (!el) return;
+  el.classList.add("is-copied");
+  if (attr) el.setAttribute(attr, copiedText);
+  const hint = hintSelector ? el.querySelector(hintSelector) : null;
+  if (hint) hint.textContent = copiedText;
+  const prev = Number(el.dataset.copyFlashTimer || 0);
+  if (prev) window.clearTimeout(prev);
+  const timer = window.setTimeout(() => {
+    el.classList.remove("is-copied");
+    if (attr) el.setAttribute(attr, restoreText);
+    if (hint) hint.textContent = restoreText;
+    delete el.dataset.copyFlashTimer;
+  }, 1600);
+  el.dataset.copyFlashTimer = String(timer);
+}
+
+async function copyText(value, flash) {
   try {
     await navigator.clipboard.writeText(value);
-    setStatus(okMsg || "Copiado.");
+    if (flash?.el) flashCopied(flash.el, flash);
+    else setStatus("Copiado.");
   } catch {
     setStatus(String(value || ""), false);
   }
@@ -821,8 +844,14 @@ function buildRow(item) {
   row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const mail = e.currentTarget.getAttribute("data-blanqueo-copy-mail") || item.correo;
-    void copyText(mail, `Correo copiado: ${mail}`);
+    const btn = e.currentTarget;
+    const mail = btn.getAttribute("data-blanqueo-copy-mail") || item.correo;
+    void copyText(mail, {
+      el: btn,
+      hintSelector: ".blanqueo-mail-copy-hint",
+      copiedText: "copiado",
+      restoreText: "copiar",
+    });
   });
 
   row.addEventListener("click", (e) => {
