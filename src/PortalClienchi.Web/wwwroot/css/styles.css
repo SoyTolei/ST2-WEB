@@ -2492,31 +2492,30 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-about-signature-by {
-  font-family: "Segoe Script", "Segoe Print", "Ink Free", "Bradley Hand ITC", cursive;
-  font-size: 0.92rem;
+  font-family: Georgia, "Palatino Linotype", Palatino, "Times New Roman", serif;
+  font-size: 0.82rem;
   font-weight: 600;
   font-style: italic;
   letter-spacing: 0.02em;
   line-height: 1;
   transform: translateY(-1px);
-  background: linear-gradient(180deg, #157a3c 0%, #d9f3e3 48%, #0f6b34 100%);
+  background: linear-gradient(180deg, #157a3c 0%, #7dcc9a 55%, #0f6b34 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 1px 0 rgba(11, 72, 36, 0.22));
 }
 
 .st2-about-signature-at {
-  font-family: "Segoe Script", "Segoe Print", "Ink Free", "Bradley Hand ITC", cursive;
-  font-size: 1.05rem;
+  font-family: Georgia, "Palatino Linotype", Palatino, "Times New Roman", serif;
+  font-size: 0.98rem;
   font-weight: 700;
+  font-style: italic;
   letter-spacing: 0.04em;
   line-height: 1;
-  background: linear-gradient(115deg, #0b6b35 0%, #2db562 36%, #f4fff8 58%, #1a8c48 100%);
+  background: linear-gradient(115deg, #0b6b35 0%, #2db562 42%, #b7e7c8 68%, #157a3c 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 1px 0 rgba(11, 72, 36, 0.28));
 }
 
 .st2-about-signature-handle {

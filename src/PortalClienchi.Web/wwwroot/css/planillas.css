@@ -47,18 +47,16 @@
   gap: 6px;
   text-align: center;
   max-width: 28rem;
-  padding-top: 14px;
+  padding: 8px 6px 4px;
+  overflow: hidden;
 }
 
 .st2-suite-sig-stage {
   position: absolute;
-  left: 50%;
-  top: -2px;
-  width: min(360px, 92vw);
-  height: 48px;
-  transform: translateX(-50%);
+  inset: 0;
+  z-index: 0;
   pointer-events: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .st2-suite-float {
@@ -68,13 +66,13 @@
   justify-content: center;
   line-height: 1;
   opacity: 0;
-  filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.12));
+  filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.1));
   will-change: transform, opacity;
 }
 
 .st2-suite-float--crest {
-  left: 4%;
-  top: 10px;
+  left: 6%;
+  top: 12%;
   width: 15px;
   height: 15px;
   object-fit: contain;
@@ -82,8 +80,8 @@
 }
 
 .st2-suite-float--crest2 {
-  right: 3%;
-  top: 4px;
+  right: 8%;
+  top: 58%;
   width: 13px;
   height: 13px;
   object-fit: contain;
@@ -91,8 +89,8 @@
 }
 
 .st2-suite-float--crest3 {
-  left: 62%;
-  top: 14px;
+  left: 18%;
+  top: 78%;
   width: 12px;
   height: 12px;
   object-fit: contain;
@@ -100,91 +98,91 @@
 }
 
 .st2-suite-float--bike {
-  left: 14%;
-  top: 2px;
+  left: 22%;
+  top: 38%;
   font-size: 0.92rem;
   animation: st2SuiteDriftR 10s ease-in-out infinite 1.2s;
 }
 
 .st2-suite-float--bike2 {
-  right: 8%;
-  top: 18px;
+  right: 14%;
+  top: 82%;
   font-size: 0.78rem;
   animation: st2SuiteDriftL 11s ease-in-out infinite 4.5s;
 }
 
 .st2-suite-float--web {
-  left: 28%;
-  top: 18px;
+  left: 8%;
+  top: 52%;
   font-size: 0.78rem;
   animation: st2SuiteDriftUp 8.5s ease-in-out infinite 0.6s;
 }
 
 .st2-suite-float--sql {
-  right: 28%;
-  top: 2px;
+  right: 6%;
+  top: 28%;
   font-size: 0.78rem;
   animation: st2SuiteDriftUp 9.5s ease-in-out infinite 2.8s;
 }
 
 .st2-suite-float--bat {
-  right: 16%;
-  top: 8px;
+  right: 28%;
+  top: 68%;
   font-size: 0.78rem;
   animation: st2SuiteDriftL 10.5s ease-in-out infinite 3.4s;
 }
 
 .st2-suite-float--tree {
-  left: 40%;
-  top: 0;
+  left: 42%;
+  top: 22%;
   font-size: 0.72rem;
   animation: st2SuiteDriftR 9.8s ease-in-out infinite 5.1s;
 }
 
 .st2-suite-float--pine {
-  right: 40%;
-  top: 20px;
+  right: 38%;
+  top: 48%;
   font-size: 0.72rem;
   animation: st2SuiteDriftUp 8.8s ease-in-out infinite 6.2s;
 }
 
 .st2-suite-float--leaf {
-  left: 52%;
-  top: 16px;
+  left: 72%;
+  top: 74%;
   font-size: 0.68rem;
   animation: st2SuiteDriftL 9.2s ease-in-out infinite 7s;
 }
 
 .st2-suite-float--seed {
-  right: 52%;
-  top: 4px;
+  left: 52%;
+  top: 86%;
   font-size: 0.68rem;
   animation: st2SuiteDriftR 8.2s ease-in-out infinite 1.8s;
 }
 
-/* Vuelan y se desvanecen: no quedan apilados en el mismo punto. */
+/* Recorren el bloque en horizontal; el recorte evita que se vayan para arriba. */
 @keyframes st2SuiteDriftL {
-  0% { opacity: 0; transform: translate(18px, 6px) scale(0.85); }
-  12% { opacity: 0.9; }
-  50% { opacity: 0.85; transform: translate(-10px, -5px) scale(1); }
-  88% { opacity: 0.75; }
-  100% { opacity: 0; transform: translate(-28px, 4px) scale(0.9); }
+  0% { opacity: 0; transform: translate(14px, 3px) scale(0.88); }
+  12% { opacity: 0.72; }
+  50% { opacity: 0.62; transform: translate(-8px, -2px) scale(1); }
+  88% { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(-18px, 2px) scale(0.92); }
 }
 
 @keyframes st2SuiteDriftR {
-  0% { opacity: 0; transform: translate(-18px, 5px) scale(0.85); }
-  12% { opacity: 0.9; }
-  50% { opacity: 0.85; transform: translate(10px, -6px) scale(1); }
-  88% { opacity: 0.75; }
-  100% { opacity: 0; transform: translate(28px, 3px) scale(0.9); }
+  0% { opacity: 0; transform: translate(-14px, 2px) scale(0.88); }
+  12% { opacity: 0.72; }
+  50% { opacity: 0.62; transform: translate(8px, -2px) scale(1); }
+  88% { opacity: 0.5; }
+  100% { opacity: 0; transform: translate(18px, 2px) scale(0.92); }
 }
 
 @keyframes st2SuiteDriftUp {
-  0% { opacity: 0; transform: translateY(10px) scale(0.85); }
-  14% { opacity: 0.9; }
-  50% { opacity: 0.85; transform: translateY(-8px) scale(1); }
-  86% { opacity: 0.7; }
-  100% { opacity: 0; transform: translateY(-16px) scale(0.88); }
+  0% { opacity: 0; transform: translateY(5px) scale(0.9); }
+  14% { opacity: 0.7; }
+  50% { opacity: 0.58; transform: translateY(-3px) scale(1); }
+  86% { opacity: 0.45; }
+  100% { opacity: 0; transform: translateY(-6px) scale(0.92); }
 }
 
 .st2-suite-sig-mark {
@@ -204,6 +202,8 @@
 }
 
 .st2-suite-sig-line {
+  position: relative;
+  z-index: 1;
   margin: 0;
   font-size: 0.7rem;
   font-weight: 500;
@@ -214,6 +214,8 @@
 }
 
 .st2-suite-sig-tools {
+  position: relative;
+  z-index: 1;
   margin: 0;
   padding-top: 6px;
   border-top: 1px solid #e2e8f0;
