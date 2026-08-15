@@ -320,7 +320,10 @@ function initPortalPicker() {
   const portals = appConfig?.portals ?? [];
   if (!portals.length || !portalSistemaPills) return;
 
-  activePortalId = appConfig?.defaultPortalId ?? portals[0]?.id ?? "bejerman";
+  const fromPath = portalIdFromPath(window.location.pathname);
+  activePortalId = (fromPath && portals.some((p) => p.id === fromPath))
+    ? fromPath
+    : (appConfig?.defaultPortalId ?? portals[0]?.id ?? "bejerman");
   portalSistemaPills.innerHTML = portals
     .map(
       (p) =>
@@ -350,8 +353,13 @@ function resetPortalSearchUi() {
   showIdleResultsState();
 }
 
-async function switchPortal(portalId) {
-  if (!portalId || portalId === activePortalId) return;
+async function switchPortal(portalId, { history = "push" } = {}) {
+  if (!portalId || portalId === activePortalId) {
+    if (history !== "none" && document.querySelector('.tab-btn.active[data-tab="portal"]')) {
+      syncTabHistory("portal", history);
+    }
+    return;
+  }
   activePortalId = portalId;
 
   for (const btn of portalSistemaPills?.querySelectorAll(".portal-sistema-pill") ?? []) {
@@ -363,6 +371,9 @@ async function switchPortal(portalId) {
   searchInput.value = "";
   if (typeFilter.options.length) typeFilter.selectedIndex = 0;
   resetPortalSearchUi();
+  if (history !== "none" && document.querySelector('.tab-btn.active[data-tab="portal"]')) {
+    syncTabHistory("portal", history);
+  }
   await checkHealth();
 }
 
@@ -1792,7 +1803,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.querySelectorAll(".tab-btn").forEach((btn) => {
-  btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  btn.addEventListener("click", () => navigateTab(btn.dataset.tab));
 });
 
 function getEmbedFrameUrl(kind) {
@@ -1917,6 +1928,8 @@ function onThomPortalChange(id) {
 
   // Las pastillas siempre abren/reabren THOM (no dejar al usuario en el gate).
   if (!document.querySelector('.tab-btn.active[data-tab="thom"]')) return;
+
+  if (!shellRouteSyncing) syncTabHistory("thom", same ? "replace" : "push");
 
   if (isThomWindowMode()) {
     showThomPanelPlaceholder();
@@ -2547,9 +2560,109 @@ function setEmbedHint(kind, message) {
 function goHome() {
   hideAbout();
   closeThomPopup();
-  goPlanillasHome();
   switchTab("planillas");
+  goPlanillasHome({ history: "replace" });
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function normalizeShellPath(pathname) {
+  const raw = String(pathname || "/").split("?")[0].split("#")[0];
+  if (!raw || raw === "/") return "/";
+  return raw.replace(/\/+$/, "") || "/";
+}
+
+function tabFromPath(pathname) {
+  const p = normalizeShellPath(pathname);
+  if (p === "/ai") return "ai";
+  if (p === "/portal" || p.startsWith("/portal/")) return "portal";
+  if (p === "/thom" || p.startsWith("/thom/")) return "thom";
+  return "planillas";
+}
+
+function thomPortalFromPath(pathname) {
+  const p = normalizeShellPath(pathname);
+  if (p.startsWith("/thom/")) {
+    const slug = p.slice("/thom/".length).split("/")[0];
+    if (THOM_PORTALS[slug]) return slug;
+  }
+  return thomPortalId;
+}
+
+function portalIdFromPath(pathname) {
+  const p = normalizeShellPath(pathname);
+  if (p.startsWith("/portal/")) {
+    return p.slice("/portal/".length).split("/")[0] || null;
+  }
+  return null;
+}
+
+function pathForTab(tabId) {
+  if (tabId === "thom") return `/thom/${thomPortalId || "bejerman"}`;
+  if (tabId === "ai") return "/ai";
+  if (tabId === "portal") {
+    return activePortalId ? `/portal/${activePortalId}` : "/portal";
+  }
+  return "/";
+}
+
+function titleForTab(tabId) {
+  if (tabId === "thom") return "ST2 · THOM";
+  if (tabId === "ai") return "ST2 · AI Platform";
+  if (tabId === "portal") return "ST2 · Portal Cliente";
+  return "ST2";
+}
+
+let shellRouteSyncing = false;
+
+function syncTabHistory(tabId, mode = "push") {
+  if (shellRouteSyncing || mode === "none") return;
+  const path = pathForTab(tabId);
+  const current = normalizeShellPath(window.location.pathname);
+  const state = { tab: tabId, thomPortal: thomPortalId, portalId: activePortalId };
+  if (mode === "replace" || current === path) {
+    window.history.replaceState(state, "", path);
+  } else {
+    window.history.pushState(state, "", path);
+  }
+}
+
+function navigateTab(tabId, { history = "push" } = {}) {
+  if (!tabId) return;
+  const currentTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
+  if (tabId === "planillas") {
+    switchTab("planillas");
+    if (currentTab && currentTab !== "planillas") {
+      goPlanillasHome({ history });
+    }
+    return;
+  }
+
+  switchTab(tabId);
+  document.title = titleForTab(tabId);
+  if (tabId === "thom") {
+    const fromPath = thomPortalFromPath(window.location.pathname);
+    if (fromPath && fromPath !== thomPortalId) setThomPortalId(fromPath);
+  }
+  if (tabId === "portal") {
+    const fromPath = portalIdFromPath(window.location.pathname);
+    if (fromPath && fromPath !== activePortalId) {
+      void switchPortal(fromPath, { history: "none" });
+    }
+  }
+  syncTabHistory(tabId, history);
+}
+
+function applyTopTabEntry() {
+  const tab = tabFromPath(window.location.pathname);
+  if (tab === "planillas") return;
+
+  const thom = thomPortalFromPath(window.location.pathname);
+  if (tab === "thom" && thom) setThomPortalId(thom);
+  const portal = portalIdFromPath(window.location.pathname);
+  if (tab === "portal" && portal) activePortalId = portal;
+
+  window.history.replaceState({ tab: "planillas" }, "", "/");
+  navigateTab(tab, { history: "push" });
 }
 
 function switchTab(tabId) {
@@ -2642,7 +2755,26 @@ setPreviewIdle(true);
 
 async function bootstrapApp() {
   await ensureAppAccess();
-  void initPlanillas();
+  await initPlanillas();
+  applyTopTabEntry();
+  window.addEventListener("popstate", () => {
+    const tab = tabFromPath(window.location.pathname);
+    shellRouteSyncing = true;
+    try {
+      if (tab === "planillas") {
+        switchTab("planillas");
+        return;
+      }
+      const thom = thomPortalFromPath(window.location.pathname);
+      if (tab === "thom" && thom) setThomPortalId(thom);
+      const portal = portalIdFromPath(window.location.pathname);
+      if (tab === "portal" && portal) void switchPortal(portal, { history: "none" });
+      switchTab(tab);
+      document.title = titleForTab(tab);
+    } finally {
+      shellRouteSyncing = false;
+    }
+  });
   // Escalonar el resto para no saturar Cloudflare en el primer segundo.
   setTimeout(() => {
     void bootstrapPortal();

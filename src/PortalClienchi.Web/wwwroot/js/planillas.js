@@ -183,7 +183,7 @@ function pathForView(name) {
     case "oportunidadMenu": return "/oportunidad";
     case "oportunidadCargar": return "/oportunidad/cargar";
     case "oportunidadGestor": return "/oportunidad/gestor";
-    case "pdfPortal": return "/pdf";
+    case "pdfPortal": return "/pdfportal";
     case "blanqueo": return "/blanqueo";
     default: return "/";
   }
@@ -201,9 +201,21 @@ function parseSistemaRoute(pathname, prefix) {
   return null;
 }
 
+function isForeignAppPath(pathname) {
+  const p = normalizePath(pathname);
+  return p === "/thom" || p.startsWith("/thom/")
+    || p === "/ai"
+    || p === "/portal" || p.startsWith("/portal/");
+}
+
+export function isPlanillasPath(pathname = window.location.pathname) {
+  return !isForeignAppPath(pathname);
+}
+
 function routeFromPath(pathname) {
   const p = normalizePath(pathname);
-  if (p === "/pdf-portal") return { view: "pdfPortal", requires: "pdf" };
+  if (isForeignAppPath(p)) return { view: "menu", foreign: true };
+  if (p === "/pdfportal" || p === "/pdf-portal" || p === "/pdf") return { view: "pdfPortal", requires: "pdf" };
   if (p === "/planillas" || p === "/index.html") return { view: "menu" };
 
   const transferencia = parseSistemaRoute(pathname, "/transferencia");
@@ -220,7 +232,6 @@ function routeFromPath(pathname) {
     case "/oportunidad": return { view: "oportunidadMenu", requires: "oportunidad" };
     case "/oportunidad/cargar": return { view: "oportunidadCargar", requires: "oportunidad" };
     case "/oportunidad/gestor": return { view: "oportunidadGestor", requires: "oportunidad" };
-    case "/pdf": return { view: "pdfPortal", requires: "pdf" };
     case "/blanqueo": return { view: "blanqueo", requires: "blanqueo" };
     default: return { view: "menu", unknown: true };
   }
@@ -1063,6 +1074,7 @@ async function revealView(name, historyMode = "push") {
 
 async function applyEntryRoute() {
   const route = routeFromPath(window.location.pathname);
+  if (route.foreign) return;
   if (route.sistema) {
     selectSistema(route.sistema);
   } else if (route.view === "transferencia" || route.view === "referral") {
@@ -1084,6 +1096,7 @@ async function applyEntryRoute() {
 
 function bindPlanillasRouting() {
   window.addEventListener("popstate", () => {
+    if (!isPlanillasPath(window.location.pathname)) return;
     const fromState = window.history.state?.st2;
     const route = fromState
       ? { view: fromState, requires: routeFromPath(pathForView(fromState)).requires, sistema: window.history.state?.sistema }
@@ -1272,10 +1285,10 @@ function loadOportunidadModule() {
   return oportunidadModulePromise;
 }
 
-export function goPlanillasHome() {
+export function goPlanillasHome({ history = "replace" } = {}) {
   if (!views.menu) return;
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
-  showView("menu", { history: "replace" });
+  showView("menu", { history });
   selectSistema(sistemaActual || readRememberedSistema());
   void refreshModuleFlags().then(() => {
     updateSistemaUi();
@@ -1283,7 +1296,7 @@ export function goPlanillasHome() {
 }
 
 export function initPlanillas() {
-  if (!views.menu) return;
+  if (!views.menu) return Promise.resolve();
 
   injectModuleHeaders();
   initTransferenciaIaUi();
@@ -1297,7 +1310,7 @@ export function initPlanillas() {
   syncBlanqueoModuleVisibility();
   showView("menu", { history: "none" });
 
-  void Promise.all([refreshModuleFlags(), loadConfig()]).then(async () => {
+  return Promise.all([refreshModuleFlags(), loadConfig()]).then(async () => {
     updatePlanBuildBadge(planillasConfig?.webBuild);
     updateSistemaUi();
     if (planillasConfig?.webBuild) {
