@@ -390,6 +390,7 @@ async function loadAppConfig() {
   applyEmbedZoom("thom");
   applyEmbedZoom("ai");
   updateThomDirectUi();
+  applyAboutUpdated();
   const activeThom = document.querySelector('.tab-btn.active[data-tab="thom"]');
   if (activeThom) activateThomTab();
 }
@@ -719,6 +720,21 @@ function getAboutVersionLabel() {
   const meta = document.querySelector('meta[name="st2-version-label"]');
   if (meta?.content?.trim()) return meta.content.trim();
   return "Versión WEB";
+}
+
+function getAboutUpdatedLabel() {
+  const fromConfig = appConfig?.webUpdatedLabel?.trim();
+  if (fromConfig) return fromConfig;
+  const meta = document.querySelector('meta[name="st2-updated-label"]');
+  if (meta?.content?.trim()) return meta.content.trim();
+  const current = aboutUpdatedEl?.textContent?.trim();
+  return current || "Última actualización";
+}
+
+function applyAboutUpdated() {
+  if (!aboutUpdatedEl) return;
+  aboutUpdatedEl.textContent = getAboutUpdatedLabel();
+  aboutUpdatedEl.classList.remove("hidden");
 }
 
 /**
@@ -1589,11 +1605,7 @@ function showAbout() {
   if (aboutTaglineEl) {
     aboutTaglineEl.textContent = getAboutVersionLabel();
   }
-  if (aboutUpdatedEl) {
-    const updated = appConfig?.webUpdatedLabel?.trim();
-    aboutUpdatedEl.textContent = updated || "";
-    aboutUpdatedEl.classList.toggle("hidden", !updated);
-  }
+  applyAboutUpdated();
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
   aboutCloseBtn?.focus();
@@ -2754,6 +2766,7 @@ resultsEmpty?.setAttribute("data-mode", "idle");
 setPreviewIdle(true);
 
 async function bootstrapApp() {
+  applyAboutUpdated();
   await ensureAppAccess();
   await initPlanillas();
   applyTopTabEntry();

@@ -47,8 +47,13 @@ public static class St2IndexHtml
         sb.AppendLine("</script>");
         sb.AppendLine($"<meta name=\"st2-build\" content=\"{WebUtility.HtmlEncode(build)}\"/>");
         sb.AppendLine($"<meta name=\"st2-version-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetVersionLabel())}\"/>");
+        sb.AppendLine($"<meta name=\"st2-updated-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetUpdatedLabel())}\"/>");
 
         html = html.Replace("</head>", sb + "</head>", StringComparison.OrdinalIgnoreCase);
+        html = html.Replace(
+            "<p id=\"st2-about-updated\" class=\"st2-about-updated\" aria-live=\"polite\">Última actualización</p>",
+            $"<p id=\"st2-about-updated\" class=\"st2-about-updated\" aria-live=\"polite\">{WebUtility.HtmlEncode(St2WebBuild.GetUpdatedLabel())}</p>",
+            StringComparison.Ordinal);
         html = html.Replace("/css/styles.css", $"/css/styles.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/planillas.css", $"/css/planillas.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);
