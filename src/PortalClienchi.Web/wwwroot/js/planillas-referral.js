@@ -450,7 +450,10 @@ function bindOnvioCard(cardId, checkId, onChange) {
 }
 
 function bindReferralEvents() {
-  document.querySelector("[data-plan-back-referral]")?.addEventListener("click", () => ctx.showView("menu"));
+  document.querySelector("[data-plan-back-referral]")?.addEventListener("click", () => {
+    if (ctx.goPlanillasMenu) ctx.goPlanillasMenu();
+    else ctx.showView("menu");
+  });
 
   document.getElementById("ref-bejerman-panel")?.addEventListener("click", (e) => {
     const v = e.target.closest("[data-version]");

@@ -93,7 +93,7 @@ app.Use(async (ctx, next) =>
 app.Use(async (ctx, next) =>
 {
     if (HttpMethods.IsGet(ctx.Request.Method)
-        && (ctx.Request.Path == "/" || ctx.Request.Path.Equals("/index.html", StringComparison.OrdinalIgnoreCase)))
+        && St2AppRoutes.IsAppShell(ctx.Request.Path))
     {
         var env = ctx.RequestServices.GetRequiredService<IWebHostEnvironment>();
         var html = await St2IndexHtml.LoadAsync(env, ctx.RequestAborted).ConfigureAwait(false);

@@ -91,6 +91,9 @@ internal sealed class EmbedSiteProxy
 
     private static bool IsSt2OwnedPath(string value)
     {
+        if (St2AppRoutes.IsAppShell(value))
+            return true;
+
         if (St2ReservedExact.Contains(value, StringComparer.OrdinalIgnoreCase))
             return true;
 

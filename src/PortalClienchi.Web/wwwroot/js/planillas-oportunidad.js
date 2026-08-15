@@ -39,6 +39,14 @@ export function openOportunidadMenu() {
   ctx.showView("oportunidadMenu");
 }
 
+export function openOportunidadCargar() {
+  openCargar();
+}
+
+export async function openOportunidadGestor() {
+  await openGestor();
+}
+
 function sistemaLabel() {
   const id = ctx.getSistema();
   return {
@@ -50,9 +58,18 @@ function sistemaLabel() {
 }
 
 function bindOportunidadEvents() {
-  document.querySelector("[data-plan-back-op-menu]")?.addEventListener("click", () => ctx.showView("menu"));
-  document.querySelector("[data-plan-back-op-cargar]")?.addEventListener("click", () => ctx.showView("oportunidadMenu"));
-  document.querySelector("[data-plan-back-op-gestor]")?.addEventListener("click", () => ctx.showView("oportunidadMenu"));
+  document.querySelector("[data-plan-back-op-menu]")?.addEventListener("click", () => {
+    if (ctx.goPlanillasMenu) ctx.goPlanillasMenu();
+    else ctx.showView("menu");
+  });
+  document.querySelector("[data-plan-back-op-cargar]")?.addEventListener("click", () => {
+    if (ctx.goOportunidadMenu) ctx.goOportunidadMenu();
+    else ctx.showView("oportunidadMenu");
+  });
+  document.querySelector("[data-plan-back-op-gestor]")?.addEventListener("click", () => {
+    if (ctx.goOportunidadMenu) ctx.goOportunidadMenu();
+    else ctx.showView("oportunidadMenu");
+  });
 
   document.querySelectorAll("[data-op-view]").forEach((card) => {
     const go = () => {

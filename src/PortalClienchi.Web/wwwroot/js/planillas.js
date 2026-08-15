@@ -127,12 +127,86 @@ const els = {
   btnVerPlanilla: () => document.getElementById("plan-btn-ver-planilla"),
 };
 
-function showView(name) {
+function normalizePath(pathname) {
+  const raw = String(pathname || "/").split("?")[0].split("#")[0];
+  if (!raw || raw === "/") return "/";
+  const trimmed = raw.replace(/\/+$/, "");
+  return trimmed || "/";
+}
+
+function pathForView(name) {
+  switch (name) {
+    case "transferencia": return "/transferencia";
+    case "referral": return "/referral";
+    case "oportunidadMenu": return "/oportunidad";
+    case "oportunidadCargar": return "/oportunidad/cargar";
+    case "oportunidadGestor": return "/oportunidad/gestor";
+    case "pdfPortal": return "/pdf";
+    case "blanqueo": return "/blanqueo";
+    default: return "/";
+  }
+}
+
+function routeFromPath(pathname) {
+  const p = normalizePath(pathname);
+  if (p === "/pdf-portal") return { view: "pdfPortal", requires: "pdf" };
+  if (p === "/planillas" || p === "/index.html") return { view: "menu" };
+  switch (p) {
+    case "/": return { view: "menu" };
+    case "/transferencia": return { view: "transferencia" };
+    case "/referral": return { view: "referral" };
+    case "/oportunidad": return { view: "oportunidadMenu", requires: "oportunidad" };
+    case "/oportunidad/cargar": return { view: "oportunidadCargar", requires: "oportunidad" };
+    case "/oportunidad/gestor": return { view: "oportunidadGestor", requires: "oportunidad" };
+    case "/pdf": return { view: "pdfPortal", requires: "pdf" };
+    case "/blanqueo": return { view: "blanqueo", requires: "blanqueo" };
+    default: return { view: "menu", unknown: true };
+  }
+}
+
+function canOpenRoute(route) {
+  if (!route?.requires) return true;
+  if (route.requires === "oportunidad") return canSeeOportunidadModule();
+  if (route.requires === "pdf") return canSeePdfPortalModule();
+  if (route.requires === "blanqueo") return canSeeBlanqueoModule();
+  return true;
+}
+
+function titleForView(name) {
+  switch (name) {
+    case "transferencia": return "ST2 · Transferencia";
+    case "referral": return "ST2 · Referral I+D";
+    case "oportunidadMenu":
+    case "oportunidadCargar":
+    case "oportunidadGestor": return "ST2 · Oportunidad";
+    case "pdfPortal": return "ST2 · Generador PDF";
+    case "blanqueo": return "ST2 · Blanqueo";
+    default: return "ST2";
+  }
+}
+
+let routeSyncing = false;
+
+function syncHistory(name, mode = "push") {
+  if (routeSyncing || mode === "none" || name === "placeholder") return;
+  const path = pathForView(name);
+  const current = normalizePath(window.location.pathname);
+  const state = { st2: name };
+  if (mode === "replace" || current === path) {
+    window.history.replaceState(state, "", path);
+  } else {
+    window.history.pushState(state, "", path);
+  }
+}
+
+function showView(name, { history = "push" } = {}) {
   Object.entries(views).forEach(([key, el]) => {
     if (!el) return;
     el.classList.toggle("hidden", key !== name);
   });
   injectModuleHeaders();
+  document.title = titleForView(name);
+  syncHistory(name, history);
 }
 
 function setSistemaIndicator(index) {
@@ -804,11 +878,149 @@ function setModuleLoading(overlayId, active) {
   overlay.setAttribute("aria-busy", active ? "true" : "false");
 }
 
-function openReferralShell() {
+function openReferralShell(historyMode = "push") {
   const badge = document.getElementById("ref-sistema-badge");
   if (badge) badge.textContent = sistemaDisplayLabel(sistemaActual);
   setModuleLoading("plan-referral-loading", true);
-  showView("referral");
+  showView("referral", { history: historyMode });
+}
+
+function goBackToPlanillasMenu() {
+  document.dispatchEvent(new CustomEvent("st2:planillas-home"));
+  const st = window.history.state?.st2;
+  if (st && st !== "menu") {
+    window.history.back();
+    return;
+  }
+  showView("menu", { history: "replace" });
+  void refreshModuleFlags().then(() => updateSistemaUi());
+}
+
+function goBackToOportunidadMenu() {
+  const st = window.history.state?.st2;
+  if (st === "oportunidadCargar" || st === "oportunidadGestor") {
+    window.history.back();
+    return;
+  }
+  void revealView("oportunidadMenu", "replace");
+}
+
+async function revealView(name, historyMode = "push") {
+  if (name === "menu" || name === "placeholder") {
+    if (name === "menu") {
+      document.dispatchEvent(new CustomEvent("st2:planillas-home"));
+    }
+    showView(name, { history: historyMode });
+    if (name === "menu") {
+      void refreshModuleFlags().then(() => updateSistemaUi());
+    }
+    return;
+  }
+
+  if (name === "transferencia") {
+    if (!sistemaActual || isSistemaPlaceholder(sistemaActual) || isLegal()) {
+      showView("menu", { history: "replace" });
+      return;
+    }
+    initTransferenciaForm();
+    showView("transferencia", { history: historyMode });
+    return;
+  }
+
+  if (name === "referral") {
+    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) {
+      showView("menu", { history: "replace" });
+      return;
+    }
+    openReferralShell(historyMode);
+    try {
+      const mod = await loadReferralModule();
+      mod.openReferral();
+      showView("referral", { history: historyMode });
+    } finally {
+      setModuleLoading("plan-referral-loading", false);
+    }
+    return;
+  }
+
+  if (name === "oportunidadMenu" || name === "oportunidadCargar" || name === "oportunidadGestor") {
+    if (!canSeeOportunidadModule() || !sistemaActual || isSistemaPlaceholder(sistemaActual) || isLegal()) {
+      showView("menu", { history: "replace" });
+      return;
+    }
+    const mod = await loadOportunidadModule();
+    if (name === "oportunidadCargar") {
+      mod.openOportunidadCargar();
+      showView("oportunidadCargar", { history: historyMode });
+      return;
+    }
+    if (name === "oportunidadGestor") {
+      await mod.openOportunidadGestor();
+      if (!views.oportunidadGestor?.classList.contains("hidden")) {
+        showView("oportunidadGestor", { history: historyMode });
+      }
+      return;
+    }
+    mod.openOportunidadMenu();
+    showView("oportunidadMenu", { history: historyMode });
+    return;
+  }
+
+  if (name === "pdfPortal") {
+    if (!canSeePdfPortalModule()) {
+      showView("menu", { history: "replace" });
+      return;
+    }
+    initPdfPortalGenerator();
+    showView("pdfPortal", { history: historyMode });
+    return;
+  }
+
+  if (name === "blanqueo") {
+    if (!canSeeBlanqueoModule()) {
+      showView("menu", { history: "replace" });
+      return;
+    }
+    showView("blanqueo", { history: historyMode });
+    await openBlanqueoModule();
+    await markBlanqueoAlertsSeen();
+  }
+}
+
+async function applyEntryRoute() {
+  const route = routeFromPath(window.location.pathname);
+  if (route.unknown || route.view === "menu" || !canOpenRoute(route)) {
+    showView("menu", { history: "replace" });
+    return;
+  }
+
+  // Deja el menú debajo en el historial: atrás del navegador no sale de ST2.
+  window.history.replaceState({ st2: "menu" }, "", "/");
+  if (route.view === "oportunidadCargar" || route.view === "oportunidadGestor") {
+    await revealView("oportunidadMenu", "push");
+  }
+  await revealView(route.view, "push");
+}
+
+function bindPlanillasRouting() {
+  window.addEventListener("popstate", () => {
+    const fromState = window.history.state?.st2;
+    const route = fromState
+      ? { view: fromState, requires: routeFromPath(pathForView(fromState)).requires }
+      : routeFromPath(window.location.pathname);
+    void (async () => {
+      routeSyncing = true;
+      try {
+        if (!canOpenRoute(route) || route.unknown) {
+          showView("menu", { history: "replace" });
+          return;
+        }
+        await revealView(route.view, "none");
+      } finally {
+        routeSyncing = false;
+      }
+    })();
+  });
 }
 
 function bindSistemaIndicatorLayout() {
@@ -830,61 +1042,35 @@ function bindEvents() {
   });
 
   document.querySelector('[data-plan-modulo="transferencia"]')?.addEventListener("click", () => {
-    if (!sistemaActual || isSistemaPlaceholder(sistemaActual) || isLegal()) return;
-    initTransferenciaForm();
-    showView("transferencia");
+    void revealView("transferencia");
   });
 
-  document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("click", async () => {
-    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
-    openReferralShell();
-    try {
-      const mod = await loadReferralModule();
-      mod.openReferral();
-    } finally {
-      setModuleLoading("plan-referral-loading", false);
-    }
+  document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("click", () => {
+    void revealView("referral");
   });
 
   document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("pointerenter", () => {
     void loadReferralModule();
   }, { passive: true });
 
-  document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", async () => {
-    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) return;
-    if (!canSeeOportunidadModule()) return;
-    const mod = await loadOportunidadModule();
-    mod.openOportunidadMenu();
+  document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", () => {
+    void revealView("oportunidadMenu");
   });
 
   document.querySelector('[data-plan-modulo="pdf-portal"]')?.addEventListener("click", () => {
-    if (!canSeePdfPortalModule()) return;
-    initPdfPortalGenerator();
-    showView("pdfPortal");
+    void revealView("pdfPortal");
   });
 
-  document.querySelector('[data-plan-modulo="blanqueo"]')?.addEventListener("click", async () => {
-    if (!canSeeBlanqueoModule()) return;
-    showView("blanqueo");
-    await openBlanqueoModule();
-    await markBlanqueoAlertsSeen();
+  document.querySelector('[data-plan-modulo="blanqueo"]')?.addEventListener("click", () => {
+    void revealView("blanqueo");
   });
 
   document.addEventListener("st2:open-blanqueo-from-alert", () => {
-    void (async () => {
-      if (!canSeeBlanqueoModule()) return;
-      showView("blanqueo");
-      await openBlanqueoModule();
-      await markBlanqueoAlertsSeen();
-    })();
+    void revealView("blanqueo");
   });
 
   document.querySelectorAll("[data-plan-back]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document.dispatchEvent(new CustomEvent("st2:planillas-home"));
-      showView("menu");
-      void refreshModuleFlags().then(() => updateSistemaUi());
-    });
+    btn.addEventListener("click", () => goBackToPlanillasMenu());
   });
 
   els.mesaBtns().forEach((btn) => {
@@ -978,6 +1164,8 @@ const planillasContext = {
   showView,
   getSistema: () => sistemaActual,
   getConfig: () => planillasConfig,
+  goPlanillasMenu: goBackToPlanillasMenu,
+  goOportunidadMenu: goBackToOportunidadMenu,
 };
 
 let referralModulePromise = null;
@@ -1005,9 +1193,8 @@ function loadOportunidadModule() {
 
 export function goPlanillasHome() {
   if (!views.menu) return;
-  // Invalidar cargas en vuelo del módulo abierto (evita errores fantasma al volver).
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
-  showView("menu");
+  showView("menu", { history: "replace" });
   selectSistema("BejermanSql");
   void refreshModuleFlags().then(() => {
     updateSistemaUi();
@@ -1021,15 +1208,17 @@ export function initPlanillas() {
   initTransferenciaIaUi();
   bindEvents();
   bindSistemaIndicatorLayout();
+  bindPlanillasRouting();
   selectSistema("BejermanSql");
   initPdfPortalGenerator();
   syncPdfPortalModuleVisibility();
   initBlanqueoModule();
   syncBlanqueoModuleVisibility();
-  showView("menu");
+  showView("menu", { history: "none" });
 
-  void refreshModuleFlags().then(() => {
+  void refreshModuleFlags().then(async () => {
     updateSistemaUi();
+    await applyEntryRoute();
     // Retrasar polling para no sumar al pico de arranque (Cloudflare 1015/429).
     setTimeout(() => {
       startBlanqueoAlertsPolling();
