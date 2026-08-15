@@ -81,6 +81,24 @@
   animation: st2SuiteDriftL 9s ease-in-out infinite;
 }
 
+.st2-suite-float--crest2 {
+  right: 3%;
+  top: 4px;
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
+  animation: st2SuiteDriftR 11.2s ease-in-out infinite 3.4s;
+}
+
+.st2-suite-float--crest3 {
+  left: 62%;
+  top: 14px;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  animation: st2SuiteDriftUp 8.6s ease-in-out infinite 6.8s;
+}
+
 .st2-suite-float--bike {
   left: 14%;
   top: 2px;
