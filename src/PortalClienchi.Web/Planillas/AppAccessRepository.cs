@@ -98,19 +98,70 @@ public sealed class AppAccessRepository
         if (!StorageReady || AppAccessExclusions.IsExcluded(email))
             return;
 
-        var now = UtcNowIso();
+        var now = DateTime.UtcNow;
+        var nowIso = now.ToString("O", CultureInfo.InvariantCulture);
+
         using var conn = Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            INSERT INTO app_access (email, first_seen_at, last_seen_at, login_count)
-            VALUES ($email, $now, $now, 1)
-            ON CONFLICT(email) DO UPDATE SET
-                last_seen_at = excluded.last_seen_at,
-                login_count = login_count + 1
-            """;
-        cmd.Parameters.AddWithValue("$email", email);
-        cmd.Parameters.AddWithValue("$now", now);
-        cmd.ExecuteNonQuery();
+        using var tx = conn.BeginTransaction();
+
+        string? lastLoginAt = null;
+        var exists = false;
+        using (var sel = conn.CreateCommand())
+        {
+            sel.Transaction = tx;
+            sel.CommandText = """
+                SELECT last_login_at
+                FROM app_access
+                WHERE email = $email
+                """;
+            sel.Parameters.AddWithValue("$email", email);
+            using var reader = sel.ExecuteReader();
+            if (reader.Read())
+            {
+                exists = true;
+                lastLoginAt = reader.IsDBNull(0) ? null : reader.GetString(0);
+            }
+        }
+
+        if (!exists)
+        {
+            using var ins = conn.CreateCommand();
+            ins.Transaction = tx;
+            ins.CommandText = """
+                INSERT INTO app_access (email, first_seen_at, last_seen_at, login_count, last_login_at)
+                VALUES ($email, $now, $now, 1, $now)
+                """;
+            ins.Parameters.AddWithValue("$email", email);
+            ins.Parameters.AddWithValue("$now", nowIso);
+            ins.ExecuteNonQuery();
+            tx.Commit();
+            return;
+        }
+
+        var increment = false;
+        if (TryParseUtc(lastLoginAt, out var lastLoginUtc))
+            increment = ArgentinaDate(lastLoginUtc) != ArgentinaDate(now);
+
+        using var upd = conn.CreateCommand();
+        upd.Transaction = tx;
+        upd.CommandText = increment
+            ? """
+                UPDATE app_access
+                SET last_seen_at = $now,
+                    last_login_at = $now,
+                    login_count = login_count + 1
+                WHERE email = $email
+                """
+            : """
+                UPDATE app_access
+                SET last_seen_at = $now,
+                    last_login_at = COALESCE(last_login_at, $now)
+                WHERE email = $email
+                """;
+        upd.Parameters.AddWithValue("$email", email);
+        upd.Parameters.AddWithValue("$now", nowIso);
+        upd.ExecuteNonQuery();
+        tx.Commit();
     }
 
     public void TouchActivity(string email)
@@ -297,6 +348,7 @@ public sealed class AppAccessRepository
         }
 
         EnsureColumn(conn, "app_access", "display_name", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "last_login_at", "TEXT NULL");
     }
 
     private static void EnsureColumn(SqliteConnection conn, string table, string column, string typeSql)
@@ -343,6 +395,12 @@ public sealed class AppAccessRepository
         }
 
         return conn;
+    }
+
+    private static DateTime ArgentinaDate(DateTime utc)
+    {
+        var instant = DateTime.SpecifyKind(utc, DateTimeKind.Utc);
+        return TimeZoneInfo.ConvertTimeFromUtc(instant, ArgentinaTimeZone).Date;
     }
 
     private static string UtcNowIso() =>
