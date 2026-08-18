@@ -644,3 +644,18 @@ html.st2-theme-dark ::-webkit-scrollbar-thumb {
 html.st2-theme-dark ::-webkit-scrollbar-track {
   background: #12161f;
 }
+
+html.st2-theme-dark .blanqueo-field label,
+html.st2-theme-dark .blanqueo-clave-hint,
+html.st2-theme-dark .blanqueo-filter-month,
+html.st2-theme-dark .blanqueo-filter-portal,
+html.st2-theme-dark .blanqueo-filter-search,
+html.st2-theme-dark .blanqueo-filter-mine,
+html.st2-theme-dark .pdf-portal-label,
+html.st2-theme-dark .pdf-fmt-field,
+html.st2-theme-dark .pdf-portal-status,
+html.st2-theme-dark .planillas-app label,
+html.st2-theme-dark .plan-field label,
+html.st2-theme-dark .plan-gestor-field-label {
+  color: #d6dee9 !important;
+}
