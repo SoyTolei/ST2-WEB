@@ -26,9 +26,12 @@ RUN set -eux; \
       apt-get clean || true; \
       rm -rf /var/lib/apt/lists/* || true; \
     done; \
-    command -v fc-cache >/dev/null; \
-    rm -rf /var/lib/apt/lists/*; \
-    fc-cache -f; \
+    if command -v fc-cache >/dev/null; then \
+      rm -rf /var/lib/apt/lists/*; \
+      fc-cache -f; \
+    else \
+      echo "WARN: fontconfig missing after apt retries; continuing without extra fonts"; \
+    fi; \
     mkdir -p /data/st2 && chmod 777 /data/st2
 
 COPY --from=build /app/publish .
