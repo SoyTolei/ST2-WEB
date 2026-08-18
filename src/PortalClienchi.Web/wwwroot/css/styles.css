@@ -238,75 +238,60 @@ body.portal-tab-active .st2-update-banner {
 }
 
 .theme-switch-track {
-  --switch-inset: 3px;
-  --switch-knob: 18px;
   position: relative;
-  width: 46px;
+  display: block;
+  width: 44px;
   height: 24px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
   box-sizing: border-box;
-}
-
-.theme-switch-sun,
-.theme-switch-moon {
-  position: absolute;
-  top: var(--switch-inset);
-  width: var(--switch-knob);
-  height: var(--switch-knob);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.theme-switch-sun {
-  left: var(--switch-inset);
-}
-
-.theme-switch-moon {
-  right: var(--switch-inset);
-}
-
-.theme-switch-sun svg,
-.theme-switch-moon svg {
-  display: block;
-  flex-shrink: 0;
-}
-
-.theme-switch-moon svg {
-  transform: translateX(0.5px);
 }
 
 .theme-switch-knob {
   position: absolute;
-  top: var(--switch-inset);
-  left: var(--switch-inset);
-  width: var(--switch-knob);
-  height: var(--switch-knob);
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
-  transition: transform 0.2s ease;
-  z-index: 0;
+  display: grid;
+  place-items: center;
+  transition: left 0.18s ease;
 }
 
-html:not(.st2-theme-dark) .theme-switch-sun {
+.theme-switch-knob svg {
+  grid-area: 1 / 1;
+  display: block;
+}
+
+.theme-switch-sun {
   color: #c2410c;
+  opacity: 1;
+}
+
+.theme-switch-moon {
+  color: #1e293b;
+  opacity: 0;
+}
+
+html.st2-theme-dark .theme-switch-sun {
+  opacity: 0;
 }
 
 html.st2-theme-dark .theme-switch-moon {
-  color: #1e293b;
+  opacity: 1;
 }
 
 html.st2-theme-dark .theme-switch-knob {
-  transform: translateX(22px);
+  left: auto;
+  right: 2px;
 }
 
 .theme-switch:hover .theme-switch-track {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .btn-ghost:hover {
