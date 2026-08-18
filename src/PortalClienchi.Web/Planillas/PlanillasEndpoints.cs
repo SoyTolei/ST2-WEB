@@ -458,7 +458,7 @@ public static class PlanillasEndpoints
 
             accessRepo.TouchActivity(email);
             blanqueoRepo.AssociatePendingRequester(email);
-            return Results.Ok(new { ok = true });
+            return Results.Ok(new { ok = true, webBuild = St2WebBuild.GetBuild() });
         });
 
         app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>

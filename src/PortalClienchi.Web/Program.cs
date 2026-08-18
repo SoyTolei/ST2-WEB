@@ -140,6 +140,17 @@ static IResult CredentialsMissing(string? portalId = null)
 
 app.MapGet("/api/live", () => Results.Ok(new { ok = true, service = "st2-web" }));
 
+app.MapGet("/api/version", (HttpContext ctx) =>
+{
+    ctx.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+    return Results.Ok(new
+    {
+        build = St2WebBuild.GetBuild(),
+        shortBuild = St2WebBuild.GetShortBuild(),
+        updatedLabel = St2WebBuild.GetUpdatedLabel(),
+    });
+});
+
 app.MapGet("/api/health", async (PortalRegistry registry, string? portal, CancellationToken ct) =>
 {
     async Task<object> CheckOne(string id)

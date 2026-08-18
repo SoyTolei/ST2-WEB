@@ -164,6 +164,69 @@ html, body {
   display: none !important;
 }
 
+.st2-update-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  flex-wrap: wrap;
+  padding: 9px 18px;
+  background: linear-gradient(90deg, #9a3412 0%, #c2410c 55%, #ea580c 100%);
+  color: #fff7ed;
+  box-shadow: 0 6px 18px rgba(154, 52, 18, 0.28);
+}
+
+.st2-update-banner.hidden {
+  display: none !important;
+}
+
+.st2-update-banner-text {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.st2-update-banner-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.st2-update-banner-reload {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 14px;
+  background: #fff;
+  color: #9a3412;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-update-banner-reload:hover {
+  background: #ffedd5;
+}
+
+.st2-update-banner-later {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: transparent;
+  color: #fff7ed;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.st2-update-banner-later:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .btn-ghost {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
@@ -181,6 +244,18 @@ html, body {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.16);
   color: #fff;
+}
+
+body.st2-has-update .main-shell {
+  height: calc(100vh - 64px - 36px - 48px);
+}
+
+body.embed-active.st2-has-update .main-shell {
+  height: calc(100vh - 52px - 48px);
+}
+
+body.portal-tab-active.st2-has-update .main-shell {
+  height: calc(100vh - 52px - 36px - 48px);
 }
 
 .main-shell {

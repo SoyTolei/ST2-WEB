@@ -2795,14 +2795,116 @@ async function bootstrapApp() {
   setTimeout(() => {
     startSessionHeartbeat();
   }, 60000);
+  startUpdateChecker();
   initEmbedReminders();
 }
 
 void bootstrapApp();
 
+const UPDATE_CHECK_MS = 45000;
+const UPDATE_SNOOZE_MS = 20 * 60 * 1000;
+const UPDATE_SNOOZE_KEY = "st2-update-snooze";
+let lastLiveBuild = "";
+let updateCheckerStarted = false;
+
+function loadedAppBuild() {
+  const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
+  if (meta) return meta;
+  return String(appConfig?.webBuild || "").trim();
+}
+
+function normalizeBuild(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function buildsDiffer(loaded, live) {
+  const a = normalizeBuild(loaded);
+  const b = normalizeBuild(live);
+  if (!a || !b) return false;
+  if (a === b) return false;
+  return a.slice(0, 7) !== b.slice(0, 7);
+}
+
+function isUpdateSnoozed(liveBuild) {
+  try {
+    const data = JSON.parse(sessionStorage.getItem(UPDATE_SNOOZE_KEY) || "null");
+    if (!data?.build || !data.until) return false;
+    if (normalizeBuild(data.build).slice(0, 7) !== normalizeBuild(liveBuild).slice(0, 7)) return false;
+    return Date.now() < Number(data.until);
+  } catch {
+    return false;
+  }
+}
+
+function snoozeUpdateBanner(liveBuild) {
+  try {
+    sessionStorage.setItem(UPDATE_SNOOZE_KEY, JSON.stringify({
+      build: liveBuild,
+      until: Date.now() + UPDATE_SNOOZE_MS,
+    }));
+  } catch {
+    // ignore
+  }
+}
+
+function setUpdateBannerVisible(show) {
+  const banner = document.getElementById("st2-update-banner");
+  if (!banner) return;
+  banner.classList.toggle("hidden", !show);
+  banner.toggleAttribute("hidden", !show);
+  document.body.classList.toggle("st2-has-update", !!show);
+}
+
+function applyLiveBuild(liveBuild) {
+  const live = String(liveBuild || "").trim();
+  if (!live) return;
+  lastLiveBuild = live;
+  if (!buildsDiffer(loadedAppBuild(), live) || isUpdateSnoozed(live)) {
+    setUpdateBannerVisible(false);
+    return;
+  }
+  setUpdateBannerVisible(true);
+}
+
+async function checkAppVersion() {
+  try {
+    const res = await fetch("/api/version", { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    applyLiveBuild(data.build || data.shortBuild || "");
+  } catch {
+    // ignore
+  }
+}
+
+function startUpdateChecker() {
+  if (updateCheckerStarted) return;
+  updateCheckerStarted = true;
+  document.getElementById("st2-update-reload")?.addEventListener("click", () => {
+    window.location.reload();
+  });
+  document.getElementById("st2-update-later")?.addEventListener("click", () => {
+    snoozeUpdateBanner(lastLiveBuild || loadedAppBuild());
+    setUpdateBannerVisible(false);
+  });
+  const tick = () => {
+    void checkAppVersion();
+  };
+  setTimeout(tick, 12000);
+  setInterval(tick, UPDATE_CHECK_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") tick();
+  });
+}
+
 function startSessionHeartbeat() {
   const ping = () => {
-    fetch("/api/planillas/session/heartbeat", { method: "POST", credentials: "include" }).catch(() => {});
+    fetch("/api/planillas/session/heartbeat", { method: "POST", credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.webBuild) applyLiveBuild(data.webBuild);
+      })
+      .catch(() => {});
   };
   ping();
   setInterval(ping, 180000);

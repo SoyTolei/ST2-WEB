@@ -65,6 +65,7 @@ internal sealed class EmbedSiteProxy
     [
         "/api/health",
         "/api/live",
+        "/api/version",
         "/api/app-config",
         "/api/types",
         "/api/organize",
