@@ -801,3 +801,96 @@ html.st2-theme-dark .plan-field label,
 html.st2-theme-dark .plan-gestor-field-label {
   color: #d6dee9 !important;
 }
+
+html.st2-theme-dark .st2-access-admin-dialog,
+html.st2-theme-dark .st2-access-name-edit-dialog,
+html.st2-theme-dark .st2-access-modules-dialog {
+  background: #1a2130 !important;
+  color: #e8eef7 !important;
+  border-color: #334155 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-title,
+html.st2-theme-dark .st2-access-name-edit-title,
+html.st2-theme-dark .st2-access-admin-email,
+html.st2-theme-dark .st2-access-modules-check {
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-kicker,
+html.st2-theme-dark .st2-access-admin-login-hint,
+html.st2-theme-dark .st2-access-admin-label,
+html.st2-theme-dark .st2-access-admin-updated,
+html.st2-theme-dark .st2-access-admin-status,
+html.st2-theme-dark .st2-access-admin-legend,
+html.st2-theme-dark .st2-access-admin-date,
+html.st2-theme-dark .st2-access-name-edit-email,
+html.st2-theme-dark .st2-access-name-edit-hint,
+html.st2-theme-dark .st2-access-modules-hint,
+html.st2-theme-dark .st2-access-modules-check-sub {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-input,
+html.st2-theme-dark .st2-access-admin-search,
+html.st2-theme-dark .st2-access-admin-cancel,
+html.st2-theme-dark .st2-access-admin-refresh,
+html.st2-theme-dark .st2-access-admin-filter,
+html.st2-theme-dark .st2-access-admin-summary,
+html.st2-theme-dark .st2-access-admin-toolbar,
+html.st2-theme-dark .st2-access-admin-table-wrap,
+html.st2-theme-dark .st2-access-admin-table,
+html.st2-theme-dark .st2-access-admin-table th,
+html.st2-theme-dark .st2-access-admin-table td {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+  border-color: #3d4b61 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-table th {
+  background: #243044 !important;
+  color: #cbd5e1 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-table tr.is-active {
+  background: #172554 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-table tr.is-new {
+  background: #3a1d12 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-filter:hover,
+html.st2-theme-dark .st2-access-admin-cancel:hover,
+html.st2-theme-dark .st2-access-admin-refresh:hover,
+html.st2-theme-dark .st2-access-name-edit-x:hover {
+  background: #243044 !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-filter.is-active {
+  background: #c2410c !important;
+  border-color: #c2410c !important;
+  color: #fff !important;
+}
+
+html.st2-theme-dark .st2-access-admin-panel-top,
+html.st2-theme-dark .st2-access-admin-panel-foot {
+  border-color: #334155 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-search::placeholder {
+  color: #7d8ba0 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-mod-empty {
+  color: #64748b !important;
+}
+
+html.st2-theme-dark .st2-access-admin-edit,
+html.st2-theme-dark .st2-access-admin-modules,
+html.st2-theme-dark .st2-access-admin-delete {
+  background: #243044 !important;
+  border-color: #3d4b61 !important;
+  color: #e8eef7 !important;
+}
