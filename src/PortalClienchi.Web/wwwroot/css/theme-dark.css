@@ -364,13 +364,13 @@ html.st2-theme-dark .plan-modulo-btn {
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
   background: linear-gradient(180deg, #1a2130 0%, #151b26 100%) !important;
-  border-color: #334155 !important;
+  border-color: rgba(234, 88, 12, 0.55) !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
 html.st2-theme-dark .portal-search-head {
-  background: linear-gradient(135deg, rgba(214, 64, 0, 0.18) 0%, rgba(26, 33, 48, 0.9) 55%) !important;
-  border-color: rgba(214, 64, 0, 0.28) !important;
+  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, rgba(26, 33, 48, 0.92) 55%) !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
 }
 
 html.st2-theme-dark .portal-kicker {
@@ -381,7 +381,7 @@ html.st2-theme-dark .search-box,
 html.st2-theme-dark .combo-box {
   background: #151c28 !important;
   color: #e8eef7 !important;
-  border-color: #3d4b61 !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
   box-shadow: none !important;
 }
 
@@ -423,7 +423,7 @@ html.st2-theme-dark .result-group-header {
 
 html.st2-theme-dark .preview-frame-wrap {
   background: linear-gradient(180deg, #1a2130 0%, #121820 100%) !important;
-  border-color: #334155 !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
   box-shadow: none;
 }
 
@@ -441,7 +441,7 @@ html.st2-theme-dark .type-badge {
 html.st2-theme-dark .portal-suggest-chip {
   background: #151c28;
   color: #e8eef7;
-  border-color: #334155;
+  border-color: rgba(234, 88, 12, 0.4);
 }
 
 html.st2-theme-dark .portal-sistema-bar {
@@ -603,20 +603,43 @@ html.st2-theme-dark .blanqueo-ready-toast.is-bad .blanqueo-ready-toast-x {
   color: #fecaca !important;
 }
 
+html.st2-theme-dark .thom-portal-seg {
+  background: #151c28 !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
+  box-shadow: none !important;
+}
+
+html.st2-theme-dark .thom-portal-btn {
+  color: #fdba74 !important;
+  background: transparent !important;
+}
+
+html.st2-theme-dark .thom-portal-btn:hover:not(.active) {
+  background: rgba(234, 88, 12, 0.18) !important;
+  color: #fed7aa !important;
+}
+
+html.st2-theme-dark .thom-portal-btn.active {
+  color: #fff !important;
+  background: linear-gradient(180deg, #e24808 0%, var(--primary) 100%) !important;
+}
+
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
   background: #151b26 !important;
+  border-color: rgba(234, 88, 12, 0.55) !important;
 }
 
 html.st2-theme-dark .portal-search-head {
-  background: linear-gradient(135deg, rgba(214, 64, 0, 0.2) 0%, #1a2130 55%) !important;
+  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, #1a2130 55%) !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
 }
 
 html.st2-theme-dark .search-box,
 html.st2-theme-dark .combo-box {
   background: #151c28 !important;
   color: #e8eef7 !important;
-  border-color: #3d4b61 !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
   box-shadow: none !important;
 }
 
