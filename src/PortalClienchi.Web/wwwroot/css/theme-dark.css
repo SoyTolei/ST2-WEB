@@ -709,33 +709,33 @@ html.st2-theme-dark .plan-ref-modal-subtitle {
 }
 
 html.st2-theme-dark .plan-ref-perfil {
-  background: #3a1d12 !important;
-  border-color: #c2410c !important;
+  background: #1e293b !important;
+  border-color: #475569 !important;
 }
 
 html.st2-theme-dark .plan-ref-perfil-label {
-  color: #fdba74 !important;
+  color: #94a3b8 !important;
 }
 
 html.st2-theme-dark .plan-ref-perfil-seg {
-  background: #151c28 !important;
-  border-color: #7c2d12 !important;
+  background: #0f172a !important;
+  border-color: #334155 !important;
 }
 
 html.st2-theme-dark .plan-ref-perfil-seg .plan-segment-btn {
-  color: #fdba74 !important;
+  color: #cbd5e1 !important;
   background: transparent !important;
 }
 
 html.st2-theme-dark .plan-ref-perfil-seg .plan-segment-btn.active {
-  background: #c2410c !important;
+  background: #0f766e !important;
   color: #fff !important;
 }
 
 html.st2-theme-dark .plan-ref-perfil-hint.is-otra {
-  background: #3a1d12 !important;
-  border-color: #c2410c !important;
-  color: #fdba74 !important;
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #cbd5e1 !important;
 }
 
 html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico {
