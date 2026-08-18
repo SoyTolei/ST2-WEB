@@ -365,6 +365,7 @@ function updateSistemaUi() {
   }
   syncPdfPortalModuleVisibility();
   syncBlanqueoModuleVisibility();
+  document.querySelector(".plan-modulos-grid")?.classList.toggle("is-compact", hideCommercial);
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
 }

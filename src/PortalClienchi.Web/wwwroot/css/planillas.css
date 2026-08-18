@@ -424,6 +424,11 @@
   min-height: 120px;
 }
 
+.plan-modulos-grid.is-compact {
+  grid-template-columns: repeat(2, minmax(180px, 280px));
+  justify-content: center;
+}
+
 .plan-modulo-btn {
   position: relative;
   border: none;
@@ -3461,7 +3466,8 @@
     padding-bottom: 4px;
   }
   .plan-sistema-grid,
-  .plan-modulos-grid { grid-template-columns: 1fr; }
+  .plan-modulos-grid,
+  .plan-modulos-grid.is-compact { grid-template-columns: 1fr; }
   .plan-sistema-indicator { display: none; }
   .plan-mesas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
