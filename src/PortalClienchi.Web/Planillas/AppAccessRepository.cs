@@ -97,6 +97,17 @@ public sealed class AppAccessRepository
     public const string StatusApproved = "approved";
     public const string StatusRejected = "rejected";
 
+    public bool IsApprovedForApp(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+        if (St2SuperAdmin.Is(email))
+            return true;
+        var rec = Find(email);
+        return rec is not null
+            && string.Equals(rec.Status, StatusApproved, StringComparison.OrdinalIgnoreCase);
+    }
+
     public AppAccessRecordDto? Find(string email)
     {
         if (!StorageReady || string.IsNullOrWhiteSpace(email))
@@ -392,7 +403,7 @@ public sealed class AppAccessRepository
             }
         }
 
-        return TimeZoneInfo.Utc;
+        return TimeZoneInfo.CreateCustomTimeZone("ART", TimeSpan.FromHours(-3), "Argentina", "Argentina");
     }
 
     public IReadOnlyList<AppAccessRecordDto> ListAll()

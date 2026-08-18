@@ -65,17 +65,30 @@ public static class St2AccessMiddleware
             }
 
             var email = PlanUserIdentity.GetFromRequest(ctx);
-            if (email is not null)
+            if (email is null)
             {
-                ctx.RequestServices.GetService<AppAccessRepository>()?.TouchActivity(email);
-                await next(ctx).ConfigureAwait(false);
+                ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await ctx.Response.WriteAsJsonAsync(new
+                {
+                    error = "Identificá tu usuario para continuar.",
+                }).ConfigureAwait(false);
                 return;
             }
 
-            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await ctx.Response.WriteAsJsonAsync(new
+            var accessRepo = ctx.RequestServices.GetService<AppAccessRepository>();
+            if (accessRepo is not null && !accessRepo.IsApprovedForApp(email))
             {
-                error = "Identificá tu usuario para continuar.",
-            }).ConfigureAwait(false);
+                PlanUserIdentity.ClearCookie(ctx);
+                ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await ctx.Response.WriteAsJsonAsync(new
+                {
+                    error = "Tu acceso todavía no está habilitado.",
+                    status = AppAccessRepository.StatusPending,
+                }).ConfigureAwait(false);
+                return;
+            }
+
+            accessRepo?.TouchActivity(email);
+            await next(ctx).ConfigureAwait(false);
         });
 }

@@ -819,14 +819,8 @@ public static class PlanillasEndpoints
     private static bool CanEnter(string email, AppAccessRepository accessRepo)
     {
         if (St2SuperAdmin.Is(email))
-        {
             accessRepo.EnsureApproved(email);
-            return true;
-        }
-
-        var rec = accessRepo.Find(email);
-        return rec is not null
-            && string.Equals(rec.Status, AppAccessRepository.StatusApproved, StringComparison.OrdinalIgnoreCase);
+        return accessRepo.IsApprovedForApp(email);
     }
 
     private static IResult OpenUserSession(
