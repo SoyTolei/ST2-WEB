@@ -478,7 +478,7 @@
 
 .plan-modulo-btn.transfer { background: #15803d; }
 .plan-modulo-btn.referral { background: #c2410c; }
-.plan-modulo-btn.oportunidad { background: #b45309; }
+.plan-modulo-btn.oportunidad { background: #a21caf; }
 .plan-modulo-btn.pdf-portal { background: #0e7490; }
 .plan-modulo-btn.blanqueo { background: #1d4ed8; }
 
@@ -725,7 +725,7 @@
 .plan-module-icon-badge.transfer { background: #dcfce7; color: #15803d; }
 .plan-module-icon-badge.referral { background: #ffedd5; color: #c2410c; }
 .plan-module-icon-badge.blanqueo { background: #dbeafe; color: #1d4ed8; }
-.plan-module-icon-badge.oportunidad { background: #fef3c7; color: #b45309; }
+.plan-module-icon-badge.oportunidad { background: #fae8ff; color: #a21caf; }
 
 .plan-accent-bar {
   height: 3px;
