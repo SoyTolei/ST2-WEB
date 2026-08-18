@@ -262,7 +262,7 @@ function canOpenRoute(route) {
   if (route.requires === "blanqueo") return canSeeBlanqueoModule() && !hidesCommercialModules();
   const sys = route.sistema || sistemaActual;
   if (route.requires === "transferencia") {
-    return !!sys && !isSistemaPlaceholder(sys) && sys !== "Legal";
+    return !!sys && !isSistemaPlaceholder(sys);
   }
   if (route.requires === "referral") {
     return !!sys && !isSistemaPlaceholder(sys);
@@ -342,16 +342,15 @@ function updateSistemaUi() {
   const oportunidadBtn = document.querySelector('[data-plan-modulo="oportunidad"]');
   const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
-  const legalSelected = isLegal() && !isSistemaPlaceholder("Legal");
   const hideCommercial = hidesCommercialModules();
 
   if (transferBtn) {
-    transferBtn.classList.toggle("hidden", legalSelected);
-    transferBtn.disabled = placeholderBlocked || legalSelected;
+    transferBtn.classList.remove("hidden");
+    transferBtn.disabled = placeholderBlocked;
   }
   if (transferNa) {
-    transferNa.classList.toggle("hidden", !legalSelected);
-    transferNa.setAttribute("aria-hidden", legalSelected ? "false" : "true");
+    transferNa.classList.add("hidden");
+    transferNa.setAttribute("aria-hidden", "true");
   }
   if (referralBtn) referralBtn.disabled = placeholderBlocked;
 
@@ -1028,7 +1027,7 @@ async function revealView(name, historyMode = "push") {
   }
 
   if (name === "transferencia") {
-    if (!sistemaActual || isSistemaPlaceholder(sistemaActual) || isLegal()) {
+    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) {
       showView("menu", { history: "replace" });
       return;
     }
