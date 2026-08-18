@@ -40,6 +40,36 @@ const openMediaBtn = document.getElementById("openMediaBtn");
 const downloadContentBtn = document.getElementById("downloadContentBtn");
 const exportPdfBtn = document.getElementById("exportPdfBtn");
 const aboutBtn = document.getElementById("aboutBtn");
+const themeToggleBtn = document.getElementById("themeToggleBtn");
+const THEME_STORAGE_KEY = "st2-theme";
+
+function isDarkTheme() {
+  return document.documentElement.classList.contains("st2-theme-dark");
+}
+
+function syncThemeToggle() {
+  const dark = isDarkTheme();
+  if (!themeToggleBtn) return;
+  themeToggleBtn.setAttribute("aria-pressed", dark ? "true" : "false");
+  const label = dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
+  themeToggleBtn.title = label;
+  themeToggleBtn.setAttribute("aria-label", label);
+  const text = themeToggleBtn.querySelector(".theme-toggle-text");
+  if (text) text.textContent = dark ? "Claro" : "Oscuro";
+}
+
+function applyTheme(dark) {
+  document.documentElement.classList.toggle("st2-theme-dark", !!dark);
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, dark ? "dark" : "light");
+  } catch {
+    /* ignore */
+  }
+  syncThemeToggle();
+}
+
+themeToggleBtn?.addEventListener("click", () => applyTheme(!isDarkTheme()));
+syncThemeToggle();
 const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");

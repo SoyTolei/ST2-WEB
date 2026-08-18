@@ -247,6 +247,29 @@ body.portal-tab-active .st2-update-banner {
   transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theme-toggle-btn svg {
+  display: block;
+}
+
+html.st2-theme-dark .theme-toggle-moon {
+  display: none;
+}
+
+html:not(.st2-theme-dark) .theme-toggle-sun {
+  display: none;
+}
+
+body.embed-active .theme-toggle-text,
+body.portal-tab-active .theme-toggle-text {
+  display: none;
+}
+
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.16);

@@ -1,0 +1,125 @@
+html.st2-theme-dark {
+  color-scheme: dark;
+  --panel: #10141c;
+  --dark: #e8eef7;
+  --border: #2b3445;
+  --white: #1a2130;
+  --text-muted: #9aa8bc;
+  --nav-well: #151b26;
+  --nav-hover: #243044;
+  --portal-sub: #c5d0de;
+  --portal-sub-hover: #dbe4f0;
+  --portal-sub-glow: rgba(0, 0, 0, 0.35);
+  --portal-sub-soft: #171e2a;
+}
+
+html.st2-theme-dark body {
+  background: var(--panel);
+  color: var(--dark);
+}
+
+html.st2-theme-dark .tab-bar {
+  background: linear-gradient(180deg, #1c2433 0%, #151b26 100%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+html.st2-theme-dark .tab-btn {
+  background: #1a2130;
+  border-color: #334155;
+  color: #dbe4f0;
+  box-shadow: none;
+}
+
+html.st2-theme-dark .tab-btn:hover:not(.active) {
+  background: #243044;
+}
+
+html.st2-theme-dark .planillas-hero,
+html.st2-theme-dark .plan-sistema-well,
+html.st2-theme-dark .plan-modulos-well,
+html.st2-theme-dark .plan-field input,
+html.st2-theme-dark .plan-field textarea,
+html.st2-theme-dark .plan-field select,
+html.st2-theme-dark .plan-user-input,
+html.st2-theme-dark .plan-user-dialog,
+html.st2-theme-dark .plan-gestor-table,
+html.st2-theme-dark .plan-gestor-table th,
+html.st2-theme-dark .plan-gestor-table td,
+html.st2-theme-dark .blanqueo-table,
+html.st2-theme-dark .blanqueo-table th,
+html.st2-theme-dark .blanqueo-table td,
+html.st2-theme-dark .st2-access-admin-dialog,
+html.st2-theme-dark .st2-access-card,
+html.st2-theme-dark .results-panel,
+html.st2-theme-dark .preview-column,
+html.st2-theme-dark .preview-idle,
+html.st2-theme-dark .preview-panel {
+  background: var(--white);
+  color: var(--dark);
+  border-color: var(--border);
+}
+
+html.st2-theme-dark .plan-pill-btn {
+  color: var(--dark);
+}
+
+html.st2-theme-dark .plan-pill-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+html.st2-theme-dark .st2-about-dialog {
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(214, 64, 0, 0.12) 0%, transparent 52%),
+    linear-gradient(180deg, #1c2433 0%, #151b26 100%);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.45),
+    0 0 0 1px #2b3445;
+}
+
+html.st2-theme-dark .st2-about-title,
+html.st2-theme-dark .st2-about-module-title {
+  color: var(--dark);
+}
+
+html.st2-theme-dark .st2-about-module {
+  background: #1a2130;
+  border-color: #2b3445;
+}
+
+html.st2-theme-dark .st2-about-module-text,
+html.st2-theme-dark .st2-about-updated {
+  color: var(--text-muted);
+}
+
+html.st2-theme-dark .search-box,
+html.st2-theme-dark .type-filter {
+  background: var(--white);
+  color: var(--dark);
+  border-color: var(--border);
+}
+
+html.st2-theme-dark .status-bar {
+  background: #151b26;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+html.st2-theme-dark .plan-legal-beta-banner {
+  background: #2a2416;
+  border-color: #92400e;
+  color: #fdba74;
+}
+
+html.st2-theme-dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html.st2-theme-dark ::-webkit-scrollbar-thumb {
+  background: #3b4658;
+  border-radius: 999px;
+}
+
+html.st2-theme-dark ::-webkit-scrollbar-track {
+  background: #12161f;
+}
