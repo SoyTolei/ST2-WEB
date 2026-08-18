@@ -758,15 +758,18 @@ html.st2-theme-dark .plan-sql-code {
 html.st2-theme-dark .st2-suite-sig-brand {
   color: #f8fafc;
   letter-spacing: 0.14em;
-  text-shadow: 0 1px 8px rgba(15, 23, 42, 0.65);
+  text-shadow:
+    0 0 8px var(--panel),
+    0 0 14px var(--panel),
+    0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 html.st2-theme-dark .st2-suite-sig-line {
-  color: #cbd5e1;
+  color: #e2e8f0;
 }
 
 html.st2-theme-dark .st2-suite-sig-tools {
-  color: #94a3b8;
+  color: #cbd5e1;
   border-top-color: #334155;
 }
 
@@ -779,12 +782,11 @@ html.st2-theme-dark .planillas-footer:hover .st2-suite-sig-brand {
 }
 
 html.st2-theme-dark .planillas-footer:hover .st2-suite-sig-line {
-  color: #e2e8f0;
+  color: #f1f5f9;
 }
 
 html.st2-theme-dark .st2-suite-float {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
-  opacity: 0.85;
 }
 
 html.st2-theme-dark .blanqueo-field label,

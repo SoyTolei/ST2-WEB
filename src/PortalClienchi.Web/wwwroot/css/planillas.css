@@ -41,6 +41,7 @@
 
 .st2-suite-sig {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -49,6 +50,20 @@
   max-width: 28rem;
   padding: 8px 6px 4px;
   overflow: hidden;
+}
+
+.st2-suite-sig::after {
+  content: "";
+  position: absolute;
+  inset: 6% 4%;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 78% 86% at 50% 48%,
+    color-mix(in srgb, var(--panel) 86%, transparent) 0%,
+    color-mix(in srgb, var(--panel) 52%, transparent) 48%,
+    transparent 74%
+  );
 }
 
 .st2-suite-sig-stage {
@@ -95,6 +110,56 @@
   height: 12px;
   object-fit: contain;
   animation: st2SuiteDriftUp 8.6s ease-in-out infinite 6.8s;
+}
+
+.st2-suite-float--portrait,
+.st2-suite-float--portrait2,
+.st2-suite-float--portrait3,
+.st2-suite-float--portrait4,
+.st2-suite-float--portrait5 {
+  object-fit: cover;
+  border-radius: 3px;
+  background: #f4efe6;
+}
+
+.st2-suite-float--portrait {
+  left: 3%;
+  top: 34%;
+  width: 16px;
+  height: 16px;
+  animation: st2SuiteDriftR 10.4s ease-in-out infinite 0.8s;
+}
+
+.st2-suite-float--portrait2 {
+  right: 3%;
+  top: 8%;
+  width: 14px;
+  height: 14px;
+  animation: st2SuiteDriftL 11.6s ease-in-out infinite 2.2s;
+}
+
+.st2-suite-float--portrait3 {
+  left: 46%;
+  top: 4%;
+  width: 13px;
+  height: 13px;
+  animation: st2SuiteDriftUp 9.1s ease-in-out infinite 4.1s;
+}
+
+.st2-suite-float--portrait4 {
+  right: 20%;
+  top: 42%;
+  width: 15px;
+  height: 15px;
+  animation: st2SuiteDriftL 10.8s ease-in-out infinite 5.6s;
+}
+
+.st2-suite-float--portrait5 {
+  left: 62%;
+  top: 84%;
+  width: 12px;
+  height: 12px;
+  animation: st2SuiteDriftR 8.9s ease-in-out infinite 7.3s;
 }
 
 .st2-suite-float--bike {
@@ -163,31 +228,31 @@
 /* Recorren el bloque en horizontal; el recorte evita que se vayan para arriba. */
 @keyframes st2SuiteDriftL {
   0% { opacity: 0; transform: translate(14px, 3px) scale(0.88); }
-  12% { opacity: 0.72; }
-  50% { opacity: 0.62; transform: translate(-8px, -2px) scale(1); }
-  88% { opacity: 0.5; }
+  12% { opacity: 0.46; }
+  50% { opacity: 0.4; transform: translate(-8px, -2px) scale(1); }
+  88% { opacity: 0.28; }
   100% { opacity: 0; transform: translate(-18px, 2px) scale(0.92); }
 }
 
 @keyframes st2SuiteDriftR {
   0% { opacity: 0; transform: translate(-14px, 2px) scale(0.88); }
-  12% { opacity: 0.72; }
-  50% { opacity: 0.62; transform: translate(8px, -2px) scale(1); }
-  88% { opacity: 0.5; }
+  12% { opacity: 0.46; }
+  50% { opacity: 0.4; transform: translate(8px, -2px) scale(1); }
+  88% { opacity: 0.28; }
   100% { opacity: 0; transform: translate(18px, 2px) scale(0.92); }
 }
 
 @keyframes st2SuiteDriftUp {
   0% { opacity: 0; transform: translateY(5px) scale(0.9); }
-  14% { opacity: 0.7; }
-  50% { opacity: 0.58; transform: translateY(-3px) scale(1); }
-  86% { opacity: 0.45; }
+  14% { opacity: 0.44; }
+  50% { opacity: 0.38; transform: translateY(-3px) scale(1); }
+  86% { opacity: 0.26; }
   100% { opacity: 0; transform: translateY(-6px) scale(0.92); }
 }
 
 .st2-suite-sig-mark {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
@@ -195,27 +260,34 @@
 }
 
 .st2-suite-sig-brand {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  letter-spacing: 0.1em;
-  color: #1e293b;
+  letter-spacing: 0.12em;
+  color: #0f172a;
+  text-shadow:
+    0 0 6px var(--panel),
+    0 0 12px var(--panel),
+    0 1px 0 var(--panel);
 }
 
 .st2-suite-sig-line {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin: 0;
-  font-size: 0.7rem;
-  font-weight: 500;
+  font-size: 0.72rem;
+  font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
-  line-height: 1.3;
+  color: #334155;
+  line-height: 1.35;
+  text-shadow:
+    0 0 8px var(--panel),
+    0 0 4px var(--panel);
 }
 
 .st2-suite-sig-tools {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   margin: 0;
   padding-top: 6px;
   border-top: 1px solid #e2e8f0;
@@ -225,11 +297,12 @@
   align-items: center;
   gap: 0.35rem 0.45rem;
   font-size: 0.68rem;
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #475569;
   line-height: 1.2;
+  text-shadow: 0 0 8px var(--panel);
 }
 
 .st2-suite-sig-tool.is-current {
@@ -242,11 +315,11 @@
 }
 
 .planillas-footer:hover .st2-suite-sig-brand {
-  color: #0f172a;
+  color: #020617;
 }
 
 .planillas-footer:hover .st2-suite-sig-line {
-  color: #475569;
+  color: #1e293b;
 }
 
 .planillas-card {
