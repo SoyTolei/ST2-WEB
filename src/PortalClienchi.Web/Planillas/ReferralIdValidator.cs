@@ -17,7 +17,7 @@ public static class ReferralIdValidator
             PlanillasSistema.Legal => PlanillasFeatureFlags.LegalEnabled
                 ? ValidateLegal(c)
                 : "El módulo LEGAL estará disponible en una próxima versión.",
-            PlanillasSistema.Chile => "El módulo Chile estará disponible en una próxima versión.",
+            PlanillasSistema.Chile => ValidateOnvio(c),
             _ => "Sistema no válido.",
         };
     }

@@ -50,12 +50,8 @@ function isLegalSistema(id) {
 }
 
 function isSistemaPlaceholder(id) {
-  if (id === "Chile") return true;
-  if (isLegalSistema(id)) {
-    const cfg = planillasConfig?.sistemas?.find((s) => s.id === "Legal");
-    return cfg?.placeholder !== false;
-  }
-  return false;
+  const cfg = planillasConfig?.sistemas?.find((s) => s.id === id);
+  return !!cfg?.placeholder;
 }
 
 function isLegal() {
@@ -123,7 +119,7 @@ const views = {
 };
 
 const els = {
-  sistemaBtns: () => document.querySelectorAll("[data-plan-sistema]"),
+  sistemaBtns: () => document.querySelectorAll(".plan-sistema-grid > [data-plan-sistema]"),
   sistemaIndicator: () => document.getElementById("plan-sistema-indicator"),
   moduloBtns: () => document.querySelectorAll("[data-plan-modulo]"),
   placeholderTitle: () => document.getElementById("plan-placeholder-title"),
@@ -167,10 +163,24 @@ function rememberSistema(id) {
   }
 }
 
+function normalizeSistemaId(id) {
+  const raw = String(id || "").trim();
+  if (SISTEMA_INDEX[raw] != null) return raw;
+  const aliases = {
+    BejermanSql: "BejermanSql",
+    bejermanSql: "BejermanSql",
+    Bejerman: "BejermanSql",
+    Onvio: "OnvioWeb",
+    onvio: "OnvioWeb",
+    OnvioWeb: "OnvioWeb",
+  };
+  return aliases[raw] || null;
+}
+
 function readRememberedSistema() {
   try {
-    const saved = localStorage.getItem(SISTEMA_STORAGE_KEY);
-    if (saved && SISTEMA_INDEX[saved] != null) return saved;
+    const saved = normalizeSistemaId(localStorage.getItem(SISTEMA_STORAGE_KEY));
+    if (saved) return saved;
   } catch {
     /* ignore */
   }
@@ -304,8 +314,12 @@ function setSistemaIndicator(index) {
   const btn = [...els.sistemaBtns()][index];
   if (!grid || !indicator || !btn) return;
 
-  indicator.style.width = `${btn.offsetWidth}px`;
-  indicator.style.transform = `translate3d(${btn.offsetLeft}px, 0, 0)`;
+  const gridRect = grid.getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  const width = Math.max(0, Math.min(btnRect.width, gridRect.width));
+  const left = Math.max(0, Math.min(btnRect.left - gridRect.left, gridRect.width - width));
+  indicator.style.width = `${width}px`;
+  indicator.style.transform = `translate3d(${left}px, 0, 0)`;
 }
 
 function refreshSistemaIndicator() {
@@ -357,9 +371,10 @@ function updateSistemaUi() {
 }
 
 function selectSistema(id) {
-  if (!id || SISTEMA_INDEX[id] == null) return;
-  sistemaActual = id;
-  rememberSistema(id);
+  const normalized = normalizeSistemaId(id);
+  if (!normalized) return;
+  sistemaActual = normalized;
+  rememberSistema(normalized);
   updateSistemaUi();
   updateTransferenciaPanels();
   if (!routeSyncing && normalizePath(window.location.pathname) === "/") {

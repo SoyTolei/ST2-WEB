@@ -137,7 +137,7 @@ public sealed class TransferenciaService
     public static TransferenciaCase FromRequest(TransferenciaGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
+        if (sistema is PlanillasSistema.None)
             throw new ArgumentException("Sistema no válido para transferencia.");
         if (sistema is PlanillasSistema.Legal && !PlanillasFeatureFlags.LegalEnabled)
             throw new ArgumentException("Sistema no válido para transferencia.");
@@ -187,8 +187,8 @@ public sealed class TransferenciaService
     public static string? ValidarRequest(TransferenciaGenerateRequest req)
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
-        if (sistema is PlanillasSistema.None or PlanillasSistema.Chile)
-            return "Elegí un sistema válido (Bejerman SQL, ONVIO/Bejerman WEB o LEGAL).";
+        if (sistema is PlanillasSistema.None)
+            return "Elegí un sistema válido (Bejerman SQL, ONVIO/Bejerman WEB, LEGAL o Chile).";
         if (sistema is PlanillasSistema.Legal && !PlanillasFeatureFlags.LegalEnabled)
             return "El módulo LEGAL estará disponible en una próxima versión.";
 

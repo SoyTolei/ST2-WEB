@@ -310,6 +310,7 @@
   padding: 8px;
   width: 100%;
   margin: 0 auto 20px;
+  overflow: hidden;
 }
 
 .plan-sistema-grid {
@@ -319,9 +320,12 @@
   position: relative;
   min-height: 54px;
   width: 100%;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .plan-pill-btn {
+  position: relative;
   border: none;
   background: transparent;
   padding: 12px 8px;
@@ -393,11 +397,13 @@
   bottom: 0;
   left: 0;
   width: 0;
+  max-width: 100%;
   background: var(--primary);
   border-radius: 10px;
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
     width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  z-index: 0;
   will-change: transform, width;
 }
 
