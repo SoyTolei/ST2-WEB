@@ -228,25 +228,71 @@ body.portal-tab-active .st2-update-banner {
   transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
-.theme-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 32px;
+.theme-switch {
+  border: 0;
+  background: transparent;
   padding: 0;
+  margin: 0;
+  cursor: pointer;
+  line-height: 0;
 }
 
-.theme-toggle-btn svg {
+.theme-switch-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: 52px;
+  height: 26px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+}
+
+.theme-switch-sun,
+.theme-switch-moon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  line-height: 0;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.theme-switch-sun svg,
+.theme-switch-moon svg {
   display: block;
 }
 
-html.st2-theme-dark .theme-toggle-moon {
-  display: none;
+.theme-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+  z-index: 0;
 }
 
-html:not(.st2-theme-dark) .theme-toggle-sun {
-  display: none;
+html:not(.st2-theme-dark) .theme-switch-sun {
+  color: #c2410c;
+}
+
+html.st2-theme-dark .theme-switch-moon {
+  color: #1e293b;
+}
+
+html.st2-theme-dark .theme-switch-knob {
+  transform: translateX(28px);
+}
+
+.theme-switch:hover .theme-switch-track {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .btn-ghost:hover {

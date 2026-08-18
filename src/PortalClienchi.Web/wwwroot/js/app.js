@@ -50,7 +50,7 @@ function isDarkTheme() {
 function syncThemeToggle() {
   const dark = isDarkTheme();
   if (!themeToggleBtn) return;
-  themeToggleBtn.setAttribute("aria-pressed", dark ? "true" : "false");
+  themeToggleBtn.setAttribute("aria-checked", dark ? "true" : "false");
   const label = dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
   themeToggleBtn.title = label;
   themeToggleBtn.setAttribute("aria-label", label);
