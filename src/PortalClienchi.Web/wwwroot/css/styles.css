@@ -231,7 +231,10 @@ body.portal-tab-active .st2-update-banner {
 .theme-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  width: 36px;
+  height: 32px;
+  padding: 0;
 }
 
 .theme-toggle-btn svg {
@@ -243,11 +246,6 @@ html.st2-theme-dark .theme-toggle-moon {
 }
 
 html:not(.st2-theme-dark) .theme-toggle-sun {
-  display: none;
-}
-
-body.embed-active .theme-toggle-text,
-body.portal-tab-active .theme-toggle-text {
   display: none;
 }
 

@@ -54,8 +54,6 @@ function syncThemeToggle() {
   const label = dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro";
   themeToggleBtn.title = label;
   themeToggleBtn.setAttribute("aria-label", label);
-  const text = themeToggleBtn.querySelector(".theme-toggle-text");
-  if (text) text.textContent = dark ? "Claro" : "Oscuro";
 }
 
 function applyTheme(dark) {

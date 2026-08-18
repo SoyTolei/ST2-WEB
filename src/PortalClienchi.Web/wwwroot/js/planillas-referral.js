@@ -87,8 +87,8 @@ function syncPerfilUi() {
 
   const planBadge = document.getElementById("ref-planilla-badge");
   if (planBadge) {
-    planBadge.textContent = "Auto si vacía";
-    planBadge.className = "plan-check-badge is-auto";
+    planBadge.textContent = esTecnico ? "Se completa sola" : "Opcional";
+    planBadge.className = esTecnico ? "plan-check-badge is-auto" : "plan-check-badge is-optional";
   }
 
   const mamBadge = document.getElementById("ref-mam-badge");
