@@ -93,6 +93,104 @@ public sealed class AppAccessRepository
         return cmd.ExecuteNonQuery();
     }
 
+    public const string StatusPending = "pending";
+    public const string StatusApproved = "approved";
+    public const string StatusRejected = "rejected";
+
+    public AppAccessRecordDto? Find(string email)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return null;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status
+            FROM app_access
+            WHERE lower(email) = lower($email)
+            LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        using var reader = cmd.ExecuteReader();
+        return reader.Read() ? ReadRecord(reader) : null;
+    }
+
+    public string RequestAccess(string email)
+    {
+        if (!StorageReady || AppAccessExclusions.IsExcluded(email))
+            return StatusRejected;
+
+        var existing = Find(email);
+        if (existing is not null)
+        {
+            if (existing.Status is StatusApproved or StatusRejected)
+                return existing.Status;
+
+            TouchActivity(email);
+            return StatusPending;
+        }
+
+        var nowIso = UtcNowIso();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO app_access (email, first_seen_at, last_seen_at, login_count, last_login_at, status)
+            VALUES ($email, $now, $now, 0, NULL, $status)
+            """;
+        cmd.Parameters.AddWithValue("$email", email);
+        cmd.Parameters.AddWithValue("$now", nowIso);
+        cmd.Parameters.AddWithValue("$status", StatusPending);
+        cmd.ExecuteNonQuery();
+        return StatusPending;
+    }
+
+    public void EnsureApproved(string email)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return;
+
+        var existing = Find(email);
+        if (existing is null)
+        {
+            var nowIso = UtcNowIso();
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                INSERT INTO app_access (email, first_seen_at, last_seen_at, login_count, last_login_at, status)
+                VALUES ($email, $now, $now, 0, NULL, $status)
+                """;
+            cmd.Parameters.AddWithValue("$email", email);
+            cmd.Parameters.AddWithValue("$now", nowIso);
+            cmd.Parameters.AddWithValue("$status", StatusApproved);
+            cmd.ExecuteNonQuery();
+            return;
+        }
+
+        if (!string.Equals(existing.Status, StatusApproved, StringComparison.OrdinalIgnoreCase))
+            SetStatus(email, StatusApproved);
+    }
+
+    public int SetStatus(string email, string status)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return 0;
+
+        var normalized = status.Trim().ToLowerInvariant();
+        if (normalized is not StatusPending and not StatusApproved and not StatusRejected)
+            return 0;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE app_access
+            SET status = $status
+            WHERE lower(email) = lower($email)
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        cmd.Parameters.AddWithValue("$status", normalized);
+        return cmd.ExecuteNonQuery();
+    }
+
     public void RecordAccess(string email)
     {
         if (!StorageReady || AppAccessExclusions.IsExcluded(email))
@@ -105,14 +203,16 @@ public sealed class AppAccessRepository
         using var tx = conn.BeginTransaction();
 
         string? lastLoginAt = null;
+        string? firstSeenAt = null;
+        string status = StatusApproved;
         var exists = false;
         using (var sel = conn.CreateCommand())
         {
             sel.Transaction = tx;
             sel.CommandText = """
-                SELECT last_login_at
+                SELECT last_login_at, first_seen_at, status
                 FROM app_access
-                WHERE email = $email
+                WHERE lower(email) = lower($email)
                 """;
             sel.Parameters.AddWithValue("$email", email);
             using var reader = sel.ExecuteReader();
@@ -120,27 +220,36 @@ public sealed class AppAccessRepository
             {
                 exists = true;
                 lastLoginAt = reader.IsDBNull(0) ? null : reader.GetString(0);
+                firstSeenAt = reader.IsDBNull(1) ? null : reader.GetString(1);
+                status = reader.IsDBNull(2) || string.IsNullOrWhiteSpace(reader.GetString(2))
+                    ? StatusApproved
+                    : reader.GetString(2);
             }
         }
 
         if (!exists)
+            return;
+
+        if (!string.Equals(status, StatusApproved, StringComparison.OrdinalIgnoreCase))
         {
-            using var ins = conn.CreateCommand();
-            ins.Transaction = tx;
-            ins.CommandText = """
-                INSERT INTO app_access (email, first_seen_at, last_seen_at, login_count, last_login_at)
-                VALUES ($email, $now, $now, 1, $now)
+            using var seen = conn.CreateCommand();
+            seen.Transaction = tx;
+            seen.CommandText = """
+                UPDATE app_access
+                SET last_seen_at = $now
+                WHERE lower(email) = lower($email)
                 """;
-            ins.Parameters.AddWithValue("$email", email);
-            ins.Parameters.AddWithValue("$now", nowIso);
-            ins.ExecuteNonQuery();
+            seen.Parameters.AddWithValue("$email", email);
+            seen.Parameters.AddWithValue("$now", nowIso);
+            seen.ExecuteNonQuery();
             tx.Commit();
             return;
         }
 
-        var increment = false;
-        if (TryParseUtc(lastLoginAt, out var lastLoginUtc))
-            increment = ArgentinaDate(lastLoginUtc) != ArgentinaDate(now);
+        var previousIso = lastLoginAt ?? firstSeenAt;
+        var increment = lastLoginAt is null
+            || !TryParseUtc(previousIso, out var previousUtc)
+            || ArgentinaDate(previousUtc) != ArgentinaDate(now);
 
         using var upd = conn.CreateCommand();
         upd.Transaction = tx;
@@ -150,13 +259,13 @@ public sealed class AppAccessRepository
                 SET last_seen_at = $now,
                     last_login_at = $now,
                     login_count = login_count + 1
-                WHERE email = $email
+                WHERE lower(email) = lower($email)
                 """
             : """
                 UPDATE app_access
                 SET last_seen_at = $now,
                     last_login_at = COALESCE(last_login_at, $now)
-                WHERE email = $email
+                WHERE lower(email) = lower($email)
                 """;
         upd.Parameters.AddWithValue("$email", email);
         upd.Parameters.AddWithValue("$now", nowIso);
@@ -214,17 +323,33 @@ public sealed class AppAccessRepository
         return IsRegisteredToday(firstSeenAtIso);
     }
 
+    public static bool IsLoggedInToday(string? lastLoginAtIso)
+    {
+        if (!TryParseUtc(lastLoginAtIso, out var instant))
+            return false;
+
+        var local = TimeZoneInfo.ConvertTimeFromUtc(instant, ArgentinaTimeZone);
+        var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone);
+        return local.Date == nowLocal.Date;
+    }
+
     public AccessSummaryDto BuildSummary(IReadOnlyList<AppAccessRecordDto> items, TimeSpan activeWindow)
     {
         var newToday = 0;
         var active = 0;
+        var pending = 0;
+        var loggedInToday = 0;
 
         foreach (var item in items)
         {
+            if (string.Equals(item.Status, StatusPending, StringComparison.OrdinalIgnoreCase))
+                pending++;
             if (IsNewTodayRegistration(item.FirstSeenAt))
                 newToday++;
             if (IsRecentlyActive(item.LastSeenAt, activeWindow))
                 active++;
+            if (IsLoggedInToday(item.LastLoginAt))
+                loggedInToday++;
         }
 
         return new AccessSummaryDto
@@ -232,6 +357,8 @@ public sealed class AppAccessRepository
             Total = items.Count,
             ActiveCount = active,
             NewTodayCount = newToday,
+            PendingCount = pending,
+            LoggedInTodayCount = loggedInToday,
             ActiveWindowMinutes = (int)activeWindow.TotalMinutes,
         };
     }
@@ -277,25 +404,17 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status
             FROM app_access
             ORDER BY last_seen_at DESC
             """;
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            var email = reader.GetString(0);
-            if (AppAccessExclusions.IsExcluded(email))
+            var item = ReadRecord(reader);
+            if (AppAccessExclusions.IsExcluded(item.Email))
                 continue;
-
-            list.Add(new AppAccessRecordDto
-            {
-                Email = email,
-                FirstSeenAt = reader.GetString(1),
-                LastSeenAt = reader.GetString(2),
-                LoginCount = reader.GetInt32(3),
-                DisplayName = reader.IsDBNull(4) ? null : reader.GetString(4),
-            });
+            list.Add(item);
         }
 
         return list;
@@ -310,22 +429,13 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status
             FROM app_access
             ORDER BY email COLLATE NOCASE
             """;
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
-        {
-            list.Add(new AppAccessRecordDto
-            {
-                Email = reader.GetString(0),
-                FirstSeenAt = reader.GetString(1),
-                LastSeenAt = reader.GetString(2),
-                LoginCount = reader.GetInt32(3),
-                DisplayName = reader.IsDBNull(4) ? null : reader.GetString(4),
-            });
-        }
+            list.Add(ReadRecord(reader));
 
         return list;
     }
@@ -349,6 +459,34 @@ public sealed class AppAccessRepository
 
         EnsureColumn(conn, "app_access", "display_name", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_login_at", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "status", "TEXT NOT NULL DEFAULT 'approved'");
+        using (var backfill = conn.CreateCommand())
+        {
+            backfill.CommandText = """
+                UPDATE app_access
+                SET status = 'approved'
+                WHERE status IS NULL OR trim(status) = ''
+                """;
+            backfill.ExecuteNonQuery();
+        }
+    }
+
+    private static AppAccessRecordDto ReadRecord(SqliteDataReader reader)
+    {
+        var status = reader.FieldCount > 6 && !reader.IsDBNull(6) ? reader.GetString(6) : StatusApproved;
+        if (string.IsNullOrWhiteSpace(status))
+            status = StatusApproved;
+
+        return new AppAccessRecordDto
+        {
+            Email = reader.GetString(0),
+            FirstSeenAt = reader.GetString(1),
+            LastSeenAt = reader.GetString(2),
+            LoginCount = reader.GetInt32(3),
+            DisplayName = reader.IsDBNull(4) ? null : reader.GetString(4),
+            LastLoginAt = reader.FieldCount > 5 && !reader.IsDBNull(5) ? reader.GetString(5) : null,
+            Status = status.Trim().ToLowerInvariant(),
+        };
     }
 
     private static void EnsureColumn(SqliteConnection conn, string table, string column, string typeSql)
@@ -414,6 +552,8 @@ public sealed class AppAccessRecordDto
     public string LastSeenAt { get; init; } = "";
     public int LoginCount { get; init; }
     public string? DisplayName { get; init; }
+    public string? LastLoginAt { get; init; }
+    public string Status { get; init; } = AppAccessRepository.StatusApproved;
 }
 
 public sealed class AccessSummaryDto
@@ -421,7 +561,18 @@ public sealed class AccessSummaryDto
     public int Total { get; init; }
     public int ActiveCount { get; init; }
     public int NewTodayCount { get; init; }
+    public int PendingCount { get; init; }
+    public int LoggedInTodayCount { get; init; }
     public int ActiveWindowMinutes { get; init; }
+}
+
+public sealed class AccessDecisionRequest
+{
+    [System.Text.Json.Serialization.JsonPropertyName("email")]
+    public string Email { get; set; } = "";
+
+    [System.Text.Json.Serialization.JsonPropertyName("action")]
+    public string Action { get; set; } = "";
 }
 
 public sealed class AccessDisplayNameRequest

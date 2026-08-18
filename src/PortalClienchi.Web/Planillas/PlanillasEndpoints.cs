@@ -441,13 +441,18 @@ public static class PlanillasEndpoints
         app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
-            if (email is not null)
+            if (email is null)
+                return Results.Ok(new { email = (string?)null, status = "anon" });
+
+            if (!CanEnter(email, accessRepo))
             {
-                accessRepo.TouchActivity(email);
-                blanqueoRepo.AssociatePendingRequester(email);
+                PlanUserIdentity.ClearCookie(ctx);
+                return Results.Ok(new { email = (string?)null, status = "anon" });
             }
 
-            return Results.Ok(new { email });
+            accessRepo.RecordAccess(email);
+            blanqueoRepo.AssociatePendingRequester(email);
+            return Results.Ok(new { email, status = "ok" });
         });
 
         app.MapPost("/api/planillas/session/heartbeat", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
@@ -472,10 +477,7 @@ public static class PlanillasEndpoints
                 });
             }
 
-            PlanUserIdentity.SetCookie(ctx, email);
-            accessRepo.RecordAccess(email);
-            blanqueoRepo.AssociatePendingRequester(email);
-            return Results.Ok(new { email });
+            return OpenUserSession(ctx, email, accessRepo, blanqueoRepo);
         });
 
         app.MapDelete("/api/planillas/session", (HttpContext ctx) =>
@@ -573,6 +575,9 @@ public static class PlanillasEndpoints
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);
                     flags ??= new ModuleAccessFlagsDto();
+                    var status = string.IsNullOrWhiteSpace(item.Status)
+                        ? AppAccessRepository.StatusApproved
+                        : item.Status;
                     return new
                     {
                         item.Email,
@@ -580,9 +585,16 @@ public static class PlanillasEndpoints
                         item.LastSeenAt,
                         item.LoginCount,
                         item.DisplayName,
-                        isActive = AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
-                        isNewToday = AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
+                        item.LastLoginAt,
+                        status,
+                        isActive = status == AppAccessRepository.StatusApproved
+                            && AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
+                        isNewToday = status == AppAccessRepository.StatusApproved
+                            && AppAccessRepository.IsNewTodayRegistration(item.FirstSeenAt),
                         isReturning = item.LoginCount > 1,
+                        isPending = status == AppAccessRepository.StatusPending,
+                        isRejected = status == AppAccessRepository.StatusRejected,
+                        loggedInToday = AppAccessRepository.IsLoggedInToday(item.LastLoginAt),
                         modules = new
                         {
                             oportunidad = flags.Oportunidad,
@@ -602,6 +614,8 @@ public static class PlanillasEndpoints
                     total = summary.Total,
                     activeCount = summary.ActiveCount,
                     newTodayCount = summary.NewTodayCount,
+                    pendingCount = summary.PendingCount,
+                    loggedInTodayCount = summary.LoggedInTodayCount,
                     activeWindowMinutes = summary.ActiveWindowMinutes,
                 });
             }
@@ -633,6 +647,38 @@ public static class PlanillasEndpoints
                 return Results.NotFound(new { error = "No se encontró ese acceso." });
 
             return Results.Ok(new { ok = true, email = email.Trim().ToLowerInvariant(), removed });
+        });
+
+        app.MapPost("/api/access/registrations/decision", (
+            HttpContext ctx,
+            IConfiguration config,
+            AppAccessRepository accessRepo,
+            AccessDecisionRequest body) =>
+        {
+            if (!St2AccessAdminAuth.IsConfigured(config))
+                return Results.NotFound();
+
+            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
+                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
+            if (email is null)
+                return Results.BadRequest(new { error = "Correo inválido." });
+
+            var action = (body.Action ?? "").Trim().ToLowerInvariant();
+            var status = action switch
+            {
+                "approve" or "aprobar" => AppAccessRepository.StatusApproved,
+                "reject" or "rechazar" => AppAccessRepository.StatusRejected,
+                _ => null,
+            };
+            if (status is null)
+                return Results.BadRequest(new { error = "Acción inválida." });
+
+            if (accessRepo.SetStatus(email, status) <= 0)
+                return Results.NotFound(new { error = "No se encontró esa solicitud." });
+
+            return Results.Ok(new { ok = true, email, status });
         });
 
         app.MapPut("/api/access/registrations/modules", (HttpContext ctx, IConfiguration config, ModuleAccessRepository modules, ModuleAccessUpdateRequest body) =>
@@ -768,6 +814,63 @@ public static class PlanillasEndpoints
 
             return Results.Ok(new { ok = true });
         });
+    }
+
+    private static bool CanEnter(string email, AppAccessRepository accessRepo)
+    {
+        if (St2SuperAdmin.Is(email))
+        {
+            accessRepo.EnsureApproved(email);
+            return true;
+        }
+
+        var rec = accessRepo.Find(email);
+        return rec is not null
+            && string.Equals(rec.Status, AppAccessRepository.StatusApproved, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static IResult OpenUserSession(
+        HttpContext ctx,
+        string email,
+        AppAccessRepository accessRepo,
+        BlanqueoRepository blanqueoRepo)
+    {
+        if (St2SuperAdmin.Is(email))
+        {
+            accessRepo.EnsureApproved(email);
+            PlanUserIdentity.SetCookie(ctx, email);
+            accessRepo.RecordAccess(email);
+            blanqueoRepo.AssociatePendingRequester(email);
+            return Results.Ok(new { email, status = "ok" });
+        }
+
+        var rec = accessRepo.Find(email);
+        var status = rec?.Status ?? "";
+        if (rec is null || string.Equals(status, AppAccessRepository.StatusPending, StringComparison.OrdinalIgnoreCase))
+        {
+            accessRepo.RequestAccess(email);
+            return Results.Json(new
+            {
+                email,
+                status = AppAccessRepository.StatusPending,
+                error = "Tu acceso quedó pendiente de aprobación. Cuando te habiliten, volvé a ingresar con el mismo correo.",
+            }, statusCode: StatusCodes.Status403Forbidden);
+        }
+
+        if (string.Equals(status, AppAccessRepository.StatusRejected, StringComparison.OrdinalIgnoreCase))
+        {
+            return Results.Json(new
+            {
+                email,
+                status = AppAccessRepository.StatusRejected,
+                error = "Este correo no está autorizado. Pedile acceso a quien administra ST2.",
+            }, statusCode: StatusCodes.Status403Forbidden);
+        }
+
+        PlanUserIdentity.SetCookie(ctx, email);
+        accessRepo.RecordAccess(email);
+        blanqueoRepo.AssociatePendingRequester(email);
+        return Results.Ok(new { email, status = "ok" });
     }
 
     internal static string PublicBaseUrl(HttpRequest request)

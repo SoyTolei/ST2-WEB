@@ -117,6 +117,11 @@ let accessModulesEmailValue = "";
 let accessModulesSaving = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
 const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
+const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
+const accessAdminKpiActive = document.getElementById("st2-access-admin-kpi-active");
+const accessAdminKpiPending = document.getElementById("st2-access-admin-kpi-pending");
+const accessAdminKpiToday = document.getElementById("st2-access-admin-kpi-today");
+const accessAdminInbox = document.getElementById("st2-access-admin-inbox");
 const thomFrame = document.getElementById("thomFrame");
 const thomEmbedLoading = document.getElementById("thomEmbedLoading");
 const thomDirectGate = document.getElementById("thomDirectGate");
@@ -997,6 +1002,8 @@ let accessAdminSortDir = "desc";
 function sortAccessAdminItems(items) {
   const dir = accessAdminSortDir === "asc" ? 1 : -1;
   return [...items].sort((a, b) => {
+    if (a.isPending !== b.isPending) return a.isPending ? -1 : 1;
+    if (a.isRejected !== b.isRejected) return a.isRejected ? 1 : -1;
     if (accessAdminSortKey === "loginCount") {
       const cmp = (Number(a.loginCount) || 0) - (Number(b.loginCount) || 0);
       if (cmp !== 0) return cmp * dir;
@@ -1116,6 +1123,9 @@ function markAccessAdminEmailsAsSeen(items) {
 function normalizeAccessAdminItems(items) {
   return items.map((item) => {
     const email = item.email || item.Email || "";
+    const status = String(item.status || item.Status || "approved").toLowerCase();
+    const isPending = !!(item.isPending ?? item.IsPending) || status === "pending";
+    const isRejected = !!(item.isRejected ?? item.IsRejected) || status === "rejected";
     const isNewToday = !!(item.isNewToday ?? item.IsNewToday);
     const displayNameOverride = (item.displayName ?? item.DisplayName ?? "").trim() || null;
     const modules = item.modules || item.Modules || {};
@@ -1124,7 +1134,12 @@ function normalizeAccessAdminItems(items) {
       displayNameOverride,
       firstSeenAt: item.firstSeenAt || item.FirstSeenAt || "",
       lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
+      lastLoginAt: item.lastLoginAt || item.LastLoginAt || "",
       loginCount: item.loginCount ?? item.LoginCount ?? 0,
+      status,
+      isPending,
+      isRejected,
+      loggedInToday: !!(item.loggedInToday ?? item.LoggedInToday),
       isActive: !!(item.isActive ?? item.IsActive),
       isNewToday,
       isUnseenNew: isNewToday && !hasAdminSeenAccessEmail(email),
@@ -1155,6 +1170,9 @@ function buildAccessAdminSnapshot(items, activeCount) {
       loginCount: item.loginCount,
       isActive: item.isActive,
       isNewToday: item.isNewToday,
+      isPending: item.isPending,
+      status: item.status,
+      loggedInToday: item.loggedInToday,
       displayNameOverride: item.displayNameOverride || "",
     })),
   });
@@ -1197,15 +1215,55 @@ function setAccessAdminSummary(text) {
 }
 
 function updateAccessAdminSummaryLine() {
-  const total = accessAdminItemsCache.length;
+  const total = accessAdminItemsCache.filter((item) => !item.isRejected).length;
+  const pending = accessAdminItemsCache.filter((item) => item.isPending).length;
+  const today = accessAdminItemsCache.filter((item) => item.loggedInToday).length;
   const { activeCount } = accessAdminMeta;
+  if (accessAdminKpiTotal) accessAdminKpiTotal.textContent = String(total);
+  if (accessAdminKpiActive) accessAdminKpiActive.textContent = String(activeCount);
+  if (accessAdminKpiPending) accessAdminKpiPending.textContent = String(pending);
+  if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
+  renderAccessAdminInbox();
   if (!total) {
     setAccessAdminSummary("");
     return;
   }
-  setAccessAdminSummary(
-    `${total} registrado${total === 1 ? "" : "s"} · ${activeCount} activo${activeCount === 1 ? "" : "s"}`
-  );
+  const bits = [
+    `${total} registrado${total === 1 ? "" : "s"}`,
+    `${activeCount} activo${activeCount === 1 ? "" : "s"}`,
+    `${today} hoy`,
+  ];
+  if (pending) bits.push(`${pending} pendiente${pending === 1 ? "" : "s"}`);
+  setAccessAdminSummary(bits.join(" · "));
+}
+
+function renderAccessAdminInbox() {
+  if (!accessAdminInbox) return;
+  const pending = accessAdminItemsCache.filter((item) => item.isPending);
+  if (!pending.length) {
+    accessAdminInbox.classList.add("hidden");
+    accessAdminInbox.innerHTML = "";
+    return;
+  }
+  accessAdminInbox.classList.remove("hidden");
+  accessAdminInbox.innerHTML = `
+    <div class="st2-access-admin-inbox-head">
+      <strong>Solicitudes nuevas</strong>
+      <span>${pending.length}</span>
+    </div>
+    ${pending.map((item) => {
+      const name = formatAccessDisplayName(item.email, item.displayNameOverride);
+      return `<div class="st2-access-admin-inbox-row" data-email="${escapeHtml(item.email)}">
+        <div>
+          <p class="st2-access-admin-inbox-name">${escapeHtml(name)}</p>
+          <p class="st2-access-admin-inbox-mail">${escapeHtml(item.email)}</p>
+        </div>
+        <div class="st2-access-admin-inbox-actions">
+          <button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}">Aprobar</button>
+          <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}">Rechazar</button>
+        </div>
+      </div>`;
+    }).join("")}`;
 }
 
 function setAccessAdminUpdatedHint(text) {
@@ -1223,6 +1281,8 @@ function getFilteredAccessAdminItems() {
   const q = accessAdminQuery.trim().toLowerCase();
   return accessAdminItemsCache.filter((item) => {
     if (accessAdminFilter === "active" && !item.isActive) return false;
+    if (accessAdminFilter === "pending" && !item.isPending) return false;
+    if (accessAdminFilter === "today" && !item.loggedInToday) return false;
     if (q) {
       const email = item.email.toLowerCase();
       const name = formatAccessDisplayName(item.email, item.displayNameOverride).toLowerCase();
@@ -1256,16 +1316,23 @@ function renderAccessAdminTable() {
   accessAdminStatus.textContent = "";
   accessAdminBody.innerHTML = items.map((item) => {
     const badges = [];
+    if (item.isPending) {
+      badges.push('<span class="st2-access-admin-pending-tag" title="Esperando aprobación">Pendiente</span>');
+    }
     if (item.isActive) {
       badges.push('<span class="st2-access-admin-live" title="Activo ahora"><span class="st2-access-admin-live-dot" aria-hidden="true"></span></span>');
     }
     if (item.isUnseenNew) {
       badges.push('<span class="st2-access-admin-new-user" title="Primer ingreso hoy">Nuevo</span>');
     }
+    if (item.loggedInToday && !item.isPending) {
+      badges.push('<span class="st2-access-admin-today-tag" title="Ingresó hoy">Hoy</span>');
+    }
     const badgeHtml = badges.length
       ? `<span class="st2-access-admin-email-badges">${badges.join("")}</span>`
       : "";
     const rowClass = [
+      item.isPending ? "is-pending" : "",
       item.isActive ? "is-active" : "",
       item.isUnseenNew ? "is-new" : "",
     ].filter(Boolean).join(" ");
@@ -1299,9 +1366,12 @@ function renderAccessAdminTable() {
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">
-        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos visibles" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
+        ${item.isPending
+          ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
+             <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
+          : `<button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos visibles" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
         <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
-        <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>
+        <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>`}
       </td>
     </tr>`;
   }).join("");
@@ -1379,6 +1449,35 @@ async function saveAccessNameEdit(displayName) {
 
 function editAccessAdminDisplayName(email) {
   openAccessNameEditModal(email);
+}
+
+async function decideAccessAdminEmail(email, action) {
+  if (!email) return;
+  const current = accessAdminItemsCache.find((item) => item.email === email);
+  const name = formatAccessDisplayName(email, current?.displayNameOverride);
+  if (action === "reject" && !confirm(`¿Rechazar el acceso de ${name}?\n${email}`)) return;
+  try {
+    const response = await fetch("/api/access/registrations/decision", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, action }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      showAccessAdminLogin();
+      if (accessAdminError) accessAdminError.textContent = "Sesión expirada. Volvé a ingresar.";
+      return;
+    }
+    if (!response.ok) {
+      setAccessAdminUpdatedHint(data.error || "No se pudo actualizar la solicitud.");
+      return;
+    }
+    await loadAccessAdminRegistrations({ silent: true, force: true });
+    setAccessAdminUpdatedHint(action === "approve" ? `Aprobado: ${name}` : `Rechazado: ${name}`);
+  } catch {
+    setAccessAdminUpdatedHint("No se pudo contactar al servidor.");
+  }
 }
 
 async function deleteAccessAdminEmail(email) {
@@ -1609,7 +1708,13 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     updateAccessAdminSummaryLine();
 
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-    if (newRegistrationEmails.length > 0) {
+    const newPending = items.filter((item) => item.isPending && newRegistrationEmails.includes(item.email));
+    if (newPending.length > 0) {
+      const label = newPending.length === 1
+        ? `Nueva solicitud: ${newPending[0].email}`
+        : `${newPending.length} solicitudes nuevas`;
+      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+    } else if (newRegistrationEmails.length > 0) {
       const label = newRegistrationEmails.length === 1
         ? `Nuevo registro: ${newRegistrationEmails[0]}`
         : `${newRegistrationEmails.length} registros nuevos`;
@@ -1681,7 +1786,27 @@ document.querySelectorAll(".st2-access-admin-th-sort").forEach((th) => {
   });
 });
 syncAccessAdminSortHeaders();
+function handleAccessAdminActionClick(e) {
+  const target = e.target;
+  if (!(target instanceof HTMLElement)) return;
+  const approveBtn = target.closest("[data-approve-email]");
+  if (approveBtn instanceof HTMLElement) {
+    void decideAccessAdminEmail(approveBtn.dataset.approveEmail || "", "approve");
+    return true;
+  }
+  const rejectBtn = target.closest("[data-reject-email]");
+  if (rejectBtn instanceof HTMLElement) {
+    void decideAccessAdminEmail(rejectBtn.dataset.rejectEmail || "", "reject");
+    return true;
+  }
+  return false;
+}
+
+accessAdminInbox?.addEventListener("click", (e) => {
+  handleAccessAdminActionClick(e);
+});
 accessAdminBody?.addEventListener("click", (e) => {
+  if (handleAccessAdminActionClick(e)) return;
   const target = e.target;
   if (!(target instanceof HTMLElement)) return;
   const modulesBtn = target.closest("[data-modules-email]");

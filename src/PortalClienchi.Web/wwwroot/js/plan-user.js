@@ -27,6 +27,31 @@ function isAllowedEmail(email) {
 }
 
 const EMAIL_HINT = "Correo inválido.";
+let lastPendingAccess = null;
+
+function accessFormEl() {
+  return document.getElementById("st2-access-form");
+}
+
+function accessPendingEl() {
+  return document.getElementById("st2-access-pending");
+}
+
+function showAccessFormState() {
+  accessFormEl()?.classList.remove("hidden");
+  accessPendingEl()?.classList.add("hidden");
+}
+
+function showAccessPendingState(email, message) {
+  const box = accessPendingEl();
+  const mailEl = document.getElementById("st2-access-pending-email");
+  const textEl = document.getElementById("st2-access-pending-text");
+  accessFormEl()?.classList.add("hidden");
+  if (box) box.classList.remove("hidden");
+  if (mailEl) mailEl.textContent = email || "";
+  if (textEl && message) textEl.textContent = message;
+  lockAppShell();
+}
 
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
@@ -83,21 +108,86 @@ function waitForAccessGate() {
   });
 }
 
+async function postAccessSession(email) {
+  const response = await fetch("/api/planillas/session", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+    credentials: "include",
+  });
+  const data = await response.json().catch(() => ({}));
+  return { response, data };
+}
+
 function showAccessGate(resolve) {
   const gate = document.getElementById("st2-access-gate");
   const input = document.getElementById("st2-access-email");
   const error = document.getElementById("st2-access-error");
   const submit = document.getElementById("st2-access-submit");
+  const retry = document.getElementById("st2-access-retry");
+  const other = document.getElementById("st2-access-other");
   if (!gate || !input || !submit) {
     resolve(null);
     return;
   }
 
   lockAppShell();
+  showAccessFormState();
   input.value = localStorage.getItem("st2_plan_user_hint") || "";
   if (error) error.textContent = "";
-  input.focus();
-  input.select();
+  if (lastPendingAccess) {
+    showAccessPendingState(lastPendingAccess.email, lastPendingAccess.message);
+    lastPendingAccess = null;
+  } else {
+    input.focus();
+    input.select();
+  }
+
+  const finishOk = async (email) => {
+    cachedEmail = email;
+    localStorage.setItem("st2_plan_user_hint", email);
+    await refreshPlanUserSession();
+    if (!cachedEmail) return false;
+    cleanup();
+    unlockAppShell();
+    updatePlanUserBadge();
+    resolve(cachedEmail);
+    return true;
+  };
+
+  const applySessionResult = async (response, data, fallbackEmail) => {
+    const status = String(data.status || "").toLowerCase();
+    const email = data.email || fallbackEmail || "";
+    if (status === "pending" || (response.status === 403 && status !== "rejected")) {
+      if (email) localStorage.setItem("st2_plan_user_hint", email);
+      showAccessPendingState(
+        email,
+        data.error || "Tu acceso tiene que ser aprobado. Cuando te habiliten, volvé a entrar con el mismo correo."
+      );
+      if (submit) submit.disabled = false;
+      return;
+    }
+    if (status === "rejected") {
+      showAccessFormState();
+      if (error) error.textContent = data.error || "Este correo no está autorizado.";
+      if (submit) submit.disabled = false;
+      return;
+    }
+    if (!response.ok) {
+      showAccessFormState();
+      if (error) error.textContent = data.error || EMAIL_HINT;
+      if (submit) submit.disabled = false;
+      return;
+    }
+    if (!data.email) {
+      if (error) error.textContent = "No se pudo confirmar la sesión.";
+      if (submit) submit.disabled = false;
+      return;
+    }
+    const ok = await finishOk(data.email);
+    if (!ok && error) error.textContent = "No se pudo confirmar la sesión. Probá de nuevo.";
+    if (submit) submit.disabled = false;
+  };
 
   const onSubmit = async () => {
     const email = input.value.trim();
@@ -112,58 +202,47 @@ function showAccessGate(resolve) {
     }
 
     submit.disabled = true;
-    let response;
     try {
-      response = await fetch("/api/planillas/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-        credentials: "include",
-      });
+      const { response, data } = await postAccessSession(email);
+      await applySessionResult(response, data, email);
     } catch {
       if (error) error.textContent = "No se pudo contactar al servidor.";
       submit.disabled = false;
+    }
+  };
+
+  const onRetry = async () => {
+    const email = document.getElementById("st2-access-pending-email")?.textContent?.trim()
+      || localStorage.getItem("st2_plan_user_hint")
+      || "";
+    if (!email) {
+      showAccessFormState();
+      input.focus();
       return;
     }
-
-    const contentType = response.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-      if (error) error.textContent = "Respuesta inesperada del servidor.";
-      submit.disabled = false;
-      return;
+    if (retry) retry.disabled = true;
+    try {
+      const { response, data } = await postAccessSession(email);
+      await applySessionResult(response, data, email);
+    } catch {
+      showAccessPendingState(email, "No se pudo contactar al servidor. Probá de nuevo en un momento.");
+    } finally {
+      if (retry) retry.disabled = false;
     }
+  };
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      if (error) error.textContent = data.error || EMAIL_HINT;
-      submit.disabled = false;
-      return;
-    }
-
-    if (!data.email) {
-      if (error) error.textContent = "No se pudo confirmar la sesión.";
-      submit.disabled = false;
-      return;
-    }
-
-    cachedEmail = data.email;
-    localStorage.setItem("st2_plan_user_hint", data.email);
-    await refreshPlanUserSession();
-    if (!cachedEmail) {
-      if (error) error.textContent = "No se pudo confirmar la sesión. Probá de nuevo.";
-      submit.disabled = false;
-      return;
-    }
-
-    cleanup();
-    unlockAppShell();
-    updatePlanUserBadge();
-    resolve(cachedEmail);
+  const onOther = () => {
+    showAccessFormState();
+    if (error) error.textContent = "";
+    input.focus();
+    input.select();
   };
 
   const cleanup = () => {
     submit.removeEventListener("click", onSubmit);
     input.removeEventListener("keydown", onKey);
+    retry?.removeEventListener("click", onRetry);
+    other?.removeEventListener("click", onOther);
     submit.disabled = false;
   };
 
@@ -173,6 +252,8 @@ function showAccessGate(resolve) {
 
   submit.addEventListener("click", onSubmit);
   input.addEventListener("keydown", onKey);
+  retry?.addEventListener("click", onRetry);
+  other?.addEventListener("click", onOther);
 }
 
 export function getPlanUserEmail() {
@@ -203,11 +284,19 @@ export async function syncPlanUserSession() {
       body: JSON.stringify({ email: hint }),
       credentials: "include",
     });
+    const data = await response.json().catch(() => ({}));
     if (response.ok) {
-      const data = await response.json().catch(() => ({}));
       cachedEmail = data.email || null;
       updatePlanUserBadge();
       return cachedEmail;
+    }
+    const status = String(data.status || "").toLowerCase();
+    if (status === "pending" || (response.status === 403 && status !== "rejected")) {
+      lastPendingAccess = {
+        email: data.email || hint,
+        message: data.error || "Tu acceso tiene que ser aprobado. Cuando te habiliten, volvé a entrar con el mismo correo.",
+      };
+      return null;
     }
   } catch {
     /* fallback a GET */

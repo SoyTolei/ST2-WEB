@@ -2007,6 +2007,147 @@ body.portal-tab-active .tab-icon {
   to { transform: rotate(360deg); }
 }
 
+.st2-access-admin-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.st2-access-admin-kpi {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px 7px;
+  min-width: 0;
+}
+
+.st2-access-admin-kpi.is-pending {
+  border-color: #fdba74;
+  background: #fff7ed;
+}
+
+.st2-access-admin-kpi-n {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.st2-access-admin-kpi-l {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+@media (max-width: 720px) {
+  .st2-access-admin-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.st2-access-admin-inbox {
+  margin: 0 0 10px;
+  border: 1px solid #fdba74;
+  background: #fff7ed;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.st2-access-admin-inbox.hidden {
+  display: none !important;
+}
+
+.st2-access-admin-inbox-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  color: #9a3412;
+}
+
+.st2-access-admin-inbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid #fed7aa;
+}
+
+.st2-access-admin-inbox-name {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.st2-access-admin-inbox-mail {
+  margin: 2px 0 0;
+  font-size: 0.72rem;
+  color: #9a3412;
+}
+
+.st2-access-admin-inbox-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.st2-access-admin-approve,
+.st2-access-admin-reject {
+  border-radius: 7px;
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-access-admin-approve {
+  border: 0;
+  background: #0f766e;
+  color: #fff;
+}
+
+.st2-access-admin-reject {
+  border: 1px solid #fda4af;
+  background: #fff;
+  color: #be123c;
+}
+
+.st2-access-admin-pending-tag,
+.st2-access-admin-today-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.st2-access-admin-pending-tag {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.st2-access-admin-today-tag {
+  background: #ecfeff;
+  color: #0e7490;
+}
+
+.st2-access-admin-table tr.is-pending {
+  background: #fff7ed;
+}
+
 .st2-access-admin-stats {
   display: flex;
   flex-wrap: wrap;
@@ -2834,6 +2975,49 @@ body.st2-access-pending .st2-app-root {
 .st2-access-submit:disabled {
   opacity: 0.65;
   cursor: wait;
+}
+
+.st2-access-pending {
+  text-align: left;
+}
+
+.st2-access-pending-kicker {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #c2410c;
+}
+
+.st2-access-pending-text {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.st2-access-pending-email {
+  margin: 0 0 14px;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #0f172a;
+  word-break: break-all;
+}
+
+.st2-access-other {
+  width: 100%;
+  margin-top: 8px;
+  border: 0;
+  background: none;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.st2-access-other:hover {
+  color: #0f172a;
 }
 
 .st2-access-foot {

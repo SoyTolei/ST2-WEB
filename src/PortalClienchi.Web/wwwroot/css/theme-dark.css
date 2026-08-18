@@ -65,6 +65,39 @@ html.st2-theme-dark .st2-access-admin-dialog {
   border-color: #2b3445;
 }
 
+html.st2-theme-dark .st2-access-pending-text,
+html.st2-theme-dark .st2-access-other {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-access-pending-email {
+  color: #e8eef7;
+}
+
+html.st2-theme-dark .st2-access-admin-kpi,
+html.st2-theme-dark .st2-access-admin-reject {
+  background: #151c28;
+  border-color: #3d4b61;
+  color: #e8eef7;
+}
+
+html.st2-theme-dark .st2-access-admin-kpi-n,
+html.st2-theme-dark .st2-access-admin-inbox-name {
+  color: #e8eef7;
+}
+
+html.st2-theme-dark .st2-access-admin-kpi.is-pending,
+html.st2-theme-dark .st2-access-admin-inbox,
+html.st2-theme-dark .st2-access-admin-table tr.is-pending {
+  background: #3a1d12;
+  border-color: #7c2d12;
+}
+
+html.st2-theme-dark .st2-access-admin-inbox-head,
+html.st2-theme-dark .st2-access-admin-inbox-mail {
+  color: #fdba74;
+}
+
 html.st2-theme-dark .status-bar {
   background: #151b26;
   color: var(--text-muted);
