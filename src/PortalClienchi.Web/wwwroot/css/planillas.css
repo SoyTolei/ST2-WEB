@@ -58,6 +58,8 @@
   inset: 6% 4%;
   z-index: 1;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
   background: radial-gradient(
     ellipse 78% 86% at 50% 48%,
     color-mix(in srgb, var(--panel) 86%, transparent) 0%,
@@ -72,6 +74,9 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 
 .st2-suite-float {
@@ -83,6 +88,7 @@
   opacity: 0;
   filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.1));
   will-change: transform, opacity;
+  animation-play-state: paused;
 }
 
 .st2-suite-float--crest {
@@ -312,6 +318,19 @@
 .st2-suite-sig-dot {
   opacity: 0.55;
   font-weight: 400;
+}
+
+.planillas-footer:hover .st2-suite-sig-stage {
+  opacity: 1;
+  visibility: visible;
+}
+
+.planillas-footer:hover .st2-suite-sig::after {
+  opacity: 1;
+}
+
+.planillas-footer:hover .st2-suite-float {
+  animation-play-state: running;
 }
 
 .planillas-footer:hover .st2-suite-sig-brand {
