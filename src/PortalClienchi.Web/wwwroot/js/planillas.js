@@ -70,6 +70,15 @@ function isChile() {
   return sistemaActual === "Chile";
 }
 
+/** Oportunidad, PDF y Blanqueo no aplican a LEGAL ni Chile. */
+function hidesCommercialModules(id = sistemaActual) {
+  return id === "Legal" || id === "Chile";
+}
+
+function syncSistemaDataset() {
+  document.body.dataset.planSistema = sistemaActual || "";
+}
+
 function updateSistemaBetaUi() {
   document.getElementById("plan-legal-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Legal"));
   document.getElementById("plan-chile-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Chile"));
@@ -238,9 +247,9 @@ function routeFromPath(pathname) {
 
 function canOpenRoute(route) {
   if (!route?.requires) return true;
-  if (route.requires === "oportunidad") return canSeeOportunidadModule();
-  if (route.requires === "pdf") return canSeePdfPortalModule();
-  if (route.requires === "blanqueo") return canSeeBlanqueoModule();
+  if (route.requires === "oportunidad") return canSeeOportunidadModule() && !hidesCommercialModules();
+  if (route.requires === "pdf") return canSeePdfPortalModule() && !hidesCommercialModules();
+  if (route.requires === "blanqueo") return canSeeBlanqueoModule() && !hidesCommercialModules();
   const sys = route.sistema || sistemaActual;
   if (route.requires === "transferencia") {
     return !!sys && !isSistemaPlaceholder(sys) && sys !== "Legal";
@@ -311,6 +320,7 @@ function updateSistemaUi() {
     btn.classList.toggle("active", active);
   });
   setSistemaIndicator(index);
+  syncSistemaDataset();
 
   const transferBtn = document.getElementById("plan-modulo-transferencia");
   const transferNa = document.getElementById("plan-modulo-transferencia-na");
@@ -318,7 +328,8 @@ function updateSistemaUi() {
   const oportunidadBtn = document.querySelector('[data-plan-modulo="oportunidad"]');
   const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
-  const legalSelected = sistemaActual === "Legal" && !isSistemaPlaceholder("Legal");
+  const legalSelected = isLegal() && !isSistemaPlaceholder("Legal");
+  const hideCommercial = hidesCommercialModules();
 
   if (transferBtn) {
     transferBtn.classList.toggle("hidden", legalSelected);
@@ -332,17 +343,16 @@ function updateSistemaUi() {
 
   if (oportunidadBtn) {
     const allowedOp = canSeeOportunidadModule();
-    oportunidadBtn.classList.toggle("hidden", legalSelected || !allowedOp);
-    oportunidadBtn.disabled = placeholderBlocked || !allowedOp;
+    oportunidadBtn.classList.toggle("hidden", hideCommercial || !allowedOp);
+    oportunidadBtn.disabled = placeholderBlocked || hideCommercial || !allowedOp;
   }
   if (oportunidadNa) {
-    // Solo mostrar "no corresponde" en LEGAL cuando la persona sí tiene permiso de oportunidad.
-    const showNa = legalSelected && canSeeOportunidadModule();
-    oportunidadNa.classList.toggle("hidden", !showNa);
-    oportunidadNa.setAttribute("aria-hidden", showNa ? "false" : "true");
+    oportunidadNa.classList.add("hidden");
+    oportunidadNa.setAttribute("aria-hidden", "true");
   }
   syncPdfPortalModuleVisibility();
   syncBlanqueoModuleVisibility();
+  renderBlanqueoAlertUi();
   updateSistemaBetaUi();
 }
 
@@ -1029,7 +1039,7 @@ async function revealView(name, historyMode = "push") {
   }
 
   if (name === "oportunidadMenu" || name === "oportunidadCargar" || name === "oportunidadGestor") {
-    if (!canSeeOportunidadModule() || !sistemaActual || isSistemaPlaceholder(sistemaActual) || isLegal()) {
+    if (!canSeeOportunidadModule() || !sistemaActual || isSistemaPlaceholder(sistemaActual) || hidesCommercialModules()) {
       showView("menu", { history: "replace" });
       return;
     }
@@ -1052,7 +1062,7 @@ async function revealView(name, historyMode = "push") {
   }
 
   if (name === "pdfPortal") {
-    if (!canSeePdfPortalModule()) {
+    if (!canSeePdfPortalModule() || hidesCommercialModules()) {
       showView("menu", { history: "replace" });
       return;
     }
@@ -1062,7 +1072,7 @@ async function revealView(name, historyMode = "push") {
   }
 
   if (name === "blanqueo") {
-    if (!canSeeBlanqueoModule()) {
+    if (!canSeeBlanqueoModule() || hidesCommercialModules()) {
       showView("menu", { history: "replace" });
       return;
     }

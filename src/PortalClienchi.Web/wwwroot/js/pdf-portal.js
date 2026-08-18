@@ -20,10 +20,15 @@ export function canSeePdfPortalModule(email = getPlanUserEmail()) {
   return canSeeFromAccess();
 }
 
+function sistemaHidesCommercialModules() {
+  const sistema = document.body.dataset.planSistema;
+  return sistema === "Legal" || sistema === "Chile";
+}
+
 export function syncPdfPortalModuleVisibility() {
   const btn = document.getElementById("plan-modulo-pdf-portal");
   if (!btn) return;
-  const allowed = canSeePdfPortalModule();
+  const allowed = canSeePdfPortalModule() && !sistemaHidesCommercialModules();
   btn.classList.toggle("hidden", !allowed);
   btn.setAttribute("aria-hidden", allowed ? "false" : "true");
 }

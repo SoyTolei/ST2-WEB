@@ -217,20 +217,22 @@ export function renderBlanqueoAlertUi() {
   const hideToast = alertMode === "confirm"
     && !!count
     && (confirmToastDismissedSig === pendingSignature(cachedAlerts) || readDismissedSig() === pendingSignature(cachedAlerts));
+  const sistema = document.body.dataset.planSistema;
+  const hideForSistema = sistema === "Legal" || sistema === "Chile";
 
   const tabBadge = document.querySelector('.tab-reminder-badge[data-reminder="planillas-blanqueo"]');
   if (tabBadge) {
     tabBadge.textContent = label;
-    tabBadge.classList.toggle("hidden", count === 0);
-    tabBadge.title = summary?.text || "";
-    tabBadge.setAttribute("aria-hidden", count ? "false" : "true");
+    tabBadge.classList.toggle("hidden", count === 0 || hideForSistema);
+    tabBadge.title = hideForSistema ? "" : (summary?.text || "");
+    tabBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
   }
 
   const modBadge = document.getElementById("plan-modulo-blanqueo-badge");
   if (modBadge) {
     modBadge.textContent = label;
-    modBadge.classList.toggle("hidden", count === 0);
-    modBadge.setAttribute("aria-hidden", count ? "false" : "true");
+    modBadge.classList.toggle("hidden", count === 0 || hideForSistema);
+    modBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
   }
 
   const toast = document.getElementById("blanqueo-ready-toast");
@@ -238,7 +240,7 @@ export function renderBlanqueoAlertUi() {
   const toastCount = document.getElementById("blanqueo-ready-toast-count");
   if (toast && toastText) {
     toast.classList.remove("is-ok", "is-warn", "is-bad");
-    if (count === 0 || !summary || hideToast) {
+    if (count === 0 || !summary || hideToast || hideForSistema) {
       toast.classList.add("hidden");
       toast.setAttribute("aria-hidden", "true");
     } else {

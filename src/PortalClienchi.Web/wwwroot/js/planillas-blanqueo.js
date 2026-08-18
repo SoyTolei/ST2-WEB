@@ -63,10 +63,15 @@ function canLoadBlanqueo(email = getPlanUserEmail()) {
   return canLoadFromAccess();
 }
 
+function sistemaHidesCommercialModules() {
+  const sistema = document.body.dataset.planSistema;
+  return sistema === "Legal" || sistema === "Chile";
+}
+
 export function syncBlanqueoModuleVisibility() {
   const btn = document.getElementById("plan-modulo-blanqueo");
   if (!btn) return;
-  const allowed = canSeeBlanqueoModule();
+  const allowed = canSeeBlanqueoModule() && !sistemaHidesCommercialModules();
   btn.classList.toggle("hidden", !allowed);
   btn.setAttribute("aria-hidden", allowed ? "false" : "true");
 }
