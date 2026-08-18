@@ -107,8 +107,6 @@
                 <button type="button" class="plan-pill-btn" data-plan-sistema="Legal">LEGAL <span id="plan-legal-beta-pill" class="plan-pill-beta hidden">Beta</span></button>
                 <button type="button" class="plan-pill-btn" data-plan-sistema="Chile">Chile <span id="plan-chile-beta-pill" class="plan-pill-beta hidden">Beta</span></button>
               </div>
-              <p id="plan-legal-beta-note" class="plan-sistema-beta-note hidden">LEGAL está en <strong>versión beta</strong> — seguimos trabajando en mejoras.</p>
-              <p id="plan-chile-beta-note" class="plan-sistema-beta-note hidden">Chile está en <strong>versión beta</strong> — seguimos trabajando en mejoras.</p>
             </div>
 
             <p class="planillas-section-title">Opciones</p>
@@ -116,7 +114,10 @@
               <div class="plan-modulos-grid">
                 <button type="button" class="plan-modulo-btn transfer" data-plan-modulo="transferencia" id="plan-modulo-transferencia">
                   <span class="plan-modulo-icon" data-plan-icon="transfer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 8h8M8 11h8M8 14h5"/></svg></span>
-                  Transferencia de Casos
+                  <span class="plan-modulo-copy">
+                    <span class="plan-modulo-label">Transferencia de Casos</span>
+                    <span class="plan-modulo-sub">Entre mesas</span>
+                  </span>
                 </button>
                 <div id="plan-modulo-transferencia-na" class="plan-modulo-na hidden" aria-hidden="true">
                   <span class="plan-modulo-icon muted" data-plan-icon="transfer" aria-hidden="true"></span>
@@ -125,11 +126,17 @@
                 </div>
                 <button type="button" class="plan-modulo-btn referral" data-plan-modulo="referral">
                   <span class="plan-modulo-icon" data-plan-icon="referral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="10.5" r="4"/><path d="M12 3.5v1.7M12 15.8v1.7M18.5 10.5h-1.8M7.3 10.5H5.5M16.8 6.2l-1.3 1.3M8.5 13.5l-1.3 1.3M16.8 14.8l-1.3-1.3M8.5 7.5L7.2 6.2"/></svg></span>
-                  Referral I+D
+                  <span class="plan-modulo-copy">
+                    <span class="plan-modulo-label">Referral I+D</span>
+                    <span class="plan-modulo-sub">Escalamiento técnico</span>
+                  </span>
                 </button>
                 <button type="button" class="plan-modulo-btn oportunidad" data-plan-modulo="oportunidad" id="plan-modulo-oportunidad">
                   <span class="plan-modulo-icon" data-plan-icon="oportunidad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" aria-hidden="true"><path d="M5.5 18.5h13M7.5 16.5v-5M11.5 16.5V8.5M15.5 16.5v-3M19.5 16.5V6.5"/></svg></span>
-                  Oportunidad de Venta
+                  <span class="plan-modulo-copy">
+                    <span class="plan-modulo-label">Oportunidad de Venta</span>
+                    <span class="plan-modulo-sub">Seguimiento comercial</span>
+                  </span>
                 </button>
                 <div id="plan-modulo-oportunidad-na" class="plan-modulo-na hidden" aria-hidden="true">
                   <span class="plan-modulo-icon muted" data-plan-icon="oportunidad" aria-hidden="true"></span>
@@ -138,11 +145,17 @@
                 </div>
                 <button type="button" class="plan-modulo-btn pdf-portal hidden" data-plan-modulo="pdf-portal" id="plan-modulo-pdf-portal" aria-hidden="true">
                   <span class="plan-modulo-icon" data-plan-icon="pdf-portal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
-                  Generador de PDFS para Portal
+                  <span class="plan-modulo-copy">
+                    <span class="plan-modulo-label">Generador de PDFs</span>
+                    <span class="plan-modulo-sub">para Portal Cliente</span>
+                  </span>
                 </button>
-                <button type="button" class="plan-modulo-btn blanqueo hidden" data-plan-modulo="blanqueo" id="plan-modulo-blanqueo" aria-hidden="true">
+                <button type="button" class="plan-modulo-btn blanqueo hidden" data-plan-modulo="blanqueo" id="plan-modulo-blanqueo" aria-hidden="true" title="Blanqueo ONVIO, On Balance y Portal Cliente">
                   <span class="plan-modulo-icon" data-plan-icon="blanqueo"></span>
-                  Blanqueo ONVIO, On Balance y Portal Cliente
+                  <span class="plan-modulo-copy">
+                    <span class="plan-modulo-label">Blanqueo de accesos</span>
+                    <span class="plan-modulo-sub">ONVIO · On Balance · Portal</span>
+                  </span>
                   <span id="plan-modulo-blanqueo-badge" class="plan-modulo-alert-badge hidden" aria-hidden="true">1</span>
                 </button>
               </div>
@@ -1341,7 +1354,7 @@
         <div class="st2-about-modules">
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">Sistema de Planillas</h3>
-            <p class="st2-about-module-text">Transferencia entre mesas y Referral I+D, con adjuntos y traza SQL.</p>
+            <p class="st2-about-module-text">Transferencia entre mesas y Referral I+D, con adjuntos y traza SQL. LEGAL y Chile están en versión beta.</p>
           </article>
           <article class="st2-about-module st2-about-module--restricted">
             <div class="st2-about-module-head">

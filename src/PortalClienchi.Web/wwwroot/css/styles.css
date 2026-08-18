@@ -165,9 +165,11 @@ html, body {
 }
 
 .st2-update-banner {
-  position: sticky;
-  top: 0;
-  z-index: 1200;
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  z-index: 2800;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -177,6 +179,11 @@ html, body {
   background: linear-gradient(90deg, #9a3412 0%, #c2410c 55%, #ea580c 100%);
   color: #fff7ed;
   box-shadow: 0 6px 18px rgba(154, 52, 18, 0.28);
+}
+
+body.embed-active .st2-update-banner,
+body.portal-tab-active .st2-update-banner {
+  top: 52px;
 }
 
 .st2-update-banner.hidden {

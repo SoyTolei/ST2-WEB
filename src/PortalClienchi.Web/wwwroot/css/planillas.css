@@ -367,19 +367,6 @@
   vertical-align: middle;
 }
 
-.plan-legal-beta-note,
-.plan-sistema-beta-note {
-  margin: -8px 0 16px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #fcd34d;
-  background: #fffbeb;
-  color: #78350f;
-  font-size: 0.78rem;
-  line-height: 1.45;
-  text-align: center;
-}
-
 .plan-legal-beta-banner {
   margin: 0 0 16px;
   padding: 10px 14px;
@@ -432,37 +419,68 @@
 .plan-modulo-btn {
   position: relative;
   border: none;
-  border-radius: 12px;
-  min-height: 108px;
-  padding: 18px;
+  border-radius: 14px;
+  min-height: 122px;
+  height: 122px;
+  padding: 14px 12px 12px;
   color: #fff;
-  font-size: 0.9375rem;
-  font-weight: 600;
+  font-size: 0.86rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  transition: opacity 0.12s;
+  gap: 8px;
+  transition: filter 0.12s ease, transform 0.12s ease;
   margin: 6px;
   width: calc(100% - 12px);
+  box-sizing: border-box;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.plan-modulo-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 2.6em;
+  justify-content: flex-start;
+}
+
+.plan-modulo-label {
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.plan-modulo-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .plan-modulo-btn:hover:not(:disabled) {
-  opacity: 0.9;
+  filter: brightness(1.06);
+  transform: translateY(-1px);
 }
 
 .plan-modulo-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  filter: none;
+  transform: none;
 }
 
-.plan-modulo-btn.transfer { background: #16a34a; }
-.plan-modulo-btn.referral { background: #1a1f2e; }
-.plan-modulo-btn.oportunidad { background: #7c3aed; }
-.plan-modulo-btn.pdf-portal { background: #0f766e; }
-.plan-modulo-btn.blanqueo { background: #0c4a6e; }
+.plan-modulo-btn.transfer { background: #15803d; }
+.plan-modulo-btn.referral { background: #c2410c; }
+.plan-modulo-btn.oportunidad { background: #b45309; }
+.plan-modulo-btn.pdf-portal { background: #0e7490; }
+.plan-modulo-btn.blanqueo { background: #1d4ed8; }
 
 .plan-modulo-alert-badge {
   position: absolute;
@@ -536,17 +554,18 @@
 }
 
 .plan-modulo-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.18);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 .plan-modulo-icon svg {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   stroke: #fff;
 }
 
@@ -703,19 +722,19 @@
   width: 22px;
   height: 22px;
 }
-.plan-module-icon-badge.transfer { background: #dcfce7; color: #16a34a; }
-.plan-module-icon-badge.referral { background: #e8edf5; color: #1a1f2e; }
-.plan-module-icon-badge.blanqueo { background: #e0f2fe; color: #0369a1; }
-.plan-module-icon-badge.oportunidad { background: #f3e8ff; color: #7c3aed; }
+.plan-module-icon-badge.transfer { background: #dcfce7; color: #15803d; }
+.plan-module-icon-badge.referral { background: #ffedd5; color: #c2410c; }
+.plan-module-icon-badge.blanqueo { background: #dbeafe; color: #1d4ed8; }
+.plan-module-icon-badge.oportunidad { background: #fef3c7; color: #b45309; }
 
 .plan-accent-bar {
   height: 3px;
   border-radius: 2px;
   margin: 0 0 20px;
 }
-.plan-accent-bar.transfer { background: #16a34a; }
-.plan-accent-bar.referral { background: #1a1f2e; }
-.plan-accent-bar.oportunidad { background: #7c3aed; }
+.plan-accent-bar.transfer { background: #15803d; }
+.plan-accent-bar.referral { background: #c2410c; }
+.plan-accent-bar.oportunidad { background: #b45309; }
 
 .plan-form-grid {
   display: grid;

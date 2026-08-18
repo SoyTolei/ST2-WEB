@@ -45,6 +45,11 @@ function sistemaDisplayLabel(id) {
   return SISTEMA_LABELS[id] || "";
 }
 
+function sistemaBadgeLabel(id = sistemaActual) {
+  const label = sistemaDisplayLabel(id);
+  return isSistemaBeta(id) ? `${label} · beta` : label;
+}
+
 function isLegalSistema(id) {
   return id === "Legal";
 }
@@ -78,8 +83,6 @@ function syncSistemaDataset() {
 function updateSistemaBetaUi() {
   document.getElementById("plan-legal-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Legal"));
   document.getElementById("plan-chile-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Chile"));
-  document.getElementById("plan-legal-beta-note")?.classList.toggle("hidden", !(isSistemaBeta("Legal") && isLegal()));
-  document.getElementById("plan-chile-beta-note")?.classList.toggle("hidden", !(isSistemaBeta("Chile") && isChile()));
 }
 
 let planillasConfig = null;
@@ -785,7 +788,7 @@ function limpiarTransferencia() {
 }
 
 function initTransferenciaForm() {
-  els.sistemaBadge().textContent = sistemaDisplayLabel(sistemaActual);
+  els.sistemaBadge().textContent = sistemaBadgeLabel(sistemaActual);
   initTransferenciaIaUi();
   limpiarTransferencia();
   updateTransferenciaPanels();
@@ -990,7 +993,7 @@ function setModuleLoading(overlayId, active) {
 
 function openReferralShell(historyMode = "push") {
   const badge = document.getElementById("ref-sistema-badge");
-  if (badge) badge.textContent = sistemaDisplayLabel(sistemaActual);
+  if (badge) badge.textContent = sistemaBadgeLabel(sistemaActual);
   setModuleLoading("plan-referral-loading", true);
   showView("referral", { history: historyMode });
 }

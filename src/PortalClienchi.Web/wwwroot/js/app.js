@@ -2795,7 +2795,6 @@ async function bootstrapApp() {
   setTimeout(() => {
     startSessionHeartbeat();
   }, 60000);
-  startUpdateChecker();
   initEmbedReminders();
 }
 
@@ -2890,12 +2889,14 @@ function startUpdateChecker() {
   const tick = () => {
     void checkAppVersion();
   };
-  setTimeout(tick, 12000);
+  tick();
   setInterval(tick, UPDATE_CHECK_MS);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") tick();
   });
 }
+
+startUpdateChecker();
 
 function startSessionHeartbeat() {
   const ping = () => {
