@@ -15,7 +15,7 @@ public static class BlanqueoEndpoints
     private static readonly Dictionary<string, HashSet<string>> TiposPorPortal = new(StringComparer.OrdinalIgnoreCase)
     {
         ["OnBalance"] = new(StringComparer.OrdinalIgnoreCase) { "Blanqueo", "MFA", "Blanqueo + MFA" },
-        ["Onvio"] = new(StringComparer.OrdinalIgnoreCase) { "Blanqueo MFA" },
+        ["Onvio"] = new(StringComparer.OrdinalIgnoreCase) { "Blanqueo", "MFA", "Blanqueo + MFA" },
         ["PortalCliente"] = new(StringComparer.OrdinalIgnoreCase) { "Activación", "Cambio de contraseña" },
     };
 
@@ -332,7 +332,7 @@ public static class BlanqueoEndpoints
             return "MFA";
         if (value.Equals("Blanqueo MFA", StringComparison.OrdinalIgnoreCase)
             || value.Equals("Blanqueo+MFA", StringComparison.OrdinalIgnoreCase))
-            return "Blanqueo MFA";
+            return "Blanqueo + MFA";
         if (value.Equals("Blanqueo + MFA", StringComparison.OrdinalIgnoreCase))
             return "Blanqueo + MFA";
         if (value.Equals("Blanqueo", StringComparison.OrdinalIgnoreCase))
@@ -371,7 +371,7 @@ public static class BlanqueoEndpoints
             return portal switch
             {
                 "OnBalance" => "En On Balance elegí Blanqueo, MFA o Blanqueo + MFA.",
-                "Onvio" => "En ONVIO elegí Blanqueo MFA.",
+                "Onvio" => "En ONVIO elegí Blanqueo, MFA o Blanqueo + MFA.",
                 "PortalCliente" => "En Portal Cliente elegí Activación o Cambio de contraseña.",
                 _ => "Elegí un tipo de solicitud válido para la plataforma.",
             };

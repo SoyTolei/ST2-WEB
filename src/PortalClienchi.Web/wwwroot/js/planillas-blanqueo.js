@@ -15,7 +15,7 @@ import { refreshBlanqueoAlerts } from "./blanqueo-alerts.js";
 const FORCE_KEY = "st2-blanqueo-force";
 const TIPOS_POR_PORTAL = {
   OnBalance: ["Blanqueo", "MFA", "Blanqueo + MFA"],
-  Onvio: ["Blanqueo MFA"],
+  Onvio: ["Blanqueo", "MFA", "Blanqueo + MFA"],
   PortalCliente: ["Activación", "Cambio de contraseña"],
 };
 const PORTALES = ["OnBalance", "Onvio", "PortalCliente"];
@@ -424,7 +424,7 @@ function syncTipoOptions(selectId, portal, preferred = "") {
   const sel = document.getElementById(selectId);
   if (!sel) return;
   const tipos = tiposForPortal(portal);
-  const current = preferred || sel.value;
+  const current = preferred === "Blanqueo MFA" ? "Blanqueo + MFA" : (preferred || sel.value);
   sel.innerHTML = tipos
     .map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`)
     .join("");
@@ -434,7 +434,7 @@ function syncTipoOptions(selectId, portal, preferred = "") {
 function syncClaveVisibility() {
   const hint = document.getElementById("blanqueo-clave-hint");
   if (!hint) return;
-  const show = getFormPortal() === "OnBalance";
+  const show = getFormPortal() === "OnBalance" || getFormPortal() === "Onvio";
   hint.classList.toggle("hidden", !show);
   hint.setAttribute("aria-hidden", show ? "false" : "true");
 }
