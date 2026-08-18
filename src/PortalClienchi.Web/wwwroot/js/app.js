@@ -2831,8 +2831,6 @@ async function bootstrapApp() {
 void bootstrapApp();
 
 const UPDATE_CHECK_MS = 45000;
-const UPDATE_SNOOZE_MS = 20 * 60 * 1000;
-const UPDATE_SNOOZE_KEY = "st2-update-snooze";
 let lastLiveBuild = "";
 let updateCheckerStarted = false;
 
@@ -2854,28 +2852,6 @@ function buildsDiffer(loaded, live) {
   return a.slice(0, 7) !== b.slice(0, 7);
 }
 
-function isUpdateSnoozed(liveBuild) {
-  try {
-    const data = JSON.parse(sessionStorage.getItem(UPDATE_SNOOZE_KEY) || "null");
-    if (!data?.build || !data.until) return false;
-    if (normalizeBuild(data.build).slice(0, 7) !== normalizeBuild(liveBuild).slice(0, 7)) return false;
-    return Date.now() < Number(data.until);
-  } catch {
-    return false;
-  }
-}
-
-function snoozeUpdateBanner(liveBuild) {
-  try {
-    sessionStorage.setItem(UPDATE_SNOOZE_KEY, JSON.stringify({
-      build: liveBuild,
-      until: Date.now() + UPDATE_SNOOZE_MS,
-    }));
-  } catch {
-    // ignore
-  }
-}
-
 function setUpdateBannerVisible(show) {
   const banner = document.getElementById("st2-update-banner");
   if (!banner) return;
@@ -2888,7 +2864,7 @@ function applyLiveBuild(liveBuild) {
   const live = String(liveBuild || "").trim();
   if (!live) return;
   lastLiveBuild = live;
-  if (!buildsDiffer(loadedAppBuild(), live) || isUpdateSnoozed(live)) {
+  if (!buildsDiffer(loadedAppBuild(), live)) {
     setUpdateBannerVisible(false);
     return;
   }
@@ -2911,10 +2887,6 @@ function startUpdateChecker() {
   updateCheckerStarted = true;
   document.getElementById("st2-update-reload")?.addEventListener("click", () => {
     window.location.reload();
-  });
-  document.getElementById("st2-update-later")?.addEventListener("click", () => {
-    snoozeUpdateBanner(lastLiveBuild || loadedAppBuild());
-    setUpdateBannerVisible(false);
   });
   const tick = () => {
     void checkAppVersion();

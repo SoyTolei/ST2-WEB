@@ -172,13 +172,15 @@ html, body {
   z-index: 2800;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px 18px;
+  justify-content: center;
+  gap: 14px 18px;
   flex-wrap: wrap;
-  padding: 9px 18px;
+  min-height: 62px;
+  padding: 14px 20px;
   background: linear-gradient(90deg, #9a3412 0%, #c2410c 55%, #ea580c 100%);
   color: #fff7ed;
-  box-shadow: 0 6px 18px rgba(154, 52, 18, 0.28);
+  box-shadow: 0 8px 22px rgba(154, 52, 18, 0.32);
+  text-align: center;
 }
 
 body.embed-active .st2-update-banner,
@@ -192,46 +194,25 @@ body.portal-tab-active .st2-update-banner {
 
 .st2-update-banner-text {
   margin: 0;
-  font-size: 0.86rem;
-  font-weight: 500;
+  font-size: 0.92rem;
+  font-weight: 600;
   line-height: 1.35;
-}
-
-.st2-update-banner-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
 }
 
 .st2-update-banner-reload {
   border: 0;
   border-radius: 999px;
-  padding: 7px 14px;
+  padding: 8px 18px;
   background: #fff;
   color: #9a3412;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .st2-update-banner-reload:hover {
   background: #ffedd5;
-}
-
-.st2-update-banner-later {
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 999px;
-  padding: 6px 12px;
-  background: transparent;
-  color: #fff7ed;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.st2-update-banner-later:hover {
-  background: rgba(255, 255, 255, 0.12);
 }
 
 .btn-ghost {
@@ -277,15 +258,15 @@ body.portal-tab-active .theme-toggle-text {
 }
 
 body.st2-has-update .main-shell {
-  height: calc(100vh - 64px - 36px - 48px);
+  height: calc(100vh - 64px - 36px - 62px);
 }
 
 body.embed-active.st2-has-update .main-shell {
-  height: calc(100vh - 52px - 48px);
+  height: calc(100vh - 52px - 62px);
 }
 
 body.portal-tab-active.st2-has-update .main-shell {
-  height: calc(100vh - 52px - 36px - 48px);
+  height: calc(100vh - 52px - 36px - 62px);
 }
 
 .main-shell {
