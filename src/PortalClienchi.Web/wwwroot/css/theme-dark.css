@@ -645,6 +645,93 @@ html.st2-theme-dark ::-webkit-scrollbar-track {
   background: #12161f;
 }
 
+html.st2-theme-dark .plan-option-well,
+html.st2-theme-dark .plan-ref-modal-body-inner,
+html.st2-theme-dark .plan-ref-modal-footer,
+html.st2-theme-dark .plan-sql-card,
+html.st2-theme-dark .plan-opt-input,
+html.st2-theme-dark .plan-opt-textarea {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+  border-color: #3d4b61 !important;
+}
+
+html.st2-theme-dark .plan-opt-check,
+html.st2-theme-dark .plan-opt-check-text,
+html.st2-theme-dark .plan-opt-field-label,
+html.st2-theme-dark .plan-tool-texts strong,
+html.st2-theme-dark .plan-sql-card-head {
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .plan-opt-check-ui {
+  background: #0f1622 !important;
+  border-color: #64748b !important;
+}
+
+html.st2-theme-dark .plan-tool-card,
+html.st2-theme-dark .plan-tool-icon {
+  background: #172554 !important;
+  border-color: #3b82f6 !important;
+  color: #93c5fd !important;
+}
+
+html.st2-theme-dark .plan-tool-card:hover {
+  background: #1e3a8a !important;
+}
+
+html.st2-theme-dark .plan-tool-texts span,
+html.st2-theme-dark .plan-ref-modal-subtitle {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil {
+  background: #3a1d12 !important;
+  border-color: #c2410c !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil-label {
+  color: #fdba74 !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil-seg {
+  background: #151c28 !important;
+  border-color: #7c2d12 !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil-seg .plan-segment-btn {
+  color: #fdba74 !important;
+  background: transparent !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil-seg .plan-segment-btn.active {
+  background: #c2410c !important;
+  color: #fff !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil-hint.is-otra {
+  background: #3a1d12 !important;
+  border-color: #c2410c !important;
+  color: #fdba74 !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico {
+  background: #172554 !important;
+  border-color: #3b82f6 !important;
+  color: #93c5fd !important;
+}
+
+html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico strong,
+html.st2-theme-dark .plan-ref-perfil-hint.is-otra strong {
+  color: inherit !important;
+}
+
+html.st2-theme-dark .plan-sql-code {
+  background: #0f1622 !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
 html.st2-theme-dark .blanqueo-field label,
 html.st2-theme-dark .blanqueo-clave-hint,
 html.st2-theme-dark .blanqueo-filter-month,
