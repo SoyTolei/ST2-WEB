@@ -34,39 +34,6 @@ html.st2-theme-dark .tab-btn:hover:not(.active) {
   background: #243044;
 }
 
-html.st2-theme-dark .planillas-hero,
-html.st2-theme-dark .plan-sistema-well,
-html.st2-theme-dark .plan-modulos-well,
-html.st2-theme-dark .plan-field input,
-html.st2-theme-dark .plan-field textarea,
-html.st2-theme-dark .plan-field select,
-html.st2-theme-dark .plan-user-input,
-html.st2-theme-dark .plan-user-dialog,
-html.st2-theme-dark .plan-gestor-table,
-html.st2-theme-dark .plan-gestor-table th,
-html.st2-theme-dark .plan-gestor-table td,
-html.st2-theme-dark .blanqueo-table,
-html.st2-theme-dark .blanqueo-table th,
-html.st2-theme-dark .blanqueo-table td,
-html.st2-theme-dark .st2-access-admin-dialog,
-html.st2-theme-dark .st2-access-card,
-html.st2-theme-dark .results-panel,
-html.st2-theme-dark .preview-column,
-html.st2-theme-dark .preview-idle,
-html.st2-theme-dark .preview-panel {
-  background: var(--white);
-  color: var(--dark);
-  border-color: var(--border);
-}
-
-html.st2-theme-dark .plan-pill-btn {
-  color: var(--dark);
-}
-
-html.st2-theme-dark .plan-pill-btn:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.06);
-}
-
 html.st2-theme-dark .st2-about-dialog {
   background:
     radial-gradient(120% 70% at 100% 0%, rgba(214, 64, 0, 0.12) 0%, transparent 52%),
@@ -91,11 +58,11 @@ html.st2-theme-dark .st2-about-updated {
   color: var(--text-muted);
 }
 
-html.st2-theme-dark .search-box,
-html.st2-theme-dark .type-filter {
-  background: var(--white);
+html.st2-theme-dark .st2-access-card,
+html.st2-theme-dark .st2-access-admin-dialog {
+  background: #1a2130;
   color: var(--dark);
-  border-color: var(--border);
+  border-color: #2b3445;
 }
 
 html.st2-theme-dark .status-bar {
@@ -108,6 +75,265 @@ html.st2-theme-dark .plan-legal-beta-banner {
   background: #2a2416;
   border-color: #92400e;
   color: #fdba74;
+}
+
+/* ── Planillas: cascarón, campos y recuadros ── */
+html.st2-theme-dark .planillas-hero,
+html.st2-theme-dark .plan-sistema-well,
+html.st2-theme-dark .plan-modulos-well,
+html.st2-theme-dark .plan-capturas-card,
+html.st2-theme-dark .plan-ticket-card,
+html.st2-theme-dark .plan-onvio-card,
+html.st2-theme-dark .plan-adj-card,
+html.st2-theme-dark .plan-check-card,
+html.st2-theme-dark .plan-op-card,
+html.st2-theme-dark .plan-op-cargar-panel,
+html.st2-theme-dark .plan-op-metodo-well,
+html.st2-theme-dark .plan-check-cards,
+html.st2-theme-dark .plan-gestor-panel,
+html.st2-theme-dark .plan-user-dialog,
+html.st2-theme-dark .plan-ref-modal,
+html.st2-theme-dark .plan-bej-config,
+html.st2-theme-dark .plan-segment-track,
+html.st2-theme-dark .plan-placeholder-module,
+html.st2-theme-dark .plan-status-bar,
+html.st2-theme-dark .pdf-portal-formatbar,
+html.st2-theme-dark .pdf-portal-editor-shell,
+html.st2-theme-dark .pdf-portal-preview,
+html.st2-theme-dark .blanqueo-toolbar,
+html.st2-theme-dark .blanqueo-form-panel,
+html.st2-theme-dark .blanqueo-list-panel {
+  background: #1a2130 !important;
+  color: var(--dark);
+  border-color: #334155 !important;
+  box-shadow: none;
+}
+
+html.st2-theme-dark .planillas-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
+html.st2-theme-dark .planillas-app textarea,
+html.st2-theme-dark .planillas-app select,
+html.st2-theme-dark .plan-opt-input,
+html.st2-theme-dark .pdf-fmt-btn,
+html.st2-theme-dark .pdf-portal-input,
+html.st2-theme-dark .pdf-portal-rich,
+html.st2-theme-dark .blanqueo-search,
+html.st2-theme-dark .blanqueo-note-textarea {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+  border-color: #3d4b61 !important;
+  box-shadow: none !important;
+}
+
+html.st2-theme-dark .planillas-app input::placeholder,
+html.st2-theme-dark .planillas-app textarea::placeholder,
+html.st2-theme-dark .pdf-portal-rich:empty::before {
+  color: #7d8ba0 !important;
+}
+
+html.st2-theme-dark .plan-pill-btn,
+html.st2-theme-dark .plan-segment-btn,
+html.st2-theme-dark .plan-mesa-btn,
+html.st2-theme-dark .plan-check-btn,
+html.st2-theme-dark .plan-onvio-option,
+html.st2-theme-dark .plan-gestor-filter,
+html.st2-theme-dark .plan-gestor-ctx,
+html.st2-theme-dark .plan-gestor-ctx button {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+  border-color: #3d4b61 !important;
+}
+
+html.st2-theme-dark .plan-pill-btn:hover:not(.active),
+html.st2-theme-dark .plan-segment-btn:hover,
+html.st2-theme-dark .plan-mesa-btn:hover,
+html.st2-theme-dark .plan-check-btn:hover,
+html.st2-theme-dark .plan-gestor-ctx button:hover {
+  background: #243044 !important;
+}
+
+html.st2-theme-dark .plan-pill-btn.active,
+html.st2-theme-dark .plan-segment-btn.active,
+html.st2-theme-dark .plan-mesa-btn.active {
+  color: #fff !important;
+}
+
+html.st2-theme-dark .plan-gestor-table,
+html.st2-theme-dark .plan-gestor-table th,
+html.st2-theme-dark .plan-gestor-table td,
+html.st2-theme-dark .blanqueo-table,
+html.st2-theme-dark .blanqueo-table th,
+html.st2-theme-dark .blanqueo-table td {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+  border-color: #334155 !important;
+}
+
+html.st2-theme-dark .plan-gestor-table tr:hover td,
+html.st2-theme-dark .blanqueo-table tr:hover td {
+  background: #1e2a3c !important;
+}
+
+html.st2-theme-dark .plan-onvio-card.tone-slate,
+html.st2-theme-dark .plan-adj-card.tone-slate {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+}
+
+html.st2-theme-dark .plan-onvio-card.tone-green,
+html.st2-theme-dark .plan-adj-card.tone-green {
+  background: #052e16 !important;
+  border-color: #166534 !important;
+}
+
+html.st2-theme-dark .plan-onvio-card.tone-orange,
+html.st2-theme-dark .plan-adj-card.tone-orange {
+  background: #431407 !important;
+  border-color: #c2410c !important;
+}
+
+html.st2-theme-dark .plan-onvio-card.tone-purple,
+html.st2-theme-dark .plan-adj-card.tone-purple {
+  background: #3b0764 !important;
+  border-color: #7e22ce !important;
+}
+
+html.st2-theme-dark .plan-onvio-card.tone-blue,
+html.st2-theme-dark .plan-adj-card.tone-blue {
+  background: #172554 !important;
+  border-color: #2563eb !important;
+}
+
+html.st2-theme-dark .plan-capturas-browse,
+html.st2-theme-dark .plan-chip,
+html.st2-theme-dark .plan-video-chip,
+html.st2-theme-dark .plan-pdf-chip,
+html.st2-theme-dark .plan-txt-chip,
+html.st2-theme-dark .plan-traza-chip,
+html.st2-theme-dark .plan-captura-thumb {
+  background: #151c28 !important;
+  border-color: #3d4b61 !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .plan-module-icon-badge.transfer { background: #052e16; color: #86efac; }
+html.st2-theme-dark .plan-module-icon-badge.referral { background: #431407; color: #fdba74; }
+html.st2-theme-dark .plan-module-icon-badge.oportunidad { background: #4a044e; color: #f0abfc; }
+html.st2-theme-dark .plan-module-icon-badge.blanqueo { background: #1e3a8a; color: #93c5fd; }
+
+html.st2-theme-dark .plan-op-icon.purple { background: #4a044e; color: #e879f9; }
+html.st2-theme-dark .plan-op-icon.orange { background: #431407; color: #fb923c; }
+
+/* No tocar los tiles de color del menú */
+html.st2-theme-dark .plan-modulo-btn {
+  color: #fff;
+}
+
+/* ── Portal Cliente ── */
+html.st2-theme-dark .search-column,
+html.st2-theme-dark .preview-column {
+  background: linear-gradient(180deg, #1a2130 0%, #151b26 100%) !important;
+  border-color: #334155 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+html.st2-theme-dark .portal-search-head {
+  background: linear-gradient(135deg, rgba(214, 64, 0, 0.18) 0%, rgba(26, 33, 48, 0.9) 55%) !important;
+  border-color: rgba(214, 64, 0, 0.28) !important;
+}
+
+html.st2-theme-dark .portal-kicker {
+  color: #fb923c;
+}
+
+html.st2-theme-dark .search-box,
+html.st2-theme-dark .combo-box {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+  border-color: #3d4b61 !important;
+  box-shadow: none !important;
+}
+
+html.st2-theme-dark .year-btn {
+  background: #151c28 !important;
+  color: #fdba74 !important;
+  border-color: #7c2d12 !important;
+}
+
+html.st2-theme-dark .year-btn:hover {
+  background: #431407 !important;
+}
+
+html.st2-theme-dark .year-btn.active {
+  background: var(--primary) !important;
+  color: #fff !important;
+}
+
+html.st2-theme-dark .result-item {
+  background: #151c28 !important;
+  border-color: #334155 !important;
+  color: #e8eef7;
+}
+
+html.st2-theme-dark .result-item:hover {
+  background: #243044 !important;
+  border-color: rgba(214, 64, 0, 0.45) !important;
+}
+
+html.st2-theme-dark .result-item.selected {
+  background: linear-gradient(180deg, #3a1d12 0%, #1a2130 100%) !important;
+  border-color: var(--primary) !important;
+}
+
+html.st2-theme-dark .result-group-header {
+  background: linear-gradient(90deg, rgba(214, 64, 0, 0.16), rgba(214, 64, 0, 0.04));
+  border-color: rgba(214, 64, 0, 0.22);
+}
+
+html.st2-theme-dark .preview-frame-wrap {
+  background: linear-gradient(180deg, #1a2130 0%, #121820 100%) !important;
+  border-color: #334155 !important;
+  box-shadow: none;
+}
+
+html.st2-theme-dark .preview-idle,
+html.st2-theme-dark .preview-loading {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+html.st2-theme-dark .type-badge {
+  background: #431407;
+  color: #fdba74;
+}
+
+html.st2-theme-dark .portal-suggest-chip {
+  background: #151c28;
+  color: #e8eef7;
+  border-color: #334155;
+}
+
+html.st2-theme-dark .portal-sistema-bar {
+  background: #151b26;
+  border-color: #334155;
+}
+
+html.st2-theme-dark .portal-sistema-pill {
+  color: #fdba74;
+}
+
+html.st2-theme-dark .portal-sistema-pill:hover {
+  background: rgba(214, 64, 0, 0.16);
+}
+
+html.st2-theme-dark .results-empty {
+  color: var(--text-muted);
+}
+
+html.st2-theme-dark .btn-ghost-dark,
+html.st2-theme-dark .btn-secondary {
+  background: #151c28;
+  color: #e8eef7;
+  border-color: #334155;
 }
 
 html.st2-theme-dark ::-webkit-scrollbar {
