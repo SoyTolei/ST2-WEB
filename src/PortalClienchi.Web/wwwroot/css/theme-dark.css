@@ -755,6 +755,38 @@ html.st2-theme-dark .plan-sql-code {
   border-color: #334155 !important;
 }
 
+html.st2-theme-dark .st2-suite-sig-brand {
+  color: #f8fafc;
+  letter-spacing: 0.14em;
+  text-shadow: 0 1px 8px rgba(15, 23, 42, 0.65);
+}
+
+html.st2-theme-dark .st2-suite-sig-line {
+  color: #cbd5e1;
+}
+
+html.st2-theme-dark .st2-suite-sig-tools {
+  color: #94a3b8;
+  border-top-color: #334155;
+}
+
+html.st2-theme-dark .st2-suite-sig-tool.is-current {
+  color: #5eead4;
+}
+
+html.st2-theme-dark .planillas-footer:hover .st2-suite-sig-brand {
+  color: #fff;
+}
+
+html.st2-theme-dark .planillas-footer:hover .st2-suite-sig-line {
+  color: #e2e8f0;
+}
+
+html.st2-theme-dark .st2-suite-float {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+  opacity: 0.85;
+}
+
 html.st2-theme-dark .blanqueo-field label,
 html.st2-theme-dark .blanqueo-clave-hint,
 html.st2-theme-dark .blanqueo-filter-month,
