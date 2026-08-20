@@ -181,11 +181,11 @@
                   </span>
                   <span id="plan-modulo-blanqueo-badge" class="plan-modulo-alert-badge hidden" aria-hidden="true">1</span>
                 </button>
-                <button type="button" class="plan-modulo-btn borrado-bases hidden" data-plan-modulo="borrado-bases" id="plan-modulo-borrado-bases" aria-hidden="true" title="Borrado de bases IVA, Sueldos y Contabilidad">
+                <button type="button" class="plan-modulo-btn borrado-bases hidden" data-plan-modulo="borrado-bases" id="plan-modulo-borrado-bases" aria-hidden="true" title="Borrado de bases IVA, SJ y CG">
                   <span class="plan-modulo-icon" data-plan-icon="borrado-bases"></span>
                   <span class="plan-modulo-copy">
                     <span class="plan-modulo-label">Borrado de bases</span>
-                    <span class="plan-modulo-sub">IVA · Sueldos · Contabilidad</span>
+                    <span class="plan-modulo-sub">IVA · SJ · CG</span>
                   </span>
                 </button>
               </div>
@@ -581,8 +581,8 @@
                     <label>Bases a borrar</label>
                     <div class="borrado-bases-checks">
                       <label class="borrado-check"><input id="borrado-base-iva" name="borrado-base" type="checkbox"/> IVA</label>
-                      <label class="borrado-check"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> Sueldos y Jornales</label>
-                      <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
+                      <label class="borrado-check" title="Sueldos y Jornales"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> SJ</label>
+                      <label class="borrado-check" title="Contabilidad General"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> CG</label>
                     </div>
                   </div>
                   <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
@@ -633,7 +633,7 @@
                         <th class="borrado-th-cuit">CUIT</th>
                         <th class="borrado-th-bases">Bases</th>
                         <th class="borrado-th-solicitante">Solicitado por</th>
-                        <th class="borrado-th-listo" title="Confirmado, pendiente u observación">Estado</th>
+                        <th class="borrado-th-listo" title="Doble clic confirma / quita listo (si tenés permiso). También: confirmado, pendiente u observación">Estado</th>
                         <th class="borrado-th-aclaracion">Aclaración</th>
                       </tr>
                     </thead>
@@ -1641,7 +1641,7 @@
               <h3 class="st2-about-module-title">Borrado de bases</h3>
               <em class="st2-about-module-badge" title="Visible solo para usuarios autorizados">acceso restringido</em>
             </div>
-            <p class="st2-about-module-text">Pedidos de borrado de IVA, Sueldos y Contabilidad, con seguimiento y confirmación.</p>
+            <p class="st2-about-module-text">Pedidos de borrado de IVA, SJ y CG, con seguimiento y confirmación.</p>
           </article>
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">THOM</h3>
@@ -1796,8 +1796,8 @@
         <span class="plan-user-label">Bases a borrar</span>
         <div class="borrado-edit-bases">
           <label class="borrado-check"><input id="borrado-edit-base-iva" name="borrado-edit-base" type="checkbox"/> IVA</label>
-          <label class="borrado-check"><input id="borrado-edit-base-sueldos" name="borrado-edit-base" type="checkbox"/> Sueldos y Jornales</label>
-          <label class="borrado-check"><input id="borrado-edit-base-contabilidad" name="borrado-edit-base" type="checkbox"/> Contabilidad General</label>
+          <label class="borrado-check" title="Sueldos y Jornales"><input id="borrado-edit-base-sueldos" name="borrado-edit-base" type="checkbox"/> SJ</label>
+          <label class="borrado-check" title="Contabilidad General"><input id="borrado-edit-base-contabilidad" name="borrado-edit-base" type="checkbox"/> CG</label>
         </div>
         <div id="borrado-edit-ejercicios-field" class="borrado-edit-ejercicios hidden" aria-hidden="true">
           <label class="plan-user-label" for="borrado-edit-ejercicios">Ejercicios a borrar</label>
@@ -1828,7 +1828,7 @@
       <h3 id="borrado-note-title">Observación</h3>
       <p class="plan-user-hint">Dejá un comentario breve sobre esta solicitud (por ejemplo, por qué no se pudo completar).</p>
       <label class="plan-user-label" for="borrado-note-text">Detalle</label>
-      <textarea id="borrado-note-text" class="borrado-note-textarea" rows="4" maxlength="280" placeholder="Ej. la base no figura en el cliente…"></textarea>
+      <textarea id="borrado-note-text" class="borrado-note-textarea" rows="4" maxlength="280" placeholder="Ej. CG sin ejercicios · IVA no encontrado · OK parcial: IVA y SJ listos…"></textarea>
       <div class="plan-user-actions">
         <button type="button" id="borrado-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="borrado-note-save" class="plan-gestor-btn-add">Guardar</button>

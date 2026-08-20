@@ -222,7 +222,7 @@ public static class BorradoBasesEndpoints
         if (!body.Iva && !body.Sueldos && !body.Contabilidad)
             return "Marcá al menos una base a borrar.";
         if (body.Contabilidad && string.IsNullOrWhiteSpace(body.EjerciciosDetalle))
-            return "Si marcás Contabilidad, completá los ejercicios a borrar.";
+            return "Si marcás CG, completá los ejercicios a borrar.";
         if ((body.EjerciciosDetalle ?? "").Trim().Length > 4000)
             return "El detalle de ejercicios es demasiado largo (máx. 4000).";
         return null;

@@ -350,7 +350,7 @@ async function createSolicitud() {
     return;
   }
   if (bases.contabilidad && !ejerciciosDetalle) {
-    setStatus("Si marcás Contabilidad, pegá los ejercicios a borrar.", true);
+    setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
     return;
   }
 
@@ -542,8 +542,8 @@ function applyFilters() {
 function basesLabel(item) {
   const parts = [];
   if (item.iva) parts.push("IVA");
-  if (item.sueldos) parts.push("Sueldos");
-  if (item.contabilidad) parts.push("Contabilidad");
+  if (item.sueldos) parts.push("SJ");
+  if (item.contabilidad) parts.push("CG");
   return parts.join(", ") || "—";
 }
 
@@ -553,11 +553,11 @@ function formatBasesPills(item) {
     pills.push('<span class="borrado-base-pill" title="IVA">IVA</span>');
   }
   if (item.sueldos) {
-    pills.push('<span class="borrado-base-pill" title="Sueldos y Jornales">Sueldos</span>');
+    pills.push('<span class="borrado-base-pill" title="Sueldos y Jornales">SJ</span>');
   }
   if (item.contabilidad) {
     const detail = String(item.ejerciciosDetalle || "").trim() || "Sin ejercicios";
-    pills.push(basePillHtml("Contabilidad", detail, true));
+    pills.push(basePillHtml("CG", detail, true));
   }
   return pills.length ? pills.join(" ") : "—";
 }
@@ -738,13 +738,20 @@ function buildRow(item) {
   });
 
   row.addEventListener("dblclick", (e) => {
-    if (e.target.closest("button.borrado-base-pill")) return;
+    if (e.target.closest("button.borrado-base-pill, button.borrado-cuit-copy")) return;
     e.preventDefault();
     selectedId = item.id;
     applyFilters();
-    if (!canConfirm) return;
+    if (!canConfirm) {
+      setStatus("Solo quien confirma puede marcar listo con doble clic.", true);
+      return;
+    }
     void toggleListoByDoubleClick(item);
   });
+
+  row.title = canConfirm
+    ? "Doble clic: marcar / quitar listo · Clic derecho: menú"
+    : "Clic derecho: menú (si sos el solicitante)";
 
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -913,7 +920,7 @@ async function saveEdit() {
     return;
   }
   if (bases.contabilidad && !ejerciciosDetalle) {
-    setStatus("Si marcás Contabilidad, pegá los ejercicios a borrar.", true);
+    setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
     return;
   }
 
