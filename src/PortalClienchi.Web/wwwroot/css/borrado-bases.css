@@ -187,12 +187,16 @@
   font-weight: 650;
   background: #ccfbf1;
   color: #115e59;
+  cursor: default;
+}
+
+button.borrado-base-pill {
   cursor: pointer;
   transition: background 0.15s ease, transform 0.12s ease;
 }
 
-.borrado-base-pill:hover,
-.borrado-base-pill:focus-visible {
+button.borrado-base-pill:hover,
+button.borrado-base-pill:focus-visible {
   background: #99f6e4;
   outline: none;
   transform: translateY(-1px);
@@ -203,8 +207,8 @@
   color: #0f766e;
 }
 
-.borrado-base-pill.contab:hover,
-.borrado-base-pill.contab:focus-visible {
+button.borrado-base-pill.contab:hover,
+button.borrado-base-pill.contab:focus-visible {
   background: #5eead4;
 }
 

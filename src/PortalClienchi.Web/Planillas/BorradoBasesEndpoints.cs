@@ -169,8 +169,8 @@ public static class BorradoBasesEndpoints
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
-        IvaDetalle = body.Iva ? NullIfBlank(body.IvaDetalle) : null,
-        SueldosDetalle = body.Sueldos ? NullIfBlank(body.SueldosDetalle) : null,
+        IvaDetalle = null,
+        SueldosDetalle = null,
         EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
     };
 
@@ -183,8 +183,8 @@ public static class BorradoBasesEndpoints
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
-        IvaDetalle = body.Iva ? NullIfBlank(body.IvaDetalle) : null,
-        SueldosDetalle = body.Sueldos ? NullIfBlank(body.SueldosDetalle) : null,
+        IvaDetalle = null,
+        SueldosDetalle = null,
         EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
     };
 
@@ -216,16 +216,8 @@ public static class BorradoBasesEndpoints
             return "Completá el nombre de empresa.";
         if (!body.Iva && !body.Sueldos && !body.Contabilidad)
             return "Marcá al menos una base a borrar.";
-        if (body.Iva && string.IsNullOrWhiteSpace(body.IvaDetalle))
-            return "Si marcás IVA, indicá el nombre de la base.";
-        if (body.Sueldos && string.IsNullOrWhiteSpace(body.SueldosDetalle))
-            return "Si marcás Sueldos, indicá el nombre de la base.";
         if (body.Contabilidad && string.IsNullOrWhiteSpace(body.EjerciciosDetalle))
             return "Si marcás Contabilidad, completá los ejercicios a borrar.";
-        if ((body.IvaDetalle ?? "").Trim().Length > 500)
-            return "El nombre de la base IVA es demasiado largo (máx. 500).";
-        if ((body.SueldosDetalle ?? "").Trim().Length > 500)
-            return "El nombre de la base Sueldos es demasiado largo (máx. 500).";
         if ((body.EjerciciosDetalle ?? "").Trim().Length > 4000)
             return "El detalle de ejercicios es demasiado largo (máx. 4000).";
         return null;

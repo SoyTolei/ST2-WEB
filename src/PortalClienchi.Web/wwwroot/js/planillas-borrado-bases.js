@@ -154,7 +154,7 @@ export function initBorradoBasesModule() {
   });
 
   document.addEventListener("click", (e) => {
-    if (e.target?.closest?.("#borrado-base-pop") || e.target?.closest?.(".borrado-base-pill")) return;
+    if (e.target?.closest?.("#borrado-base-pop") || e.target?.closest?.("button.borrado-base-pill")) return;
     hideCtx();
     hideBasePop();
   });
@@ -257,14 +257,10 @@ function syncMineFilterVisibility() {
 }
 
 function syncDetalleFieldsVisibility() {
-  toggleDetailField("borrado-iva-field", "borrado-iva-detalle", !!document.getElementById("borrado-base-iva")?.checked);
-  toggleDetailField("borrado-sueldos-field", "borrado-sueldos-detalle", !!document.getElementById("borrado-base-sueldos")?.checked);
   toggleDetailField("borrado-ejercicios-field", "borrado-ejercicios", !!document.getElementById("borrado-base-contabilidad")?.checked);
 }
 
 function syncEditDetalleFieldsVisibility() {
-  toggleDetailField("borrado-edit-iva-field", "borrado-edit-iva-detalle", !!document.getElementById("borrado-edit-base-iva")?.checked);
-  toggleDetailField("borrado-edit-sueldos-field", "borrado-edit-sueldos-detalle", !!document.getElementById("borrado-edit-base-sueldos")?.checked);
   toggleDetailField("borrado-edit-ejercicios-field", "borrado-edit-ejercicios", !!document.getElementById("borrado-edit-base-contabilidad")?.checked);
 }
 
@@ -293,15 +289,11 @@ function clearForm() {
   const cliente = document.getElementById("borrado-cliente");
   const empresa = document.getElementById("borrado-empresa");
   const nombre = document.getElementById("borrado-nombre-empresa");
-  const ivaDetalle = document.getElementById("borrado-iva-detalle");
-  const sueldosDetalle = document.getElementById("borrado-sueldos-detalle");
   const ejercicios = document.getElementById("borrado-ejercicios");
   if (caso) caso.value = "";
   if (cliente) cliente.value = "";
   if (empresa) empresa.value = "";
   if (nombre) nombre.value = "";
-  if (ivaDetalle) ivaDetalle.value = "";
-  if (sueldosDetalle) sueldosDetalle.value = "";
   if (ejercicios) ejercicios.value = "";
   document.querySelectorAll('input[name="borrado-base"]').forEach((el) => {
     el.checked = false;
@@ -344,8 +336,6 @@ async function createSolicitud() {
   const nroEmpresa = document.getElementById("borrado-empresa")?.value.trim() || "";
   const nombreEmpresa = document.getElementById("borrado-nombre-empresa")?.value.trim() || "";
   const bases = readBasesFromForm("borrado-base");
-  const ivaDetalle = document.getElementById("borrado-iva-detalle")?.value.trim() || "";
-  const sueldosDetalle = document.getElementById("borrado-sueldos-detalle")?.value.trim() || "";
   const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
@@ -354,14 +344,6 @@ async function createSolicitud() {
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
     setStatus("Marcá al menos una base a borrar.", true);
-    return;
-  }
-  if (bases.iva && !ivaDetalle) {
-    setStatus("Si marcás IVA, indicá el nombre de la base.", true);
-    return;
-  }
-  if (bases.sueldos && !sueldosDetalle) {
-    setStatus("Si marcás Sueldos, indicá el nombre de la base.", true);
     return;
   }
   if (bases.contabilidad && !ejerciciosDetalle) {
@@ -380,8 +362,6 @@ async function createSolicitud() {
         nroEmpresa,
         nombreEmpresa,
         ...bases,
-        ivaDetalle: bases.iva ? ivaDetalle : null,
-        sueldosDetalle: bases.sueldos ? sueldosDetalle : null,
         ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
       }),
     });
@@ -564,12 +544,10 @@ function basesLabel(item) {
 function formatBasesPills(item) {
   const pills = [];
   if (item.iva) {
-    const detail = String(item.ivaDetalle || "").trim() || "Sin nombre de base";
-    pills.push(basePillHtml("IVA", detail, false));
+    pills.push('<span class="borrado-base-pill" title="IVA">IVA</span>');
   }
   if (item.sueldos) {
-    const detail = String(item.sueldosDetalle || "").trim() || "Sin nombre de base";
-    pills.push(basePillHtml("Sueldos", detail, false));
+    pills.push('<span class="borrado-base-pill" title="Sueldos y Jornales">Sueldos</span>');
   }
   if (item.contabilidad) {
     const detail = String(item.ejerciciosDetalle || "").trim() || "Sin ejercicios";
@@ -698,7 +676,7 @@ function buildRow(item) {
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    const pill = e.target.closest(".borrado-base-pill");
+    const pill = e.target.closest("button.borrado-base-pill");
     if (pill) {
       e.preventDefault();
       e.stopPropagation();
@@ -716,7 +694,7 @@ function buildRow(item) {
   });
 
   row.addEventListener("dblclick", (e) => {
-    if (e.target.closest(".borrado-base-pill")) return;
+    if (e.target.closest("button.borrado-base-pill")) return;
     e.preventDefault();
     selectedId = item.id;
     applyFilters();
@@ -848,8 +826,6 @@ function openEditModal(item) {
   const iva = document.getElementById("borrado-edit-base-iva");
   const sueldos = document.getElementById("borrado-edit-base-sueldos");
   const contabilidad = document.getElementById("borrado-edit-base-contabilidad");
-  const ivaDetalle = document.getElementById("borrado-edit-iva-detalle");
-  const sueldosDetalle = document.getElementById("borrado-edit-sueldos-detalle");
   const ejercicios = document.getElementById("borrado-edit-ejercicios");
   if (caso) caso.value = item.nroCaso || "";
   if (cliente) cliente.value = item.nroCliente || "";
@@ -859,8 +835,6 @@ function openEditModal(item) {
   if (sueldos) sueldos.checked = !!item.sueldos;
   if (contabilidad) contabilidad.checked = !!item.contabilidad;
   syncEditDetalleFieldsVisibility();
-  if (ivaDetalle) ivaDetalle.value = item.iva ? (item.ivaDetalle || "") : "";
-  if (sueldosDetalle) sueldosDetalle.value = item.sueldos ? (item.sueldosDetalle || "") : "";
   if (ejercicios) ejercicios.value = item.contabilidad ? (item.ejerciciosDetalle || "") : "";
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
@@ -881,8 +855,6 @@ async function saveEdit() {
   const nroEmpresa = document.getElementById("borrado-edit-empresa")?.value.trim() || "";
   const nombreEmpresa = document.getElementById("borrado-edit-nombre-empresa")?.value.trim() || "";
   const bases = readBasesFromForm("borrado-edit-base");
-  const ivaDetalle = document.getElementById("borrado-edit-iva-detalle")?.value.trim() || "";
-  const sueldosDetalle = document.getElementById("borrado-edit-sueldos-detalle")?.value.trim() || "";
   const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
@@ -891,14 +863,6 @@ async function saveEdit() {
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
     setStatus("Marcá al menos una base a borrar.", true);
-    return;
-  }
-  if (bases.iva && !ivaDetalle) {
-    setStatus("Si marcás IVA, indicá el nombre de la base.", true);
-    return;
-  }
-  if (bases.sueldos && !sueldosDetalle) {
-    setStatus("Si marcás Sueldos, indicá el nombre de la base.", true);
     return;
   }
   if (bases.contabilidad && !ejerciciosDetalle) {
@@ -916,8 +880,6 @@ async function saveEdit() {
         nroEmpresa,
         nombreEmpresa,
         ...bases,
-        ivaDetalle: bases.iva ? ivaDetalle : null,
-        sueldosDetalle: bases.sueldos ? sueldosDetalle : null,
         ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
       }),
     });
