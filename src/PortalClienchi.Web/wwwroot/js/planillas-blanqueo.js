@@ -6,7 +6,7 @@ import {
   refreshModuleFlags,
   isSt2SuperAdmin,
 } from "./module-access.js";
-import { refreshBlanqueoAlerts } from "./blanqueo-alerts.js";
+import { notifyBlanqueoChanged } from "./blanqueo-alerts.js";
 
 /**
  * Override: localStorage.setItem("st2-blanqueo-force", "1")
@@ -488,6 +488,7 @@ async function createSolicitud() {
     setStatus(ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`);
     scrollListToEndOnce = true;
     await reloadList();
+    notifyBlanqueoChanged();
     document.getElementById("blanqueo-correo")?.focus();
   } catch (err) {
     setStatus(err?.message || "No se pudo guardar.", true);
@@ -893,7 +894,7 @@ async function toggleListoByDoubleClick(item) {
     await patchItem(item.id, body);
     setStatus(nextListo ? "Marcado como listo." : "Se quitó el listo.");
     await reloadList();
-    void refreshBlanqueoAlerts();
+    notifyBlanqueoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }
@@ -1004,9 +1005,7 @@ async function handleCtxAction(action) {
     }
     setStatus("Actualizado.");
     await reloadList();
-    if (action === "listo" || action === "unlisto") {
-      void refreshBlanqueoAlerts();
-    }
+    notifyBlanqueoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }
@@ -1094,6 +1093,7 @@ async function confirmDeleteModal() {
     hideDeleteModal();
     setStatus("Solicitud eliminada.");
     await reloadList();
+    notifyBlanqueoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo eliminar.", true);
   }
@@ -1129,7 +1129,7 @@ async function saveNoteModal() {
     hideNoteModal();
     setStatus("Aclaración guardada.");
     await reloadList();
-    void refreshBlanqueoAlerts();
+    notifyBlanqueoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo guardar la aclaración.", true);
   }

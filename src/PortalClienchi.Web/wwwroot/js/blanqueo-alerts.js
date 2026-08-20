@@ -1,7 +1,9 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { canSeeBlanqueoModule, canConfirmBlanqueoModule } from "./module-access.js";
 
-const POLL_MS = 30000;
+const POLL_MS_VISIBLE = 5000;
+const POLL_MS_HIDDEN = 30000;
+const REFRESH_THROTTLE_MS = 2500;
 const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed-v2";
 
 let pollTimer = null;
@@ -28,6 +30,11 @@ export function getBlanqueoAlerts() {
   return cachedAlerts.slice();
 }
 
+/** Refresca alertas al instante (p. ej. tras confirmar o cargar una solicitud). */
+export function notifyBlanqueoChanged() {
+  void refreshBlanqueoAlerts({ force: true });
+}
+
 export async function refreshBlanqueoAlerts({ force = false } = {}) {
   const email = getPlanUserEmail();
   const canSee = canSeeBlanqueoModule() || canConfirmBlanqueoModule();
@@ -42,7 +49,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
   retryCount = 0;
   const now = Date.now();
   if (!force && refreshInFlight) return refreshInFlight;
-  if (!force && lastRefreshAt > 0 && now - lastRefreshAt < 15000) {
+  if (!force && lastRefreshAt > 0 && now - lastRefreshAt < REFRESH_THROTTLE_MS) {
     renderBlanqueoAlertUi();
     return cachedAlerts;
   }
@@ -256,15 +263,28 @@ export function renderBlanqueoAlertUi() {
   }
 }
 
+function pollIntervalMs() {
+  return document.visibilityState === "visible" ? POLL_MS_VISIBLE : POLL_MS_HIDDEN;
+}
+
+function schedulePollTick() {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  pollTimer = setInterval(() => {
+    void refreshBlanqueoAlerts();
+  }, pollIntervalMs());
+}
+
 export function startBlanqueoAlertsPolling() {
   stopBlanqueoAlertsPolling();
   confirmToastDismissedSig = readDismissedSig();
   void refreshBlanqueoAlerts({ force: true });
-  pollTimer = setInterval(() => {
-    void refreshBlanqueoAlerts();
-  }, POLL_MS);
+  schedulePollTick();
 
   document.addEventListener("visibilitychange", onVisibility);
+  window.addEventListener("focus", onWindowFocus);
   bindToastOnce();
 }
 
@@ -278,12 +298,19 @@ export function stopBlanqueoAlertsPolling() {
     retryTimer = null;
   }
   document.removeEventListener("visibilitychange", onVisibility);
+  window.removeEventListener("focus", onWindowFocus);
 }
 
 function onVisibility() {
+  schedulePollTick();
   if (document.visibilityState === "visible") {
     void refreshBlanqueoAlerts({ force: true });
   }
+}
+
+function onWindowFocus() {
+  if (document.visibilityState !== "visible") return;
+  void refreshBlanqueoAlerts({ force: true });
 }
 
 function bindToastOnce() {
