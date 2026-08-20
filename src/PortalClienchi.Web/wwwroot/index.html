@@ -1850,6 +1850,22 @@
     </div>
   </div>
 
+  <div id="borrado-listo-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-listo-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="borrado-listo-title">Confirmar borrado</h3>
+      <p class="plan-user-hint">Marcá las bases que sí se borraron. Las que dejes sin marcar van a la aclaración como “no”.</p>
+      <div id="borrado-listo-checks" class="borrado-listo-checks">
+        <label id="borrado-listo-iva-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-iva" type="checkbox"/> IVA</label>
+        <label id="borrado-listo-sueldos-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-sueldos" type="checkbox"/> SJ</label>
+        <label id="borrado-listo-contabilidad-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-contabilidad" type="checkbox"/> CG</label>
+      </div>
+      <div class="plan-user-actions">
+        <button type="button" id="borrado-listo-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="borrado-listo-confirm" class="plan-gestor-btn-add">Confirmar listo</button>
+      </div>
+    </div>
+  </div>
+
   <div id="plan-user-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="plan-user-title" aria-modal="true">
     <div class="plan-user-dialog">
       <h3 id="plan-user-title">Identificá tu usuario</h3>

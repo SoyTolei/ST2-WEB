@@ -203,7 +203,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-.borrado-cuit-copy {
+.borrado-col-cliente {
+  white-space: nowrap;
+}
+
+.borrado-cliente-copy {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -219,29 +223,29 @@
   border-radius: 4px;
 }
 
-.borrado-cuit-copy:hover {
+.borrado-cliente-copy:hover {
   background: #fff1f2;
   color: #be123c;
 }
 
-.borrado-cuit-copy-text {
+.borrado-cliente-copy-text {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.borrado-cuit-copy-hint {
+.borrado-cliente-copy-hint {
   font-size: 0.65rem;
   font-weight: 650;
   color: #94a3b8;
   text-transform: lowercase;
 }
 
-.borrado-cuit-copy:hover .borrado-cuit-copy-hint,
-.borrado-cuit-copy.is-copied .borrado-cuit-copy-hint {
+.borrado-cliente-copy:hover .borrado-cliente-copy-hint,
+.borrado-cliente-copy.is-copied .borrado-cliente-copy-hint {
   color: #be123c;
 }
 
-.borrado-cuit-copy.is-copied .borrado-cuit-copy-hint {
+.borrado-cliente-copy.is-copied .borrado-cliente-copy-hint {
   color: #e11d48;
 }
 
@@ -328,10 +332,10 @@ button.borrado-base-pill.contab:focus-visible {
   white-space: pre-wrap;
   word-break: break-word;
   font-size: 0.86rem;
-  line-height: 1.4;
+  line-height: 1.45;
   color: #0f172a;
   overflow: auto;
-  max-height: 9rem;
+  max-height: 14rem;
 }
 
 .borrado-base-pop-copy {
@@ -384,6 +388,36 @@ button.borrado-base-pill.contab:focus-visible {
 .borrado-pill.bad {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.borrado-col-aclaracion {
+  white-space: normal;
+  min-width: 8rem;
+  max-width: 16rem;
+}
+
+.borrado-aclaracion-full {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #3730a3;
+  background: #e0e7ff;
+  border-radius: 6px;
+  padding: 0.25rem 0.45rem;
+}
+
+.borrado-listo-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin: 0.35rem 0 0.75rem;
+}
+
+.borrado-listo-check.hidden {
+  display: none !important;
 }
 
 .borrado-estado-pending {

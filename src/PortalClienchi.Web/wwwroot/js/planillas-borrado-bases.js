@@ -27,6 +27,8 @@ let fechaSortDir = "desc";
 let monthFilterTouched = false;
 let listLoadGen = 0;
 let scrollListToEndOnce = false;
+/** @type {number | null} */
+let pendingListoId = null;
 
 export function canSeeBorradoBasesModule(email = getPlanUserEmail()) {
   try {
@@ -144,6 +146,14 @@ export function initBorradoBasesModule() {
     if (e.target === e.currentTarget) hideNoteModal();
   });
 
+  document.getElementById("borrado-listo-cancel")?.addEventListener("click", () => hideListoModal());
+  document.getElementById("borrado-listo-confirm")?.addEventListener("click", () => {
+    void confirmListoModal();
+  });
+  document.getElementById("borrado-listo-overlay")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) hideListoModal();
+  });
+
   const ctx = document.getElementById("borrado-ctx");
   ctx?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -180,6 +190,7 @@ export function initBorradoBasesModule() {
     hideEditModal();
     hideDeleteModal();
     hideNoteModal();
+    hideListoModal();
     const status = document.getElementById("borrado-status");
     if (status) {
       status.classList.add("hidden");
@@ -559,15 +570,35 @@ function formatBasesPills(item) {
   }
   if (item.contabilidad) {
     const detail = String(item.ejerciciosDetalle || "").trim() || "Sin ejercicios";
-    pills.push(basePillHtml("CG", detail, true));
+    const display = formatEjerciciosSeparated(detail);
+    pills.push(basePillHtml("CG", display, true));
   }
   return pills.length ? pills.join(" ") : "—";
 }
 
+/** Separa varios ejercicios con guiones cuando hay más de uno. */
+function splitEjercicios(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return [];
+  let parts = text.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean);
+  if (parts.length <= 1) {
+    const alt = text.split(/\s*[;|]\s*|\s+[-–—]\s+/).map((s) => s.trim()).filter(Boolean);
+    if (alt.length > 1) parts = alt;
+  }
+  return parts;
+}
+
+function formatEjerciciosSeparated(raw) {
+  const parts = splitEjercicios(raw);
+  if (parts.length === 0) return "Sin ejercicios";
+  if (parts.length === 1) return parts[0];
+  return `-\n${parts.join("\n-\n")}\n-`;
+}
+
 function basePillHtml(label, detail, contab) {
-  const tip = escapeHtml(detail.length > 120 ? `${detail.slice(0, 117)}…` : detail);
+  const tip = escapeAttr(detail);
   const cls = contab ? "borrado-base-pill contab" : "borrado-base-pill";
-  return `<button type="button" class="${cls}" title="${tip} — clic para ver / copiar" data-borrado-base-label="${escapeHtml(label)}" data-borrado-base-detail="${escapeHtml(detail)}">${escapeHtml(label)}</button>`;
+  return `<button type="button" class="${cls}" title="${tip}" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}">${escapeHtml(label)}</button>`;
 }
 
 function hideBasePop() {
@@ -631,12 +662,12 @@ async function copyBasePopText() {
   }
 }
 
-async function copyCuitText(value, btn) {
+async function copyClienteText(value, btn) {
   try {
     await navigator.clipboard.writeText(value);
     if (btn) {
       btn.classList.add("is-copied");
-      const hint = btn.querySelector(".borrado-cuit-copy-hint");
+      const hint = btn.querySelector(".borrado-cliente-copy-hint");
       if (hint) hint.textContent = "copiado";
       const prev = Number(btn.dataset.copyFlashTimer || 0);
       if (prev) window.clearTimeout(prev);
@@ -688,40 +719,42 @@ function buildRow(item) {
   const nro = String(item.nroEmpresa || "").trim();
   const nombre = String(item.nombreEmpresa || "").trim();
   const cuit = String(item.cuit || "").trim();
+  const cliente = String(item.nroCliente || "").trim();
+  const aclaracion = String(item.aclaracion || "").trim();
   const empresaTitle = escapeHtml(nro && nombre ? `[${nro}] ${nombre}` : (nro || nombre || ""));
   row.innerHTML = `
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
-    <td class="borrado-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>
+    <td class="borrado-col-cliente" title="${escapeHtml(cliente)}">
+      ${cliente
+        ? `<button type="button" class="borrado-cliente-copy" data-borrado-copy-cliente="${escapeHtml(cliente)}" title="Clic para copiar N° de cliente">
+            <span class="borrado-cliente-copy-text">${escapeHtml(cliente)}</span>
+            <span class="borrado-cliente-copy-hint" aria-hidden="true">copiar</span>
+          </button>`
+        : "—"}
+    </td>
     <td class="borrado-col-empresa" title="${empresaTitle}">
       <span class="borrado-empresa-nro">${escapeHtml(nro ? `[${nro}]` : "—")}</span>
       <span class="borrado-empresa-nombre">${escapeHtml(nombre || "")}</span>
     </td>
-    <td class="borrado-col-cuit" title="${escapeHtml(cuit)}">
-      ${cuit
-        ? `<button type="button" class="borrado-cuit-copy" data-borrado-copy-cuit="${escapeHtml(cuit)}" title="Clic para copiar CUIT">
-            <span class="borrado-cuit-copy-text">${escapeHtml(cuit)}</span>
-            <span class="borrado-cuit-copy-hint" aria-hidden="true">copiar</span>
-          </button>`
-        : "—"}
-    </td>
+    <td class="borrado-col-cuit">${escapeHtml(cuit || "—")}</td>
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="borrado-col-listo">${formatEstadoCell(item)}</td>
-    <td class="borrado-col-aclaracion">${item.aclaracion ? `<span class="borrado-pill note" title="${escapeHtml(item.aclaracion)}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
+    <td class="borrado-col-aclaracion">${aclaracion ? `<span class="borrado-aclaracion-full">${escapeHtml(aclaracion)}</span>` : "—"}</td>
   `;
 
-  row.querySelector("[data-borrado-copy-cuit]")?.addEventListener("click", (e) => {
+  row.querySelector("[data-borrado-copy-cliente]")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     const btn = e.currentTarget;
-    const value = btn.getAttribute("data-borrado-copy-cuit") || cuit;
-    void copyCuitText(value, btn);
+    const value = btn.getAttribute("data-borrado-copy-cliente") || cliente;
+    void copyClienteText(value, btn);
   });
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-borrado-copy-cuit]")) return;
+    if (e.target.closest("[data-borrado-copy-cliente]")) return;
     const pill = e.target.closest("button.borrado-base-pill");
     if (pill) {
       e.preventDefault();
@@ -740,7 +773,7 @@ function buildRow(item) {
   });
 
   row.addEventListener("dblclick", (e) => {
-    if (e.target.closest("button.borrado-base-pill, button.borrado-cuit-copy")) return;
+    if (e.target.closest("button.borrado-base-pill, button.borrado-cliente-copy")) return;
     e.preventDefault();
     selectedId = item.id;
     applyFilters();
@@ -768,9 +801,69 @@ function buildRow(item) {
 
 async function toggleListoByDoubleClick(item) {
   try {
-    const nextListo = !item.listo;
-    await patchItem(item.id, { listo: nextListo });
-    setStatus(nextListo ? "Marcado como listo." : "Se quitó el listo.");
+    if (item.listo) {
+      await patchItem(item.id, { listo: false });
+      setStatus("Se quitó el listo.");
+      await reloadList();
+      notifyBorradoChanged();
+      return;
+    }
+    openListoModal(item);
+  } catch (err) {
+    setStatus(err?.message || "No se pudo actualizar.", true);
+  }
+}
+
+function openListoModal(item) {
+  pendingListoId = item.id;
+  selectedId = item.id;
+  const overlay = document.getElementById("borrado-listo-overlay");
+  const wrapIva = document.getElementById("borrado-listo-iva-wrap");
+  const wrapSj = document.getElementById("borrado-listo-sueldos-wrap");
+  const wrapCg = document.getElementById("borrado-listo-contabilidad-wrap");
+  const chkIva = document.getElementById("borrado-listo-iva");
+  const chkSj = document.getElementById("borrado-listo-sueldos");
+  const chkCg = document.getElementById("borrado-listo-contabilidad");
+
+  wrapIva?.classList.toggle("hidden", !item.iva);
+  wrapSj?.classList.toggle("hidden", !item.sueldos);
+  wrapCg?.classList.toggle("hidden", !item.contabilidad);
+  if (chkIva) chkIva.checked = !!item.iva;
+  if (chkSj) chkSj.checked = !!item.sueldos;
+  if (chkCg) chkCg.checked = !!item.contabilidad;
+
+  overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  document.getElementById("borrado-listo-confirm")?.focus();
+}
+
+function hideListoModal() {
+  pendingListoId = null;
+  const overlay = document.getElementById("borrado-listo-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+}
+
+async function confirmListoModal() {
+  if (!pendingListoId) return;
+  const item = items.find((x) => x.id === pendingListoId);
+  if (!item) {
+    hideListoModal();
+    return;
+  }
+
+  const missing = [];
+  if (item.iva && !document.getElementById("borrado-listo-iva")?.checked) missing.push("IVA no");
+  if (item.sueldos && !document.getElementById("borrado-listo-sueldos")?.checked) missing.push("SJ no");
+  if (item.contabilidad && !document.getElementById("borrado-listo-contabilidad")?.checked) missing.push("CG no");
+
+  const body = { listo: true };
+  if (missing.length) body.aclaracion = missing.join(" · ");
+
+  try {
+    await patchItem(pendingListoId, body);
+    hideListoModal();
+    setStatus(missing.length ? `Listo. Aclaración: ${missing.join(" · ")}` : "Marcado como listo.");
     await reloadList();
     notifyBorradoChanged();
   } catch (err) {
@@ -851,7 +944,8 @@ async function handleCtxAction(action) {
       return;
     }
     if (action === "listo") {
-      await patchItem(selectedId, { listo: true });
+      openListoModal(item);
+      return;
     } else if (action === "unlisto") {
       await patchItem(selectedId, { listo: false });
     } else if (action === "aclaracion-manual") {
@@ -1038,4 +1132,8 @@ function escapeHtml(value) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/\r?\n/g, "&#10;");
 }
