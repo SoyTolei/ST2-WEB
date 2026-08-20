@@ -194,6 +194,31 @@ public sealed class BlanqueoRepository
         return updated;
     }
 
+    /// <summary>
+    /// Actualiza el nombre visible en todas las solicitudes ya vinculadas a ese correo.
+    /// </summary>
+    public int SyncRequesterDisplayName(string email, string? displayName)
+    {
+        var normalized = PlanUserIdentity.ValidateAndNormalize(email);
+        if (normalized is null)
+            return 0;
+
+        var preferredName = string.IsNullOrWhiteSpace(displayName)
+            ? BlanqueoEndpoints.DisplayNameFromEmail(normalized)
+            : displayName.Trim();
+
+        using var conn = Open();
+        using var upd = conn.CreateCommand();
+        upd.CommandText = """
+            UPDATE blanqueo_solicitudes
+            SET solicitado_por_nombre = $nombre
+            WHERE lower(solicitado_por_email) = lower($email)
+            """;
+        upd.Parameters.AddWithValue("$email", normalized);
+        upd.Parameters.AddWithValue("$nombre", preferredName);
+        return upd.ExecuteNonQuery();
+    }
+
     private static HashSet<string> LoadImportFingerprints(SqliteConnection conn)
     {
         var set = new HashSet<string>(StringComparer.Ordinal);

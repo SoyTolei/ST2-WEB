@@ -171,7 +171,12 @@ public static class BlanqueoEndpoints
             return Results.Ok(new { ok = true, marked, mode = "requester" });
         });
 
-        app.MapPost("/api/planillas/blanqueo", (HttpContext ctx, BlanqueoCreateRequest body, BlanqueoRepository repo, ModuleAccessRepository modules) =>
+        app.MapPost("/api/planillas/blanqueo", (
+            HttpContext ctx,
+            BlanqueoCreateRequest body,
+            BlanqueoRepository repo,
+            ModuleAccessRepository modules,
+            AppAccessRepository accessRepo) =>
         {
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
@@ -185,7 +190,10 @@ public static class BlanqueoEndpoints
             try
             {
                 var fecha = DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-                var nombre = DisplayNameFromEmail(email!);
+                var access = accessRepo.Find(email!);
+                var nombre = !string.IsNullOrWhiteSpace(access?.DisplayName)
+                    ? access!.DisplayName!.Trim()
+                    : DisplayNameFromEmail(email!);
                 var item = repo.Insert(NormalizeCreate(body), email!, nombre, fecha);
                 return Results.Ok(item);
             }

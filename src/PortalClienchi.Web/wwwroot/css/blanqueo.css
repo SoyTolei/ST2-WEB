@@ -754,7 +754,10 @@
 .blanqueo-table .blanqueo-th-solicitante,
 .blanqueo-table .blanqueo-col-solicitante {
   width: 14%;
+  max-width: 0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .blanqueo-table .blanqueo-th-tipo,

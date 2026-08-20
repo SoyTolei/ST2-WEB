@@ -768,6 +768,7 @@ public static class PlanillasEndpoints
             var email = body.Email.Trim().ToLowerInvariant();
             var displayName = string.IsNullOrWhiteSpace(body.DisplayName) ? null : body.DisplayName.Trim();
             blanqueoRepo.AssociatePendingRequester(email, displayName);
+            blanqueoRepo.SyncRequesterDisplayName(email, displayName);
 
             return Results.Ok(new
             {
