@@ -452,34 +452,62 @@ body.portal-tab-active .tab-bar {
 #panel-admin.active {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
-  padding: 10px 16px 12px;
+  height: 100%;
+  padding: 6px 12px 8px;
   overflow: hidden;
 }
 
 #panel-admin .st2-admin-tab-shell,
 #panel-admin .st2-access-admin-dialog {
-  width: min(1180px, 100%);
-  max-height: none;
-  height: 100%;
-  flex: 1;
-  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(1280px, 100%);
+  max-height: none !important;
+  min-height: calc(100dvh - 118px);
+  height: calc(100dvh - 118px);
+  flex: 1 1 auto;
   margin: 0 auto;
   overflow: hidden;
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
 }
 
 #panel-admin .st2-access-admin-panel {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
-  padding: 14px 18px 12px;
+  height: 100%;
+  padding: 10px 14px 8px;
 }
 
 #panel-admin .st2-access-admin-panel-top {
-  margin-bottom: 8px;
-  padding-bottom: 8px;
+  margin-bottom: 6px;
+  padding-bottom: 6px;
   flex-shrink: 0;
+}
+
+#panel-admin .st2-access-admin-panel-head {
+  margin-bottom: 4px;
+}
+
+#panel-admin .st2-access-admin-kpis {
+  gap: 6px;
+  margin: 0 0 4px;
+}
+
+#panel-admin .st2-access-admin-kpi {
+  padding: 6px 8px;
+}
+
+#panel-admin .st2-access-admin-kpi-n {
+  font-size: 1.15rem;
+}
+
+#panel-admin .st2-access-admin-stats {
+  margin: 0;
+  gap: 4px 10px;
 }
 
 #panel-admin .st2-access-admin-toolbar,
@@ -489,25 +517,29 @@ body.portal-tab-active .tab-bar {
   flex-shrink: 0;
 }
 
+#panel-admin .st2-access-admin-toolbar {
+  margin-bottom: 6px;
+}
+
 #panel-admin .st2-access-admin-table-wrap {
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: calc(100dvh - 300px);
   max-height: none;
   overflow: auto;
 }
 
 #panel-admin .st2-access-admin-table th,
 #panel-admin .st2-access-admin-table td {
-  padding: 7px 10px;
+  padding: 6px 10px;
 }
 
 #panel-admin .st2-access-admin-panel-foot {
-  margin-top: 8px;
-  padding-top: 8px;
+  margin-top: 6px;
+  padding-top: 6px;
 }
 
 .st2-admin-tab-shell {
-  width: min(1180px, 100%);
+  width: min(1280px, 100%);
   margin: 0 auto;
   max-height: none;
 }

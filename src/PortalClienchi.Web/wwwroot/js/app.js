@@ -75,7 +75,7 @@ const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const aboutUpdatedEl = document.getElementById("st2-about-updated");
 const ADMIN_TAB_ID = "admin";
-const ADMIN_PATH = "/tolei";
+const ADMIN_PATH = "/admin";
 
 const tabAdminBtn = document.getElementById("tabAdminBtn");
 const adminTabBadge = document.getElementById("st2-admin-tab-badge");
@@ -86,7 +86,6 @@ const accessAdminPass = document.getElementById("st2-access-admin-pass");
 const accessAdminError = document.getElementById("st2-access-admin-error");
 const accessAdminSubmit = document.getElementById("st2-access-admin-submit");
 const accessAdminCancel = document.getElementById("st2-access-admin-cancel");
-const accessAdminLogout = document.getElementById("st2-access-admin-logout");
 const accessAdminStatus = document.getElementById("st2-access-admin-status");
 const accessAdminBody = document.getElementById("st2-access-admin-body");
 const accessAdminSummary = document.getElementById("st2-access-admin-summary");
@@ -1597,17 +1596,6 @@ function leaveAdminTab() {
   resetAccessAdminSnapshot();
 }
 
-async function logoutAccessAdminSession() {
-  try {
-    await fetch("/api/access/admin/session", { method: "DELETE", credentials: "include" });
-  } catch {
-    /* ignore */
-  }
-  showAccessAdminLogin();
-  resetAccessAdminSnapshot();
-  if (accessAdminError) accessAdminError.textContent = "Sesión de admin cerrada.";
-}
-
 async function submitAccessAdminLogin() {
   const username = accessAdminUser?.value.trim() || "";
   const password = accessAdminPass?.value || "";
@@ -1760,7 +1748,6 @@ function hideAbout() {
 aboutBtn?.addEventListener("click", showAbout);
 document.addEventListener("st2:session-changed", () => syncAdminTabVisibility());
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
-accessAdminLogout?.addEventListener("click", () => { void logoutAccessAdminSession(); });
 accessAdminRefresh?.addEventListener("click", () => {
   void loadAccessAdminRegistrations({ silent: true, force: true });
 });
@@ -2745,7 +2732,7 @@ function normalizeShellPath(pathname) {
 
 function tabFromPath(pathname) {
   const p = normalizeShellPath(pathname);
-  if (p === ADMIN_PATH) return ADMIN_TAB_ID;
+  if (p === ADMIN_PATH || p === "/tolei") return ADMIN_TAB_ID;
   if (p === "/ai") return "ai";
   if (p === "/portal" || p.startsWith("/portal/")) return "portal";
   if (p === "/thom" || p.startsWith("/thom/")) return "thom";
