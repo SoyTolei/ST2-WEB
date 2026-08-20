@@ -153,12 +153,29 @@ export function initBorradoBasesModule() {
     void handleCtxAction(action);
   });
 
-  document.addEventListener("click", () => hideCtx());
-  document.addEventListener("scroll", () => hideCtx(), true);
+  document.addEventListener("click", (e) => {
+    if (e.target?.closest?.("#borrado-base-pop") || e.target?.closest?.(".borrado-base-pill")) return;
+    hideCtx();
+    hideBasePop();
+  });
+  document.addEventListener("scroll", () => {
+    hideCtx();
+    hideBasePop();
+  }, true);
+
+  document.getElementById("borrado-base-pop-close")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    hideBasePop();
+  });
+  document.getElementById("borrado-base-pop-copy")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    void copyBasePopText();
+  });
 
   document.addEventListener("st2:planillas-home", () => {
     listLoadGen += 1;
     hideCtx();
+    hideBasePop();
     hideEditModal();
     hideDeleteModal();
     hideNoteModal();
@@ -547,18 +564,85 @@ function basesLabel(item) {
 function formatBasesPills(item) {
   const pills = [];
   if (item.iva) {
-    const tip = escapeHtml(item.ivaDetalle || "IVA");
-    pills.push(`<span class="borrado-base-pill" title="${tip}">IVA</span>`);
+    const detail = String(item.ivaDetalle || "").trim() || "Sin nombre de base";
+    pills.push(basePillHtml("IVA", detail, false));
   }
   if (item.sueldos) {
-    const tip = escapeHtml(item.sueldosDetalle || "Sueldos");
-    pills.push(`<span class="borrado-base-pill" title="${tip}">Sueldos</span>`);
+    const detail = String(item.sueldosDetalle || "").trim() || "Sin nombre de base";
+    pills.push(basePillHtml("Sueldos", detail, false));
   }
   if (item.contabilidad) {
-    const tip = escapeHtml(item.ejerciciosDetalle || "Contabilidad General");
-    pills.push(`<span class="borrado-base-pill contab" title="${tip}">Contabilidad</span>`);
+    const detail = String(item.ejerciciosDetalle || "").trim() || "Sin ejercicios";
+    pills.push(basePillHtml("Contabilidad", detail, true));
   }
   return pills.length ? pills.join(" ") : "—";
+}
+
+function basePillHtml(label, detail, contab) {
+  const tip = escapeHtml(detail.length > 120 ? `${detail.slice(0, 117)}…` : detail);
+  const cls = contab ? "borrado-base-pill contab" : "borrado-base-pill";
+  return `<button type="button" class="${cls}" title="${tip} — clic para ver / copiar" data-borrado-base-label="${escapeHtml(label)}" data-borrado-base-detail="${escapeHtml(detail)}">${escapeHtml(label)}</button>`;
+}
+
+function hideBasePop() {
+  const pop = document.getElementById("borrado-base-pop");
+  if (!pop) return;
+  pop.classList.add("hidden");
+  pop.setAttribute("aria-hidden", "true");
+}
+
+function showBasePop(anchor, label, detail) {
+  const pop = document.getElementById("borrado-base-pop");
+  const title = document.getElementById("borrado-base-pop-title");
+  const text = document.getElementById("borrado-base-pop-text");
+  const copyBtn = document.getElementById("borrado-base-pop-copy");
+  if (!pop || !anchor) return;
+
+  hideCtx();
+  if (title) title.textContent = label || "Base";
+  if (text) text.textContent = detail || "—";
+  if (copyBtn) {
+    copyBtn.classList.remove("is-copied");
+    copyBtn.setAttribute("data-copy-hint", "Copiar");
+    copyBtn.textContent = "Copiar";
+  }
+
+  pop.classList.remove("hidden");
+  pop.setAttribute("aria-hidden", "false");
+
+  const rect = anchor.getBoundingClientRect();
+  const pad = 8;
+  const w = pop.offsetWidth || 280;
+  const h = pop.offsetHeight || 140;
+  let left = rect.left;
+  let top = rect.bottom + 6;
+  if (left + w > window.innerWidth - pad) left = window.innerWidth - w - pad;
+  if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
+  pop.style.left = `${Math.max(pad, left)}px`;
+  pop.style.top = `${Math.max(pad, top)}px`;
+}
+
+async function copyBasePopText() {
+  const text = document.getElementById("borrado-base-pop-text")?.textContent || "";
+  const btn = document.getElementById("borrado-base-pop-copy");
+  try {
+    await navigator.clipboard.writeText(text);
+    if (btn) {
+      btn.classList.add("is-copied");
+      btn.textContent = "Copiado";
+      btn.setAttribute("data-copy-hint", "Copiado");
+      const prev = Number(btn.dataset.copyFlashTimer || 0);
+      if (prev) window.clearTimeout(prev);
+      btn.dataset.copyFlashTimer = String(window.setTimeout(() => {
+        btn.classList.remove("is-copied");
+        btn.textContent = "Copiar";
+        btn.setAttribute("data-copy-hint", "Copiar");
+        delete btn.dataset.copyFlashTimer;
+      }, 1400));
+    }
+  } catch {
+    setStatus(text, false);
+  }
 }
 
 function renderTable(filtered) {
@@ -614,11 +698,25 @@ function buildRow(item) {
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
+    const pill = e.target.closest(".borrado-base-pill");
+    if (pill) {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedId = item.id;
+      showBasePop(
+        pill,
+        pill.getAttribute("data-borrado-base-label") || "",
+        pill.getAttribute("data-borrado-base-detail") || "",
+      );
+      return;
+    }
+    hideBasePop();
     selectedId = item.id;
     applyFilters();
   });
 
   row.addEventListener("dblclick", (e) => {
+    if (e.target.closest(".borrado-base-pill")) return;
     e.preventDefault();
     selectedId = item.id;
     applyFilters();
@@ -628,6 +726,7 @@ function buildRow(item) {
 
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
+    hideBasePop();
     selectedId = item.id;
     applyFilters();
     showCtx(e.clientX, e.clientY, item);
