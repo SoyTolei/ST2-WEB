@@ -461,8 +461,69 @@ body.portal-tab-active .tab-bar {
   max-height: none;
 }
 
+.st2-header-admin-btn.hidden {
+  display: none !important;
+}
+
+.st2-header-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  border: 1px solid rgba(214, 64, 0, 0.45);
+  border-left-width: 3px;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.98) 100%);
+  color: #f1f5f9;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 7px 13px 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease;
+}
+
+.st2-header-admin-icon {
+  flex-shrink: 0;
+  opacity: 0.92;
+}
+
+.st2-header-admin-label {
+  line-height: 1;
+}
+
+.st2-header-admin-btn:hover {
+  background: linear-gradient(180deg, rgba(51, 65, 85, 0.95) 0%, rgba(30, 41, 59, 1) 100%);
+  border-color: rgba(234, 88, 12, 0.65);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(214, 64, 0, 0.2);
+}
+
+.st2-header-admin-btn:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.55);
+  outline-offset: 2px;
+}
+
 .tab-btn-admin.hidden {
   display: none !important;
+}
+
+.tab-btn-admin:not(.active) {
+  color: #64748b;
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(248, 250, 252, 0.85);
+}
+
+.tab-btn-admin:not(.active):hover {
+  color: #334155;
+  border-color: rgba(214, 64, 0, 0.25);
+  background: #fff;
 }
 
 #panel-portal.active {
@@ -2965,14 +3026,6 @@ body.st2-access-pending .st2-app-root {
 
 .st2-access-pass-wrap {
   margin-top: 12px;
-}
-
-.st2-header-admin-btn.hidden {
-  display: none !important;
-}
-
-.st2-header-admin-btn {
-  font-weight: 600;
 }
 
 .st2-access-error {

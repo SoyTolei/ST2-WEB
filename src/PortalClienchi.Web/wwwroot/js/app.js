@@ -74,6 +74,9 @@ const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const aboutUpdatedEl = document.getElementById("st2-about-updated");
+const ADMIN_TAB_ID = "admin";
+const ADMIN_PATH = "/tolei";
+
 const tabAdminBtn = document.getElementById("tabAdminBtn");
 const headerAdminBtn = document.getElementById("st2-header-admin-btn");
 const adminTabBadge = document.getElementById("st2-admin-tab-badge");
@@ -1073,7 +1076,7 @@ function syncAdminTabVisibility() {
   tabAdminBtn?.setAttribute("aria-hidden", show ? "false" : "true");
   headerAdminBtn?.classList.toggle("hidden", !show);
   headerAdminBtn?.setAttribute("aria-hidden", show ? "false" : "true");
-  if (!show && document.querySelector('.tab-btn.active[data-tab="admin"]')) {
+  if (!show && document.querySelector(`.tab-btn.active[data-tab="${ADMIN_TAB_ID}"]`)) {
     navigateTab("planillas", { history: "replace" });
   }
 }
@@ -1543,7 +1546,7 @@ function stopAccessAdminPolling() {
 function startAccessAdminPolling() {
   stopAccessAdminPolling();
   accessAdminPollTimer = setInterval(() => {
-    if (!document.querySelector('.tab-btn.active[data-tab="admin"]')) {
+    if (!document.querySelector(`.tab-btn.active[data-tab="${ADMIN_TAB_ID}"]`)) {
       stopAccessAdminPolling();
       return;
     }
@@ -1761,7 +1764,7 @@ function hideAbout() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
-headerAdminBtn?.addEventListener("click", () => navigateTab("admin"));
+headerAdminBtn?.addEventListener("click", () => navigateTab(ADMIN_TAB_ID));
 document.addEventListener("st2:session-changed", () => syncAdminTabVisibility());
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminLogout?.addEventListener("click", () => { void logoutAccessAdminSession(); });
@@ -2749,7 +2752,7 @@ function normalizeShellPath(pathname) {
 
 function tabFromPath(pathname) {
   const p = normalizeShellPath(pathname);
-  if (p === "/admin") return "admin";
+  if (p === ADMIN_PATH) return ADMIN_TAB_ID;
   if (p === "/ai") return "ai";
   if (p === "/portal" || p.startsWith("/portal/")) return "portal";
   if (p === "/thom" || p.startsWith("/thom/")) return "thom";
@@ -2774,7 +2777,7 @@ function portalIdFromPath(pathname) {
 }
 
 function pathForTab(tabId) {
-  if (tabId === "admin") return "/admin";
+  if (tabId === ADMIN_TAB_ID) return ADMIN_PATH;
   if (tabId === "thom") return `/thom/${thomPortalId || "bejerman"}`;
   if (tabId === "ai") return "/ai";
   if (tabId === "portal") {
@@ -2784,7 +2787,7 @@ function pathForTab(tabId) {
 }
 
 function titleForTab(tabId) {
-  if (tabId === "admin") return "ST2 · Admin";
+  if (tabId === ADMIN_TAB_ID) return "ST2 · Administración";
   if (tabId === "thom") return "ST2 · THOM";
   if (tabId === "ai") return "ST2 · AI Platform";
   if (tabId === "portal") return "ST2 · Portal Cliente";
@@ -2807,7 +2810,7 @@ function syncTabHistory(tabId, mode = "push") {
 
 function navigateTab(tabId, { history = "push" } = {}) {
   if (!tabId) return;
-  if (tabId === "admin" && !isSt2SuperAdmin()) {
+  if (tabId === ADMIN_TAB_ID && !isSt2SuperAdmin()) {
     navigateTab("planillas", { history: "replace" });
     return;
   }
@@ -2850,7 +2853,7 @@ function applyTopTabEntry() {
 
 function switchTab(tabId) {
   const prevTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
-  if (prevTab === "admin" && tabId !== "admin") {
+  if (prevTab === ADMIN_TAB_ID && tabId !== ADMIN_TAB_ID) {
     leaveAdminTab();
   }
 
@@ -2883,7 +2886,7 @@ function switchTab(tabId) {
   } else if (tabId === "ai") {
     loadEmbedFrame("ai");
     startEngagementTimer("ai");
-  } else if (tabId === "admin") {
+  } else if (tabId === ADMIN_TAB_ID) {
     void activateAdminTab();
   }
 
