@@ -101,6 +101,54 @@ public static class BorradoBasesEndpoints
             return Results.Ok(updated);
         });
 
+        app.MapGet("/api/planillas/borrado-bases/alerts", (HttpContext ctx, BorradoBasesRepository repo, ModuleAccessRepository modules) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
+                return error!;
+
+            if (flags.BorradoBasesConfirm)
+            {
+                var pending = repo.ListPendingForConfirm();
+                return Results.Ok(new
+                {
+                    mode = "confirm",
+                    count = pending.Count,
+                    items = pending,
+                });
+            }
+
+            var alerts = repo.ListUnseenAlerts(email!);
+            return Results.Ok(new
+            {
+                mode = "requester",
+                count = alerts.Count,
+                items = alerts,
+            });
+        });
+
+        app.MapPost("/api/planillas/borrado-bases/alerts/seen", async (HttpContext ctx, BorradoBasesRepository repo, ModuleAccessRepository modules, CancellationToken ct) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
+                return error!;
+
+            if (flags.BorradoBasesConfirm)
+                return Results.Ok(new { ok = true, marked = 0, mode = "confirm" });
+
+            int[]? ids = null;
+            try
+            {
+                var body = await ctx.Request.ReadFromJsonAsync<BorradoAlertsSeenRequest>(cancellationToken: ct).ConfigureAwait(false);
+                ids = body?.Ids;
+            }
+            catch
+            {
+                // body opcional
+            }
+
+            var marked = repo.MarkAlertsSeen(email!, ids);
+            return Results.Ok(new { ok = true, marked, mode = "requester" });
+        });
+
         app.MapDelete("/api/planillas/borrado-bases/{id:int}", (
             HttpContext ctx,
             int id,

@@ -10,6 +10,10 @@ import {
   startBlanqueoAlertsPolling,
   renderBlanqueoAlertUi,
 } from "./blanqueo-alerts.js";
+import {
+  startBorradoAlertsPolling,
+  renderBorradoAlertUi,
+} from "./borrado-alerts.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -1211,6 +1215,10 @@ function bindEvents() {
     void revealView("blanqueo");
   });
 
+  document.addEventListener("st2:open-borrado-from-alert", () => {
+    void revealView("borradoBases");
+  });
+
   document.querySelectorAll("[data-plan-back]").forEach((btn) => {
     btn.addEventListener("click", () => goBackToPlanillasMenu());
   });
@@ -1367,8 +1375,10 @@ export function initPlanillas() {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }
     startBlanqueoAlertsPolling();
+    startBorradoAlertsPolling();
     startModuleAccessPolling();
     renderBlanqueoAlertUi();
+    renderBorradoAlertUi();
     document.addEventListener("st2:modules-access-changed", () => {
       updateSistemaUi();
     });

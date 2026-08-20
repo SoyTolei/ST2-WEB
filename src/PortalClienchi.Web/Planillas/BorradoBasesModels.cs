@@ -62,3 +62,27 @@ public sealed class BorradoBasesPatchRequest
     public string? Aclaracion { get; set; }
     public bool ClearAclaracion { get; set; }
 }
+
+public static class BorradoAlertKinds
+{
+    public const string Ready = "ready";
+    public const string Note = "note";
+    public const string Pending = "pending";
+}
+
+public sealed class BorradoAlertDto
+{
+    public int Id { get; set; }
+    public int SolicitudId { get; set; }
+    public string NroCaso { get; set; } = "";
+    public string NroEmpresa { get; set; } = "";
+    public string NombreEmpresa { get; set; } = "";
+    public string Cuit { get; set; } = "";
+    public string Kind { get; set; } = BorradoAlertKinds.Ready;
+    public string CreatedAt { get; set; } = "";
+}
+
+public sealed class BorradoAlertsSeenRequest
+{
+    public int[]? Ids { get; set; }
+}

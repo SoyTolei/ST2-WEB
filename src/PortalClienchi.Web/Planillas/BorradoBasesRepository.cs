@@ -134,6 +134,13 @@ public sealed class BorradoBasesRepository
         else if (req.Aclaracion is not null)
             aclaracion = string.IsNullOrWhiteSpace(req.Aclaracion) ? null : req.Aclaracion.Trim();
 
+        // Listo y aclaración pueden convivir (misma lógica que Blanqueo sin "No registrado").
+        if (req.Listo == true)
+            listo = true;
+
+        var wasListo = current.Listo;
+        var prevAclaracion = current.Aclaracion;
+
         using var conn = Open();
         using var upd = conn.CreateCommand();
         upd.CommandText = """
@@ -148,7 +155,193 @@ public sealed class BorradoBasesRepository
 
         current.Listo = listo;
         current.Aclaracion = aclaracion;
+        SyncRequesterAlert(conn, current, wasListo, prevAclaracion);
         return current;
+    }
+
+    /// <summary>
+    /// Cola para quien confirma: pendientes vivos (sin listo y sin aclaración).
+    /// </summary>
+    public IReadOnlyList<BorradoAlertDto> ListPendingForConfirm()
+    {
+        var list = new List<BorradoAlertDto>();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, nro_caso, nro_empresa, nombre_empresa, cuit, fecha_solicitud
+            FROM borrado_bases_solicitudes
+            WHERE listo = 0
+              AND (aclaracion IS NULL OR trim(aclaracion) = '')
+            ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) DESC, id DESC
+            """;
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            list.Add(new BorradoAlertDto
+            {
+                Id = r.GetInt32(0),
+                SolicitudId = r.GetInt32(0),
+                NroCaso = r.IsDBNull(1) ? "" : r.GetString(1),
+                NroEmpresa = r.IsDBNull(2) ? "" : r.GetString(2),
+                NombreEmpresa = r.IsDBNull(3) ? "" : r.GetString(3),
+                Cuit = r.IsDBNull(4) ? "" : r.GetString(4),
+                Kind = BorradoAlertKinds.Pending,
+                CreatedAt = r.IsDBNull(5) ? "" : r.GetString(5),
+            });
+        }
+
+        return list;
+    }
+
+    public IReadOnlyList<BorradoAlertDto> ListUnseenAlerts(string email)
+    {
+        var normalized = PlanUserIdentity.ValidateAndNormalize(email);
+        if (normalized is null)
+            return [];
+
+        var list = new List<BorradoAlertDto>();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, solicitud_id, nro_caso, nro_empresa, nombre_empresa, cuit, created_at, kind
+            FROM borrado_bases_alerts
+            WHERE lower(email) = lower($email) AND seen = 0
+            ORDER BY id DESC
+            """;
+        cmd.Parameters.AddWithValue("$email", normalized);
+        using var r = cmd.ExecuteReader();
+        while (r.Read())
+        {
+            list.Add(new BorradoAlertDto
+            {
+                Id = r.GetInt32(0),
+                SolicitudId = r.GetInt32(1),
+                NroCaso = r.IsDBNull(2) ? "" : r.GetString(2),
+                NroEmpresa = r.IsDBNull(3) ? "" : r.GetString(3),
+                NombreEmpresa = r.IsDBNull(4) ? "" : r.GetString(4),
+                Cuit = r.IsDBNull(5) ? "" : r.GetString(5),
+                CreatedAt = r.IsDBNull(6) ? "" : r.GetString(6),
+                Kind = r.IsDBNull(7) || string.IsNullOrWhiteSpace(r.GetString(7))
+                    ? BorradoAlertKinds.Ready
+                    : r.GetString(7),
+            });
+        }
+
+        return list;
+    }
+
+    public int MarkAlertsSeen(string email, IEnumerable<int>? ids = null)
+    {
+        var normalized = PlanUserIdentity.ValidateAndNormalize(email);
+        if (normalized is null)
+            return 0;
+
+        var idList = ids?.Where(i => i > 0).Distinct().ToList() ?? [];
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        if (idList.Count == 0)
+        {
+            cmd.CommandText = """
+                UPDATE borrado_bases_alerts
+                SET seen = 1
+                WHERE lower(email) = lower($email) AND seen = 0
+                """;
+            cmd.Parameters.AddWithValue("$email", normalized);
+            return cmd.ExecuteNonQuery();
+        }
+
+        var placeholders = string.Join(",", idList.Select((_, i) => $"$id{i}"));
+        cmd.CommandText = $"""
+            UPDATE borrado_bases_alerts
+            SET seen = 1
+            WHERE lower(email) = lower($email) AND seen = 0 AND id IN ({placeholders})
+            """;
+        cmd.Parameters.AddWithValue("$email", normalized);
+        for (var i = 0; i < idList.Count; i++)
+            cmd.Parameters.AddWithValue($"$id{i}", idList[i]);
+        return cmd.ExecuteNonQuery();
+    }
+
+    private static void SyncRequesterAlert(
+        SqliteConnection conn,
+        BorradoBasesRecordDto item,
+        bool wasListo,
+        string? prevAclaracion)
+    {
+        string? kind = null;
+        if (item.Listo)
+            kind = BorradoAlertKinds.Ready;
+        else if (!string.IsNullOrWhiteSpace(item.Aclaracion))
+            kind = BorradoAlertKinds.Note;
+
+        var listoChanged = wasListo != item.Listo;
+        var aclaracionChanged = !string.Equals(
+            (prevAclaracion ?? "").Trim(),
+            (item.Aclaracion ?? "").Trim(),
+            StringComparison.Ordinal);
+
+        if (kind is null)
+        {
+            if (listoChanged || aclaracionChanged)
+                DeleteAlertBySolicitud(conn, item.Id);
+            return;
+        }
+
+        if (!listoChanged && !aclaracionChanged)
+            return;
+
+        UpsertAlert(conn, item, kind);
+    }
+
+    private static void UpsertAlert(SqliteConnection conn, BorradoBasesRecordDto item, string kind)
+    {
+        var email = PlanUserIdentity.ValidateAndNormalize(item.SolicitadoPorEmail);
+        if (email is null)
+            return;
+
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO borrado_bases_alerts
+                (solicitud_id, email, nro_caso, nro_empresa, nombre_empresa, cuit, kind, created_at, seen)
+            VALUES
+                ($solicitud, $email, $caso, $empresa, $nombre, $cuit, $kind, $created, 0)
+            ON CONFLICT(solicitud_id) DO UPDATE SET
+                email = excluded.email,
+                nro_caso = excluded.nro_caso,
+                nro_empresa = excluded.nro_empresa,
+                nombre_empresa = excluded.nombre_empresa,
+                cuit = excluded.cuit,
+                kind = excluded.kind,
+                created_at = excluded.created_at,
+                seen = 0
+            """;
+        cmd.Parameters.AddWithValue("$solicitud", item.Id);
+        cmd.Parameters.AddWithValue("$email", email);
+        cmd.Parameters.AddWithValue("$caso", item.NroCaso);
+        cmd.Parameters.AddWithValue("$empresa", item.NroEmpresa);
+        cmd.Parameters.AddWithValue("$nombre", item.NombreEmpresa);
+        cmd.Parameters.AddWithValue("$cuit", item.Cuit);
+        cmd.Parameters.AddWithValue("$kind", kind);
+        cmd.Parameters.AddWithValue("$created", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+        cmd.ExecuteNonQuery();
+    }
+
+    private static void DeleteAlertBySolicitud(SqliteConnection conn, int solicitudId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM borrado_bases_alerts WHERE solicitud_id = $id";
+        cmd.Parameters.AddWithValue("$id", solicitudId);
+        cmd.ExecuteNonQuery();
+    }
+
+    public bool Delete(int id)
+    {
+        using var conn = Open();
+        DeleteAlertBySolicitud(conn, id);
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM borrado_bases_solicitudes WHERE id = $id";
+        cmd.Parameters.AddWithValue("$id", id);
+        return cmd.ExecuteNonQuery() > 0;
     }
 
     public int SyncRequesterDisplayName(string email, string? displayName)
@@ -171,15 +364,6 @@ public sealed class BorradoBasesRepository
         upd.Parameters.AddWithValue("$email", normalized);
         upd.Parameters.AddWithValue("$nombre", preferredName);
         return upd.ExecuteNonQuery();
-    }
-
-    public bool Delete(int id)
-    {
-        using var conn = Open();
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM borrado_bases_solicitudes WHERE id = $id";
-        cmd.Parameters.AddWithValue("$id", id);
-        return cmd.ExecuteNonQuery() > 0;
     }
 
     private static void BindFields(SqliteCommand cmd, BorradoBasesCreateRequest req)
@@ -246,6 +430,29 @@ public sealed class BorradoBasesRepository
         EnsureColumn(conn, "sueldos_detalle", "TEXT NULL");
         EnsureColumn(conn, "cuit", "TEXT NOT NULL DEFAULT ''");
         MigrateCuilToCuit(conn);
+        EnsureAlertsTable(conn);
+    }
+
+    private static void EnsureAlertsTable(SqliteConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS borrado_bases_alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                solicitud_id INTEGER NOT NULL UNIQUE,
+                email TEXT NOT NULL COLLATE NOCASE,
+                nro_caso TEXT NOT NULL,
+                nro_empresa TEXT NOT NULL,
+                nombre_empresa TEXT NOT NULL,
+                cuit TEXT NOT NULL DEFAULT '',
+                kind TEXT NOT NULL DEFAULT 'ready',
+                created_at TEXT NOT NULL,
+                seen INTEGER NOT NULL DEFAULT 0
+            );
+            CREATE INDEX IF NOT EXISTS idx_borrado_bases_alerts_email_seen
+                ON borrado_bases_alerts (email, seen);
+            """;
+        cmd.ExecuteNonQuery();
     }
 
     private static void MigrateCuilToCuit(SqliteConnection conn)

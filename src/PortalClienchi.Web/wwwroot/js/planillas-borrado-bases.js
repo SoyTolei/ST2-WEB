@@ -6,6 +6,7 @@ import {
   refreshModuleFlags,
   isSt2SuperAdmin,
 } from "./module-access.js";
+import { notifyBorradoChanged } from "./borrado-alerts.js";
 
 /**
  * Override: localStorage.setItem("st2-borrado-bases-force", "1")
@@ -375,6 +376,7 @@ async function createSolicitud() {
     setStatus("Solicitud agregada.");
     scrollListToEndOnce = true;
     await reloadList();
+    notifyBorradoChanged();
     document.getElementById("borrado-caso")?.focus();
   } catch (err) {
     setStatus(err?.message || "No se pudo guardar.", true);
@@ -770,6 +772,7 @@ async function toggleListoByDoubleClick(item) {
     await patchItem(item.id, { listo: nextListo });
     setStatus(nextListo ? "Marcado como listo." : "Se quitó el listo.");
     await reloadList();
+    notifyBorradoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }
@@ -862,6 +865,7 @@ async function handleCtxAction(action) {
     }
     setStatus("Actualizado.");
     await reloadList();
+    notifyBorradoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }
@@ -943,6 +947,7 @@ async function saveEdit() {
     hideEditModal();
     setStatus("Solicitud editada.");
     await reloadList();
+    notifyBorradoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo editar.", true);
   }
@@ -976,6 +981,7 @@ async function confirmDeleteModal() {
     hideDeleteModal();
     setStatus("Solicitud eliminada.");
     await reloadList();
+    notifyBorradoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo eliminar.", true);
   }
@@ -1009,6 +1015,7 @@ async function saveNoteModal() {
     hideNoteModal();
     setStatus("Aclaración guardada.");
     await reloadList();
+    notifyBorradoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo guardar la aclaración.", true);
   }
