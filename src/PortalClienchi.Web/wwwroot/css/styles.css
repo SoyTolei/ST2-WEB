@@ -450,16 +450,13 @@ body.portal-tab-active .tab-bar {
 .tab-panel:not(.active) { display: none; }
 
 #panel-admin.active {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  height: auto;
+  display: block;
+  flex: 1 0 auto;
+  min-height: calc(100dvh - 130px);
+  height: fit-content;
   max-height: none;
-  padding: 4px 10px 20px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  padding: 4px 10px 24px;
+  overflow: visible;
 }
 
 #panel-admin .st2-admin-tab-shell,
@@ -469,19 +466,20 @@ body.portal-tab-active .tab-bar {
   width: min(1320px, 100%);
   max-height: none !important;
   min-height: calc(100dvh - 112px);
-  height: auto;
-  flex: 1 1 auto;
+  height: fit-content;
+  flex: none;
   margin: 0 auto;
   overflow: visible;
+  background: #f8fafc;
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
 }
 
 #panel-admin .st2-access-admin-panel {
   display: flex;
   flex-direction: column;
-  flex: 1 1 auto;
+  flex: none;
   min-height: 0;
-  height: auto;
+  height: fit-content;
   padding: 10px 14px 12px;
   overflow: visible;
 }
@@ -525,10 +523,9 @@ body.portal-tab-active .tab-bar {
   margin-bottom: 8px;
 }
 
-/* Un solo scroll fluido: la tabla crece y scrollea el panel, no un cajón chico interno. */
 #panel-admin .st2-access-admin-table-wrap {
-  flex: 0 0 auto;
-  min-height: calc(100dvh - 250px);
+  flex: none;
+  min-height: 0;
   max-height: none;
   overflow: visible;
   border: 1px solid #e2e8f0;
@@ -547,8 +544,13 @@ body.portal-tab-active .tab-bar {
 }
 
 body.admin-tab-active .main-shell {
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  height: auto;
+  min-height: calc(100vh - 64px - 36px);
+  overflow: visible;
+}
+
+body.admin-tab-active {
+  overflow-y: auto;
 }
 
 .st2-admin-tab-shell {
