@@ -449,6 +449,22 @@ body.portal-tab-active .tab-bar {
 
 .tab-panel:not(.active) { display: none; }
 
+#panel-admin.active {
+  display: block;
+  padding: 16px 20px 28px;
+  overflow: auto;
+}
+
+.st2-admin-tab-shell {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  max-height: none;
+}
+
+.tab-btn-admin.hidden {
+  display: none !important;
+}
+
 #panel-portal.active {
   flex: 1;
   min-height: 0;

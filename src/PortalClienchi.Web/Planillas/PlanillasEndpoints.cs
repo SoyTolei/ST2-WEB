@@ -484,6 +484,17 @@ public static class PlanillasEndpoints
 
             if (St2SuperAdminGate.RequiresPassword(email))
             {
+                if (!St2SuperAdminGate.IsConfigured(config))
+                {
+                    return Results.Json(new
+                    {
+                        email,
+                        status = "password_required",
+                        requiresPassword = true,
+                        error = "Acceso de administrador no configurado en el servidor (falta ST2_SUPER_ADMIN_PASSWORD).",
+                    }, statusCode: StatusCodes.Status503ServiceUnavailable);
+                }
+
                 if (!St2SuperAdminGate.ValidatePassword(config, body.Password))
                 {
                     return Results.Json(new

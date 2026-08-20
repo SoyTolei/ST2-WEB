@@ -22,6 +22,7 @@ public static class St2AppRoutes
             or "/blanqueo"
             or "/thom"
             or "/ai"
+            or "/admin"
             or "/portal"
             || p.StartsWith("/oportunidad/", StringComparison.OrdinalIgnoreCase)
             || p.StartsWith("/transferencia/", StringComparison.OrdinalIgnoreCase)

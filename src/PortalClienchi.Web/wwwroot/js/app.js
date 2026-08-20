@@ -1,5 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess } from "./plan-user.js";
+import { isSt2SuperAdmin } from "./module-access.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -72,9 +73,9 @@ const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
-const aboutIconEl = document.getElementById("st2-about-icon");
 const aboutUpdatedEl = document.getElementById("st2-about-updated");
-const accessAdminOverlay = document.getElementById("st2-access-admin-overlay");
+const tabAdminBtn = document.getElementById("tabAdminBtn");
+const adminTabBadge = document.getElementById("st2-admin-tab-badge");
 const accessAdminLogin = document.getElementById("st2-access-admin-login");
 const accessAdminPanel = document.getElementById("st2-access-admin-panel");
 const accessAdminUser = document.getElementById("st2-access-admin-user");
@@ -82,7 +83,7 @@ const accessAdminPass = document.getElementById("st2-access-admin-pass");
 const accessAdminError = document.getElementById("st2-access-admin-error");
 const accessAdminSubmit = document.getElementById("st2-access-admin-submit");
 const accessAdminCancel = document.getElementById("st2-access-admin-cancel");
-const accessAdminClosePanel = document.getElementById("st2-access-admin-close-panel");
+const accessAdminLogout = document.getElementById("st2-access-admin-logout");
 const accessAdminStatus = document.getElementById("st2-access-admin-status");
 const accessAdminBody = document.getElementById("st2-access-admin-body");
 const accessAdminSummary = document.getElementById("st2-access-admin-summary");
@@ -1053,12 +1054,8 @@ function setAccessAdminSort(key) {
   renderAccessAdminTable();
 }
 
-const ADMIN_ICON_CLICKS = 5;
-const ADMIN_ICON_WINDOW_MS = 2500;
 const ACCESS_ADMIN_SEEN_KEY = "st2-access-admin-seen-v1";
 
-let adminIconClicks = 0;
-let adminIconTimer = null;
 let accessAdminLoading = false;
 let accessAdminPollTimer = null;
 let accessAdminLastSnapshot = "";
@@ -1068,6 +1065,24 @@ let accessAdminItemsCache = [];
 let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
 let accessAdminFilter = "all";
 let accessAdminQuery = "";
+
+function syncAdminTabVisibility() {
+  const show = isSt2SuperAdmin();
+  tabAdminBtn?.classList.toggle("hidden", !show);
+  tabAdminBtn?.setAttribute("aria-hidden", show ? "false" : "true");
+  if (!show && document.querySelector('.tab-btn.active[data-tab="admin"]')) {
+    navigateTab("planillas", { history: "replace" });
+  }
+}
+
+function updateAdminTabBadge() {
+  if (!adminTabBadge || !isSt2SuperAdmin()) return;
+  const pending = accessAdminItemsCache.filter((item) => item.isPending).length;
+  const label = pending > 99 ? "99+" : String(pending);
+  adminTabBadge.textContent = label;
+  adminTabBadge.classList.toggle("hidden", pending === 0);
+  adminTabBadge.setAttribute("aria-hidden", pending ? "false" : "true");
+}
 
 function loadAccessAdminSeenMap() {
   try {
@@ -1223,6 +1238,7 @@ function updateAccessAdminSummaryLine() {
   if (accessAdminKpiActive) accessAdminKpiActive.textContent = String(activeCount);
   if (accessAdminKpiPending) accessAdminKpiPending.textContent = String(pending);
   if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
+  updateAdminTabBadge();
   renderAccessAdminInbox();
   if (!total) {
     setAccessAdminSummary("");
@@ -1524,32 +1540,12 @@ function stopAccessAdminPolling() {
 function startAccessAdminPolling() {
   stopAccessAdminPolling();
   accessAdminPollTimer = setInterval(() => {
-    if (accessAdminPanel?.classList.contains("hidden")) {
+    if (!document.querySelector('.tab-btn.active[data-tab="admin"]')) {
       stopAccessAdminPolling();
       return;
     }
     void loadAccessAdminRegistrations({ silent: true, auto: true });
   }, 20000);
-}
-
-function resetAdminIconClicks() {
-  adminIconClicks = 0;
-  if (adminIconTimer) {
-    clearTimeout(adminIconTimer);
-    adminIconTimer = null;
-  }
-}
-
-function registerAdminIconClick(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  adminIconClicks += 1;
-  if (adminIconTimer) clearTimeout(adminIconTimer);
-  adminIconTimer = setTimeout(resetAdminIconClicks, ADMIN_ICON_WINDOW_MS);
-  if (adminIconClicks >= ADMIN_ICON_CLICKS) {
-    resetAdminIconClicks();
-    void openAccessAdminOverlay();
-  }
 }
 
 function showAccessAdminLogin() {
@@ -1564,17 +1560,19 @@ function showAccessAdminPanel() {
   accessAdminPanel?.classList.remove("hidden");
 }
 
-async function openAccessAdminOverlay() {
-  if (!accessAdminOverlay) return;
-  accessAdminOverlay.classList.remove("hidden");
-  accessAdminOverlay.setAttribute("aria-hidden", "false");
+async function activateAdminTab() {
+  if (!isSt2SuperAdmin()) {
+    navigateTab("planillas", { history: "replace" });
+    return;
+  }
+
   showAccessAdminLogin();
 
   try {
     const response = await fetch("/api/access/admin/session", { credentials: "include" });
     if (response.status === 404) {
       if (accessAdminError) {
-        accessAdminError.textContent = "Panel no configurado en el servidor (faltan variables de admin).";
+        accessAdminError.textContent = "Panel no configurado en el servidor (faltan ST2_ACCESS_ADMIN_USER y ST2_ACCESS_ADMIN_PASSWORD).";
       }
       accessAdminUser?.focus();
       return;
@@ -1593,12 +1591,21 @@ async function openAccessAdminOverlay() {
   accessAdminUser?.focus();
 }
 
-function hideAccessAdminOverlay() {
+function leaveAdminTab() {
   markAccessAdminEmailsAsSeen(accessAdminItemsCache);
   stopAccessAdminPolling();
   resetAccessAdminSnapshot();
-  accessAdminOverlay?.classList.add("hidden");
-  accessAdminOverlay?.setAttribute("aria-hidden", "true");
+}
+
+async function logoutAccessAdminSession() {
+  try {
+    await fetch("/api/access/admin/session", { method: "DELETE", credentials: "include" });
+  } catch {
+    /* ignore */
+  }
+  showAccessAdminLogin();
+  resetAccessAdminSnapshot();
+  if (accessAdminError) accessAdminError.textContent = "Sesión de admin cerrada.";
 }
 
 async function submitAccessAdminLogin() {
@@ -1751,9 +1758,8 @@ function hideAbout() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
-aboutIconEl?.addEventListener("click", registerAdminIconClick);
-accessAdminCancel?.addEventListener("click", hideAccessAdminOverlay);
-accessAdminClosePanel?.addEventListener("click", hideAccessAdminOverlay);
+accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
+accessAdminLogout?.addEventListener("click", () => { void logoutAccessAdminSession(); });
 accessAdminRefresh?.addEventListener("click", () => {
   void loadAccessAdminRegistrations({ silent: true, force: true });
 });
@@ -2738,6 +2744,7 @@ function normalizeShellPath(pathname) {
 
 function tabFromPath(pathname) {
   const p = normalizeShellPath(pathname);
+  if (p === "/admin") return "admin";
   if (p === "/ai") return "ai";
   if (p === "/portal" || p.startsWith("/portal/")) return "portal";
   if (p === "/thom" || p.startsWith("/thom/")) return "thom";
@@ -2762,6 +2769,7 @@ function portalIdFromPath(pathname) {
 }
 
 function pathForTab(tabId) {
+  if (tabId === "admin") return "/admin";
   if (tabId === "thom") return `/thom/${thomPortalId || "bejerman"}`;
   if (tabId === "ai") return "/ai";
   if (tabId === "portal") {
@@ -2771,6 +2779,7 @@ function pathForTab(tabId) {
 }
 
 function titleForTab(tabId) {
+  if (tabId === "admin") return "ST2 · Admin";
   if (tabId === "thom") return "ST2 · THOM";
   if (tabId === "ai") return "ST2 · AI Platform";
   if (tabId === "portal") return "ST2 · Portal Cliente";
@@ -2793,6 +2802,10 @@ function syncTabHistory(tabId, mode = "push") {
 
 function navigateTab(tabId, { history = "push" } = {}) {
   if (!tabId) return;
+  if (tabId === "admin" && !isSt2SuperAdmin()) {
+    navigateTab("planillas", { history: "replace" });
+    return;
+  }
   const currentTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
   if (tabId === "planillas") {
     switchTab("planillas");
@@ -2831,6 +2844,11 @@ function applyTopTabEntry() {
 }
 
 function switchTab(tabId) {
+  const prevTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
+  if (prevTab === "admin" && tabId !== "admin") {
+    leaveAdminTab();
+  }
+
   document.querySelectorAll(".tab-btn").forEach((btn) => {
     const active = btn.dataset.tab === tabId;
     btn.classList.toggle("active", active);
@@ -2860,6 +2878,8 @@ function switchTab(tabId) {
   } else if (tabId === "ai") {
     loadEmbedFrame("ai");
     startEngagementTimer("ai");
+  } else if (tabId === "admin") {
+    void activateAdminTab();
   }
 
   refreshBadges();
@@ -2921,6 +2941,7 @@ setPreviewIdle(true);
 async function bootstrapApp() {
   applyAboutUpdated();
   await ensureAppAccess();
+  syncAdminTabVisibility();
   await initPlanillas();
   applyTopTabEntry();
   window.addEventListener("popstate", () => {

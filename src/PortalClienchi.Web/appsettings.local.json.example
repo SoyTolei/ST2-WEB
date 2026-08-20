@@ -34,6 +34,6 @@
     "Password": "tu-contraseña-admin"
   },
   "St2SuperAdmin": {
-    "Password": "opcional-solo-si-querés-sobreescribir-la-clave-del-super-admin"
+    "Password": "contraseña-para-leonel.gallo@thomsonreuters.com (Railway: ST2_SUPER_ADMIN_PASSWORD)"
   }
 }

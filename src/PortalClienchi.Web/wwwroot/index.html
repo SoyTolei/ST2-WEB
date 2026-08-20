@@ -87,6 +87,11 @@
           <div id="portalSistemaPills" class="portal-sistema-pills" role="tablist" aria-label="Catálogo del Portal Cliente"></div>
         </div>
       </div>
+      <button type="button" class="tab-btn tab-btn-admin hidden" data-tab="admin" role="tab" id="tabAdminBtn" aria-hidden="true" title="Panel de administración">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>
+        Admin
+        <span class="tab-reminder-badge hidden" id="st2-admin-tab-badge" aria-hidden="true">1</span>
+      </button>
     </nav>
 
     <section id="panel-planillas" class="tab-panel active" role="tabpanel">
@@ -1363,6 +1368,93 @@
           allow="clipboard-read; clipboard-write; fullscreen; autoplay"></iframe>
       </div>
     </section>
+
+    <section id="panel-admin" class="tab-panel hidden" role="tabpanel" aria-labelledby="tabAdminBtn">
+      <div class="st2-access-admin-dialog st2-admin-tab-shell">
+        <div id="st2-access-admin-login">
+          <p class="st2-access-admin-kicker">Administración</p>
+          <h3 id="st2-access-admin-title" class="st2-access-admin-title">Panel de accesos</h3>
+          <p class="st2-access-admin-login-hint">Ingresá con las credenciales de administrador para ver registrados, solicitudes y módulos.</p>
+          <label class="st2-access-admin-label" for="st2-access-admin-user">Usuario</label>
+          <input id="st2-access-admin-user" type="text" class="st2-access-admin-input" autocomplete="username" spellcheck="false"/>
+          <label class="st2-access-admin-label" for="st2-access-admin-pass">Contraseña</label>
+          <input id="st2-access-admin-pass" type="password" class="st2-access-admin-input" autocomplete="current-password"/>
+          <p id="st2-access-admin-error" class="st2-access-admin-error" role="alert"></p>
+          <div class="st2-access-admin-actions">
+            <button type="button" id="st2-access-admin-cancel" class="st2-access-admin-cancel">Volver</button>
+            <button type="button" id="st2-access-admin-submit" class="st2-access-admin-submit">Ingresar</button>
+          </div>
+        </div>
+        <div id="st2-access-admin-panel" class="st2-access-admin-panel hidden">
+          <div class="st2-access-admin-panel-top">
+            <div class="st2-access-admin-panel-head">
+              <div class="st2-access-admin-panel-titles">
+                <p class="st2-access-admin-kicker">Administración</p>
+                <h3 class="st2-access-admin-title">Control de accesos</h3>
+              </div>
+              <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
+            </div>
+            <div class="st2-access-admin-kpis" id="st2-access-admin-kpis">
+              <div class="st2-access-admin-kpi">
+                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-total">—</span>
+                <span class="st2-access-admin-kpi-l">Registrados</span>
+              </div>
+              <div class="st2-access-admin-kpi">
+                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-active">—</span>
+                <span class="st2-access-admin-kpi-l">Activos</span>
+              </div>
+              <div class="st2-access-admin-kpi is-pending">
+                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-pending">—</span>
+                <span class="st2-access-admin-kpi-l">Pendientes</span>
+              </div>
+              <div class="st2-access-admin-kpi">
+                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-today">—</span>
+                <span class="st2-access-admin-kpi-l">Ingresaron hoy</span>
+              </div>
+            </div>
+            <div class="st2-access-admin-stats">
+              <p id="st2-access-admin-summary" class="st2-access-admin-summary hidden"></p>
+              <p id="st2-access-admin-updated" class="st2-access-admin-updated hidden"></p>
+            </div>
+          </div>
+          <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>
+          <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
+          <div id="st2-access-admin-toolbar" class="st2-access-admin-toolbar hidden">
+            <div class="st2-access-admin-filters" role="tablist" aria-label="Filtro de accesos">
+              <button type="button" class="st2-access-admin-filter is-active" data-filter="all">Todos</button>
+              <button type="button" class="st2-access-admin-filter" data-filter="pending">Pendientes</button>
+              <button type="button" class="st2-access-admin-filter" data-filter="active">Activos</button>
+              <button type="button" class="st2-access-admin-filter" data-filter="today">Hoy</button>
+            </div>
+            <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
+          </div>
+          <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
+            <table class="st2-access-admin-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th title="Op = Oportunidad · PDF = Generador · Blanq = Blanqueo · Blanq✓ = puede confirmar">Módulos extra</th>
+                  <th id="st2-access-admin-th-last" class="st2-access-admin-th-sort" data-sort="lastSeen" title="Clic para ordenar por último acceso" aria-sort="descending" tabindex="0" role="columnheader">
+                    Último acceso <span class="st2-access-admin-sort-mark" aria-hidden="true">↓</span>
+                  </th>
+                  <th id="st2-access-admin-th-logins" class="st2-access-admin-th-sort" data-sort="loginCount" title="Días distintos en los que abrió ST2 (no cuenta F5 el mismo día). Clic para ordenar." aria-sort="none" tabindex="0" role="columnheader">
+                    Ingresos <span class="st2-access-admin-sort-mark" aria-hidden="true"></span>
+                  </th>
+                  <th class="st2-access-admin-th-actions">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="st2-access-admin-body"></tbody>
+            </table>
+          </div>
+          <div class="st2-access-admin-panel-foot">
+            <p class="st2-access-admin-legend">Referral I+D y Transferencia: todos · Op / PDF / Blanqueo: ☰ por usuario</p>
+            <div class="st2-access-admin-actions st2-access-admin-actions-panel">
+              <button type="button" id="st2-access-admin-logout" class="st2-access-admin-cancel">Cerrar sesión admin</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <footer id="statusBar" class="status-bar hidden">
@@ -1560,93 +1652,6 @@
     </div>
   </div>
 
-  </div>
-
-  <div id="st2-access-admin-overlay" class="st2-access-admin-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-admin-title">
-    <div class="st2-access-admin-dialog">
-      <div id="st2-access-admin-login">
-        <p class="st2-access-admin-kicker">Panel</p>
-        <h3 id="st2-access-admin-title" class="st2-access-admin-title">Accesos</h3>
-        <p class="st2-access-admin-login-hint">Ingresá para ver registrados y módulos visibles.</p>
-        <label class="st2-access-admin-label" for="st2-access-admin-user">Usuario</label>
-        <input id="st2-access-admin-user" type="text" class="st2-access-admin-input" autocomplete="username" spellcheck="false"/>
-        <label class="st2-access-admin-label" for="st2-access-admin-pass">Contraseña</label>
-        <input id="st2-access-admin-pass" type="password" class="st2-access-admin-input" autocomplete="current-password"/>
-        <p id="st2-access-admin-error" class="st2-access-admin-error" role="alert"></p>
-        <div class="st2-access-admin-actions">
-          <button type="button" id="st2-access-admin-cancel" class="st2-access-admin-cancel">Cancelar</button>
-          <button type="button" id="st2-access-admin-submit" class="st2-access-admin-submit">Ingresar</button>
-        </div>
-      </div>
-      <div id="st2-access-admin-panel" class="st2-access-admin-panel hidden">
-        <div class="st2-access-admin-panel-top">
-          <div class="st2-access-admin-panel-head">
-            <div class="st2-access-admin-panel-titles">
-              <p class="st2-access-admin-kicker">Administración</p>
-              <h3 class="st2-access-admin-title">Control de accesos</h3>
-            </div>
-            <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
-          </div>
-          <div class="st2-access-admin-kpis" id="st2-access-admin-kpis">
-            <div class="st2-access-admin-kpi">
-              <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-total">—</span>
-              <span class="st2-access-admin-kpi-l">Registrados</span>
-            </div>
-            <div class="st2-access-admin-kpi">
-              <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-active">—</span>
-              <span class="st2-access-admin-kpi-l">Activos</span>
-            </div>
-            <div class="st2-access-admin-kpi is-pending">
-              <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-pending">—</span>
-              <span class="st2-access-admin-kpi-l">Pendientes</span>
-            </div>
-            <div class="st2-access-admin-kpi">
-              <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-today">—</span>
-              <span class="st2-access-admin-kpi-l">Ingresaron hoy</span>
-            </div>
-          </div>
-          <div class="st2-access-admin-stats">
-            <p id="st2-access-admin-summary" class="st2-access-admin-summary hidden"></p>
-            <p id="st2-access-admin-updated" class="st2-access-admin-updated hidden"></p>
-          </div>
-        </div>
-        <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>
-        <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
-        <div id="st2-access-admin-toolbar" class="st2-access-admin-toolbar hidden">
-          <div class="st2-access-admin-filters" role="tablist" aria-label="Filtro de accesos">
-            <button type="button" class="st2-access-admin-filter is-active" data-filter="all">Todos</button>
-            <button type="button" class="st2-access-admin-filter" data-filter="pending">Pendientes</button>
-            <button type="button" class="st2-access-admin-filter" data-filter="active">Activos</button>
-            <button type="button" class="st2-access-admin-filter" data-filter="today">Hoy</button>
-          </div>
-          <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
-        </div>
-        <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
-          <table class="st2-access-admin-table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th title="Op = Oportunidad · PDF = Generador · Blanq = Blanqueo · Blanq✓ = puede confirmar">Módulos extra</th>
-                <th id="st2-access-admin-th-last" class="st2-access-admin-th-sort" data-sort="lastSeen" title="Clic para ordenar por último acceso" aria-sort="descending" tabindex="0" role="columnheader">
-                  Último acceso <span class="st2-access-admin-sort-mark" aria-hidden="true">↓</span>
-                </th>
-                <th id="st2-access-admin-th-logins" class="st2-access-admin-th-sort" data-sort="loginCount" title="Días distintos en los que abrió ST2 (no cuenta F5 el mismo día). Clic para ordenar." aria-sort="none" tabindex="0" role="columnheader">
-                  Ingresos <span class="st2-access-admin-sort-mark" aria-hidden="true"></span>
-                </th>
-                <th class="st2-access-admin-th-actions">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="st2-access-admin-body"></tbody>
-          </table>
-        </div>
-        <div class="st2-access-admin-panel-foot">
-          <p class="st2-access-admin-legend">Referral I+D y Transferencia: todos · Op / PDF / Blanqueo: ☰ por usuario</p>
-          <div class="st2-access-admin-actions st2-access-admin-actions-panel">
-            <button type="button" id="st2-access-admin-close-panel" class="st2-access-admin-cancel">Cerrar</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <div id="st2-access-name-edit-overlay" class="st2-access-name-edit-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-name-edit-title">

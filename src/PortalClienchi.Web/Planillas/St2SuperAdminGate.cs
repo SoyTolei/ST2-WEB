@@ -6,27 +6,26 @@ namespace PortalClienchi.Web.Planillas;
 /// <summary>
 /// Contraseña extra solo para el super-admin al abrir sesión en ST2.
 /// El resto de correos sigue entrando solo con el mail aprobado.
+/// Configurar en Railway: ST2_SUPER_ADMIN_PASSWORD
 /// </summary>
 public static class St2SuperAdminGate
 {
-    /// <summary>SHA-256 de "st2-super-admin-v1\0" + contraseña por defecto (rotá con env si hace falta).</summary>
-    private const string DefaultPasswordSha256Hex =
-        "f48fd720bbe269d73282635195b1140d93d72bf15e25bf929861d0cf9785446d";
-
     public static bool RequiresPassword(string? email) => St2SuperAdmin.Is(email);
+
+    public static bool IsConfigured(IConfiguration configuration)
+        => GetConfiguredPassword(configuration) is not null;
 
     public static bool ValidatePassword(IConfiguration configuration, string? password)
     {
+        var configured = GetConfiguredPassword(configuration);
+        if (configured is null)
+            return false;
+
         var pass = password ?? "";
         if (pass.Length == 0)
             return false;
 
-        var configured = GetConfiguredPassword(configuration);
-        if (configured is not null)
-            return SecureEquals(pass, configured);
-
-        var hashHex = Sha256Hex("st2-super-admin-v1\0" + pass);
-        return SecureEquals(hashHex, DefaultPasswordSha256Hex);
+        return SecureEquals(pass, configured);
     }
 
     private static string? GetConfiguredPassword(IConfiguration configuration)
@@ -49,12 +48,6 @@ public static class St2SuperAdminGate
         }
 
         return string.IsNullOrWhiteSpace(pass) ? null : pass;
-    }
-
-    private static string Sha256Hex(string value)
-    {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(value));
-        return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
     private static bool SecureEquals(string left, string right)
