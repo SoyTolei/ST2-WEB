@@ -1,7 +1,7 @@
-/* Borrado de bases — teal (no confundir con Referral naranja) */
+/* Borrado de bases — rosa/carmesí (distinto de Transferencia verde y PDF cyan) */
 
 .plan-modulo-btn.borrado-bases {
-  background: #0f766e;
+  background: #be123c;
 }
 
 .borrado-app {
@@ -39,11 +39,11 @@
 }
 
 .borrado-accent-form {
-  background: linear-gradient(90deg, #0f766e, #14b8a6);
+  background: linear-gradient(90deg, #be123c, #fb7185);
 }
 
 .borrado-accent-list {
-  background: linear-gradient(90deg, #115e59, #0d9488);
+  background: linear-gradient(90deg, #9f1239, #e11d48);
 }
 
 .borrado-form-grid {
@@ -215,8 +215,8 @@
 }
 
 .borrado-cuit-copy:hover {
-  background: #ecfdf5;
-  color: #0f766e;
+  background: #fff1f2;
+  color: #be123c;
 }
 
 .borrado-cuit-copy-text {
@@ -233,11 +233,11 @@
 
 .borrado-cuit-copy:hover .borrado-cuit-copy-hint,
 .borrado-cuit-copy.is-copied .borrado-cuit-copy-hint {
-  color: #0f766e;
+  color: #be123c;
 }
 
 .borrado-cuit-copy.is-copied .borrado-cuit-copy-hint {
-  color: #059669;
+  color: #e11d48;
 }
 
 .borrado-base-pill {
@@ -249,8 +249,8 @@
   font: inherit;
   font-size: 0.7rem;
   font-weight: 650;
-  background: #ccfbf1;
-  color: #115e59;
+  background: #ffe4e6;
+  color: #9f1239;
   cursor: default;
 }
 
@@ -261,19 +261,19 @@ button.borrado-base-pill {
 
 button.borrado-base-pill:hover,
 button.borrado-base-pill:focus-visible {
-  background: #99f6e4;
+  background: #fecdd3;
   outline: none;
   transform: translateY(-1px);
 }
 
 .borrado-base-pill.contab {
-  background: #99f6e4;
-  color: #0f766e;
+  background: #fecdd3;
+  color: #be123c;
 }
 
 button.borrado-base-pill.contab:hover,
 button.borrado-base-pill.contab:focus-visible {
-  background: #5eead4;
+  background: #fda4af;
 }
 
 .borrado-base-pop {
@@ -287,7 +287,7 @@ button.borrado-base-pill.contab:focus-visible {
   padding: 0.7rem 0.8rem 0.75rem;
   border-radius: 10px;
   background: #fff;
-  border: 1px solid #99f6e4;
+  border: 1px solid #fecdd3;
   box-shadow: 0 10px 28px rgba(15, 118, 110, 0.18);
 }
 
@@ -305,7 +305,7 @@ button.borrado-base-pill.contab:focus-visible {
 .borrado-base-pop-title {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #0f766e;
+  color: #be123c;
 }
 
 .borrado-base-pop-close {
@@ -334,7 +334,7 @@ button.borrado-base-pill.contab:focus-visible {
   border: 0;
   border-radius: 999px;
   padding: 0.35rem 0.85rem;
-  background: #0f766e;
+  background: #be123c;
   color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
@@ -342,11 +342,11 @@ button.borrado-base-pill.contab:focus-visible {
 }
 
 .borrado-base-pop-copy:hover {
-  background: #115e59;
+  background: #9f1239;
 }
 
 .borrado-base-pop-copy.is-copied {
-  background: #059669;
+  background: #e11d48;
 }
 
 .borrado-col-solicitante {
