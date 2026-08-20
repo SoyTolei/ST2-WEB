@@ -23,7 +23,7 @@ public sealed class BorradoBasesRepository
     public bool StorageReady { get; private set; }
 
     private const string SelectColumns = """
-        id, nro_caso, nro_cliente, nro_empresa, nombre_empresa,
+        id, nro_caso, nro_cliente, nro_empresa, nombre_empresa, cuil,
         iva, sueldos, contabilidad, iva_detalle, sueldos_detalle, ejercicios_detalle,
         fecha_solicitud, solicitado_por_email, solicitado_por_nombre,
         listo, aclaracion, fecha_creacion
@@ -64,11 +64,11 @@ public sealed class BorradoBasesRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             INSERT INTO borrado_bases_solicitudes
-                (nro_caso, nro_cliente, nro_empresa, nombre_empresa,
+                (nro_caso, nro_cliente, nro_empresa, nombre_empresa, cuil,
                  iva, sueldos, contabilidad, iva_detalle, sueldos_detalle, ejercicios_detalle,
                  fecha_solicitud, solicitado_por_email, solicitado_por_nombre, listo, aclaracion)
             VALUES
-                ($caso, $cliente, $empresa, $nombreEmpresa,
+                ($caso, $cliente, $empresa, $nombreEmpresa, $cuil,
                  $iva, $sueldos, $contabilidad, $ivaDetalle, $sueldosDetalle, $ejercicios,
                  $fecha, $email, $nombre, 0, NULL)
             """;
@@ -86,6 +86,7 @@ public sealed class BorradoBasesRepository
             NroCliente = req.NroCliente.Trim(),
             NroEmpresa = req.NroEmpresa.Trim(),
             NombreEmpresa = req.NombreEmpresa.Trim(),
+            Cuil = req.Cuil.Trim(),
             Iva = req.Iva,
             Sueldos = req.Sueldos,
             Contabilidad = req.Contabilidad,
@@ -108,7 +109,7 @@ public sealed class BorradoBasesRepository
         upd.CommandText = """
             UPDATE borrado_bases_solicitudes
             SET nro_caso = $caso, nro_cliente = $cliente, nro_empresa = $empresa,
-                nombre_empresa = $nombreEmpresa, iva = $iva, sueldos = $sueldos,
+                nombre_empresa = $nombreEmpresa, cuil = $cuil, iva = $iva, sueldos = $sueldos,
                 contabilidad = $contabilidad, iva_detalle = $ivaDetalle,
                 sueldos_detalle = $sueldosDetalle, ejercicios_detalle = $ejercicios
             WHERE id = $id
@@ -187,6 +188,7 @@ public sealed class BorradoBasesRepository
         cmd.Parameters.AddWithValue("$cliente", req.NroCliente.Trim());
         cmd.Parameters.AddWithValue("$empresa", req.NroEmpresa.Trim());
         cmd.Parameters.AddWithValue("$nombreEmpresa", req.NombreEmpresa.Trim());
+        cmd.Parameters.AddWithValue("$cuil", req.Cuil.Trim());
         cmd.Parameters.AddWithValue("$iva", req.Iva ? 1 : 0);
         cmd.Parameters.AddWithValue("$sueldos", req.Sueldos ? 1 : 0);
         cmd.Parameters.AddWithValue("$contabilidad", req.Contabilidad ? 1 : 0);
@@ -203,6 +205,7 @@ public sealed class BorradoBasesRepository
             NroCliente = req.NroCliente,
             NroEmpresa = req.NroEmpresa,
             NombreEmpresa = req.NombreEmpresa,
+            Cuil = req.Cuil,
             Iva = req.Iva,
             Sueldos = req.Sueldos,
             Contabilidad = req.Contabilidad,
@@ -223,6 +226,7 @@ public sealed class BorradoBasesRepository
                 nro_cliente TEXT NOT NULL,
                 nro_empresa TEXT NOT NULL,
                 nombre_empresa TEXT NOT NULL,
+                cuil TEXT NOT NULL DEFAULT '',
                 iva INTEGER NOT NULL DEFAULT 0,
                 sueldos INTEGER NOT NULL DEFAULT 0,
                 contabilidad INTEGER NOT NULL DEFAULT 0,
@@ -240,6 +244,7 @@ public sealed class BorradoBasesRepository
         cmd.ExecuteNonQuery();
         EnsureColumn(conn, "iva_detalle", "TEXT NULL");
         EnsureColumn(conn, "sueldos_detalle", "TEXT NULL");
+        EnsureColumn(conn, "cuil", "TEXT NOT NULL DEFAULT ''");
     }
 
     private static void EnsureColumn(SqliteConnection conn, string column, string definition)
@@ -281,18 +286,19 @@ public sealed class BorradoBasesRepository
         NroCliente = r.IsDBNull(2) ? "" : r.GetString(2),
         NroEmpresa = r.IsDBNull(3) ? "" : r.GetString(3),
         NombreEmpresa = r.IsDBNull(4) ? "" : r.GetString(4),
-        Iva = !r.IsDBNull(5) && r.GetInt32(5) != 0,
-        Sueldos = !r.IsDBNull(6) && r.GetInt32(6) != 0,
-        Contabilidad = !r.IsDBNull(7) && r.GetInt32(7) != 0,
-        IvaDetalle = r.IsDBNull(8) ? null : r.GetString(8),
-        SueldosDetalle = r.IsDBNull(9) ? null : r.GetString(9),
-        EjerciciosDetalle = r.IsDBNull(10) ? null : r.GetString(10),
-        FechaSolicitud = r.IsDBNull(11) ? "" : r.GetString(11),
-        SolicitadoPorEmail = r.IsDBNull(12) ? "" : r.GetString(12),
-        SolicitadoPorNombre = r.IsDBNull(13) ? "" : r.GetString(13),
-        Listo = !r.IsDBNull(14) && r.GetInt32(14) != 0,
-        Aclaracion = r.IsDBNull(15) ? null : r.GetString(15),
-        FechaCreacion = r.IsDBNull(16) ? "" : FormatFechaCreacion(r.GetValue(16)),
+        Cuil = r.IsDBNull(5) ? "" : r.GetString(5),
+        Iva = !r.IsDBNull(6) && r.GetInt32(6) != 0,
+        Sueldos = !r.IsDBNull(7) && r.GetInt32(7) != 0,
+        Contabilidad = !r.IsDBNull(8) && r.GetInt32(8) != 0,
+        IvaDetalle = r.IsDBNull(9) ? null : r.GetString(9),
+        SueldosDetalle = r.IsDBNull(10) ? null : r.GetString(10),
+        EjerciciosDetalle = r.IsDBNull(11) ? null : r.GetString(11),
+        FechaSolicitud = r.IsDBNull(12) ? "" : r.GetString(12),
+        SolicitadoPorEmail = r.IsDBNull(13) ? "" : r.GetString(13),
+        SolicitadoPorNombre = r.IsDBNull(14) ? "" : r.GetString(14),
+        Listo = !r.IsDBNull(15) && r.GetInt32(15) != 0,
+        Aclaracion = r.IsDBNull(16) ? null : r.GetString(16),
+        FechaCreacion = r.IsDBNull(17) ? "" : FormatFechaCreacion(r.GetValue(17)),
     };
 
     private static string FormatFechaCreacion(object value)

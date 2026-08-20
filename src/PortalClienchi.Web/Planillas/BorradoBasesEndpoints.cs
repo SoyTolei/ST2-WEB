@@ -166,6 +166,7 @@ public static class BorradoBasesEndpoints
         NroCliente = body.NroCliente.Trim(),
         NroEmpresa = body.NroEmpresa.Trim(),
         NombreEmpresa = body.NombreEmpresa.Trim(),
+        Cuil = NormalizeCuil(body.Cuil),
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
@@ -180,6 +181,7 @@ public static class BorradoBasesEndpoints
         NroCliente = body.NroCliente.Trim(),
         NroEmpresa = body.NroEmpresa.Trim(),
         NombreEmpresa = body.NombreEmpresa.Trim(),
+        Cuil = NormalizeCuil(body.Cuil),
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
@@ -196,11 +198,10 @@ public static class BorradoBasesEndpoints
         NroCliente = body.NroCliente,
         NroEmpresa = body.NroEmpresa,
         NombreEmpresa = body.NombreEmpresa,
+        Cuil = body.Cuil,
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
-        IvaDetalle = body.IvaDetalle,
-        SueldosDetalle = body.SueldosDetalle,
         EjerciciosDetalle = body.EjerciciosDetalle,
     });
 
@@ -214,6 +215,10 @@ public static class BorradoBasesEndpoints
             return "Completá el N° de empresa.";
         if (string.IsNullOrWhiteSpace(body.NombreEmpresa))
             return "Completá el nombre de empresa.";
+        if (string.IsNullOrWhiteSpace(body.Cuil))
+            return "Completá el CUIL.";
+        if (NormalizeCuil(body.Cuil).Length > 20)
+            return "El CUIL es demasiado largo.";
         if (!body.Iva && !body.Sueldos && !body.Contabilidad)
             return "Marcá al menos una base a borrar.";
         if (body.Contabilidad && string.IsNullOrWhiteSpace(body.EjerciciosDetalle))
@@ -222,6 +227,9 @@ public static class BorradoBasesEndpoints
             return "El detalle de ejercicios es demasiado largo (máx. 4000).";
         return null;
     }
+
+    private static string NormalizeCuil(string? value) =>
+        Regex.Replace((value ?? "").Trim(), @"\s+", " ");
 
     private static string? NullIfBlank(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

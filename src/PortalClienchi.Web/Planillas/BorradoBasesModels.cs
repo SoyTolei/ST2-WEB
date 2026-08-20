@@ -7,12 +7,13 @@ public sealed class BorradoBasesRecordDto
     public string NroCliente { get; set; } = "";
     public string NroEmpresa { get; set; } = "";
     public string NombreEmpresa { get; set; } = "";
+    public string Cuil { get; set; } = "";
     public bool Iva { get; set; }
     public bool Sueldos { get; set; }
     public bool Contabilidad { get; set; }
-    /// <summary>Nombre / detalle de la base IVA (requerido si Iva).</summary>
+    /// <summary>Nombre / detalle de la base IVA (legacy; ya no se carga en UI).</summary>
     public string? IvaDetalle { get; set; }
-    /// <summary>Nombre / detalle de la base Sueldos (requerido si Sueldos).</summary>
+    /// <summary>Nombre / detalle de la base Sueldos (legacy; ya no se carga en UI).</summary>
     public string? SueldosDetalle { get; set; }
     /// <summary>Ejercicios a borrar (requerido si Contabilidad).</summary>
     public string? EjerciciosDetalle { get; set; }
@@ -31,6 +32,7 @@ public sealed class BorradoBasesCreateRequest
     public string NroCliente { get; set; } = "";
     public string NroEmpresa { get; set; } = "";
     public string NombreEmpresa { get; set; } = "";
+    public string Cuil { get; set; } = "";
     public bool Iva { get; set; }
     public bool Sueldos { get; set; }
     public bool Contabilidad { get; set; }
@@ -45,6 +47,7 @@ public sealed class BorradoBasesUpdateRequest
     public string NroCliente { get; set; } = "";
     public string NroEmpresa { get; set; } = "";
     public string NombreEmpresa { get; set; } = "";
+    public string Cuil { get; set; } = "";
     public bool Iva { get; set; }
     public bool Sueldos { get; set; }
     public bool Contabilidad { get; set; }
