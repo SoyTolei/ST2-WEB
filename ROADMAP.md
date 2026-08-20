@@ -14,10 +14,10 @@ Ideas y pendientes sin fecha fija. Lo marcado como **después** no se implementa
 - [ ] Badge de pendientes ADMIN actualizado en background
 - [ ] Rol “admin” para más de un correo
 - [ ] Auditoría de aprobaciones / rechazos de acceso
-- [ ] Sesión firmada (cookie de identidad con firma HMAC)
 
 ## Hecho recientemente (referencia)
 
+- Cookie de sesión firmada (HMAC) — ya no alcanza inventar el email en la cookie
 - Panel ADMIN como pestaña dedicada (sin acceso oculto en Acerca de)
 - Contraseña de super-admin por variable de entorno
 - Alertas de blanqueo más frecuentes sin refrescar

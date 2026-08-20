@@ -35,5 +35,8 @@
   },
   "St2SuperAdmin": {
     "Password": "solo-local-opcional (en prod: ST2_SUPER_ADMIN_PASSWORD)"
+  },
+  "St2Session": {
+    "Secret": "cadena-larga-aleatoria (en prod: ST2_SESSION_SECRET)"
   }
 }
