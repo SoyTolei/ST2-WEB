@@ -79,7 +79,7 @@ export function initBorradoBasesModule() {
     void createSolicitud();
   });
 
-  ["borrado-caso", "borrado-cliente", "borrado-empresa", "borrado-nombre-empresa", "borrado-cuil"].forEach((id) => {
+  ["borrado-caso", "borrado-cliente", "borrado-empresa", "borrado-nombre-empresa", "borrado-cuit"].forEach((id) => {
     document.getElementById(id)?.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -289,13 +289,13 @@ function clearForm() {
   const cliente = document.getElementById("borrado-cliente");
   const empresa = document.getElementById("borrado-empresa");
   const nombre = document.getElementById("borrado-nombre-empresa");
-  const cuil = document.getElementById("borrado-cuil");
+  const cuit = document.getElementById("borrado-cuit");
   const ejercicios = document.getElementById("borrado-ejercicios");
   if (caso) caso.value = "";
   if (cliente) cliente.value = "";
   if (empresa) empresa.value = "";
   if (nombre) nombre.value = "";
-  if (cuil) cuil.value = "";
+  if (cuit) cuit.value = "";
   if (ejercicios) ejercicios.value = "";
   document.querySelectorAll('input[name="borrado-base"]').forEach((el) => {
     el.checked = false;
@@ -337,12 +337,12 @@ async function createSolicitud() {
   const nroCliente = document.getElementById("borrado-cliente")?.value.trim() || "";
   const nroEmpresa = document.getElementById("borrado-empresa")?.value.trim() || "";
   const nombreEmpresa = document.getElementById("borrado-nombre-empresa")?.value.trim() || "";
-  const cuil = document.getElementById("borrado-cuil")?.value.trim() || "";
+  const cuit = document.getElementById("borrado-cuit")?.value.trim() || "";
   const bases = readBasesFromForm("borrado-base");
   const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa || !cuil) {
-    setStatus("Completá caso, cliente, empresa, nombre y CUIL.", true);
+  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa || !cuit) {
+    setStatus("Completá caso, cliente, código, nombre y CUIT.", true);
     return;
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
@@ -364,7 +364,7 @@ async function createSolicitud() {
         nroCliente,
         nroEmpresa,
         nombreEmpresa,
-        cuil,
+        cuit,
         ...bases,
         ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
       }),
@@ -459,7 +459,7 @@ function normalizeItem(raw) {
     nroCliente: src.nroCliente ?? src.NroCliente ?? "",
     nroEmpresa: src.nroEmpresa ?? src.NroEmpresa ?? "",
     nombreEmpresa: src.nombreEmpresa ?? src.NombreEmpresa ?? "",
-    cuil: src.cuil ?? src.Cuil ?? "",
+    cuit: src.cuit ?? src.Cuit ?? "",
     iva: !!(src.iva ?? src.Iva),
     sueldos: !!(src.sueldos ?? src.Sueldos),
     contabilidad: !!(src.contabilidad ?? src.Contabilidad),
@@ -490,7 +490,7 @@ function getFilteredItems() {
         item.nroCliente,
         item.nroEmpresa,
         item.nombreEmpresa,
-        item.cuil,
+        item.cuit,
         item.solicitadoPorNombre,
         item.ivaDetalle,
         item.sueldosDetalle,
@@ -629,12 +629,12 @@ async function copyBasePopText() {
   }
 }
 
-async function copyCuilText(value, btn) {
+async function copyCuitText(value, btn) {
   try {
     await navigator.clipboard.writeText(value);
     if (btn) {
       btn.classList.add("is-copied");
-      const hint = btn.querySelector(".borrado-cuil-copy-hint");
+      const hint = btn.querySelector(".borrado-cuit-copy-hint");
       if (hint) hint.textContent = "copiado";
       const prev = Number(btn.dataset.copyFlashTimer || 0);
       if (prev) window.clearTimeout(prev);
@@ -685,7 +685,7 @@ function buildRow(item) {
 
   const nro = String(item.nroEmpresa || "").trim();
   const nombre = String(item.nombreEmpresa || "").trim();
-  const cuil = String(item.cuil || "").trim();
+  const cuit = String(item.cuit || "").trim();
   const empresaTitle = escapeHtml(nro && nombre ? `[${nro}] ${nombre}` : (nro || nombre || ""));
   row.innerHTML = `
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
@@ -695,11 +695,11 @@ function buildRow(item) {
       <span class="borrado-empresa-nro">${escapeHtml(nro ? `[${nro}]` : "—")}</span>
       <span class="borrado-empresa-nombre">${escapeHtml(nombre || "")}</span>
     </td>
-    <td class="borrado-col-cuil" title="${escapeHtml(cuil)}">
-      ${cuil
-        ? `<button type="button" class="borrado-cuil-copy" data-borrado-copy-cuil="${escapeHtml(cuil)}" title="Clic para copiar CUIL">
-            <span class="borrado-cuil-copy-text">${escapeHtml(cuil)}</span>
-            <span class="borrado-cuil-copy-hint" aria-hidden="true">copiar</span>
+    <td class="borrado-col-cuit" title="${escapeHtml(cuit)}">
+      ${cuit
+        ? `<button type="button" class="borrado-cuit-copy" data-borrado-copy-cuit="${escapeHtml(cuit)}" title="Clic para copiar CUIT">
+            <span class="borrado-cuit-copy-text">${escapeHtml(cuit)}</span>
+            <span class="borrado-cuit-copy-hint" aria-hidden="true">copiar</span>
           </button>`
         : "—"}
     </td>
@@ -709,17 +709,17 @@ function buildRow(item) {
     <td class="borrado-col-aclaracion">${item.aclaracion ? `<span class="borrado-pill note" title="${escapeHtml(item.aclaracion)}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
   `;
 
-  row.querySelector("[data-borrado-copy-cuil]")?.addEventListener("click", (e) => {
+  row.querySelector("[data-borrado-copy-cuit]")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     const btn = e.currentTarget;
-    const value = btn.getAttribute("data-borrado-copy-cuil") || cuil;
-    void copyCuilText(value, btn);
+    const value = btn.getAttribute("data-borrado-copy-cuit") || cuit;
+    void copyCuitText(value, btn);
   });
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-borrado-copy-cuil]")) return;
+    if (e.target.closest("[data-borrado-copy-cuit]")) return;
     const pill = e.target.closest("button.borrado-base-pill");
     if (pill) {
       e.preventDefault();
@@ -867,7 +867,7 @@ function openEditModal(item) {
   const cliente = document.getElementById("borrado-edit-cliente");
   const empresa = document.getElementById("borrado-edit-empresa");
   const nombre = document.getElementById("borrado-edit-nombre-empresa");
-  const cuilInput = document.getElementById("borrado-edit-cuil");
+  const cuitInput = document.getElementById("borrado-edit-cuit");
   const iva = document.getElementById("borrado-edit-base-iva");
   const sueldos = document.getElementById("borrado-edit-base-sueldos");
   const contabilidad = document.getElementById("borrado-edit-base-contabilidad");
@@ -876,7 +876,7 @@ function openEditModal(item) {
   if (cliente) cliente.value = item.nroCliente || "";
   if (empresa) empresa.value = item.nroEmpresa || "";
   if (nombre) nombre.value = item.nombreEmpresa || "";
-  if (cuilInput) cuilInput.value = item.cuil || "";
+  if (cuitInput) cuitInput.value = item.cuit || "";
   if (iva) iva.checked = !!item.iva;
   if (sueldos) sueldos.checked = !!item.sueldos;
   if (contabilidad) contabilidad.checked = !!item.contabilidad;
@@ -900,12 +900,12 @@ async function saveEdit() {
   const nroCliente = document.getElementById("borrado-edit-cliente")?.value.trim() || "";
   const nroEmpresa = document.getElementById("borrado-edit-empresa")?.value.trim() || "";
   const nombreEmpresa = document.getElementById("borrado-edit-nombre-empresa")?.value.trim() || "";
-  const cuil = document.getElementById("borrado-edit-cuil")?.value.trim() || "";
+  const cuit = document.getElementById("borrado-edit-cuit")?.value.trim() || "";
   const bases = readBasesFromForm("borrado-edit-base");
   const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa || !cuil) {
-    setStatus("Completá caso, cliente, empresa, nombre y CUIL.", true);
+  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa || !cuit) {
+    setStatus("Completá caso, cliente, código, nombre y CUIT.", true);
     return;
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
@@ -926,7 +926,7 @@ async function saveEdit() {
         nroCliente,
         nroEmpresa,
         nombreEmpresa,
-        cuil,
+        cuit,
         ...bases,
         ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
       }),
@@ -946,7 +946,7 @@ function openDeleteModal(item) {
   const overlay = document.getElementById("borrado-delete-overlay");
   const desc = document.getElementById("borrado-delete-desc");
   if (desc) {
-    desc.textContent = `${item.nroCaso || "—"} · ${item.cuil || "—"} · ${item.nombreEmpresa || "—"}`;
+    desc.textContent = `${item.nroCaso || "—"} · ${item.cuit || "—"} · ${item.nombreEmpresa || "—"}`;
   }
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");

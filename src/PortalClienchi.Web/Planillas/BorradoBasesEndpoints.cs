@@ -166,7 +166,7 @@ public static class BorradoBasesEndpoints
         NroCliente = body.NroCliente.Trim(),
         NroEmpresa = body.NroEmpresa.Trim(),
         NombreEmpresa = body.NombreEmpresa.Trim(),
-        Cuil = NormalizeCuil(body.Cuil),
+        Cuit = NormalizeCuit(body.Cuit),
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
@@ -181,7 +181,7 @@ public static class BorradoBasesEndpoints
         NroCliente = body.NroCliente.Trim(),
         NroEmpresa = body.NroEmpresa.Trim(),
         NombreEmpresa = body.NombreEmpresa.Trim(),
-        Cuil = NormalizeCuil(body.Cuil),
+        Cuit = NormalizeCuit(body.Cuit),
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
@@ -198,7 +198,7 @@ public static class BorradoBasesEndpoints
         NroCliente = body.NroCliente,
         NroEmpresa = body.NroEmpresa,
         NombreEmpresa = body.NombreEmpresa,
-        Cuil = body.Cuil,
+        Cuit = body.Cuit,
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
@@ -212,13 +212,13 @@ public static class BorradoBasesEndpoints
         if (string.IsNullOrWhiteSpace(body.NroCliente))
             return "Completá el N° de cliente.";
         if (string.IsNullOrWhiteSpace(body.NroEmpresa))
-            return "Completá el N° de empresa.";
+            return "Completá el código de empresa.";
         if (string.IsNullOrWhiteSpace(body.NombreEmpresa))
             return "Completá el nombre de empresa.";
-        if (string.IsNullOrWhiteSpace(body.Cuil))
-            return "Completá el CUIL.";
-        if (NormalizeCuil(body.Cuil).Length > 20)
-            return "El CUIL es demasiado largo.";
+        if (string.IsNullOrWhiteSpace(body.Cuit))
+            return "Completá el CUIT.";
+        if (NormalizeCuit(body.Cuit).Length > 20)
+            return "El CUIT es demasiado largo.";
         if (!body.Iva && !body.Sueldos && !body.Contabilidad)
             return "Marcá al menos una base a borrar.";
         if (body.Contabilidad && string.IsNullOrWhiteSpace(body.EjerciciosDetalle))
@@ -228,7 +228,7 @@ public static class BorradoBasesEndpoints
         return null;
     }
 
-    private static string NormalizeCuil(string? value) =>
+    private static string NormalizeCuit(string? value) =>
         Regex.Replace((value ?? "").Trim(), @"\s+", " ");
 
     private static string? NullIfBlank(string? value) =>

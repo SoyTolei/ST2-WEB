@@ -192,13 +192,13 @@
   text-overflow: ellipsis;
 }
 
-.borrado-col-cuil {
+.borrado-col-cuit {
   white-space: nowrap;
   min-width: 7.5rem;
   font-variant-numeric: tabular-nums;
 }
 
-.borrado-cuil-copy {
+.borrado-cuit-copy {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -214,29 +214,29 @@
   border-radius: 4px;
 }
 
-.borrado-cuil-copy:hover {
+.borrado-cuit-copy:hover {
   background: #ecfdf5;
   color: #0f766e;
 }
 
-.borrado-cuil-copy-text {
+.borrado-cuit-copy-text {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.borrado-cuil-copy-hint {
+.borrado-cuit-copy-hint {
   font-size: 0.65rem;
   font-weight: 650;
   color: #94a3b8;
   text-transform: lowercase;
 }
 
-.borrado-cuil-copy:hover .borrado-cuil-copy-hint,
-.borrado-cuil-copy.is-copied .borrado-cuil-copy-hint {
+.borrado-cuit-copy:hover .borrado-cuit-copy-hint,
+.borrado-cuit-copy.is-copied .borrado-cuit-copy-hint {
   color: #0f766e;
 }
 
-.borrado-cuil-copy.is-copied .borrado-cuil-copy-hint {
+.borrado-cuit-copy.is-copied .borrado-cuit-copy-hint {
   color: #059669;
 }
 
