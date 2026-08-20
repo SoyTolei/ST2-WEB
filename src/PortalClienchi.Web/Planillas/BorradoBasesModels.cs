@@ -10,6 +10,11 @@ public sealed class BorradoBasesRecordDto
     public bool Iva { get; set; }
     public bool Sueldos { get; set; }
     public bool Contabilidad { get; set; }
+    /// <summary>Nombre / detalle de la base IVA (requerido si Iva).</summary>
+    public string? IvaDetalle { get; set; }
+    /// <summary>Nombre / detalle de la base Sueldos (requerido si Sueldos).</summary>
+    public string? SueldosDetalle { get; set; }
+    /// <summary>Ejercicios a borrar (requerido si Contabilidad).</summary>
     public string? EjerciciosDetalle { get; set; }
     public string FechaSolicitud { get; set; } = "";
     public string SolicitadoPorEmail { get; set; } = "";
@@ -29,6 +34,8 @@ public sealed class BorradoBasesCreateRequest
     public bool Iva { get; set; }
     public bool Sueldos { get; set; }
     public bool Contabilidad { get; set; }
+    public string? IvaDetalle { get; set; }
+    public string? SueldosDetalle { get; set; }
     public string? EjerciciosDetalle { get; set; }
 }
 
@@ -41,6 +48,8 @@ public sealed class BorradoBasesUpdateRequest
     public bool Iva { get; set; }
     public bool Sueldos { get; set; }
     public bool Contabilidad { get; set; }
+    public string? IvaDetalle { get; set; }
+    public string? SueldosDetalle { get; set; }
     public string? EjerciciosDetalle { get; set; }
 }
 

@@ -22,16 +22,20 @@ public sealed class BorradoBasesRepository
     public string DatabasePath => _dbPath;
     public bool StorageReady { get; private set; }
 
+    private const string SelectColumns = """
+        id, nro_caso, nro_cliente, nro_empresa, nombre_empresa,
+        iva, sueldos, contabilidad, iva_detalle, sueldos_detalle, ejercicios_detalle,
+        fecha_solicitud, solicitado_por_email, solicitado_por_nombre,
+        listo, aclaracion, fecha_creacion
+        """;
+
     public IReadOnlyList<BorradoBasesRecordDto> LoadAll()
     {
         var list = new List<BorradoBasesRecordDto>();
         using var conn = Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            SELECT id, nro_caso, nro_cliente, nro_empresa, nombre_empresa,
-                   iva, sueldos, contabilidad, ejercicios_detalle,
-                   fecha_solicitud, solicitado_por_email, solicitado_por_nombre,
-                   listo, aclaracion, fecha_creacion
+        cmd.CommandText = $"""
+            SELECT {SelectColumns}
             FROM borrado_bases_solicitudes
             ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) DESC, id DESC
             """;
@@ -45,11 +49,8 @@ public sealed class BorradoBasesRepository
     {
         using var conn = Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            SELECT id, nro_caso, nro_cliente, nro_empresa, nombre_empresa,
-                   iva, sueldos, contabilidad, ejercicios_detalle,
-                   fecha_solicitud, solicitado_por_email, solicitado_por_nombre,
-                   listo, aclaracion, fecha_creacion
+        cmd.CommandText = $"""
+            SELECT {SelectColumns}
             FROM borrado_bases_solicitudes WHERE id = $id
             """;
         cmd.Parameters.AddWithValue("$id", id);
@@ -64,11 +65,11 @@ public sealed class BorradoBasesRepository
         cmd.CommandText = """
             INSERT INTO borrado_bases_solicitudes
                 (nro_caso, nro_cliente, nro_empresa, nombre_empresa,
-                 iva, sueldos, contabilidad, ejercicios_detalle,
+                 iva, sueldos, contabilidad, iva_detalle, sueldos_detalle, ejercicios_detalle,
                  fecha_solicitud, solicitado_por_email, solicitado_por_nombre, listo, aclaracion)
             VALUES
                 ($caso, $cliente, $empresa, $nombreEmpresa,
-                 $iva, $sueldos, $contabilidad, $ejercicios,
+                 $iva, $sueldos, $contabilidad, $ivaDetalle, $sueldosDetalle, $ejercicios,
                  $fecha, $email, $nombre, 0, NULL)
             """;
         BindFields(cmd, req);
@@ -88,7 +89,9 @@ public sealed class BorradoBasesRepository
             Iva = req.Iva,
             Sueldos = req.Sueldos,
             Contabilidad = req.Contabilidad,
-            EjerciciosDetalle = string.IsNullOrWhiteSpace(req.EjerciciosDetalle) ? null : req.EjerciciosDetalle.Trim(),
+            IvaDetalle = NullIfBlank(req.IvaDetalle),
+            SueldosDetalle = NullIfBlank(req.SueldosDetalle),
+            EjerciciosDetalle = NullIfBlank(req.EjerciciosDetalle),
             FechaSolicitud = fecha,
             SolicitadoPorEmail = email.Trim().ToLowerInvariant(),
             SolicitadoPorNombre = displayName.Trim(),
@@ -106,7 +109,8 @@ public sealed class BorradoBasesRepository
             UPDATE borrado_bases_solicitudes
             SET nro_caso = $caso, nro_cliente = $cliente, nro_empresa = $empresa,
                 nombre_empresa = $nombreEmpresa, iva = $iva, sueldos = $sueldos,
-                contabilidad = $contabilidad, ejercicios_detalle = $ejercicios
+                contabilidad = $contabilidad, iva_detalle = $ivaDetalle,
+                sueldos_detalle = $sueldosDetalle, ejercicios_detalle = $ejercicios
             WHERE id = $id
             """;
         upd.Parameters.AddWithValue("$id", id);
@@ -128,18 +132,6 @@ public sealed class BorradoBasesRepository
             aclaracion = null;
         else if (req.Aclaracion is not null)
             aclaracion = string.IsNullOrWhiteSpace(req.Aclaracion) ? null : req.Aclaracion.Trim();
-
-        if (req.Listo == true)
-        {
-            listo = true;
-            if (IsNoRegistrado(aclaracion))
-                aclaracion = null;
-        }
-        else if (IsNoRegistrado(aclaracion))
-        {
-            listo = false;
-            aclaracion = "No registrado";
-        }
 
         using var conn = Open();
         using var upd = conn.CreateCommand();
@@ -198,8 +190,9 @@ public sealed class BorradoBasesRepository
         cmd.Parameters.AddWithValue("$iva", req.Iva ? 1 : 0);
         cmd.Parameters.AddWithValue("$sueldos", req.Sueldos ? 1 : 0);
         cmd.Parameters.AddWithValue("$contabilidad", req.Contabilidad ? 1 : 0);
-        var ejercicios = string.IsNullOrWhiteSpace(req.EjerciciosDetalle) ? null : req.EjerciciosDetalle.Trim();
-        cmd.Parameters.AddWithValue("$ejercicios", (object?)ejercicios ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$ivaDetalle", (object?)NullIfBlank(req.IvaDetalle) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$sueldosDetalle", (object?)NullIfBlank(req.SueldosDetalle) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$ejercicios", (object?)NullIfBlank(req.EjerciciosDetalle) ?? DBNull.Value);
     }
 
     private static void BindFields(SqliteCommand cmd, BorradoBasesUpdateRequest req)
@@ -213,6 +206,8 @@ public sealed class BorradoBasesRepository
             Iva = req.Iva,
             Sueldos = req.Sueldos,
             Contabilidad = req.Contabilidad,
+            IvaDetalle = req.IvaDetalle,
+            SueldosDetalle = req.SueldosDetalle,
             EjerciciosDetalle = req.EjerciciosDetalle,
         });
     }
@@ -231,6 +226,8 @@ public sealed class BorradoBasesRepository
                 iva INTEGER NOT NULL DEFAULT 0,
                 sueldos INTEGER NOT NULL DEFAULT 0,
                 contabilidad INTEGER NOT NULL DEFAULT 0,
+                iva_detalle TEXT NULL,
+                sueldos_detalle TEXT NULL,
                 ejercicios_detalle TEXT NULL,
                 fecha_solicitud TEXT NOT NULL,
                 solicitado_por_email TEXT NOT NULL,
@@ -241,6 +238,24 @@ public sealed class BorradoBasesRepository
             )
             """;
         cmd.ExecuteNonQuery();
+        EnsureColumn(conn, "iva_detalle", "TEXT NULL");
+        EnsureColumn(conn, "sueldos_detalle", "TEXT NULL");
+    }
+
+    private static void EnsureColumn(SqliteConnection conn, string column, string definition)
+    {
+        using var info = conn.CreateCommand();
+        info.CommandText = "PRAGMA table_info(borrado_bases_solicitudes)";
+        using var r = info.ExecuteReader();
+        while (r.Read())
+        {
+            if (r.GetString(1).Equals(column, StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        using var alter = conn.CreateCommand();
+        alter.CommandText = $"ALTER TABLE borrado_bases_solicitudes ADD COLUMN {column} {definition}";
+        alter.ExecuteNonQuery();
     }
 
     private void EnsureWritable(string dir)
@@ -269,13 +284,15 @@ public sealed class BorradoBasesRepository
         Iva = !r.IsDBNull(5) && r.GetInt32(5) != 0,
         Sueldos = !r.IsDBNull(6) && r.GetInt32(6) != 0,
         Contabilidad = !r.IsDBNull(7) && r.GetInt32(7) != 0,
-        EjerciciosDetalle = r.IsDBNull(8) ? null : r.GetString(8),
-        FechaSolicitud = r.IsDBNull(9) ? "" : r.GetString(9),
-        SolicitadoPorEmail = r.IsDBNull(10) ? "" : r.GetString(10),
-        SolicitadoPorNombre = r.IsDBNull(11) ? "" : r.GetString(11),
-        Listo = !r.IsDBNull(12) && r.GetInt32(12) != 0,
-        Aclaracion = r.IsDBNull(13) ? null : r.GetString(13),
-        FechaCreacion = r.IsDBNull(14) ? "" : FormatFechaCreacion(r.GetValue(14)),
+        IvaDetalle = r.IsDBNull(8) ? null : r.GetString(8),
+        SueldosDetalle = r.IsDBNull(9) ? null : r.GetString(9),
+        EjerciciosDetalle = r.IsDBNull(10) ? null : r.GetString(10),
+        FechaSolicitud = r.IsDBNull(11) ? "" : r.GetString(11),
+        SolicitadoPorEmail = r.IsDBNull(12) ? "" : r.GetString(12),
+        SolicitadoPorNombre = r.IsDBNull(13) ? "" : r.GetString(13),
+        Listo = !r.IsDBNull(14) && r.GetInt32(14) != 0,
+        Aclaracion = r.IsDBNull(15) ? null : r.GetString(15),
+        FechaCreacion = r.IsDBNull(16) ? "" : FormatFechaCreacion(r.GetValue(16)),
     };
 
     private static string FormatFechaCreacion(object value)
@@ -285,8 +302,8 @@ public sealed class BorradoBasesRepository
         return Convert.ToString(value, CultureInfo.InvariantCulture) ?? "";
     }
 
-    private static bool IsNoRegistrado(string? aclaracion) =>
-        string.Equals((aclaracion ?? "").Trim(), "No registrado", StringComparison.OrdinalIgnoreCase);
+    private static string? NullIfBlank(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private SqliteConnection Open()
     {

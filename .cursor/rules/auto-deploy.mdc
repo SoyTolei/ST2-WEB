@@ -1,0 +1,14 @@
+---
+description: Auto commit y push a main sin pedir confirmación
+alwaysApply: true
+---
+
+# Deploy automático
+
+Al terminar trabajo usable en este repo:
+
+1. Hacé **commit** de los cambios relevantes (sin bin/obj ni secretos).
+2. Hacé **push** a `origin` de la rama actual (normalmente `main`) **sin preguntar**.
+3. No uses `git push --force` / `--force-with-lease` salvo que el usuario lo pida explícitamente con force rewrite.
+4. Mensajes de commit en español, estilo corto, enfocados en el “por qué”.
+5. Si falta identidad de git, usá env `GIT_AUTHOR_*` / `GIT_COMMITTER_*` con el autor de commits recientes del repo; **no** cambies `git config`.

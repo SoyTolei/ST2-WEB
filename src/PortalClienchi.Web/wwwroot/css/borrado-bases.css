@@ -1,7 +1,7 @@
-/* Borrado de bases — reutiliza layout de blanqueo con acentos propios */
+/* Borrado de bases — teal (no confundir con Referral naranja) */
 
 .plan-modulo-btn.borrado-bases {
-  background: #b45309;
+  background: #0f766e;
 }
 
 .borrado-app {
@@ -18,11 +18,11 @@
 }
 
 .borrado-accent-form {
-  background: linear-gradient(90deg, #b45309, #f59e0b);
+  background: linear-gradient(90deg, #0f766e, #14b8a6);
 }
 
 .borrado-accent-list {
-  background: linear-gradient(90deg, #92400e, #d97706);
+  background: linear-gradient(90deg, #115e59, #0d9488);
 }
 
 .borrado-form-panel.hidden {
@@ -69,11 +69,13 @@
   user-select: none;
 }
 
-.borrado-field-ejercicios.hidden {
+.borrado-field-ejercicios.hidden,
+.borrado-detail-field.hidden {
   display: none;
 }
 
-.borrado-field-ejercicios {
+.borrado-field-ejercicios,
+.borrado-detail-field {
   grid-column: 1 / -1;
 }
 
@@ -177,13 +179,13 @@
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 650;
-  background: #ffedd5;
-  color: #9a3412;
+  background: #ccfbf1;
+  color: #115e59;
 }
 
 .borrado-base-pill.contab {
-  background: #fef3c7;
-  color: #92400e;
+  background: #99f6e4;
+  color: #0f766e;
   cursor: help;
 }
 
@@ -231,10 +233,6 @@
   background: color-mix(in srgb, #e0e7ff 28%, transparent);
 }
 
-.borrado-row-noreg {
-  background: color-mix(in srgb, #fee2e2 40%, transparent);
-}
-
 .borrado-ctx {
   position: fixed;
   z-index: 80;
@@ -254,7 +252,8 @@
   margin: 0.25rem 0 0.5rem;
 }
 
-.borrado-edit-ejercicios.hidden {
+.borrado-edit-ejercicios.hidden,
+.borrado-edit-detail.hidden {
   display: none;
 }
 

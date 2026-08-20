@@ -51,6 +51,10 @@
     <p class="st2-update-banner-text">Hay una actualización disponible. Recargá para ver los cambios nuevos.</p>
     <button type="button" id="st2-update-reload" class="st2-update-banner-reload">Recargar</button>
   </div>
+  <div id="st2-modules-banner" class="st2-modules-banner hidden" role="status" aria-live="polite" hidden>
+    <p id="st2-modules-banner-text" class="st2-modules-banner-text">Se habilitó un módulo nuevo. Recargá para verlo en Planillas.</p>
+    <button type="button" id="st2-modules-reload" class="st2-modules-banner-reload">Recargar</button>
+  </div>
 
   <div class="main-shell">
     <nav class="tab-bar" role="tablist" aria-label="Módulos ST2">
@@ -577,6 +581,14 @@
                       <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
                     </div>
                   </div>
+                  <div id="borrado-iva-field" class="borrado-field borrado-detail-field hidden" aria-hidden="true">
+                    <label for="borrado-iva-detalle">Nombre de la base IVA</label>
+                    <input id="borrado-iva-detalle" type="text" autocomplete="off" spellcheck="false" placeholder="Ej. IVA Empresa Demo…"/>
+                  </div>
+                  <div id="borrado-sueldos-field" class="borrado-field borrado-detail-field hidden" aria-hidden="true">
+                    <label for="borrado-sueldos-detalle">Nombre de la base Sueldos</label>
+                    <input id="borrado-sueldos-detalle" type="text" autocomplete="off" spellcheck="false" placeholder="Ej. Sueldos Empresa Demo…"/>
+                  </div>
                   <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
                     <label for="borrado-ejercicios">Ejercicios a borrar</label>
                     <textarea id="borrado-ejercicios" rows="4" placeholder="Pegá el detalle del mail con los ejercicios a borrar…" spellcheck="false"></textarea>
@@ -637,7 +649,6 @@
                 <button type="button" class="borrado-ctx-listo" data-borrado-ctx="listo">Marcar listo</button>
                 <button type="button" data-borrado-ctx="unlisto">Quitar listo</button>
                 <hr/>
-                <button type="button" data-borrado-ctx="aclaracion-no-registrado">No registrado</button>
                 <button type="button" data-borrado-ctx="aclaracion-manual">Agregar observación</button>
                 <button type="button" data-borrado-ctx="clear-aclaracion">Quitar observación</button>
                 <hr/>
@@ -1779,6 +1790,14 @@
           <label class="borrado-check"><input id="borrado-edit-base-iva" name="borrado-edit-base" type="checkbox"/> IVA</label>
           <label class="borrado-check"><input id="borrado-edit-base-sueldos" name="borrado-edit-base" type="checkbox"/> Sueldos y Jornales</label>
           <label class="borrado-check"><input id="borrado-edit-base-contabilidad" name="borrado-edit-base" type="checkbox"/> Contabilidad General</label>
+        </div>
+        <div id="borrado-edit-iva-field" class="borrado-edit-detail hidden" aria-hidden="true">
+          <label class="plan-user-label" for="borrado-edit-iva-detalle">Nombre de la base IVA</label>
+          <input id="borrado-edit-iva-detalle" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        </div>
+        <div id="borrado-edit-sueldos-field" class="borrado-edit-detail hidden" aria-hidden="true">
+          <label class="plan-user-label" for="borrado-edit-sueldos-detalle">Nombre de la base Sueldos</label>
+          <input id="borrado-edit-sueldos-detalle" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
         </div>
         <div id="borrado-edit-ejercicios-field" class="borrado-edit-ejercicios hidden" aria-hidden="true">
           <label class="plan-user-label" for="borrado-edit-ejercicios">Ejercicios a borrar</label>

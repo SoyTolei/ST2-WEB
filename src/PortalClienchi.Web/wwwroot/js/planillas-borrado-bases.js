@@ -89,10 +89,10 @@ export function initBorradoBasesModule() {
   });
 
   document.querySelectorAll('input[name="borrado-base"]').forEach((el) => {
-    el.addEventListener("change", () => syncEjerciciosVisibility());
+    el.addEventListener("change", () => syncDetalleFieldsVisibility());
   });
   document.querySelectorAll('input[name="borrado-edit-base"]').forEach((el) => {
-    el.addEventListener("change", () => syncEditEjerciciosVisibility());
+    el.addEventListener("change", () => syncEditDetalleFieldsVisibility());
   });
 
   document.getElementById("borrado-filter-month")?.addEventListener("change", () => {
@@ -170,7 +170,7 @@ export function initBorradoBasesModule() {
   });
 
   syncSolicitanteBadge();
-  syncEjerciciosVisibility();
+  syncDetalleFieldsVisibility();
 }
 
 export async function openBorradoBasesModule() {
@@ -239,29 +239,27 @@ function syncMineFilterVisibility() {
   if (!show && check) check.checked = false;
 }
 
-function syncEjerciciosVisibility() {
-  const contabilidad = !!document.getElementById("borrado-base-contabilidad")?.checked;
-  const field = document.getElementById("borrado-ejercicios-field");
-  if (field) {
-    field.classList.toggle("hidden", !contabilidad);
-    field.setAttribute("aria-hidden", contabilidad ? "false" : "true");
-  }
-  if (!contabilidad) {
-    const ta = document.getElementById("borrado-ejercicios");
-    if (ta) ta.value = "";
-  }
+function syncDetalleFieldsVisibility() {
+  toggleDetailField("borrado-iva-field", "borrado-iva-detalle", !!document.getElementById("borrado-base-iva")?.checked);
+  toggleDetailField("borrado-sueldos-field", "borrado-sueldos-detalle", !!document.getElementById("borrado-base-sueldos")?.checked);
+  toggleDetailField("borrado-ejercicios-field", "borrado-ejercicios", !!document.getElementById("borrado-base-contabilidad")?.checked);
 }
 
-function syncEditEjerciciosVisibility() {
-  const contabilidad = !!document.getElementById("borrado-edit-base-contabilidad")?.checked;
-  const field = document.getElementById("borrado-edit-ejercicios-field");
+function syncEditDetalleFieldsVisibility() {
+  toggleDetailField("borrado-edit-iva-field", "borrado-edit-iva-detalle", !!document.getElementById("borrado-edit-base-iva")?.checked);
+  toggleDetailField("borrado-edit-sueldos-field", "borrado-edit-sueldos-detalle", !!document.getElementById("borrado-edit-base-sueldos")?.checked);
+  toggleDetailField("borrado-edit-ejercicios-field", "borrado-edit-ejercicios", !!document.getElementById("borrado-edit-base-contabilidad")?.checked);
+}
+
+function toggleDetailField(fieldId, inputId, show) {
+  const field = document.getElementById(fieldId);
   if (field) {
-    field.classList.toggle("hidden", !contabilidad);
-    field.setAttribute("aria-hidden", contabilidad ? "false" : "true");
+    field.classList.toggle("hidden", !show);
+    field.setAttribute("aria-hidden", show ? "false" : "true");
   }
-  if (!contabilidad) {
-    const ta = document.getElementById("borrado-edit-ejercicios");
-    if (ta) ta.value = "";
+  if (!show) {
+    const input = document.getElementById(inputId);
+    if (input) input.value = "";
   }
 }
 
@@ -278,16 +276,20 @@ function clearForm() {
   const cliente = document.getElementById("borrado-cliente");
   const empresa = document.getElementById("borrado-empresa");
   const nombre = document.getElementById("borrado-nombre-empresa");
+  const ivaDetalle = document.getElementById("borrado-iva-detalle");
+  const sueldosDetalle = document.getElementById("borrado-sueldos-detalle");
   const ejercicios = document.getElementById("borrado-ejercicios");
   if (caso) caso.value = "";
   if (cliente) cliente.value = "";
   if (empresa) empresa.value = "";
   if (nombre) nombre.value = "";
+  if (ivaDetalle) ivaDetalle.value = "";
+  if (sueldosDetalle) sueldosDetalle.value = "";
   if (ejercicios) ejercicios.value = "";
   document.querySelectorAll('input[name="borrado-base"]').forEach((el) => {
     el.checked = false;
   });
-  syncEjerciciosVisibility();
+  syncDetalleFieldsVisibility();
 }
 
 function readBasesFromForm(prefix) {
@@ -325,6 +327,8 @@ async function createSolicitud() {
   const nroEmpresa = document.getElementById("borrado-empresa")?.value.trim() || "";
   const nombreEmpresa = document.getElementById("borrado-nombre-empresa")?.value.trim() || "";
   const bases = readBasesFromForm("borrado-base");
+  const ivaDetalle = document.getElementById("borrado-iva-detalle")?.value.trim() || "";
+  const sueldosDetalle = document.getElementById("borrado-sueldos-detalle")?.value.trim() || "";
   const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
@@ -333,6 +337,14 @@ async function createSolicitud() {
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
     setStatus("Marcá al menos una base a borrar.", true);
+    return;
+  }
+  if (bases.iva && !ivaDetalle) {
+    setStatus("Si marcás IVA, indicá el nombre de la base.", true);
+    return;
+  }
+  if (bases.sueldos && !sueldosDetalle) {
+    setStatus("Si marcás Sueldos, indicá el nombre de la base.", true);
     return;
   }
   if (bases.contabilidad && !ejerciciosDetalle) {
@@ -351,6 +363,8 @@ async function createSolicitud() {
         nroEmpresa,
         nombreEmpresa,
         ...bases,
+        ivaDetalle: bases.iva ? ivaDetalle : null,
+        sueldosDetalle: bases.sueldos ? sueldosDetalle : null,
         ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
       }),
     });
@@ -447,6 +461,8 @@ function normalizeItem(raw) {
     iva: !!(src.iva ?? src.Iva),
     sueldos: !!(src.sueldos ?? src.Sueldos),
     contabilidad: !!(src.contabilidad ?? src.Contabilidad),
+    ivaDetalle: src.ivaDetalle ?? src.IvaDetalle ?? null,
+    sueldosDetalle: src.sueldosDetalle ?? src.SueldosDetalle ?? null,
     ejerciciosDetalle: src.ejerciciosDetalle ?? src.EjerciciosDetalle ?? null,
     fechaSolicitud: src.fechaSolicitud ?? src.FechaSolicitud ?? "",
     fechaCreacion: src.fechaCreacion ?? src.FechaCreacion ?? "",
@@ -473,6 +489,8 @@ function getFilteredItems() {
         item.nroEmpresa,
         item.nombreEmpresa,
         item.solicitadoPorNombre,
+        item.ivaDetalle,
+        item.sueldosDetalle,
         item.ejerciciosDetalle,
         item.aclaracion,
         basesLabel(item),
@@ -528,8 +546,14 @@ function basesLabel(item) {
 
 function formatBasesPills(item) {
   const pills = [];
-  if (item.iva) pills.push('<span class="borrado-base-pill">IVA</span>');
-  if (item.sueldos) pills.push('<span class="borrado-base-pill">Sueldos</span>');
+  if (item.iva) {
+    const tip = escapeHtml(item.ivaDetalle || "IVA");
+    pills.push(`<span class="borrado-base-pill" title="${tip}">IVA</span>`);
+  }
+  if (item.sueldos) {
+    const tip = escapeHtml(item.sueldosDetalle || "Sueldos");
+    pills.push(`<span class="borrado-base-pill" title="${tip}">Sueldos</span>`);
+  }
   if (item.contabilidad) {
     const tip = escapeHtml(item.ejerciciosDetalle || "Contabilidad General");
     pills.push(`<span class="borrado-base-pill contab" title="${tip}">Contabilidad</span>`);
@@ -570,21 +594,22 @@ function buildRow(item) {
   if (selectedId === item.id) row.classList.add("selected");
   if (item.listo) row.classList.add("borrado-row-listo");
   if (item.aclaracion) row.classList.add("borrado-row-aclaracion");
-  if (isNoRegistrado(item.aclaracion) && !item.listo) row.classList.add("borrado-row-noreg");
 
-  const empresaTitle = escapeHtml(`${item.nroEmpresa || ""} · ${item.nombreEmpresa || ""}`.trim());
+  const nro = String(item.nroEmpresa || "").trim();
+  const nombre = String(item.nombreEmpresa || "").trim();
+  const empresaTitle = escapeHtml(nro && nombre ? `[${nro}] ${nombre}` : (nro || nombre || ""));
   row.innerHTML = `
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
     <td class="borrado-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>
     <td class="borrado-col-empresa" title="${empresaTitle}">
-      <span class="borrado-empresa-nro">${escapeHtml(item.nroEmpresa || "—")}</span>
-      <span class="borrado-empresa-nombre">${escapeHtml(item.nombreEmpresa || "")}</span>
+      <span class="borrado-empresa-nro">${escapeHtml(nro ? `[${nro}]` : "—")}</span>
+      <span class="borrado-empresa-nombre">${escapeHtml(nombre || "")}</span>
     </td>
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="borrado-col-listo">${formatEstadoCell(item)}</td>
-    <td class="borrado-col-aclaracion">${item.aclaracion ? `<span class="borrado-pill ${isNoRegistrado(item.aclaracion) ? "bad" : "note"}" title="${escapeHtml(item.aclaracion)}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
+    <td class="borrado-col-aclaracion">${item.aclaracion ? `<span class="borrado-pill note" title="${escapeHtml(item.aclaracion)}">${escapeHtml(item.aclaracion)}</span>` : "—"}</td>
   `;
 
   row.addEventListener("click", (e) => {
@@ -614,10 +639,7 @@ function buildRow(item) {
 async function toggleListoByDoubleClick(item) {
   try {
     const nextListo = !item.listo;
-    const body = nextListo
-      ? { listo: true, ...(isNoRegistrado(item.aclaracion) ? { clearAclaracion: true } : {}) }
-      : { listo: false };
-    await patchItem(item.id, body);
+    await patchItem(item.id, { listo: nextListo });
     setStatus(nextListo ? "Marcado como listo." : "Se quitó el listo.");
     await reloadList();
   } catch (err) {
@@ -658,7 +680,7 @@ function showCtx(x, y, item) {
     const action = btn.getAttribute("data-borrado-ctx");
     let show = false;
     if (action === "editar" || action === "eliminar") show = owner || confirm;
-    else if (["listo", "unlisto", "aclaracion-no-registrado", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
+    else if (["listo", "unlisto", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
       show = confirm;
     }
     btn.classList.toggle("hidden", !show);
@@ -698,13 +720,9 @@ async function handleCtxAction(action) {
       return;
     }
     if (action === "listo") {
-      const body = { listo: true };
-      if (isNoRegistrado(item.aclaracion)) body.clearAclaracion = true;
-      await patchItem(selectedId, body);
+      await patchItem(selectedId, { listo: true });
     } else if (action === "unlisto") {
       await patchItem(selectedId, { listo: false });
-    } else if (action === "aclaracion-no-registrado") {
-      await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
     } else if (action === "aclaracion-manual") {
       openNoteModal(item);
       return;
@@ -728,19 +746,23 @@ function openEditModal(item) {
   const cliente = document.getElementById("borrado-edit-cliente");
   const empresa = document.getElementById("borrado-edit-empresa");
   const nombre = document.getElementById("borrado-edit-nombre-empresa");
+  const iva = document.getElementById("borrado-edit-base-iva");
+  const sueldos = document.getElementById("borrado-edit-base-sueldos");
+  const contabilidad = document.getElementById("borrado-edit-base-contabilidad");
+  const ivaDetalle = document.getElementById("borrado-edit-iva-detalle");
+  const sueldosDetalle = document.getElementById("borrado-edit-sueldos-detalle");
   const ejercicios = document.getElementById("borrado-edit-ejercicios");
   if (caso) caso.value = item.nroCaso || "";
   if (cliente) cliente.value = item.nroCliente || "";
   if (empresa) empresa.value = item.nroEmpresa || "";
   if (nombre) nombre.value = item.nombreEmpresa || "";
-  const iva = document.getElementById("borrado-edit-base-iva");
-  const sueldos = document.getElementById("borrado-edit-base-sueldos");
-  const contabilidad = document.getElementById("borrado-edit-base-contabilidad");
   if (iva) iva.checked = !!item.iva;
   if (sueldos) sueldos.checked = !!item.sueldos;
   if (contabilidad) contabilidad.checked = !!item.contabilidad;
-  if (ejercicios) ejercicios.value = item.ejerciciosDetalle || "";
-  syncEditEjerciciosVisibility();
+  syncEditDetalleFieldsVisibility();
+  if (ivaDetalle) ivaDetalle.value = item.iva ? (item.ivaDetalle || "") : "";
+  if (sueldosDetalle) sueldosDetalle.value = item.sueldos ? (item.sueldosDetalle || "") : "";
+  if (ejercicios) ejercicios.value = item.contabilidad ? (item.ejerciciosDetalle || "") : "";
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   caso?.focus();
@@ -760,6 +782,8 @@ async function saveEdit() {
   const nroEmpresa = document.getElementById("borrado-edit-empresa")?.value.trim() || "";
   const nombreEmpresa = document.getElementById("borrado-edit-nombre-empresa")?.value.trim() || "";
   const bases = readBasesFromForm("borrado-edit-base");
+  const ivaDetalle = document.getElementById("borrado-edit-iva-detalle")?.value.trim() || "";
+  const sueldosDetalle = document.getElementById("borrado-edit-sueldos-detalle")?.value.trim() || "";
   const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
@@ -768,6 +792,14 @@ async function saveEdit() {
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
     setStatus("Marcá al menos una base a borrar.", true);
+    return;
+  }
+  if (bases.iva && !ivaDetalle) {
+    setStatus("Si marcás IVA, indicá el nombre de la base.", true);
+    return;
+  }
+  if (bases.sueldos && !sueldosDetalle) {
+    setStatus("Si marcás Sueldos, indicá el nombre de la base.", true);
     return;
   }
   if (bases.contabilidad && !ejerciciosDetalle) {
@@ -785,6 +817,8 @@ async function saveEdit() {
         nroEmpresa,
         nombreEmpresa,
         ...bases,
+        ivaDetalle: bases.iva ? ivaDetalle : null,
+        sueldosDetalle: bases.sueldos ? sueldosDetalle : null,
         ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
       }),
     });
@@ -853,8 +887,6 @@ async function saveNoteModal() {
   try {
     if (!text) {
       await patchItem(selectedId, { clearAclaracion: true });
-    } else if (isNoRegistrado(text)) {
-      await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
     } else {
       await patchItem(selectedId, { aclaracion: text });
     }
@@ -875,10 +907,6 @@ async function patchItem(id, body) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
   return data;
-}
-
-function isNoRegistrado(value) {
-  return String(value || "").trim().toLowerCase() === "no registrado";
 }
 
 function escapeHtml(value) {

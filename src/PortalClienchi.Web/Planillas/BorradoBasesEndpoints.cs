@@ -169,7 +169,9 @@ public static class BorradoBasesEndpoints
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
-        EjerciciosDetalle = string.IsNullOrWhiteSpace(body.EjerciciosDetalle) ? null : body.EjerciciosDetalle.Trim(),
+        IvaDetalle = body.Iva ? NullIfBlank(body.IvaDetalle) : null,
+        SueldosDetalle = body.Sueldos ? NullIfBlank(body.SueldosDetalle) : null,
+        EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
     };
 
     private static BorradoBasesUpdateRequest NormalizeUpdate(BorradoBasesUpdateRequest body) => new()
@@ -181,43 +183,56 @@ public static class BorradoBasesEndpoints
         Iva = body.Iva,
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
-        EjerciciosDetalle = string.IsNullOrWhiteSpace(body.EjerciciosDetalle) ? null : body.EjerciciosDetalle.Trim(),
+        IvaDetalle = body.Iva ? NullIfBlank(body.IvaDetalle) : null,
+        SueldosDetalle = body.Sueldos ? NullIfBlank(body.SueldosDetalle) : null,
+        EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
     };
 
-    private static string? ValidateCreate(BorradoBasesCreateRequest body) => ValidateFields(
-        body.NroCaso, body.NroCliente, body.NroEmpresa, body.NombreEmpresa,
-        body.Iva, body.Sueldos, body.Contabilidad, body.EjerciciosDetalle);
+    private static string? ValidateCreate(BorradoBasesCreateRequest body) => ValidateFields(body);
 
-    private static string? ValidateUpdate(BorradoBasesUpdateRequest body) => ValidateFields(
-        body.NroCaso, body.NroCliente, body.NroEmpresa, body.NombreEmpresa,
-        body.Iva, body.Sueldos, body.Contabilidad, body.EjerciciosDetalle);
-
-    private static string? ValidateFields(
-        string nroCaso,
-        string nroCliente,
-        string nroEmpresa,
-        string nombreEmpresa,
-        bool iva,
-        bool sueldos,
-        bool contabilidad,
-        string? ejerciciosDetalle)
+    private static string? ValidateUpdate(BorradoBasesUpdateRequest body) => ValidateFields(new BorradoBasesCreateRequest
     {
-        if (string.IsNullOrWhiteSpace(nroCaso))
+        NroCaso = body.NroCaso,
+        NroCliente = body.NroCliente,
+        NroEmpresa = body.NroEmpresa,
+        NombreEmpresa = body.NombreEmpresa,
+        Iva = body.Iva,
+        Sueldos = body.Sueldos,
+        Contabilidad = body.Contabilidad,
+        IvaDetalle = body.IvaDetalle,
+        SueldosDetalle = body.SueldosDetalle,
+        EjerciciosDetalle = body.EjerciciosDetalle,
+    });
+
+    private static string? ValidateFields(BorradoBasesCreateRequest body)
+    {
+        if (string.IsNullOrWhiteSpace(body.NroCaso))
             return "Completá el N° de caso.";
-        if (string.IsNullOrWhiteSpace(nroCliente))
+        if (string.IsNullOrWhiteSpace(body.NroCliente))
             return "Completá el N° de cliente.";
-        if (string.IsNullOrWhiteSpace(nroEmpresa))
+        if (string.IsNullOrWhiteSpace(body.NroEmpresa))
             return "Completá el N° de empresa.";
-        if (string.IsNullOrWhiteSpace(nombreEmpresa))
+        if (string.IsNullOrWhiteSpace(body.NombreEmpresa))
             return "Completá el nombre de empresa.";
-        if (!iva && !sueldos && !contabilidad)
+        if (!body.Iva && !body.Sueldos && !body.Contabilidad)
             return "Marcá al menos una base a borrar.";
-        if (contabilidad && string.IsNullOrWhiteSpace(ejerciciosDetalle))
+        if (body.Iva && string.IsNullOrWhiteSpace(body.IvaDetalle))
+            return "Si marcás IVA, indicá el nombre de la base.";
+        if (body.Sueldos && string.IsNullOrWhiteSpace(body.SueldosDetalle))
+            return "Si marcás Sueldos, indicá el nombre de la base.";
+        if (body.Contabilidad && string.IsNullOrWhiteSpace(body.EjerciciosDetalle))
             return "Si marcás Contabilidad, completá los ejercicios a borrar.";
-        if ((ejerciciosDetalle ?? "").Trim().Length > 4000)
+        if ((body.IvaDetalle ?? "").Trim().Length > 500)
+            return "El nombre de la base IVA es demasiado largo (máx. 500).";
+        if ((body.SueldosDetalle ?? "").Trim().Length > 500)
+            return "El nombre de la base Sueldos es demasiado largo (máx. 500).";
+        if ((body.EjerciciosDetalle ?? "").Trim().Length > 4000)
             return "El detalle de ejercicios es demasiado largo (máx. 4000).";
         return null;
     }
+
+    private static string? NullIfBlank(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     public static string DisplayNameFromEmail(string email)
     {

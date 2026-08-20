@@ -215,6 +215,66 @@ body.portal-tab-active .st2-update-banner {
   background: #ffedd5;
 }
 
+.st2-modules-banner {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  z-index: 2790;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 18px;
+  flex-wrap: wrap;
+  min-height: 62px;
+  padding: 14px 20px;
+  background: linear-gradient(90deg, #115e59 0%, #0f766e 55%, #14b8a6 100%);
+  color: #f0fdfa;
+  box-shadow: 0 8px 22px rgba(15, 118, 110, 0.32);
+  text-align: center;
+}
+
+body.st2-has-update .st2-modules-banner {
+  top: calc(64px + 62px);
+}
+
+body.embed-active .st2-modules-banner,
+body.portal-tab-active .st2-modules-banner {
+  top: 52px;
+}
+
+body.embed-active.st2-has-update .st2-modules-banner,
+body.portal-tab-active.st2-has-update .st2-modules-banner {
+  top: calc(52px + 62px);
+}
+
+.st2-modules-banner.hidden {
+  display: none !important;
+}
+
+.st2-modules-banner-text {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.st2-modules-banner-reload {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: #fff;
+  color: #115e59;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.st2-modules-banner-reload:hover {
+  background: #ccfbf1;
+}
+
 .btn-ghost {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
@@ -310,6 +370,30 @@ body.embed-active.st2-has-update .main-shell {
 
 body.portal-tab-active.st2-has-update .main-shell {
   height: calc(100vh - 52px - 36px - 62px);
+}
+
+body.st2-has-modules-update .main-shell {
+  height: calc(100vh - 64px - 36px - 62px);
+}
+
+body.st2-has-update.st2-has-modules-update .main-shell {
+  height: calc(100vh - 64px - 36px - 124px);
+}
+
+body.embed-active.st2-has-modules-update .main-shell {
+  height: calc(100vh - 52px - 62px);
+}
+
+body.embed-active.st2-has-update.st2-has-modules-update .main-shell {
+  height: calc(100vh - 52px - 124px);
+}
+
+body.portal-tab-active.st2-has-modules-update .main-shell {
+  height: calc(100vh - 52px - 36px - 62px);
+}
+
+body.portal-tab-active.st2-has-update.st2-has-modules-update .main-shell {
+  height: calc(100vh - 52px - 36px - 124px);
 }
 
 .main-shell {

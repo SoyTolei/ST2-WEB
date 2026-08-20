@@ -5,7 +5,7 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule } from "./planillas-borrado-bases.js";
-import { refreshModuleFlags, canSeeOportunidadModule } from "./module-access.js";
+import { refreshModuleFlags, canSeeOportunidadModule, startModuleAccessPolling } from "./module-access.js";
 import {
   startBlanqueoAlertsPolling,
   renderBlanqueoAlertUi,
@@ -1360,14 +1360,21 @@ export function initPlanillas() {
   syncBorradoBasesModuleVisibility();
   showView("menu", { history: "none" });
 
-  return Promise.all([refreshModuleFlags(), loadConfig()]).then(async () => {
+  return Promise.all([refreshModuleFlags({ baseline: true }), loadConfig()]).then(async () => {
     updatePlanBuildBadge(planillasConfig?.webBuild);
     updateSistemaUi();
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }
     startBlanqueoAlertsPolling();
+    startModuleAccessPolling();
     renderBlanqueoAlertUi();
+    document.addEventListener("st2:modules-access-changed", () => {
+      updateSistemaUi();
+    });
+    document.addEventListener("st2:modules-flags-refreshed", () => {
+      updateSistemaUi();
+    });
     await applyEntryRoute();
     setTimeout(() => {
       void loadReferralModule();
