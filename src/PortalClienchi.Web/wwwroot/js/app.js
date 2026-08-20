@@ -1338,13 +1338,14 @@ function renderAccessAdminTable() {
     if (item.isPending) {
       badges.push('<span class="st2-access-admin-pending-tag" title="Esperando aprobación">Pendiente</span>');
     }
-    if (item.isActive) {
-      badges.push('<span class="st2-access-admin-live" title="Activo ahora"><span class="st2-access-admin-live-dot" aria-hidden="true"></span></span>');
-    }
     if (item.isUnseenNew) {
       badges.push('<span class="st2-access-admin-new-user" title="Primer ingreso hoy">Nuevo</span>');
     }
-    if (item.loggedInToday && !item.isPending) {
+    if (item.isActive && item.loggedInToday && !item.isPending) {
+      badges.push('<span class="st2-access-admin-today-tag is-live" title="Activo ahora · Ingresó hoy"><span class="st2-access-admin-live-dot" aria-hidden="true"></span>Hoy</span>');
+    } else if (item.isActive) {
+      badges.push('<span class="st2-access-admin-live" title="Activo ahora"><span class="st2-access-admin-live-dot" aria-hidden="true"></span></span>');
+    } else if (item.loggedInToday && !item.isPending) {
       badges.push('<span class="st2-access-admin-today-tag" title="Ingresó hoy">Hoy</span>');
     }
     const badgeHtml = badges.length
