@@ -34,6 +34,6 @@
     "Password": "tu-contraseña-admin"
   },
   "St2SuperAdmin": {
-    "Password": "contraseña-para-leonel.gallo@thomsonreuters.com (Railway: ST2_SUPER_ADMIN_PASSWORD)"
+    "Password": "solo-local-opcional (en prod: ST2_SUPER_ADMIN_PASSWORD)"
   }
 }

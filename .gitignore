@@ -34,3 +34,7 @@ test.pdf
 
 # Fuentes locales (se usan las del sistema / Docker)
 src/PortalClienchi.Web/Fonts/
+
+# Artefactos temporales / checks locales
+tmp/
+

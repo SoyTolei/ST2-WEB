@@ -1,79 +1,82 @@
-# PortalClienchiWEB
+# ST2 WEB
 
-Versión web de **ST2**, basada en la lógica de [PortalClienchi](../PortalClienchi) (escritorio). El proyecto original **no se modifica**; este repo referencia `PortalClienchi.Core` como biblioteca compartida.
+Suite web interna **ST2**: planillas, blanqueo de accesos, generador de PDFs, Portal Cliente, THOM y AI Platform.
 
-## Estado actual (MVP)
+> Nombre técnico del proyecto en código: `PortalClienchi.Web` / `PortalClienchi.Core` (legado). El producto visible es **ST2**.
 
-- Buscador del **Portal Cliente** en vivo (misma API que la app de escritorio)
-- Filtros por tipo y año
-- Vista previa HTML del instructivo
-- Copiar link / abrir en portal / abrir adjuntos
+## Qué incluye
 
-Próximos módulos: Planillas, THOM, AI Platform.
+| Módulo | Descripción |
+|--------|-------------|
+| **Sistema de Planillas** | Transferencia entre mesas, Referral I+D, Oportunidad de venta |
+| **Blanqueo** | Solicitudes ONVIO / On Balance / Portal Cliente, confirmación y alertas |
+| **PDF Portal** | Generación de PDFs A4 con branding TR |
+| **Portal Cliente** | Búsqueda de instructivos, vista previa y acceso al portal |
+| **THOM** | Open Arena / CSS-TAP en ventana integrada |
+| **AI Platform** | Acceso a la plataforma de IA corporativa |
+| **ADMIN** | Panel de accesos (aprobación de usuarios y módulos) — ruta `/tolei` |
 
 ## Requisitos
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (o runtime ASP.NET Core 9)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- (Opcional) Docker, para el mismo build que producción
 
-## Configuración
-
-1. Copiá el ejemplo de credenciales:
+## Configuración local
 
 ```powershell
-cd "C:\PARA LOGMEIN\XXXXXXXX\TEST EXES\PortalClienchiWEB\src\PortalClienchi.Web"
+cd src/PortalClienchi.Web
 copy appsettings.local.json.example appsettings.local.json
 ```
 
-2. Editá `appsettings.local.json` con tu usuario y contraseña del portal.
+Editá `appsettings.local.json` con tus credenciales. Ese archivo **no se sube a Git**.
 
-> Las credenciales quedan **solo en el servidor**. No se envían al navegador.
->
-> ST2 Web usa la misma ruta que el escritorio: `%LOCALAPPDATA%\ST2\appsettings.local.json`.  
-> Si la app de escritorio ya funciona, podés reutilizar ese archivo sin duplicar credenciales.
+También podés usar variables de entorno (Railway / Docker), por ejemplo:
+
+- `ST2_SUPER_ADMIN_PASSWORD` — clave extra del super-admin al entrar
+- `ST2_ACCESS_ADMIN_USER` / `ST2_ACCESS_ADMIN_PASSWORD` — panel ADMIN
+- Credenciales de portales e IA según `appsettings.local.json.example`
 
 ## Ejecutar
 
 ```powershell
-cd "C:\PARA LOGMEIN\XXXXXXXX\TEST EXES\PortalClienchiWEB"
-dotnet run --project src\PortalClienchi.Web\PortalClienchi.Web.csproj
+dotnet run --project src/PortalClienchi.Web/PortalClienchi.Web.csproj
 ```
 
-Abrí [http://localhost:5180](http://localhost:5180).
+Abrí la URL que indique la consola (por defecto suele ser `http://localhost:5180`).
 
-**Importante:** si creaste o editaste `appsettings.local.json`, **reiniciá el servidor** (Ctrl+C y volvé a ejecutar `dotnet run`).
-
-## Solución de problemas
-
-| Síntoma | Causa probable | Qué hacer |
-|---------|----------------|-----------|
-| «Error al buscar» / login 400 | Credenciales vacías o servidor viejo | Reiniciar `dotnet run` después de configurar `appsettings.local.json` |
-| «Faltan credenciales» | No hay Email/Password | Copiá el `.example` o usá el archivo de `%LOCALAPPDATA%\ST2\` |
-| THOM/AI no cargan en iframe | El sitio bloquea embeds | Usá «Abrir en navegador» (igual puede pasar en algunos entornos web) |
+Si cambiás `appsettings.local.json`, reiniciá el servidor.
 
 ## Estructura
 
 ```
-PortalClienchiWEB/
+ST2-WEB/
+├── Dockerfile
+├── railway.toml
 ├── PortalClienchiWEB.sln
+├── ROADMAP.md
 └── src/
-    └── PortalClienchi.Web/          ← API + frontend estático
-        ├── Program.cs
-        ├── appsettings.json
-        └── wwwroot/                 ← UI del buscador
+    ├── PortalClienchi.Core/     ← lógica compartida (portal, utilidades)
+    └── PortalClienchi.Web/      ← API ASP.NET + frontend (wwwroot)
 ```
 
-## Dependencia del proyecto original
+Datos en producción: SQLite y archivos bajo `ST2_DATA_DIR` (por defecto `/data/st2`).
 
-`PortalClienchi.Web` referencia:
+## Deploy
 
-`../PortalClienchi/src/PortalClienchi.Core/PortalClienchi.Core.csproj`
-
-No hace falta copiar archivos: la lógica de búsqueda, API del portal e utilidades HTML se reutilizan sin tocar el repo de escritorio.
-
-## Publicar
+Producción actual: **Railway** (Docker + volume en `/data/st2`, auto-deploy desde `main`).
 
 ```powershell
-dotnet publish src\PortalClienchi.Web\PortalClienchi.Web.csproj -c Release -o publish
+dotnet publish src/PortalClienchi.Web/PortalClienchi.Web.csproj -c Release -o publish
 ```
 
-Incluí `appsettings.local.json` en el servidor de destino (o variables de entorno equivalentes).
+Healthcheck: `GET /api/live`
+
+## Notas de seguridad
+
+- No commits de `appsettings.local.json` ni secretos reales
+- El panel ADMIN y la clave de super-admin van por variables de entorno
+- Antes de hacer el repo público, rotá cualquier clave que haya estado en chats o en configs locales
+
+## Roadmap
+
+Ver [ROADMAP.md](./ROADMAP.md).
