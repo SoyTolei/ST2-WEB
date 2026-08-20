@@ -454,22 +454,25 @@ body.portal-tab-active .tab-bar {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
-  padding: 6px 12px 8px;
-  overflow: hidden;
+  height: auto;
+  max-height: none;
+  padding: 4px 10px 20px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 #panel-admin .st2-admin-tab-shell,
 #panel-admin .st2-access-admin-dialog {
   display: flex;
   flex-direction: column;
-  width: min(1280px, 100%);
+  width: min(1320px, 100%);
   max-height: none !important;
-  min-height: calc(100dvh - 118px);
-  height: calc(100dvh - 118px);
+  min-height: calc(100dvh - 112px);
+  height: auto;
   flex: 1 1 auto;
   margin: 0 auto;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
 }
 
@@ -478,8 +481,9 @@ body.portal-tab-active .tab-bar {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
-  padding: 10px 14px 8px;
+  height: auto;
+  padding: 10px 14px 12px;
+  overflow: visible;
 }
 
 #panel-admin .st2-access-admin-panel-top {
@@ -502,7 +506,7 @@ body.portal-tab-active .tab-bar {
 }
 
 #panel-admin .st2-access-admin-kpi-n {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
 }
 
 #panel-admin .st2-access-admin-stats {
@@ -518,28 +522,37 @@ body.portal-tab-active .tab-bar {
 }
 
 #panel-admin .st2-access-admin-toolbar {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
+/* Un solo scroll fluido: la tabla crece y scrollea el panel, no un cajón chico interno. */
 #panel-admin .st2-access-admin-table-wrap {
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 300px);
+  flex: 0 0 auto;
+  min-height: calc(100dvh - 250px);
   max-height: none;
-  overflow: auto;
+  overflow: visible;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
 }
 
 #panel-admin .st2-access-admin-table th,
 #panel-admin .st2-access-admin-table td {
-  padding: 6px 10px;
+  padding: 8px 11px;
 }
 
 #panel-admin .st2-access-admin-panel-foot {
-  margin-top: 6px;
-  padding-top: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+body.admin-tab-active .main-shell {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .st2-admin-tab-shell {
-  width: min(1280px, 100%);
+  width: min(1320px, 100%);
   margin: 0 auto;
   max-height: none;
 }

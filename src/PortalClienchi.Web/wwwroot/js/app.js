@@ -2853,6 +2853,7 @@ function switchTab(tabId) {
   thomPortalBar?.classList.toggle("hidden", tabId !== "thom");
   document.body.classList.toggle("portal-tab-active", tabId === "portal");
   document.body.classList.toggle("thom-tab-active", tabId === "thom");
+  document.body.classList.toggle("admin-tab-active", tabId === ADMIN_TAB_ID);
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
 
   if (tabId !== "thom") {
