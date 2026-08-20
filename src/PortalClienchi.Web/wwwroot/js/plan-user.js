@@ -104,6 +104,7 @@ function unlockAppShell() {
   document.body.classList.remove("st2-access-pending");
   document.body.classList.add("st2-access-ok");
   document.getElementById("st2-access-gate")?.classList.add("hidden");
+  document.dispatchEvent(new CustomEvent("st2:session-changed"));
 }
 
 function lockAppShell() {

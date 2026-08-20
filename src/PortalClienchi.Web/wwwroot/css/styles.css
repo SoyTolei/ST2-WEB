@@ -2967,8 +2967,12 @@ body.st2-access-pending .st2-app-root {
   margin-top: 12px;
 }
 
-.st2-access-pass-wrap.hidden {
-  display: none;
+.st2-header-admin-btn.hidden {
+  display: none !important;
+}
+
+.st2-header-admin-btn {
+  font-weight: 600;
 }
 
 .st2-access-error {

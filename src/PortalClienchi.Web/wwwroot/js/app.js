@@ -75,6 +75,7 @@ const aboutCloseBtn = document.getElementById("st2-about-close");
 const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const aboutUpdatedEl = document.getElementById("st2-about-updated");
 const tabAdminBtn = document.getElementById("tabAdminBtn");
+const headerAdminBtn = document.getElementById("st2-header-admin-btn");
 const adminTabBadge = document.getElementById("st2-admin-tab-badge");
 const accessAdminLogin = document.getElementById("st2-access-admin-login");
 const accessAdminPanel = document.getElementById("st2-access-admin-panel");
@@ -1070,6 +1071,8 @@ function syncAdminTabVisibility() {
   const show = isSt2SuperAdmin();
   tabAdminBtn?.classList.toggle("hidden", !show);
   tabAdminBtn?.setAttribute("aria-hidden", show ? "false" : "true");
+  headerAdminBtn?.classList.toggle("hidden", !show);
+  headerAdminBtn?.setAttribute("aria-hidden", show ? "false" : "true");
   if (!show && document.querySelector('.tab-btn.active[data-tab="admin"]')) {
     navigateTab("planillas", { history: "replace" });
   }
@@ -1758,6 +1761,8 @@ function hideAbout() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
+headerAdminBtn?.addEventListener("click", () => navigateTab("admin"));
+document.addEventListener("st2:session-changed", () => syncAdminTabVisibility());
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminLogout?.addEventListener("click", () => { void logoutAccessAdminSession(); });
 accessAdminRefresh?.addEventListener("click", () => {
