@@ -450,13 +450,64 @@ body.portal-tab-active .tab-bar {
 .tab-panel:not(.active) { display: none; }
 
 #panel-admin.active {
-  display: block;
-  padding: 16px 20px 28px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 10px 16px 12px;
+  overflow: hidden;
+}
+
+#panel-admin .st2-admin-tab-shell,
+#panel-admin .st2-access-admin-dialog {
+  width: min(1180px, 100%);
+  max-height: none;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  margin: 0 auto;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
+}
+
+#panel-admin .st2-access-admin-panel {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 18px 12px;
+}
+
+#panel-admin .st2-access-admin-panel-top {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  flex-shrink: 0;
+}
+
+#panel-admin .st2-access-admin-toolbar,
+#panel-admin #st2-access-admin-inbox,
+#panel-admin #st2-access-admin-status,
+#panel-admin .st2-access-admin-panel-foot {
+  flex-shrink: 0;
+}
+
+#panel-admin .st2-access-admin-table-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
 }
 
+#panel-admin .st2-access-admin-table th,
+#panel-admin .st2-access-admin-table td {
+  padding: 7px 10px;
+}
+
+#panel-admin .st2-access-admin-panel-foot {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
 .st2-admin-tab-shell {
-  width: min(1080px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
   max-height: none;
 }
