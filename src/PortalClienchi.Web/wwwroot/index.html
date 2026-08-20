@@ -588,15 +588,15 @@
                     <input id="borrado-nombre-empresa" type="text" autocomplete="off" spellcheck="false"/>
                   </div>
                   <div class="borrado-field">
-                    <label for="borrado-cuit">CUIT</label>
-                    <input id="borrado-cuit" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" placeholder="30-12345678-9"/>
+                    <label for="borrado-cuit">CUIT <span class="borrado-optional">(opcional)</span></label>
+                    <input id="borrado-cuit" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"/>
                   </div>
                   <div class="borrado-field borrado-field-bases">
                     <label>Bases a borrar</label>
                     <div class="borrado-bases-checks">
                       <label class="borrado-check"><input id="borrado-base-iva" name="borrado-base" type="checkbox"/> IVA</label>
-                      <label class="borrado-check" title="Sueldos y Jornales"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> SJ</label>
-                      <label class="borrado-check" title="Contabilidad General"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> CG</label>
+                      <label class="borrado-check"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> Sueldos y Jornales</label>
+                      <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
                     </div>
                   </div>
                   <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
@@ -1805,13 +1805,13 @@
         <input id="borrado-edit-empresa" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
         <label class="plan-user-label" for="borrado-edit-nombre-empresa">Nombre de empresa</label>
         <input id="borrado-edit-nombre-empresa" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
-        <label class="plan-user-label" for="borrado-edit-cuit">CUIT</label>
+        <label class="plan-user-label" for="borrado-edit-cuit">CUIT <span class="borrado-optional">(opcional)</span></label>
         <input id="borrado-edit-cuit" type="text" class="plan-user-input" inputmode="numeric" autocomplete="off" spellcheck="false"/>
         <span class="plan-user-label">Bases a borrar</span>
         <div class="borrado-edit-bases">
           <label class="borrado-check"><input id="borrado-edit-base-iva" name="borrado-edit-base" type="checkbox"/> IVA</label>
-          <label class="borrado-check" title="Sueldos y Jornales"><input id="borrado-edit-base-sueldos" name="borrado-edit-base" type="checkbox"/> SJ</label>
-          <label class="borrado-check" title="Contabilidad General"><input id="borrado-edit-base-contabilidad" name="borrado-edit-base" type="checkbox"/> CG</label>
+          <label class="borrado-check"><input id="borrado-edit-base-sueldos" name="borrado-edit-base" type="checkbox"/> Sueldos y Jornales</label>
+          <label class="borrado-check"><input id="borrado-edit-base-contabilidad" name="borrado-edit-base" type="checkbox"/> Contabilidad General</label>
         </div>
         <div id="borrado-edit-ejercicios-field" class="borrado-edit-ejercicios hidden" aria-hidden="true">
           <label class="plan-user-label" for="borrado-edit-ejercicios">Ejercicios a borrar</label>

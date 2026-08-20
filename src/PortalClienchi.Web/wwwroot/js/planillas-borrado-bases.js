@@ -342,8 +342,8 @@ async function createSolicitud() {
   const bases = readBasesFromForm("borrado-base");
   const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa || !cuit) {
-    setStatus("Completá caso, cliente, código, nombre y CUIT.", true);
+  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
+    setStatus("Completá caso, cliente, código y nombre de empresa.", true);
     return;
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
@@ -915,8 +915,8 @@ async function saveEdit() {
   const bases = readBasesFromForm("borrado-edit-base");
   const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa || !cuit) {
-    setStatus("Completá caso, cliente, código, nombre y CUIT.", true);
+  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
+    setStatus("Completá caso, cliente, código y nombre de empresa.", true);
     return;
   }
   if (!bases.iva && !bases.sueldos && !bases.contabilidad) {

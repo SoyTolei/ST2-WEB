@@ -263,8 +263,6 @@ public static class BorradoBasesEndpoints
             return "Completá el código de empresa.";
         if (string.IsNullOrWhiteSpace(body.NombreEmpresa))
             return "Completá el nombre de empresa.";
-        if (string.IsNullOrWhiteSpace(body.Cuit))
-            return "Completá el CUIT.";
         if (NormalizeCuit(body.Cuit).Length > 20)
             return "El CUIT es demasiado largo.";
         if (!body.Iva && !body.Sueldos && !body.Contabilidad)
