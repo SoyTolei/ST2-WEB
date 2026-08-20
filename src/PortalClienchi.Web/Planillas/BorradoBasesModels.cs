@@ -67,7 +67,16 @@ public static class BorradoAlertKinds
 {
     public const string Ready = "ready";
     public const string Note = "note";
+    public const string Partial = "partial";
     public const string Pending = "pending";
+
+    /// <summary>Confirmación con alguna base marcada ✗ (no hecha).</summary>
+    public static bool IsPartialListo(string? aclaracion)
+    {
+        var text = (aclaracion ?? "").Trim();
+        return text.Contains('✗', StringComparison.Ordinal)
+            || text.Contains(" no", StringComparison.OrdinalIgnoreCase);
+    }
 }
 
 public sealed class BorradoAlertDto

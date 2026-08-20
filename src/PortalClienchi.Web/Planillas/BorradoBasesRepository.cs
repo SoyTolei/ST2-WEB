@@ -270,7 +270,9 @@ public sealed class BorradoBasesRepository
     {
         string? kind = null;
         if (item.Listo)
-            kind = BorradoAlertKinds.Ready;
+            kind = BorradoAlertKinds.IsPartialListo(item.Aclaracion)
+                ? BorradoAlertKinds.Partial
+                : BorradoAlertKinds.Ready;
         else if (!string.IsNullOrWhiteSpace(item.Aclaracion))
             kind = BorradoAlertKinds.Note;
 

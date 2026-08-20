@@ -19,6 +19,7 @@ let confirmToastDismissedSig = "";
 
 const KIND_READY = "ready";
 const KIND_NOTE = "note";
+const KIND_PARTIAL = "partial";
 const KIND_PENDING = "pending";
 
 export function getBorradoAlertCount() {
@@ -130,6 +131,7 @@ function normalizeAlert(raw) {
   const kindRaw = String(src.kind ?? src.Kind ?? KIND_READY).trim().toLowerCase();
   let kind = KIND_READY;
   if (kindRaw === KIND_PENDING || kindRaw === "review") kind = KIND_PENDING;
+  else if (kindRaw === KIND_PARTIAL || kindRaw === "parcial") kind = KIND_PARTIAL;
   else if (kindRaw === KIND_NOTE || kindRaw === "aclaracion" || kindRaw === "observacion") kind = KIND_NOTE;
 
   return {
@@ -184,15 +186,21 @@ function summarizeAlerts(alerts) {
     };
   }
 
-  const counts = { ready: 0, note: 0 };
+  const counts = { ready: 0, note: 0, partial: 0 };
   for (const a of alerts) {
-    if (a.kind === KIND_NOTE) counts.note += 1;
+    if (a.kind === KIND_PARTIAL) counts.partial += 1;
+    else if (a.kind === KIND_NOTE) counts.note += 1;
     else counts.ready += 1;
   }
 
   let tone = "ok";
   let text = "";
-  if (counts.note > 0) {
+  if (counts.partial > 0) {
+    tone = "warn";
+    text = counts.partial === 1
+      ? "Tenés 1 borrado confirmado con bases pendientes de revisar"
+      : `Tenés ${counts.partial} borrados confirmados con bases pendientes de revisar`;
+  } else if (counts.note > 0) {
     tone = "warn";
     text = counts.note === 1
       ? "Tenés 1 borrado de bases con una observación"
