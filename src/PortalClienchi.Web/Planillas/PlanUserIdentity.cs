@@ -105,4 +105,8 @@ public sealed class PlanUserSessionRequest
 {
     [JsonPropertyName("email")]
     public string Email { get; set; } = "";
+
+    /// <summary>Solo requerido para el super-admin.</summary>
+    [JsonPropertyName("password")]
+    public string? Password { get; set; }
 }

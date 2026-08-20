@@ -2840,6 +2840,14 @@
   font-size: 0.92rem;
 }
 
+.plan-user-pass-wrap {
+  margin-top: 12px;
+}
+
+.plan-user-pass-wrap.hidden {
+  display: none;
+}
+
 .plan-user-error {
   min-height: 1.2em;
   margin: 8px 0 0;

@@ -466,7 +466,12 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true, webBuild = St2WebBuild.GetBuild() });
         });
 
-        app.MapPost("/api/planillas/session", (HttpContext ctx, PlanUserSessionRequest body, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
+        app.MapPost("/api/planillas/session", (
+            HttpContext ctx,
+            PlanUserSessionRequest body,
+            AppAccessRepository accessRepo,
+            BlanqueoRepository blanqueoRepo,
+            IConfiguration config) =>
         {
             var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
             if (email is null)
@@ -475,6 +480,22 @@ public static class PlanillasEndpoints
                 {
                     error = "Correo inválido.",
                 });
+            }
+
+            if (St2SuperAdminGate.RequiresPassword(email))
+            {
+                if (!St2SuperAdminGate.ValidatePassword(config, body.Password))
+                {
+                    return Results.Json(new
+                    {
+                        email,
+                        status = "password_required",
+                        requiresPassword = true,
+                        error = string.IsNullOrEmpty(body.Password)
+                            ? "Este correo pide contraseña."
+                            : "Contraseña incorrecta.",
+                    }, statusCode: StatusCodes.Status401Unauthorized);
+                }
             }
 
             return OpenUserSession(ctx, email, accessRepo, blanqueoRepo);

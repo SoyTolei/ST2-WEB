@@ -32,5 +32,8 @@
   "St2AccessAdmin": {
     "Username": "tu-usuario-admin",
     "Password": "tu-contraseña-admin"
+  },
+  "St2SuperAdmin": {
+    "Password": "opcional-solo-si-querés-sobreescribir-la-clave-del-super-admin"
   }
 }

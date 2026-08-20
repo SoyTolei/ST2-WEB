@@ -2947,6 +2947,14 @@ body.st2-access-pending .st2-app-root {
   border-color: var(--primary);
 }
 
+.st2-access-pass-wrap {
+  margin-top: 12px;
+}
+
+.st2-access-pass-wrap.hidden {
+  display: none;
+}
+
 .st2-access-error {
   min-height: 1.2em;
   margin: 8px 0 0;

@@ -5,6 +5,7 @@ let appUnlocked = false;
 
 const SESSION_OPTS = { credentials: "include" };
 const ALLOWED_DOMAIN = "thomsonreuters.com";
+const SUPER_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 const LOCAL_NAME_PATTERN = /^[a-z]{2,}(?:\.[a-z]{2,})+$/;
 const BLOCKED_LOCAL_TOKENS = new Set([
   "test", "testing", "tester", "upload", "uploads", "admin", "administrator",
@@ -24,6 +25,16 @@ function isAllowedEmail(email) {
   if (domain !== ALLOWED_DOMAIN) return false;
   if (!LOCAL_NAME_PATTERN.test(local)) return false;
   return !local.split(".").some((token) => BLOCKED_LOCAL_TOKENS.has(token));
+}
+
+function isSuperAdminEmail(email) {
+  return String(email || "").trim().toLowerCase() === SUPER_ADMIN_EMAIL;
+}
+
+function syncPasswordFieldVisibility(emailInput, wrapEl, passInput) {
+  const needsPass = isSuperAdminEmail(emailInput?.value || "");
+  wrapEl?.classList.toggle("hidden", !needsPass);
+  if (!needsPass && passInput) passInput.value = "";
 }
 
 const EMAIL_HINT = "Correo inválido.";
@@ -108,11 +119,13 @@ function waitForAccessGate() {
   });
 }
 
-async function postAccessSession(email) {
+async function postAccessSession(email, password = "") {
+  const payload = { email };
+  if (isSuperAdminEmail(email)) payload.password = password || "";
   const response = await fetch("/api/planillas/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify(payload),
     credentials: "include",
   });
   const data = await response.json().catch(() => ({}));
@@ -122,6 +135,8 @@ async function postAccessSession(email) {
 function showAccessGate(resolve) {
   const gate = document.getElementById("st2-access-gate");
   const input = document.getElementById("st2-access-email");
+  const passInput = document.getElementById("st2-access-pass");
+  const passWrap = document.getElementById("st2-access-pass-wrap");
   const error = document.getElementById("st2-access-error");
   const submit = document.getElementById("st2-access-submit");
   const retry = document.getElementById("st2-access-retry");
@@ -134,6 +149,8 @@ function showAccessGate(resolve) {
   lockAppShell();
   showAccessFormState();
   input.value = localStorage.getItem("st2_plan_user_hint") || "";
+  if (passInput) passInput.value = "";
+  syncPasswordFieldVisibility(input, passWrap, passInput);
   if (error) error.textContent = "";
   if (lastPendingAccess) {
     showAccessPendingState(lastPendingAccess.email, lastPendingAccess.message);
@@ -146,6 +163,7 @@ function showAccessGate(resolve) {
   const finishOk = async (email) => {
     cachedEmail = email;
     localStorage.setItem("st2_plan_user_hint", email);
+    if (passInput) passInput.value = "";
     await refreshPlanUserSession();
     if (!cachedEmail) return false;
     cleanup();
@@ -158,7 +176,7 @@ function showAccessGate(resolve) {
   const applySessionResult = async (response, data, fallbackEmail) => {
     const status = String(data.status || "").toLowerCase();
     const email = data.email || fallbackEmail || "";
-    if (status === "pending" || (response.status === 403 && status !== "rejected")) {
+    if (status === "pending" || (response.status === 403 && status !== "rejected" && status !== "password_required")) {
       if (email) localStorage.setItem("st2_plan_user_hint", email);
       showAccessPendingState(
         email,
@@ -170,6 +188,14 @@ function showAccessGate(resolve) {
     if (status === "rejected") {
       showAccessFormState();
       if (error) error.textContent = data.error || "Este correo no está autorizado.";
+      if (submit) submit.disabled = false;
+      return;
+    }
+    if (status === "password_required" || data.requiresPassword) {
+      showAccessFormState();
+      syncPasswordFieldVisibility(input, passWrap, passInput);
+      if (error) error.textContent = data.error || "Este correo pide contraseña.";
+      passInput?.focus();
       if (submit) submit.disabled = false;
       return;
     }
@@ -191,6 +217,7 @@ function showAccessGate(resolve) {
 
   const onSubmit = async () => {
     const email = input.value.trim();
+    const password = passInput?.value || "";
     if (error) error.textContent = "";
     if (!email) {
       if (error) error.textContent = "Ingresá tu correo.";
@@ -200,10 +227,16 @@ function showAccessGate(resolve) {
       if (error) error.textContent = EMAIL_HINT;
       return;
     }
+    if (isSuperAdminEmail(email) && !password) {
+      syncPasswordFieldVisibility(input, passWrap, passInput);
+      if (error) error.textContent = "Ingresá la contraseña de este correo.";
+      passInput?.focus();
+      return;
+    }
 
     submit.disabled = true;
     try {
-      const { response, data } = await postAccessSession(email);
+      const { response, data } = await postAccessSession(email, password);
       await applySessionResult(response, data, email);
     } catch {
       if (error) error.textContent = "No se pudo contactar al servidor.";
@@ -220,6 +253,13 @@ function showAccessGate(resolve) {
       input.focus();
       return;
     }
+    if (isSuperAdminEmail(email)) {
+      showAccessFormState();
+      input.value = email;
+      syncPasswordFieldVisibility(input, passWrap, passInput);
+      passInput?.focus();
+      return;
+    }
     if (retry) retry.disabled = true;
     try {
       const { response, data } = await postAccessSession(email);
@@ -234,13 +274,21 @@ function showAccessGate(resolve) {
   const onOther = () => {
     showAccessFormState();
     if (error) error.textContent = "";
+    if (passInput) passInput.value = "";
+    syncPasswordFieldVisibility(input, passWrap, passInput);
     input.focus();
     input.select();
+  };
+
+  const onEmailInput = () => {
+    syncPasswordFieldVisibility(input, passWrap, passInput);
   };
 
   const cleanup = () => {
     submit.removeEventListener("click", onSubmit);
     input.removeEventListener("keydown", onKey);
+    passInput?.removeEventListener("keydown", onKey);
+    input.removeEventListener("input", onEmailInput);
     retry?.removeEventListener("click", onRetry);
     other?.removeEventListener("click", onOther);
     submit.disabled = false;
@@ -252,6 +300,8 @@ function showAccessGate(resolve) {
 
   submit.addEventListener("click", onSubmit);
   input.addEventListener("keydown", onKey);
+  passInput?.addEventListener("keydown", onKey);
+  input.addEventListener("input", onEmailInput);
   retry?.addEventListener("click", onRetry);
   other?.addEventListener("click", onOther);
 }
@@ -276,6 +326,11 @@ export async function refreshPlanUserSession() {
 export async function syncPlanUserSession() {
   const hint = localStorage.getItem("st2_plan_user_hint");
   if (!hint) return refreshPlanUserSession();
+
+  // Super-admin: no reabrir sesión solo con el mail guardado; hace falta cookie o contraseña.
+  if (isSuperAdminEmail(hint)) {
+    return refreshPlanUserSession();
+  }
 
   try {
     const response = await fetch("/api/planillas/session", {
@@ -373,6 +428,8 @@ function sleep(ms) {
 function showPlanUserModal(resolve) {
   const overlay = document.getElementById("plan-user-overlay");
   const input = document.getElementById("plan-user-email");
+  const passInput = document.getElementById("plan-user-pass");
+  const passWrap = document.getElementById("plan-user-pass-wrap");
   const error = document.getElementById("plan-user-error");
   if (!overlay || !input) {
     resolve(null);
@@ -380,6 +437,8 @@ function showPlanUserModal(resolve) {
   }
 
   input.value = localStorage.getItem("st2_plan_user_hint") || "";
+  if (passInput) passInput.value = "";
+  syncPasswordFieldVisibility(input, passWrap, passInput);
   if (error) error.textContent = "";
   overlay.classList.remove("hidden");
   overlay.setAttribute("aria-hidden", "false");
@@ -388,6 +447,7 @@ function showPlanUserModal(resolve) {
 
   const onSubmit = async () => {
     const email = input.value.trim();
+    const password = passInput?.value || "";
     if (error) error.textContent = "";
     if (!email) {
       if (error) error.textContent = "Ingresá tu correo.";
@@ -397,13 +457,21 @@ function showPlanUserModal(resolve) {
       if (error) error.textContent = EMAIL_HINT;
       return;
     }
+    if (isSuperAdminEmail(email) && !password) {
+      syncPasswordFieldVisibility(input, passWrap, passInput);
+      if (error) error.textContent = "Ingresá la contraseña de este correo.";
+      passInput?.focus();
+      return;
+    }
 
     let response;
     try {
+      const payload = { email };
+      if (isSuperAdminEmail(email)) payload.password = password;
       response = await fetch("/api/planillas/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(payload),
         credentials: "include",
       });
     } catch {
@@ -423,6 +491,12 @@ function showPlanUserModal(resolve) {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      if (data.requiresPassword || String(data.status || "").toLowerCase() === "password_required") {
+        syncPasswordFieldVisibility(input, passWrap, passInput);
+        if (error) error.textContent = data.error || "Este correo pide contraseña.";
+        passInput?.focus();
+        return;
+      }
       if (error) error.textContent = data.error || EMAIL_HINT;
       return;
     }
@@ -434,6 +508,7 @@ function showPlanUserModal(resolve) {
 
     cachedEmail = data.email;
     localStorage.setItem("st2_plan_user_hint", data.email);
+    if (passInput) passInput.value = "";
     await refreshPlanUserSession();
     if (!cachedEmail) {
       if (error) error.textContent = "No se pudo confirmar la sesión. Probá de nuevo.";
@@ -453,10 +528,16 @@ function showPlanUserModal(resolve) {
     resolve(null);
   };
 
+  const onEmailInput = () => {
+    syncPasswordFieldVisibility(input, passWrap, passInput);
+  };
+
   const cleanup = () => {
     document.getElementById("plan-user-submit")?.removeEventListener("click", onSubmit);
     document.getElementById("plan-user-cancel")?.removeEventListener("click", onCancel);
     input.removeEventListener("keydown", onKey);
+    passInput?.removeEventListener("keydown", onKey);
+    input.removeEventListener("input", onEmailInput);
   };
 
   const onKey = (e) => {
@@ -467,6 +548,8 @@ function showPlanUserModal(resolve) {
   document.getElementById("plan-user-submit")?.addEventListener("click", onSubmit);
   document.getElementById("plan-user-cancel")?.addEventListener("click", onCancel);
   input.addEventListener("keydown", onKey);
+  passInput?.addEventListener("keydown", onKey);
+  input.addEventListener("input", onEmailInput);
 }
 
 function updatePlanUserBadge() {
