@@ -7,13 +7,34 @@
 .borrado-app {
   display: grid;
   gap: 1rem;
+  padding: 4px 2px 12px;
+}
+
+#planillas-borrado-bases {
+  max-width: none;
+}
+
+.planillas-card:has(#planillas-borrado-bases .borrado-app),
+#planillas-borrado-bases > .planillas-card {
+  max-width: min(1840px, 99.5vw);
+  --plan-card-pad-x: 20px;
+}
+
+.borrado-form-panel {
+  margin-bottom: 16px;
+}
+
+.borrado-form-panel.hidden {
+  display: none !important;
 }
 
 .borrado-app.borrado-list-only .borrado-table-wrap {
-  min-height: 22rem;
+  min-height: min(72vh, 760px);
+  max-height: min(90vh, 1200px);
 }
 
 .borrado-app.borrado-list-only .plan-gestor-panel-list {
+  margin-top: 0;
   flex: 1;
 }
 
@@ -23,10 +44,6 @@
 
 .borrado-accent-list {
   background: linear-gradient(90deg, #115e59, #0d9488);
-}
-
-.borrado-form-panel.hidden {
-  display: none;
 }
 
 .borrado-form-grid {
@@ -133,8 +150,12 @@
 }
 
 .borrado-table-wrap {
-  max-height: min(55vh, 34rem);
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
+  min-height: min(58vh, 560px);
+  max-height: min(82vh, 980px);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
 }
 
 .borrado-table th,
