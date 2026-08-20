@@ -2780,7 +2780,7 @@ function pathForTab(tabId) {
 }
 
 function titleForTab(tabId) {
-  if (tabId === ADMIN_TAB_ID) return "ST2 · Administración";
+  if (tabId === ADMIN_TAB_ID) return "ST2 · ADMIN";
   if (tabId === "thom") return "ST2 · THOM";
   if (tabId === "ai") return "ST2 · AI Platform";
   if (tabId === "portal") return "ST2 · Portal Cliente";
