@@ -741,7 +741,7 @@ function buildRow(item) {
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="borrado-col-listo">${formatEstadoCell(item)}</td>
-    <td class="borrado-col-aclaracion">${aclaracion ? `<span class="borrado-aclaracion-full">${escapeHtml(aclaracion)}</span>` : "—"}</td>
+    <td class="borrado-col-aclaracion">${formatAclaracionCell(aclaracion)}</td>
   `;
 
   row.querySelector("[data-borrado-copy-cliente]")?.addEventListener("click", (e) => {
@@ -852,23 +852,35 @@ async function confirmListoModal() {
     return;
   }
 
-  const missing = [];
-  if (item.iva && !document.getElementById("borrado-listo-iva")?.checked) missing.push("IVA no");
-  if (item.sueldos && !document.getElementById("borrado-listo-sueldos")?.checked) missing.push("SJ no");
-  if (item.contabilidad && !document.getElementById("borrado-listo-contabilidad")?.checked) missing.push("CG no");
-
-  const body = { listo: true };
-  if (missing.length) body.aclaracion = missing.join(" · ");
+  const done = {
+    iva: !!item.iva && !!document.getElementById("borrado-listo-iva")?.checked,
+    sueldos: !!item.sueldos && !!document.getElementById("borrado-listo-sueldos")?.checked,
+    contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
+  };
+  const summary = buildListoSummary(item, done);
 
   try {
-    await patchItem(pendingListoId, body);
+    await patchItem(pendingListoId, { listo: true, aclaracion: summary });
     hideListoModal();
-    setStatus(missing.length ? `Listo. Aclaración: ${missing.join(" · ")}` : "Marcado como listo.");
+    setStatus(`Confirmado: ${summary}`);
     await reloadList();
     notifyBorradoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }
+}
+
+/** Resumen al confirmar: "Listo IVA, SJ, CG" o "✓ IVA · ✗ SJ · ✓ CG". */
+function buildListoSummary(item, done) {
+  const parts = [];
+  if (item.iva) parts.push({ label: "IVA", ok: !!done.iva });
+  if (item.sueldos) parts.push({ label: "SJ", ok: !!done.sueldos });
+  if (item.contabilidad) parts.push({ label: "CG", ok: !!done.contabilidad });
+  if (!parts.length) return "Listo";
+
+  const allOk = parts.every((p) => p.ok);
+  if (allOk) return `Listo ${parts.map((p) => p.label).join(", ")}`;
+  return parts.map((p) => `${p.ok ? "✓" : "✗"} ${p.label}`).join(" · ");
 }
 
 function formatFecha(iso) {
@@ -885,12 +897,29 @@ function formatFecha(iso) {
 
 function formatEstadoCell(item) {
   if (item.listo) {
-    return '<span class="borrado-pill ok">Listo</span>';
+    return '<span class="borrado-estado-ok" title="Confirmado / verificado" aria-label="Listo">✓</span>';
   }
   if (!String(item.aclaracion || "").trim()) {
     return '<span class="borrado-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
   }
   return "—";
+}
+
+function formatAclaracionCell(text) {
+  const raw = String(text || "").trim();
+  if (!raw) return "—";
+  // Resume de listo parcial: ✓ IVA · ✗ SJ · ✓ CG
+  if (/[✓✗]/.test(raw)) {
+    const html = escapeHtml(raw)
+      .replace(/✓/g, '<span class="borrado-mark-ok" aria-hidden="true">✓</span>')
+      .replace(/✗/g, '<span class="borrado-mark-no" aria-hidden="true">✗</span>');
+    return `<span class="borrado-aclaracion-full borrado-aclaracion-marks">${html}</span>`;
+  }
+  // Todos OK: Listo IVA, SJ, CG
+  if (/^Listo\b/i.test(raw)) {
+    return `<span class="borrado-aclaracion-full borrado-aclaracion-listo">${escapeHtml(raw)}</span>`;
+  }
+  return `<span class="borrado-aclaracion-full">${escapeHtml(raw)}</span>`;
 }
 
 function showCtx(x, y, item) {

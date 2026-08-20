@@ -409,6 +409,26 @@ button.borrado-base-pill.contab:focus-visible {
   padding: 0.25rem 0.45rem;
 }
 
+.borrado-aclaracion-listo {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.borrado-aclaracion-marks {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+.borrado-mark-ok {
+  color: #15803d;
+  font-weight: 800;
+}
+
+.borrado-mark-no {
+  color: #be123c;
+  font-weight: 800;
+}
+
 .borrado-listo-checks {
   display: flex;
   flex-wrap: wrap;
@@ -418,6 +438,17 @@ button.borrado-base-pill.contab:focus-visible {
 
 .borrado-listo-check.hidden {
   display: none !important;
+}
+
+.borrado-estado-ok {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #15803d;
+  line-height: 1;
 }
 
 .borrado-estado-pending {
