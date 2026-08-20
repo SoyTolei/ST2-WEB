@@ -116,6 +116,9 @@ const accessModPdf = document.getElementById("st2-mod-pdf");
 const accessModBlanqueo = document.getElementById("st2-mod-blanqueo");
 const accessModBlanqueoConfirm = document.getElementById("st2-mod-blanqueo-confirm");
 const accessModBlanqueoLoad = document.getElementById("st2-mod-blanqueo-load");
+const accessModBorradoBases = document.getElementById("st2-mod-borrado-bases");
+const accessModBorradoBasesConfirm = document.getElementById("st2-mod-borrado-bases-confirm");
+const accessModBorradoBasesLoad = document.getElementById("st2-mod-borrado-bases-load");
 let accessModulesEmailValue = "";
 let accessModulesSaving = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
@@ -1169,6 +1172,11 @@ function normalizeAccessAdminItems(items) {
         blanqueoLoad: modules.blanqueoLoad == null && modules.BlanqueoLoad == null
           ? !!(modules.blanqueo ?? modules.Blanqueo) && !(modules.blanqueoConfirm ?? modules.BlanqueoConfirm)
           : !!(modules.blanqueoLoad ?? modules.BlanqueoLoad),
+        borradoBases: !!(modules.borradoBases ?? modules.BorradoBases),
+        borradoBasesConfirm: !!(modules.borradoBasesConfirm ?? modules.BorradoBasesConfirm),
+        borradoBasesLoad: modules.borradoBasesLoad == null && modules.BorradoBasesLoad == null
+          ? !!(modules.borradoBases ?? modules.BorradoBases) && !(modules.borradoBasesConfirm ?? modules.BorradoBasesConfirm)
+          : !!(modules.borradoBasesLoad ?? modules.BorradoBasesLoad),
       },
     };
   });
@@ -1366,6 +1374,13 @@ function renderAccessAdminTable() {
       modBadges.push({ label: "Blanq✓", title: "Blanqueo: solo listado / confirma" });
     } else if (mods.blanqueo) {
       modBadges.push({ label: "Blanq", title: "Blanqueo: puede cargar" });
+    }
+    if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
+      modBadges.push({ label: "Borr✓+", title: "Borrado de bases: confirma y carga" });
+    } else if (mods.borradoBasesConfirm) {
+      modBadges.push({ label: "Borr✓", title: "Borrado de bases: solo listado / confirma" });
+    } else if (mods.borradoBases) {
+      modBadges.push({ label: "Borr", title: "Borrado de bases: puede cargar" });
     }
     const modHtml = modBadges.length
       ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
@@ -1832,6 +1847,7 @@ function openAccessModulesModal(email) {
   accessModulesEmailValue = email;
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
+  if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
   if (accessModOportunidad) accessModOportunidad.checked = !!mods.oportunidad;
   if (accessModPdf) accessModPdf.checked = !!mods.pdfPortal;
   if (accessModBlanqueo) accessModBlanqueo.checked = !!mods.blanqueo;
@@ -1840,6 +1856,13 @@ function openAccessModulesModal(email) {
     accessModBlanqueoLoad.checked = mods.blanqueoLoad == null
       ? !!mods.blanqueo && !mods.blanqueoConfirm
       : !!mods.blanqueoLoad;
+  }
+  if (accessModBorradoBases) accessModBorradoBases.checked = !!mods.borradoBases;
+  if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = !!mods.borradoBasesConfirm;
+  if (accessModBorradoBasesLoad) {
+    accessModBorradoBasesLoad.checked = mods.borradoBasesLoad == null
+      ? !!mods.borradoBases && !mods.borradoBasesConfirm
+      : !!mods.borradoBasesLoad;
   }
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
@@ -1869,6 +1892,29 @@ accessModBlanqueo?.addEventListener("change", () => {
   }
 });
 
+accessModBorradoBasesConfirm?.addEventListener("change", () => {
+  if (accessModBorradoBasesConfirm.checked && accessModBorradoBases) {
+    accessModBorradoBases.checked = true;
+  }
+  if (accessModBorradoBasesConfirm.checked && accessModBorradoBasesLoad && !accessModBorradoBasesLoad.dataset.userTouched) {
+    accessModBorradoBasesLoad.checked = false;
+  }
+});
+accessModBorradoBasesLoad?.addEventListener("change", () => {
+  if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.dataset.userTouched = "1";
+  if (accessModBorradoBasesLoad?.checked && accessModBorradoBases) {
+    accessModBorradoBases.checked = true;
+  }
+});
+accessModBorradoBases?.addEventListener("change", () => {
+  if (!accessModBorradoBases.checked) {
+    if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = false;
+    if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.checked = false;
+  } else if (accessModBorradoBasesLoad && !accessModBorradoBasesConfirm?.checked) {
+    accessModBorradoBasesLoad.checked = true;
+  }
+});
+
 async function saveAccessModules() {
   if (!accessModulesEmailValue || accessModulesSaving) return;
   accessModulesSaving = true;
@@ -1886,6 +1932,9 @@ async function saveAccessModules() {
         blanqueo: !!accessModBlanqueo?.checked,
         blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
         blanqueoLoad: !!accessModBlanqueoLoad?.checked,
+        borradoBases: !!accessModBorradoBases?.checked,
+        borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
+        borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
       }),
     });
     const data = await response.json().catch(() => ({}));
@@ -1901,6 +1950,9 @@ async function saveAccessModules() {
               blanqueo: !!mods.blanqueo,
               blanqueoConfirm: !!mods.blanqueoConfirm,
               blanqueoLoad: !!mods.blanqueoLoad,
+              borradoBases: !!mods.borradoBases,
+              borradoBasesConfirm: !!mods.borradoBasesConfirm,
+              borradoBasesLoad: !!mods.borradoBasesLoad,
             },
           }
         : item

@@ -21,6 +21,7 @@ export const PLAN_ICONS = {
   ia: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.1 3.4L16.5 8l-3.4 1.1L12 12.5 10.9 9.1 7.5 8l3.4-1.1L12 3z"/><path d="M19 13l.9 2.8L22.7 17l-2.8.9L19 20.7l-.9-2.8-2.8-.9 2.8-.9L19 13z"/><path d="M5 15l.7 2.1L7.8 18l-2.1.7L5 21.4l-.7-2.1L2.2 18l2.1-.7L5 15z"/></svg>`,
   pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h6M8 17h4"/></svg>`,
   blanqueo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5 12 13.5 20 8.5"/><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M16.5 17.5a3.5 3.5 0 1 0-3.2-4.9"/><path d="M13.2 14.2h3.1v3.1"/></svg>`,
+  "borrado-bases": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v4c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 10v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4"/><path d="M9 16.5 12 19.5 15 16.5"/><path d="M12 13.5v6"/></svg>`,
 };
 
 export function injectModuleHeaders() {

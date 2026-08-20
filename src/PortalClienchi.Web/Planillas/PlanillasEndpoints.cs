@@ -535,6 +535,9 @@ public static class PlanillasEndpoints
                     blanqueo = flags.Blanqueo,
                     blanqueoConfirm = flags.BlanqueoConfirm,
                     blanqueoLoad = flags.BlanqueoLoad,
+                    borradoBases = flags.BorradoBases,
+                    borradoBasesConfirm = flags.BorradoBasesConfirm,
+                    borradoBasesLoad = flags.BorradoBasesLoad,
                 },
             });
         });
@@ -634,6 +637,9 @@ public static class PlanillasEndpoints
                             blanqueo = flags.Blanqueo,
                             blanqueoConfirm = flags.BlanqueoConfirm,
                             blanqueoLoad = flags.BlanqueoLoad,
+                            borradoBases = flags.BorradoBases,
+                            borradoBasesConfirm = flags.BorradoBasesConfirm,
+                            borradoBasesLoad = flags.BorradoBasesLoad,
                         },
                     };
                 }).ToList();
@@ -735,6 +741,9 @@ public static class PlanillasEndpoints
                         blanqueo = flags.Blanqueo,
                         blanqueoConfirm = flags.BlanqueoConfirm,
                         blanqueoLoad = flags.BlanqueoLoad,
+                        borradoBases = flags.BorradoBases,
+                        borradoBasesConfirm = flags.BorradoBasesConfirm,
+                        borradoBasesLoad = flags.BorradoBasesLoad,
                     },
                 });
             }
@@ -749,6 +758,7 @@ public static class PlanillasEndpoints
             IConfiguration config,
             AppAccessRepository accessRepo,
             BlanqueoRepository blanqueoRepo,
+            BorradoBasesRepository borradoBasesRepo,
             CancellationToken ct) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
@@ -769,6 +779,7 @@ public static class PlanillasEndpoints
             var displayName = string.IsNullOrWhiteSpace(body.DisplayName) ? null : body.DisplayName.Trim();
             blanqueoRepo.AssociatePendingRequester(email, displayName);
             blanqueoRepo.SyncRequesterDisplayName(email, displayName);
+            borradoBasesRepo.SyncRequesterDisplayName(email, displayName);
 
             return Results.Ok(new
             {

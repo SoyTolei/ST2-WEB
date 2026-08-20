@@ -37,6 +37,7 @@ builder.Services.AddSingleton<ReferralIdService>();
 builder.Services.AddSingleton<OportunidadRepository>();
 builder.Services.AddSingleton<OportunidadService>();
 builder.Services.AddSingleton<BlanqueoRepository>();
+builder.Services.AddSingleton<BorradoBasesRepository>();
 builder.Services.AddSingleton<AppAccessRepository>();
 builder.Services.AddSingleton<ModuleAccessRepository>();
 
@@ -414,6 +415,7 @@ app.MapMethods("/embed/{site}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE",
 
 app.MapPlanillasEndpoints();
 app.MapBlanqueoEndpoints();
+app.MapBorradoBasesEndpoints();
 app.MapPortalPdfEndpoints();
 
 app.MapWhen(

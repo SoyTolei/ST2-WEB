@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="/css/planillas.css"/>
   <link rel="stylesheet" href="/css/pdf-portal.css"/>
   <link rel="stylesheet" href="/css/blanqueo.css"/>
+  <link rel="stylesheet" href="/css/borrado-bases.css"/>
   <link rel="stylesheet" href="/css/theme-dark.css"/>
 </head>
 <body class="st2-access-pending">
@@ -100,7 +101,7 @@
           <div class="planillas-card">
             <div class="planillas-hero">
               <h2>Sistema de Planillas</h2>
-              <p>Transferencias, Referral I+D, oportunidades y blanqueo de accesos</p>
+              <p>Transferencias, Referral I+D, oportunidades, blanqueo y borrado de bases</p>
               <div class="accent-bar"></div>
             </div>
 
@@ -175,6 +176,13 @@
                     <span class="plan-modulo-sub">ONVIO · On Balance · Portal Cliente</span>
                   </span>
                   <span id="plan-modulo-blanqueo-badge" class="plan-modulo-alert-badge hidden" aria-hidden="true">1</span>
+                </button>
+                <button type="button" class="plan-modulo-btn borrado-bases hidden" data-plan-modulo="borrado-bases" id="plan-modulo-borrado-bases" aria-hidden="true" title="Borrado de bases IVA, Sueldos y Contabilidad">
+                  <span class="plan-modulo-icon" data-plan-icon="borrado-bases"></span>
+                  <span class="plan-modulo-copy">
+                    <span class="plan-modulo-label">Borrado de bases</span>
+                    <span class="plan-modulo-sub">IVA · Sueldos · Contabilidad</span>
+                  </span>
                 </button>
               </div>
             </div>
@@ -523,6 +531,121 @@
               </div>
 
               <p id="blanqueo-status" class="plan-status-bar hidden" role="status"></p>
+            </div>
+          </div>
+        </div>
+
+        <div id="planillas-borrado-bases" class="planillas-view hidden">
+          <div class="planillas-card plan-gestor-card">
+            <div class="plan-module-sticky-head">
+              <div class="planillas-toolbar">
+                <button type="button" class="planillas-back" data-plan-back>← Volver al menú</button>
+                <div class="plan-module-title-row">
+                  <span class="plan-module-icon-badge borrado-bases" data-plan-icon="borrado-bases"></span>
+                  <h2 class="plan-module-title">Borrado de bases</h2>
+                </div>
+                <span id="borrado-user-badge" class="plan-gestor-user-badge hidden"></span>
+              </div>
+            </div>
+
+            <div class="borrado-app">
+              <div class="plan-gestor-panel borrado-form-panel">
+                <div class="plan-gestor-panel-accent borrado-accent-form"></div>
+                <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
+                <div class="borrado-form-grid">
+                  <div class="borrado-field">
+                    <label for="borrado-caso">N° de caso</label>
+                    <input id="borrado-caso" type="text" autocomplete="off" spellcheck="false"/>
+                  </div>
+                  <div class="borrado-field">
+                    <label for="borrado-cliente">N° de cliente</label>
+                    <input id="borrado-cliente" type="text" autocomplete="off" spellcheck="false"/>
+                  </div>
+                  <div class="borrado-field">
+                    <label for="borrado-empresa">N° de empresa</label>
+                    <input id="borrado-empresa" type="text" autocomplete="off" spellcheck="false"/>
+                  </div>
+                  <div class="borrado-field">
+                    <label for="borrado-nombre-empresa">Nombre de empresa</label>
+                    <input id="borrado-nombre-empresa" type="text" autocomplete="off" spellcheck="false"/>
+                  </div>
+                  <div class="borrado-field borrado-field-bases">
+                    <label>Bases a borrar</label>
+                    <div class="borrado-bases-checks">
+                      <label class="borrado-check"><input id="borrado-base-iva" name="borrado-base" type="checkbox"/> IVA</label>
+                      <label class="borrado-check"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> Sueldos y Jornales</label>
+                      <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
+                    </div>
+                  </div>
+                  <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
+                    <label for="borrado-ejercicios">Ejercicios a borrar</label>
+                    <textarea id="borrado-ejercicios" rows="4" placeholder="Pegá el detalle del mail con los ejercicios a borrar…" spellcheck="false"></textarea>
+                  </div>
+                  <div class="borrado-field borrado-field-actions">
+                    <button type="button" id="borrado-add" class="btn btn-primary">Agregar</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="plan-gestor-panel plan-gestor-panel-list">
+                <div class="plan-gestor-panel-accent borrado-accent-list"></div>
+                <h3 class="plan-gestor-panel-title">
+                  Listado <span id="borrado-count" class="plan-gestor-count"></span>
+                </h3>
+                <div class="borrado-filter-bar">
+                  <label class="borrado-filter-month">
+                    Mes
+                    <select id="borrado-filter-month">
+                      <option value="all">Todos los meses</option>
+                    </select>
+                  </label>
+                  <label class="borrado-filter-search">
+                    Buscar
+                    <input id="borrado-search" type="search" placeholder="caso, cliente, empresa…" autocomplete="off" spellcheck="false"/>
+                  </label>
+                  <label id="borrado-filter-mine-wrap" class="borrado-filter-mine hidden">
+                    <input id="borrado-filter-mine" type="checkbox"/>
+                    Solo mías
+                  </label>
+                  <label id="borrado-preview-confirm-wrap" class="borrado-preview-confirm hidden" title="Solo vos: previsualizar cómo lo ven los confirmadores">
+                    <input id="borrado-preview-confirm" type="checkbox"/>
+                    Vista confirmador
+                  </label>
+                </div>
+                <div class="plan-gestor-table-wrap borrado-table-wrap">
+                  <table class="plan-gestor-table borrado-table">
+                    <thead>
+                      <tr>
+                        <th id="borrado-th-fecha" class="borrado-th-fecha" scope="col" title="Lo más nuevo arriba — clic para invertir" aria-sort="descending">
+                          Fecha <span class="borrado-sort-mark" aria-hidden="true">↓</span>
+                        </th>
+                        <th class="borrado-th-caso">N° caso</th>
+                        <th class="borrado-th-cliente">N° cliente</th>
+                        <th class="borrado-th-empresa">Empresa</th>
+                        <th class="borrado-th-bases">Bases</th>
+                        <th class="borrado-th-solicitante">Solicitado por</th>
+                        <th class="borrado-th-listo" title="Confirmado, pendiente u observación">Estado</th>
+                        <th class="borrado-th-aclaracion">Aclaración</th>
+                      </tr>
+                    </thead>
+                    <tbody id="borrado-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div id="borrado-ctx" class="plan-gestor-ctx borrado-ctx hidden" role="menu">
+                <button type="button" class="borrado-ctx-listo" data-borrado-ctx="listo">Marcar listo</button>
+                <button type="button" data-borrado-ctx="unlisto">Quitar listo</button>
+                <hr/>
+                <button type="button" data-borrado-ctx="aclaracion-no-registrado">No registrado</button>
+                <button type="button" data-borrado-ctx="aclaracion-manual">Agregar observación</button>
+                <button type="button" data-borrado-ctx="clear-aclaracion">Quitar observación</button>
+                <hr/>
+                <button type="button" data-borrado-ctx="editar">Editar</button>
+                <button type="button" data-borrado-ctx="eliminar">Eliminar</button>
+              </div>
+
+              <p id="borrado-status" class="plan-status-bar hidden" role="status"></p>
             </div>
           </div>
         </div>
@@ -1496,6 +1619,13 @@
             </div>
             <p class="st2-about-module-text">Solicitudes de blanqueo y blanqueo+MFA, con seguimiento y confirmación.</p>
           </article>
+          <article class="st2-about-module st2-about-module--restricted">
+            <div class="st2-about-module-head">
+              <h3 class="st2-about-module-title">Borrado de bases</h3>
+              <em class="st2-about-module-badge" title="Visible solo para usuarios autorizados">acceso restringido</em>
+            </div>
+            <p class="st2-about-module-text">Pedidos de borrado de IVA, Sueldos y Contabilidad, con seguimiento y confirmación.</p>
+          </article>
           <article class="st2-about-module">
             <h3 class="st2-about-module-title">THOM</h3>
             <p class="st2-about-module-text">Open Arena y CSS-TAP en ventana integrada.</p>
@@ -1631,6 +1761,62 @@
     </div>
   </div>
 
+  <div id="borrado-edit-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-edit-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="borrado-edit-title">Editar solicitud</h3>
+      <p class="plan-user-hint">Modificá los datos y guardá los cambios.</p>
+      <div class="borrado-edit-grid">
+        <label class="plan-user-label" for="borrado-edit-caso">N° de caso</label>
+        <input id="borrado-edit-caso" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <label class="plan-user-label" for="borrado-edit-cliente">N° de cliente</label>
+        <input id="borrado-edit-cliente" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <label class="plan-user-label" for="borrado-edit-empresa">N° de empresa</label>
+        <input id="borrado-edit-empresa" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <label class="plan-user-label" for="borrado-edit-nombre-empresa">Nombre de empresa</label>
+        <input id="borrado-edit-nombre-empresa" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <span class="plan-user-label">Bases a borrar</span>
+        <div class="borrado-edit-bases">
+          <label class="borrado-check"><input id="borrado-edit-base-iva" name="borrado-edit-base" type="checkbox"/> IVA</label>
+          <label class="borrado-check"><input id="borrado-edit-base-sueldos" name="borrado-edit-base" type="checkbox"/> Sueldos y Jornales</label>
+          <label class="borrado-check"><input id="borrado-edit-base-contabilidad" name="borrado-edit-base" type="checkbox"/> Contabilidad General</label>
+        </div>
+        <div id="borrado-edit-ejercicios-field" class="borrado-edit-ejercicios hidden" aria-hidden="true">
+          <label class="plan-user-label" for="borrado-edit-ejercicios">Ejercicios a borrar</label>
+          <textarea id="borrado-edit-ejercicios" class="borrado-note-textarea" rows="4" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div class="plan-user-actions">
+        <button type="button" id="borrado-edit-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="borrado-edit-save" class="plan-gestor-btn-add">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="borrado-delete-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-delete-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="borrado-delete-title">Eliminar solicitud</h3>
+      <p class="plan-user-hint">¿Seguro que querés eliminar esta solicitud? Esta acción no se puede deshacer.</p>
+      <p id="borrado-delete-desc" class="op-delete-desc"></p>
+      <div class="plan-user-actions">
+        <button type="button" id="borrado-delete-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="borrado-delete-confirm" class="plan-gestor-btn-red">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="borrado-note-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-note-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="borrado-note-title">Observación</h3>
+      <p class="plan-user-hint">Dejá un comentario breve sobre esta solicitud (por ejemplo, por qué no se pudo completar).</p>
+      <label class="plan-user-label" for="borrado-note-text">Detalle</label>
+      <textarea id="borrado-note-text" class="borrado-note-textarea" rows="4" maxlength="280" placeholder="Ej. la base no figura en el cliente…"></textarea>
+      <div class="plan-user-actions">
+        <button type="button" id="borrado-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="borrado-note-save" class="plan-gestor-btn-add">Guardar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="plan-user-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="plan-user-title" aria-modal="true">
     <div class="plan-user-dialog">
       <h3 id="plan-user-title">Identificá tu usuario</h3>
@@ -1704,6 +1890,19 @@
         <span>Puede cargar solicitudes (formulario nueva)</span>
       </label>
       <p class="st2-access-modules-hint st2-access-modules-hint-sub">Confirmadores sin “cargar” ven solo el listado ampliado. Marcá ambas si también deben cargar.</p>
+      <label class="st2-access-modules-check">
+        <input id="st2-mod-borrado-bases" type="checkbox"/>
+        <span>Borrado de bases</span>
+      </label>
+      <label class="st2-access-modules-check st2-access-modules-check-sub">
+        <input id="st2-mod-borrado-bases-confirm" type="checkbox"/>
+        <span>Puede confirmar borrado (listo / observaciones)</span>
+      </label>
+      <label class="st2-access-modules-check st2-access-modules-check-sub">
+        <input id="st2-mod-borrado-bases-load" type="checkbox"/>
+        <span>Puede cargar borrados (formulario nueva)</span>
+      </label>
+      <p class="st2-access-modules-hint st2-access-modules-hint-sub">Mismo criterio que blanqueo: confirmadores sin “cargar” ven solo el listado.</p>
       <p id="st2-access-modules-error" class="st2-access-admin-error" role="alert"></p>
       <div class="st2-access-modules-actions">
         <button type="button" id="st2-access-modules-cancel" class="st2-access-admin-cancel">Cancelar</button>

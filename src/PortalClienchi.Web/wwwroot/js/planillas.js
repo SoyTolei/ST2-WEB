@@ -4,6 +4,7 @@ import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule } from "./planillas-blanqueo.js";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule } from "./planillas-borrado-bases.js";
 import { refreshModuleFlags, canSeeOportunidadModule } from "./module-access.js";
 import {
   startBlanqueoAlertsPolling,
@@ -119,6 +120,7 @@ const views = {
   oportunidadGestor: document.getElementById("planillas-oportunidad-gestor"),
   pdfPortal: document.getElementById("planillas-pdf-portal"),
   blanqueo: document.getElementById("planillas-blanqueo"),
+  borradoBases: document.getElementById("planillas-borrado-bases"),
 };
 
 const els = {
@@ -206,6 +208,7 @@ function pathForView(name) {
     case "oportunidadGestor": return "/oportunidad/gestor";
     case "pdfPortal": return "/pdfportal";
     case "blanqueo": return "/blanqueo";
+    case "borradoBases": return "/borrado-bases";
     default: return "/";
   }
 }
@@ -254,6 +257,7 @@ function routeFromPath(pathname) {
     case "/oportunidad/cargar": return { view: "oportunidadCargar", requires: "oportunidad" };
     case "/oportunidad/gestor": return { view: "oportunidadGestor", requires: "oportunidad" };
     case "/blanqueo": return { view: "blanqueo", requires: "blanqueo" };
+    case "/borrado-bases": return { view: "borradoBases", requires: "borrado-bases" };
     default: return { view: "menu", unknown: true };
   }
 }
@@ -263,6 +267,7 @@ function canOpenRoute(route) {
   if (route.requires === "oportunidad") return canSeeOportunidadModule() && !hidesCommercialModules();
   if (route.requires === "pdf") return canSeePdfPortalModule() && !hidesCommercialModules();
   if (route.requires === "blanqueo") return canSeeBlanqueoModule() && !hidesCommercialModules();
+  if (route.requires === "borrado-bases") return canSeeBorradoBasesModule() && !hidesCommercialModules();
   const sys = route.sistema || sistemaActual;
   if (route.requires === "transferencia") {
     return !!sys && !isSistemaPlaceholder(sys);
@@ -282,6 +287,7 @@ function titleForView(name) {
     case "oportunidadGestor": return "ST2 · Oportunidad";
     case "pdfPortal": return "ST2 · Generador PDF";
     case "blanqueo": return "ST2 · Blanqueo";
+    case "borradoBases": return "ST2 · Borrado de bases";
     default: return "ST2";
   }
 }
@@ -368,6 +374,7 @@ function updateSistemaUi() {
   }
   syncPdfPortalModuleVisibility();
   syncBlanqueoModuleVisibility();
+  syncBorradoBasesModuleVisibility();
   document.querySelector(".plan-modulos-grid")?.classList.toggle("is-compact", hideCommercial);
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
@@ -1096,6 +1103,16 @@ async function revealView(name, historyMode = "push") {
     }
     showView("blanqueo", { history: historyMode });
     await openBlanqueoModule();
+    return;
+  }
+
+  if (name === "borradoBases") {
+    if (!canSeeBorradoBasesModule() || hidesCommercialModules()) {
+      showView("menu", { history: "replace" });
+      return;
+    }
+    showView("borradoBases", { history: historyMode });
+    await openBorradoBasesModule();
   }
 }
 
@@ -1184,6 +1201,10 @@ function bindEvents() {
 
   document.querySelector('[data-plan-modulo="blanqueo"]')?.addEventListener("click", () => {
     void revealView("blanqueo");
+  });
+
+  document.querySelector('[data-plan-modulo="borrado-bases"]')?.addEventListener("click", () => {
+    void revealView("borradoBases");
   });
 
   document.addEventListener("st2:open-blanqueo-from-alert", () => {
@@ -1335,6 +1356,8 @@ export function initPlanillas() {
   syncPdfPortalModuleVisibility();
   initBlanqueoModule();
   syncBlanqueoModuleVisibility();
+  initBorradoBasesModule();
+  syncBorradoBasesModuleVisibility();
   showView("menu", { history: "none" });
 
   return Promise.all([refreshModuleFlags(), loadConfig()]).then(async () => {

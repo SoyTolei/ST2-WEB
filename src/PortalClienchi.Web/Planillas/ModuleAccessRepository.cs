@@ -94,10 +94,30 @@ public sealed class ModuleAccessRepository
         if (blanqueoLoad)
             blanqueo = true;
 
+        var borradoBases = req.BorradoBases ?? current.BorradoBases;
+        var borradoBasesConfirm = req.BorradoBasesConfirm ?? current.BorradoBasesConfirm;
+        if (borradoBasesConfirm)
+            borradoBases = true;
+
+        bool borradoBasesLoad;
+        if (req.BorradoBasesLoad is not null)
+            borradoBasesLoad = req.BorradoBasesLoad.Value;
+        else if (!borradoBases)
+            borradoBasesLoad = false;
+        else if (borradoBasesConfirm && req.BorradoBasesConfirm == true)
+            borradoBasesLoad = false;
+        else
+            borradoBasesLoad = current.BorradoBasesLoad || !borradoBasesConfirm;
+
+        if (borradoBasesLoad)
+            borradoBases = true;
+
         WriteModule(conn, email, PlanModuleIds.Oportunidad, oportunidad, false);
         WriteModule(conn, email, PlanModuleIds.PdfPortal, pdfPortal, false);
         WriteModule(conn, email, PlanModuleIds.Blanqueo, blanqueo, blanqueoConfirm);
         WriteModule(conn, email, PlanModuleIds.BlanqueoLoad, blanqueoLoad, false);
+        WriteModule(conn, email, PlanModuleIds.BorradoBases, borradoBases, borradoBasesConfirm);
+        WriteModule(conn, email, PlanModuleIds.BorradoBasesLoad, borradoBasesLoad, false);
 
         return ReadFlags(conn, email);
     }
@@ -119,6 +139,7 @@ public sealed class ModuleAccessRepository
     {
         var flags = new ModuleAccessFlagsDto();
         var loadExplicit = false;
+        var borradoLoadExplicit = false;
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT module, can_view, can_confirm
@@ -146,6 +167,16 @@ public sealed class ModuleAccessRepository
                 loadExplicit = true;
                 flags.BlanqueoLoad = view;
             }
+            else if (module.Equals(PlanModuleIds.BorradoBases, StringComparison.OrdinalIgnoreCase))
+            {
+                flags.BorradoBases = view || confirm;
+                flags.BorradoBasesConfirm = confirm;
+            }
+            else if (module.Equals(PlanModuleIds.BorradoBasesLoad, StringComparison.OrdinalIgnoreCase))
+            {
+                borradoLoadExplicit = true;
+                flags.BorradoBasesLoad = view;
+            }
         }
 
         // Legacy: sin fila blanqueo_load → confirmador = solo listado; el resto puede cargar.
@@ -154,6 +185,12 @@ public sealed class ModuleAccessRepository
 
         if (flags.BlanqueoLoad)
             flags.Blanqueo = true;
+
+        if (flags.BorradoBases && !borradoLoadExplicit)
+            flags.BorradoBasesLoad = !flags.BorradoBasesConfirm;
+
+        if (flags.BorradoBasesLoad)
+            flags.BorradoBases = true;
 
         return flags;
     }
@@ -231,6 +268,7 @@ public sealed class ModuleAccessRepository
         }
 
         EnsureBlanqueoLoadDefaults();
+        EnsureBorradoBasesDefaults();
     }
 
     /// <summary>
@@ -292,6 +330,47 @@ public sealed class ModuleAccessRepository
                 """;
             mark.ExecuteNonQuery();
             _logger.LogInformation("Defaults blanqueo_load aplicados (confirmadores = solo listado)");
+        }
+    }
+
+    /// <summary>Seed inicial de Borrado de bases (mismo equipo que blanqueo).</summary>
+    private void EnsureBorradoBasesDefaults()
+    {
+        lock (_gate)
+        {
+            using var conn = Open();
+            using (var check = conn.CreateCommand())
+            {
+                check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'seeded_borrado_bases_v1'";
+                var existing = check.ExecuteScalar() as string;
+                if (string.Equals(existing, "1", StringComparison.Ordinal))
+                    return;
+            }
+
+            foreach (var email in new[]
+                     {
+                         "leonel.gallo@thomsonreuters.com",
+                         "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com",
+                         "alexis.ruiz@thomsonreuters.com",
+                         "yohanaelizabeth.orellana@thomsonreuters.com",
+                     })
+            {
+                var confirm = email is "leonel.gallo@thomsonreuters.com"
+                    or "alexis.ruiz@thomsonreuters.com"
+                    or "yohanaelizabeth.orellana@thomsonreuters.com";
+                var load = email is "leonel.gallo@thomsonreuters.com"
+                    or "sabrinacecilia.rodriguezcuaglia@thomsonreuters.com";
+                WriteModule(conn, email, PlanModuleIds.BorradoBases, true, confirm);
+                WriteModule(conn, email, PlanModuleIds.BorradoBasesLoad, load, false);
+            }
+
+            using var mark = conn.CreateCommand();
+            mark.CommandText = """
+                INSERT INTO module_access_meta (key, value) VALUES ('seeded_borrado_bases_v1', '1')
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                """;
+            mark.ExecuteNonQuery();
+            _logger.LogInformation("Seed inicial de Borrado de bases aplicado");
         }
     }
 

@@ -20,6 +20,7 @@ public static class St2AppRoutes
             or "/pdf-portal"
             or "/pdfportal"
             or "/blanqueo"
+            or "/borrado-bases"
             or "/thom"
             or "/ai"
             or "/admin"

@@ -18,6 +18,7 @@ public static class St2IndexHtml
         "planillas-icons.js",
         "planillas-referral-dialogs.js",
         "planillas-blanqueo.js",
+        "planillas-borrado-bases.js",
         "blanqueo-alerts.js",
         "module-access.js",
         "pdf-portal.js",
@@ -61,6 +62,7 @@ public static class St2IndexHtml
         html = html.Replace("/css/styles.css", $"/css/styles.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/planillas.css", $"/css/planillas.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/blanqueo.css", $"/css/blanqueo.css?v={v}", StringComparison.Ordinal);
+        html = html.Replace("/css/borrado-bases.css", $"/css/borrado-bases.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/pdf-portal.css", $"/css/pdf-portal.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/theme-dark.css", $"/css/theme-dark.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);

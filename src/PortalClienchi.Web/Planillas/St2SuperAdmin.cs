@@ -19,5 +19,8 @@ public static class St2SuperAdmin
         Blanqueo = true,
         BlanqueoConfirm = true,
         BlanqueoLoad = true,
+        BorradoBases = true,
+        BorradoBasesConfirm = true,
+        BorradoBasesLoad = true,
     };
 }

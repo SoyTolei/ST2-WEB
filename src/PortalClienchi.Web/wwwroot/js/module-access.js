@@ -15,6 +15,9 @@ function fullFlags() {
     blanqueo: true,
     blanqueoConfirm: true,
     blanqueoLoad: true,
+    borradoBases: true,
+    borradoBasesConfirm: true,
+    borradoBasesLoad: true,
   };
 }
 
@@ -25,6 +28,9 @@ function emptyFlags() {
     blanqueo: false,
     blanqueoConfirm: false,
     blanqueoLoad: false,
+    borradoBases: false,
+    borradoBasesConfirm: false,
+    borradoBasesLoad: false,
   };
 }
 
@@ -73,6 +79,9 @@ export async function refreshModuleFlags({ force = false } = {}) {
         blanqueo: !!m.blanqueo,
         blanqueoConfirm: !!m.blanqueoConfirm,
         blanqueoLoad: m.blanqueoLoad == null ? !m.blanqueoConfirm : !!m.blanqueoLoad,
+        borradoBases: !!m.borradoBases,
+        borradoBasesConfirm: !!m.borradoBasesConfirm,
+        borradoBasesLoad: m.borradoBasesLoad == null ? !m.borradoBasesConfirm : !!m.borradoBasesLoad,
       };
       lastLoadedAt = Date.now();
     } catch {
@@ -105,4 +114,16 @@ export function canConfirmBlanqueoModule() {
 
 export function canLoadBlanqueoModule() {
   return !!getCachedModuleFlags().blanqueoLoad;
+}
+
+export function canSeeBorradoBasesModule() {
+  return !!getCachedModuleFlags().borradoBases;
+}
+
+export function canConfirmBorradoBasesModule() {
+  return !!getCachedModuleFlags().borradoBasesConfirm;
+}
+
+export function canLoadBorradoBasesModule() {
+  return !!getCachedModuleFlags().borradoBasesLoad;
 }
