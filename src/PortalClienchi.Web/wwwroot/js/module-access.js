@@ -133,7 +133,7 @@ export function clearViewAsProfile() {
   document.dispatchEvent(new CustomEvent("st2:view-as-changed", { detail: null }));
 }
 
-function isPrimarySuperAdmin(email = getPlanUserEmail()) {
+export function isPrimarySuperAdmin(email = getPlanUserEmail()) {
   return String(email || "").trim().toLowerCase() === SUPER_ADMIN_EMAIL;
 }
 

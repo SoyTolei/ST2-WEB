@@ -1657,12 +1657,6 @@
         <section class="st2-about-tools" aria-label="Herramientas de la suite">
           <div class="st2-about-tools-head">
             <h3 class="st2-about-tools-title">Herramientas</h3>
-            <p class="st2-about-tools-hint">Misma versión para todos · descargas desde acá</p>
-            <p class="st2-about-tools-url-help">
-              Si <strong>Subir</strong> falla: usá <strong>URL</strong>.
-              Subí el archivo a <a href="https://litterbox.catbox.moe" target="_blank" rel="noopener noreferrer">litterbox.catbox.moe</a>,
-              copiá el link y pegalo. También va Drive/Dropbox.
-            </p>
           </div>
           <div class="st2-about-tools-list">
             <article class="st2-about-tool is-current">
@@ -1679,7 +1673,7 @@
               </div>
               <div class="st2-about-tool-actions">
                 <button type="button" class="st2-about-tool-dl" data-tool-download="sql" disabled>Pronto</button>
-                <button type="button" class="st2-about-tool-url hidden" data-tool-url="sql" title="Publicar desde URL (recomendado para archivos grandes)">URL</button>
+                <button type="button" class="st2-about-tool-url hidden" data-tool-url="sql" title="Publicar desde URL">URL</button>
                 <label class="st2-about-tool-upload hidden" data-tool-upload-wrap="sql" title="Subir nueva versión (solo admin)">
                   <input type="file" class="st2-about-tool-file" data-tool-upload="sql" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1,.bin"/>
                   <span>Subir</span>
@@ -1693,7 +1687,7 @@
               </div>
               <div class="st2-about-tool-actions">
                 <button type="button" class="st2-about-tool-dl" data-tool-download="bat" disabled>Pronto</button>
-                <button type="button" class="st2-about-tool-url hidden" data-tool-url="bat" title="Publicar desde URL (recomendado para archivos grandes)">URL</button>
+                <button type="button" class="st2-about-tool-url hidden" data-tool-url="bat" title="Publicar desde URL">URL</button>
                 <label class="st2-about-tool-upload hidden" data-tool-upload-wrap="bat" title="Subir nueva versión (solo admin)">
                   <input type="file" class="st2-about-tool-file" data-tool-upload="bat" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1,.bin"/>
                   <span>Subir</span>
@@ -1714,6 +1708,32 @@
           <p id="st2-about-busy-text" class="st2-about-busy-text">Subiendo…</p>
           <div class="st2-about-busy-bar" aria-hidden="true"><span id="st2-about-busy-bar-fill"></span></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="st2-tool-url-overlay" class="st2-tool-url-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-tool-url-title" aria-hidden="true">
+    <div class="st2-tool-url-dialog">
+      <h3 id="st2-tool-url-title">Publicar herramienta</h3>
+      <p id="st2-tool-url-lead" class="st2-tool-url-lead">Pegá el link de descarga y el nombre del archivo.</p>
+      <label class="st2-tool-url-label" for="st2-tool-url-input">Link del archivo</label>
+      <input id="st2-tool-url-input" class="st2-tool-url-input" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…"/>
+      <label class="st2-tool-url-label" for="st2-tool-url-name">Nombre con extensión</label>
+      <input id="st2-tool-url-name" class="st2-tool-url-input" type="text" autocomplete="off" spellcheck="false" placeholder="ej. st2ps.bat o paquete.zip"/>
+      <p id="st2-tool-url-error" class="st2-tool-url-error hidden" role="alert"></p>
+      <div class="st2-tool-url-actions">
+        <button type="button" id="st2-tool-url-cancel" class="st2-tool-url-btn st2-tool-url-btn--ghost">Cancelar</button>
+        <button type="button" id="st2-tool-url-submit" class="st2-tool-url-btn st2-tool-url-btn--primary">Publicar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="st2-msg-overlay" class="st2-tool-url-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-msg-title" aria-hidden="true">
+    <div class="st2-tool-url-dialog st2-msg-dialog">
+      <h3 id="st2-msg-title">Aviso</h3>
+      <p id="st2-msg-body" class="st2-tool-url-lead st2-msg-body"></p>
+      <div class="st2-tool-url-actions">
+        <button type="button" id="st2-msg-ok" class="st2-tool-url-btn st2-tool-url-btn--primary">Entendido</button>
       </div>
     </div>
   </div>

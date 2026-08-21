@@ -1,6 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess } from "./plan-user.js";
-import { isSt2SuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1810,7 +1810,8 @@ function markToolsSeen() {
 }
 
 function renderAboutTools() {
-  const canUpload = isSt2SuperAdmin();
+  // Solo el super admin publica; el resto solo ve Descargar.
+  const canUpload = isPrimarySuperAdmin() && !getViewAsProfile();
   for (const id of ["sql", "bat"]) {
     const tool = (cachedTools || []).find((t) => t.id === id);
     const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
@@ -1891,17 +1892,14 @@ async function downloadTool(toolId) {
 }
 
 async function uploadTool(toolId, file) {
-  if (!file || !isSt2SuperAdmin()) return;
+  if (!file || !isPrimarySuperAdmin() || getViewAsProfile()) return;
 
-  // Archivos grandes: el browser→proxy no banca bien; publicar por URL directa.
+  // Archivos grandes: pedir URL en el modal de ST2 (no el prompt de Chrome).
   if (file.size > 8 * 1024 * 1024) {
-    const url = window.prompt(
-      `“${file.name}” pesa ${formatToolSize(file.size)}.\n\n` +
-      "Para archivos grandes pegá una URL directa de descarga (http/https).\n" +
-      "Ej: link de OneDrive/Google Drive en modo directo, o un hosting temporal."
-    );
-    if (!url) return;
-    await publishToolFromUrl(toolId, url.trim(), file.name);
+    openToolUrlDialog(toolId, {
+      lead: `“${file.name}” pesa ${formatToolSize(file.size)}. Pegá un link de descarga directa.`,
+      fileName: file.name,
+    });
     return;
   }
 
@@ -2006,14 +2004,14 @@ async function uploadTool(toolId, file) {
       msg += `\n(no pude leer /api/tools: ${e2?.message || e2})`;
     }
     setAboutToolsStatus(msg, true);
-    try { window.alert(msg); } catch { /* ignore */ }
+    showSt2Message("No se pudo subir", msg);
   } finally {
     hideBusy();
   }
 }
 
 async function publishToolFromUrl(toolId, url, fileNameHint = "") {
-  if (!toolId || !url || !isSt2SuperAdmin()) return;
+  if (!toolId || !url || !isPrimarySuperAdmin() || getViewAsProfile()) return;
   const busy = document.getElementById("st2-about-busy");
   const busyText = document.getElementById("st2-about-busy-text");
   const busyFill = document.getElementById("st2-about-busy-bar-fill");
@@ -2060,28 +2058,122 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
   } catch (err) {
     const msg = err?.message || "No se pudo publicar desde URL.";
     setAboutToolsStatus(msg, true);
-    try { window.alert(msg); } catch { /* ignore */ }
+    showSt2Message("No se pudo publicar", msg);
   } finally {
     hideBusy();
   }
 }
 
+let toolUrlDialogToolId = "";
+let toolUrlDialogBound = false;
+
+function showSt2Message(title, body) {
+  const overlay = document.getElementById("st2-msg-overlay");
+  const titleEl = document.getElementById("st2-msg-title");
+  const bodyEl = document.getElementById("st2-msg-body");
+  if (!overlay) return;
+  if (titleEl) titleEl.textContent = title || "Aviso";
+  if (bodyEl) bodyEl.textContent = body || "";
+  overlay.classList.remove("hidden");
+  overlay.setAttribute("aria-hidden", "false");
+  document.getElementById("st2-msg-ok")?.focus();
+}
+
+function hideSt2Message() {
+  const overlay = document.getElementById("st2-msg-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+}
+
+function openToolUrlDialog(toolId, { lead = "", fileName = "", url = "" } = {}) {
+  if (!toolId || !isPrimarySuperAdmin() || getViewAsProfile()) return;
+  bindToolUrlDialog();
+  toolUrlDialogToolId = toolId;
+  const overlay = document.getElementById("st2-tool-url-overlay");
+  const leadEl = document.getElementById("st2-tool-url-lead");
+  const urlInput = document.getElementById("st2-tool-url-input");
+  const nameInput = document.getElementById("st2-tool-url-name");
+  const errEl = document.getElementById("st2-tool-url-error");
+  const titleEl = document.getElementById("st2-tool-url-title");
+  const label = toolId === "bat" ? "ST2.BAT" : "ST2.SQL";
+  if (titleEl) titleEl.textContent = `Publicar ${label}`;
+  if (leadEl) {
+    leadEl.textContent = lead
+      || "Pegá el link de descarga y el nombre del archivo con su extensión.";
+  }
+  if (urlInput) urlInput.value = url || "";
+  if (nameInput) {
+    nameInput.value = fileName
+      || (toolId === "bat" ? "st2ps.bat" : "st2-sql.zip");
+  }
+  if (errEl) {
+    errEl.textContent = "";
+    errEl.classList.add("hidden");
+  }
+  overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  (url ? nameInput : urlInput)?.focus();
+}
+
+function hideToolUrlDialog() {
+  const overlay = document.getElementById("st2-tool-url-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+  toolUrlDialogToolId = "";
+}
+
+function bindToolUrlDialog() {
+  if (toolUrlDialogBound) return;
+  toolUrlDialogBound = true;
+  document.getElementById("st2-tool-url-cancel")?.addEventListener("click", hideToolUrlDialog);
+  document.getElementById("st2-msg-ok")?.addEventListener("click", hideSt2Message);
+  document.getElementById("st2-tool-url-overlay")?.addEventListener("click", (e) => {
+    if (e.target?.id === "st2-tool-url-overlay") hideToolUrlDialog();
+  });
+  document.getElementById("st2-msg-overlay")?.addEventListener("click", (e) => {
+    if (e.target?.id === "st2-msg-overlay") hideSt2Message();
+  });
+  document.getElementById("st2-tool-url-submit")?.addEventListener("click", () => {
+    const url = String(document.getElementById("st2-tool-url-input")?.value || "").trim();
+    const fileName = String(document.getElementById("st2-tool-url-name")?.value || "").trim();
+    const errEl = document.getElementById("st2-tool-url-error");
+    const showErr = (msg) => {
+      if (!errEl) return;
+      errEl.textContent = msg;
+      errEl.classList.remove("hidden");
+    };
+    if (!toolUrlDialogToolId) return;
+    if (!/^https?:\/\//i.test(url)) {
+      showErr("Pegá un link http/https válido.");
+      document.getElementById("st2-tool-url-input")?.focus();
+      return;
+    }
+    if (!fileName || !fileName.includes(".")) {
+      showErr("Indicá el nombre con extensión (ej. st2ps.bat o paquete.zip).");
+      document.getElementById("st2-tool-url-name")?.focus();
+      return;
+    }
+    const id = toolUrlDialogToolId;
+    hideToolUrlDialog();
+    void publishToolFromUrl(id, url, fileName);
+  });
+  document.getElementById("st2-tool-url-input")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("st2-tool-url-submit")?.click();
+  });
+  document.getElementById("st2-tool-url-name")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("st2-tool-url-submit")?.click();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const urlOverlay = document.getElementById("st2-tool-url-overlay");
+    const msgOverlay = document.getElementById("st2-msg-overlay");
+    if (urlOverlay && !urlOverlay.classList.contains("hidden")) hideToolUrlDialog();
+    else if (msgOverlay && !msgOverlay.classList.contains("hidden")) hideSt2Message();
+  });
+}
+
 function promptToolFromUrl(toolId) {
-  if (!toolId || !isSt2SuperAdmin()) return;
-  const url = window.prompt(
-    "Pegá la URL del archivo:\n\n" +
-    "1) Subilo a un host temporal (pixeldrain, gofile, litterbox…)\n" +
-    "2) Copiá el link de descarga\n" +
-    "3) Pegalo acá"
-  );
-  if (!url) return;
-  const suggested = toolId === "bat" ? "st2ps.bat" : "st2-sql.zip";
-  const fileName = window.prompt(
-    "Nombre del archivo CON extensión (ej. st2ps.bat o paquete.zip):",
-    suggested
-  );
-  if (!fileName) return;
-  void publishToolFromUrl(toolId, url.trim(), fileName.trim());
+  openToolUrlDialog(toolId);
 }
 
 function bytesToHex(bytes) {
@@ -2138,6 +2230,7 @@ function xhrJson(method, url, bodyObj) {
 function bindAboutToolsUi() {
   if (toolsBound) return;
   toolsBound = true;
+  bindToolUrlDialog();
   document.querySelectorAll("[data-tool-download]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-tool-download");
