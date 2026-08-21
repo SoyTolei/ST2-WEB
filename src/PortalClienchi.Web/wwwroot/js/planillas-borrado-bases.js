@@ -698,7 +698,10 @@ function showBasePop(anchor, label, detail) {
   if (!pop || !anchor) return;
 
   hideCtx();
-  if (title) title.textContent = label || "Base";
+  if (title) {
+    const raw = String(label || "").trim();
+    title.textContent = raw === "CG" ? "Contabilidad General" : (raw || "Base");
+  }
   if (text) text.textContent = detail || "—";
   if (copyBtn) {
     copyBtn.classList.remove("is-copied");

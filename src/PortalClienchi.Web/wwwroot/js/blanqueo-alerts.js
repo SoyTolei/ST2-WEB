@@ -188,6 +188,22 @@ export async function markBlanqueoAlertsSeen(ids = null) {
   renderBlanqueoAlertUi();
 }
 
+function firstNameFromEmail(email) {
+  const local = String(email || "").split("@")[0] || "";
+  const first = local.split(/[._\-]+/).filter(Boolean)[0] || "";
+  if (!first) return "";
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
+/** Saludo personal solo para quien carga solicitudes (no confirmadores). */
+function greetRequester(message) {
+  if (alertMode === "confirm") return message;
+  const name = firstNameFromEmail(getPlanUserEmail());
+  if (!name || !message) return message;
+  const body = message.charAt(0).toLowerCase() + message.slice(1);
+  return `Hola ${name}! ${body}`;
+}
+
 function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
@@ -227,7 +243,7 @@ function summarizeAlerts(alerts) {
       : `Tenés ${counts.ready} blanqueos de clave confirmados`;
   }
 
-  return { tone, text, counts };
+  return { tone, text: greetRequester(text), counts };
 }
 
 export function renderBlanqueoAlertUi() {
