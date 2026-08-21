@@ -383,6 +383,15 @@ function isOwner(item) {
   return String(item.solicitadoPorEmail || "").trim().toLowerCase() === currentEmail();
 }
 
+/** Pendiente = sin listo y sin aclaración. Ahí el solicitante puede editar/eliminar. */
+function isPendingSolicitud(item) {
+  return !item?.listo && !String(item?.aclaracion || "").trim();
+}
+
+function canOwnerMutate(item) {
+  return isOwner(item) && isPendingSolicitud(item);
+}
+
 async function createSolicitud() {
   if (!effectiveCanLoad()) {
     setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
@@ -1095,13 +1104,12 @@ function showCtx(x, y, item) {
   const menu = document.getElementById("borrado-ctx");
   if (!menu) return;
 
-  const owner = isOwner(item);
   const confirm = canConfirm;
 
   menu.querySelectorAll("[data-borrado-ctx]").forEach((btn) => {
     const action = btn.getAttribute("data-borrado-ctx");
     let show = false;
-    if (action === "editar" || action === "eliminar") show = owner || confirm;
+    if (action === "editar" || action === "eliminar") show = confirm || canOwnerMutate(item);
     else if (["listo", "unlisto", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
       show = confirm;
     }
@@ -1138,6 +1146,10 @@ async function handleCtxAction(action) {
 
   try {
     if (action === "editar") {
+      if (!canConfirm && !canOwnerMutate(item)) {
+        setStatus("Solo se puede editar en estado pendiente.", true);
+        return;
+      }
       openEditModal(item);
       return;
     }
@@ -1154,6 +1166,10 @@ async function handleCtxAction(action) {
       if (resultado) await patchItem(selectedId, { aclaracion: resultado });
       else await patchItem(selectedId, { clearAclaracion: true });
     } else if (action === "eliminar") {
+      if (!canConfirm && !canOwnerMutate(item)) {
+        setStatus("Solo se puede eliminar en estado pendiente.", true);
+        return;
+      }
       openDeleteModal(item);
       return;
     }

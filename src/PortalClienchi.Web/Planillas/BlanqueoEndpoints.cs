@@ -215,6 +215,9 @@ public static class BlanqueoEndpoints
             if (!IsOwner(current, email!) && !flags.BlanqueoConfirm)
                 return Results.Json(new { error = "Solo podés editar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
+            if (!flags.BlanqueoConfirm && IsLockedForOwner(current))
+                return Results.Json(new { error = "Solo se puede editar en estado pendiente." }, statusCode: StatusCodes.Status403Forbidden);
+
             var validation = ValidateUpdate(body);
             if (validation is not null)
                 return Results.BadRequest(new { error = validation });
@@ -261,6 +264,9 @@ public static class BlanqueoEndpoints
             if (!IsOwner(current, email!) && !flags.BlanqueoConfirm)
                 return Results.Json(new { error = "Solo podés eliminar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
+            if (!flags.BlanqueoConfirm && IsLockedForOwner(current))
+                return Results.Json(new { error = "Solo se puede eliminar en estado pendiente." }, statusCode: StatusCodes.Status403Forbidden);
+
             if (!repo.Delete(id))
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
 
@@ -270,6 +276,9 @@ public static class BlanqueoEndpoints
 
     private static bool IsOwner(BlanqueoRecordDto item, string email) =>
         string.Equals(item.SolicitadoPorEmail, email, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsLockedForOwner(BlanqueoRecordDto item) =>
+        item.Listo || !string.IsNullOrWhiteSpace(item.Aclaracion);
 
     private static bool TryAuthorize(
         HttpContext ctx,

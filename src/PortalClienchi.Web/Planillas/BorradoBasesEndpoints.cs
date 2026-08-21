@@ -71,6 +71,9 @@ public static class BorradoBasesEndpoints
             if (!IsOwner(current, email!) && !flags.BorradoBasesConfirm)
                 return Results.Json(new { error = "Solo podés editar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
+            if (!flags.BorradoBasesConfirm && IsLockedForOwner(current))
+                return Results.Json(new { error = "Solo se puede editar en estado pendiente." }, statusCode: StatusCodes.Status403Forbidden);
+
             var validation = ValidateUpdate(body);
             if (validation is not null)
                 return Results.BadRequest(new { error = validation });
@@ -183,6 +186,9 @@ public static class BorradoBasesEndpoints
             if (!IsOwner(current, email!) && !flags.BorradoBasesConfirm)
                 return Results.Json(new { error = "Solo podés eliminar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
+            if (!flags.BorradoBasesConfirm && IsLockedForOwner(current))
+                return Results.Json(new { error = "Solo se puede eliminar en estado pendiente." }, statusCode: StatusCodes.Status403Forbidden);
+
             if (!repo.Delete(id))
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
 
@@ -192,6 +198,9 @@ public static class BorradoBasesEndpoints
 
     private static bool IsOwner(BorradoBasesRecordDto item, string email) =>
         string.Equals(item.SolicitadoPorEmail, email, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsLockedForOwner(BorradoBasesRecordDto item) =>
+        item.Listo || !string.IsNullOrWhiteSpace(item.Aclaracion);
 
     private static bool TryAuthorize(
         HttpContext ctx,
