@@ -752,10 +752,7 @@ function buildRow(item) {
   const cuitFmt = formatCuit(cuit);
   const cliente = String(item.nroCliente || "").trim();
   const aclaracion = String(item.aclaracion || "").trim();
-  const empresaTitle = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
-  const empresaHtml = !nro && !nombre
-    ? "—"
-    : `<span class="borrado-empresa-inline">${nro ? `<strong class="borrado-empresa-code">[${escapeHtml(nro)}]</strong>` : ""}${nro && nombre ? " " : ""}${nombre ? `<span class="borrado-empresa-nombre">${escapeHtml(nombre)}</span>` : ""}</span>`;
+  const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
   const clienteCell = !cliente
     ? "—"
     : canConfirm
@@ -769,7 +766,9 @@ function buildRow(item) {
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
     <td class="borrado-col-cliente" title="${escapeHtml(cliente)}">${clienteCell}</td>
-    <td class="borrado-col-empresa" title="${escapeHtml(empresaTitle)}">${empresaHtml}</td>
+    <td class="borrado-col-empresa" title="${escapeHtml(empresaLabel)}">
+      <span class="borrado-empresa-inline">${escapeHtml(empresaLabel)}</span>
+    </td>
     <td class="borrado-col-cuit" title="${escapeHtml(cuit || "")}">${escapeHtml(cuitFmt)}</td>
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
@@ -991,13 +990,22 @@ function formatCuit(raw) {
   return String(raw || "").trim() || "—";
 }
 
+function isPartialListo(item) {
+  if (!item?.listo) return false;
+  const { resultado } = parseAclaracion(item.aclaracion);
+  return /✗/.test(String(resultado || ""));
+}
+
 function formatEstadoCell(item) {
   if (item.listo) {
-    return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada</span>';
+    if (isPartialListo(item)) {
+      return '<span class="borrado-pill partial" title="Algunas bases quedaron pendientes">Parcial ⚡</span>';
+    }
+    return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada ✓</span>';
   }
   const { resultado, nota } = parseAclaracion(item.aclaracion);
   if (!resultado && !nota) {
-    return '<span class="borrado-estado-pending" title="Pendiente de confirmación">Pendiente</span>';
+    return '<span class="borrado-estado-pending" title="Pendiente de confirmación">Pendiente ⏳</span>';
   }
   return "—";
 }
