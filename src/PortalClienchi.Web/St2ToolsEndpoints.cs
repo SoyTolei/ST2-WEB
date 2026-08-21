@@ -261,16 +261,6 @@ public static class St2ToolsEndpoints
                     || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
                     return Fail(store, toolId, "URL inválida (solo http/https).", 400);
 
-                var fileName = string.IsNullOrWhiteSpace(body.FileName)
-                    ? Path.GetFileName(uri.AbsolutePath)
-                    : body.FileName.Trim();
-                if (string.IsNullOrWhiteSpace(fileName) || fileName is "." or "..")
-                    fileName = $"st2-{toolId}.bin";
-                if (string.IsNullOrWhiteSpace(Path.GetExtension(fileName))
-                    && !string.IsNullOrWhiteSpace(body.FileName)
-                    && body.FileName.Contains('.'))
-                    fileName = body.FileName.Trim();
-
                 using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(15) };
                 http.DefaultRequestHeaders.UserAgent.ParseAdd("ST2-Web/1.0");
                 using var resp = await http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct)
@@ -281,6 +271,18 @@ public static class St2ToolsEndpoints
                 var len = resp.Content.Headers.ContentLength ?? -1;
                 if (len > 120L * 1024 * 1024)
                     return Fail(store, toolId, "El archivo remoto supera 120 MB.", 400);
+
+                var headerName = resp.Content.Headers.ContentDisposition?.FileNameStar
+                    ?? resp.Content.Headers.ContentDisposition?.FileName;
+                if (!string.IsNullOrWhiteSpace(headerName))
+                    headerName = headerName.Trim().Trim('"');
+
+                var fileName = ResolvePackageFileName(
+                    toolId,
+                    body.FileName,
+                    Path.GetFileName(uri.AbsolutePath),
+                    headerName,
+                    resp.Content.Headers.ContentType?.MediaType);
 
                 await using var remote = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
                 var saved = await store.SaveStreamAsync(toolId, fileName, remote, body.Version, len, ct)
@@ -317,6 +319,58 @@ public static class St2ToolsEndpoints
                 return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
         }
+    }
+
+    private static readonly HashSet<string> KnownExtTokens = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "zip", "7z", "rar", "exe", "msi", "bat", "cmd", "ps1", "bin",
+    };
+
+    /// <summary>
+    /// Los hosts temporales a menudo dan path sin extensión (ej. ".../zip" → nombre "zip").
+    /// </summary>
+    private static string ResolvePackageFileName(
+        string toolId,
+        string? fromBody,
+        string? fromUrlPath,
+        string? fromContentDisposition,
+        string? contentType)
+    {
+        foreach (var raw in new[] { fromBody, fromContentDisposition, fromUrlPath })
+        {
+            var candidate = (raw ?? "").Trim().Trim('"');
+            if (string.IsNullOrWhiteSpace(candidate) || candidate is "." or "..")
+                continue;
+
+            candidate = Path.GetFileName(candidate);
+            if (string.IsNullOrWhiteSpace(candidate))
+                continue;
+
+            // "zip" / "bat" sin punto → ".zip" / ".bat"
+            if (KnownExtTokens.Contains(candidate))
+                return $"st2-{toolId}.{candidate.ToLowerInvariant()}";
+
+            var ext = Path.GetExtension(candidate);
+            if (!string.IsNullOrWhiteSpace(ext) && KnownExtTokens.Contains(ext.TrimStart('.')))
+                return candidate;
+        }
+
+        var byMime = contentType?.ToLowerInvariant() switch
+        {
+            "application/zip" or "application/x-zip-compressed" => ".zip",
+            "application/x-7z-compressed" => ".7z",
+            "application/vnd.rar" or "application/x-rar-compressed" => ".rar",
+            "application/vnd.microsoft.portable-executable" or "application/x-msdownload" => ".exe",
+            "application/octet-stream" => toolId.Equals("bat", StringComparison.OrdinalIgnoreCase) ? ".bat" : ".zip",
+            _ => null,
+        };
+        if (byMime is not null)
+            return $"st2-{toolId}{byMime}";
+
+        // Default sensato por herramienta
+        return toolId.Equals("bat", StringComparison.OrdinalIgnoreCase)
+            ? $"st2-{toolId}.bat"
+            : $"st2-{toolId}.zip";
     }
 
     private static string NormalizeDownloadUrl(string url)

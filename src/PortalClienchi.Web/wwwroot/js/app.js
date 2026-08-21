@@ -2037,7 +2037,13 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
   if (!fileName) {
     try { fileName = decodeURIComponent(url.split("?")[0].split("/").pop() || ""); } catch { fileName = ""; }
   }
-  if (!fileName) fileName = `st2-${toolId}.bin`;
+  // Hosts que dejan el path en "zip" / "bat" sin punto.
+  if (/^(zip|7z|rar|exe|msi|bat|cmd|ps1|bin)$/i.test(fileName)) {
+    fileName = `st2-${toolId}.${fileName.toLowerCase()}`;
+  }
+  if (!fileName || !fileName.includes(".")) {
+    fileName = toolId === "bat" ? `st2-${toolId}.bat` : `st2-${toolId}.zip`;
+  }
 
   showBusy(`Descargando desde URL…`, 20);
   setAboutToolsStatus(`Publicando ${fileName} desde URL…`);
@@ -2064,14 +2070,18 @@ function promptToolFromUrl(toolId) {
   if (!toolId || !isSt2SuperAdmin()) return;
   const url = window.prompt(
     "Pegá la URL del archivo:\n\n" +
-    "1) Entrá a https://litterbox.catbox.moe\n" +
-    "2) Subí el .bat / .zip / .exe\n" +
-    "3) Copiá el link que te da\n" +
-    "4) Pegalo acá\n\n" +
-    "También sirve un link de Google Drive o Dropbox compartido."
+    "1) Subilo a un host temporal (pixeldrain, gofile, litterbox…)\n" +
+    "2) Copiá el link de descarga\n" +
+    "3) Pegalo acá"
   );
   if (!url) return;
-  void publishToolFromUrl(toolId, url.trim());
+  const suggested = toolId === "bat" ? "st2ps.bat" : "st2-sql.zip";
+  const fileName = window.prompt(
+    "Nombre del archivo CON extensión (ej. st2ps.bat o paquete.zip):",
+    suggested
+  );
+  if (!fileName) return;
+  void publishToolFromUrl(toolId, url.trim(), fileName.trim());
 }
 
 function bytesToHex(bytes) {
