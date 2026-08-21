@@ -677,10 +677,10 @@ function basePillHtml(label, detail, contab, count = 0) {
     ? "borrado-base-pill contab has-detail"
     : "borrado-base-pill has-detail";
   const n = Number(count) > 0 ? Number(count) : 0;
-  const meta = n > 0
-    ? `<span class="borrado-base-pill-meta" aria-hidden="true">${n}</span>`
+  const countHtml = n > 0
+    ? `<span class="borrado-base-cg-count" aria-hidden="true">${n}</span>`
     : "";
-  return `<button type="button" class="${cls}" title="${tip}" aria-label="Ver ejercicios de ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span>${meta}<span class="borrado-base-pill-action" aria-hidden="true">ver</span></button>`;
+  return `<span class="borrado-base-cg"><button type="button" class="${cls}" title="${tip}" aria-label="Ver ejercicios de ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">ver</span></button>${countHtml}</span>`;
 }
 
 function hideBasePop() {
