@@ -88,7 +88,8 @@ public static class St2ToolsEndpoints
                 return Results.NotFound(new { error = "Todavía no hay un paquete publicado para esa herramienta." });
 
             var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            return Results.File(stream, meta.ContentType, meta.FileName, enableRangeProcessing: true);
+            // octet-stream evita que el proxy bloquee descargas .bat/.exe
+            return Results.File(stream, "application/octet-stream", meta.FileName, enableRangeProcessing: true);
         });
 
         // Rutas "kit" bajo /api/planillas (mismo estilo que el resto de la app; evita WAF sobre /upload*).
@@ -285,10 +286,36 @@ public static class St2ToolsEndpoints
                     resp.Content.Headers.ContentType?.MediaType);
 
                 await using var remote = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-                var saved = await store.SaveStreamAsync(toolId, fileName, remote, body.Version, len, ct)
-                    .ConfigureAwait(false);
-                store.ClearLastError();
-                return Results.Ok(saved);
+                // Buffer mínimo para rechazar páginas HTML (links de landing, no el archivo).
+                var probe = new byte[512];
+                var probed = await remote.ReadAsync(probe.AsMemory(0, probe.Length), ct).ConfigureAwait(false);
+                if (probed > 0 && LooksLikeHtml(probe.AsSpan(0, probed)))
+                {
+                    return Fail(store, toolId,
+                        "El link devolvió una página web, no el archivo. Usá un link de descarga directa.", 400);
+                }
+
+                var tmp = store.BeginTempFile(toolId);
+                try
+                {
+                    await using (var fs = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        if (probed > 0)
+                            await fs.WriteAsync(probe.AsMemory(0, probed), ct).ConfigureAwait(false);
+                        await remote.CopyToAsync(fs, ct).ConfigureAwait(false);
+                        await fs.FlushAsync(ct).ConfigureAwait(false);
+                    }
+
+                    await using var input = new FileStream(tmp, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    var saved = await store.SaveStreamAsync(toolId, fileName, input, body.Version, input.Length, ct)
+                        .ConfigureAwait(false);
+                    store.ClearLastError();
+                    return Results.Ok(saved);
+                }
+                finally
+                {
+                    try { if (File.Exists(tmp)) File.Delete(tmp); } catch { /* ignore */ }
+                }
             }
             catch (ArgumentException ex)
             {
@@ -371,6 +398,27 @@ public static class St2ToolsEndpoints
         return toolId.Equals("bat", StringComparison.OrdinalIgnoreCase)
             ? $"st2-{toolId}.bat"
             : $"st2-{toolId}.zip";
+    }
+
+    private static bool LooksLikeHtml(ReadOnlySpan<byte> bytes)
+    {
+        var i = 0;
+        while (i < bytes.Length && (bytes[i] is 0x20 or 0x09 or 0x0D or 0x0A or 0xEF or 0xBB or 0xBF))
+            i++;
+        if (i >= bytes.Length) return false;
+        // <! or <html or <HTML
+        if (bytes[i] != (byte)'<') return false;
+        if (i + 1 < bytes.Length && bytes[i + 1] == (byte)'!') return true;
+        if (i + 4 < bytes.Length)
+        {
+            var c1 = (char)bytes[i + 1];
+            var c2 = (char)bytes[i + 2];
+            var c3 = (char)bytes[i + 3];
+            var c4 = (char)bytes[i + 4];
+            var tag = string.Concat(c1, c2, c3, c4).ToLowerInvariant();
+            if (tag is "html" or "head" or "body") return true;
+        }
+        return false;
     }
 
     private static string NormalizeDownloadUrl(string url)

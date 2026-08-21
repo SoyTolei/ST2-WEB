@@ -371,6 +371,44 @@ public sealed class St2ToolsStore
             .GetResult();
     }
 
+    /// <summary>
+    /// Copia paquetes desde tools-packages/{sql|bat}/ embebidos en el deploy hacia el volume.
+    /// Cada deploy con archivos nuevos los publica automáticamente.
+    /// </summary>
+    public int SeedFromBundled(params string?[] candidateRoots)
+    {
+        var seeded = 0;
+        foreach (var root in candidateRoots)
+        {
+            if (string.IsNullOrWhiteSpace(root))
+                continue;
+            var packagesRoot = Path.Combine(root, "tools-packages");
+            if (!Directory.Exists(packagesRoot))
+                continue;
+
+            foreach (var id in ToolIds)
+            {
+                var dir = Path.Combine(packagesRoot, id);
+                if (!Directory.Exists(dir))
+                    continue;
+
+                var file = Directory.EnumerateFiles(dir)
+                    .Where(f => AllowedExtensions.Contains(Path.GetExtension(f)))
+                    .OrderByDescending(f => new FileInfo(f).LastWriteTimeUtc)
+                    .FirstOrDefault();
+                if (file is null)
+                    continue;
+
+                var info = new FileInfo(file);
+                var ver = info.LastWriteTimeUtc.ToString("yyyy.MM.dd");
+                using var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+                SaveStreamAsync(id, info.Name, fs, ver, info.Length).GetAwaiter().GetResult();
+                seeded++;
+            }
+        }
+        return seeded;
+    }
+
     private void EnsureRoot()
     {
         try

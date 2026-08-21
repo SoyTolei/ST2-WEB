@@ -38,6 +38,7 @@ RUN set -eux; \
     mkdir -p /data/st2/tmp && chmod 777 /data/st2 /data/st2/tmp
 
 COPY --from=build /app/publish .
+COPY tools-packages/ /app/tools-packages/
 
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "PortalClienchi.Web.dll"]

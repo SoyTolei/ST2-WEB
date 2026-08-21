@@ -92,6 +92,19 @@ catch (Exception ex)
     app.Logger.LogWarning(ex, "No se pudo purgar capturas vencidas al iniciar");
 }
 
+try
+{
+    var env = app.Services.GetRequiredService<IWebHostEnvironment>();
+    var tools = app.Services.GetRequiredService<St2ToolsStore>();
+    var seeded = tools.SeedFromBundled(AppContext.BaseDirectory, env.ContentRootPath);
+    if (seeded > 0)
+        app.Logger.LogInformation("ST2 tools: {Count} paquete(s) sembrados desde tools-packages", seeded);
+}
+catch (Exception ex)
+{
+    app.Logger.LogWarning(ex, "No se pudieron sembrar herramientas desde tools-packages");
+}
+
 app.UseForwardedHeaders();
 
 app.Use(async (ctx, next) =>
