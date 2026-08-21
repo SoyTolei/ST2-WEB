@@ -1932,7 +1932,7 @@ async function uploadTool(toolId, file) {
   try {
     stage = "ping";
     showBusy("Verificando volume…", 8);
-    const ping = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-ping`, null);
+    const ping = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/ping`, null);
     if (!ping?.ok) {
       throw Object.assign(new Error(ping?.error || "Canario de tools falló."), {
         reached: !!ping?.reached,
@@ -1954,7 +1954,7 @@ async function uploadTool(toolId, file) {
 
     stage = "begin";
     showBusy(`Iniciando subida (${total} partes)…`, 16);
-    await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/parts/begin`, {
+    await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/begin`, {
       u: uploadId,
       t: total,
     });
@@ -1966,7 +1966,7 @@ async function uploadTool(toolId, file) {
       const pct = 16 + Math.round(((i + 1) / total) * 70);
       showBusy(`Enviando parte ${i + 1}/${total}…`, pct);
       setAboutToolsStatus(`Enviando ${originalName}: parte ${i + 1}/${total}`);
-      await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/parts/push`, {
+      await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/push`, {
         u: uploadId,
         i,
         t: total,
@@ -1976,7 +1976,7 @@ async function uploadTool(toolId, file) {
 
     stage = "commit";
     showBusy("Publicando paquete…", 92);
-    const data = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/parts/commit`, {
+    const data = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/commit`, {
       u: uploadId,
       t: total,
       n: toBase64Url(originalName),
@@ -2042,7 +2042,7 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
   showBusy(`Descargando desde URL…`, 20);
   setAboutToolsStatus(`Publicando ${fileName} desde URL…`);
   try {
-    const data = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/from-url`, {
+    const data = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/from-url`, {
       url,
       fileName,
       version,
@@ -2062,7 +2062,14 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
 
 function promptToolFromUrl(toolId) {
   if (!toolId || !isSt2SuperAdmin()) return;
-  const url = window.prompt("Pegá la URL directa del paquete (http/https):");
+  const url = window.prompt(
+    "Pegá la URL del archivo:\n\n" +
+    "1) Entrá a https://litterbox.catbox.moe\n" +
+    "2) Subí el .bat / .zip / .exe\n" +
+    "3) Copiá el link que te da\n" +
+    "4) Pegalo acá\n\n" +
+    "También sirve un link de Google Drive o Dropbox compartido."
+  );
   if (!url) return;
   void publishToolFromUrl(toolId, url.trim());
 }

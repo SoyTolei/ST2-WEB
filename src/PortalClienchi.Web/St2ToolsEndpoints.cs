@@ -79,33 +79,6 @@ public static class St2ToolsEndpoints
             }
         });
 
-        app.MapPost("/api/tools/{toolId}/upload-ping", (HttpContext ctx, string toolId, St2ToolsStore store) =>
-        {
-            if (!TryRequireSuperAdmin(ctx, out var email, out var error))
-                return error!;
-
-            try
-            {
-                if (!St2ToolsStore.ToolIds.Contains(toolId.Trim().ToLowerInvariant()))
-                    return Fail(store, toolId, "Herramienta inválida.", 400);
-
-                var probe = store.WriteProbe();
-                return Results.Ok(new
-                {
-                    ok = true,
-                    reached = true,
-                    toolId,
-                    email,
-                    probe,
-                    dataDir = store.RootPath,
-                });
-            }
-            catch (Exception ex)
-            {
-                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
-            }
-        });
-
         app.MapGet("/api/tools/{toolId}/download", (HttpContext ctx, string toolId, St2ToolsStore store) =>
         {
             if (!TryRequireUser(ctx, out _, out var error))
@@ -118,8 +91,48 @@ public static class St2ToolsEndpoints
             return Results.File(stream, meta.ContentType, meta.FileName, enableRangeProcessing: true);
         });
 
-        // Inicio de subida por partes (JSON chico, solo hex después).
-        app.MapPost("/api/tools/{toolId}/parts/begin", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        // Rutas "kit" bajo /api/planillas (mismo estilo que el resto de la app; evita WAF sobre /upload*).
+        app.MapPost("/api/planillas/kit/{toolId}/ping", HandlePing);
+        app.MapPost("/api/planillas/kit/{toolId}/begin", HandlePartsBegin);
+        app.MapPost("/api/planillas/kit/{toolId}/push", HandlePartsPush);
+        app.MapPost("/api/planillas/kit/{toolId}/commit", HandlePartsCommit);
+        app.MapPost("/api/planillas/kit/{toolId}/from-url", HandleFromUrl);
+
+        // Compat con rutas viejas.
+        app.MapPost("/api/tools/{toolId}/upload-ping", HandlePing);
+        app.MapPost("/api/tools/{toolId}/parts/begin", HandlePartsBegin);
+        app.MapPost("/api/tools/{toolId}/parts/push", HandlePartsPush);
+        app.MapPost("/api/tools/{toolId}/parts/commit", HandlePartsCommit);
+        app.MapPost("/api/tools/{toolId}/from-url", HandleFromUrl);
+
+        Task<IResult> HandlePing(HttpContext ctx, string toolId, St2ToolsStore store)
+        {
+            if (!TryRequireSuperAdmin(ctx, out var email, out var error))
+                return Task.FromResult(error!);
+
+            try
+            {
+                if (!St2ToolsStore.ToolIds.Contains(toolId.Trim().ToLowerInvariant()))
+                    return Task.FromResult(Fail(store, toolId, "Herramienta inválida.", 400));
+
+                var probe = store.WriteProbe();
+                return Task.FromResult(Results.Ok(new
+                {
+                    ok = true,
+                    reached = true,
+                    toolId,
+                    email,
+                    probe,
+                    dataDir = store.RootPath,
+                }));
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex));
+            }
+        }
+
+        async Task<IResult> HandlePartsBegin(HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct)
         {
             try
             {
@@ -142,9 +155,9 @@ public static class St2ToolsEndpoints
             {
                 return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
-        });
+        }
 
-        app.MapPost("/api/tools/{toolId}/parts/push", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        async Task<IResult> HandlePartsPush(HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct)
         {
             try
             {
@@ -183,9 +196,9 @@ public static class St2ToolsEndpoints
             {
                 return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
-        });
+        }
 
-        app.MapPost("/api/tools/{toolId}/parts/commit", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        async Task<IResult> HandlePartsCommit(HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct)
         {
             try
             {
@@ -230,10 +243,9 @@ public static class St2ToolsEndpoints
             {
                 return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
-        });
+        }
 
-        // Archivos grandes (ej. ST2.SQL ~75 MB): el server descarga la URL (no pasa el binario por el proxy del browser).
-        app.MapPost("/api/tools/{toolId}/from-url", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        async Task<IResult> HandleFromUrl(HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct)
         {
             try
             {
@@ -244,7 +256,8 @@ public static class St2ToolsEndpoints
                 if (body is null || string.IsNullOrWhiteSpace(body.Url))
                     return Fail(store, toolId, "Falta la URL.", 400);
 
-                if (!Uri.TryCreate(body.Url.Trim(), UriKind.Absolute, out var uri)
+                var normalized = NormalizeDownloadUrl(body.Url.Trim());
+                if (!Uri.TryCreate(normalized, UriKind.Absolute, out var uri)
                     || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
                     return Fail(store, toolId, "URL inválida (solo http/https).", 400);
 
@@ -253,6 +266,10 @@ public static class St2ToolsEndpoints
                     : body.FileName.Trim();
                 if (string.IsNullOrWhiteSpace(fileName) || fileName is "." or "..")
                     fileName = $"st2-{toolId}.bin";
+                if (string.IsNullOrWhiteSpace(Path.GetExtension(fileName))
+                    && !string.IsNullOrWhiteSpace(body.FileName)
+                    && body.FileName.Contains('.'))
+                    fileName = body.FileName.Trim();
 
                 using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(15) };
                 http.DefaultRequestHeaders.UserAgent.ParseAdd("ST2-Web/1.0");
@@ -299,55 +316,28 @@ public static class St2ToolsEndpoints
             {
                 return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
-        });
+        }
+    }
 
-        // Compat: publicar desde captura (si se usa otro cliente).
-        app.MapPost("/api/tools/{toolId}/publish", async (
-            HttpContext ctx,
-            string toolId,
-            St2ToolsStore store,
-            LocalCapturaStore capturas,
-            CancellationToken ct) =>
+    private static string NormalizeDownloadUrl(string url)
+    {
+        var driveFile = Regex.Match(url, @"drive\.google\.com/file/d/([^/]+)", RegexOptions.IgnoreCase);
+        if (driveFile.Success)
+            return $"https://drive.google.com/uc?export=download&id={driveFile.Groups[1].Value}&confirm=t";
+
+        var driveOpen = Regex.Match(url, @"[?&]id=([a-zA-Z0-9_-]+)", RegexOptions.IgnoreCase);
+        if (url.Contains("drive.google.com", StringComparison.OrdinalIgnoreCase) && driveOpen.Success)
+            return $"https://drive.google.com/uc?export=download&id={driveOpen.Groups[1].Value}&confirm=t";
+
+        if (url.Contains("dropbox.com", StringComparison.OrdinalIgnoreCase))
         {
-            try
-            {
-                if (!TryRequireSuperAdmin(ctx, out _, out var error))
-                    return error!;
+            if (url.Contains("dl=0", StringComparison.OrdinalIgnoreCase))
+                return url.Replace("dl=0", "dl=1", StringComparison.OrdinalIgnoreCase);
+            if (!url.Contains("dl=", StringComparison.OrdinalIgnoreCase))
+                return url + (url.Contains('?', StringComparison.Ordinal) ? "&dl=1" : "?dl=1");
+        }
 
-                var body = await ctx.Request.ReadFromJsonAsync<PublishRequest>(ct).ConfigureAwait(false);
-                if (body is null)
-                    return Fail(store, toolId, "Cuerpo inválido.", 400);
-
-                var capturaId = ParseCapturaId(body.CapturaId ?? body.Url);
-                if (capturaId is null)
-                    return Fail(store, toolId, "Falta el id de captura (/c/…).", 400);
-
-                if (!capturas.TryOpenById(capturaId, out LocalMediaOpen? open) || open is null)
-                    return Fail(store, toolId, "No se encontró el archivo temporal de captura.", 404);
-
-                var bytes = await File.ReadAllBytesAsync(open.FullPath, ct).ConfigureAwait(false);
-                if (body.Xor)
-                {
-                    for (var i = 0; i < bytes.Length; i++)
-                        bytes[i] ^= XorKey;
-                }
-
-                var fileName = string.IsNullOrWhiteSpace(body.FileName)
-                    ? $"st2-{toolId}.bin"
-                    : body.FileName.Trim();
-
-                await using var input = new MemoryStream(bytes, writable: false);
-                var saved = await store.SaveStreamAsync(toolId, fileName, input, body.Version, bytes.Length, ct)
-                    .ConfigureAwait(false);
-                try { capturas.TryDeleteById(capturaId); } catch { /* ignore */ }
-                store.ClearLastError();
-                return Results.Ok(saved);
-            }
-            catch (Exception ex)
-            {
-                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
-            }
-        });
+        return url;
     }
 
     private static string DecodeMeta(string? raw, string fallback)
@@ -368,32 +358,6 @@ public static class St2ToolsEndpoints
         catch
         {
             return fallback;
-        }
-    }
-
-    private static string? ParseCapturaId(string? urlOrId)
-    {
-        if (string.IsNullOrWhiteSpace(urlOrId))
-            return null;
-
-        var s = urlOrId.Trim();
-        if (CapturaIdRegex.IsMatch(s))
-            return s;
-
-        try
-        {
-            if (Uri.TryCreate(s, UriKind.Absolute, out var abs))
-                s = abs.AbsolutePath;
-            var marker = s.LastIndexOf("/c/", StringComparison.OrdinalIgnoreCase);
-            if (marker >= 0)
-                s = s[(marker + 3)..];
-            s = s.Split('?', '#')[0].Trim('/');
-            var id = s.Split('/')[0];
-            return CapturaIdRegex.IsMatch(id) ? id : null;
-        }
-        catch
-        {
-            return null;
         }
     }
 
@@ -463,15 +427,5 @@ public static class St2ToolsEndpoints
         public string? Url { get; set; }
         public string? FileName { get; set; }
         public string? Version { get; set; }
-    }
-
-    private sealed class PublishRequest
-    {
-        public string? CapturaId { get; set; }
-        public string? Url { get; set; }
-        public string? FileName { get; set; }
-        public string? Version { get; set; }
-        [JsonPropertyName("xor")]
-        public bool Xor { get; set; } = true;
     }
 }
