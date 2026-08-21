@@ -368,15 +368,16 @@
 .planillas-hero-easter {
   position: absolute;
   top: -14px;
-  right: 10px;
-  width: 44px;
+  left: 10px;
+  right: auto;
+  width: 52px;
   height: auto;
   pointer-events: none;
   z-index: 2;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
-  transform: rotate(6deg);
+  transform: rotate(-6deg);
   user-select: none;
 }
 

@@ -217,7 +217,7 @@ function escapeToastHtml(value) {
 }
 
 /** Icono vectorial (evita el emoji pixelado de Windows). */
-const TOAST_WAVE_HTML = `<span class="toast-emoji" aria-hidden="true"><svg class="toast-emoji-svg" viewBox="0 0 36 36" width="18" height="18" focusable="false"><circle cx="18" cy="18" r="18" fill="#FFCC4D"/><circle cx="12" cy="14.5" r="2.2" fill="#664500"/><circle cx="24" cy="14.5" r="2.2" fill="#664500"/><path fill="#664500" d="M10.5 22.5c1.8 3.2 4.5 4.8 7.5 4.8s5.7-1.6 7.5-4.8"/><path fill="#FFCC4D" stroke="#F4900C" stroke-width="1.2" stroke-linecap="round" d="M29.2 8.2c.4-1.6 1.9-2.4 3.2-1.8 1.2.5 1.7 2.1 1.1 3.5l-2.6 6.2c-.3.8-1.2 1.2-2 .9-.8-.3-1.2-1.2-.9-2l1.2-2.8"/><path fill="#FFCC4D" stroke="#F4900C" stroke-width="1.2" stroke-linecap="round" d="M31.5 7.4l1.6 3.2"/></svg></span>`;
+const TOAST_WAVE_HTML = `<span class="toast-emoji" aria-hidden="true"><svg class="toast-emoji-svg" viewBox="0 0 36 36" width="18" height="18" focusable="false"><circle cx="18" cy="18" r="18" fill="#FFCC4D"/><path fill="#292F33" d="M8.5 13.2h19c.9 0 1.6.7 1.6 1.6v3.1c0 .9-.7 1.6-1.6 1.6h-19c-.9 0-1.6-.7-1.6-1.6v-3.1c0-.9.7-1.6 1.6-1.6z"/><path fill="#66757F" d="M10.2 14.5h6.2v2.4H10.2zm9.4 0h6.2v2.4h-6.2z"/><path fill="#292F33" d="M4.2 14.5c-.8 0-1.4.7-1.2 1.4.5 1.8 1.9 3 3.6 3.3v-3.1c0-.9-.7-1.6-1.6-1.6h-.8zm27.6 0h-.8c-.9 0-1.6.7-1.6 1.6v3.1c1.7-.3 3.1-1.5 3.6-3.3.2-.7-.4-1.4-1.2-1.4z"/><path fill="#664500" d="M12.5 24.2c1.6 2.2 3.7 3.3 5.5 3.3s3.9-1.1 5.5-3.3"/></svg></span>`;
 
 function setToastText(el, text) {
   if (!el) return;
