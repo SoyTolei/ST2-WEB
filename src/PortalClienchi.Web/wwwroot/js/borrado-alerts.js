@@ -197,7 +197,39 @@ function firstNameFromEmail(email) {
   return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
 }
 
-const TOAST_WAVE_MARK = "{{toast-wave}}";
+const TOAST_FOOD_MARK = "{{toast-food}}";
+const TOAST_FOOD_KEY = "st2-toast-food-pizza-used";
+const TOAST_FOOD_EMOJIS = [
+  "🍕", // primero siempre
+  "🍔", "🍟", "🌮", "🍣", "🍩", "🍦", "🥐", "🍜", "🥗", "🍪", "🍉",
+  "🌭", "🍝", "🧁", "🍓", "🥑", "🧀",
+];
+
+function nextFoodEmoji() {
+  try {
+    if (sessionStorage.getItem(TOAST_FOOD_KEY) !== "1") {
+      sessionStorage.setItem(TOAST_FOOD_KEY, "1");
+      return TOAST_FOOD_EMOJIS[0];
+    }
+  } catch {
+    return TOAST_FOOD_EMOJIS[0];
+  }
+  const rest = TOAST_FOOD_EMOJIS.slice(1);
+  return rest[Math.floor(Math.random() * rest.length)] || "🍕";
+}
+
+function foodForToast(text) {
+  const key = `st2-toast-food:${String(text || "").slice(0, 160)}`;
+  try {
+    const cached = sessionStorage.getItem(key);
+    if (cached) return cached;
+    const food = nextFoodEmoji();
+    sessionStorage.setItem(key, food);
+    return food;
+  } catch {
+    return nextFoodEmoji();
+  }
+}
 
 /** Saludo personal solo para quien carga solicitudes (no confirmadores). */
 function greetRequester(message) {
@@ -205,7 +237,7 @@ function greetRequester(message) {
   const name = firstNameFromEmail(getPlanUserEmail());
   if (!name || !message) return message;
   const body = message.charAt(0).toLowerCase() + message.slice(1);
-  return `Hola ${name}! ${TOAST_WAVE_MARK} ${body}`;
+  return `Hola ${name}! ${TOAST_FOOD_MARK} ${body}`;
 }
 
 function escapeToastHtml(value) {
@@ -216,14 +248,12 @@ function escapeToastHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-/** Icono vectorial (evita el emoji pixelado de Windows). */
-const TOAST_WAVE_HTML = `<span class="toast-emoji" aria-hidden="true"><svg class="toast-emoji-svg" viewBox="0 0 36 36" width="18" height="18" focusable="false"><circle cx="18" cy="18" r="18" fill="#FFCC4D"/><path fill="#292F33" d="M8.5 13.2h19c.9 0 1.6.7 1.6 1.6v3.1c0 .9-.7 1.6-1.6 1.6h-19c-.9 0-1.6-.7-1.6-1.6v-3.1c0-.9.7-1.6 1.6-1.6z"/><path fill="#66757F" d="M10.2 14.5h6.2v2.4H10.2zm9.4 0h6.2v2.4h-6.2z"/><path fill="#292F33" d="M4.2 14.5c-.8 0-1.4.7-1.2 1.4.5 1.8 1.9 3 3.6 3.3v-3.1c0-.9-.7-1.6-1.6-1.6h-.8zm27.6 0h-.8c-.9 0-1.6.7-1.6 1.6v3.1c1.7-.3 3.1-1.5 3.6-3.3.2-.7-.4-1.4-1.2-1.4z"/><path fill="#664500" d="M12.5 24.2c1.6 2.2 3.7 3.3 5.5 3.3s3.9-1.1 5.5-3.3"/></svg></span>`;
-
 function setToastText(el, text) {
   if (!el) return;
+  const food = foodForToast(text);
   el.innerHTML = escapeToastHtml(text).replace(
-    /\{\{toast-wave\}\}/g,
-    TOAST_WAVE_HTML,
+    /\{\{toast-food\}\}/g,
+    `<span class="toast-emoji" aria-hidden="true">${food}</span>`,
   );
 }
 

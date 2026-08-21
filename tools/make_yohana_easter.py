@@ -1,4 +1,4 @@
-"""Quita fondo negro casi puro de PNG/JPEG/GIF y guarda en wwwroot/img."""
+"""Quita fondo negro y reduce GIF/PNG para el easter egg del hero."""
 from __future__ import annotations
 
 import sys
@@ -8,6 +8,7 @@ from PIL import Image, ImageSequence
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "src" / "PortalClienchi.Web" / "wwwroot" / "img"
+MAX_SIDE = 96
 
 
 def strip_black(im: Image.Image, thresh: int = 28) -> Image.Image:
@@ -16,7 +17,7 @@ def strip_black(im: Image.Image, thresh: int = 28) -> Image.Image:
     w, h = im.size
     for y in range(h):
         for x in range(w):
-            r, g, b, a = pixels[x, y]
+            r, g, b, _a = pixels[x, y]
             if r <= thresh and g <= thresh and b <= thresh:
                 pixels[x, y] = (0, 0, 0, 0)
     for _ in range(2):
@@ -33,22 +34,32 @@ def strip_black(im: Image.Image, thresh: int = 28) -> Image.Image:
     return im
 
 
-def crop_opaque(im: Image.Image, pad: int = 4) -> Image.Image:
-    pixels = im.load()
+def fit(im: Image.Image, max_side: int = MAX_SIDE) -> Image.Image:
+    w, h = im.size
+    scale = min(1.0, max_side / max(w, h))
+    if scale >= 1:
+        return im
+    nw, nh = max(1, int(w * scale)), max(1, int(h * scale))
+    return im.resize((nw, nh), Image.Resampling.NEAREST)
+
+
+def opaque_bbox(im: Image.Image, pad: int = 2):
+    px = im.load()
     w, h = im.size
     xs, ys = [], []
     for y in range(h):
         for x in range(w):
-            if pixels[x, y][3] > 0:
+            if px[x, y][3] > 0:
                 xs.append(x)
                 ys.append(y)
     if not xs:
-        return im
-    left = max(0, min(xs) - pad)
-    right = min(w, max(xs) + pad + 1)
-    top = max(0, min(ys) - pad)
-    bottom = min(h, max(ys) + pad + 1)
-    return im.crop((left, top, right, bottom))
+        return None
+    return (
+        max(0, min(xs) - pad),
+        max(0, min(ys) - pad),
+        min(w, max(xs) + pad + 1),
+        min(h, max(ys) + pad + 1),
+    )
 
 
 def process(src: Path) -> Path:
@@ -58,60 +69,74 @@ def process(src: Path) -> Path:
     animated = n_frames > 1 or bool(getattr(im, "is_animated", False))
 
     if animated:
+        # Sample frames if too many (keep ~24fps feel for idle bob)
+        step = max(1, n_frames // 48)  # cap ~48 frames
         frames = []
         durations = []
-        bbox = None
-        for frame in ImageSequence.Iterator(im):
-            cleaned = strip_black(frame.copy())
+        for i, frame in enumerate(ImageSequence.Iterator(im)):
+            if i % step != 0:
+                continue
+            cleaned = fit(strip_black(frame.copy()))
             frames.append(cleaned)
-            durations.append(frame.info.get("duration", 80))
-            # accumulate bbox
-            px = cleaned.load()
-            w, h = cleaned.size
-            for y in range(h):
-                for x in range(w):
-                    if px[x, y][3] > 0:
-                        if bbox is None:
-                            bbox = [x, y, x, y]
-                        else:
-                            bbox[0] = min(bbox[0], x)
-                            bbox[1] = min(bbox[1], y)
-                            bbox[2] = max(bbox[2], x)
-                            bbox[3] = max(bbox[3], y)
-        if bbox:
-            pad = 4
-            box = (
-                max(0, bbox[0] - pad),
-                max(0, bbox[1] - pad),
-                min(frames[0].size[0], bbox[2] + pad + 1),
-                min(frames[0].size[1], bbox[3] + pad + 1),
+            durations.append(max(40, int(frame.info.get("duration", 80) * step)))
+
+        box = None
+        for f in frames:
+            b = opaque_bbox(f)
+            if not b:
+                continue
+            if box is None:
+                box = list(b)
+            else:
+                box[0] = min(box[0], b[0])
+                box[1] = min(box[1], b[1])
+                box[2] = max(box[2], b[2])
+                box[3] = max(box[3], b[3])
+        if box:
+            frames = [f.crop(tuple(box)) for f in frames]
+
+        # Quantize for smaller GIF
+        qframes = []
+        for f in frames:
+            q = f.convert("RGBA")
+            # composite on transparent then palette
+            alpha = q.split()[-1]
+            pal = q.convert("RGB").convert(
+                "P", palette=Image.Palette.ADAPTIVE, colors=64
             )
-            frames = [f.crop(box) for f in frames]
+            # restore transparency for near-zero alpha
+            mask = alpha.point(lambda a: 255 if a < 16 else 0)
+            pal.info["transparency"] = 0
+            # Use disposal-friendly approach: convert via RGBA paste
+            rgba = q.copy()
+            qframes.append(rgba)
+
         out = OUT_DIR / "yohana-corner.gif"
-        frames[0].save(
+        qframes[0].save(
             out,
             save_all=True,
-            append_images=frames[1:],
-            duration=durations,
+            append_images=qframes[1:],
+            duration=durations[: len(qframes)],
             loop=0,
             disposal=2,
-            transparency=0,
             optimize=False,
         )
-        # Also keep a PNG first-frame fallback
-        frames[0].save(OUT_DIR / "yohana-corner.png", "PNG")
-        print(f"GIF animado: {out} ({len(frames)} frames)")
+        qframes[0].save(OUT_DIR / "yohana-corner.png", "PNG")
+        print(f"GIF: {out} frames={len(qframes)} size={qframes[0].size} bytes={out.stat().st_size}")
         return out
 
-    cleaned = crop_opaque(strip_black(im))
+    cleaned = fit(strip_black(im))
+    box = opaque_bbox(cleaned)
+    if box:
+        cleaned = cleaned.crop(box)
     out = OUT_DIR / "yohana-corner.png"
     cleaned.save(out, "PNG")
-    print(f"PNG estático: {out} {cleaned.size} (el origen no era GIF animado)")
+    print(f"PNG: {out} {cleaned.size}")
     return out
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Uso: python make_yohana_easter.py <ruta-gif-o-imagen>")
+        print("Uso: python make_yohana_easter.py <ruta>")
         sys.exit(1)
     process(Path(sys.argv[1]))

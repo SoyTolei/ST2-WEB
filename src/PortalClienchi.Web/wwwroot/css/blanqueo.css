@@ -533,18 +533,14 @@
 }
 
 .blanqueo-ready-toast-text .toast-emoji {
-  display: inline-flex;
-  align-items: center;
-  vertical-align: -0.2em;
-  margin: 0 0.1em;
+  display: inline-block;
+  font-weight: 400;
+  font-style: normal;
+  font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 1.15em;
   line-height: 1;
-}
-
-.blanqueo-ready-toast-text .toast-emoji-svg {
-  display: block;
-  width: 1.15em;
-  height: 1.15em;
-  flex-shrink: 0;
+  vertical-align: -0.12em;
+  margin: 0 0.12em;
 }
 
 .blanqueo-ready-toast-actions {
