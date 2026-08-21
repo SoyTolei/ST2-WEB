@@ -1618,34 +1618,42 @@
   <div id="st2-about-overlay" class="st2-about-overlay hidden" role="dialog" aria-labelledby="st2-about-title" aria-modal="true">
     <div class="st2-about-dialog">
       <button type="button" id="st2-about-close" class="st2-about-close" aria-label="Cerrar">×</button>
-      <div class="st2-about-head">
-        <img src="/st2.ico" alt="" id="st2-about-icon" class="st2-about-icon" width="40" height="40"/>
-        <div class="st2-about-head-text">
-          <h2 id="st2-about-title" class="st2-about-title">ST2</h2>
-          <p id="st2-about-tagline" class="st2-about-tagline">Suite de herramientas</p>
-        </div>
-      </div>
       <div class="st2-about-accent"></div>
       <div class="st2-about-body">
         <section class="st2-about-notice" aria-label="Aviso de uso">
-          <p class="st2-about-notice-lead">Suite de Herramientas de uso interno.</p>
-          <p class="st2-about-notice-text">
-            <strong class="st2-about-abbr"><span>S</span>oluciones <span>T</span>ecnológicas <span>2</span></strong>,
-            es un conjunto de utilidades armadas para el día a día en la mesa de ayuda.
-            <em>No es un producto oficial de Thomson Reuters</em>
-            <span class="st2-about-aside" title="por el momento">👀 por el momento</span>.
-          </p>
-          <p class="st2-about-notice-text">
-            El acceso está pensado para todos los agentes de la mesa de servicios; no es obligatorio su uso.
-            Si encontrás alguna falla, o creés que puedo aplicar una mejora, por favor notificámelo. ¡Gracias!
-            <a
-              href="https://tolei.dev"
-              class="st2-about-inline-sig"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="Leonel Gallo · tolei.dev"
-            ><span class="st2-about-signature-by" aria-hidden="true">×</span> <span class="st2-about-signature-at">LG</span></a>
-          </p>
+          <div class="st2-about-notice-row">
+            <img src="/st2.ico" alt="" id="st2-about-icon" class="st2-about-icon" width="40" height="40"/>
+            <div class="st2-about-notice-copy">
+              <p class="st2-about-notice-lead">Suite de Herramientas de Uso Interno</p>
+              <p class="st2-about-notice-text">
+                <strong class="st2-about-abbr"><span>S</span>oluciones <span>T</span>ecnológicas <span>2</span> (ST2)</strong>
+                es un conjunto de utilidades desarrolladas para agilizar las tareas diarias de la mesa de ayuda.
+              </p>
+              <p class="st2-about-notice-text st2-about-notice-italic">
+                <em>Por el momento, no constituye un producto oficial o licenciado por Thomson Reuters.</em>
+              </p>
+              <p class="st2-about-notice-text">
+                El acceso está disponible para todos los agentes de la mesa de servicios, aunque su uso no es obligatorio.
+                Si detectás alguna falla o tenés alguna sugerencia de mejora, no dudes en avisarme. ¡Gracias!
+              </p>
+              <div class="st2-about-signature" aria-label="× LG">
+                <a
+                  href="https://tolei.dev"
+                  class="st2-about-signature-handle"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Leonel Gallo · tolei.dev"
+                >
+                  <span class="st2-about-signature-by" aria-hidden="true">×</span>
+                  <span class="st2-about-signature-at">LG</span>
+                </a>
+                <span class="st2-about-signature-bike-track" aria-hidden="true">
+                  <span class="st2-about-signature-bike st2-about-signature-bike--rear">🚲</span>
+                  <span class="st2-about-signature-bike st2-about-signature-bike--front">🚲</span>
+                </span>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="st2-about-tools" aria-label="Herramientas de la suite">
@@ -1669,7 +1677,7 @@
               <div class="st2-about-tool-actions">
                 <button type="button" class="st2-about-tool-dl" data-tool-download="sql" disabled>Pronto</button>
                 <label class="st2-about-tool-upload hidden" data-tool-upload-wrap="sql" title="Subir nueva versión (solo admin)">
-                  <input type="file" class="st2-about-tool-file" data-tool-upload="sql" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1"/>
+                  <input type="file" class="st2-about-tool-file" data-tool-upload="sql" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1,.bin"/>
                   <span>Subir</span>
                 </label>
               </div>
@@ -1682,7 +1690,7 @@
               <div class="st2-about-tool-actions">
                 <button type="button" class="st2-about-tool-dl" data-tool-download="bat" disabled>Pronto</button>
                 <label class="st2-about-tool-upload hidden" data-tool-upload-wrap="bat" title="Subir nueva versión (solo admin)">
-                  <input type="file" class="st2-about-tool-file" data-tool-upload="bat" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1"/>
+                  <input type="file" class="st2-about-tool-file" data-tool-upload="bat" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1,.bin"/>
                   <span>Subir</span>
                 </label>
               </div>

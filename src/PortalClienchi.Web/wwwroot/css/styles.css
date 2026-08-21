@@ -1933,44 +1933,13 @@ body.portal-tab-active .tab-icon {
   color: var(--dark);
 }
 
-.st2-about-head {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  padding-right: 28px;
-  padding-left: 28px;
-}
-
-.st2-about-head-text {
-  min-width: 0;
-  width: 100%;
-}
-
 .st2-about-icon {
   flex-shrink: 0;
   border-radius: 10px;
   cursor: default;
-}
-
-.st2-about-title {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--dark);
-  letter-spacing: -0.03em;
-}
-
-.st2-about-tagline {
-  margin: 4px 0 0;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  line-height: 1.35;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  width: 40px;
+  height: 40px;
+  margin-top: 2px;
 }
 
 .st2-about-accent {
@@ -1984,7 +1953,7 @@ body.portal-tab-active .tab-icon {
     rgba(214, 64, 0, 0.35) 80%,
     transparent 100%
   );
-  margin-bottom: 16px;
+  margin: 4px 0 16px;
 }
 
 .st2-about-body {
@@ -1998,6 +1967,17 @@ body.portal-tab-active .tab-icon {
   border: 1px solid #f3d5b8;
   background: linear-gradient(180deg, #fffdf9 0%, #fff6ec 100%);
   box-shadow: inset 3px 0 0 #e07a2f;
+}
+
+.st2-about-notice-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.st2-about-notice-copy {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .st2-about-notice-lead {
@@ -2014,33 +1994,32 @@ body.portal-tab-active .tab-icon {
   color: #c2410c;
 }
 
-.st2-about-aside {
-  display: inline;
-  margin-left: 4px;
-  font-size: 0.8em;
-  font-weight: 600;
-  color: #9a3412;
-  white-space: nowrap;
-}
-
-.st2-about-inline-sig {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-  margin-left: 6px;
-  text-decoration: none;
-  vertical-align: baseline;
-}
-
-.st2-about-inline-sig:hover .st2-about-signature-at {
-  text-decoration: underline;
-}
-
 .st2-about-notice-text {
   margin: 0 0 8px;
   font-size: 0.84rem;
   line-height: 1.5;
   color: #4b5563;
+}
+
+.st2-about-notice-italic {
+  color: #6b7280;
+}
+
+.st2-about-notice-copy > .st2-about-signature {
+  margin-top: 10px;
+  align-self: flex-start;
+  justify-content: flex-start;
+}
+
+.st2-about-signature-handle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  text-decoration: none;
+}
+
+.st2-about-signature-handle:hover .st2-about-signature-at {
+  text-decoration: underline;
 }
 
 .st2-about-notice-text:last-child {

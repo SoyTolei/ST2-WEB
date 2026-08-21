@@ -30,7 +30,7 @@ public sealed class St2ToolsStore
 
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".zip", ".7z", ".rar", ".exe", ".msi", ".bat", ".cmd", ".ps1",
+        ".zip", ".7z", ".rar", ".exe", ".msi", ".bat", ".cmd", ".ps1", ".bin",
     };
 
     private static readonly JsonSerializerOptions JsonOpts = new()
@@ -176,7 +176,7 @@ public sealed class St2ToolsStore
         var ext = Path.GetExtension(safeName);
         if (string.IsNullOrWhiteSpace(ext) || !AllowedExtensions.Contains(ext))
             throw new ArgumentException(
-                $"Formato no permitido ({safeName}). Usá zip, 7z, rar, exe, msi, bat, cmd o ps1.");
+                $"Formato no permitido ({safeName}). Usá zip, 7z, rar, exe, msi, bat, cmd, ps1 o bin.");
 
         var ver = string.IsNullOrWhiteSpace(version)
             ? DateTime.UtcNow.ToString("yyyy.MM.dd")
@@ -307,6 +307,7 @@ public sealed class St2ToolsStore
         ".bat" => "application/x-bat",
         ".cmd" => "application/x-bat",
         ".ps1" => "application/octet-stream",
+        ".bin" => "application/octet-stream",
         _ => "application/octet-stream",
     };
 

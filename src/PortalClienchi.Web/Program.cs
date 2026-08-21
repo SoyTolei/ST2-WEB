@@ -20,6 +20,9 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = 120 * 1024 * 1024;
+    // Evita spulear multipart a /tmp del contenedor (falla con archivos > ~64 KB).
+    options.MemoryBufferThreshold = 120 * 1024 * 1024;
+    options.ValueLengthLimit = 120 * 1024 * 1024;
 });
 
 PlanillasFeatureFlags.LegalEnabled = builder.Configuration.GetValue("Planillas:LegalEnabled", false);
@@ -53,6 +56,7 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
 {
     // Capturas + paquetes de herramientas (ST2.SQL / ST2.BAT) hasta ~120 MB
     options.MultipartBodyLengthLimit = 120 * 1024 * 1024;
+    options.MemoryBufferThreshold = 120 * 1024 * 1024;
     options.ValueLengthLimit = 120 * 1024 * 1024;
     options.MultipartHeadersLengthLimit = 64 * 1024;
 });
@@ -62,6 +66,20 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
 });
+
+// Temp del proceso en el volume (multipart / IO intermedio).
+try
+{
+    var dataTmp = Path.Combine(St2Paths.GetDataDirectory(), "tmp");
+    Directory.CreateDirectory(dataTmp);
+    Environment.SetEnvironmentVariable("TMPDIR", dataTmp);
+    Environment.SetEnvironmentVariable("TMP", dataTmp);
+    Environment.SetEnvironmentVariable("TEMP", dataTmp);
+}
+catch
+{
+    // Si el volume aún no montó, Kestrel usa el temp del SO.
+}
 
 var app = builder.Build();
 

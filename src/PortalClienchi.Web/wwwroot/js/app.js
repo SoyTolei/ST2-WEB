@@ -72,8 +72,9 @@ syncThemeToggle();
 const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
-const aboutTaglineEl = document.getElementById("st2-about-tagline");
 const aboutUpdatedEl = document.getElementById("st2-about-updated");
+let pathBeforeAbout = "/";
+let aboutRouteOpen = false;
 const ADMIN_TAB_ID = "admin";
 const ADMIN_PATH = "/admin";
 
@@ -1907,45 +1908,95 @@ async function uploadTool(toolId, file) {
     if (busyFill) busyFill.style.width = "8%";
   };
 
+  const maxB64 = 25 * 1024 * 1024;
+  const useB64 = file.size > 0 && file.size <= maxB64;
   showBusy(`Subiendo ${file.name}…`, 5);
-  setAboutToolsStatus(`Subiendo ${file.name} (${formatToolSize(file.size)})…`);
+  setAboutToolsStatus(
+    useB64
+      ? `Subiendo ${file.name} (${formatToolSize(file.size)}) vía JSON…`
+      : `Subiendo ${file.name} (${formatToolSize(file.size)})…`
+  );
 
-  const body = new FormData();
-  body.append("file", file, file.name || `st2-${toolId}.bin`);
-  body.append("version", new Date().toISOString().slice(0, 10).replace(/-/g, "."));
+  const version = new Date().toISOString().slice(0, 10).replace(/-/g, ".");
 
   try {
-    const data = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload`);
-      xhr.withCredentials = true;
-      xhr.upload.onprogress = (ev) => {
-        if (!ev.lengthComputable) {
-          showBusy(`Subiendo ${file.name}…`);
-          return;
-        }
-        const pct = Math.round((ev.loaded / ev.total) * 100);
-        showBusy(`Subiendo ${file.name}… ${pct}%`, pct);
-        setAboutToolsStatus(`Subiendo ${file.name}… ${pct}%`);
-      };
-      xhr.onload = () => {
-        let parsed = {};
-        const raw = String(xhr.responseText || "");
-        try { parsed = JSON.parse(raw || "{}"); } catch { /* ignore */ }
-        if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
-        else {
-          const msg = parsed?.error || parsed?.detail || parsed?.title
-            || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
-          const err = new Error(msg);
-          err.status = xhr.status;
-          err.raw = raw;
-          err.payload = parsed;
-          reject(err);
-        }
-      };
-      xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
-      xhr.send(body);
-    });
+    let data;
+    if (useB64) {
+      showBusy(`Codificando ${file.name}…`, 15);
+      const contentBase64 = await fileToBase64(file);
+      showBusy(`Enviando ${file.name}…`, 40);
+      data = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-b64`);
+        xhr.withCredentials = true;
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.upload.onprogress = (ev) => {
+          if (!ev.lengthComputable) return;
+          const pct = 40 + Math.round((ev.loaded / ev.total) * 55);
+          showBusy(`Enviando ${file.name}… ${Math.min(95, pct)}%`, pct);
+        };
+        xhr.onload = () => {
+          let parsed = {};
+          const raw = String(xhr.responseText || "");
+          try { parsed = JSON.parse(raw || "{}"); } catch { /* ignore */ }
+          if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
+          else {
+            const msg = parsed?.error || parsed?.detail || parsed?.title
+              || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
+            const err = new Error(msg);
+            err.status = xhr.status;
+            err.raw = raw;
+            err.payload = parsed;
+            reject(err);
+          }
+        };
+        xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
+        xhr.send(JSON.stringify({
+          fileName: file.name || `st2-${toolId}.bin`,
+          version,
+          contentBase64,
+        }));
+      });
+    } else {
+      const body = new FormData();
+      // Nombre neutro en multipart: algunos proxies bloquean .bat/.exe en el filename.
+      const wireName = `st2-${toolId}.bin`;
+      body.append("file", file, wireName);
+      body.append("originalName", file.name || wireName);
+      body.append("version", version);
+
+      data = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload`);
+        xhr.withCredentials = true;
+        xhr.upload.onprogress = (ev) => {
+          if (!ev.lengthComputable) {
+            showBusy(`Subiendo ${file.name}…`);
+            return;
+          }
+          const pct = Math.round((ev.loaded / ev.total) * 100);
+          showBusy(`Subiendo ${file.name}… ${pct}%`, pct);
+          setAboutToolsStatus(`Subiendo ${file.name}… ${pct}%`);
+        };
+        xhr.onload = () => {
+          let parsed = {};
+          const raw = String(xhr.responseText || "");
+          try { parsed = JSON.parse(raw || "{}"); } catch { /* ignore */ }
+          if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
+          else {
+            const msg = parsed?.error || parsed?.detail || parsed?.title
+              || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
+            const err = new Error(msg);
+            err.status = xhr.status;
+            err.raw = raw;
+            err.payload = parsed;
+            reject(err);
+          }
+        };
+        xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
+        xhr.send(body);
+      });
+    }
 
     showBusy("Listo", 100);
     setAboutToolsStatus(`Publicado ${data.name || toolId} v${data.version || ""}`.trim());
@@ -1953,7 +2004,6 @@ async function uploadTool(toolId, file) {
     markToolsSeen();
   } catch (err) {
     let msg = err?.message || "No se pudo subir.";
-    // Si el body vino vacío (500 genérico), pedir el lastError guardado en disco
     try {
       const dig = await apiGet("/api/tools");
       if (dig?.lastError) {
@@ -1966,6 +2016,19 @@ async function uploadTool(toolId, file) {
   } finally {
     hideBusy();
   }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || "");
+      const idx = dataUrl.indexOf(",");
+      resolve(idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl);
+    };
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo en el navegador."));
+    reader.readAsDataURL(file);
+  });
 }
 
 function bindAboutToolsUi() {
@@ -1987,10 +2050,9 @@ function bindAboutToolsUi() {
   });
 }
 
-function showAbout() {
+function showAbout({ history = "push" } = {}) {
   const webMeta = document.getElementById("st2-about-web-meta");
   if (webMeta) webMeta.textContent = getAboutVersionLabel();
-  if (aboutTaglineEl) aboutTaglineEl.textContent = "Suite de herramientas";
   applyAboutUpdated();
   bindAboutToolsUi();
   void refreshAboutTools().then(() => {
@@ -1999,7 +2061,62 @@ function showAbout() {
   });
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
+  aboutRouteOpen = true;
+  document.title = "ST2 · Acerca de";
+  if (history !== "none") {
+    const current = normalizeShellPath(window.location.pathname);
+    if (current !== "/about") pathBeforeAbout = current || "/";
+    syncAboutHistory(history);
+  }
   aboutCloseBtn?.focus();
+}
+
+function hideAbout({ history = "restore" } = {}) {
+  aboutOverlay?.classList.add("hidden");
+  aboutOverlay?.setAttribute("aria-hidden", "true");
+  aboutRouteOpen = false;
+  const onAboutPath = normalizeShellPath(window.location.pathname) === "/about";
+  if (history !== "none" && onAboutPath) {
+    const fallback = pathBeforeAbout && pathBeforeAbout !== "/about" ? pathBeforeAbout : "/";
+    const tab = tabFromPath(fallback);
+    document.title = titleForTab(tab);
+    if (!shellRouteSyncing) {
+      window.history.replaceState(
+        { tab, thomPortal: thomPortalId, portalId: activePortalId },
+        "",
+        fallback
+      );
+    }
+  } else {
+    const tab = document.querySelector(".tab-btn.active")?.dataset?.tab || "planillas";
+    document.title = titleForTab(tab);
+  }
+  aboutBtn?.focus();
+}
+
+function syncAboutHistory(mode = "push") {
+  if (shellRouteSyncing || mode === "none") return;
+  const current = normalizeShellPath(window.location.pathname);
+  const state = {
+    tab: document.querySelector(".tab-btn.active")?.dataset?.tab || "planillas",
+    thomPortal: thomPortalId,
+    portalId: activePortalId,
+    about: true,
+  };
+  if (mode === "replace" || current === "/about") {
+    window.history.replaceState(state, "", "/about");
+  } else {
+    window.history.pushState(state, "", "/about");
+  }
+}
+
+function applyAboutFromPath() {
+  if (normalizeShellPath(window.location.pathname) === "/about") {
+    showAbout({ history: "none" });
+    return true;
+  }
+  if (aboutRouteOpen) hideAbout({ history: "none" });
+  return false;
 }
 
 async function refreshToolsDiagHint() {
@@ -2016,12 +2133,6 @@ async function refreshToolsDiagHint() {
   } catch {
     // silencioso: el diag no debe tapar la UI si falla
   }
-}
-
-function hideAbout() {
-  aboutOverlay?.classList.add("hidden");
-  aboutOverlay?.setAttribute("aria-hidden", "true");
-  aboutBtn?.focus();
 }
 
 aboutBtn?.addEventListener("click", showAbout);
@@ -3180,6 +3291,9 @@ function syncTabHistory(tabId, mode = "push") {
 
 function navigateTab(tabId, { history = "push" } = {}) {
   if (!tabId) return;
+  if (aboutRouteOpen || normalizeShellPath(window.location.pathname) === "/about") {
+    hideAbout({ history: "restore" });
+  }
   if (tabId === ADMIN_TAB_ID && !isSt2SuperAdmin()) {
     navigateTab("planillas", { history: "replace" });
     return;
@@ -3209,6 +3323,8 @@ function navigateTab(tabId, { history = "push" } = {}) {
 }
 
 function applyTopTabEntry() {
+  if (applyAboutFromPath()) return;
+
   const tab = tabFromPath(window.location.pathname);
   if (tab === "planillas") return;
 
@@ -3328,6 +3444,7 @@ async function bootstrapApp() {
   syncAdminTabVisibility();
   applyTopTabEntry();
   window.addEventListener("popstate", () => {
+    if (applyAboutFromPath()) return;
     const tab = tabFromPath(window.location.pathname);
     shellRouteSyncing = true;
     try {

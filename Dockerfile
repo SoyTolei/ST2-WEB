@@ -12,6 +12,9 @@ WORKDIR /app
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ST2_DATA_DIR=/data/st2
+ENV TMPDIR=/data/st2/tmp
+ENV TMP=/data/st2/tmp
+ENV TEMP=/data/st2/tmp
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Reintentos por si apt del builder de Railway falla por red/transitorio.
@@ -32,7 +35,7 @@ RUN set -eux; \
     else \
       echo "WARN: fontconfig missing after apt retries; continuing without extra fonts"; \
     fi; \
-    mkdir -p /data/st2 && chmod 777 /data/st2
+    mkdir -p /data/st2/tmp && chmod 777 /data/st2 /data/st2/tmp
 
 COPY --from=build /app/publish .
 
