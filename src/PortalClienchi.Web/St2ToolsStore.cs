@@ -97,9 +97,16 @@ public sealed class St2ToolsStore
         EnsureRoot();
         var probe = Path.Combine(_root, $".probe-{Guid.NewGuid():N}.txt");
         File.WriteAllText(probe, DateTime.UtcNow.ToString("o"));
-        var info = new FileInfo(probe);
-        File.Delete(probe);
-        return $"write-ok size={info.Length} root={_root}";
+        long length;
+        try
+        {
+            length = new FileInfo(probe).Length;
+        }
+        finally
+        {
+            try { File.Delete(probe); } catch { /* ignore */ }
+        }
+        return $"write-ok size={length} root={_root}";
     }
 
     public void WriteLastError(string toolId, Exception ex)

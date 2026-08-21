@@ -1995,11 +1995,12 @@ async function refreshToolsDiagHint() {
       setAboutToolsStatus(data?.error || "Diagnóstico: no se pudo escribir en el volume.", true);
       return;
     }
+    // Volume OK: no molestar si no hay error de subida pendiente
     if (data?.lastError) {
       setAboutToolsStatus(`Último error de subida:\n${String(data.lastError).slice(0, 400)}`, true);
     }
-  } catch (err) {
-    setAboutToolsStatus(err?.message || "No se pudo diagnosticar el volume.", true);
+  } catch {
+    // silencioso: el diag no debe tapar la UI si falla
   }
 }
 
