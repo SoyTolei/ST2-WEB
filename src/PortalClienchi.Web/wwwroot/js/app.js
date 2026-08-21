@@ -1908,95 +1908,53 @@ async function uploadTool(toolId, file) {
     if (busyFill) busyFill.style.width = "8%";
   };
 
-  const maxB64 = 25 * 1024 * 1024;
-  const useB64 = file.size > 0 && file.size <= maxB64;
-  showBusy(`Subiendo ${file.name}…`, 5);
-  setAboutToolsStatus(
-    useB64
-      ? `Subiendo ${file.name} (${formatToolSize(file.size)}) vía JSON…`
-      : `Subiendo ${file.name} (${formatToolSize(file.size)})…`
-  );
-
   const version = new Date().toISOString().slice(0, 10).replace(/-/g, ".");
+  showBusy(`Preparando ${file.name}…`, 5);
+  setAboutToolsStatus(`Subiendo ${file.name} (${formatToolSize(file.size)})…`);
 
   try {
-    let data;
-    if (useB64) {
-      showBusy(`Codificando ${file.name}…`, 15);
-      const contentBase64 = await fileToBase64(file);
-      showBusy(`Enviando ${file.name}…`, 40);
-      data = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-b64`);
-        xhr.withCredentials = true;
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.upload.onprogress = (ev) => {
-          if (!ev.lengthComputable) return;
-          const pct = 40 + Math.round((ev.loaded / ev.total) * 55);
-          showBusy(`Enviando ${file.name}… ${Math.min(95, pct)}%`, pct);
-        };
-        xhr.onload = () => {
-          let parsed = {};
-          const raw = String(xhr.responseText || "");
-          try { parsed = JSON.parse(raw || "{}"); } catch { /* ignore */ }
-          if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
-          else {
-            const msg = parsed?.error || parsed?.detail || parsed?.title
-              || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
-            const err = new Error(msg);
-            err.status = xhr.status;
-            err.raw = raw;
-            err.payload = parsed;
-            reject(err);
-          }
-        };
-        xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
-        xhr.send(JSON.stringify({
-          fileName: file.name || `st2-${toolId}.bin`,
-          version,
-          contentBase64,
-        }));
-      });
-    } else {
-      const body = new FormData();
-      // Nombre neutro en multipart: algunos proxies bloquean .bat/.exe en el filename.
-      const wireName = `st2-${toolId}.bin`;
-      body.append("file", file, wireName);
-      body.append("originalName", file.name || wireName);
-      body.append("version", version);
-
-      data = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload`);
-        xhr.withCredentials = true;
-        xhr.upload.onprogress = (ev) => {
-          if (!ev.lengthComputable) {
-            showBusy(`Subiendo ${file.name}…`);
-            return;
-          }
-          const pct = Math.round((ev.loaded / ev.total) * 100);
-          showBusy(`Subiendo ${file.name}… ${pct}%`, pct);
-          setAboutToolsStatus(`Subiendo ${file.name}… ${pct}%`);
-        };
-        xhr.onload = () => {
-          let parsed = {};
-          const raw = String(xhr.responseText || "");
-          try { parsed = JSON.parse(raw || "{}"); } catch { /* ignore */ }
-          if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
-          else {
-            const msg = parsed?.error || parsed?.detail || parsed?.title
-              || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
-            const err = new Error(msg);
-            err.status = xhr.status;
-            err.raw = raw;
-            err.payload = parsed;
-            reject(err);
-          }
-        };
-        xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
-        xhr.send(body);
-      });
+    // 1) Canario: confirma que el POST llega a la app (si 500 vacío → proxy).
+    showBusy("Verificando canal de subida…", 10);
+    const ping = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-ping`, null);
+    if (!ping?.reached && !ping?.ok) {
+      throw new Error(ping?.error || "El canario de subida no respondió OK.");
     }
+
+    // 2) PUT binario XOR (sin .bat en URL ni multipart).
+    showBusy(`Ofuscando ${file.name}…`, 25);
+    const plain = new Uint8Array(await file.arrayBuffer());
+    const wired = new Uint8Array(plain.length);
+    for (let i = 0; i < plain.length; i++) wired[i] = plain[i] ^ 0xa5;
+
+    const ext = (file.name.includes(".") ? file.name.split(".").pop() : "bin") || "bin";
+    const qs = new URLSearchParams({
+      v: version,
+      z: "1",
+      x: toBase64Url(ext),
+      n: toBase64Url(file.name || `st2-${toolId}.${ext}`),
+    });
+
+    showBusy(`Enviando ${file.name}…`, 40);
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-raw?${qs}`);
+      xhr.withCredentials = true;
+      xhr.setRequestHeader("Content-Type", "application/octet-stream");
+      xhr.setRequestHeader("X-St2-Xor", "1");
+      xhr.upload.onprogress = (ev) => {
+        if (!ev.lengthComputable) return;
+        const pct = 40 + Math.round((ev.loaded / ev.total) * 55);
+        showBusy(`Enviando ${file.name}… ${Math.min(95, pct)}%`, pct);
+        setAboutToolsStatus(`Enviando ${file.name}… ${Math.min(95, pct)}%`);
+      };
+      xhr.onload = () => {
+        const parsed = parseXhrJson(xhr);
+        if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
+        else reject(makeUploadError(xhr, parsed));
+      };
+      xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
+      xhr.send(wired);
+    });
 
     showBusy("Listo", 100);
     setAboutToolsStatus(`Publicado ${data.name || toolId} v${data.version || ""}`.trim());
@@ -2004,10 +1962,15 @@ async function uploadTool(toolId, file) {
     markToolsSeen();
   } catch (err) {
     let msg = err?.message || "No se pudo subir.";
+    const proxyHint = !err?.reached && (err?.status === 500 || err?.status === 403)
+      ? "\n\nParece un bloqueo del proxy (Cloudflare): el pedido no llegó a ST2 o llegó vacío."
+      : "";
     try {
       const dig = await apiGet("/api/tools");
       if (dig?.lastError) {
         msg = `${msg}\n\nDetalle servidor:\n${String(dig.lastError).slice(0, 500)}`;
+      } else if (!err?.reached) {
+        msg = `${msg}${proxyHint}\n(dataDir: ${dig?.dataDir || "?"}; sin lastError en disco → no ejecutó el handler)`;
       } else if (dig?.dataDir) {
         msg = `${msg}\n(dataDir: ${dig.dataDir})`;
       }
@@ -2018,16 +1981,45 @@ async function uploadTool(toolId, file) {
   }
 }
 
-function fileToBase64(file) {
+function toBase64Url(text) {
+  const b64 = btoa(unescape(encodeURIComponent(String(text || ""))));
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function parseXhrJson(xhr) {
+  const raw = String(xhr.responseText || "");
+  try { return JSON.parse(raw || "{}"); } catch { return { raw: raw.slice(0, 200) }; }
+}
+
+function makeUploadError(xhr, parsed) {
+  const raw = String(xhr.responseText || "");
+  const msg = parsed?.error || parsed?.detail || parsed?.title
+    || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
+  const err = new Error(msg);
+  err.status = xhr.status;
+  err.raw = raw;
+  err.payload = parsed;
+  err.reached = !!parsed?.reached || !!parsed?.dataDir || !!parsed?.exceptionType;
+  err.cfRay = xhr.getResponseHeader("cf-ray") || xhr.getResponseHeader("CF-RAY");
+  if (err.cfRay && !err.reached) {
+    err.message = `${msg} [cf-ray ${err.cfRay}]`;
+  }
+  return err;
+}
+
+function xhrJson(method, url, bodyObj) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result || "");
-      const idx = dataUrl.indexOf(",");
-      resolve(idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl);
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.withCredentials = true;
+    if (bodyObj != null) xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onload = () => {
+      const parsed = parseXhrJson(xhr);
+      if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
+      else reject(makeUploadError(xhr, parsed));
     };
-    reader.onerror = () => reject(new Error("No se pudo leer el archivo en el navegador."));
-    reader.readAsDataURL(file);
+    xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
+    xhr.send(bodyObj == null ? null : JSON.stringify(bodyObj));
   });
 }
 

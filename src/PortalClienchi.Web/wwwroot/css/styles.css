@@ -1887,14 +1887,14 @@ body.portal-tab-active .tab-icon {
 
 .st2-about-dialog {
   position: relative;
-  width: min(100%, 520px);
-  max-height: min(90vh, 720px);
+  width: min(100%, 640px);
+  max-height: min(90vh, 780px);
   overflow: auto;
   background:
     radial-gradient(120% 70% at 100% 0%, rgba(214, 64, 0, 0.06) 0%, transparent 52%),
     linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   border-radius: 16px;
-  padding: 28px 28px 20px;
+  padding: 32px 34px 24px;
   box-shadow:
     0 24px 48px rgba(26, 31, 46, 0.22),
     0 0 0 1px rgba(226, 230, 239, 0.9);
@@ -1961,8 +1961,8 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-about-notice {
-  margin: 0 0 18px;
-  padding: 14px 14px 12px;
+  margin: 0 0 22px;
+  padding: 16px 16px 14px;
   border-radius: 12px;
   border: 1px solid #f3d5b8;
   background: linear-gradient(180deg, #fffdf9 0%, #fff6ec 100%);
@@ -1972,7 +1972,7 @@ body.portal-tab-active .tab-icon {
 .st2-about-notice-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 14px;
 }
 
 .st2-about-notice-copy {
@@ -1981,7 +1981,7 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-about-notice-lead {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--dark);
@@ -1991,22 +1991,25 @@ body.portal-tab-active .tab-icon {
 
 .st2-about-abbr span {
   font-weight: 800;
-  color: #c2410c;
 }
 
 .st2-about-notice-text {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 0.84rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #4b5563;
 }
 
-.st2-about-notice-italic {
+.st2-about-notice-aside {
+  display: inline;
+  font-size: 0.76rem;
+  font-style: italic;
+  line-height: 1.45;
   color: #6b7280;
 }
 
 .st2-about-notice-copy > .st2-about-signature {
-  margin-top: 10px;
+  margin-top: 12px;
   align-self: flex-start;
   justify-content: flex-start;
 }

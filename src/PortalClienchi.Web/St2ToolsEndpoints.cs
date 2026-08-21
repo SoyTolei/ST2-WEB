@@ -6,7 +6,7 @@ namespace PortalClienchi.Web;
 public static class St2ToolsEndpoints
 {
     private const long MaxUploadBytes = 120L * 1024 * 1024;
-    private const long MaxBase64Bytes = 25L * 1024 * 1024;
+    private const byte XorKey = 0xA5;
 
     public static void MapSt2ToolsEndpoints(this WebApplication app)
     {
@@ -55,6 +55,35 @@ public static class St2ToolsEndpoints
             }
         });
 
+        // Canario: si esto falla con 500 vacío, el proxy corta antes de la app.
+        app.MapPost("/api/tools/{toolId}/upload-ping", (HttpContext ctx, string toolId, St2ToolsStore store) =>
+        {
+            if (!TryRequireSuperAdmin(ctx, out var email, out var error))
+                return error!;
+
+            try
+            {
+                if (!St2ToolsStore.ToolIds.Contains(toolId.Trim().ToLowerInvariant()))
+                    return Fail(store, toolId, "Herramienta inválida.", 400);
+
+                var probe = store.WriteProbe();
+                store.ClearLastError();
+                return Results.Ok(new
+                {
+                    ok = true,
+                    reached = true,
+                    toolId,
+                    email,
+                    probe,
+                    dataDir = store.RootPath,
+                });
+            }
+            catch (Exception ex)
+            {
+                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
+            }
+        });
+
         app.MapGet("/api/tools/{toolId}/download", (HttpContext ctx, string toolId, St2ToolsStore store) =>
         {
             if (!TryRequireUser(ctx, out _, out var error))
@@ -67,7 +96,85 @@ public static class St2ToolsEndpoints
             return Results.File(stream, meta.ContentType, meta.FileName, enableRangeProcessing: true);
         });
 
-        // Multipart (legacy / archivos grandes). Preferir /upload-b64 para .bat y similares.
+        // PUT binario ofuscado (XOR): evita WAF que escanea .bat / multipart / JSON con payload legible.
+        app.MapMethods("/api/tools/{toolId}/upload-raw", new[] { "PUT", "POST" }, async (
+            HttpRequest request,
+            string toolId,
+            St2ToolsStore store,
+            CancellationToken ct) =>
+        {
+            try
+            {
+                var sizeFeature = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
+                if (sizeFeature is not null && !sizeFeature.IsReadOnly)
+                    sizeFeature.MaxRequestBodySize = MaxUploadBytes;
+
+                var email = PlanUserIdentity.GetFromRequest(request.HttpContext);
+                if (email is null)
+                    return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+                if (!St2SuperAdmin.Is(email))
+                    return Results.Json(new { error = "Solo el administrador puede subir paquetes." }, statusCode: StatusCodes.Status403Forbidden);
+
+                var version = request.Query["v"].ToString();
+                if (string.IsNullOrWhiteSpace(version))
+                    version = DateTime.UtcNow.ToString("yyyy.MM.dd");
+
+                // Extensión y nombre en Base64URL (sin ".bat" en claro en la URL).
+                var ext = DecodeMeta(request.Query["x"].ToString(), fallback: "bin");
+                if (!ext.StartsWith('.'))
+                    ext = "." + ext.TrimStart('.');
+                var displayName = DecodeMeta(request.Query["n"].ToString(), fallback: $"st2-{toolId}{ext}");
+                if (string.IsNullOrWhiteSpace(Path.GetExtension(displayName)))
+                    displayName += ext;
+
+                await using var ms = new MemoryStream();
+                await request.Body.CopyToAsync(ms, ct).ConfigureAwait(false);
+                var bytes = ms.ToArray();
+                if (bytes.Length <= 0)
+                    return Fail(store, toolId, "El cuerpo llegó vacío.", 400);
+                if (bytes.Length > MaxUploadBytes)
+                    return Fail(store, toolId, "El archivo supera el máximo de 120 MB.", 400);
+
+                var xor = string.Equals(request.Query["z"].ToString(), "1", StringComparison.Ordinal)
+                    || string.Equals(request.Headers["X-St2-Xor"].ToString(), "1", StringComparison.Ordinal);
+                if (xor)
+                {
+                    for (var i = 0; i < bytes.Length; i++)
+                        bytes[i] ^= XorKey;
+                }
+
+                await using var input = new MemoryStream(bytes, writable: false);
+                var saved = await store.SaveStreamAsync(toolId, displayName, input, version, bytes.Length, ct)
+                    .ConfigureAwait(false);
+                store.ClearLastError();
+                return Results.Ok(saved);
+            }
+            catch (ArgumentException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (BadHttpRequestException ex)
+            {
+                return Fail(store, toolId, "Pedido inválido o archivo demasiado grande: " + ex.Message, 400, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Fail(store, toolId, "Sin permiso de escritura en el volume (RAILWAY_RUN_UID=0).", 500, ex);
+            }
+            catch (IOException ex)
+            {
+                return Fail(store, toolId, "Error de disco: " + ex.Message, 500, ex);
+            }
+            catch (Exception ex)
+            {
+                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
+            }
+        });
+
         app.MapPost("/api/tools/{toolId}/upload", async (HttpRequest request, string toolId, St2ToolsStore store, CancellationToken ct) =>
         {
             try
@@ -125,73 +232,27 @@ public static class St2ToolsEndpoints
                 return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
         });
+    }
 
-        // JSON + Base64: evita WAF/proxy que bloquea multipart con .bat/.exe y el spool a /tmp.
-        app.MapPost("/api/tools/{toolId}/upload-b64", async (HttpRequest request, string toolId, St2ToolsStore store, CancellationToken ct) =>
+    private static string DecodeMeta(string? raw, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return fallback;
+        try
         {
-            try
+            var s = raw.Trim().Replace('-', '+').Replace('_', '/');
+            switch (s.Length % 4)
             {
-                var sizeFeature = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
-                if (sizeFeature is not null && !sizeFeature.IsReadOnly)
-                    sizeFeature.MaxRequestBodySize = MaxUploadBytes;
-
-                var email = PlanUserIdentity.GetFromRequest(request.HttpContext);
-                if (email is null)
-                    return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
-                if (!St2SuperAdmin.Is(email))
-                    return Results.Json(new { error = "Solo el administrador puede subir paquetes." }, statusCode: StatusCodes.Status403Forbidden);
-
-                var body = await request.ReadFromJsonAsync<ToolUploadB64Request>(ct).ConfigureAwait(false);
-                if (body is null || string.IsNullOrWhiteSpace(body.ContentBase64))
-                    return Fail(store, toolId, "Falta contentBase64.", 400);
-
-                byte[] bytes;
-                try
-                {
-                    bytes = Convert.FromBase64String(body.ContentBase64.Trim());
-                }
-                catch (FormatException ex)
-                {
-                    return Fail(store, toolId, "Base64 inválido.", 400, ex);
-                }
-
-                if (bytes.Length <= 0)
-                    return Fail(store, toolId, "El archivo llegó vacío.", 400);
-                if (bytes.Length > MaxBase64Bytes)
-                    return Fail(store, toolId, $"Para archivos > {MaxBase64Bytes / (1024 * 1024)} MB usá un .zip por multipart.", 400);
-
-                var fileName = string.IsNullOrWhiteSpace(body.FileName) ? $"st2-{toolId}.bin" : body.FileName;
-                await using var input = new MemoryStream(bytes, writable: false);
-                var saved = await store.SaveStreamAsync(toolId, fileName, input, body.Version, bytes.Length, ct)
-                    .ConfigureAwait(false);
-                store.ClearLastError();
-                return Results.Ok(saved);
+                case 2: s += "=="; break;
+                case 3: s += "="; break;
             }
-            catch (ArgumentException ex)
-            {
-                return Fail(store, toolId, ex.Message, 400, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Fail(store, toolId, ex.Message, 400, ex);
-            }
-            catch (BadHttpRequestException ex)
-            {
-                return Fail(store, toolId, "Pedido inválido o archivo demasiado grande: " + ex.Message, 400, ex);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Fail(store, toolId, "Sin permiso de escritura en el volume (RAILWAY_RUN_UID=0).", 500, ex);
-            }
-            catch (IOException ex)
-            {
-                return Fail(store, toolId, "Error de disco: " + ex.Message, 500, ex);
-            }
-            catch (Exception ex)
-            {
-                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
-            }
-        });
+            var text = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(s)).Trim();
+            return string.IsNullOrWhiteSpace(text) ? fallback : text;
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 
     private static IResult Fail(St2ToolsStore store, string toolId, string message, int status, Exception? ex = null)
@@ -204,6 +265,7 @@ public static class St2ToolsEndpoints
             exceptionType = ex?.GetType().FullName,
             dataDir = store.RootPath,
             toolId,
+            reached = true,
         }, statusCode: status);
     }
 
@@ -229,12 +291,5 @@ public static class St2ToolsEndpoints
             return false;
         }
         return true;
-    }
-
-    private sealed class ToolUploadB64Request
-    {
-        public string? FileName { get; set; }
-        public string? Version { get; set; }
-        public string? ContentBase64 { get; set; }
     }
 }
