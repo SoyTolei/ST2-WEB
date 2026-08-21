@@ -10,7 +10,7 @@ public static class ReferralIdConstants
     public const string PlaceholderPasoAPaso = "Detalle paso a paso del proceso realizado por el usuario";
 
     public static readonly string[] Versiones = ["8.71", "8.80"];
-    public static readonly string[] Modulos = ["e-Flexware", "Contabilidad General", "Sueldos y Jornales", "Queries"];
+    public static readonly string[] Modulos = ["Gestión", "Contabilidad General", "Sueldos y Jornales", "Queries"];
     public static readonly string[] Collations = ["Modern_Spanish_CI_AS", "Latin1_General_CI_AS"];
     public static readonly string[] SqlServerVersions =
     [
