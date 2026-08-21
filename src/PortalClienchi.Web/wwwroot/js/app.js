@@ -1757,9 +1757,9 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
 }
 
 function showAbout() {
-  if (aboutTaglineEl) {
-    aboutTaglineEl.textContent = getAboutVersionLabel();
-  }
+  const webMeta = document.getElementById("st2-about-web-meta");
+  if (webMeta) webMeta.textContent = getAboutVersionLabel();
+  if (aboutTaglineEl) aboutTaglineEl.textContent = "Suite de herramientas";
   applyAboutUpdated();
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");

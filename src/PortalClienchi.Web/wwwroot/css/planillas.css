@@ -337,10 +337,6 @@
   color: #020617;
 }
 
-.planillas-footer:hover .st2-suite-sig-line {
-  color: #1e293b;
-}
-
 .planillas-card {
   --plan-card-pad-x: 44px;
   --plan-card-pad-top: 32px;

@@ -70,18 +70,44 @@ html.st2-theme-dark .st2-about-dialog {
 }
 
 html.st2-theme-dark .st2-about-title,
-html.st2-theme-dark .st2-about-module-title {
+html.st2-theme-dark .st2-about-notice-lead,
+html.st2-theme-dark .st2-about-tool-name {
   color: var(--dark);
 }
 
-html.st2-theme-dark .st2-about-module {
+html.st2-theme-dark .st2-about-notice {
+  background: linear-gradient(180deg, #2a2118 0%, #241c16 100%);
+  border-color: #5b3d28;
+  box-shadow: inset 3px 0 0 #e07a2f;
+}
+
+html.st2-theme-dark .st2-about-notice-text,
+html.st2-theme-dark .st2-about-tool-desc,
+html.st2-theme-dark .st2-about-tools-hint,
+html.st2-theme-dark .st2-about-updated {
+  color: var(--text-muted);
+}
+
+html.st2-theme-dark .st2-about-tool {
   background: #1a2130;
   border-color: #2b3445;
 }
 
-html.st2-theme-dark .st2-about-module-text,
-html.st2-theme-dark .st2-about-updated {
-  color: var(--text-muted);
+html.st2-theme-dark .st2-about-tool.is-current {
+  background: linear-gradient(180deg, #2a2118 0%, #241c16 100%);
+  border-color: #5b3d28;
+}
+
+html.st2-theme-dark .st2-about-tool-dl {
+  background: #151b26;
+  border-color: #2b3445;
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-about-tool-dl:not(:disabled) {
+  background: #2a2118;
+  border-color: #9a3412;
+  color: #fdba74;
 }
 
 html.st2-theme-dark .st2-access-card,
