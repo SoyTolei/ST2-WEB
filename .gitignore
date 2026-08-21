@@ -38,8 +38,4 @@ src/PortalClienchi.Web/Fonts/
 # Artefactos temporales / checks locales
 tmp/
 
-# Backup local del GIF original del easter egg (no deploy)
-src/PortalClienchi.Web/wwwroot/img/yohana-corner.original.gif
-src/PortalClienchi.Web/wwwroot/img/yohana-corner.src.gif
-
 

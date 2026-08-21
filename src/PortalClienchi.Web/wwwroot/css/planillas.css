@@ -367,26 +367,37 @@
 
 .planillas-hero-easter {
   position: absolute;
-  top: -18px;
-  left: 8px;
+  top: -16px;
+  left: 6px;
   right: auto;
-  width: 72px;
+  width: 64px;
   height: auto;
   pointer-events: none;
   z-index: 2;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
-  transform: rotate(-6deg);
   user-select: none;
-  /* visibility (no display:none): evita que el GIF se congele al mostrar con Ver como */
   opacity: 1;
   visibility: visible;
+  transform-origin: 50% 85%;
+  animation: planillas-hero-easter-bob 2.6s ease-in-out infinite;
 }
 
 .planillas-hero-easter.is-hidden {
   opacity: 0;
   visibility: hidden;
+  animation: none;
+}
+
+@keyframes planillas-hero-easter-bob {
+  0%,
+  100% {
+    transform: rotate(-7deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-4px);
+  }
 }
 
 .planillas-hero h2 {
