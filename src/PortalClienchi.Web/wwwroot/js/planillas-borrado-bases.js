@@ -750,9 +750,10 @@ function buildRow(item) {
   const nro = String(item.nroEmpresa || "").trim();
   const nombre = String(item.nombreEmpresa || "").trim();
   const cuit = String(item.cuit || "").trim();
+  const cuitFmt = formatCuit(cuit);
   const cliente = String(item.nroCliente || "").trim();
   const aclaracion = String(item.aclaracion || "").trim();
-  const empresaTitle = escapeHtml(nro && nombre ? `[${nro}] ${nombre}` : (nro || nombre || ""));
+  const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
   const clienteCell = !cliente
     ? "—"
     : canConfirm
@@ -766,11 +767,10 @@ function buildRow(item) {
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
     <td class="borrado-col-cliente" title="${escapeHtml(cliente)}">${clienteCell}</td>
-    <td class="borrado-col-empresa" title="${empresaTitle}">
-      <span class="borrado-empresa-nro">${escapeHtml(nro ? `[${nro}]` : "—")}</span>
-      <span class="borrado-empresa-nombre">${escapeHtml(nombre || "")}</span>
+    <td class="borrado-col-empresa" title="${escapeHtml(empresaLabel)}">
+      <span class="borrado-empresa-inline">${escapeHtml(empresaLabel)}</span>
     </td>
-    <td class="borrado-col-cuit">${escapeHtml(cuit || "—")}</td>
+    <td class="borrado-col-cuit" title="${escapeHtml(cuit || "")}">${escapeHtml(cuitFmt)}</td>
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="borrado-col-listo">${formatEstadoCell(item)}</td>
@@ -969,13 +969,22 @@ function formatFecha(iso) {
   return `${day}-${month}-${String(year).slice(-2)}`;
 }
 
+function formatCuit(raw) {
+  const digits = String(raw || "").replace(/\D/g, "");
+  if (!digits) return "—";
+  if (digits.length === 11) {
+    return `${digits.slice(0, 2)}-${digits.slice(2, 10)}-${digits.slice(10)}`;
+  }
+  return String(raw || "").trim() || "—";
+}
+
 function formatEstadoCell(item) {
   if (item.listo) {
-    return '<span class="borrado-estado-ok" title="Confirmado / verificado" aria-label="Listo">✓</span>';
+    return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada</span>';
   }
   const { resultado, nota } = parseAclaracion(item.aclaracion);
   if (!resultado && !nota) {
-    return '<span class="borrado-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
+    return '<span class="borrado-estado-pending" title="Pendiente de confirmación">Pendiente</span>';
   }
   return "—";
 }

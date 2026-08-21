@@ -168,39 +168,82 @@
   white-space: nowrap;
 }
 
+.borrado-table thead th,
+.borrado-table tbody td {
+  padding: 8px 6px;
+}
+
 .borrado-th-fecha {
   cursor: pointer;
   user-select: none;
 }
 
+.borrado-table .borrado-th-fecha,
+.borrado-table .borrado-col-fecha {
+  width: 4.2rem;
+  padding-right: 4px;
+}
+
+.borrado-table .borrado-th-caso,
+.borrado-table .borrado-col-caso {
+  width: 4.5rem;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.borrado-table .borrado-th-cliente,
+.borrado-table .borrado-col-cliente {
+  width: 5.5rem;
+  padding-left: 4px;
+  padding-right: 6px;
+}
+
 .borrado-col-empresa {
-  white-space: normal;
-  min-width: 9rem;
+  white-space: nowrap;
   max-width: 14rem;
 }
 
-.borrado-empresa-nro {
-  display: block;
+.borrado-empresa-inline {
+  display: inline-block;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.84rem;
   font-weight: 600;
-  font-size: 0.82rem;
-  color: var(--text-muted, #64748b);
+  line-height: 1.25;
+  vertical-align: middle;
+}
+
+.borrado-table .borrado-th-cuit,
+.borrado-table .borrado-col-cuit {
+  width: 7.25rem;
+  max-width: 7.25rem;
+  padding-right: 4px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
 
-.borrado-empresa-nombre {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: inherit;
-  line-height: 1.25;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.borrado-table .borrado-th-bases,
+.borrado-table .borrado-col-bases {
+  padding-left: 4px;
+  padding-right: 6px;
+  white-space: nowrap;
 }
 
-.borrado-col-cuit {
-  white-space: nowrap;
-  min-width: 7.5rem;
-  font-variant-numeric: tabular-nums;
+.borrado-table .borrado-th-solicitante,
+.borrado-table .borrado-col-solicitante {
+  width: 7.5rem;
+  max-width: 7.5rem;
+  padding-left: 4px;
+}
+
+.borrado-table .borrado-th-listo,
+.borrado-table .borrado-col-listo {
+  width: 5.5rem;
+  text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .borrado-col-cliente {
@@ -383,7 +426,7 @@ button.borrado-base-pill.contab:focus-visible {
 }
 
 .borrado-col-solicitante {
-  max-width: 9rem;
+  max-width: 7.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -416,8 +459,8 @@ button.borrado-base-pill.contab:focus-visible {
 
 .borrado-col-aclaracion {
   white-space: normal;
-  min-width: 8rem;
-  max-width: 16rem;
+  min-width: 12rem;
+  width: 22%;
 }
 
 .borrado-aclaracion-full {
@@ -477,19 +520,15 @@ button.borrado-base-pill.contab:focus-visible {
   display: none !important;
 }
 
-.borrado-estado-ok {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #15803d;
-  line-height: 1;
-}
-
 .borrado-estado-pending {
-  font-size: 0.95rem;
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
 }
 
 .borrado-row-listo {
