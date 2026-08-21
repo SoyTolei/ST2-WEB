@@ -206,6 +206,11 @@
   border-radius: 8px;
 }
 
+.borrado-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
 .borrado-table th,
 .borrado-table td {
   white-space: nowrap;
@@ -236,21 +241,24 @@
 
 .borrado-table .borrado-th-cliente,
 .borrado-table .borrado-col-cliente {
-  width: 5.5rem;
+  width: 5.6rem;
+  max-width: 5.6rem;
   padding-left: 4px;
   padding-right: 6px;
 }
 
-.borrado-col-empresa {
+.borrado-table .borrado-th-empresa,
+.borrado-table .borrado-col-empresa {
+  width: 11.5rem;
+  max-width: 12.5rem;
+  padding-left: 4px;
+  padding-right: 10px;
   white-space: nowrap;
-  width: 1%;
-  max-width: 16rem;
-  padding-right: 2px;
 }
 
 .borrado-empresa-inline {
   display: inline-block;
-  max-width: 16rem;
+  max-width: 11.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 0.84rem;
@@ -261,10 +269,10 @@
 
 .borrado-table .borrado-th-cuit,
 .borrado-table .borrado-col-cuit {
-  width: 7.1rem;
-  max-width: 7.1rem;
-  padding-left: 2px;
-  padding-right: 4px;
+  width: 7.4rem;
+  max-width: 7.4rem;
+  padding-left: 8px;
+  padding-right: 6px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
@@ -272,17 +280,17 @@
 
 .borrado-table .borrado-th-bases,
 .borrado-table .borrado-col-bases {
-  width: 1%;
-  padding-left: 2px;
-  padding-right: 0;
+  width: 7.25rem;
+  padding-left: 4px;
+  padding-right: 12px;
   white-space: nowrap;
 }
 
 .borrado-table .borrado-th-solicitante,
 .borrado-table .borrado-col-solicitante {
-  width: 6.25rem;
-  max-width: 6.25rem;
-  padding-left: 0;
+  width: 7rem;
+  max-width: 7.5rem;
+  padding-left: 10px;
   padding-right: 4px;
 }
 
@@ -474,7 +482,7 @@ button.borrado-base-pill.contab:focus-visible {
 }
 
 .borrado-col-solicitante {
-  max-width: 6.25rem;
+  max-width: 7.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
