@@ -206,6 +206,23 @@ function greetRequester(message) {
   return `Hola ${name} 🫡 ${body}`;
 }
 
+function escapeToastHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/** El toast usa font-weight bold: el emoji hay que sacarlo de la negrita o Windows lo pixela. */
+function setToastText(el, text) {
+  if (!el) return;
+  el.innerHTML = escapeToastHtml(text).replace(
+    /🫡/g,
+    '<span class="toast-emoji" aria-hidden="true">🫡</span>',
+  );
+}
+
 function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
@@ -288,7 +305,7 @@ export function renderBorradoAlertUi() {
         toastCount.textContent = label;
         toastCount.setAttribute("aria-hidden", "false");
       }
-      toastText.textContent = summary.text;
+      setToastText(toastText, summary.text);
       toast.classList.add(summary.tone === "warn" ? "is-warn" : "is-ok");
       toast.classList.remove("hidden");
       toast.setAttribute("aria-hidden", "false");
