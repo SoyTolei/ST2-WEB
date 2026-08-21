@@ -8,7 +8,7 @@ namespace PortalClienchi.Web;
 public static class St2ToolsEndpoints
 {
     private const byte XorKey = 0xA5;
-    private const int MaxPartBytes = 8 * 1024;
+    private const int MaxPartBytes = 64 * 1024;
 
     private static readonly Regex CapturaIdRegex = new(
         @"^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{8}$",
@@ -21,12 +21,32 @@ public static class St2ToolsEndpoints
             if (!TryRequireUser(ctx, out _, out var error))
                 return error!;
 
-            return Results.Ok(new
+            try
             {
-                tools = store.List(),
-                dataDir = store.RootPath,
-                lastError = store.ReadLastError(),
-            });
+                var tools = store.List();
+                var lastError = store.ReadLastError();
+                if (lastError is { Length: > 2000 })
+                    lastError = lastError[..2000] + "…";
+
+                return Results.Ok(new
+                {
+                    tools,
+                    dataDir = store.RootPath,
+                    lastError,
+                    reached = true,
+                });
+            }
+            catch (Exception ex)
+            {
+                try { store.WriteLastError("list", ex); } catch { /* ignore */ }
+                return Results.Json(new
+                {
+                    error = "No se pudo listar herramientas: " + ex.Message,
+                    exceptionType = ex.GetType().FullName,
+                    dataDir = store.RootPath,
+                    reached = true,
+                }, statusCode: StatusCodes.Status500InternalServerError);
+            }
         });
 
         app.MapGet("/api/tools/diag", (HttpContext ctx, St2ToolsStore store) =>
@@ -212,6 +232,75 @@ public static class St2ToolsEndpoints
             }
         });
 
+        // Archivos grandes (ej. ST2.SQL ~75 MB): el server descarga la URL (no pasa el binario por el proxy del browser).
+        app.MapPost("/api/tools/{toolId}/from-url", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        {
+            try
+            {
+                if (!TryRequireSuperAdmin(ctx, out _, out var error))
+                    return error!;
+
+                var body = await ctx.Request.ReadFromJsonAsync<FromUrlRequest>(ct).ConfigureAwait(false);
+                if (body is null || string.IsNullOrWhiteSpace(body.Url))
+                    return Fail(store, toolId, "Falta la URL.", 400);
+
+                if (!Uri.TryCreate(body.Url.Trim(), UriKind.Absolute, out var uri)
+                    || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                    return Fail(store, toolId, "URL inválida (solo http/https).", 400);
+
+                var fileName = string.IsNullOrWhiteSpace(body.FileName)
+                    ? Path.GetFileName(uri.AbsolutePath)
+                    : body.FileName.Trim();
+                if (string.IsNullOrWhiteSpace(fileName) || fileName is "." or "..")
+                    fileName = $"st2-{toolId}.bin";
+
+                using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(15) };
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("ST2-Web/1.0");
+                using var resp = await http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct)
+                    .ConfigureAwait(false);
+                if (!resp.IsSuccessStatusCode)
+                    return Fail(store, toolId, $"No se pudo descargar la URL (HTTP {(int)resp.StatusCode}).", 400);
+
+                var len = resp.Content.Headers.ContentLength ?? -1;
+                if (len > 120L * 1024 * 1024)
+                    return Fail(store, toolId, "El archivo remoto supera 120 MB.", 400);
+
+                await using var remote = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+                var saved = await store.SaveStreamAsync(toolId, fileName, remote, body.Version, len, ct)
+                    .ConfigureAwait(false);
+                store.ClearLastError();
+                return Results.Ok(saved);
+            }
+            catch (ArgumentException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (HttpRequestException ex)
+            {
+                return Fail(store, toolId, "Error al descargar: " + ex.Message, 400, ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                return Fail(store, toolId, "Timeout descargando la URL.", 400, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Fail(store, toolId, "Sin permiso de escritura en el volume (RAILWAY_RUN_UID=0).", 500, ex);
+            }
+            catch (IOException ex)
+            {
+                return Fail(store, toolId, "Error de disco: " + ex.Message, 500, ex);
+            }
+            catch (Exception ex)
+            {
+                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
+            }
+        });
+
         // Compat: publicar desde captura (si se usa otro cliente).
         app.MapPost("/api/tools/{toolId}/publish", async (
             HttpContext ctx,
@@ -367,6 +456,13 @@ public static class St2ToolsEndpoints
         public string? N { get; set; }
         public string? V { get; set; }
         public bool Z { get; set; } = true;
+    }
+
+    private sealed class FromUrlRequest
+    {
+        public string? Url { get; set; }
+        public string? FileName { get; set; }
+        public string? Version { get; set; }
     }
 
     private sealed class PublishRequest

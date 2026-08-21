@@ -2208,6 +2208,28 @@ body.portal-tab-active .tab-icon {
   border-color: #ea580c;
 }
 
+.st2-about-tool-url {
+  flex-shrink: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.st2-about-tool-url.hidden {
+  display: none;
+}
+
+.st2-about-tool-url:hover {
+  border-color: #64748b;
+  color: #0f172a;
+}
+
 .st2-about-tool-upload {
   position: relative;
   display: inline-flex;

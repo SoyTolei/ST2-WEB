@@ -320,7 +320,7 @@ function resetPreviewToPlaceholder() {
 }
 
 async function apiGet(url, signal) {
-  const response = await fetch(url, { signal });
+  const response = await fetch(url, { signal, credentials: "include", cache: "no-store" });
   if (!response.ok) {
     const problem = await response.json().catch(() => ({}));
     throw new Error(problem.detail || problem.error || problem.title || `Error ${response.status}`);
@@ -1817,7 +1817,9 @@ function renderAboutTools() {
     const desc = card?.querySelector("[data-tool-desc]");
     const btn = card?.querySelector(`[data-tool-download="${id}"]`);
     const uploadWrap = card?.querySelector(`[data-tool-upload-wrap="${id}"]`);
+    const urlBtn = card?.querySelector(`[data-tool-url="${id}"]`);
     uploadWrap?.classList.toggle("hidden", !canUpload);
+    urlBtn?.classList.toggle("hidden", !canUpload);
 
     if (!tool?.available) {
       if (desc) {
@@ -1890,6 +1892,19 @@ async function downloadTool(toolId) {
 
 async function uploadTool(toolId, file) {
   if (!file || !isSt2SuperAdmin()) return;
+
+  // Archivos grandes: el browser→proxy no banca bien; publicar por URL directa.
+  if (file.size > 8 * 1024 * 1024) {
+    const url = window.prompt(
+      `“${file.name}” pesa ${formatToolSize(file.size)}.\n\n` +
+      "Para archivos grandes pegá una URL directa de descarga (http/https).\n" +
+      "Ej: link de OneDrive/Google Drive en modo directo, o un hosting temporal."
+    );
+    if (!url) return;
+    await publishToolFromUrl(toolId, url.trim(), file.name);
+    return;
+  }
+
   const busy = document.getElementById("st2-about-busy");
   const busyText = document.getElementById("st2-about-busy-text");
   const busyFill = document.getElementById("st2-about-busy-bar-fill");
@@ -1931,7 +1946,7 @@ async function uploadTool(toolId, file) {
     const wired = new Uint8Array(plain.length);
     for (let i = 0; i < plain.length; i++) wired[i] = plain[i] ^ 0xa5;
 
-    const chunkSize = 4096;
+    const chunkSize = 32 * 1024;
     const total = Math.max(1, Math.ceil(wired.length / chunkSize));
     const uploadId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
       .map((b) => b.toString(16).padStart(2, "0"))
@@ -1995,6 +2010,61 @@ async function uploadTool(toolId, file) {
   } finally {
     hideBusy();
   }
+}
+
+async function publishToolFromUrl(toolId, url, fileNameHint = "") {
+  if (!toolId || !url || !isSt2SuperAdmin()) return;
+  const busy = document.getElementById("st2-about-busy");
+  const busyText = document.getElementById("st2-about-busy-text");
+  const busyFill = document.getElementById("st2-about-busy-bar-fill");
+  const showBusy = (msg, pct = null) => {
+    if (busyText) busyText.textContent = msg;
+    if (busyFill) {
+      const w = pct == null ? 12 : Math.max(4, Math.min(100, pct));
+      busyFill.style.width = `${w}%`;
+    }
+    busy?.classList.remove("hidden");
+    busy?.setAttribute("aria-hidden", "false");
+  };
+  const hideBusy = () => {
+    busy?.classList.add("hidden");
+    busy?.setAttribute("aria-hidden", "true");
+    if (busyFill) busyFill.style.width = "8%";
+  };
+
+  const version = new Date().toISOString().slice(0, 10).replace(/-/g, ".");
+  let fileName = String(fileNameHint || "").trim();
+  if (!fileName) {
+    try { fileName = decodeURIComponent(url.split("?")[0].split("/").pop() || ""); } catch { fileName = ""; }
+  }
+  if (!fileName) fileName = `st2-${toolId}.bin`;
+
+  showBusy(`Descargando desde URL…`, 20);
+  setAboutToolsStatus(`Publicando ${fileName} desde URL…`);
+  try {
+    const data = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/from-url`, {
+      url,
+      fileName,
+      version,
+    });
+    showBusy("Listo", 100);
+    setAboutToolsStatus(`Publicado ${data.name || toolId} v${data.version || ""}`.trim());
+    await refreshAboutTools({ silent: true });
+    markToolsSeen();
+  } catch (err) {
+    const msg = err?.message || "No se pudo publicar desde URL.";
+    setAboutToolsStatus(msg, true);
+    try { window.alert(msg); } catch { /* ignore */ }
+  } finally {
+    hideBusy();
+  }
+}
+
+function promptToolFromUrl(toolId) {
+  if (!toolId || !isSt2SuperAdmin()) return;
+  const url = window.prompt("Pegá la URL directa del paquete (http/https):");
+  if (!url) return;
+  void publishToolFromUrl(toolId, url.trim());
 }
 
 function bytesToHex(bytes) {
@@ -2063,6 +2133,12 @@ function bindAboutToolsUi() {
       const file = input.files?.[0];
       input.value = "";
       if (id && file) void uploadTool(id, file);
+    });
+  });
+  document.querySelectorAll("[data-tool-url]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-tool-url");
+      if (id) promptToolFromUrl(id);
     });
   });
 }
@@ -2140,15 +2216,13 @@ async function refreshToolsDiagHint() {
   try {
     const data = await apiGet("/api/tools/diag");
     if (!data?.ok) {
-      setAboutToolsStatus(data?.error || "Diagnóstico: no se pudo escribir en el volume.", true);
+      console.warn("tools diag:", data?.error || data);
       return;
     }
-    // Volume OK: no molestar si no hay error de subida pendiente
-    if (data?.lastError) {
-      setAboutToolsStatus(`Último error de subida:\n${String(data.lastError).slice(0, 400)}`, true);
-    }
-  } catch {
-    // silencioso: el diag no debe tapar la UI si falla
+    // No tapar la UI con lastError viejos; solo consola.
+    if (data?.lastError) console.warn("tools lastError:", String(data.lastError).slice(0, 300));
+  } catch (err) {
+    console.warn("tools diag failed", err);
   }
 }
 

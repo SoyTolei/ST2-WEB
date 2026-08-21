@@ -113,7 +113,7 @@ public sealed class St2ToolsStore
     {
         if (!TryNormalizeId(toolId, out var id))
             throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
-        if (totalParts is < 1 or > 20000)
+        if (totalParts is < 1 or > 10000)
             throw new ArgumentException("Cantidad de partes inválida.");
 
         var session = SanitizeUploadId(uploadId);
@@ -134,7 +134,7 @@ public sealed class St2ToolsStore
             throw new ArgumentException("Índice de parte inválido.");
         if (payload is null || payload.Length == 0)
             throw new ArgumentException("Parte vacía.");
-        if (payload.Length > 64 * 1024)
+        if (payload.Length > 96 * 1024)
             throw new ArgumentException("Parte demasiado grande.");
 
         var session = SanitizeUploadId(uploadId);
@@ -240,7 +240,14 @@ public sealed class St2ToolsStore
     {
         try
         {
-            return File.Exists(_lastErrorPath) ? File.ReadAllText(_lastErrorPath) : null;
+            if (!File.Exists(_lastErrorPath))
+                return null;
+            var text = File.ReadAllText(_lastErrorPath);
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+            // Evitar romper el JSON del listado si el archivo quedó corrupto/enorme.
+            var clean = new string(text.Where(ch => !char.IsControl(ch) || ch is '\n' or '\r' or '\t').ToArray());
+            return clean.Length > 4000 ? clean[..4000] + "…" : clean;
         }
         catch
         {
