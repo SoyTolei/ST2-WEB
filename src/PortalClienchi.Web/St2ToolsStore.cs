@@ -49,31 +49,21 @@ public sealed class St2ToolsStore
     {
         _root = Path.Combine(St2Paths.GetDataDirectory(), "tools");
         _manifestPath = Path.Combine(_root, "manifest.json");
-        Directory.CreateDirectory(_root);
+        EnsureRoot();
     }
+
+    public string RootPath => _root;
 
     public IReadOnlyList<St2ToolPackageDto> List()
     {
         lock (_gate)
         {
+            EnsureRoot();
             var map = ReadManifestUnlocked();
             var list = new List<St2ToolPackageDto>(ToolIds.Length);
             foreach (var id in ToolIds)
-            {
                 list.Add(ToDto(id, map.GetValueOrDefault(id)));
-            }
             return list;
-        }
-    }
-
-    public St2ToolPackageDto? Get(string toolId)
-    {
-        if (!TryNormalizeId(toolId, out var id))
-            return null;
-        lock (_gate)
-        {
-            var map = ReadManifestUnlocked();
-            return ToDto(id, map.GetValueOrDefault(id));
         }
     }
 
@@ -100,7 +90,13 @@ public sealed class St2ToolsStore
         }
     }
 
-    public St2ToolPackageDto SaveUpload(string toolId, string originalFileName, Stream content, string? version, long? knownLength)
+    public async Task<St2ToolPackageDto> SaveUploadAsync(
+        string toolId,
+        string originalFileName,
+        Stream content,
+        string? version,
+        long? knownLength,
+        CancellationToken ct = default)
     {
         if (!TryNormalizeId(toolId, out var id))
             throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
@@ -116,36 +112,36 @@ public sealed class St2ToolsStore
         if (ver.Length > 40)
             throw new ArgumentException("La versión es demasiado larga.");
 
+        EnsureRoot();
         var toolDir = Path.Combine(_root, id);
         Directory.CreateDirectory(toolDir);
+
         var destPath = Path.Combine(toolDir, safeName);
-        var tmpPath = destPath + ".uploading";
+        var tmpPath = Path.Combine(toolDir, $".{Guid.NewGuid():N}.uploading");
 
         try
         {
-            using (var fs = new FileStream(tmpPath, FileMode.Create, FileAccess.Write, FileShare.None))
+            await using (var fs = new FileStream(tmpPath, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
-                content.CopyTo(fs);
+                await content.CopyToAsync(fs, ct).ConfigureAwait(false);
+                await fs.FlushAsync(ct).ConfigureAwait(false);
             }
 
             var size = new FileInfo(tmpPath).Length;
+            if (knownLength is > 0 && size == 0)
+                throw new InvalidOperationException("El archivo llegó vacío.");
             if (size <= 0)
                 throw new InvalidOperationException("El archivo está vacío.");
             if (size > 120L * 1024 * 1024)
                 throw new InvalidOperationException("El archivo supera el máximo de 120 MB.");
 
-            // Reemplazar archivo anterior del tool
             lock (_gate)
             {
-                if (Directory.Exists(toolDir))
+                foreach (var old in Directory.EnumerateFiles(toolDir))
                 {
-                    foreach (var old in Directory.EnumerateFiles(toolDir))
-                    {
-                        if (!string.Equals(old, tmpPath, StringComparison.OrdinalIgnoreCase))
-                        {
-                            try { File.Delete(old); } catch { /* ignore */ }
-                        }
-                    }
+                    if (string.Equals(old, tmpPath, StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    try { File.Delete(old); } catch { /* ignore */ }
                 }
 
                 if (File.Exists(destPath))
@@ -173,6 +169,20 @@ public sealed class St2ToolsStore
                     File.Delete(tmpPath);
             }
             catch { /* ignore */ }
+        }
+    }
+
+    private void EnsureRoot()
+    {
+        try
+        {
+            Directory.CreateDirectory(_root);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"No se pudo crear la carpeta de herramientas ({_root}). Revisá el volume /data/st2. {ex.Message}",
+                ex);
         }
     }
 

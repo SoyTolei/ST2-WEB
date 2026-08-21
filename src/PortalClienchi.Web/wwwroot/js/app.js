@@ -1889,23 +1889,63 @@ async function downloadTool(toolId) {
 
 async function uploadTool(toolId, file) {
   if (!file || !isSt2SuperAdmin()) return;
+  const busy = document.getElementById("st2-about-busy");
+  const busyText = document.getElementById("st2-about-busy-text");
+  const busyFill = document.getElementById("st2-about-busy-bar-fill");
+  const showBusy = (msg, pct = null) => {
+    if (busyText) busyText.textContent = msg;
+    if (busyFill) {
+      const w = pct == null ? 12 : Math.max(4, Math.min(100, pct));
+      busyFill.style.width = `${w}%`;
+    }
+    busy?.classList.remove("hidden");
+    busy?.setAttribute("aria-hidden", "false");
+  };
+  const hideBusy = () => {
+    busy?.classList.add("hidden");
+    busy?.setAttribute("aria-hidden", "true");
+    if (busyFill) busyFill.style.width = "8%";
+  };
+
+  showBusy(`Subiendo ${file.name}…`, 5);
   setAboutToolsStatus(`Subiendo ${file.name}…`);
+
   const body = new FormData();
   body.append("file", file);
   body.append("version", new Date().toISOString().slice(0, 10).replace(/-/g, "."));
+
   try {
-    const res = await fetch(`/api/tools/${encodeURIComponent(toolId)}/upload`, {
-      method: "POST",
-      credentials: "include",
-      body,
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload`);
+      xhr.withCredentials = true;
+      xhr.upload.onprogress = (ev) => {
+        if (!ev.lengthComputable) {
+          showBusy(`Subiendo ${file.name}…`);
+          return;
+        }
+        const pct = Math.round((ev.loaded / ev.total) * 100);
+        showBusy(`Subiendo ${file.name}… ${pct}%`, pct);
+        setAboutToolsStatus(`Subiendo ${file.name}… ${pct}%`);
+      };
+      xhr.onload = () => {
+        let parsed = {};
+        try { parsed = JSON.parse(xhr.responseText || "{}"); } catch { /* ignore */ }
+        if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
+        else reject(new Error(parsed?.error || parsed?.detail || `Error ${xhr.status}`));
+      };
+      xhr.onerror = () => reject(new Error("No se pudo contactar al servidor."));
+      xhr.send(body);
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.error || "No se pudo subir el paquete.");
+
+    showBusy("Guardando en el servidor…", 100);
     setAboutToolsStatus(`Publicado ${data.name || toolId} v${data.version || ""}`.trim());
     await refreshAboutTools({ silent: true });
     markToolsSeen();
   } catch (err) {
     setAboutToolsStatus(err?.message || "No se pudo subir.", true);
+  } finally {
+    hideBusy();
   }
 }
 

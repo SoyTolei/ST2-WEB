@@ -4,6 +4,7 @@ import {
   canConfirmBlanqueoModule,
   isViewingAsProfile,
 } from "./module-access.js";
+import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -307,13 +308,12 @@ export function renderBlanqueoAlertUi() {
   const sistema = document.body.dataset.planSistema;
   const hideForSistema = sistema === "Legal" || sistema === "Chile";
 
-  const tabBadge = document.querySelector('.tab-reminder-badge[data-reminder="planillas-blanqueo"]');
-  if (tabBadge) {
-    tabBadge.textContent = label;
-    tabBadge.classList.toggle("hidden", count === 0 || hideForSistema);
-    tabBadge.title = hideForSistema ? "" : (summary?.text || "");
-    tabBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
-  }
+  const tabHidden = count === 0 || hideForSistema;
+  setPlanillasTabAlertPart("blanqueo", {
+    count,
+    title: summary?.text || "",
+    hidden: tabHidden,
+  });
 
   const modBadge = document.getElementById("plan-modulo-blanqueo-badge");
   if (modBadge) {

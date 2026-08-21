@@ -116,8 +116,18 @@ html.st2-theme-dark .st2-about-tool-upload {
   color: #cbd5e1;
 }
 
-html.st2-theme-dark .st2-about-tools-status.is-error {
-  color: #fca5a5;
+html.st2-theme-dark .st2-about-busy {
+  background: rgba(15, 20, 30, 0.72);
+}
+
+html.st2-theme-dark .st2-about-busy-card {
+  background: #241c16;
+  border-color: #5b3d28;
+}
+
+html.st2-theme-dark .st2-about-abbr span,
+html.st2-theme-dark .st2-about-aside {
+  color: #fdba74;
 }
 
 html.st2-theme-dark .st2-access-card,
