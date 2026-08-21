@@ -31,7 +31,7 @@ public static class BorradoBasesEndpoints
         {
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
-            if (!flags.BorradoBasesLoad)
+            if (!flags.BorradoBasesLoad && !flags.BorradoBasesConfirm)
                 return Results.Json(new { error = "Tu perfil es solo listado: no podés cargar solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
 
             var validation = ValidateCreate(body);

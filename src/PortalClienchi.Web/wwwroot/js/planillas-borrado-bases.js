@@ -127,13 +127,12 @@ export function initBorradoBasesModule() {
   document.getElementById("borrado-preview-confirm")?.addEventListener("change", (e) => {
     const on = !!e.target?.checked;
     try {
-      if (on) sessionStorage.setItem(PREVIEW_LIST_KEY, "1");
-      else sessionStorage.removeItem(PREVIEW_LIST_KEY);
+      sessionStorage.setItem(PREVIEW_LIST_KEY, on ? "1" : "0");
     } catch { /* ignore */ }
     syncLoadFormVisibility();
     setStatus(on
-      ? "Vista confirmador: solo listado ampliado (como lo ven ellos)."
-      : "Volviste a tu vista normal (con formulario).");
+      ? "Vista confirmador: solo listado (ocultá el formulario)."
+      : "Formulario de carga visible. Marcá “Vista confirmador” para volver al listado.");
   });
   document.getElementById("borrado-th-fecha")?.addEventListener("click", () => {
     fechaSortDir = fechaSortDir === "desc" ? "asc" : "desc";
@@ -238,17 +237,20 @@ export async function openBorradoBasesModule() {
 }
 
 function isPreviewConfirmListOnly() {
-  if (!isSt2SuperAdmin()) return false;
+  if (!canConfirm) return false;
+  if (isViewingAsProfile()) return true;
   try {
-    return sessionStorage.getItem(PREVIEW_LIST_KEY) === "1";
+    const v = sessionStorage.getItem(PREVIEW_LIST_KEY);
+    if (v === null || v === "") return true;
+    return v === "1";
   } catch {
-    return false;
+    return true;
   }
 }
 
 function effectiveCanLoad() {
   if (isPreviewConfirmListOnly()) return false;
-  return canLoad;
+  return canLoad || canConfirm;
 }
 
 function syncLoadFormVisibility() {
@@ -257,11 +259,11 @@ function syncLoadFormVisibility() {
   if (formPanel) formPanel.classList.toggle("hidden", !showForm);
 
   const app = document.querySelector(".borrado-app");
-  if (app) app.classList.toggle("borrado-list-only", (!!canConfirm && !showForm) || isPreviewConfirmListOnly());
+  if (app) app.classList.toggle("borrado-list-only", !showForm);
 
   const previewWrap = document.getElementById("borrado-preview-confirm-wrap");
   const previewCheck = document.getElementById("borrado-preview-confirm");
-  const showPreview = isSt2SuperAdmin() && canLoad && !isViewingAsProfile();
+  const showPreview = canConfirm && !isViewingAsProfile();
   if (previewWrap) previewWrap.classList.toggle("hidden", !showPreview);
   if (previewCheck && showPreview) previewCheck.checked = isPreviewConfirmListOnly();
 }
@@ -368,7 +370,7 @@ function isOwner(item) {
 }
 
 async function createSolicitud() {
-  if (!canLoad) {
+  if (!effectiveCanLoad()) {
     setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
     return;
   }

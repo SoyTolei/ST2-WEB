@@ -1369,27 +1369,27 @@ function renderAccessAdminTable() {
     const mods = item.modules || {};
     const modBadges = [];
     if (mods.oportunidad) {
-      modBadges.push({ label: "Op", title: "Oportunidad de Venta" });
+      modBadges.push({ label: "OP", title: "Oportunidad de Venta" });
     }
     if (mods.pdfPortal) {
       modBadges.push({ label: "PDF", title: "Generador PDF-Portal" });
     }
     if (mods.blanqueoConfirm && mods.blanqueoLoad) {
-      modBadges.push({ label: "Blanq✓+", title: "Blanqueo Claves: confirma y carga" });
+      modBadges.push({ label: "BLANQ✓+", title: "Blanqueo Claves: confirma y carga" });
     } else if (mods.blanqueoConfirm) {
-      modBadges.push({ label: "Blanq✓", title: "Blanqueo Claves: solo listado / confirma" });
-    } else if (mods.blanqueo) {
-      modBadges.push({ label: "Blanq", title: "Blanqueo Claves: puede cargar" });
+      modBadges.push({ label: "BLANQ✓", title: "Blanqueo Claves: solo confirma" });
+    } else if (mods.blanqueoLoad || mods.blanqueo) {
+      modBadges.push({ label: "BLANQ✓", title: "Blanqueo Claves: puede cargar" });
     }
     if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
-      modBadges.push({ label: "Borr✓+", title: "Borrado de bases: confirma y carga" });
+      modBadges.push({ label: "BASES✓+", title: "Borrado de bases: confirma y carga" });
     } else if (mods.borradoBasesConfirm) {
-      modBadges.push({ label: "Borr✓", title: "Borrado de bases: solo listado / confirma" });
-    } else if (mods.borradoBases) {
-      modBadges.push({ label: "Borr", title: "Borrado de bases: puede cargar" });
+      modBadges.push({ label: "BASES✓", title: "Borrado de bases: solo confirma" });
+    } else if (mods.borradoBasesLoad || mods.borradoBases) {
+      modBadges.push({ label: "BASES✓", title: "Borrado de bases: puede cargar" });
     }
     if (item.isSt2Admin) {
-      modBadges.push({ label: "Admin", title: "ADMIN WEB" });
+      modBadges.push({ label: "ADMIN", title: "ADMIN WEB" });
     }
     const modHtml = modBadges.length
       ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
