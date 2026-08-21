@@ -1379,14 +1379,14 @@ function renderAccessAdminTable() {
     } else if (mods.blanqueoConfirm) {
       modBadges.push({ label: "BLANQ✓", title: "Blanqueo Claves: solo confirma" });
     } else if (mods.blanqueoLoad || mods.blanqueo) {
-      modBadges.push({ label: "BLANQ✓", title: "Blanqueo Claves: puede cargar" });
+      modBadges.push({ label: "BLANQ", title: "Blanqueo Claves: puede cargar" });
     }
     if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
       modBadges.push({ label: "BASES✓+", title: "Borrado de bases: confirma y carga" });
     } else if (mods.borradoBasesConfirm) {
       modBadges.push({ label: "BASES✓", title: "Borrado de bases: solo confirma" });
     } else if (mods.borradoBasesLoad || mods.borradoBases) {
-      modBadges.push({ label: "BASES✓", title: "Borrado de bases: puede cargar" });
+      modBadges.push({ label: "BASES", title: "Borrado de bases: puede cargar" });
     }
     if (item.isSt2Admin) {
       modBadges.push({ label: "ADMIN", title: "ADMIN WEB" });
