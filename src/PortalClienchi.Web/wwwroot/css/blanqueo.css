@@ -370,6 +370,30 @@
   color: #ecfdf5;
 }
 
+/* Clave distinta a la genérica (p. ej. Sueldo.20261 en aclaración): ámbar, no verde de Listo. */
+.blanqueo-clave-pill--custom {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.blanqueo-clave-pill--custom:hover,
+.blanqueo-clave-pill--custom:focus-visible {
+  background: #fef3c7;
+  border-color: #d97706;
+}
+
+.blanqueo-clave-pill--custom.is-copied {
+  background: #ffedd5;
+  border-color: #ea580c;
+  color: #c2410c;
+}
+
+.blanqueo-clave-pill--custom.is-copied .blanqueo-clave-pill-action {
+  background: #c2410c;
+  color: #fff7ed;
+}
+
 .blanqueo-ready-toast {
   display: flex;
   align-items: center;

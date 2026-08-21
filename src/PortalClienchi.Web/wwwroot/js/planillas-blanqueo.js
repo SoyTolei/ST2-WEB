@@ -997,10 +997,12 @@ function isBlanqueoConClave(item) {
 }
 
 /** Pastilla con la clave: punteada, “Copiar” al hover, clic copia. */
-function formatClaveCopyPill(clave, title = "Clic para copiar la clave") {
+function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custom = false } = {}) {
   const value = String(clave || "").trim();
   if (!value) return "";
-  return `<button type="button" class="blanqueo-clave-pill" data-blanqueo-copy-clave="${escapeHtml(value)}" title="${escapeHtml(title)}" aria-label="Copiar clave ${escapeHtml(value)}">
+  const isCustom = custom || value.toLowerCase() !== claveDefault().toLowerCase();
+  const cls = isCustom ? "blanqueo-clave-pill blanqueo-clave-pill--custom" : "blanqueo-clave-pill";
+  return `<button type="button" class="${cls}" data-blanqueo-copy-clave="${escapeHtml(value)}" title="${escapeHtml(title)}" aria-label="Copiar clave ${escapeHtml(value)}">
     <code class="blanqueo-clave-pill-label">${escapeHtml(value)}</code>
     <span class="blanqueo-clave-pill-action" aria-hidden="true">Copiar</span>
   </button>`;
@@ -1017,7 +1019,7 @@ function formatAclaracionCell(item) {
   if (aclaracion) {
     const claveExtra = parseClaveFromAclaracion(aclaracion);
     if (claveExtra) {
-      return formatClaveCopyPill(claveExtra, "Clic para copiar la clave de la aclaración");
+      return formatClaveCopyPill(claveExtra, "Clic para copiar la clave de la aclaración", { custom: true });
     }
     const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
     return `<span class="blanqueo-pill ${cls}" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
