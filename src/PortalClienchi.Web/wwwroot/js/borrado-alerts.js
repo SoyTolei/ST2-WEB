@@ -197,13 +197,15 @@ function firstNameFromEmail(email) {
   return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
 }
 
+const TOAST_WAVE_MARK = "{{toast-wave}}";
+
 /** Saludo personal solo para quien carga solicitudes (no confirmadores). */
 function greetRequester(message) {
   if (alertMode === "confirm") return message;
   const name = firstNameFromEmail(getPlanUserEmail());
   if (!name || !message) return message;
   const body = message.charAt(0).toLowerCase() + message.slice(1);
-  return `Hola ${name} 🫡 ${body}`;
+  return `Hola ${name}! ${TOAST_WAVE_MARK} ${body}`;
 }
 
 function escapeToastHtml(value) {
@@ -214,12 +216,14 @@ function escapeToastHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-/** El toast usa font-weight bold: el emoji hay que sacarlo de la negrita o Windows lo pixela. */
+/** Icono vectorial (evita el emoji pixelado de Windows). */
+const TOAST_WAVE_HTML = `<span class="toast-emoji" aria-hidden="true"><svg class="toast-emoji-svg" viewBox="0 0 36 36" width="18" height="18" focusable="false"><circle cx="18" cy="18" r="18" fill="#FFCC4D"/><circle cx="12" cy="14.5" r="2.2" fill="#664500"/><circle cx="24" cy="14.5" r="2.2" fill="#664500"/><path fill="#664500" d="M10.5 22.5c1.8 3.2 4.5 4.8 7.5 4.8s5.7-1.6 7.5-4.8"/><path fill="#FFCC4D" stroke="#F4900C" stroke-width="1.2" stroke-linecap="round" d="M29.2 8.2c.4-1.6 1.9-2.4 3.2-1.8 1.2.5 1.7 2.1 1.1 3.5l-2.6 6.2c-.3.8-1.2 1.2-2 .9-.8-.3-1.2-1.2-.9-2l1.2-2.8"/><path fill="#FFCC4D" stroke="#F4900C" stroke-width="1.2" stroke-linecap="round" d="M31.5 7.4l1.6 3.2"/></svg></span>`;
+
 function setToastText(el, text) {
   if (!el) return;
   el.innerHTML = escapeToastHtml(text).replace(
-    /🫡/g,
-    '<span class="toast-emoji" aria-hidden="true">🫡</span>',
+    /\{\{toast-wave\}\}/g,
+    TOAST_WAVE_HTML,
   );
 }
 
