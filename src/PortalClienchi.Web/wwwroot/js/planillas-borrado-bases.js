@@ -618,42 +618,56 @@ function formatBasesPills(item) {
   return pills.length ? pills.join(" ") : "—";
 }
 
-/** Separa varios ejercicios (saltos de línea, “ejercicio …, ejercicio …”, comas, etc.). */
+/** Separa varios ejercicios (saltos de línea, “y”, comas, etc.). */
 function splitEjercicios(raw) {
   const text = String(raw || "").trim();
   if (!text) return [];
 
-  let parts = text.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean);
+  const lines = text.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean);
+  const parts = [];
 
-  if (parts.length <= 1) {
-    // "Ejercicio 2025, ejercicio 2023"
-    const byEjercicio = text
-      .split(/\s*,\s*(?=(?:ejercicio|ej\.?)\b)/i)
-      .map((s) => s.trim())
+  for (const line of lines) {
+    // "Ejercicio 2023, y Ejercicio 2024" | "Ejercicio 2025, ejercicio 2023" | "… ; …"
+    const chunks = line
+      .split(
+        /\s*(?:,\s*y\s+|\s+y\s+|,\s*|;|\||\s+[-–—]\s+)\s*(?=(?:ejercicio|ej\.?)\b)/i
+      )
+      .map((s) => s.trim().replace(/^[-–—]\s*/, "").replace(/^,\s*/, "").replace(/^y\s+/i, ""))
       .filter(Boolean);
-    if (byEjercicio.length > 1) parts = byEjercicio;
-  }
 
-  if (parts.length <= 1) {
-    const alt = text.split(/\s*[;|]\s*|\s+[-–—]\s+/).map((s) => s.trim()).filter(Boolean);
-    if (alt.length > 1) parts = alt;
-  }
-
-  if (parts.length <= 1 && text.includes(",")) {
-    const byComma = text.split(/\s*,\s*/).map((s) => s.trim()).filter(Boolean);
-    if (byComma.length > 1 && byComma.every((p) => /ejercicio|\bej\.?\b|\b20\d{2}\b/i.test(p))) {
-      parts = byComma;
+    if (chunks.length > 1) {
+      parts.push(...chunks);
+      continue;
     }
+
+    // Solo años: "2025, 2023 y 2024"
+    const years = line.match(/\b20\d{2}\b/g);
+    if (years && years.length > 1 && /^(?:ejercicio|ej\.?)?\s*20\d{2}(?:\s*[,;y&]\s*(?:ejercicio|ej\.?)?\s*20\d{2})+$/i.test(line.replace(/\s+/g, " ").trim())) {
+      parts.push(...years.map((y) => `Ejercicio ${y}`));
+      continue;
+    }
+
+    parts.push(line.replace(/^[-–—]\s*/, ""));
   }
 
   return parts;
 }
 
+function formatEjercicioLabel(part) {
+  const cleaned = String(part || "").trim().replace(/^[-–—]\s*/, "");
+  if (!cleaned) return "";
+  const m = cleaned.match(/^(?:ejercicio|ej\.?)\s*(20\d{2})\b/i);
+  if (m) return `Ejercicio ${m[1]}`;
+  const yearOnly = cleaned.match(/^20\d{2}$/);
+  if (yearOnly) return `Ejercicio ${yearOnly[0]}`;
+  return cleaned;
+}
+
 function formatEjerciciosSeparated(raw) {
-  const parts = splitEjercicios(raw);
+  const parts = splitEjercicios(raw).map(formatEjercicioLabel).filter(Boolean);
   if (parts.length === 0) return "Sin ejercicios";
   // Una línea por ejercicio: "- Ejercicio 2025"
-  return parts.map((p) => `- ${p.replace(/^[-–—]\s*/, "")}`).join("\n");
+  return parts.map((p) => `- ${p}`).join("\n");
 }
 
 function basePillHtml(label, detail, contab) {
