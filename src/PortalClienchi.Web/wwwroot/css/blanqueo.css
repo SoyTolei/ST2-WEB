@@ -605,7 +605,7 @@
   align-items: center;
   gap: 8px;
   align-self: end;
-  margin: 0 0 2px auto;
+  margin: 0;
   padding: 8px 12px;
   border: 1px dashed #7dd3fc;
   border-radius: 8px;
@@ -615,6 +615,8 @@
   color: #0369a1;
   cursor: pointer;
   user-select: none;
+  flex: 0 0 auto;
+  order: 20;
 }
 
 .blanqueo-preview-confirm.hidden {

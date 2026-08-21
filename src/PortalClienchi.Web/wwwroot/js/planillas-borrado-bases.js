@@ -236,9 +236,17 @@ export async function openBorradoBasesModule() {
   await reloadList();
 }
 
+function ensureConfirmViewDefault() {
+  if (!canConfirm) return;
+  try {
+    if (sessionStorage.getItem(PREVIEW_LIST_KEY) === null) {
+      sessionStorage.setItem(PREVIEW_LIST_KEY, "1");
+    }
+  } catch { /* ignore */ }
+}
+
 function isPreviewConfirmListOnly() {
   if (!canConfirm) return false;
-  if (isViewingAsProfile()) return true;
   try {
     const v = sessionStorage.getItem(PREVIEW_LIST_KEY);
     if (v === null || v === "") return true;
@@ -254,6 +262,7 @@ function effectiveCanLoad() {
 }
 
 function syncLoadFormVisibility() {
+  ensureConfirmViewDefault();
   const showForm = effectiveCanLoad();
   const formPanel = document.querySelector(".borrado-form-panel");
   if (formPanel) formPanel.classList.toggle("hidden", !showForm);
@@ -263,9 +272,14 @@ function syncLoadFormVisibility() {
 
   const previewWrap = document.getElementById("borrado-preview-confirm-wrap");
   const previewCheck = document.getElementById("borrado-preview-confirm");
-  const showPreview = canConfirm && !isViewingAsProfile();
-  if (previewWrap) previewWrap.classList.toggle("hidden", !showPreview);
-  if (previewCheck && showPreview) previewCheck.checked = isPreviewConfirmListOnly();
+  const showPreview = !!canConfirm;
+  if (previewWrap) {
+    previewWrap.classList.toggle("hidden", !showPreview);
+    previewWrap.setAttribute("aria-hidden", showPreview ? "false" : "true");
+  }
+  if (previewCheck && showPreview) {
+    previewCheck.checked = isPreviewConfirmListOnly();
+  }
 }
 
 function syncSolicitanteBadge() {

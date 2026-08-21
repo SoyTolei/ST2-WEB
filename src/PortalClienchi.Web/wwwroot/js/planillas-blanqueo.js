@@ -254,13 +254,20 @@ export async function openBlanqueoModule() {
   await reloadList();
 }
 
+function ensureConfirmViewDefault() {
+  if (!canConfirm) return;
+  try {
+    if (sessionStorage.getItem(PREVIEW_LIST_KEY) === null) {
+      sessionStorage.setItem(PREVIEW_LIST_KEY, "1");
+    }
+  } catch { /* ignore */ }
+}
+
 function isPreviewConfirmListOnly() {
   if (!canConfirm) return false;
-  // En vista previa de un confirmador, simular su default (listado).
-  if (isViewingAsProfile()) return true;
   try {
     const v = sessionStorage.getItem(PREVIEW_LIST_KEY);
-    if (v === null || v === "") return true; // por defecto: vista confirmador ON
+    if (v === null || v === "") return true; // por defecto ON
     return v === "1";
   } catch {
     return true;
@@ -274,6 +281,7 @@ function effectiveCanLoad() {
 }
 
 function syncLoadFormVisibility() {
+  ensureConfirmViewDefault();
   const showForm = effectiveCanLoad();
   const formPanel = document.querySelector(".blanqueo-form-panel");
   if (formPanel) formPanel.classList.toggle("hidden", !showForm);
@@ -283,9 +291,15 @@ function syncLoadFormVisibility() {
 
   const previewWrap = document.getElementById("blanqueo-preview-confirm-wrap");
   const previewCheck = document.getElementById("blanqueo-preview-confirm");
-  const showPreview = canConfirm && !isViewingAsProfile();
-  if (previewWrap) previewWrap.classList.toggle("hidden", !showPreview);
-  if (previewCheck && showPreview) previewCheck.checked = isPreviewConfirmListOnly();
+  // Visible para todo confirmador (también en “ver como”).
+  const showPreview = !!canConfirm;
+  if (previewWrap) {
+    previewWrap.classList.toggle("hidden", !showPreview);
+    previewWrap.setAttribute("aria-hidden", showPreview ? "false" : "true");
+  }
+  if (previewCheck && showPreview) {
+    previewCheck.checked = isPreviewConfirmListOnly();
+  }
 }
 
 function syncSolicitanteBadge() {
