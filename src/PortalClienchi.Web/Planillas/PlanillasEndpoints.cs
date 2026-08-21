@@ -518,16 +518,18 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true });
         });
 
-        app.MapGet("/api/planillas/modules", (HttpContext ctx, ModuleAccessRepository modules) =>
+        app.MapGet("/api/planillas/modules", (HttpContext ctx, ModuleAccessRepository modules, AppAccessRepository accessRepo) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
             if (email is null)
                 return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             var flags = modules.GetFlags(email);
+            var st2Admin = St2SuperAdmin.Is(email) || accessRepo.IsSt2Admin(email);
             return Results.Ok(new
             {
                 email,
+                st2Admin,
                 modules = new
                 {
                     oportunidad = flags.Oportunidad,
@@ -630,6 +632,7 @@ public static class PlanillasEndpoints
                         isPending = status == AppAccessRepository.StatusPending,
                         isRejected = status == AppAccessRepository.StatusRejected,
                         loggedInToday = AppAccessRepository.IsLoggedInToday(item.LastLoginAt),
+                        isSt2Admin = St2SuperAdmin.Is(item.Email) || accessRepo.IsSt2Admin(item.Email),
                         modules = new
                         {
                             oportunidad = flags.Oportunidad,
@@ -719,7 +722,7 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true, email, status });
         });
 
-        app.MapPut("/api/access/registrations/modules", (HttpContext ctx, IConfiguration config, ModuleAccessRepository modules, ModuleAccessUpdateRequest body) =>
+        app.MapPut("/api/access/registrations/modules", (HttpContext ctx, IConfiguration config, ModuleAccessRepository modules, AppAccessRepository accessRepo, ModuleAccessUpdateRequest body) =>
         {
             if (!St2AccessAdminAuth.IsConfigured(config))
                 return Results.NotFound();
@@ -730,10 +733,23 @@ public static class PlanillasEndpoints
             try
             {
                 var flags = modules.Upsert(body);
+                var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
+                var isSt2Admin = St2SuperAdmin.Is(email);
+                if (body.St2Admin is not null && email is not null && !St2SuperAdmin.Is(email))
+                {
+                    accessRepo.SetSt2Admin(email, body.St2Admin.Value);
+                    isSt2Admin = body.St2Admin.Value;
+                }
+                else if (email is not null)
+                {
+                    isSt2Admin = St2SuperAdmin.Is(email) || accessRepo.IsSt2Admin(email);
+                }
+
                 return Results.Ok(new
                 {
                     ok = true,
-                    email = PlanUserIdentity.ValidateAndNormalize(body.Email),
+                    email,
+                    isSt2Admin,
                     modules = new
                     {
                         oportunidad = flags.Oportunidad,

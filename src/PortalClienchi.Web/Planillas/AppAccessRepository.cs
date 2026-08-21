@@ -471,6 +471,7 @@ public sealed class AppAccessRepository
         EnsureColumn(conn, "app_access", "display_name", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_login_at", "TEXT NULL");
         EnsureColumn(conn, "app_access", "status", "TEXT NOT NULL DEFAULT 'approved'");
+        EnsureColumn(conn, "app_access", "is_st2_admin", "INTEGER NOT NULL DEFAULT 0");
         using (var backfill = conn.CreateCommand())
         {
             backfill.CommandText = """
@@ -480,6 +481,46 @@ public sealed class AppAccessRepository
                 """;
             backfill.ExecuteNonQuery();
         }
+    }
+
+    public bool IsSt2Admin(string? email)
+    {
+        if (St2SuperAdmin.Is(email))
+            return true;
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return false;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT is_st2_admin FROM app_access
+            WHERE lower(email) = lower($email)
+            LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        var raw = cmd.ExecuteScalar();
+        if (raw is null || raw is DBNull)
+            return false;
+        return Convert.ToInt32(raw, CultureInfo.InvariantCulture) != 0;
+    }
+
+    public int SetSt2Admin(string email, bool isAdmin)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return 0;
+        if (St2SuperAdmin.Is(email))
+            return 0;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE app_access
+            SET is_st2_admin = $admin
+            WHERE lower(email) = lower($email)
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        cmd.Parameters.AddWithValue("$admin", isAdmin ? 1 : 0);
+        return cmd.ExecuteNonQuery();
     }
 
     private static AppAccessRecordDto ReadRecord(SqliteDataReader reader)

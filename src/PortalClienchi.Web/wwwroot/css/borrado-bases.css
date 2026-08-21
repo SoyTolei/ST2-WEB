@@ -208,45 +208,69 @@
 }
 
 .borrado-cliente-copy {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 6px;
   max-width: 100%;
   border: 0;
-  padding: 0.1rem 0.2rem;
   background: transparent;
-  color: inherit;
+  padding: 0;
+  margin: 0;
   font: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
+  color: #0f766e;
   cursor: pointer;
-  border-radius: 4px;
+  text-align: left;
 }
 
 .borrado-cliente-copy:hover {
-  background: #fff1f2;
-  color: #be123c;
+  color: #115e59;
+  text-decoration: underline;
+}
+
+.borrado-cliente-copy-icon {
+  flex-shrink: 0;
+  font-size: 0.85em;
+  line-height: 1;
+  text-decoration: none;
 }
 
 .borrado-cliente-copy-text {
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .borrado-cliente-copy-hint {
-  font-size: 0.65rem;
-  font-weight: 650;
-  color: #94a3b8;
-  text-transform: lowercase;
+  flex-shrink: 0;
+  margin-left: 2px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.35;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  text-decoration: none;
 }
 
 .borrado-cliente-copy:hover .borrado-cliente-copy-hint,
+.borrado-cliente-copy:focus-visible .borrado-cliente-copy-hint,
 .borrado-cliente-copy.is-copied .borrado-cliente-copy-hint {
-  color: #be123c;
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .borrado-cliente-copy.is-copied .borrado-cliente-copy-hint {
-  color: #e11d48;
+  background: #047857;
+  color: #ecfdf5;
 }
 
 .borrado-base-pill {

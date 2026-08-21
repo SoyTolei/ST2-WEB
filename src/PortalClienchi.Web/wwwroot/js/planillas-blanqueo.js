@@ -5,6 +5,7 @@ import {
   canLoadBlanqueoModule as canLoadFromAccess,
   refreshModuleFlags,
   isSt2SuperAdmin,
+  getViewAsProfile,
 } from "./module-access.js";
 import { notifyBlanqueoChanged } from "./blanqueo-alerts.js";
 
@@ -120,7 +121,11 @@ export function initBlanqueoModule() {
   });
   document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
-  document.getElementById("blanqueo-filter-mine")?.addEventListener("change", () => applyFilters());
+  document.getElementById("blanqueo-filter-mine")?.addEventListener("change", (e) => {
+    const check = e.target;
+    if (check) check.dataset.userTouched = "1";
+    applyFilters();
+  });
   document.getElementById("blanqueo-preview-confirm")?.addEventListener("change", (e) => {
     const on = !!e.target?.checked;
     try {
@@ -284,7 +289,11 @@ function syncMineFilterVisibility() {
   // Quien confirma (admin de blanqueo) siempre ve el listado completo.
   const show = !canConfirm;
   wrap.classList.toggle("hidden", !show);
-  if (!show && check) check.checked = false;
+  if (!show && check) {
+    check.checked = false;
+  } else if (show && check && check.dataset.userTouched !== "1") {
+    check.checked = true;
+  }
   syncConfirmToolsVisibility();
 }
 
@@ -308,6 +317,8 @@ function displayNameFromEmail(email) {
 }
 
 function currentEmail() {
+  const viewAs = getViewAsProfile();
+  if (viewAs?.email) return String(viewAs.email).trim().toLowerCase();
   return String(getPlanUserEmail() || "").trim().toLowerCase();
 }
 

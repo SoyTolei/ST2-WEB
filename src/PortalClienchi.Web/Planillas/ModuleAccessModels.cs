@@ -47,4 +47,6 @@ public sealed class ModuleAccessUpdateRequest
     public bool? BorradoBases { get; set; }
     public bool? BorradoBasesConfirm { get; set; }
     public bool? BorradoBasesLoad { get; set; }
+    /// <summary>Puede ver la pestaña Admin ST2 (además del super-admin primario).</summary>
+    public bool? St2Admin { get; set; }
 }

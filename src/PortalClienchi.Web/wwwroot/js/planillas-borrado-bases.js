@@ -5,6 +5,7 @@ import {
   canLoadBorradoBasesModule as canLoadFromAccess,
   refreshModuleFlags,
   isSt2SuperAdmin,
+  getViewAsProfile,
 } from "./module-access.js";
 import { notifyBorradoChanged } from "./borrado-alerts.js";
 
@@ -103,7 +104,11 @@ export function initBorradoBasesModule() {
     applyFilters();
   });
   document.getElementById("borrado-search")?.addEventListener("input", () => applyFilters());
-  document.getElementById("borrado-filter-mine")?.addEventListener("change", () => applyFilters());
+  document.getElementById("borrado-filter-mine")?.addEventListener("change", (e) => {
+    const check = e.target;
+    if (check) check.dataset.userTouched = "1";
+    applyFilters();
+  });
   document.getElementById("borrado-preview-confirm")?.addEventListener("change", (e) => {
     const on = !!e.target?.checked;
     try {
@@ -265,7 +270,11 @@ function syncMineFilterVisibility() {
   if (!wrap) return;
   const show = !canConfirm;
   wrap.classList.toggle("hidden", !show);
-  if (!show && check) check.checked = false;
+  if (!show && check) {
+    check.checked = false;
+  } else if (show && check && check.dataset.userTouched !== "1") {
+    check.checked = true;
+  }
 }
 
 function syncDetalleFieldsVisibility() {
@@ -324,6 +333,8 @@ function readBasesFromForm(prefix) {
 }
 
 function currentEmail() {
+  const viewAs = getViewAsProfile();
+  if (viewAs?.email) return String(viewAs.email).trim().toLowerCase();
   return String(getPlanUserEmail() || "").trim().toLowerCase();
 }
 
@@ -746,6 +757,7 @@ function buildRow(item) {
     ? "—"
     : canConfirm
       ? `<button type="button" class="borrado-cliente-copy" data-borrado-copy-cliente="${escapeHtml(cliente)}" title="Clic para copiar N° de cliente">
+            <span class="borrado-cliente-copy-icon" aria-hidden="true">📋</span>
             <span class="borrado-cliente-copy-text">${escapeHtml(cliente)}</span>
             <span class="borrado-cliente-copy-hint" aria-hidden="true">copiar</span>
           </button>`

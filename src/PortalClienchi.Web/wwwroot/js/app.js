@@ -1,6 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess } from "./plan-user.js";
-import { isSt2SuperAdmin } from "./module-access.js";
+import { isSt2SuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -119,6 +119,11 @@ const accessModBlanqueoLoad = document.getElementById("st2-mod-blanqueo-load");
 const accessModBorradoBases = document.getElementById("st2-mod-borrado-bases");
 const accessModBorradoBasesConfirm = document.getElementById("st2-mod-borrado-bases-confirm");
 const accessModBorradoBasesLoad = document.getElementById("st2-mod-borrado-bases-load");
+const accessModSt2Admin = document.getElementById("st2-mod-st2-admin");
+const accessModSt2AdminWrap = document.getElementById("st2-mod-st2-admin-wrap");
+const viewAsBanner = document.getElementById("st2-view-as-banner");
+const viewAsBannerText = document.getElementById("st2-view-as-banner-text");
+const viewAsExitBtn = document.getElementById("st2-view-as-exit");
 let accessModulesEmailValue = "";
 let accessModulesSaving = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
@@ -1160,6 +1165,7 @@ function normalizeAccessAdminItems(items) {
       isPending,
       isRejected,
       loggedInToday: !!(item.loggedInToday ?? item.LoggedInToday),
+      isSt2Admin: !!(item.isSt2Admin ?? item.IsSt2Admin),
       isActive: !!(item.isActive ?? item.IsActive),
       isNewToday,
       isUnseenNew: isNewToday && !hasAdminSeenAccessEmail(email),
@@ -1382,6 +1388,9 @@ function renderAccessAdminTable() {
     } else if (mods.borradoBases) {
       modBadges.push({ label: "Borr", title: "Borrado de bases: puede cargar" });
     }
+    if (item.isSt2Admin) {
+      modBadges.push({ label: "Admin", title: "Panel Admin ST2" });
+    }
     const modHtml = modBadges.length
       ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
       : `<span class="st2-access-admin-mod-empty" title="Sin módulos extra">—</span>`;
@@ -1399,7 +1408,8 @@ function renderAccessAdminTable() {
         ${item.isPending
           ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
              <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
-          : `<button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos visibles" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
+          : `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>
+        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos visibles" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
         <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
         <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>`}
       </td>
@@ -1761,7 +1771,14 @@ function hideAbout() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
-document.addEventListener("st2:session-changed", () => syncAdminTabVisibility());
+document.addEventListener("st2:session-changed", () => {
+  syncAdminTabVisibility();
+  syncViewAsBanner();
+});
+viewAsExitBtn?.addEventListener("click", () => {
+  clearViewAsProfile();
+  window.location.reload();
+});
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
   void loadAccessAdminRegistrations({ silent: true, force: true });
@@ -1818,6 +1835,11 @@ accessAdminBody?.addEventListener("click", (e) => {
   if (handleAccessAdminActionClick(e)) return;
   const target = e.target;
   if (!(target instanceof HTMLElement)) return;
+  const previewBtn = target.closest("[data-preview-email]");
+  if (previewBtn instanceof HTMLElement) {
+    startAccessProfilePreview(previewBtn.dataset.previewEmail || "");
+    return;
+  }
   const modulesBtn = target.closest("[data-modules-email]");
   if (modulesBtn instanceof HTMLElement) {
     openAccessModulesModal(modulesBtn.dataset.modulesEmail || "");
@@ -1840,10 +1862,40 @@ function closeAccessModulesModal() {
   if (accessModulesError) accessModulesError.textContent = "";
 }
 
+const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
+
+function startAccessProfilePreview(email) {
+  if (!email) return;
+  const current = accessAdminItemsCache.find((item) => item.email === email);
+  if (!current || current.isPending) return;
+  const displayName = formatAccessDisplayName(current.email, current.displayNameOverride);
+  startViewAsProfile({
+    email: current.email,
+    displayName,
+    modules: current.modules || {},
+  });
+  window.location.hash = "#/planillas";
+  window.location.reload();
+}
+
+function syncViewAsBanner() {
+  const viewAs = getViewAsProfile();
+  const show = !!viewAs;
+  if (viewAsBanner) {
+    viewAsBanner.classList.toggle("hidden", !show);
+    viewAsBanner.toggleAttribute("hidden", !show);
+  }
+  if (viewAsBannerText && viewAs) {
+    viewAsBannerText.textContent = `Viendo el perfil de ${viewAs.displayName || viewAs.email}`;
+  }
+  document.body.classList.toggle("st2-viewing-as-profile", show);
+}
+
 function openAccessModulesModal(email) {
   if (!accessModulesOverlay || !email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   const mods = current?.modules || {};
+  const isPrimary = String(email).trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
   accessModulesEmailValue = email;
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
@@ -1863,6 +1915,13 @@ function openAccessModulesModal(email) {
     accessModBorradoBasesLoad.checked = mods.borradoBasesLoad == null
       ? !!mods.borradoBases && !mods.borradoBasesConfirm
       : !!mods.borradoBasesLoad;
+  }
+  if (accessModSt2Admin) {
+    accessModSt2Admin.checked = isPrimary || !!current?.isSt2Admin;
+    accessModSt2Admin.disabled = isPrimary;
+  }
+  if (accessModSt2AdminWrap) {
+    accessModSt2AdminWrap.classList.toggle("is-primary-locked", isPrimary);
   }
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
@@ -1935,6 +1994,7 @@ async function saveAccessModules() {
         borradoBases: !!accessModBorradoBases?.checked,
         borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
         borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
+        st2Admin: !!accessModSt2Admin?.checked,
       }),
     });
     const data = await response.json().catch(() => ({}));
@@ -1944,6 +2004,7 @@ async function saveAccessModules() {
       item.email === accessModulesEmailValue
         ? {
             ...item,
+            isSt2Admin: !!(data.isSt2Admin ?? accessModSt2Admin?.checked),
             modules: {
               oportunidad: !!mods.oportunidad,
               pdfPortal: !!mods.pdfPortal,
@@ -2983,7 +3044,9 @@ async function bootstrapApp() {
   applyAboutUpdated();
   await ensureAppAccess();
   syncAdminTabVisibility();
+  syncViewAsBanner();
   await initPlanillas();
+  syncAdminTabVisibility();
   applyTopTabEntry();
   window.addEventListener("popstate", () => {
     const tab = tabFromPath(window.location.pathname);

@@ -951,6 +951,7 @@ html.st2-theme-dark .st2-access-admin-mod-empty {
 
 html.st2-theme-dark .st2-access-admin-edit,
 html.st2-theme-dark .st2-access-admin-modules,
+html.st2-theme-dark .st2-access-admin-preview,
 html.st2-theme-dark .st2-access-admin-delete {
   background: #243044 !important;
   border-color: #3d4b61 !important;

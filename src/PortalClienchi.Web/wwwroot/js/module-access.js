@@ -3,6 +3,7 @@ import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 const FORCE_KEY = "st2-modules-force-all";
 /** Acceso total permanente (coincide con backend St2SuperAdmin). */
 const SUPER_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
+const VIEW_AS_KEY = "st2-view-as-profile-v1";
 const MODULES_POLL_MS = 20000;
 
 const MODULE_LABELS = {
@@ -17,6 +18,7 @@ const MODULE_LABELS = {
 };
 
 let cachedFlags = null;
+let cachedSt2Admin = false;
 let loadPromise = null;
 let lastLoadedAt = 0;
 /** Snapshot de flags ya “conocidos” por el usuario (para detectar altas nuevas). */
@@ -92,12 +94,64 @@ function bindModulesBanner() {
   });
 }
 
-export function isSt2SuperAdmin(email = getPlanUserEmail()) {
+function readViewAs() {
+  try {
+    const raw = sessionStorage.getItem(VIEW_AS_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.email || !data.modules) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export function getViewAsProfile() {
+  return readViewAs();
+}
+
+export function isViewingAsProfile() {
+  return !!readViewAs();
+}
+
+export function startViewAsProfile({ email, displayName, modules }) {
+  const payload = {
+    email: String(email || "").trim().toLowerCase(),
+    displayName: String(displayName || "").trim() || email,
+    modules: cloneFlags(parseFlagsFromApi(modules || {})),
+  };
+  sessionStorage.setItem(VIEW_AS_KEY, JSON.stringify(payload));
+  document.dispatchEvent(new CustomEvent("st2:view-as-changed", { detail: payload }));
+}
+
+export function clearViewAsProfile() {
+  sessionStorage.removeItem(VIEW_AS_KEY);
+  document.dispatchEvent(new CustomEvent("st2:view-as-changed", { detail: null }));
+}
+
+function isPrimarySuperAdmin(email = getPlanUserEmail()) {
   return String(email || "").trim().toLowerCase() === SUPER_ADMIN_EMAIL;
 }
 
+/**
+ * Panel Admin / privilegios de administración.
+ * Mientras se previsualiza otro perfil, se comporta como ese usuario (sin admin).
+ */
+export function isSt2SuperAdmin(email = getPlanUserEmail()) {
+  if (readViewAs()) return false;
+  const target = String(email || "").trim().toLowerCase();
+  const me = String(getPlanUserEmail() || "").trim().toLowerCase();
+  if (target && target !== me) {
+    return target === SUPER_ADMIN_EMAIL;
+  }
+  if (isPrimarySuperAdmin(me)) return true;
+  return !!cachedSt2Admin;
+}
+
 export function getCachedModuleFlags() {
-  if (isSt2SuperAdmin()) return fullFlags();
+  const viewAs = readViewAs();
+  if (viewAs?.modules) return cloneFlags(viewAs.modules);
+  if (isPrimarySuperAdmin()) return fullFlags();
   return cachedFlags || emptyFlags();
 }
 
@@ -121,29 +175,32 @@ function parseFlagsFromApi(m) {
  */
 export async function refreshModuleFlags({ force = false, baseline = false, detectNew = false } = {}) {
   try {
-    if (localStorage.getItem(FORCE_KEY) === "1" || isSt2SuperAdmin()) {
+    if (localStorage.getItem(FORCE_KEY) === "1" || isPrimarySuperAdmin()) {
       cachedFlags = fullFlags();
+      cachedSt2Admin = true;
       lastLoadedAt = Date.now();
       if (baseline || !knownFlags) knownFlags = cloneFlags(cachedFlags);
-      return cachedFlags;
+      return getCachedModuleFlags();
     }
   } catch {
-    if (isSt2SuperAdmin()) {
+    if (isPrimarySuperAdmin()) {
       cachedFlags = fullFlags();
+      cachedSt2Admin = true;
       if (baseline || !knownFlags) knownFlags = cloneFlags(cachedFlags);
-      return cachedFlags;
+      return getCachedModuleFlags();
     }
   }
 
   if (!getPlanUserEmail()) {
     cachedFlags = emptyFlags();
+    cachedSt2Admin = false;
     if (baseline) knownFlags = cloneFlags(cachedFlags);
-    return cachedFlags;
+    return getCachedModuleFlags();
   }
 
   if (!force && loadPromise) return loadPromise;
   if (!force && cachedFlags && Date.now() - lastLoadedAt < 60000) {
-    return cachedFlags;
+    return getCachedModuleFlags();
   }
 
   loadPromise = (async () => {
@@ -152,6 +209,7 @@ export async function refreshModuleFlags({ force = false, baseline = false, dete
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
       const next = parseFlagsFromApi(data.modules || {});
+      cachedSt2Admin = !!data.st2Admin || isPrimarySuperAdmin();
       const prevKnown = knownFlags ? cloneFlags(knownFlags) : null;
 
       cachedFlags = next;
@@ -188,7 +246,8 @@ export function startModuleAccessPolling() {
 
   const tick = () => {
     if (document.visibilityState === "hidden") return;
-    if (isSt2SuperAdmin()) return;
+    if (isPrimarySuperAdmin()) return;
+    if (readViewAs()) return;
     void refreshModuleFlags({ force: true, detectNew: true }).then((flags) => {
       document.dispatchEvent(new CustomEvent("st2:modules-flags-refreshed", {
         detail: { flags: cloneFlags(flags) },
