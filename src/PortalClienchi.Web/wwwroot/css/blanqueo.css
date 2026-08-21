@@ -44,12 +44,26 @@
 
 .blanqueo-clave-hint {
   margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+  background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
   font-size: 0.82rem;
-  color: #475569;
+  font-weight: 600;
+  color: #1e3a5f;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 8px;
+}
+
+.blanqueo-clave-hint-label {
+  font-weight: 650;
+}
+
+.blanqueo-clave-hint-note {
+  font-weight: 500;
+  color: #64748b;
 }
 
 .blanqueo-clave-hint.hidden {
@@ -266,6 +280,68 @@
 .blanqueo-clave-code:hover {
   background: #e2e8f0;
   border-color: #64748b;
+}
+
+.blanqueo-estado-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.blanqueo-clave-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.blanqueo-clave-row--copy {
+  border: 1px dashed #0d9488;
+  background: #f0fdfa;
+  color: #0f766e;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.blanqueo-clave-row--copy:hover,
+.blanqueo-clave-row--copy:focus-visible {
+  background: #ccfbf1;
+  border-color: #0f766e;
+  outline: none;
+}
+
+.blanqueo-clave-row--copy.is-copied {
+  border-style: solid;
+  background: #d1fae5;
+  color: #047857;
+}
+
+.blanqueo-clave-row-label {
+  font-weight: 650;
+  color: #0f766e;
+}
+
+.blanqueo-clave-row-value {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.blanqueo-clave-row--note {
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #b45309;
+  padding: 0.2rem 0.45rem;
 }
 
 .blanqueo-ready-toast {

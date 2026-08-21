@@ -484,9 +484,11 @@ function syncTipoOptions(selectId, portal, preferred = "") {
 function syncClaveVisibility() {
   const hint = document.getElementById("blanqueo-clave-hint");
   if (!hint) return;
-  const show = getFormPortal() === "OnBalance" || getFormPortal() === "Onvio";
-  hint.classList.toggle("hidden", !show);
-  hint.setAttribute("aria-hidden", show ? "false" : "true");
+  // Aviso fijo del listado (todos), oculto solo en Legal/Chile.
+  const sistema = document.body.dataset.planSistema;
+  const hide = sistema === "Legal" || sistema === "Chile";
+  hint.classList.toggle("hidden", hide);
+  hint.setAttribute("aria-hidden", hide ? "true" : "false");
 }
 
 async function createSolicitud() {
@@ -904,15 +906,28 @@ function buildRow(item) {
     });
   });
 
+  row.querySelector("[data-blanqueo-copy-clave]")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const clave = btn.getAttribute("data-blanqueo-copy-clave") || claveDefault();
+    void copyText(clave, {
+      el: btn,
+      copiedText: "Copiado",
+      restoreText: "Clave",
+    });
+  });
+
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-blanqueo-copy-mail]")) return;
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave]")) return;
     selectedId = item.id;
     applyFilters();
   });
 
   row.addEventListener("dblclick", (e) => {
     e.preventDefault();
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave]")) return;
     selectedId = item.id;
     applyFilters();
     if (!canConfirm) return;
@@ -969,15 +984,40 @@ function formatFecha(iso) {
   return `${day}-${month}-${String(year).slice(-2)}`;
 }
 
+function claveDefault() {
+  const btn = document.getElementById("blanqueo-clave-copy");
+  return String(btn?.dataset.clave || btn?.textContent || "Sueldo.2026").trim() || "Sueldo.2026";
+}
+
+function isBlanqueoConClave(item) {
+  return /blanqueo/i.test(String(item?.tipoSolicitud || ""));
+}
+
+function formatClaveChip(item) {
+  if (!item?.listo || !isBlanqueoConClave(item)) return "";
+  const aclaracion = String(item.aclaracion || "").trim();
+  if (aclaracion) {
+    return `<span class="blanqueo-clave-row blanqueo-clave-row--note" title="La clave u observación está en Aclaración">Clave en aclaración</span>`;
+  }
+  const clave = claveDefault();
+  return `<button type="button" class="blanqueo-clave-row blanqueo-clave-row--copy" data-blanqueo-copy-clave="${escapeHtml(clave)}" title="Clic para copiar la clave">
+    <span class="blanqueo-clave-row-label">Clave:</span>
+    <code class="blanqueo-clave-row-value">${escapeHtml(clave)}</code>
+  </button>`;
+}
+
 function formatEstadoCell(item) {
+  let estado;
   if (item.listo) {
-    return '<span class="blanqueo-pill ok">Listo</span>';
+    estado = '<span class="blanqueo-pill ok">Listo</span>';
+  } else if (!String(item.aclaracion || "").trim()) {
+    estado = '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
+  } else {
+    estado = "—";
   }
-  // Pendiente: sin confirmar y sin observación / no registrado.
-  if (!String(item.aclaracion || "").trim()) {
-    return '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
-  }
-  return "—";
+  const chip = formatClaveChip(item);
+  if (!chip) return estado;
+  return `<div class="blanqueo-estado-stack">${estado}${chip}</div>`;
 }
 
 function showCtx(x, y, item) {
