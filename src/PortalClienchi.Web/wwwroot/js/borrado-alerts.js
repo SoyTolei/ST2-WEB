@@ -64,9 +64,9 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
         return cachedAlerts;
       }
       const data = await res.json().catch(() => ({}));
-      alertMode = String(data.mode || "").toLowerCase() === "confirm" || canConfirmBorradoBasesModule()
-        ? "confirm"
-        : "requester";
+      // Respetar el mode del API (si hay avisos personales, vienen como requester
+      // aunque el usuario también pueda confirmar).
+      alertMode = String(data.mode || "").toLowerCase() === "confirm" ? "confirm" : "requester";
       cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
       if (alertMode === "confirm") {
         const sig = pendingSignature(cachedAlerts);
@@ -193,24 +193,27 @@ function summarizeAlerts(alerts) {
     else counts.ready += 1;
   }
 
-  let tone = "ok";
-  let text = "";
-  if (counts.partial > 0) {
-    tone = "warn";
-    text = counts.partial === 1
-      ? "Tenés 1 borrado confirmado con bases pendientes de revisar"
-      : `Tenés ${counts.partial} borrados confirmados con bases pendientes de revisar`;
-  } else if (counts.note > 0) {
-    tone = "warn";
-    text = counts.note === 1
-      ? "Tenés 1 borrado de bases con una observación"
-      : `Tenés ${counts.note} borrados de bases con observación`;
-  } else {
-    tone = "ok";
-    text = counts.ready === 1
-      ? "Tenés un borrado de bases confirmado"
-      : `Tenés ${counts.ready} borrados de bases confirmados`;
+  const parts = [];
+  if (counts.ready > 0) {
+    parts.push(counts.ready === 1
+      ? "1 borrado eliminado"
+      : `${counts.ready} borrados eliminados`);
   }
+  if (counts.partial > 0) {
+    parts.push(counts.partial === 1
+      ? "1 borrado parcial"
+      : `${counts.partial} borrados parciales`);
+  }
+  if (counts.note > 0) {
+    parts.push(counts.note === 1
+      ? "1 observación"
+      : `${counts.note} observaciones`);
+  }
+
+  const tone = (counts.partial > 0 || counts.note > 0) ? "warn" : "ok";
+  const text = parts.length
+    ? `Tenés ${parts.join(" y ")}`
+    : "Tenés novedades en borrado de bases";
 
   return { tone, text, counts };
 }

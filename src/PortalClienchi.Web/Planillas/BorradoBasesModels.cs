@@ -74,8 +74,14 @@ public static class BorradoAlertKinds
     public static bool IsPartialListo(string? aclaracion)
     {
         var text = (aclaracion ?? "").Trim();
-        return text.Contains('✗', StringComparison.Ordinal)
-            || text.Contains(" no", StringComparison.OrdinalIgnoreCase);
+        if (string.IsNullOrEmpty(text))
+            return false;
+        // Solo el resumen de bases (✓/✗); no confundir con observaciones libres.
+        var resultado = text;
+        var sep = text.IndexOf("---", StringComparison.Ordinal);
+        if (sep >= 0)
+            resultado = text[..sep].Trim();
+        return resultado.Contains('✗', StringComparison.Ordinal);
     }
 }
 

@@ -108,6 +108,19 @@ public static class BorradoBasesEndpoints
 
             if (flags.BorradoBasesConfirm)
             {
+                // Si hay avisos personales (su solicitud quedó eliminada/parcial/con nota),
+                // priorizarlos: si no, la cola de pendientes a confirmar.
+                var personal = repo.ListUnseenAlerts(email!);
+                if (personal.Count > 0)
+                {
+                    return Results.Ok(new
+                    {
+                        mode = "requester",
+                        count = personal.Count,
+                        items = personal,
+                    });
+                }
+
                 var pending = repo.ListPendingForConfirm();
                 return Results.Ok(new
                 {
