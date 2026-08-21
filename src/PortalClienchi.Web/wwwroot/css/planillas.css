@@ -367,10 +367,10 @@
 
 .planillas-hero-easter {
   position: absolute;
-  top: -14px;
-  left: 10px;
+  top: -18px;
+  left: 8px;
   right: auto;
-  width: 56px;
+  width: 72px;
   height: auto;
   pointer-events: none;
   z-index: 2;
