@@ -889,9 +889,20 @@ html.st2-theme-dark .st2-access-admin-legend,
 html.st2-theme-dark .st2-access-admin-date,
 html.st2-theme-dark .st2-access-name-edit-email,
 html.st2-theme-dark .st2-access-name-edit-hint,
-html.st2-theme-dark .st2-access-modules-hint,
+html.st2-theme-dark .st2-access-modules-profile-label,
+html.st2-theme-dark .st2-access-modules-email,
 html.st2-theme-dark .st2-access-modules-check-sub {
   color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-profile {
+  background: #243044 !important;
+  border-color: #3d4b61 !important;
+  border-left-color: #fb923c !important;
+}
+
+html.st2-theme-dark .st2-access-modules-name {
+  color: #f8fafc !important;
 }
 
 html.st2-theme-dark .st2-access-admin-input,

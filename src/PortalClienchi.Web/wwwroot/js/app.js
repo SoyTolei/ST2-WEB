@@ -107,6 +107,7 @@ let accessNameEditAutoValue = "";
 let accessNameEditSaving = false;
 const accessModulesOverlay = document.getElementById("st2-access-modules-overlay");
 const accessModulesEmail = document.getElementById("st2-access-modules-email");
+const accessModulesName = document.getElementById("st2-access-modules-name");
 const accessModulesError = document.getElementById("st2-access-modules-error");
 const accessModulesClose = document.getElementById("st2-access-modules-close");
 const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
@@ -1409,7 +1410,7 @@ function renderAccessAdminTable() {
           ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
              <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
           : `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>
-        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos visibles" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
+        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos habilitados" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
         <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
         <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>`}
       </td>
@@ -1897,6 +1898,8 @@ function openAccessModulesModal(email) {
   const mods = current?.modules || {};
   const isPrimary = String(email).trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
   accessModulesEmailValue = email;
+  const displayName = formatAccessDisplayName(email, current?.displayNameOverride);
+  if (accessModulesName) accessModulesName.textContent = displayName;
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
   if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;

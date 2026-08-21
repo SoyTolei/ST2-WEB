@@ -1917,50 +1917,50 @@
   <div id="st2-access-modules-overlay" class="st2-access-name-edit-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="st2-access-modules-title">
     <div class="st2-access-name-edit-dialog st2-access-modules-dialog">
       <div class="st2-access-name-edit-head">
-        <h3 id="st2-access-modules-title" class="st2-access-name-edit-title">Módulos visibles</h3>
+        <h3 id="st2-access-modules-title" class="st2-access-name-edit-title">Módulos habilitados</h3>
         <button type="button" id="st2-access-modules-close" class="st2-access-name-edit-x" aria-label="Cerrar">×</button>
       </div>
-      <p id="st2-access-modules-email" class="st2-access-name-edit-email"></p>
-      <p class="st2-access-modules-hint">Referral I+D y Transferencia son para todos. Acá elegís el resto.</p>
+      <div id="st2-access-modules-profile" class="st2-access-modules-profile">
+        <span class="st2-access-modules-profile-label">Perfil</span>
+        <strong id="st2-access-modules-name" class="st2-access-modules-name"></strong>
+        <span id="st2-access-modules-email" class="st2-access-modules-email"></span>
+      </div>
       <label class="st2-access-modules-check">
         <input id="st2-mod-oportunidad" type="checkbox"/>
-        <span>Oportunidad de Venta</span>
+        <span>💼 Oportunidad de Venta</span>
       </label>
       <label class="st2-access-modules-check">
         <input id="st2-mod-pdf" type="checkbox"/>
-        <span>Generador PDF-Portal</span>
+        <span>📄 Generador PDF-Portal</span>
       </label>
       <label class="st2-access-modules-check">
         <input id="st2-mod-blanqueo" type="checkbox"/>
-        <span>Blanqueo Claves</span>
+        <span>🔑 Blanqueo Claves</span>
       </label>
       <label class="st2-access-modules-check st2-access-modules-check-sub">
         <input id="st2-mod-blanqueo-confirm" type="checkbox"/>
-        <span>Puede confirmar</span>
+        <span>✓ Puede confirmar</span>
       </label>
       <label class="st2-access-modules-check st2-access-modules-check-sub">
         <input id="st2-mod-blanqueo-load" type="checkbox"/>
-        <span>Puede cargar</span>
+        <span>＋ Puede cargar</span>
       </label>
-      <p class="st2-access-modules-hint st2-access-modules-hint-sub">Confirmadores sin “cargar” ven solo el listado ampliado. Marcá ambas si también deben cargar.</p>
       <label class="st2-access-modules-check">
         <input id="st2-mod-borrado-bases" type="checkbox"/>
-        <span>Borrado de bases</span>
+        <span>🗄️ Borrado de bases</span>
       </label>
       <label class="st2-access-modules-check st2-access-modules-check-sub">
         <input id="st2-mod-borrado-bases-confirm" type="checkbox"/>
-        <span>Puede confirmar</span>
+        <span>✓ Puede confirmar</span>
       </label>
       <label class="st2-access-modules-check st2-access-modules-check-sub">
         <input id="st2-mod-borrado-bases-load" type="checkbox"/>
-        <span>Puede cargar</span>
+        <span>＋ Puede cargar</span>
       </label>
-      <p class="st2-access-modules-hint st2-access-modules-hint-sub">Mismo criterio que blanqueo: confirmadores sin “cargar” ven solo el listado.</p>
       <label id="st2-mod-st2-admin-wrap" class="st2-access-modules-check st2-access-modules-check-admin">
         <input id="st2-mod-st2-admin" type="checkbox"/>
-        <span>ADMIN WEB</span>
+        <span>🛡️ ADMIN WEB</span>
       </label>
-      <p class="st2-access-modules-hint st2-access-modules-hint-sub">Delegá la pestaña Admin de la web. El super admin primario no se puede quitar.</p>
       <p id="st2-access-modules-error" class="st2-access-admin-error" role="alert"></p>
       <div class="st2-access-modules-actions">
         <button type="button" id="st2-access-modules-cancel" class="st2-access-admin-cancel">Cancelar</button>

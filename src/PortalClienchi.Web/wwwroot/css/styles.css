@@ -2778,16 +2778,38 @@ body.portal-tab-active .tab-icon {
   width: min(420px, 96vw);
 }
 
-.st2-access-modules-hint {
-  margin: 0 0 14px;
-  font-size: 0.8rem;
-  color: #64748b;
-  line-height: 1.4;
+.st2-access-modules-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #f97316;
 }
 
-.st2-access-modules-hint-sub {
-  margin: -2px 0 12px 22px;
-  font-size: 0.74rem;
+.st2-access-modules-profile-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.st2-access-modules-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+}
+
+.st2-access-modules-email {
+  font-size: 0.78rem;
+  color: #64748b;
+  word-break: break-all;
+  line-height: 1.35;
 }
 
 .st2-access-modules-check {
