@@ -8,13 +8,13 @@ const MODULES_POLL_MS = 20000;
 
 const MODULE_LABELS = {
   oportunidad: "Oportunidad de Venta",
-  pdfPortal: "Generador de PDFs",
-  blanqueo: "Blanqueo de accesos",
-  blanqueoConfirm: "confirmar blanqueo",
-  blanqueoLoad: "cargar blanqueo",
+  pdfPortal: "Generador PDF-Portal",
+  blanqueo: "Blanqueo Claves",
+  blanqueoConfirm: "puede confirmar blanqueo",
+  blanqueoLoad: "puede cargar blanqueo",
   borradoBases: "Borrado de bases",
-  borradoBasesConfirm: "confirmar borrado de bases",
-  borradoBasesLoad: "cargar borrado de bases",
+  borradoBasesConfirm: "puede confirmar borrado",
+  borradoBasesLoad: "puede cargar borrado",
 };
 
 let cachedFlags = null;

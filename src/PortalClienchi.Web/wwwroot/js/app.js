@@ -1372,14 +1372,14 @@ function renderAccessAdminTable() {
       modBadges.push({ label: "Op", title: "Oportunidad de Venta" });
     }
     if (mods.pdfPortal) {
-      modBadges.push({ label: "PDF", title: "Generador de PDFS para Portal" });
+      modBadges.push({ label: "PDF", title: "Generador PDF-Portal" });
     }
     if (mods.blanqueoConfirm && mods.blanqueoLoad) {
-      modBadges.push({ label: "Blanq✓+", title: "Blanqueo: confirma y carga" });
+      modBadges.push({ label: "Blanq✓+", title: "Blanqueo Claves: confirma y carga" });
     } else if (mods.blanqueoConfirm) {
-      modBadges.push({ label: "Blanq✓", title: "Blanqueo: solo listado / confirma" });
+      modBadges.push({ label: "Blanq✓", title: "Blanqueo Claves: solo listado / confirma" });
     } else if (mods.blanqueo) {
-      modBadges.push({ label: "Blanq", title: "Blanqueo: puede cargar" });
+      modBadges.push({ label: "Blanq", title: "Blanqueo Claves: puede cargar" });
     }
     if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
       modBadges.push({ label: "Borr✓+", title: "Borrado de bases: confirma y carga" });
@@ -1389,7 +1389,7 @@ function renderAccessAdminTable() {
       modBadges.push({ label: "Borr", title: "Borrado de bases: puede cargar" });
     }
     if (item.isSt2Admin) {
-      modBadges.push({ label: "Admin", title: "Panel Admin ST2" });
+      modBadges.push({ label: "Admin", title: "ADMIN WEB" });
     }
     const modHtml = modBadges.length
       ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
