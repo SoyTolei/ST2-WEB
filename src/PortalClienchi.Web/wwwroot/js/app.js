@@ -1930,9 +1930,14 @@ async function uploadTool(toolId, file) {
       };
       xhr.onload = () => {
         let parsed = {};
-        try { parsed = JSON.parse(xhr.responseText || "{}"); } catch { /* ignore */ }
+        const raw = String(xhr.responseText || "");
+        try { parsed = JSON.parse(raw || "{}"); } catch { /* ignore */ }
         if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
-        else reject(new Error(parsed?.error || parsed?.detail || `Error ${xhr.status}`));
+        else {
+          const msg = parsed?.error || parsed?.detail || parsed?.title
+            || (raw ? raw.slice(0, 240) : `Error ${xhr.status}`);
+          reject(new Error(msg));
+        }
       };
       xhr.onerror = () => reject(new Error("No se pudo contactar al servidor."));
       xhr.send(body);

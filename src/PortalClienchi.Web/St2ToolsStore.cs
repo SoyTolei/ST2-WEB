@@ -44,11 +44,13 @@ public sealed class St2ToolsStore
     private readonly object _gate = new();
     private readonly string _root;
     private readonly string _manifestPath;
+    private readonly string _lastErrorPath;
 
     public St2ToolsStore()
     {
         _root = Path.Combine(St2Paths.GetDataDirectory(), "tools");
         _manifestPath = Path.Combine(_root, "manifest.json");
+        _lastErrorPath = Path.Combine(_root, "last-upload-error.txt");
         EnsureRoot();
     }
 
@@ -90,13 +92,69 @@ public sealed class St2ToolsStore
         }
     }
 
-    public async Task<St2ToolPackageDto> SaveUploadAsync(
-        string toolId,
-        string originalFileName,
-        Stream content,
-        string? version,
-        long? knownLength,
-        CancellationToken ct = default)
+    public string WriteProbe()
+    {
+        EnsureRoot();
+        var probe = Path.Combine(_root, $".probe-{Guid.NewGuid():N}.txt");
+        File.WriteAllText(probe, DateTime.UtcNow.ToString("o"));
+        var info = new FileInfo(probe);
+        File.Delete(probe);
+        return $"write-ok size={info.Length} root={_root}";
+    }
+
+    public void WriteLastError(string toolId, Exception ex)
+    {
+        try
+        {
+            EnsureRoot();
+            File.WriteAllText(
+                _lastErrorPath,
+                $"{DateTime.UtcNow:o}\ntool={toolId}\n{ex}");
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    public void ClearLastError()
+    {
+        try
+        {
+            if (File.Exists(_lastErrorPath))
+                File.Delete(_lastErrorPath);
+        }
+        catch
+        {
+            // ignore
+        }
+    }
+
+    public string? ReadLastError()
+    {
+        try
+        {
+            return File.Exists(_lastErrorPath) ? File.ReadAllText(_lastErrorPath) : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Crea un temp dentro del volume (no en /tmp del contenedor).</summary>
+    public string BeginTempFile(string toolId)
+    {
+        if (!TryNormalizeId(toolId, out var id))
+            throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
+
+        EnsureRoot();
+        var toolDir = Path.Combine(_root, id);
+        Directory.CreateDirectory(toolDir);
+        return Path.Combine(toolDir, $".{Guid.NewGuid():N}.uploading");
+    }
+
+    public St2ToolPackageDto CommitTempFile(string toolId, string tmpPath, string originalFileName, string? version, long sizeBytes)
     {
         if (!TryNormalizeId(toolId, out var id))
             throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
@@ -112,63 +170,42 @@ public sealed class St2ToolsStore
         if (ver.Length > 40)
             throw new ArgumentException("La versión es demasiado larga.");
 
-        EnsureRoot();
+        if (sizeBytes <= 0)
+            throw new InvalidOperationException("El archivo está vacío.");
+        if (sizeBytes > 120L * 1024 * 1024)
+            throw new InvalidOperationException("El archivo supera el máximo de 120 MB.");
+
+        if (!File.Exists(tmpPath))
+            throw new InvalidOperationException("No se encontró el archivo temporal subido.");
+
         var toolDir = Path.Combine(_root, id);
         Directory.CreateDirectory(toolDir);
-
         var destPath = Path.Combine(toolDir, safeName);
-        var tmpPath = Path.Combine(toolDir, $".{Guid.NewGuid():N}.uploading");
 
-        try
+        lock (_gate)
         {
-            await using (var fs = new FileStream(tmpPath, FileMode.Create, FileAccess.Write, FileShare.None, 64 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan))
+            foreach (var old in Directory.EnumerateFiles(toolDir))
             {
-                await content.CopyToAsync(fs, ct).ConfigureAwait(false);
-                await fs.FlushAsync(ct).ConfigureAwait(false);
+                if (string.Equals(old, tmpPath, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                try { File.Delete(old); } catch { /* ignore */ }
             }
 
-            var size = new FileInfo(tmpPath).Length;
-            if (knownLength is > 0 && size == 0)
-                throw new InvalidOperationException("El archivo llegó vacío.");
-            if (size <= 0)
-                throw new InvalidOperationException("El archivo está vacío.");
-            if (size > 120L * 1024 * 1024)
-                throw new InvalidOperationException("El archivo supera el máximo de 120 MB.");
+            if (File.Exists(destPath))
+                File.Delete(destPath);
+            File.Move(tmpPath, destPath);
 
-            lock (_gate)
+            var map = ReadManifestUnlocked();
+            map[id] = new ManifestEntry
             {
-                foreach (var old in Directory.EnumerateFiles(toolDir))
-                {
-                    if (string.Equals(old, tmpPath, StringComparison.OrdinalIgnoreCase))
-                        continue;
-                    try { File.Delete(old); } catch { /* ignore */ }
-                }
-
-                if (File.Exists(destPath))
-                    File.Delete(destPath);
-                File.Move(tmpPath, destPath);
-
-                var map = ReadManifestUnlocked();
-                map[id] = new ManifestEntry
-                {
-                    Version = ver,
-                    FileName = safeName,
-                    SizeBytes = size,
-                    UpdatedAtUtc = DateTime.UtcNow.ToString("o"),
-                    ContentType = GuessContentType(ext),
-                };
-                WriteManifestUnlocked(map);
-                return ToDto(id, map[id]);
-            }
-        }
-        finally
-        {
-            try
-            {
-                if (File.Exists(tmpPath))
-                    File.Delete(tmpPath);
-            }
-            catch { /* ignore */ }
+                Version = ver,
+                FileName = safeName,
+                SizeBytes = sizeBytes,
+                UpdatedAtUtc = DateTime.UtcNow.ToString("o"),
+                ContentType = GuessContentType(ext),
+            };
+            WriteManifestUnlocked(map);
+            return ToDto(id, map[id]);
         }
     }
 
