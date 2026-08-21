@@ -2001,7 +2001,8 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-about-notice-aside {
-  display: inline;
+  display: block;
+  margin: 0 0 10px;
   font-size: 0.76rem;
   font-style: italic;
   line-height: 1.45;
