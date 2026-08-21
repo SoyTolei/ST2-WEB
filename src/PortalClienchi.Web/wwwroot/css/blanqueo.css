@@ -57,6 +57,12 @@
   gap: 6px 8px;
 }
 
+.blanqueo-clave-hint-emoji {
+  flex-shrink: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .blanqueo-clave-hint-label {
   font-weight: 650;
 }
@@ -282,66 +288,66 @@
   border-color: #64748b;
 }
 
-.blanqueo-estado-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
-}
-
-.blanqueo-clave-row {
+/* Pastilla Clave (misma dinámica que CG en borrado): punteado + “ver” al hover. */
+.blanqueo-clave-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  max-width: 100%;
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1.2;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
-.blanqueo-clave-row--copy {
-  border: 1px dashed #0d9488;
-  background: #f0fdfa;
-  color: #0f766e;
-  padding: 0.2rem 0.45rem;
-  cursor: pointer;
+  gap: 0;
+  margin: 0;
+  padding: 0.16rem 0.5rem;
+  border: 1px dashed #38bdf8;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
 }
 
-.blanqueo-clave-row--copy:hover,
-.blanqueo-clave-row--copy:focus-visible {
-  background: #ccfbf1;
-  border-color: #0f766e;
-  outline: none;
-}
-
-.blanqueo-clave-row--copy.is-copied {
+.blanqueo-clave-pill:hover,
+.blanqueo-clave-pill:focus-visible {
+  background: #bae6fd;
+  border-color: #0284c7;
   border-style: solid;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.blanqueo-clave-pill.is-copied {
   background: #d1fae5;
+  border-color: #059669;
+  border-style: solid;
   color: #047857;
 }
 
-.blanqueo-clave-row-label {
-  font-weight: 650;
-  color: #0f766e;
+.blanqueo-clave-pill-label {
+  letter-spacing: 0.02em;
 }
 
-.blanqueo-clave-row-value {
-  font-family: Consolas, "Courier New", monospace;
-  font-size: 0.78rem;
+.blanqueo-clave-pill-action {
+  display: inline-block;
+  max-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 0.62rem;
   font-weight: 700;
-  color: #0f172a;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+  transition: opacity 0.15s ease, max-width 0.15s ease, margin-left 0.15s ease;
 }
 
-.blanqueo-clave-row--note {
-  border: 1px solid #fcd34d;
-  background: #fffbeb;
-  color: #b45309;
-  padding: 0.2rem 0.45rem;
+.blanqueo-clave-pill:hover .blanqueo-clave-pill-action,
+.blanqueo-clave-pill:focus-visible .blanqueo-clave-pill-action {
+  max-width: 2.5rem;
+  margin-left: 0.28rem;
+  opacity: 1;
 }
 
 .blanqueo-ready-toast {
