@@ -61,94 +61,74 @@ public static class St2ToolsEndpoints
             return Results.File(stream, meta.ContentType, meta.FileName, enableRangeProcessing: true);
         });
 
-        // Mismo esquema que /api/planillas/capturas/upload (ya funciona en Railway).
-        app.MapPost("/api/tools/{toolId}/upload", async (HttpContext ctx, string toolId, St2ToolsStore store) =>
+        app.MapPost("/api/tools/{toolId}/upload", async (HttpRequest request, string toolId, St2ToolsStore store, CancellationToken ct) =>
         {
+            // Igual que capturas: HttpRequest + ReadFormAsync (sin DisableAntiforgery).
             try
             {
-                var sizeFeature = ctx.Features.Get<IHttpMaxRequestBodySizeFeature>();
+                var sizeFeature = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
                 if (sizeFeature is not null && !sizeFeature.IsReadOnly)
                     sizeFeature.MaxRequestBodySize = 120L * 1024 * 1024;
 
-                if (!TryRequireSuperAdmin(ctx, out _, out var error))
-                    return error!;
+                var email = PlanUserIdentity.GetFromRequest(request.HttpContext);
+                if (email is null)
+                    return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+                if (!St2SuperAdmin.Is(email))
+                    return Results.Json(new { error = "Solo el administrador puede subir paquetes." }, statusCode: StatusCodes.Status403Forbidden);
 
-                if (!ctx.Request.HasFormContentType)
-                    return Fail(store, toolId, "Enviá el archivo como multipart/form-data.", StatusCodes.Status400BadRequest);
+                if (!request.HasFormContentType)
+                    return Fail(store, toolId, "Se esperaba multipart/form-data.", 400);
 
-                var form = await ctx.Request.ReadFormAsync(ctx.RequestAborted).ConfigureAwait(false);
+                var form = await request.ReadFormAsync(ct).ConfigureAwait(false);
                 var file = form.Files.GetFile("file") ?? form.Files.FirstOrDefault();
                 var version = form["version"].ToString();
 
                 if (file is null || file.Length <= 0)
-                    return Fail(store, toolId, "Falta el archivo.", StatusCodes.Status400BadRequest);
+                    return Fail(store, toolId, "No se recibió el archivo.", 400);
 
-                var tmpPath = store.BeginTempFile(toolId);
-                try
-                {
-                    await using (var fs = new FileStream(
-                                     tmpPath,
-                                     FileMode.Create,
-                                     FileAccess.Write,
-                                     FileShare.None,
-                                     64 * 1024,
-                                     FileOptions.Asynchronous | FileOptions.SequentialScan))
-                    await using (var input = file.OpenReadStream())
-                    {
-                        await input.CopyToAsync(fs, ctx.RequestAborted).ConfigureAwait(false);
-                        await fs.FlushAsync(ctx.RequestAborted).ConfigureAwait(false);
-                    }
-
-                    var saved = store.CommitTempFile(toolId, tmpPath, file.FileName, version, new FileInfo(tmpPath).Length);
-                    store.ClearLastError();
-                    return Results.Ok(saved);
-                }
-                catch
-                {
-                    try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { /* ignore */ }
-                    throw;
-                }
+                // Copiar directo al volume con nombre estable (evita Move/FileInfo raros en Linux).
+                await using var input = file.OpenReadStream();
+                var saved = await store.SaveStreamAsync(toolId, file.FileName, input, version, file.Length, ct)
+                    .ConfigureAwait(false);
+                store.ClearLastError();
+                return Results.Ok(saved);
             }
             catch (ArgumentException ex)
             {
-                return Fail(store, toolId, ex.Message, StatusCodes.Status400BadRequest, ex);
+                return Fail(store, toolId, ex.Message, 400, ex);
             }
             catch (InvalidOperationException ex)
             {
-                return Fail(store, toolId, ex.Message, StatusCodes.Status400BadRequest, ex);
+                return Fail(store, toolId, ex.Message, 400, ex);
             }
             catch (BadHttpRequestException ex)
             {
-                return Fail(store, toolId, "Pedido inválido o archivo demasiado grande: " + ex.Message, StatusCodes.Status400BadRequest, ex);
+                return Fail(store, toolId, "Pedido inválido o archivo demasiado grande: " + ex.Message, 400, ex);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Fail(
-                    store,
-                    toolId,
-                    "Sin permiso para escribir en el volume. En Railway: Volume en /data/st2 y RAILWAY_RUN_UID=0.",
-                    StatusCodes.Status500InternalServerError,
-                    ex);
+                return Fail(store, toolId, "Sin permiso de escritura en el volume (RAILWAY_RUN_UID=0).", 500, ex);
+            }
+            catch (IOException ex)
+            {
+                return Fail(store, toolId, "Error de disco: " + ex.Message, 500, ex);
             }
             catch (Exception ex)
             {
-                return Fail(
-                    store,
-                    toolId,
-                    "No se pudo guardar el paquete: " + ex.GetType().Name + ": " + ex.Message,
-                    StatusCodes.Status500InternalServerError,
-                    ex);
+                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
-        }).DisableAntiforgery();
+        });
     }
 
     private static IResult Fail(St2ToolsStore store, string toolId, string message, int status, Exception? ex = null)
     {
         try { store.WriteLastError(toolId, ex ?? new Exception(message)); } catch { /* ignore */ }
+        // Respuesta mínima: evita problemas serializando stacks enormes
         return Results.Json(new
         {
             error = message,
-            detail = ex?.ToString(),
+            detail = ex?.Message,
+            exceptionType = ex?.GetType().FullName,
             dataDir = store.RootPath,
             toolId,
         }, statusCode: status);

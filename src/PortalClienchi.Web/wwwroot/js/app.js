@@ -1908,10 +1908,10 @@ async function uploadTool(toolId, file) {
   };
 
   showBusy(`Subiendo ${file.name}…`, 5);
-  setAboutToolsStatus(`Subiendo ${file.name}…`);
+  setAboutToolsStatus(`Subiendo ${file.name} (${formatToolSize(file.size)})…`);
 
   const body = new FormData();
-  body.append("file", file);
+  body.append("file", file, file.name || `st2-${toolId}.bin`);
   body.append("version", new Date().toISOString().slice(0, 10).replace(/-/g, "."));
 
   try {
@@ -1935,20 +1935,34 @@ async function uploadTool(toolId, file) {
         if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
         else {
           const msg = parsed?.error || parsed?.detail || parsed?.title
-            || (raw ? raw.slice(0, 240) : `Error ${xhr.status}`);
-          reject(new Error(msg));
+            || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
+          const err = new Error(msg);
+          err.status = xhr.status;
+          err.raw = raw;
+          err.payload = parsed;
+          reject(err);
         }
       };
-      xhr.onerror = () => reject(new Error("No se pudo contactar al servidor."));
+      xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
       xhr.send(body);
     });
 
-    showBusy("Guardando en el servidor…", 100);
+    showBusy("Listo", 100);
     setAboutToolsStatus(`Publicado ${data.name || toolId} v${data.version || ""}`.trim());
     await refreshAboutTools({ silent: true });
     markToolsSeen();
   } catch (err) {
-    setAboutToolsStatus(err?.message || "No se pudo subir.", true);
+    let msg = err?.message || "No se pudo subir.";
+    // Si el body vino vacío (500 genérico), pedir el lastError guardado en disco
+    try {
+      const dig = await apiGet("/api/tools");
+      if (dig?.lastError) {
+        msg = `${msg}\n\nDetalle servidor:\n${String(dig.lastError).slice(0, 500)}`;
+      } else if (dig?.dataDir) {
+        msg = `${msg}\n(dataDir: ${dig.dataDir})`;
+      }
+    } catch { /* ignore */ }
+    setAboutToolsStatus(msg, true);
   } finally {
     hideBusy();
   }

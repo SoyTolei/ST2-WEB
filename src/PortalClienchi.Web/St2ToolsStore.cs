@@ -161,7 +161,13 @@ public sealed class St2ToolsStore
         return Path.Combine(toolDir, $".{Guid.NewGuid():N}.uploading");
     }
 
-    public St2ToolPackageDto CommitTempFile(string toolId, string tmpPath, string originalFileName, string? version, long sizeBytes)
+    public async Task<St2ToolPackageDto> SaveStreamAsync(
+        string toolId,
+        string originalFileName,
+        Stream content,
+        string? version,
+        long declaredLength,
+        CancellationToken ct = default)
     {
         if (!TryNormalizeId(toolId, out var id))
             throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
@@ -169,7 +175,8 @@ public sealed class St2ToolsStore
         var safeName = SanitizeFileName(originalFileName);
         var ext = Path.GetExtension(safeName);
         if (string.IsNullOrWhiteSpace(ext) || !AllowedExtensions.Contains(ext))
-            throw new ArgumentException("Formato no permitido. Usá zip, 7z, rar, exe, msi, bat, cmd o ps1.");
+            throw new ArgumentException(
+                $"Formato no permitido ({safeName}). Usá zip, 7z, rar, exe, msi, bat, cmd o ps1.");
 
         var ver = string.IsNullOrWhiteSpace(version)
             ? DateTime.UtcNow.ToString("yyyy.MM.dd")
@@ -177,43 +184,85 @@ public sealed class St2ToolsStore
         if (ver.Length > 40)
             throw new ArgumentException("La versión es demasiado larga.");
 
-        if (sizeBytes <= 0)
-            throw new InvalidOperationException("El archivo está vacío.");
-        if (sizeBytes > 120L * 1024 * 1024)
-            throw new InvalidOperationException("El archivo supera el máximo de 120 MB.");
+        // Nombre estable por herramienta (evita caracteres raros del original)
+        var finalName = $"st2-{id}{ext.ToLowerInvariant()}";
 
-        if (!File.Exists(tmpPath))
-            throw new InvalidOperationException("No se encontró el archivo temporal subido.");
-
+        EnsureRoot();
         var toolDir = Path.Combine(_root, id);
         Directory.CreateDirectory(toolDir);
-        var destPath = Path.Combine(toolDir, safeName);
 
-        lock (_gate)
+        var tmpPath = Path.Combine(toolDir, $".upload-{Guid.NewGuid():N}.partial");
+        var destPath = Path.Combine(toolDir, finalName);
+
+        try
         {
+            long written;
+            await using (var fs = new FileStream(
+                             tmpPath,
+                             FileMode.Create,
+                             FileAccess.Write,
+                             FileShare.None,
+                             64 * 1024,
+                             FileOptions.Asynchronous | FileOptions.SequentialScan))
+            {
+                await content.CopyToAsync(fs, ct).ConfigureAwait(false);
+                await fs.FlushAsync(ct).ConfigureAwait(false);
+                written = fs.Length;
+            }
+
+            if (written <= 0 && declaredLength <= 0)
+                throw new InvalidOperationException("El archivo llegó vacío.");
+            if (written <= 0)
+                written = declaredLength;
+            if (written > 120L * 1024 * 1024)
+                throw new InvalidOperationException("El archivo supera el máximo de 120 MB.");
+
+            // Reemplazo atómico-ish: copiar y borrar temp (sin File.Move ni FileInfo.Length tardío)
+            File.Copy(tmpPath, destPath, overwrite: true);
+            try { File.Delete(tmpPath); } catch { /* ignore */ }
+
+            // Limpiar otros archivos viejos del tool
             foreach (var old in Directory.EnumerateFiles(toolDir))
             {
-                if (string.Equals(old, tmpPath, StringComparison.OrdinalIgnoreCase))
+                var name = Path.GetFileName(old);
+                if (string.Equals(name, finalName, StringComparison.OrdinalIgnoreCase))
                     continue;
+                if (name.StartsWith(".", StringComparison.Ordinal))
+                {
+                    try { File.Delete(old); } catch { /* ignore */ }
+                    continue;
+                }
                 try { File.Delete(old); } catch { /* ignore */ }
             }
 
-            if (File.Exists(destPath))
-                File.Delete(destPath);
-            File.Move(tmpPath, destPath);
-
-            var map = ReadManifestUnlocked();
-            map[id] = new ManifestEntry
+            lock (_gate)
             {
-                Version = ver,
-                FileName = safeName,
-                SizeBytes = sizeBytes,
-                UpdatedAtUtc = DateTime.UtcNow.ToString("o"),
-                ContentType = GuessContentType(ext),
-            };
-            WriteManifestUnlocked(map);
-            return ToDto(id, map[id]);
+                var map = ReadManifestUnlocked();
+                map[id] = new ManifestEntry
+                {
+                    Version = ver,
+                    FileName = finalName,
+                    SizeBytes = written,
+                    UpdatedAtUtc = DateTime.UtcNow.ToString("o"),
+                    ContentType = GuessContentType(ext),
+                };
+                WriteManifestUnlocked(map);
+                return ToDto(id, map[id]);
+            }
         }
+        finally
+        {
+            try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { /* ignore */ }
+        }
+    }
+
+    public St2ToolPackageDto CommitTempFile(string toolId, string tmpPath, string originalFileName, string? version, long sizeBytes)
+    {
+        // Compat: reusa SaveStreamAsync vía FileStream
+        using var fs = new FileStream(tmpPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return SaveStreamAsync(toolId, originalFileName, fs, version, sizeBytes)
+            .GetAwaiter()
+            .GetResult();
     }
 
     private void EnsureRoot()
