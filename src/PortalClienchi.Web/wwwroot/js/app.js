@@ -1979,10 +1979,28 @@ function showAbout() {
   if (aboutTaglineEl) aboutTaglineEl.textContent = "Suite de herramientas";
   applyAboutUpdated();
   bindAboutToolsUi();
-  void refreshAboutTools().then(() => markToolsSeen());
+  void refreshAboutTools().then(() => {
+    markToolsSeen();
+    if (isSt2SuperAdmin()) void refreshToolsDiagHint();
+  });
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
   aboutCloseBtn?.focus();
+}
+
+async function refreshToolsDiagHint() {
+  try {
+    const data = await apiGet("/api/tools/diag");
+    if (!data?.ok) {
+      setAboutToolsStatus(data?.error || "Diagnóstico: no se pudo escribir en el volume.", true);
+      return;
+    }
+    if (data?.lastError) {
+      setAboutToolsStatus(`Último error de subida:\n${String(data.lastError).slice(0, 400)}`, true);
+    }
+  } catch (err) {
+    setAboutToolsStatus(err?.message || "No se pudo diagnosticar el volume.", true);
+  }
 }
 
 function hideAbout() {
