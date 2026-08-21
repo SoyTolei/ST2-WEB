@@ -426,6 +426,39 @@ public sealed class LocalCapturaStore
         return true;
     }
 
+    /// <summary>Borra un media local por id corto (archivo + .meta si existe).</summary>
+    public bool TryDeleteById(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id) || !ShortIdRegex.IsMatch(id.Trim()))
+            return false;
+
+        id = id.Trim();
+        var deleted = false;
+        foreach (var ext in StoredExts)
+        {
+            var path = Path.Combine(_root, id + ext);
+            if (!File.Exists(path))
+                continue;
+            try
+            {
+                File.Delete(path);
+                deleted = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "No se pudo borrar captura {Path}", path);
+            }
+        }
+
+        var meta = Path.Combine(_root, id + ".meta");
+        if (File.Exists(meta))
+        {
+            try { File.Delete(meta); } catch { /* ignore */ }
+        }
+
+        return deleted;
+    }
+
     private string NewShortId()
     {
         Span<byte> bytes = stackalloc byte[8];

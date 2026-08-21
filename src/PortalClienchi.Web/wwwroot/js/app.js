@@ -1909,43 +1909,37 @@ async function uploadTool(toolId, file) {
   };
 
   const version = new Date().toISOString().slice(0, 10).replace(/-/g, ".");
-  showBusy(`Preparando ${file.name}…`, 5);
-  setAboutToolsStatus(`Subiendo ${file.name} (${formatToolSize(file.size)})…`);
+  const originalName = file.name || `st2-${toolId}.bin`;
+  showBusy(`Preparando ${originalName}…`, 5);
+  setAboutToolsStatus(`Subiendo ${originalName} (${formatToolSize(file.size)})…`);
 
   try {
-    // 1) Canario: confirma que el POST llega a la app (si 500 vacío → proxy).
-    showBusy("Verificando canal de subida…", 10);
+    // 1) Canario del volume de tools
+    showBusy("Verificando volume…", 8);
     const ping = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-ping`, null);
-    if (!ping?.reached && !ping?.ok) {
-      throw new Error(ping?.error || "El canario de subida no respondió OK.");
+    if (!ping?.ok) {
+      throw Object.assign(new Error(ping?.error || "Canario de tools falló."), { reached: !!ping?.reached });
     }
 
-    // 2) PUT binario XOR (sin .bat en URL ni multipart).
-    showBusy(`Ofuscando ${file.name}…`, 25);
+    // 2) Ofuscar y subir por el canal de capturas (multipart TXT), que ya funciona en prod
+    showBusy(`Codificando ${originalName}…`, 18);
     const plain = new Uint8Array(await file.arrayBuffer());
     const wired = new Uint8Array(plain.length);
     for (let i = 0; i < plain.length; i++) wired[i] = plain[i] ^ 0xa5;
+    const relayFile = new File([wired], "st2-pkg.txt", { type: "text/plain" });
 
-    const ext = (file.name.includes(".") ? file.name.split(".").pop() : "bin") || "bin";
-    const qs = new URLSearchParams({
-      v: version,
-      z: "1",
-      x: toBase64Url(ext),
-      n: toBase64Url(file.name || `st2-${toolId}.${ext}`),
-    });
+    showBusy(`Subiendo ${originalName}…`, 35);
+    const form = new FormData();
+    form.append("capturas", relayFile, "st2-pkg.txt");
 
-    showBusy(`Enviando ${file.name}…`, 40);
-    const data = await new Promise((resolve, reject) => {
+    const captura = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-raw?${qs}`);
+      xhr.open("POST", "/api/planillas/capturas/upload");
       xhr.withCredentials = true;
-      xhr.setRequestHeader("Content-Type", "application/octet-stream");
-      xhr.setRequestHeader("X-St2-Xor", "1");
       xhr.upload.onprogress = (ev) => {
         if (!ev.lengthComputable) return;
-        const pct = 40 + Math.round((ev.loaded / ev.total) * 55);
-        showBusy(`Enviando ${file.name}… ${Math.min(95, pct)}%`, pct);
-        setAboutToolsStatus(`Enviando ${file.name}… ${Math.min(95, pct)}%`);
+        const pct = 35 + Math.round((ev.loaded / ev.total) * 40);
+        showBusy(`Subiendo ${originalName}… ${Math.min(75, pct)}%`, pct);
       };
       xhr.onload = () => {
         const parsed = parseXhrJson(xhr);
@@ -1953,7 +1947,22 @@ async function uploadTool(toolId, file) {
         else reject(makeUploadError(xhr, parsed));
       };
       xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
-      xhr.send(wired);
+      xhr.send(form);
+    });
+
+    const enlace = Array.isArray(captura?.enlaces) ? captura.enlaces[0] : null;
+    const url = enlace?.url || enlace?.Url;
+    if (!url) {
+      throw new Error(enlace?.error || "La subida temporal no devolvió URL.");
+    }
+
+    // 3) Publicar en tools desde la captura (JSON chico; sin .bat en el wire)
+    showBusy("Publicando paquete…", 85);
+    const data = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/publish`, {
+      url,
+      fileName: originalName,
+      version,
+      xor: true,
     });
 
     showBusy("Listo", 100);
@@ -1962,28 +1971,18 @@ async function uploadTool(toolId, file) {
     markToolsSeen();
   } catch (err) {
     let msg = err?.message || "No se pudo subir.";
-    const proxyHint = !err?.reached && (err?.status === 500 || err?.status === 403)
-      ? "\n\nParece un bloqueo del proxy (Cloudflare): el pedido no llegó a ST2 o llegó vacío."
-      : "";
     try {
       const dig = await apiGet("/api/tools");
       if (dig?.lastError) {
         msg = `${msg}\n\nDetalle servidor:\n${String(dig.lastError).slice(0, 500)}`;
-      } else if (!err?.reached) {
-        msg = `${msg}${proxyHint}\n(dataDir: ${dig?.dataDir || "?"}; sin lastError en disco → no ejecutó el handler)`;
       } else if (dig?.dataDir) {
-        msg = `${msg}\n(dataDir: ${dig.dataDir})`;
+        msg = `${msg}\n(dataDir: ${dig.dataDir}${err?.status ? `; HTTP ${err.status}` : ""})`;
       }
     } catch { /* ignore */ }
     setAboutToolsStatus(msg, true);
   } finally {
     hideBusy();
   }
-}
-
-function toBase64Url(text) {
-  const b64 = btoa(unescape(encodeURIComponent(String(text || ""))));
-  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
 function parseXhrJson(xhr) {

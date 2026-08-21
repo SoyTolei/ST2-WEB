@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Features;
 using PortalClienchi.Web.Planillas;
 
@@ -7,6 +9,10 @@ public static class St2ToolsEndpoints
 {
     private const long MaxUploadBytes = 120L * 1024 * 1024;
     private const byte XorKey = 0xA5;
+
+    private static readonly Regex CapturaIdRegex = new(
+        @"^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{8}$",
+        RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     public static void MapSt2ToolsEndpoints(this WebApplication app)
     {
@@ -55,7 +61,6 @@ public static class St2ToolsEndpoints
             }
         });
 
-        // Canario: si esto falla con 500 vacío, el proxy corta antes de la app.
         app.MapPost("/api/tools/{toolId}/upload-ping", (HttpContext ctx, string toolId, St2ToolsStore store) =>
         {
             if (!TryRequireSuperAdmin(ctx, out var email, out var error))
@@ -96,56 +101,51 @@ public static class St2ToolsEndpoints
             return Results.File(stream, meta.ContentType, meta.FileName, enableRangeProcessing: true);
         });
 
-        // PUT binario ofuscado (XOR): evita WAF que escanea .bat / multipart / JSON con payload legible.
-        app.MapMethods("/api/tools/{toolId}/upload-raw", new[] { "PUT", "POST" }, async (
-            HttpRequest request,
+        // Publica un paquete ya subido por el canal de capturas (TXT), que en prod sí funciona.
+        app.MapPost("/api/tools/{toolId}/publish", async (
+            HttpContext ctx,
             string toolId,
             St2ToolsStore store,
+            LocalCapturaStore capturas,
             CancellationToken ct) =>
         {
             try
             {
-                var sizeFeature = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
-                if (sizeFeature is not null && !sizeFeature.IsReadOnly)
-                    sizeFeature.MaxRequestBodySize = MaxUploadBytes;
+                if (!TryRequireSuperAdmin(ctx, out _, out var error))
+                    return error!;
 
-                var email = PlanUserIdentity.GetFromRequest(request.HttpContext);
-                if (email is null)
-                    return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
-                if (!St2SuperAdmin.Is(email))
-                    return Results.Json(new { error = "Solo el administrador puede subir paquetes." }, statusCode: StatusCodes.Status403Forbidden);
+                var body = await ctx.Request.ReadFromJsonAsync<PublishRequest>(ct).ConfigureAwait(false);
+                if (body is null)
+                    return Fail(store, toolId, "Cuerpo inválido.", 400);
 
-                var version = request.Query["v"].ToString();
-                if (string.IsNullOrWhiteSpace(version))
-                    version = DateTime.UtcNow.ToString("yyyy.MM.dd");
+                var capturaId = ParseCapturaId(body.CapturaId ?? body.Url);
+                if (capturaId is null)
+                    return Fail(store, toolId, "Falta el id de captura (/c/…).", 400);
 
-                // Extensión y nombre en Base64URL (sin ".bat" en claro en la URL).
-                var ext = DecodeMeta(request.Query["x"].ToString(), fallback: "bin");
-                if (!ext.StartsWith('.'))
-                    ext = "." + ext.TrimStart('.');
-                var displayName = DecodeMeta(request.Query["n"].ToString(), fallback: $"st2-{toolId}{ext}");
-                if (string.IsNullOrWhiteSpace(Path.GetExtension(displayName)))
-                    displayName += ext;
+                if (!capturas.TryOpenById(capturaId, out LocalMediaOpen? open) || open is null)
+                    return Fail(store, toolId, "No se encontró el archivo temporal de captura.", 404);
 
-                await using var ms = new MemoryStream();
-                await request.Body.CopyToAsync(ms, ct).ConfigureAwait(false);
-                var bytes = ms.ToArray();
+                var bytes = await File.ReadAllBytesAsync(open.FullPath, ct).ConfigureAwait(false);
                 if (bytes.Length <= 0)
-                    return Fail(store, toolId, "El cuerpo llegó vacío.", 400);
+                    return Fail(store, toolId, "El archivo temporal está vacío.", 400);
                 if (bytes.Length > MaxUploadBytes)
                     return Fail(store, toolId, "El archivo supera el máximo de 120 MB.", 400);
 
-                var xor = string.Equals(request.Query["z"].ToString(), "1", StringComparison.Ordinal)
-                    || string.Equals(request.Headers["X-St2-Xor"].ToString(), "1", StringComparison.Ordinal);
-                if (xor)
+                if (body.Xor)
                 {
                     for (var i = 0; i < bytes.Length; i++)
                         bytes[i] ^= XorKey;
                 }
 
+                var fileName = string.IsNullOrWhiteSpace(body.FileName)
+                    ? $"st2-{toolId}.bin"
+                    : body.FileName.Trim();
+
                 await using var input = new MemoryStream(bytes, writable: false);
-                var saved = await store.SaveStreamAsync(toolId, displayName, input, version, bytes.Length, ct)
+                var saved = await store.SaveStreamAsync(toolId, fileName, input, body.Version, bytes.Length, ct)
                     .ConfigureAwait(false);
+
+                try { capturas.TryDeleteById(capturaId); } catch { /* ignore */ }
                 store.ClearLastError();
                 return Results.Ok(saved);
             }
@@ -156,10 +156,6 @@ public static class St2ToolsEndpoints
             catch (InvalidOperationException ex)
             {
                 return Fail(store, toolId, ex.Message, 400, ex);
-            }
-            catch (BadHttpRequestException ex)
-            {
-                return Fail(store, toolId, "Pedido inválido o archivo demasiado grande: " + ex.Message, 400, ex);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -175,6 +171,7 @@ public static class St2ToolsEndpoints
             }
         });
 
+        // Fallback legacy multipart (zip grandes, etc.).
         app.MapPost("/api/tools/{toolId}/upload", async (HttpRequest request, string toolId, St2ToolsStore store, CancellationToken ct) =>
         {
             try
@@ -234,24 +231,29 @@ public static class St2ToolsEndpoints
         });
     }
 
-    private static string DecodeMeta(string? raw, string fallback)
+    private static string? ParseCapturaId(string? urlOrId)
     {
-        if (string.IsNullOrWhiteSpace(raw))
-            return fallback;
+        if (string.IsNullOrWhiteSpace(urlOrId))
+            return null;
+
+        var s = urlOrId.Trim();
+        if (CapturaIdRegex.IsMatch(s))
+            return s;
+
         try
         {
-            var s = raw.Trim().Replace('-', '+').Replace('_', '/');
-            switch (s.Length % 4)
-            {
-                case 2: s += "=="; break;
-                case 3: s += "="; break;
-            }
-            var text = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(s)).Trim();
-            return string.IsNullOrWhiteSpace(text) ? fallback : text;
+            if (Uri.TryCreate(s, UriKind.Absolute, out var abs))
+                s = abs.AbsolutePath;
+            var marker = s.LastIndexOf("/c/", StringComparison.OrdinalIgnoreCase);
+            if (marker >= 0)
+                s = s[(marker + 3)..];
+            s = s.Split('?', '#')[0].Trim('/');
+            var id = s.Split('/')[0];
+            return CapturaIdRegex.IsMatch(id) ? id : null;
         }
         catch
         {
-            return fallback;
+            return null;
         }
     }
 
@@ -291,5 +293,15 @@ public static class St2ToolsEndpoints
             return false;
         }
         return true;
+    }
+
+    private sealed class PublishRequest
+    {
+        public string? CapturaId { get; set; }
+        public string? Url { get; set; }
+        public string? FileName { get; set; }
+        public string? Version { get; set; }
+        [JsonPropertyName("xor")]
+        public bool Xor { get; set; } = true;
     }
 }
