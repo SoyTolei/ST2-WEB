@@ -621,9 +621,8 @@ function splitEjercicios(raw) {
 function formatEjerciciosSeparated(raw) {
   const parts = splitEjercicios(raw);
   if (parts.length === 0) return "Sin ejercicios";
-  if (parts.length === 1) return parts[0];
-  // Uno debajo del otro, con guiones y espacio
-  return `-\n\n${parts.join("\n\n-\n\n")}\n\n-`;
+  // Una línea por ejercicio: "- Ejercicio 2025"
+  return parts.map((p) => `- ${p.replace(/^[-–—]\s*/, "")}`).join("\n");
 }
 
 function basePillHtml(label, detail, contab) {
@@ -753,7 +752,10 @@ function buildRow(item) {
   const cuitFmt = formatCuit(cuit);
   const cliente = String(item.nroCliente || "").trim();
   const aclaracion = String(item.aclaracion || "").trim();
-  const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
+  const empresaTitle = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
+  const empresaHtml = !nro && !nombre
+    ? "—"
+    : `<span class="borrado-empresa-inline">${nro ? `<strong class="borrado-empresa-code">[${escapeHtml(nro)}]</strong>` : ""}${nro && nombre ? " " : ""}${nombre ? `<span class="borrado-empresa-nombre">${escapeHtml(nombre)}</span>` : ""}</span>`;
   const clienteCell = !cliente
     ? "—"
     : canConfirm
@@ -767,9 +769,7 @@ function buildRow(item) {
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
     <td class="borrado-col-cliente" title="${escapeHtml(cliente)}">${clienteCell}</td>
-    <td class="borrado-col-empresa" title="${escapeHtml(empresaLabel)}">
-      <span class="borrado-empresa-inline">${escapeHtml(empresaLabel)}</span>
-    </td>
+    <td class="borrado-col-empresa" title="${escapeHtml(empresaTitle)}">${empresaHtml}</td>
     <td class="borrado-col-cuit" title="${escapeHtml(cuit || "")}">${escapeHtml(cuitFmt)}</td>
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
@@ -832,10 +832,23 @@ function buildRow(item) {
   return row;
 }
 
+function aclaracionWithoutResultado(item) {
+  const { nota } = parseAclaracion(item?.aclaracion);
+  return String(nota || "").trim() || null;
+}
+
+async function unsetListo(item) {
+  const aclaracion = aclaracionWithoutResultado(item);
+  const patch = { listo: false };
+  if (aclaracion) patch.aclaracion = aclaracion;
+  else patch.clearAclaracion = true;
+  await patchItem(item.id, patch);
+}
+
 async function toggleListoByDoubleClick(item) {
   try {
     if (item.listo) {
-      await patchItem(item.id, { listo: false });
+      await unsetListo(item);
       setStatus("Se quitó el listo.");
       await reloadList();
       notifyBorradoChanged();
@@ -1069,7 +1082,7 @@ async function handleCtxAction(action) {
       openListoModal(item);
       return;
     } else if (action === "unlisto") {
-      await patchItem(selectedId, { listo: false });
+      await unsetListo(item);
     } else if (action === "aclaracion-manual") {
       openNoteModal(item);
       return;
