@@ -2125,6 +2125,18 @@ body.portal-tab-active .tab-icon {
   color: #94a3b8;
 }
 
+.st2-about-tools-url-help {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.st2-about-tools-url-help a {
+  color: #c2410c;
+  font-weight: 600;
+}
+
 .st2-about-tools-list {
   display: flex;
   flex-direction: column;
