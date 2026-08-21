@@ -370,7 +370,7 @@
   top: -14px;
   left: 10px;
   right: auto;
-  width: 52px;
+  width: 56px;
   height: auto;
   pointer-events: none;
   z-index: 2;
@@ -379,10 +379,14 @@
   filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
   transform: rotate(-6deg);
   user-select: none;
+  /* visibility (no display:none): evita que el GIF se congele al mostrar con Ver como */
+  opacity: 1;
+  visibility: visible;
 }
 
-.planillas-hero-easter.hidden {
-  display: none !important;
+.planillas-hero-easter.is-hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .planillas-hero h2 {

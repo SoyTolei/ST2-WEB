@@ -1365,8 +1365,14 @@ function syncPlanillasHeroEaster() {
   if (!el) return;
   const email = effectivePlanillasEmail();
   const show = email === HERO_EASTER_EMAIL;
-  el.classList.toggle("hidden", !show);
+  const wasHidden = el.classList.contains("is-hidden");
+  el.classList.toggle("is-hidden", !show);
   el.setAttribute("aria-hidden", show ? "false" : "true");
+  // Reinicia la animación del GIF al pasar a visible (Ver como / login)
+  if (show && wasHidden) {
+    const base = (el.getAttribute("src") || "").split("?")[0] || "/img/yohana-corner.gif";
+    el.src = `${base}?v=${Date.now()}`;
+  }
 }
 
 export function initPlanillas() {
