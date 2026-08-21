@@ -45,6 +45,7 @@ public sealed class St2ToolsStore
     private readonly string _root;
     private readonly string _manifestPath;
     private readonly string _lastErrorPath;
+    private string[] _bundledPackageRoots = [];
 
     public St2ToolsStore()
     {
@@ -56,6 +57,19 @@ public sealed class St2ToolsStore
 
     public string RootPath => _root;
 
+    /// <summary>Registra carpetas tools-packages embebidas en la imagen (p. ej. /app/tools-packages).</summary>
+    public void SetBundledRoots(params string?[] candidateRoots)
+    {
+        _bundledPackageRoots = candidateRoots
+            .Where(r => !string.IsNullOrWhiteSpace(r))
+            .Select(r => Path.Combine(r!, "tools-packages"))
+            .Where(Directory.Exists)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
+
+    public IReadOnlyList<string> BundledPackageRoots => _bundledPackageRoots;
+
     public IReadOnlyList<St2ToolPackageDto> List()
     {
         lock (_gate)
@@ -64,7 +78,13 @@ public sealed class St2ToolsStore
             var map = ReadManifestUnlocked();
             var list = new List<St2ToolPackageDto>(ToolIds.Length);
             foreach (var id in ToolIds)
-                list.Add(ToDto(id, map.GetValueOrDefault(id)));
+            {
+                // La imagen (tools-packages) manda: así Descargar aparece aunque falle el seed al volume.
+                if (TryFindBundledFile(id, out var bundled))
+                    list.Add(ToDtoFromBundled(id, bundled));
+                else
+                    list.Add(ToDto(id, map.GetValueOrDefault(id)));
+            }
             return list;
         }
     }
@@ -78,17 +98,28 @@ public sealed class St2ToolsStore
 
         lock (_gate)
         {
+            if (TryFindBundledFile(id, out var bundled))
+            {
+                fullPath = bundled;
+                meta = ToDtoFromBundled(id, bundled);
+                return true;
+            }
+
             var map = ReadManifestUnlocked();
-            if (!map.TryGetValue(id, out var entry) || entry is null || string.IsNullOrWhiteSpace(entry.FileName))
-                return false;
+            if (map.TryGetValue(id, out var entry)
+                && entry is not null
+                && !string.IsNullOrWhiteSpace(entry.FileName))
+            {
+                var path = Path.Combine(_root, id, entry.FileName);
+                if (File.Exists(path))
+                {
+                    fullPath = path;
+                    meta = ToDto(id, entry);
+                    return true;
+                }
+            }
 
-            var path = Path.Combine(_root, id, entry.FileName);
-            if (!File.Exists(path))
-                return false;
-
-            fullPath = path;
-            meta = ToDto(id, entry);
-            return true;
+            return false;
         }
     }
 
@@ -372,41 +403,61 @@ public sealed class St2ToolsStore
     }
 
     /// <summary>
-    /// Copia paquetes desde tools-packages/{sql|bat}/ embebidos en el deploy hacia el volume.
-    /// Cada deploy con archivos nuevos los publica automáticamente.
+    /// Copia paquetes embebidos al volume (best-effort, por herramienta).
+    /// Aunque falle el seed, List/TryOpen siguen sirviendo desde la imagen.
     /// </summary>
-    public int SeedFromBundled(params string?[] candidateRoots)
+    public int SeedFromBundled()
     {
         var seeded = 0;
-        foreach (var root in candidateRoots)
+        foreach (var id in ToolIds)
         {
-            if (string.IsNullOrWhiteSpace(root))
-                continue;
-            var packagesRoot = Path.Combine(root, "tools-packages");
-            if (!Directory.Exists(packagesRoot))
-                continue;
-
-            foreach (var id in ToolIds)
+            try
             {
-                var dir = Path.Combine(packagesRoot, id);
-                if (!Directory.Exists(dir))
-                    continue;
-
-                var file = Directory.EnumerateFiles(dir)
-                    .Where(f => AllowedExtensions.Contains(Path.GetExtension(f)))
-                    .OrderByDescending(f => new FileInfo(f).LastWriteTimeUtc)
-                    .FirstOrDefault();
-                if (file is null)
+                if (!TryFindBundledFile(id, out var file))
                     continue;
 
                 var info = new FileInfo(file);
+                // No copiar de nuevo si el volume ya tiene el mismo tamaño.
+                var existing = Path.Combine(_root, id, $"st2-{id}{info.Extension.ToLowerInvariant()}");
+                if (File.Exists(existing) && new FileInfo(existing).Length == info.Length)
+                {
+                    seeded++;
+                    continue;
+                }
+
                 var ver = info.LastWriteTimeUtc.ToString("yyyy.MM.dd");
                 using var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
                 SaveStreamAsync(id, info.Name, fs, ver, info.Length).GetAwaiter().GetResult();
                 seeded++;
             }
+            catch
+            {
+                // Seguir con la otra herramienta; el fallback bundled cubre la descarga.
+            }
         }
         return seeded;
+    }
+
+    private bool TryFindBundledFile(string id, out string path)
+    {
+        path = "";
+        foreach (var packagesRoot in _bundledPackageRoots)
+        {
+            var dir = Path.Combine(packagesRoot, id);
+            if (!Directory.Exists(dir))
+                continue;
+
+            var file = Directory.EnumerateFiles(dir)
+                .Where(f => AllowedExtensions.Contains(Path.GetExtension(f)))
+                .OrderByDescending(f => new FileInfo(f).LastWriteTimeUtc)
+                .FirstOrDefault();
+            if (file is null)
+                continue;
+
+            path = file;
+            return true;
+        }
+        return false;
     }
 
     private void EnsureRoot()
@@ -471,6 +522,23 @@ public sealed class St2ToolsStore
             UpdatedAtUtc = available ? (entry!.UpdatedAtUtc ?? "") : "",
             ContentType = available ? (entry!.ContentType ?? "application/octet-stream") : "application/octet-stream",
             Available = available,
+        };
+    }
+
+    private St2ToolPackageDto ToDtoFromBundled(string id, string filePath)
+    {
+        var info = new FileInfo(filePath);
+        var ext = info.Extension;
+        return new St2ToolPackageDto
+        {
+            Id = id,
+            Name = ToolNames.GetValueOrDefault(id) ?? id.ToUpperInvariant(),
+            Version = info.LastWriteTimeUtc.ToString("yyyy.MM.dd"),
+            FileName = info.Name,
+            SizeBytes = info.Length,
+            UpdatedAtUtc = info.LastWriteTimeUtc.ToString("o"),
+            ContentType = GuessContentType(ext),
+            Available = true,
         };
     }
 

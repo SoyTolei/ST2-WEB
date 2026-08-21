@@ -96,13 +96,17 @@ try
 {
     var env = app.Services.GetRequiredService<IWebHostEnvironment>();
     var tools = app.Services.GetRequiredService<St2ToolsStore>();
-    var seeded = tools.SeedFromBundled(AppContext.BaseDirectory, env.ContentRootPath);
+    tools.SetBundledRoots(AppContext.BaseDirectory, env.ContentRootPath);
+    app.Logger.LogInformation(
+        "ST2 tools bundled roots: {Roots}",
+        string.Join(" | ", tools.BundledPackageRoots.DefaultIfEmpty("(ninguno)")));
+    var seeded = tools.SeedFromBundled();
     if (seeded > 0)
-        app.Logger.LogInformation("ST2 tools: {Count} paquete(s) sembrados desde tools-packages", seeded);
+        app.Logger.LogInformation("ST2 tools: {Count} paquete(s) en volume/imagen", seeded);
 }
 catch (Exception ex)
 {
-    app.Logger.LogWarning(ex, "No se pudieron sembrar herramientas desde tools-packages");
+    app.Logger.LogWarning(ex, "No se pudieron preparar herramientas desde tools-packages");
 }
 
 app.UseForwardedHeaders();

@@ -32,6 +32,7 @@ public static class St2ToolsEndpoints
                 {
                     tools,
                     dataDir = store.RootPath,
+                    bundledRoots = store.BundledPackageRoots,
                     lastError,
                     reached = true,
                 });
