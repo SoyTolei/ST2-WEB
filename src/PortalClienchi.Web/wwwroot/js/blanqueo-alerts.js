@@ -1,5 +1,9 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
-import { canSeeBlanqueoModule, canConfirmBlanqueoModule } from "./module-access.js";
+import {
+  canSeeBlanqueoModule,
+  canConfirmBlanqueoModule,
+  isViewingAsProfile,
+} from "./module-access.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -56,7 +60,18 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
 
   refreshInFlight = (async () => {
     try {
-      const res = await planUserFetch("/api/planillas/blanqueo/alerts");
+      if (isViewingAsProfile() && !canConfirmBlanqueoModule()) {
+        cachedAlerts = [];
+        alertMode = "requester";
+        lastRefreshAt = Date.now();
+        renderBlanqueoAlertUi();
+        return cachedAlerts;
+      }
+
+      const alertsUrl = isViewingAsProfile() && canConfirmBlanqueoModule()
+        ? "/api/planillas/blanqueo/alerts?mode=confirm"
+        : "/api/planillas/blanqueo/alerts";
+      const res = await planUserFetch(alertsUrl);
       if (res.status === 401 || res.status === 403) {
         cachedAlerts = [];
         alertMode = "requester";
@@ -64,9 +79,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
         return cachedAlerts;
       }
       const data = await res.json().catch(() => ({}));
-      alertMode = String(data.mode || "").toLowerCase() === "confirm" || canConfirmBlanqueoModule()
-        ? "confirm"
-        : "requester";
+      alertMode = String(data.mode || "").toLowerCase() === "confirm" ? "confirm" : "requester";
       cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
       if (alertMode === "confirm") {
         const sig = pendingSignature(cachedAlerts);

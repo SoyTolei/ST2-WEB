@@ -6,6 +6,7 @@ import {
   refreshModuleFlags,
   isSt2SuperAdmin,
   getViewAsProfile,
+  isViewingAsProfile,
 } from "./module-access.js";
 import { notifyBlanqueoChanged } from "./blanqueo-alerts.js";
 
@@ -37,6 +38,7 @@ let listLoadGen = 0;
 let scrollListToEndOnce = false;
 
 export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
+  if (isViewingAsProfile()) return canSeeFromAccess();
   try {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
@@ -46,6 +48,7 @@ export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
 }
 
 function canConfirmBlanqueo(email = getPlanUserEmail()) {
+  if (isViewingAsProfile()) return canConfirmFromAccess();
   try {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
@@ -55,6 +58,7 @@ function canConfirmBlanqueo(email = getPlanUserEmail()) {
 }
 
 function canLoadBlanqueo(email = getPlanUserEmail()) {
+  if (isViewingAsProfile()) return canLoadFromAccess();
   try {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
@@ -62,6 +66,17 @@ function canLoadBlanqueo(email = getPlanUserEmail()) {
   if (isSt2SuperAdmin(email)) return true;
   if (!String(email || "").trim()) return false;
   return canLoadFromAccess();
+}
+
+/** En vista previa de perfil, ignorar canConfirm/canLoad del API (son los del admin real). */
+function applyEffectiveAccess(data = {}) {
+  if (isViewingAsProfile()) {
+    canConfirm = canConfirmBlanqueo();
+    canLoad = canLoadBlanqueo();
+    return;
+  }
+  canConfirm = !!data.canConfirm || canConfirmBlanqueo();
+  canLoad = data.canLoad == null ? canLoadBlanqueo() : !!data.canLoad || isSt2SuperAdmin();
 }
 
 function sistemaHidesCommercialModules() {
@@ -264,21 +279,22 @@ function syncLoadFormVisibility() {
 
   const previewWrap = document.getElementById("blanqueo-preview-confirm-wrap");
   const previewCheck = document.getElementById("blanqueo-preview-confirm");
-  const showPreview = isSt2SuperAdmin() && canLoad;
+  const showPreview = isSt2SuperAdmin() && canLoad && !isViewingAsProfile();
   if (previewWrap) previewWrap.classList.toggle("hidden", !showPreview);
   if (previewCheck && showPreview) previewCheck.checked = isPreviewConfirmListOnly();
 }
 
 function syncSolicitanteBadge() {
   const badge = document.getElementById("blanqueo-user-badge");
-  const email = getPlanUserEmail();
+  const viewAs = getViewAsProfile();
+  const email = viewAs?.email || getPlanUserEmail();
   if (!badge) return;
   if (!email) {
     badge.classList.add("hidden");
     badge.textContent = "";
     return;
   }
-  badge.textContent = displayNameFromEmail(email);
+  badge.textContent = viewAs?.displayName || displayNameFromEmail(email);
   badge.classList.remove("hidden");
 }
 
@@ -302,7 +318,7 @@ function syncConfirmToolsVisibility() {
   if (exportBtn) exportBtn.classList.toggle("hidden", !canConfirm);
 
   const importWrap = document.getElementById("blanqueo-import-wrap");
-  if (importWrap) importWrap.classList.toggle("hidden", !isSt2SuperAdmin());
+  if (importWrap) importWrap.classList.toggle("hidden", !isSt2SuperAdmin() || isViewingAsProfile());
 
   syncLoadFormVisibility();
 }
@@ -518,8 +534,7 @@ async function reloadList() {
     }
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = (Array.isArray(data.items) ? data.items : []).map(normalizeBlanqueoItem);
-    canConfirm = !!data.canConfirm || canConfirmBlanqueo();
-    canLoad = data.canLoad == null ? canLoadBlanqueo() : !!data.canLoad || isSt2SuperAdmin();
+    applyEffectiveAccess(data);
     syncMineFilterVisibility();
     syncLoadFormVisibility();
     syncClaveUi(data.claveBlanqueo);

@@ -1,5 +1,9 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
-import { canSeeBorradoBasesModule, canConfirmBorradoBasesModule } from "./module-access.js";
+import {
+  canSeeBorradoBasesModule,
+  canConfirmBorradoBasesModule,
+  isViewingAsProfile,
+} from "./module-access.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -56,7 +60,19 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
 
   refreshInFlight = (async () => {
     try {
-      const res = await planUserFetch("/api/planillas/borrado-bases/alerts");
+      // Vista previa de perfil: simular alertas como las vería esa persona.
+      if (isViewingAsProfile() && !canConfirmBorradoBasesModule()) {
+        cachedAlerts = [];
+        alertMode = "requester";
+        lastRefreshAt = Date.now();
+        renderBorradoAlertUi();
+        return cachedAlerts;
+      }
+
+      const alertsUrl = isViewingAsProfile() && canConfirmBorradoBasesModule()
+        ? "/api/planillas/borrado-bases/alerts?mode=confirm"
+        : "/api/planillas/borrado-bases/alerts";
+      const res = await planUserFetch(alertsUrl);
       if (res.status === 401 || res.status === 403) {
         cachedAlerts = [];
         alertMode = "requester";

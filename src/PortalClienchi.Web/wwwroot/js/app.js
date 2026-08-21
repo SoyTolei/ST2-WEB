@@ -1886,7 +1886,7 @@ function syncViewAsBanner() {
     viewAsBanner.toggleAttribute("hidden", !show);
   }
   if (viewAsBannerText && viewAs) {
-    viewAsBannerText.textContent = `Viendo el perfil de ${viewAs.displayName || viewAs.email}`;
+    viewAsBannerText.textContent = `Vista previa: cómo ve ST2 ${viewAs.displayName || viewAs.email} (módulos, permisos y pantallas)`;
   }
   document.body.classList.toggle("st2-viewing-as-profile", show);
 }

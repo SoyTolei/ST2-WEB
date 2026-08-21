@@ -6,6 +6,7 @@ import {
   refreshModuleFlags,
   isSt2SuperAdmin,
   getViewAsProfile,
+  isViewingAsProfile,
 } from "./module-access.js";
 import { notifyBorradoChanged } from "./borrado-alerts.js";
 
@@ -32,6 +33,7 @@ let scrollListToEndOnce = false;
 let pendingListoId = null;
 
 export function canSeeBorradoBasesModule(email = getPlanUserEmail()) {
+  if (isViewingAsProfile()) return canSeeFromAccess();
   try {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
@@ -41,6 +43,7 @@ export function canSeeBorradoBasesModule(email = getPlanUserEmail()) {
 }
 
 function canConfirmBorrado(email = getPlanUserEmail()) {
+  if (isViewingAsProfile()) return canConfirmFromAccess();
   try {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
@@ -50,6 +53,7 @@ function canConfirmBorrado(email = getPlanUserEmail()) {
 }
 
 function canLoadBorrado(email = getPlanUserEmail()) {
+  if (isViewingAsProfile()) return canLoadFromAccess();
   try {
     if (localStorage.getItem(FORCE_KEY) === "1") return true;
   } catch { /* ignore */ }
@@ -57,6 +61,17 @@ function canLoadBorrado(email = getPlanUserEmail()) {
   if (isSt2SuperAdmin(email)) return true;
   if (!String(email || "").trim()) return false;
   return canLoadFromAccess();
+}
+
+/** En vista previa de perfil, ignorar canConfirm/canLoad del API (son los del admin real). */
+function applyEffectiveAccess(data = {}) {
+  if (isViewingAsProfile()) {
+    canConfirm = canConfirmBorrado();
+    canLoad = canLoadBorrado();
+    return;
+  }
+  canConfirm = !!data.canConfirm || canConfirmBorrado();
+  canLoad = data.canLoad == null ? canLoadBorrado() : !!data.canLoad || isSt2SuperAdmin();
 }
 
 function sistemaHidesCommercialModules() {
@@ -246,21 +261,22 @@ function syncLoadFormVisibility() {
 
   const previewWrap = document.getElementById("borrado-preview-confirm-wrap");
   const previewCheck = document.getElementById("borrado-preview-confirm");
-  const showPreview = isSt2SuperAdmin() && canLoad;
+  const showPreview = isSt2SuperAdmin() && canLoad && !isViewingAsProfile();
   if (previewWrap) previewWrap.classList.toggle("hidden", !showPreview);
   if (previewCheck && showPreview) previewCheck.checked = isPreviewConfirmListOnly();
 }
 
 function syncSolicitanteBadge() {
   const badge = document.getElementById("borrado-user-badge");
-  const email = getPlanUserEmail();
+  const viewAs = getViewAsProfile();
+  const email = viewAs?.email || getPlanUserEmail();
   if (!badge) return;
   if (!email) {
     badge.classList.add("hidden");
     badge.textContent = "";
     return;
   }
-  badge.textContent = displayNameFromEmail(email);
+  badge.textContent = viewAs?.displayName || displayNameFromEmail(email);
   badge.classList.remove("hidden");
 }
 
@@ -414,8 +430,7 @@ async function reloadList() {
     if (gen !== listLoadGen) return;
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     items = (Array.isArray(data.items) ? data.items : []).map(normalizeItem);
-    canConfirm = !!data.canConfirm || canConfirmBorrado();
-    canLoad = data.canLoad == null ? canLoadBorrado() : !!data.canLoad || isSt2SuperAdmin();
+    applyEffectiveAccess(data);
     syncMineFilterVisibility();
     syncLoadFormVisibility();
     rebuildMonthOptions();

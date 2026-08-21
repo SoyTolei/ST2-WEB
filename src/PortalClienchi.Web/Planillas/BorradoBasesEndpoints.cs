@@ -108,10 +108,15 @@ public static class BorradoBasesEndpoints
 
             if (flags.BorradoBasesConfirm)
             {
+                var forceConfirmQueue = string.Equals(
+                    ctx.Request.Query["mode"].ToString(),
+                    "confirm",
+                    StringComparison.OrdinalIgnoreCase);
+
                 // Si hay avisos personales (su solicitud quedó eliminada/parcial/con nota),
-                // priorizarlos: si no, la cola de pendientes a confirmar.
+                // priorizarlos — salvo que pidan explícitamente la cola de confirmación (vista previa).
                 var personal = repo.ListUnseenAlerts(email!);
-                if (personal.Count > 0)
+                if (!forceConfirmQueue && personal.Count > 0)
                 {
                     return Results.Ok(new
                     {

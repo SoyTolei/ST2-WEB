@@ -121,6 +121,10 @@ export function startViewAsProfile({ email, displayName, modules }) {
     modules: cloneFlags(parseFlagsFromApi(modules || {})),
   };
   sessionStorage.setItem(VIEW_AS_KEY, JSON.stringify(payload));
+  try {
+    sessionStorage.removeItem("st2-blanqueo-preview-list-only");
+    sessionStorage.removeItem("st2-borrado-preview-list-only");
+  } catch { /* ignore */ }
   document.dispatchEvent(new CustomEvent("st2:view-as-changed", { detail: payload }));
 }
 
