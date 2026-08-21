@@ -212,18 +212,18 @@ function summarizeAlerts(alerts) {
   const parts = [];
   if (counts.ready > 0) {
     parts.push(counts.ready === 1
-      ? "1 borrado eliminado"
-      : `${counts.ready} borrados eliminados`);
+      ? "una solicitud de borrado de bases ya eliminada"
+      : `${counts.ready} solicitudes de borrado de bases ya eliminadas`);
   }
   if (counts.partial > 0) {
     parts.push(counts.partial === 1
-      ? "1 borrado parcial"
-      : `${counts.partial} borrados parciales`);
+      ? "una solicitud de borrado parcialmente realizada (revisá las bases pendientes)"
+      : `${counts.partial} solicitudes de borrado parcialmente realizadas (revisá las bases pendientes)`);
   }
   if (counts.note > 0) {
     parts.push(counts.note === 1
-      ? "1 observación"
-      : `${counts.note} observaciones`);
+      ? "una observación nueva en borrado de bases"
+      : `${counts.note} observaciones nuevas en borrado de bases`);
   }
 
   const tone = (counts.partial > 0 || counts.note > 0) ? "warn" : "ok";
