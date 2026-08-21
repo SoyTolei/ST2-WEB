@@ -203,7 +203,7 @@ function greetRequester(message) {
   const name = firstNameFromEmail(getPlanUserEmail());
   if (!name || !message) return message;
   const body = message.charAt(0).toLowerCase() + message.slice(1);
-  return `Hola ${name} 🗣️❗ ${body}`;
+  return `Hola ${name} 🫡 ${body}`;
 }
 
 function summarizeAlerts(alerts) {
@@ -233,8 +233,8 @@ function summarizeAlerts(alerts) {
   }
   if (counts.partial > 0) {
     parts.push(counts.partial === 1
-      ? "una solicitud de borrado parcialmente realizada (revisá las bases pendientes)"
-      : `${counts.partial} solicitudes de borrado parcialmente realizadas (revisá las bases pendientes)`);
+      ? "una solicitud de borrado parcialmente realizada (revisá las aclaraciones)"
+      : `${counts.partial} solicitudes de borrado parcialmente realizadas (revisá las aclaraciones)`);
   }
   if (counts.note > 0) {
     parts.push(counts.note === 1
