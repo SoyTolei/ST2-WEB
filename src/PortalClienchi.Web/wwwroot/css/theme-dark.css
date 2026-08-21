@@ -70,6 +70,11 @@ html.st2-theme-dark .st2-about-dialog {
 }
 
 html.st2-theme-dark .st2-about-title,
+html.st2-theme-dark .st2-about-notice-lead,
+html.st2-theme-dark .st2-about-tool-name {
+  color: var(--dark);
+}
+
 html.st2-theme-dark .st2-tool-url-dialog {
   background: #1a2130;
   border-color: #2b3445;
