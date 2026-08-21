@@ -613,7 +613,8 @@ function formatBasesPills(item) {
   if (item.contabilidad) {
     const detail = String(item.ejerciciosDetalle || "").trim() || "Sin ejercicios";
     const display = formatEjerciciosSeparated(detail);
-    pills.push(basePillHtml("CG", display, true));
+    const count = splitEjercicios(detail).length || 1;
+    pills.push(basePillHtml("CG", display, true, count));
   }
   return pills.length ? pills.join(" ") : "—";
 }
@@ -670,10 +671,16 @@ function formatEjerciciosSeparated(raw) {
   return parts.map((p) => `- ${p}`).join("\n");
 }
 
-function basePillHtml(label, detail, contab) {
-  const tip = escapeAttr(detail);
-  const cls = contab ? "borrado-base-pill contab" : "borrado-base-pill";
-  return `<button type="button" class="${cls}" title="${tip}" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}">${escapeHtml(label)}</button>`;
+function basePillHtml(label, detail, contab, count = 0) {
+  const tip = escapeAttr(`Clic para ver ejercicios\n${detail}`);
+  const cls = contab
+    ? "borrado-base-pill contab has-detail"
+    : "borrado-base-pill has-detail";
+  const n = Number(count) > 0 ? Number(count) : 0;
+  const meta = n > 0
+    ? `<span class="borrado-base-pill-meta" aria-hidden="true">${n}</span>`
+    : "";
+  return `<button type="button" class="${cls}" title="${tip}" aria-label="Ver ejercicios de ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span>${meta}<span class="borrado-base-pill-action" aria-hidden="true">ver</span></button>`;
 }
 
 function hideBasePop() {

@@ -399,18 +399,27 @@
   background: #ffe4e6;
   color: #9f1239;
   cursor: default;
+  vertical-align: middle;
 }
 
 button.borrado-base-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.12s ease;
+  border: 1px dashed #fb7185;
+  padding: 0.16rem 0.45rem 0.16rem 0.5rem;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 button.borrado-base-pill:hover,
 button.borrado-base-pill:focus-visible {
   background: #fecdd3;
+  border-color: #e11d48;
+  border-style: solid;
   outline: none;
   transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(190, 18, 60, 0.18);
 }
 
 .borrado-base-pill.contab {
@@ -421,6 +430,43 @@ button.borrado-base-pill:focus-visible {
 button.borrado-base-pill.contab:hover,
 button.borrado-base-pill.contab:focus-visible {
   background: #fda4af;
+}
+
+.borrado-base-pill-label {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.borrado-base-pill-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.05rem;
+  height: 1.05rem;
+  padding: 0 0.28rem;
+  border-radius: 999px;
+  background: #9f1239;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.borrado-base-pill-action {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9f1239;
+  opacity: 0.85;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+button.borrado-base-pill:hover .borrado-base-pill-action,
+button.borrado-base-pill:focus-visible .borrado-base-pill-action {
+  opacity: 1;
+  color: #881337;
 }
 
 .borrado-base-pop {
