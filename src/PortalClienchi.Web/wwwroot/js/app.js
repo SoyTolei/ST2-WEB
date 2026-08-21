@@ -108,6 +108,7 @@ let accessNameEditSaving = false;
 const accessModulesOverlay = document.getElementById("st2-access-modules-overlay");
 const accessModulesEmail = document.getElementById("st2-access-modules-email");
 const accessModulesName = document.getElementById("st2-access-modules-name");
+const accessModulesPreview = document.getElementById("st2-access-modules-preview");
 const accessModulesError = document.getElementById("st2-access-modules-error");
 const accessModulesClose = document.getElementById("st2-access-modules-close");
 const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
@@ -1370,17 +1371,17 @@ function renderAccessAdminTable() {
     const mods = item.modules || {};
     const modBadges = [];
     if (mods.oportunidad) {
-      modBadges.push({ label: "OP", title: "Oportunidad de Venta" });
+      modBadges.push({ label: "OPOR", title: "Oportunidad de Venta" });
     }
     if (mods.pdfPortal) {
       modBadges.push({ label: "PDF", title: "Generador PDF-Portal" });
     }
     if (mods.blanqueoConfirm && mods.blanqueoLoad) {
-      modBadges.push({ label: "BLANQ✓+", title: "Blanqueo Claves: confirma y carga" });
+      modBadges.push({ label: "BLANQUEOS✓+", title: "Blanqueo Claves: confirma y carga" });
     } else if (mods.blanqueoConfirm) {
-      modBadges.push({ label: "BLANQ✓", title: "Blanqueo Claves: solo confirma" });
+      modBadges.push({ label: "BLANQUEOS✓", title: "Blanqueo Claves: solo confirma" });
     } else if (mods.blanqueoLoad || mods.blanqueo) {
-      modBadges.push({ label: "BLANQ", title: "Blanqueo Claves: puede cargar" });
+      modBadges.push({ label: "BLANQUEOS", title: "Blanqueo Claves: puede cargar" });
     }
     if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
       modBadges.push({ label: "BASES✓+", title: "Borrado de bases: confirma y carga" });
@@ -1865,7 +1866,7 @@ function closeAccessModulesModal() {
 
 const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 
-function startAccessProfilePreview(email) {
+function startAccessProfilePreview(email, modulesOverride = null) {
   if (!email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   if (!current || current.isPending) return;
@@ -1873,10 +1874,28 @@ function startAccessProfilePreview(email) {
   startViewAsProfile({
     email: current.email,
     displayName,
-    modules: current.modules || {},
+    modules: modulesOverride || current.modules || {},
   });
   window.location.hash = "#/planillas";
   window.location.reload();
+}
+
+function modulesFromAccessForm() {
+  return {
+    oportunidad: !!accessModOportunidad?.checked,
+    pdfPortal: !!accessModPdf?.checked,
+    blanqueo: !!accessModBlanqueo?.checked,
+    blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
+    blanqueoLoad: !!accessModBlanqueoLoad?.checked,
+    borradoBases: !!accessModBorradoBases?.checked,
+    borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
+    borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
+  };
+}
+
+function previewAccessModulesProfile() {
+  if (!accessModulesEmailValue) return;
+  startAccessProfilePreview(accessModulesEmailValue, modulesFromAccessForm());
 }
 
 function syncViewAsBanner() {
@@ -2034,6 +2053,9 @@ async function saveAccessModules() {
 accessModulesClose?.addEventListener("click", closeAccessModulesModal);
 accessModulesCancel?.addEventListener("click", closeAccessModulesModal);
 accessModulesSave?.addEventListener("click", () => { void saveAccessModules(); });
+accessModulesPreview?.addEventListener("click", () => {
+  previewAccessModulesProfile();
+});
 accessModulesOverlay?.addEventListener("click", (e) => {
   if (e.target === accessModulesOverlay) closeAccessModulesModal();
 });

@@ -1921,19 +1921,25 @@
         <button type="button" id="st2-access-modules-close" class="st2-access-name-edit-x" aria-label="Cerrar">×</button>
       </div>
       <div id="st2-access-modules-profile" class="st2-access-modules-profile">
-        <span class="st2-access-modules-profile-label">Perfil</span>
+        <div class="st2-access-modules-profile-top">
+          <span class="st2-access-modules-profile-label">Perfil</span>
+          <button type="button" id="st2-access-modules-preview" class="st2-access-modules-preview" title="Ver como ve este perfil">
+            <svg class="st2-access-modules-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg>
+            Ver como
+          </button>
+        </div>
         <strong id="st2-access-modules-name" class="st2-access-modules-name"></strong>
         <span id="st2-access-modules-email" class="st2-access-modules-email"></span>
       </div>
-      <label class="st2-access-modules-check">
+      <label class="st2-access-modules-check st2-access-modules-check-main">
         <input id="st2-mod-oportunidad" type="checkbox"/>
         <span>💼 Oportunidad de Venta</span>
       </label>
-      <label class="st2-access-modules-check">
+      <label class="st2-access-modules-check st2-access-modules-check-main">
         <input id="st2-mod-pdf" type="checkbox"/>
         <span>📄 Generador PDF-Portal</span>
       </label>
-      <label class="st2-access-modules-check">
+      <label class="st2-access-modules-check st2-access-modules-check-main">
         <input id="st2-mod-blanqueo" type="checkbox"/>
         <span>🔑 Blanqueo Claves</span>
       </label>
@@ -1945,7 +1951,7 @@
         <input id="st2-mod-blanqueo-load" type="checkbox"/>
         <span>＋ Puede cargar</span>
       </label>
-      <label class="st2-access-modules-check">
+      <label class="st2-access-modules-check st2-access-modules-check-main">
         <input id="st2-mod-borrado-bases" type="checkbox"/>
         <span>🗄️ Borrado de bases</span>
       </label>
@@ -1957,7 +1963,7 @@
         <input id="st2-mod-borrado-bases-load" type="checkbox"/>
         <span>＋ Puede cargar</span>
       </label>
-      <label id="st2-mod-st2-admin-wrap" class="st2-access-modules-check st2-access-modules-check-admin">
+      <label id="st2-mod-st2-admin-wrap" class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-admin">
         <input id="st2-mod-st2-admin" type="checkbox"/>
         <span>🛡️ ADMIN WEB</span>
       </label>

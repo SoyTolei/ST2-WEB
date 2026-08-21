@@ -2565,22 +2565,24 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-admin-table th:nth-child(1),
 .st2-access-admin-table td:nth-child(1) {
-  width: 28%;
+  width: 30%;
 }
 
 .st2-access-admin-table th:nth-child(2),
 .st2-access-admin-table td:nth-child(2) {
-  width: 26%;
+  width: 32%;
 }
 
 .st2-access-admin-table th:nth-child(3),
 .st2-access-admin-table td:nth-child(3) {
-  width: 16%;
+  width: 12%;
+  padding-right: 4px;
 }
 
 .st2-access-admin-table th:nth-child(4),
 .st2-access-admin-table td:nth-child(4) {
-  width: 10%;
+  width: 7%;
+  padding-left: 2px;
   text-align: center;
 }
 
@@ -2790,12 +2792,49 @@ body.portal-tab-active .tab-icon {
   border-left: 3px solid #f97316;
 }
 
+.st2-access-modules-profile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
 .st2-access-modules-profile-label {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #64748b;
+}
+
+.st2-access-modules-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #fff;
+  color: #0369a1;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px #bae6fd;
+}
+
+.st2-access-modules-preview:hover {
+  background: #e0f2fe;
+  color: #0c4a6e;
+}
+
+.st2-access-modules-preview-icon {
+  width: 13px;
+  height: 13px;
+  display: block;
+  pointer-events: none;
 }
 
 .st2-access-modules-name {
@@ -2822,10 +2861,19 @@ body.portal-tab-active .tab-icon {
   cursor: pointer;
 }
 
+.st2-access-modules-check-main > span {
+  font-weight: 700;
+}
+
 .st2-access-modules-check-sub {
   margin-left: 22px;
   font-size: 0.84rem;
-  color: #334155;
+  color: #475569;
+}
+
+.st2-access-modules-check-sub > span {
+  font-style: italic;
+  font-weight: 500;
 }
 
 .st2-access-modules-actions {
