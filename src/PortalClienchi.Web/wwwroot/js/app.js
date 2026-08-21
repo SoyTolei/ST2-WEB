@@ -1910,59 +1910,63 @@ async function uploadTool(toolId, file) {
 
   const version = new Date().toISOString().slice(0, 10).replace(/-/g, ".");
   const originalName = file.name || `st2-${toolId}.bin`;
-  showBusy(`Preparando ${originalName}…`, 5);
+  let stage = "inicio";
+  showBusy(`Preparando ${originalName}…`, 4);
   setAboutToolsStatus(`Subiendo ${originalName} (${formatToolSize(file.size)})…`);
 
   try {
-    // 1) Canario del volume de tools
+    stage = "ping";
     showBusy("Verificando volume…", 8);
     const ping = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/upload-ping`, null);
     if (!ping?.ok) {
-      throw Object.assign(new Error(ping?.error || "Canario de tools falló."), { reached: !!ping?.reached });
+      throw Object.assign(new Error(ping?.error || "Canario de tools falló."), {
+        reached: !!ping?.reached,
+        stage,
+      });
     }
 
-    // 2) Ofuscar y subir por el canal de capturas (multipart TXT), que ya funciona en prod
-    showBusy(`Codificando ${originalName}…`, 18);
+    stage = "encode";
+    showBusy(`Codificando ${originalName}…`, 12);
     const plain = new Uint8Array(await file.arrayBuffer());
     const wired = new Uint8Array(plain.length);
     for (let i = 0; i < plain.length; i++) wired[i] = plain[i] ^ 0xa5;
-    const relayFile = new File([wired], "st2-pkg.txt", { type: "text/plain" });
 
-    showBusy(`Subiendo ${originalName}…`, 35);
-    const form = new FormData();
-    form.append("capturas", relayFile, "st2-pkg.txt");
+    const chunkSize = 4096;
+    const total = Math.max(1, Math.ceil(wired.length / chunkSize));
+    const uploadId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
-    const captura = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "/api/planillas/capturas/upload");
-      xhr.withCredentials = true;
-      xhr.upload.onprogress = (ev) => {
-        if (!ev.lengthComputable) return;
-        const pct = 35 + Math.round((ev.loaded / ev.total) * 40);
-        showBusy(`Subiendo ${originalName}… ${Math.min(75, pct)}%`, pct);
-      };
-      xhr.onload = () => {
-        const parsed = parseXhrJson(xhr);
-        if (xhr.status >= 200 && xhr.status < 300) resolve(parsed);
-        else reject(makeUploadError(xhr, parsed));
-      };
-      xhr.onerror = () => reject(new Error("No se pudo contactar al servidor (red / proxy)."));
-      xhr.send(form);
+    stage = "begin";
+    showBusy(`Iniciando subida (${total} partes)…`, 16);
+    await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/parts/begin`, {
+      u: uploadId,
+      t: total,
     });
 
-    const enlace = Array.isArray(captura?.enlaces) ? captura.enlaces[0] : null;
-    const url = enlace?.url || enlace?.Url;
-    if (!url) {
-      throw new Error(enlace?.error || "La subida temporal no devolvió URL.");
+    for (let i = 0; i < total; i++) {
+      stage = `part-${i + 1}/${total}`;
+      const slice = wired.subarray(i * chunkSize, Math.min(wired.length, (i + 1) * chunkSize));
+      const hex = bytesToHex(slice);
+      const pct = 16 + Math.round(((i + 1) / total) * 70);
+      showBusy(`Enviando parte ${i + 1}/${total}…`, pct);
+      setAboutToolsStatus(`Enviando ${originalName}: parte ${i + 1}/${total}`);
+      await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/parts/push`, {
+        u: uploadId,
+        i,
+        t: total,
+        h: hex,
+      });
     }
 
-    // 3) Publicar en tools desde la captura (JSON chico; sin .bat en el wire)
-    showBusy("Publicando paquete…", 85);
-    const data = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/publish`, {
-      url,
-      fileName: originalName,
-      version,
-      xor: true,
+    stage = "commit";
+    showBusy("Publicando paquete…", 92);
+    const data = await xhrJson("POST", `/api/tools/${encodeURIComponent(toolId)}/parts/commit`, {
+      u: uploadId,
+      t: total,
+      n: toBase64Url(originalName),
+      v: version,
+      z: true,
     });
 
     showBusy("Listo", 100);
@@ -1970,19 +1974,40 @@ async function uploadTool(toolId, file) {
     await refreshAboutTools({ silent: true });
     markToolsSeen();
   } catch (err) {
-    let msg = err?.message || "No se pudo subir.";
+    const status = err?.status ? `HTTP ${err.status}` : "sin HTTP";
+    let msg = `Falló en ${err?.stage || stage} (${status}): ${err?.message || "No se pudo subir."}`;
+    if (err?.cfRay) msg += `\ncf-ray: ${err.cfRay}`;
     try {
-      const dig = await apiGet("/api/tools");
-      if (dig?.lastError) {
-        msg = `${msg}\n\nDetalle servidor:\n${String(dig.lastError).slice(0, 500)}`;
-      } else if (dig?.dataDir) {
-        msg = `${msg}\n(dataDir: ${dig.dataDir}${err?.status ? `; HTTP ${err.status}` : ""})`;
+      const dig = await fetch("/api/tools", { credentials: "include", cache: "no-store" }).then(async (r) => {
+        const body = await r.json().catch(() => ({}));
+        return { ok: r.ok, status: r.status, body };
+      });
+      if (dig?.body?.lastError) {
+        msg += `\n\nDetalle servidor:\n${String(dig.body.lastError).slice(0, 600)}`;
+      } else {
+        msg += `\n(dataDir: ${dig?.body?.dataDir || "?"}; lastError vacío)`;
       }
-    } catch { /* ignore */ }
+    } catch (e2) {
+      msg += `\n(no pude leer /api/tools: ${e2?.message || e2})`;
+    }
     setAboutToolsStatus(msg, true);
+    try { window.alert(msg); } catch { /* ignore */ }
   } finally {
     hideBusy();
   }
+}
+
+function bytesToHex(bytes) {
+  let out = "";
+  for (let i = 0; i < bytes.length; i++) {
+    out += bytes[i].toString(16).padStart(2, "0");
+  }
+  return out;
+}
+
+function toBase64Url(text) {
+  const b64 = btoa(unescape(encodeURIComponent(String(text || ""))));
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
 function parseXhrJson(xhr) {
@@ -1990,7 +2015,7 @@ function parseXhrJson(xhr) {
   try { return JSON.parse(raw || "{}"); } catch { return { raw: raw.slice(0, 200) }; }
 }
 
-function makeUploadError(xhr, parsed) {
+function makeUploadError(xhr, parsed, stage) {
   const raw = String(xhr.responseText || "");
   const msg = parsed?.error || parsed?.detail || parsed?.title
     || (raw ? raw.slice(0, 400) : `Error HTTP ${xhr.status} (sin detalle)`);
@@ -1998,6 +2023,7 @@ function makeUploadError(xhr, parsed) {
   err.status = xhr.status;
   err.raw = raw;
   err.payload = parsed;
+  err.stage = stage;
   err.reached = !!parsed?.reached || !!parsed?.dataDir || !!parsed?.exceptionType;
   err.cfRay = xhr.getResponseHeader("cf-ray") || xhr.getResponseHeader("CF-RAY");
   if (err.cfRay && !err.reached) {

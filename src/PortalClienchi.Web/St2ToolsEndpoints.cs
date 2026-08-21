@@ -1,14 +1,14 @@
+using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http.Features;
 using PortalClienchi.Web.Planillas;
 
 namespace PortalClienchi.Web;
 
 public static class St2ToolsEndpoints
 {
-    private const long MaxUploadBytes = 120L * 1024 * 1024;
     private const byte XorKey = 0xA5;
+    private const int MaxPartBytes = 8 * 1024;
 
     private static readonly Regex CapturaIdRegex = new(
         @"^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{8}$",
@@ -43,9 +43,6 @@ public static class St2ToolsEndpoints
                     dataDir = store.RootPath,
                     probe,
                     lastError = store.ReadLastError(),
-                    tmp = Environment.GetEnvironmentVariable("TMPDIR")
-                        ?? Environment.GetEnvironmentVariable("TMP")
-                        ?? Environment.GetEnvironmentVariable("TEMP"),
                 });
             }
             catch (Exception ex)
@@ -57,6 +54,7 @@ public static class St2ToolsEndpoints
                     dataDir = store.RootPath,
                     error = ex.Message,
                     lastError = store.ReadLastError(),
+                    reached = true,
                 }, statusCode: StatusCodes.Status500InternalServerError);
             }
         });
@@ -72,7 +70,6 @@ public static class St2ToolsEndpoints
                     return Fail(store, toolId, "Herramienta inválida.", 400);
 
                 var probe = store.WriteProbe();
-                store.ClearLastError();
                 return Results.Ok(new
                 {
                     ok = true,
@@ -101,7 +98,121 @@ public static class St2ToolsEndpoints
             return Results.File(stream, meta.ContentType, meta.FileName, enableRangeProcessing: true);
         });
 
-        // Publica un paquete ya subido por el canal de capturas (TXT), que en prod sí funciona.
+        // Inicio de subida por partes (JSON chico, solo hex después).
+        app.MapPost("/api/tools/{toolId}/parts/begin", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        {
+            try
+            {
+                if (!TryRequireSuperAdmin(ctx, out _, out var error))
+                    return error!;
+
+                var body = await ctx.Request.ReadFromJsonAsync<PartsBeginRequest>(ct).ConfigureAwait(false);
+                if (body is null || string.IsNullOrWhiteSpace(body.U) || body.T < 1)
+                    return Fail(store, toolId, "Pedido de inicio inválido.", 400);
+
+                var session = store.BeginPartUpload(toolId, body.U, body.T);
+                store.ClearLastError();
+                return Results.Ok(new { ok = true, reached = true, u = session, t = body.T, dataDir = store.RootPath });
+            }
+            catch (ArgumentException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (Exception ex)
+            {
+                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
+            }
+        });
+
+        app.MapPost("/api/tools/{toolId}/parts/push", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        {
+            try
+            {
+                if (!TryRequireSuperAdmin(ctx, out _, out var error))
+                    return error!;
+
+                var body = await ctx.Request.ReadFromJsonAsync<PartsPushRequest>(ct).ConfigureAwait(false);
+                if (body is null || string.IsNullOrWhiteSpace(body.U) || string.IsNullOrWhiteSpace(body.H))
+                    return Fail(store, toolId, "Parte inválida.", 400);
+
+                byte[] payload;
+                try
+                {
+                    payload = Convert.FromHexString(body.H.Trim());
+                }
+                catch (FormatException ex)
+                {
+                    return Fail(store, toolId, "Hex inválido en la parte.", 400, ex);
+                }
+
+                if (payload.Length is 0 or > MaxPartBytes)
+                    return Fail(store, toolId, "Tamaño de parte inválido.", 400);
+
+                store.SavePart(toolId, body.U, body.I, body.T, payload);
+                return Results.Ok(new { ok = true, reached = true, i = body.I, t = body.T });
+            }
+            catch (ArgumentException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (Exception ex)
+            {
+                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
+            }
+        });
+
+        app.MapPost("/api/tools/{toolId}/parts/commit", async (HttpContext ctx, string toolId, St2ToolsStore store, CancellationToken ct) =>
+        {
+            try
+            {
+                if (!TryRequireSuperAdmin(ctx, out _, out var error))
+                    return error!;
+
+                var body = await ctx.Request.ReadFromJsonAsync<PartsCommitRequest>(ct).ConfigureAwait(false);
+                if (body is null || string.IsNullOrWhiteSpace(body.U) || body.T < 1)
+                    return Fail(store, toolId, "Commit inválido.", 400);
+
+                var fileName = DecodeMeta(body.N, fallback: $"st2-{toolId}.bin");
+                var saved = await store.CommitPartsAsync(
+                        toolId,
+                        body.U,
+                        body.T,
+                        fileName,
+                        body.V,
+                        xor: body.Z,
+                        xorKey: XorKey,
+                        ct)
+                    .ConfigureAwait(false);
+                store.ClearLastError();
+                return Results.Ok(saved);
+            }
+            catch (ArgumentException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Fail(store, toolId, ex.Message, 400, ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Fail(store, toolId, "Sin permiso de escritura en el volume (RAILWAY_RUN_UID=0).", 500, ex);
+            }
+            catch (IOException ex)
+            {
+                return Fail(store, toolId, "Error de disco: " + ex.Message, 500, ex);
+            }
+            catch (Exception ex)
+            {
+                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
+            }
+        });
+
+        // Compat: publicar desde captura (si se usa otro cliente).
         app.MapPost("/api/tools/{toolId}/publish", async (
             HttpContext ctx,
             string toolId,
@@ -126,11 +237,6 @@ public static class St2ToolsEndpoints
                     return Fail(store, toolId, "No se encontró el archivo temporal de captura.", 404);
 
                 var bytes = await File.ReadAllBytesAsync(open.FullPath, ct).ConfigureAwait(false);
-                if (bytes.Length <= 0)
-                    return Fail(store, toolId, "El archivo temporal está vacío.", 400);
-                if (bytes.Length > MaxUploadBytes)
-                    return Fail(store, toolId, "El archivo supera el máximo de 120 MB.", 400);
-
                 if (body.Xor)
                 {
                     for (var i = 0; i < bytes.Length; i++)
@@ -144,91 +250,36 @@ public static class St2ToolsEndpoints
                 await using var input = new MemoryStream(bytes, writable: false);
                 var saved = await store.SaveStreamAsync(toolId, fileName, input, body.Version, bytes.Length, ct)
                     .ConfigureAwait(false);
-
                 try { capturas.TryDeleteById(capturaId); } catch { /* ignore */ }
                 store.ClearLastError();
                 return Results.Ok(saved);
             }
-            catch (ArgumentException ex)
-            {
-                return Fail(store, toolId, ex.Message, 400, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Fail(store, toolId, ex.Message, 400, ex);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Fail(store, toolId, "Sin permiso de escritura en el volume (RAILWAY_RUN_UID=0).", 500, ex);
-            }
-            catch (IOException ex)
-            {
-                return Fail(store, toolId, "Error de disco: " + ex.Message, 500, ex);
-            }
             catch (Exception ex)
             {
                 return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
             }
         });
+    }
 
-        // Fallback legacy multipart (zip grandes, etc.).
-        app.MapPost("/api/tools/{toolId}/upload", async (HttpRequest request, string toolId, St2ToolsStore store, CancellationToken ct) =>
+    private static string DecodeMeta(string? raw, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+            return fallback;
+        try
         {
-            try
+            var s = raw.Trim().Replace('-', '+').Replace('_', '/');
+            switch (s.Length % 4)
             {
-                var sizeFeature = request.HttpContext.Features.Get<IHttpMaxRequestBodySizeFeature>();
-                if (sizeFeature is not null && !sizeFeature.IsReadOnly)
-                    sizeFeature.MaxRequestBodySize = MaxUploadBytes;
-
-                var email = PlanUserIdentity.GetFromRequest(request.HttpContext);
-                if (email is null)
-                    return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
-                if (!St2SuperAdmin.Is(email))
-                    return Results.Json(new { error = "Solo el administrador puede subir paquetes." }, statusCode: StatusCodes.Status403Forbidden);
-
-                if (!request.HasFormContentType)
-                    return Fail(store, toolId, "Se esperaba multipart/form-data.", 400);
-
-                var form = await request.ReadFormAsync(ct).ConfigureAwait(false);
-                var file = form.Files.GetFile("file") ?? form.Files.FirstOrDefault();
-                var version = form["version"].ToString();
-                var originalName = form["originalName"].ToString();
-
-                if (file is null || file.Length <= 0)
-                    return Fail(store, toolId, "No se recibió el archivo.", 400);
-
-                var nameForSave = string.IsNullOrWhiteSpace(originalName) ? file.FileName : originalName;
-                await using var input = file.OpenReadStream();
-                var saved = await store.SaveStreamAsync(toolId, nameForSave, input, version, file.Length, ct)
-                    .ConfigureAwait(false);
-                store.ClearLastError();
-                return Results.Ok(saved);
+                case 2: s += "=="; break;
+                case 3: s += "="; break;
             }
-            catch (ArgumentException ex)
-            {
-                return Fail(store, toolId, ex.Message, 400, ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Fail(store, toolId, ex.Message, 400, ex);
-            }
-            catch (BadHttpRequestException ex)
-            {
-                return Fail(store, toolId, "Pedido inválido o archivo demasiado grande: " + ex.Message, 400, ex);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Fail(store, toolId, "Sin permiso de escritura en el volume (RAILWAY_RUN_UID=0).", 500, ex);
-            }
-            catch (IOException ex)
-            {
-                return Fail(store, toolId, "Error de disco: " + ex.Message, 500, ex);
-            }
-            catch (Exception ex)
-            {
-                return Fail(store, toolId, $"{ex.GetType().Name}: {ex.Message}", 500, ex);
-            }
-        });
+            var text = Encoding.UTF8.GetString(Convert.FromBase64String(s)).Trim();
+            return string.IsNullOrWhiteSpace(text) ? fallback : text;
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 
     private static string? ParseCapturaId(string? urlOrId)
@@ -277,7 +328,7 @@ public static class St2ToolsEndpoints
         error = null;
         if (email is null)
         {
-            error = Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+            error = Results.Json(new { error = "Identificá tu usuario para continuar.", reached = true }, statusCode: StatusCodes.Status401Unauthorized);
             return false;
         }
         return true;
@@ -289,10 +340,33 @@ public static class St2ToolsEndpoints
             return false;
         if (!St2SuperAdmin.Is(email))
         {
-            error = Results.Json(new { error = "Solo el administrador puede subir paquetes." }, statusCode: StatusCodes.Status403Forbidden);
+            error = Results.Json(new { error = "Solo el administrador puede subir paquetes.", reached = true }, statusCode: StatusCodes.Status403Forbidden);
             return false;
         }
         return true;
+    }
+
+    private sealed class PartsBeginRequest
+    {
+        public string? U { get; set; }
+        public int T { get; set; }
+    }
+
+    private sealed class PartsPushRequest
+    {
+        public string? U { get; set; }
+        public int I { get; set; }
+        public int T { get; set; }
+        public string? H { get; set; }
+    }
+
+    private sealed class PartsCommitRequest
+    {
+        public string? U { get; set; }
+        public int T { get; set; }
+        public string? N { get; set; }
+        public string? V { get; set; }
+        public bool Z { get; set; } = true;
     }
 
     private sealed class PublishRequest

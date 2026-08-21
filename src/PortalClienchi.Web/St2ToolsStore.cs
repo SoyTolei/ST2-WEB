@@ -109,6 +109,105 @@ public sealed class St2ToolsStore
         return $"write-ok size={length} root={_root}";
     }
 
+    public string BeginPartUpload(string toolId, string uploadId, int totalParts)
+    {
+        if (!TryNormalizeId(toolId, out var id))
+            throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
+        if (totalParts is < 1 or > 20000)
+            throw new ArgumentException("Cantidad de partes inválida.");
+
+        var session = SanitizeUploadId(uploadId);
+        EnsureRoot();
+        var dir = Path.Combine(_root, id, ".parts", session);
+        if (Directory.Exists(dir))
+            Directory.Delete(dir, recursive: true);
+        Directory.CreateDirectory(dir);
+        File.WriteAllText(Path.Combine(dir, "meta.txt"), $"total={totalParts}\n");
+        return session;
+    }
+
+    public void SavePart(string toolId, string uploadId, int index, int totalParts, byte[] payload)
+    {
+        if (!TryNormalizeId(toolId, out var id))
+            throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
+        if (index < 0 || index >= totalParts)
+            throw new ArgumentException("Índice de parte inválido.");
+        if (payload is null || payload.Length == 0)
+            throw new ArgumentException("Parte vacía.");
+        if (payload.Length > 64 * 1024)
+            throw new ArgumentException("Parte demasiado grande.");
+
+        var session = SanitizeUploadId(uploadId);
+        var dir = Path.Combine(_root, id, ".parts", session);
+        if (!Directory.Exists(dir))
+            throw new InvalidOperationException("Sesión de subida no iniciada.");
+
+        var path = Path.Combine(dir, $"{index:D5}.part");
+        File.WriteAllBytes(path, payload);
+    }
+
+    public async Task<St2ToolPackageDto> CommitPartsAsync(
+        string toolId,
+        string uploadId,
+        int totalParts,
+        string originalFileName,
+        string? version,
+        bool xor,
+        byte xorKey,
+        CancellationToken ct = default)
+    {
+        if (!TryNormalizeId(toolId, out var id))
+            throw new ArgumentException("Herramienta inválida. Usá sql o bat.");
+
+        var session = SanitizeUploadId(uploadId);
+        var dir = Path.Combine(_root, id, ".parts", session);
+        if (!Directory.Exists(dir))
+            throw new InvalidOperationException("Sesión de subida no encontrada.");
+
+        await using var ms = new MemoryStream();
+        for (var i = 0; i < totalParts; i++)
+        {
+            ct.ThrowIfCancellationRequested();
+            var partPath = Path.Combine(dir, $"{i:D5}.part");
+            if (!File.Exists(partPath))
+                throw new InvalidOperationException($"Falta la parte {i + 1}/{totalParts}.");
+            var bytes = await File.ReadAllBytesAsync(partPath, ct).ConfigureAwait(false);
+            await ms.WriteAsync(bytes, ct).ConfigureAwait(false);
+        }
+
+        var data = ms.ToArray();
+        if (xor)
+        {
+            for (var i = 0; i < data.Length; i++)
+                data[i] ^= xorKey;
+        }
+
+        try
+        {
+            await using var input = new MemoryStream(data, writable: false);
+            return await SaveStreamAsync(toolId, originalFileName, input, version, data.Length, ct)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            try { Directory.Delete(dir, recursive: true); } catch { /* ignore */ }
+        }
+    }
+
+    private static string SanitizeUploadId(string uploadId)
+    {
+        var raw = (uploadId ?? "").Trim().ToLowerInvariant();
+        if (raw.Length is < 8 or > 64)
+            throw new ArgumentException("Id de subida inválido.");
+        foreach (var c in raw)
+        {
+            if (c is (>= 'a' and <= 'z') or (>= '0' and <= '9'))
+                continue;
+            throw new ArgumentException("Id de subida inválido.");
+        }
+        return raw;
+    }
+
     public void WriteLastError(string toolId, Exception ex)
     {
         try
