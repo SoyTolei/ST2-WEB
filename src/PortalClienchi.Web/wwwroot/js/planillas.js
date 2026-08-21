@@ -5,7 +5,7 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule } from "./planillas-borrado-bases.js";
-import { refreshModuleFlags, canSeeOportunidadModule, startModuleAccessPolling } from "./module-access.js";
+import { refreshModuleFlags, canSeeOportunidadModule, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
@@ -1354,10 +1354,16 @@ export function goPlanillasHome({ history = "replace" } = {}) {
   });
 }
 
+function effectivePlanillasEmail() {
+  const viewAs = getViewAsProfile();
+  if (viewAs?.email) return String(viewAs.email).trim().toLowerCase();
+  return String(getPlanUserEmail() || "").trim().toLowerCase();
+}
+
 function syncPlanillasHeroEaster() {
   const el = document.getElementById("planillas-hero-easter");
   if (!el) return;
-  const email = String(getPlanUserEmail() || "").trim().toLowerCase();
+  const email = effectivePlanillasEmail();
   const show = email === HERO_EASTER_EMAIL;
   el.classList.toggle("hidden", !show);
   el.setAttribute("aria-hidden", show ? "false" : "true");
@@ -1380,6 +1386,7 @@ export function initPlanillas() {
   syncBorradoBasesModuleVisibility();
   syncPlanillasHeroEaster();
   document.addEventListener("st2:session-changed", syncPlanillasHeroEaster);
+  document.addEventListener("st2:view-as-changed", syncPlanillasHeroEaster);
   showView("menu", { history: "none" });
 
   return Promise.all([refreshModuleFlags({ baseline: true }), loadConfig()]).then(async () => {
