@@ -53,6 +53,8 @@ export function refreshBadges() {
     const badge = document.querySelector(`.tab-reminder-badge[data-reminder="${tab}"]`);
     if (!badge) continue;
     const show = shouldShowReminder(tab);
+    badge.textContent = "!";
+    badge.classList.add("tab-reminder-badge--hint");
     badge.classList.toggle("hidden", !show);
     badge.title = TOOLTIPS[tab];
     badge.setAttribute("aria-hidden", show ? "false" : "true");
