@@ -485,7 +485,9 @@ public sealed class St2ToolsStore
 
             var file = Directory.EnumerateFiles(dir)
                 .Where(f => AllowedExtensions.Contains(Path.GetExtension(f)))
-                .OrderByDescending(f => new FileInfo(f).LastWriteTimeUtc)
+                // Preferir .zip (el navegador confía más que en .exe/.bat sueltos).
+                .OrderByDescending(f => Path.GetExtension(f).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(f => new FileInfo(f).LastWriteTimeUtc)
                 .FirstOrDefault();
             if (file is null)
                 continue;
@@ -570,12 +572,23 @@ public sealed class St2ToolsStore
             Id = id,
             Name = ToolNames.GetValueOrDefault(id) ?? id.ToUpperInvariant(),
             Version = info.LastWriteTimeUtc.ToString("yyyy.MM.dd"),
-            FileName = info.Name,
+            FileName = CanonicalDownloadName(id, info.Name),
             SizeBytes = info.Length,
             UpdatedAtUtc = info.LastWriteTimeUtc.ToString("o"),
             ContentType = GuessContentType(ext),
             Available = true,
         };
+    }
+
+    /// <summary>Nombres canónicos que ve el usuario al descargar.</summary>
+    public static string CanonicalDownloadName(string id, string? actualName = null)
+    {
+        var ext = Path.GetExtension(actualName ?? "").ToLowerInvariant();
+        if (id.Equals("sql", StringComparison.OrdinalIgnoreCase))
+            return ext == ".zip" ? "ST2 - Herramientas SQL.zip" : "ST2 - Herramientas SQL.exe";
+        if (id.Equals("bat", StringComparison.OrdinalIgnoreCase))
+            return ext == ".zip" ? "ST2-PS.zip" : "ST2-PS.bat";
+        return string.IsNullOrWhiteSpace(actualName) ? $"st2-{id}.bin" : Path.GetFileName(actualName);
     }
 
     private Dictionary<string, ManifestEntry> ReadManifestUnlocked()

@@ -1,11 +1,9 @@
 # Paquetes ST2 embebidos en el deploy
 
-La app sirve estos archivos directo desde la imagen (sin Subir/URL en la UI).
+La app sirve estos `.zip` (el navegador confía más que en `.exe`/`.bat` sueltos).
 
 ```
 tools-packages/
-  bat/st2-bat.bat
-  sql/st2-sql.exe
+  bat/ST2-PS.zip                 → contiene ST2-PS.bat
+  sql/ST2 - Herramientas SQL.zip → contiene ST2 - Herramientas SQL.exe
 ```
-
-Extensiones válidas: `.zip` `.7z` `.rar` `.exe` `.msi` `.bat` `.cmd` `.ps1` `.bin`

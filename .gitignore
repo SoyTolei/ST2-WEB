@@ -4,6 +4,7 @@ obj/
 publish/
 publish-win64/
 *.zip
+!tools-packages/**/*.zip
 
 # Config local con credenciales
 appsettings.local.json

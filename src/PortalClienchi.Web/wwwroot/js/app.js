@@ -1828,13 +1828,18 @@ function renderAboutTools() {
       continue;
     }
 
+    const label =
+      tool.fileName ||
+      (id === "sql" ? "ST2 - Herramientas SQL.zip" : "ST2-PS.zip");
     if (desc) {
-      desc.textContent = `v${tool.version}${tool.sizeBytes ? ` · ${formatToolSize(tool.sizeBytes)}` : ""}`;
+      desc.textContent = tool.sizeBytes
+        ? `${label} · ${formatToolSize(tool.sizeBytes)}`
+        : label;
     }
     if (btn) {
       btn.disabled = false;
       btn.textContent = "Descargar";
-      btn.title = `Descargar ${tool.fileName || tool.name}`;
+      btn.title = `Descargar ${label}`;
     }
   }
   syncAboutToolsBadge();
@@ -1847,10 +1852,23 @@ async function refreshAboutTools({ silent = false } = {}) {
     renderAboutTools();
     if (!silent) setAboutToolsStatus("");
   } catch (err) {
-    // Si el listado falla, igual ofrecemos descarga (paquetes van en el deploy).
     cachedTools = [
-      { id: "sql", name: "ST2.SQL", available: true, version: "deploy", fileName: "st2-sql.exe", sizeBytes: 0 },
-      { id: "bat", name: "ST2.BAT", available: true, version: "deploy", fileName: "st2-bat.bat", sizeBytes: 0 },
+      {
+        id: "sql",
+        name: "ST2.SQL",
+        available: true,
+        version: "",
+        fileName: "ST2 - Herramientas SQL.zip",
+        sizeBytes: 0,
+      },
+      {
+        id: "bat",
+        name: "ST2.BAT",
+        available: true,
+        version: "",
+        fileName: "ST2-PS.zip",
+        sizeBytes: 0,
+      },
     ];
     renderAboutTools();
     if (!silent) setAboutToolsStatus("");
