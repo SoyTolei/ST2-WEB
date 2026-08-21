@@ -576,15 +576,34 @@ function formatBasesPills(item) {
   return pills.length ? pills.join(" ") : "—";
 }
 
-/** Separa varios ejercicios con guiones cuando hay más de uno. */
+/** Separa varios ejercicios (saltos de línea, “ejercicio …, ejercicio …”, comas, etc.). */
 function splitEjercicios(raw) {
   const text = String(raw || "").trim();
   if (!text) return [];
+
   let parts = text.split(/\r?\n+/).map((s) => s.trim()).filter(Boolean);
+
+  if (parts.length <= 1) {
+    // "Ejercicio 2025, ejercicio 2023"
+    const byEjercicio = text
+      .split(/\s*,\s*(?=(?:ejercicio|ej\.?)\b)/i)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (byEjercicio.length > 1) parts = byEjercicio;
+  }
+
   if (parts.length <= 1) {
     const alt = text.split(/\s*[;|]\s*|\s+[-–—]\s+/).map((s) => s.trim()).filter(Boolean);
     if (alt.length > 1) parts = alt;
   }
+
+  if (parts.length <= 1 && text.includes(",")) {
+    const byComma = text.split(/\s*,\s*/).map((s) => s.trim()).filter(Boolean);
+    if (byComma.length > 1 && byComma.every((p) => /ejercicio|\bej\.?\b|\b20\d{2}\b/i.test(p))) {
+      parts = byComma;
+    }
+  }
+
   return parts;
 }
 
@@ -592,7 +611,8 @@ function formatEjerciciosSeparated(raw) {
   const parts = splitEjercicios(raw);
   if (parts.length === 0) return "Sin ejercicios";
   if (parts.length === 1) return parts[0];
-  return `-\n${parts.join("\n-\n")}\n-`;
+  // Uno debajo del otro, con guiones y espacio
+  return `-\n\n${parts.join("\n\n-\n\n")}\n\n-`;
 }
 
 function basePillHtml(label, detail, contab) {
@@ -722,17 +742,18 @@ function buildRow(item) {
   const cliente = String(item.nroCliente || "").trim();
   const aclaracion = String(item.aclaracion || "").trim();
   const empresaTitle = escapeHtml(nro && nombre ? `[${nro}] ${nombre}` : (nro || nombre || ""));
-  row.innerHTML = `
-    <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
-    <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
-    <td class="borrado-col-cliente" title="${escapeHtml(cliente)}">
-      ${cliente
-        ? `<button type="button" class="borrado-cliente-copy" data-borrado-copy-cliente="${escapeHtml(cliente)}" title="Clic para copiar N° de cliente">
+  const clienteCell = !cliente
+    ? "—"
+    : canConfirm
+      ? `<button type="button" class="borrado-cliente-copy" data-borrado-copy-cliente="${escapeHtml(cliente)}" title="Clic para copiar N° de cliente">
             <span class="borrado-cliente-copy-text">${escapeHtml(cliente)}</span>
             <span class="borrado-cliente-copy-hint" aria-hidden="true">copiar</span>
           </button>`
-        : "—"}
-    </td>
+      : escapeHtml(cliente);
+  row.innerHTML = `
+    <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
+    <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
+    <td class="borrado-col-cliente" title="${escapeHtml(cliente)}">${clienteCell}</td>
     <td class="borrado-col-empresa" title="${empresaTitle}">
       <span class="borrado-empresa-nro">${escapeHtml(nro ? `[${nro}]` : "—")}</span>
       <span class="borrado-empresa-nombre">${escapeHtml(nombre || "")}</span>
@@ -858,9 +879,11 @@ async function confirmListoModal() {
     contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
   };
   const summary = buildListoSummary(item, done);
+  const { nota } = parseAclaracion(item.aclaracion);
+  const aclaracion = composeAclaracion(summary, nota);
 
   try {
-    await patchItem(pendingListoId, { listo: true, aclaracion: summary });
+    await patchItem(pendingListoId, { listo: true, aclaracion });
     hideListoModal();
     setStatus(`Confirmado: ${summary}`);
     await reloadList();
@@ -883,6 +906,45 @@ function buildListoSummary(item, done) {
   return parts.map((p) => `${p.ok ? "✓" : "✗"} ${p.label}`).join(" · ");
 }
 
+const ACLARACION_SEP = "\n---\n";
+
+function isResultadoAclaracion(text) {
+  const t = String(text || "").trim();
+  return /^Listo\b/i.test(t) || /[✓✗]/.test(t);
+}
+
+/** Separa resultado de bases (checks) y observación libre. */
+function parseAclaracion(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return { resultado: "", nota: "" };
+
+  if (text.includes(ACLARACION_SEP.trim()) || text.includes("\n---\n")) {
+    const idx = text.indexOf("---");
+    if (idx >= 0) {
+      const before = text.slice(0, idx).replace(/\n+$/, "").trim();
+      const after = text.slice(idx + 3).replace(/^\n+/, "").trim();
+      return { resultado: before, nota: after };
+    }
+  }
+
+  if (isResultadoAclaracion(text)) {
+    const lines = text.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    if (lines.length > 1 && isResultadoAclaracion(lines[0]) && !isResultadoAclaracion(lines.slice(1).join(" "))) {
+      return { resultado: lines[0], nota: lines.slice(1).join("\n") };
+    }
+    return { resultado: text, nota: "" };
+  }
+
+  return { resultado: "", nota: text };
+}
+
+function composeAclaracion(resultado, nota) {
+  const r = String(resultado || "").trim();
+  const n = String(nota || "").trim();
+  if (r && n) return `${r}${ACLARACION_SEP}${n}`;
+  return r || n || null;
+}
+
 function formatFecha(iso) {
   const raw = String(iso || "").trim();
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
@@ -899,27 +961,37 @@ function formatEstadoCell(item) {
   if (item.listo) {
     return '<span class="borrado-estado-ok" title="Confirmado / verificado" aria-label="Listo">✓</span>';
   }
-  if (!String(item.aclaracion || "").trim()) {
+  const { resultado, nota } = parseAclaracion(item.aclaracion);
+  if (!resultado && !nota) {
     return '<span class="borrado-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
   }
   return "—";
 }
 
-function formatAclaracionCell(text) {
-  const raw = String(text || "").trim();
-  if (!raw) return "—";
-  // Resume de listo parcial: ✓ IVA · ✗ SJ · ✓ CG
+function formatResultadoHtml(resultado) {
+  const raw = String(resultado || "").trim();
+  if (!raw) return "";
   if (/[✓✗]/.test(raw)) {
     const html = escapeHtml(raw)
       .replace(/✓/g, '<span class="borrado-mark-ok" aria-hidden="true">✓</span>')
       .replace(/✗/g, '<span class="borrado-mark-no" aria-hidden="true">✗</span>');
     return `<span class="borrado-aclaracion-full borrado-aclaracion-marks">${html}</span>`;
   }
-  // Todos OK: Listo IVA, SJ, CG
   if (/^Listo\b/i.test(raw)) {
     return `<span class="borrado-aclaracion-full borrado-aclaracion-listo">${escapeHtml(raw)}</span>`;
   }
   return `<span class="borrado-aclaracion-full">${escapeHtml(raw)}</span>`;
+}
+
+function formatAclaracionCell(text) {
+  const { resultado, nota } = parseAclaracion(text);
+  if (!resultado && !nota) return "—";
+  const parts = [];
+  if (resultado) parts.push(formatResultadoHtml(resultado));
+  if (nota) {
+    parts.push(`<span class="borrado-aclaracion-full borrado-aclaracion-nota">${escapeHtml(nota)}</span>`);
+  }
+  return `<div class="borrado-aclaracion-stack">${parts.join("")}</div>`;
 }
 
 function showCtx(x, y, item) {
@@ -981,7 +1053,9 @@ async function handleCtxAction(action) {
       openNoteModal(item);
       return;
     } else if (action === "clear-aclaracion") {
-      await patchItem(selectedId, { clearAclaracion: true });
+      const { resultado } = parseAclaracion(item.aclaracion);
+      if (resultado) await patchItem(selectedId, { aclaracion: resultado });
+      else await patchItem(selectedId, { clearAclaracion: true });
     } else if (action === "eliminar") {
       openDeleteModal(item);
       return;
@@ -1114,7 +1188,8 @@ function openNoteModal(item) {
   selectedId = item.id;
   const overlay = document.getElementById("borrado-note-overlay");
   const text = document.getElementById("borrado-note-text");
-  if (text) text.value = item.aclaracion || "";
+  const { nota } = parseAclaracion(item.aclaracion);
+  if (text) text.value = nota || "";
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   text?.focus();
@@ -1128,19 +1203,22 @@ function hideNoteModal() {
 
 async function saveNoteModal() {
   if (!selectedId) return;
-  const text = String(document.getElementById("borrado-note-text")?.value || "").trim();
+  const item = items.find((x) => x.id === selectedId);
+  const { resultado } = parseAclaracion(item?.aclaracion);
+  const nota = String(document.getElementById("borrado-note-text")?.value || "").trim();
+  const aclaracion = composeAclaracion(resultado, nota);
   try {
-    if (!text) {
+    if (!aclaracion) {
       await patchItem(selectedId, { clearAclaracion: true });
     } else {
-      await patchItem(selectedId, { aclaracion: text });
+      await patchItem(selectedId, { aclaracion });
     }
     hideNoteModal();
-    setStatus("Aclaración guardada.");
+    setStatus("Observación guardada.");
     await reloadList();
     notifyBorradoChanged();
   } catch (err) {
-    setStatus(err?.message || "No se pudo guardar la aclaración.", true);
+    setStatus(err?.message || "No se pudo guardar la observación.", true);
   }
 }
 

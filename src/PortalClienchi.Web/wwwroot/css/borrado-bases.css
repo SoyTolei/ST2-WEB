@@ -419,6 +419,19 @@ button.borrado-base-pill.contab:focus-visible {
   background: #f1f5f9;
 }
 
+.borrado-aclaracion-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.borrado-aclaracion-nota {
+  color: #3730a3;
+  background: #e0e7ff;
+  border-left: 3px solid #6366f1;
+}
+
 .borrado-mark-ok {
   color: #15803d;
   font-weight: 800;
