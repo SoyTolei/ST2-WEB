@@ -206,9 +206,11 @@
   border-radius: 8px;
 }
 
+/* Columnas compactas al contenido; Aclaración absorbe el resto. */
 .borrado-table {
-  table-layout: fixed;
   width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
 }
 
 .borrado-table th,
@@ -218,7 +220,8 @@
 
 .borrado-table thead th,
 .borrado-table tbody td {
-  padding: 8px 6px;
+  padding: 8px 10px;
+  vertical-align: middle;
 }
 
 .borrado-th-fecha {
@@ -228,37 +231,35 @@
 
 .borrado-table .borrado-th-fecha,
 .borrado-table .borrado-col-fecha {
-  width: 4.2rem;
-  padding-right: 4px;
+  width: 1%;
+  padding-right: 6px;
 }
 
 .borrado-table .borrado-th-caso,
 .borrado-table .borrado-col-caso {
-  width: 4.5rem;
-  padding-left: 4px;
-  padding-right: 4px;
+  width: 1%;
+  padding-left: 6px;
+  padding-right: 8px;
 }
 
 .borrado-table .borrado-th-cliente,
 .borrado-table .borrado-col-cliente {
-  width: 5.6rem;
-  max-width: 5.6rem;
-  padding-left: 4px;
-  padding-right: 6px;
+  width: 1%;
+  padding-left: 6px;
+  padding-right: 12px;
 }
 
 .borrado-table .borrado-th-empresa,
 .borrado-table .borrado-col-empresa {
-  width: 11.5rem;
-  max-width: 12.5rem;
+  width: 1%;
+  max-width: 15rem;
   padding-left: 4px;
-  padding-right: 10px;
-  white-space: nowrap;
+  padding-right: 14px;
 }
 
 .borrado-empresa-inline {
   display: inline-block;
-  max-width: 11.5rem;
+  max-width: 14rem;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 0.84rem;
@@ -269,10 +270,9 @@
 
 .borrado-table .borrado-th-cuit,
 .borrado-table .borrado-col-cuit {
-  width: 7.4rem;
-  max-width: 7.4rem;
-  padding-left: 8px;
-  padding-right: 6px;
+  width: 1%;
+  padding-left: 4px;
+  padding-right: 14px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
@@ -280,26 +280,26 @@
 
 .borrado-table .borrado-th-bases,
 .borrado-table .borrado-col-bases {
-  width: 7.25rem;
-  padding-left: 4px;
-  padding-right: 12px;
+  width: 1%;
+  padding-left: 6px;
+  padding-right: 18px;
   white-space: nowrap;
 }
 
 .borrado-table .borrado-th-solicitante,
 .borrado-table .borrado-col-solicitante {
-  width: 7rem;
-  max-width: 7.5rem;
-  padding-left: 10px;
-  padding-right: 4px;
+  width: 1%;
+  max-width: 9rem;
+  padding-left: 6px;
+  padding-right: 10px;
 }
 
 .borrado-table .borrado-th-listo,
 .borrado-table .borrado-col-listo {
-  width: 6.25rem;
+  width: 1%;
   text-align: center;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 8px;
+  padding-right: 10px;
 }
 
 .borrado-col-cliente {
@@ -311,7 +311,6 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  max-width: 100%;
   border: 0;
   background: transparent;
   padding: 0;
@@ -335,15 +334,16 @@
 }
 
 .borrado-cliente-copy-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
 .borrado-cliente-copy-hint {
-  flex-shrink: 0;
-  margin-left: 2px;
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  z-index: 2;
   padding: 1px 6px;
   border-radius: 999px;
   background: #0f172a;
@@ -354,17 +354,17 @@
   text-transform: uppercase;
   line-height: 1.35;
   opacity: 0;
-  transform: translateX(-4px);
   transition: opacity 0.15s ease, transform 0.15s ease;
   pointer-events: none;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .borrado-cliente-copy:hover .borrado-cliente-copy-hint,
 .borrado-cliente-copy:focus-visible .borrado-cliente-copy-hint,
 .borrado-cliente-copy.is-copied .borrado-cliente-copy-hint {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(-50%) translateX(0);
 }
 
 .borrado-cliente-copy.is-copied .borrado-cliente-copy-hint {
@@ -482,7 +482,7 @@ button.borrado-base-pill.contab:focus-visible {
 }
 
 .borrado-col-solicitante {
-  max-width: 7.5rem;
+  max-width: 9rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -520,8 +520,8 @@ button.borrado-base-pill.contab:focus-visible {
 
 .borrado-col-aclaracion {
   white-space: normal;
-  min-width: 13rem;
-  width: 28%;
+  min-width: 14rem;
+  width: 99%;
 }
 
 .borrado-aclaracion-full {
