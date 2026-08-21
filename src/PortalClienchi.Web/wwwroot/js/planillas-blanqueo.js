@@ -997,24 +997,35 @@ function isBlanqueoConClave(item) {
 }
 
 /** Pastilla con la clave: punteada, “Copiar” al hover, clic copia. */
-function formatClaveCopyPill(item) {
-  if (!item?.listo || !isBlanqueoConClave(item)) return "";
-  if (String(item.aclaracion || "").trim()) return "";
-  const clave = claveDefault();
-  return `<button type="button" class="blanqueo-clave-pill" data-blanqueo-copy-clave="${escapeHtml(clave)}" title="Clic para copiar la clave genérica" aria-label="Copiar clave ${escapeHtml(clave)}">
-    <code class="blanqueo-clave-pill-label">${escapeHtml(clave)}</code>
+function formatClaveCopyPill(clave, title = "Clic para copiar la clave") {
+  const value = String(clave || "").trim();
+  if (!value) return "";
+  return `<button type="button" class="blanqueo-clave-pill" data-blanqueo-copy-clave="${escapeHtml(value)}" title="${escapeHtml(title)}" aria-label="Copiar clave ${escapeHtml(value)}">
+    <code class="blanqueo-clave-pill-label">${escapeHtml(value)}</code>
     <span class="blanqueo-clave-pill-action" aria-hidden="true">Copiar</span>
   </button>`;
+}
+
+/** Extrae la clave de aclaraciones tipo "Clave: Sueldo.20261". */
+function parseClaveFromAclaracion(aclaracion) {
+  const m = String(aclaracion || "").trim().match(/^clave\s*:\s*(.+)$/i);
+  return m ? m[1].trim() : "";
 }
 
 function formatAclaracionCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (aclaracion) {
+    const claveExtra = parseClaveFromAclaracion(aclaracion);
+    if (claveExtra) {
+      return formatClaveCopyPill(claveExtra, "Clic para copiar la clave de la aclaración");
+    }
     const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
     return `<span class="blanqueo-pill ${cls}" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
   }
-  const clavePill = formatClaveCopyPill(item);
-  return clavePill || "—";
+  if (item?.listo && isBlanqueoConClave(item)) {
+    return formatClaveCopyPill(claveDefault(), "Clic para copiar la clave genérica") || "—";
+  }
+  return "—";
 }
 
 function formatEstadoCell(item) {

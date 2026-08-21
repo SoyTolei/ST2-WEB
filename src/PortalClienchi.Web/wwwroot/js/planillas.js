@@ -6,6 +6,7 @@ import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalM
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule } from "./planillas-borrado-bases.js";
 import { refreshModuleFlags, canSeeOportunidadModule, startModuleAccessPolling } from "./module-access.js";
+import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
   renderBlanqueoAlertUi,
@@ -14,6 +15,8 @@ import {
   startBorradoAlertsPolling,
   renderBorradoAlertUi,
 } from "./borrado-alerts.js";
+
+const HERO_EASTER_EMAIL = "yohana.colacci@thomsonreuters.com";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -1351,6 +1354,15 @@ export function goPlanillasHome({ history = "replace" } = {}) {
   });
 }
 
+function syncPlanillasHeroEaster() {
+  const el = document.getElementById("planillas-hero-easter");
+  if (!el) return;
+  const email = String(getPlanUserEmail() || "").trim().toLowerCase();
+  const show = email === HERO_EASTER_EMAIL;
+  el.classList.toggle("hidden", !show);
+  el.setAttribute("aria-hidden", show ? "false" : "true");
+}
+
 export function initPlanillas() {
   if (!views.menu) return Promise.resolve();
 
@@ -1366,11 +1378,14 @@ export function initPlanillas() {
   syncBlanqueoModuleVisibility();
   initBorradoBasesModule();
   syncBorradoBasesModuleVisibility();
+  syncPlanillasHeroEaster();
+  document.addEventListener("st2:session-changed", syncPlanillasHeroEaster);
   showView("menu", { history: "none" });
 
   return Promise.all([refreshModuleFlags({ baseline: true }), loadConfig()]).then(async () => {
     updatePlanBuildBadge(planillasConfig?.webBuild);
     updateSistemaUi();
+    syncPlanillasHeroEaster();
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }

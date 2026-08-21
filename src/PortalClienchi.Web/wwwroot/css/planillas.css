@@ -355,12 +355,33 @@
 }
 
 .planillas-hero {
+  position: relative;
   text-align: center;
   padding: 20px 16px 24px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: #fff;
   margin-bottom: 24px;
+  overflow: visible;
+}
+
+.planillas-hero-easter {
+  position: absolute;
+  top: -14px;
+  right: 10px;
+  width: 44px;
+  height: auto;
+  pointer-events: none;
+  z-index: 2;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
+  transform: rotate(6deg);
+  user-select: none;
+}
+
+.planillas-hero-easter.hidden {
+  display: none !important;
 }
 
 .planillas-hero h2 {
