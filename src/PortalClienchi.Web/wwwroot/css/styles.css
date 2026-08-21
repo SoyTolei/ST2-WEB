@@ -2188,6 +2188,14 @@ body.portal-tab-active .tab-icon {
   gap: 6px;
 }
 
+.st2-about-tool-size {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
 .st2-about-tool-dl {
   flex-shrink: 0;
   border: 1px solid #cbd5e1;

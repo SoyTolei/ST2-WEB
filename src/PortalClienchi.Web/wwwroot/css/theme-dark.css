@@ -105,6 +105,7 @@ html.st2-theme-dark .st2-about-notice {
 html.st2-theme-dark .st2-about-notice-text,
 html.st2-theme-dark .st2-about-tool-desc,
 html.st2-theme-dark .st2-about-tools-hint,
+html.st2-theme-dark .st2-about-tool-size,
 html.st2-theme-dark .st2-about-updated {
   color: var(--text-muted);
 }

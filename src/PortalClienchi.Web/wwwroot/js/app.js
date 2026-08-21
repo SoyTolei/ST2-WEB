@@ -1810,15 +1810,31 @@ function markToolsSeen() {
 }
 
 function renderAboutTools() {
+  const copy = {
+    sql: {
+      desc: "App de escritorio · backups, restauración, consultas y traza SQL",
+      file: "ST2 - Herramientas SQL.zip",
+    },
+    bat: {
+      desc: "Herramienta TEC · Verificación, Registro de componentes, automatización.",
+      file: "ST2-PS.zip",
+    },
+  };
+
   for (const id of ["sql", "bat"]) {
     const tool = (cachedTools || []).find((t) => t.id === id);
     const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
     const desc = card?.querySelector("[data-tool-desc]");
+    const sizeEl = card?.querySelector(`[data-tool-size="${id}"]`);
     const btn = card?.querySelector(`[data-tool-download="${id}"]`);
+    const meta = copy[id];
+
+    if (desc) desc.textContent = meta.desc;
 
     if (!tool?.available) {
-      if (desc) {
-        desc.textContent = id === "sql" ? "Herramientas SQL" : "Automatizaciones / utilidades";
+      if (sizeEl) {
+        sizeEl.hidden = true;
+        sizeEl.textContent = "";
       }
       if (btn) {
         btn.disabled = true;
@@ -1828,13 +1844,15 @@ function renderAboutTools() {
       continue;
     }
 
-    const label =
-      tool.fileName ||
-      (id === "sql" ? "ST2 - Herramientas SQL.zip" : "ST2-PS.zip");
-    if (desc) {
-      desc.textContent = tool.sizeBytes
-        ? `${label} · ${formatToolSize(tool.sizeBytes)}`
-        : label;
+    const label = tool.fileName || meta.file;
+    if (sizeEl) {
+      if (tool.sizeBytes) {
+        sizeEl.hidden = false;
+        sizeEl.textContent = formatToolSize(tool.sizeBytes);
+      } else {
+        sizeEl.hidden = true;
+        sizeEl.textContent = "";
+      }
     }
     if (btn) {
       btn.disabled = false;
