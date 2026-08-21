@@ -324,7 +324,11 @@
 }
 
 .blanqueo-clave-pill-label {
-  letter-spacing: 0.02em;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: inherit;
 }
 
 .blanqueo-clave-pill-action {
@@ -344,8 +348,9 @@
 }
 
 .blanqueo-clave-pill:hover .blanqueo-clave-pill-action,
-.blanqueo-clave-pill:focus-visible .blanqueo-clave-pill-action {
-  max-width: 2.5rem;
+.blanqueo-clave-pill:focus-visible .blanqueo-clave-pill-action,
+.blanqueo-clave-pill.is-copied .blanqueo-clave-pill-action {
+  max-width: 4rem;
   margin-left: 0.28rem;
   opacity: 1;
 }

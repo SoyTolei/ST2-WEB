@@ -203,7 +203,7 @@ function greetRequester(message) {
   const name = firstNameFromEmail(getPlanUserEmail());
   if (!name || !message) return message;
   const body = message.charAt(0).toLowerCase() + message.slice(1);
-  return `Hola ${name}! ${body}`;
+  return `Hola ${name} 🗣️❗ ${body}`;
 }
 
 function summarizeAlerts(alerts) {

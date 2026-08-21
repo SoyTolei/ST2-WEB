@@ -911,11 +911,14 @@ function buildRow(item) {
     e.stopPropagation();
     const btn = e.currentTarget;
     const clave = btn.getAttribute("data-blanqueo-copy-clave") || claveDefault();
+    const action = btn.querySelector(".blanqueo-clave-pill-action");
     void copyText(clave, {
       el: btn,
+      hintSelector: ".blanqueo-clave-pill-action",
       copiedText: "Copiado",
-      restoreText: "ver",
+      restoreText: "Copiar",
     });
+    if (action) action.textContent = "Copiado";
   });
 
   row.addEventListener("click", (e) => {
@@ -993,14 +996,14 @@ function isBlanqueoConClave(item) {
   return /blanqueo/i.test(String(item?.tipoSolicitud || ""));
 }
 
-/** Botón estilo CG: punteado, “ver” al hover, copia la clave genérica. */
+/** Pastilla con la clave: punteada, “Copiar” al hover, clic copia. */
 function formatClaveCopyPill(item) {
   if (!item?.listo || !isBlanqueoConClave(item)) return "";
   if (String(item.aclaracion || "").trim()) return "";
   const clave = claveDefault();
   return `<button type="button" class="blanqueo-clave-pill" data-blanqueo-copy-clave="${escapeHtml(clave)}" title="Clic para copiar la clave genérica" aria-label="Copiar clave ${escapeHtml(clave)}">
-    <span class="blanqueo-clave-pill-label">Clave</span>
-    <span class="blanqueo-clave-pill-action" aria-hidden="true">ver</span>
+    <code class="blanqueo-clave-pill-label">${escapeHtml(clave)}</code>
+    <span class="blanqueo-clave-pill-action" aria-hidden="true">Copiar</span>
   </button>`;
 }
 
