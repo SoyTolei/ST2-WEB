@@ -229,9 +229,8 @@ function foodForToast(text) {
   }
 }
 
-/** Saludo personal solo para quien carga solicitudes (no confirmadores). */
+/** Saludo personal con emoji de comida en el toast. */
 function greetRequester(message) {
-  if (alertMode === "confirm") return message;
   const name = firstNameFromEmail(getPlanUserEmail());
   if (!name || !message) return message;
   const body = message.charAt(0).toLowerCase() + message.slice(1);
@@ -258,11 +257,12 @@ function setToastText(el, text) {
 function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
+    const text = n === 1
+      ? "Tenés 1 blanqueo para confirmar o revisar"
+      : `Tenés ${n} blanqueos para confirmar o revisar`;
     return {
       tone: "warn",
-      text: n === 1
-        ? "Tenés 1 blanqueo para confirmar o revisar"
-        : `Tenés ${n} blanqueos para confirmar o revisar`,
+      text: greetRequester(text),
       counts: { pending: n },
     };
   }
