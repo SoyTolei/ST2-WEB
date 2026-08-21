@@ -206,7 +206,7 @@
   border-radius: 8px;
 }
 
-/* Columnas compactas al contenido; Aclaración absorbe el resto. */
+/* Solo Código/Empresa y Aclaración crecen; el resto queda al ancho del contenido. */
 .borrado-table {
   width: 100%;
   table-layout: auto;
@@ -230,36 +230,50 @@
 }
 
 .borrado-table .borrado-th-fecha,
-.borrado-table .borrado-col-fecha {
+.borrado-table .borrado-col-fecha,
+.borrado-table .borrado-th-caso,
+.borrado-table .borrado-col-caso,
+.borrado-table .borrado-th-cliente,
+.borrado-table .borrado-col-cliente,
+.borrado-table .borrado-th-cuit,
+.borrado-table .borrado-col-cuit,
+.borrado-table .borrado-th-bases,
+.borrado-table .borrado-col-bases,
+.borrado-table .borrado-th-solicitante,
+.borrado-table .borrado-col-solicitante,
+.borrado-table .borrado-th-listo,
+.borrado-table .borrado-col-listo {
   width: 1%;
+}
+
+.borrado-table .borrado-th-fecha,
+.borrado-table .borrado-col-fecha {
   padding-right: 6px;
 }
 
 .borrado-table .borrado-th-caso,
 .borrado-table .borrado-col-caso {
-  width: 1%;
   padding-left: 6px;
   padding-right: 8px;
 }
 
 .borrado-table .borrado-th-cliente,
 .borrado-table .borrado-col-cliente {
-  width: 1%;
   padding-left: 6px;
   padding-right: 12px;
 }
 
+/* Crece según el nombre de empresa (no absorbe el hueco vacío de la tabla). */
 .borrado-table .borrado-th-empresa,
 .borrado-table .borrado-col-empresa {
-  width: 1%;
-  max-width: 15rem;
   padding-left: 4px;
   padding-right: 14px;
+  max-width: 22rem;
 }
 
 .borrado-empresa-inline {
   display: inline-block;
-  max-width: 14rem;
+  max-width: 22rem;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 0.84rem;
@@ -270,25 +284,20 @@
 
 .borrado-table .borrado-th-cuit,
 .borrado-table .borrado-col-cuit {
-  width: 1%;
   padding-left: 4px;
   padding-right: 14px;
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
 
 .borrado-table .borrado-th-bases,
 .borrado-table .borrado-col-bases {
-  width: 1%;
   padding-left: 6px;
   padding-right: 18px;
-  white-space: nowrap;
 }
 
 .borrado-table .borrado-th-solicitante,
 .borrado-table .borrado-col-solicitante {
-  width: 1%;
   max-width: 9rem;
   padding-left: 6px;
   padding-right: 10px;
@@ -296,10 +305,16 @@
 
 .borrado-table .borrado-th-listo,
 .borrado-table .borrado-col-listo {
-  width: 1%;
   text-align: center;
   padding-left: 8px;
   padding-right: 10px;
+}
+
+.borrado-table .borrado-th-aclaracion,
+.borrado-table .borrado-col-aclaracion {
+  width: 100%;
+  min-width: 14rem;
+  white-space: normal;
 }
 
 .borrado-col-cliente {
@@ -520,8 +535,6 @@ button.borrado-base-pill.contab:focus-visible {
 
 .borrado-col-aclaracion {
   white-space: normal;
-  min-width: 14rem;
-  width: 99%;
 }
 
 .borrado-aclaracion-full {
