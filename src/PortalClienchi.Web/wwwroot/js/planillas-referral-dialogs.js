@@ -332,17 +332,6 @@ function openSqlTriggersNav(referralCfg) {
   });
 }
 
-function renderMamSqlSection(referralCfg) {
-  return `<div id="ref-mam-sql-section" class="plan-mam-sql-section">
-    <div class="plan-mam-sql-head">
-      <h4 class="plan-modal-section">Consultas SQL — Triggers</h4>
-      <button type="button" id="ref-mam-sql-expand" class="plan-sql-expand-btn">Vista ampliada</button>
-    </div>
-    <p class="plan-modal-hint">Consultas listas para SQL Server. Copiá la que necesites y ejecutala en la base del cliente. IsDisabled: 0 = habilitado, 1 = deshabilitado.</p>
-    ${renderSqlTriggerCards(triggersQueries(referralCfg))}
-  </div>`;
-}
-
 export async function runMamDialog(referralCfg, { mamState, mamPersActu, mamTriggers }) {
   const opts = referralCfg?.mamOpciones || [];
   let triggers = mamTriggers || "";
@@ -364,15 +353,14 @@ export async function runMamDialog(referralCfg, { mamState, mamPersActu, mamTrig
       <span class="plan-tool-icon mam">SQL</span>
       <span class="plan-tool-texts">
         <strong>Ir a consultas SQL para triggers</strong>
-        <span>Desplazá hacia abajo o abrí la vista ampliada</span>
+        <span>Abrí la vista separada con las consultas listas para copiar</span>
       </span>
-      <span class="plan-tool-arrow">↓</span>
+      <span class="plan-tool-arrow" aria-hidden="true">→</span>
     </button>`;
 
     return `<p class="plan-modal-hint">Marcá las opciones que correspondan. «No utiliza MAM» desmarca el resto.</p>
       ${optionWell(options)}
-      ${sqlBtn}
-      ${renderMamSqlSection(referralCfg)}`;
+      ${sqlBtn}`;
   };
 
   const mountMam = (body) => {
@@ -380,19 +368,7 @@ export async function runMamDialog(referralCfg, { mamState, mamPersActu, mamTrig
       cb.addEventListener("change", () => applyMamMutex(body));
     });
     applyMamMutex(body);
-    bindSqlCopy(body);
     body.querySelector("#ref-mam-sql-btn")?.addEventListener("click", (e) => {
-      e.preventDefault();
-      const section = body.querySelector("#ref-mam-sql-section");
-      if (section) {
-        section.scrollIntoView({ behavior: "smooth", block: "start" });
-        section.classList.add("highlight");
-        setTimeout(() => section.classList.remove("highlight"), 1200);
-      } else {
-        openSqlTriggersNav(referralCfg);
-      }
-    });
-    body.querySelector("#ref-mam-sql-expand")?.addEventListener("click", (e) => {
       e.preventDefault();
       openSqlTriggersNav(referralCfg);
     });
