@@ -110,6 +110,16 @@ html.st2-theme-dark .st2-about-tool-dl:not(:disabled) {
   color: #fdba74;
 }
 
+html.st2-theme-dark .st2-about-tool-upload {
+  background: #151b26;
+  border-color: #475569;
+  color: #cbd5e1;
+}
+
+html.st2-theme-dark .st2-about-tools-status.is-error {
+  color: #fca5a5;
+}
+
 html.st2-theme-dark .st2-access-card,
 html.st2-theme-dark .st2-access-admin-dialog {
   background: #1a2130;

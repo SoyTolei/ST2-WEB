@@ -2096,6 +2096,13 @@ body.portal-tab-active .tab-icon {
   color: #c2410c;
 }
 
+.st2-about-tool-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+}
+
 .st2-about-tool-dl {
   flex-shrink: 0;
   border: 1px solid #cbd5e1;
@@ -2119,6 +2126,51 @@ body.portal-tab-active .tab-icon {
 .st2-about-tool-dl:not(:disabled):hover {
   background: #ffedd5;
   border-color: #ea580c;
+}
+
+.st2-about-tool-upload {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.st2-about-tool-upload.hidden {
+  display: none;
+}
+
+.st2-about-tool-upload:hover {
+  border-color: #64748b;
+  color: #0f172a;
+}
+
+.st2-about-tool-file {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.st2-about-tools-status {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.st2-about-tools-status.is-error {
+  color: #b91c1c;
+}
+
+.st2-about-tools-status.hidden {
+  display: none;
 }
 
 .about-btn {

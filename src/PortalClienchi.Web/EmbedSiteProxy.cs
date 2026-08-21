@@ -76,6 +76,7 @@ internal sealed class EmbedSiteProxy
         "/api/portal-pdf/",
         "/api/access/",
         "/api/capturas/",
+        "/api/tools/",
     ];
 
     private static readonly string[] St2ReservedExact =

@@ -1756,11 +1756,185 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
   }
 }
 
+const TOOLS_SEEN_KEY = "st2-tools-seen-versions";
+const aboutToolsBadge = document.getElementById("about-tools-badge");
+const aboutToolsStatus = document.getElementById("st2-about-tools-status");
+let cachedTools = [];
+let toolsBound = false;
+
+function readSeenToolVersions() {
+  try {
+    return JSON.parse(localStorage.getItem(TOOLS_SEEN_KEY) || "{}") || {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSeenToolVersions(map) {
+  try {
+    localStorage.setItem(TOOLS_SEEN_KEY, JSON.stringify(map || {}));
+  } catch { /* ignore */ }
+}
+
+function formatToolSize(bytes) {
+  const n = Number(bytes) || 0;
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function setAboutToolsStatus(msg, isError = false) {
+  if (!aboutToolsStatus) return;
+  aboutToolsStatus.textContent = msg || "";
+  aboutToolsStatus.classList.toggle("hidden", !msg);
+  aboutToolsStatus.classList.toggle("is-error", !!isError && !!msg);
+}
+
+function syncAboutToolsBadge() {
+  if (!aboutToolsBadge) return;
+  const seen = readSeenToolVersions();
+  const hasNew = (cachedTools || []).some((t) => t?.available && t.version && seen[t.id] !== t.version);
+  aboutToolsBadge.classList.toggle("hidden", !hasNew);
+  aboutToolsBadge.setAttribute("aria-hidden", hasNew ? "false" : "true");
+  aboutToolsBadge.title = hasNew ? "Hay una versión nueva de herramientas" : "";
+}
+
+function markToolsSeen() {
+  const next = { ...readSeenToolVersions() };
+  for (const t of cachedTools || []) {
+    if (t?.available && t.version) next[t.id] = t.version;
+  }
+  writeSeenToolVersions(next);
+  syncAboutToolsBadge();
+}
+
+function renderAboutTools() {
+  const canUpload = isSt2SuperAdmin();
+  for (const id of ["sql", "bat"]) {
+    const tool = (cachedTools || []).find((t) => t.id === id);
+    const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
+    const desc = card?.querySelector("[data-tool-desc]");
+    const btn = card?.querySelector(`[data-tool-download="${id}"]`);
+    const uploadWrap = card?.querySelector(`[data-tool-upload-wrap="${id}"]`);
+    uploadWrap?.classList.toggle("hidden", !canUpload);
+
+    if (!tool?.available) {
+      if (desc) {
+        desc.textContent = id === "sql" ? "Herramientas SQL" : "Automatizaciones / utilidades";
+      }
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Pronto";
+        btn.title = "Todavía no hay un paquete publicado";
+      }
+      continue;
+    }
+
+    if (desc) {
+      desc.textContent = `v${tool.version}${tool.sizeBytes ? ` · ${formatToolSize(tool.sizeBytes)}` : ""}`;
+    }
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Descargar";
+      btn.title = `Descargar ${tool.fileName || tool.name}`;
+    }
+  }
+  syncAboutToolsBadge();
+}
+
+async function refreshAboutTools({ silent = false } = {}) {
+  try {
+    const data = await apiGet("/api/tools");
+    cachedTools = Array.isArray(data?.tools) ? data.tools : [];
+    renderAboutTools();
+    if (!silent) setAboutToolsStatus("");
+  } catch (err) {
+    cachedTools = [];
+    renderAboutTools();
+    if (!silent) setAboutToolsStatus(err?.message || "No se pudieron cargar las herramientas.", true);
+  }
+}
+
+async function downloadTool(toolId) {
+  const btn = document.querySelector(`[data-tool-download="${toolId}"]`);
+  if (!btn || btn.disabled) return;
+  setAboutToolsStatus("Preparando descarga…");
+  try {
+    const res = await fetch(`/api/tools/${encodeURIComponent(toolId)}/download`, { credentials: "include" });
+    if (!res.ok) {
+      let msg = "No se pudo descargar.";
+      try {
+        const data = await res.json();
+        if (data?.error) msg = data.error;
+      } catch { /* ignore */ }
+      throw new Error(msg);
+    }
+    const blob = await res.blob();
+    const cd = res.headers.get("content-disposition") || "";
+    const match = /filename\*?=(?:UTF-8''|")?([^\";]+)/i.exec(cd);
+    const name = match ? decodeURIComponent(match[1].replace(/"/g, "")) : `${toolId}.bin`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setAboutToolsStatus(`Descarga lista: ${name}`);
+  } catch (err) {
+    setAboutToolsStatus(err?.message || "No se pudo descargar.", true);
+  }
+}
+
+async function uploadTool(toolId, file) {
+  if (!file || !isSt2SuperAdmin()) return;
+  setAboutToolsStatus(`Subiendo ${file.name}…`);
+  const body = new FormData();
+  body.append("file", file);
+  body.append("version", new Date().toISOString().slice(0, 10).replace(/-/g, "."));
+  try {
+    const res = await fetch(`/api/tools/${encodeURIComponent(toolId)}/upload`, {
+      method: "POST",
+      credentials: "include",
+      body,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || "No se pudo subir el paquete.");
+    setAboutToolsStatus(`Publicado ${data.name || toolId} v${data.version || ""}`.trim());
+    await refreshAboutTools({ silent: true });
+    markToolsSeen();
+  } catch (err) {
+    setAboutToolsStatus(err?.message || "No se pudo subir.", true);
+  }
+}
+
+function bindAboutToolsUi() {
+  if (toolsBound) return;
+  toolsBound = true;
+  document.querySelectorAll("[data-tool-download]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-tool-download");
+      if (id) void downloadTool(id);
+    });
+  });
+  document.querySelectorAll("[data-tool-upload]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const id = input.getAttribute("data-tool-upload");
+      const file = input.files?.[0];
+      input.value = "";
+      if (id && file) void uploadTool(id, file);
+    });
+  });
+}
+
 function showAbout() {
   const webMeta = document.getElementById("st2-about-web-meta");
   if (webMeta) webMeta.textContent = getAboutVersionLabel();
   if (aboutTaglineEl) aboutTaglineEl.textContent = "Suite de herramientas";
   applyAboutUpdated();
+  bindAboutToolsUi();
+  void refreshAboutTools().then(() => markToolsSeen());
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
   aboutCloseBtn?.focus();
@@ -3070,6 +3244,8 @@ async function bootstrapApp() {
   await ensureAppAccess();
   syncAdminTabVisibility();
   syncViewAsBanner();
+  bindAboutToolsUi();
+  void refreshAboutTools({ silent: true });
   await initPlanillas();
   syncAdminTabVisibility();
   applyTopTabEntry();

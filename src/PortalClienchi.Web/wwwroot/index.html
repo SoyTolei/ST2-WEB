@@ -1657,22 +1657,31 @@
             <article class="st2-about-tool" id="st2-about-tool-sql" data-tool="sql">
               <div class="st2-about-tool-main">
                 <span class="st2-about-tool-name">ST2.SQL</span>
-                <span class="st2-about-tool-desc">Herramientas SQL</span>
+                <span class="st2-about-tool-desc" data-tool-desc>Herramientas SQL</span>
               </div>
-              <button type="button" class="st2-about-tool-dl" data-tool-download="sql" disabled title="Todavía no hay un paquete publicado">
-                Pronto
-              </button>
+              <div class="st2-about-tool-actions">
+                <button type="button" class="st2-about-tool-dl" data-tool-download="sql" disabled>Pronto</button>
+                <label class="st2-about-tool-upload hidden" data-tool-upload-wrap="sql" title="Subir nueva versión (solo admin)">
+                  <input type="file" class="st2-about-tool-file" data-tool-upload="sql" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1"/>
+                  <span>Subir</span>
+                </label>
+              </div>
             </article>
             <article class="st2-about-tool" id="st2-about-tool-bat" data-tool="bat">
               <div class="st2-about-tool-main">
                 <span class="st2-about-tool-name">ST2.BAT</span>
-                <span class="st2-about-tool-desc">Automatizaciones / utilidades</span>
+                <span class="st2-about-tool-desc" data-tool-desc>Automatizaciones / utilidades</span>
               </div>
-              <button type="button" class="st2-about-tool-dl" data-tool-download="bat" disabled title="Todavía no hay un paquete publicado">
-                Pronto
-              </button>
+              <div class="st2-about-tool-actions">
+                <button type="button" class="st2-about-tool-dl" data-tool-download="bat" disabled>Pronto</button>
+                <label class="st2-about-tool-upload hidden" data-tool-upload-wrap="bat" title="Subir nueva versión (solo admin)">
+                  <input type="file" class="st2-about-tool-file" data-tool-upload="bat" accept=".zip,.7z,.rar,.exe,.msi,.bat,.cmd,.ps1"/>
+                  <span>Subir</span>
+                </label>
+              </div>
             </article>
           </div>
+          <p id="st2-about-tools-status" class="st2-about-tools-status hidden" aria-live="polite"></p>
         </section>
 
         <div class="st2-about-foot">

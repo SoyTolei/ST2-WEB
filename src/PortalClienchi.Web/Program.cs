@@ -40,6 +40,7 @@ builder.Services.AddSingleton<BlanqueoRepository>();
 builder.Services.AddSingleton<BorradoBasesRepository>();
 builder.Services.AddSingleton<AppAccessRepository>();
 builder.Services.AddSingleton<ModuleAccessRepository>();
+builder.Services.AddSingleton<St2ToolsStore>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -50,8 +51,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
 {
-    options.MultipartBodyLengthLimit = 40 * 1024 * 1024; // 40 MB (capturas comprimidas en servidor)
-    options.ValueLengthLimit = 40 * 1024 * 1024;
+    // Capturas + paquetes de herramientas (ST2.SQL / ST2.BAT) hasta ~120 MB
+    options.MultipartBodyLengthLimit = 120 * 1024 * 1024;
+    options.ValueLengthLimit = 120 * 1024 * 1024;
     options.MultipartHeadersLengthLimit = 64 * 1024;
 });
 
@@ -417,6 +419,7 @@ app.MapPlanillasEndpoints();
 app.MapBlanqueoEndpoints();
 app.MapBorradoBasesEndpoints();
 app.MapPortalPdfEndpoints();
+app.MapSt2ToolsEndpoints();
 
 app.MapWhen(
     ctx => EmbedSiteProxy.ShouldMirrorThomPath(ctx.Request.Path),
