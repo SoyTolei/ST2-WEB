@@ -125,9 +125,7 @@
 }
 
 .borrado-filter-month,
-.borrado-filter-search,
-.borrado-filter-mine,
-.borrado-preview-confirm {
+.borrado-filter-search {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -136,17 +134,60 @@
   color: var(--text-muted, #64748b);
 }
 
-.borrado-filter-mine,
-.borrado-preview-confirm {
-  flex-direction: row;
+.borrado-filter-mine {
+  display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding-bottom: 0.35rem;
+  gap: 8px;
+  align-self: end;
+  margin: 0 0 2px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
 }
 
-.borrado-filter-mine.hidden,
+.borrado-filter-mine.hidden {
+  display: none !important;
+}
+
+.borrado-filter-mine input {
+  margin: 0;
+  accent-color: #be123c;
+}
+
+.borrado-preview-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  margin: 0 0 2px auto;
+  padding: 8px 12px;
+  border: 1px dashed #fda4af;
+  border-radius: 8px;
+  background: #fff1f2;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9f1239;
+  cursor: pointer;
+  user-select: none;
+}
+
 .borrado-preview-confirm.hidden {
-  display: none;
+  display: none !important;
+}
+
+.borrado-preview-confirm:hover {
+  background: #ffe4e6;
+}
+
+.borrado-preview-confirm input {
+  margin: 0;
+  accent-color: #e11d48;
 }
 
 .borrado-filter-search {
@@ -200,13 +241,14 @@
 
 .borrado-col-empresa {
   white-space: nowrap;
-  max-width: 12.5rem;
-  padding-right: 4px;
+  width: 1%;
+  max-width: 16rem;
+  padding-right: 2px;
 }
 
 .borrado-empresa-inline {
   display: inline-block;
-  max-width: 12.5rem;
+  max-width: 16rem;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 0.84rem;
@@ -217,9 +259,9 @@
 
 .borrado-table .borrado-th-cuit,
 .borrado-table .borrado-col-cuit {
-  width: 7.25rem;
-  max-width: 7.25rem;
-  padding-left: 4px;
+  width: 7.1rem;
+  max-width: 7.1rem;
+  padding-left: 2px;
   padding-right: 4px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -228,21 +270,23 @@
 
 .borrado-table .borrado-th-bases,
 .borrado-table .borrado-col-bases {
-  padding-left: 4px;
-  padding-right: 2px;
+  width: 1%;
+  padding-left: 2px;
+  padding-right: 0;
   white-space: nowrap;
 }
 
 .borrado-table .borrado-th-solicitante,
 .borrado-table .borrado-col-solicitante {
-  width: 7rem;
-  max-width: 7rem;
-  padding-left: 2px;
+  width: 6.25rem;
+  max-width: 6.25rem;
+  padding-left: 0;
+  padding-right: 4px;
 }
 
 .borrado-table .borrado-th-listo,
 .borrado-table .borrado-col-listo {
-  width: 5.5rem;
+  width: 6.25rem;
   text-align: center;
   padding-left: 4px;
   padding-right: 4px;
@@ -428,7 +472,7 @@ button.borrado-base-pill.contab:focus-visible {
 }
 
 .borrado-col-solicitante {
-  max-width: 7rem;
+  max-width: 6.25rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -466,8 +510,8 @@ button.borrado-base-pill.contab:focus-visible {
 
 .borrado-col-aclaracion {
   white-space: normal;
-  min-width: 12rem;
-  width: 22%;
+  min-width: 13rem;
+  width: 28%;
 }
 
 .borrado-aclaracion-full {

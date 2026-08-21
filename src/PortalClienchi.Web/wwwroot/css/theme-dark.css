@@ -855,6 +855,7 @@ html.st2-theme-dark .blanqueo-filter-month,
 html.st2-theme-dark .blanqueo-filter-portal,
 html.st2-theme-dark .blanqueo-filter-search,
 html.st2-theme-dark .blanqueo-filter-mine,
+html.st2-theme-dark .borrado-filter-mine,
 html.st2-theme-dark .pdf-portal-label,
 html.st2-theme-dark .pdf-fmt-field,
 html.st2-theme-dark .pdf-portal-status,
@@ -956,4 +957,10 @@ html.st2-theme-dark .st2-access-admin-delete {
   background: #243044 !important;
   border-color: #3d4b61 !important;
   color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .borrado-filter-mine {
+  background: #1e293b !important;
+  border-color: #3d4b61 !important;
+  color: #e2e8f0 !important;
 }

@@ -1814,7 +1814,7 @@ document.querySelectorAll(".st2-access-admin-th-sort").forEach((th) => {
 syncAccessAdminSortHeaders();
 function handleAccessAdminActionClick(e) {
   const target = e.target;
-  if (!(target instanceof HTMLElement)) return;
+  if (!(target instanceof Element)) return false;
   const approveBtn = target.closest("[data-approve-email]");
   if (approveBtn instanceof HTMLElement) {
     void decideAccessAdminEmail(approveBtn.dataset.approveEmail || "", "approve");
@@ -1834,7 +1834,7 @@ accessAdminInbox?.addEventListener("click", (e) => {
 accessAdminBody?.addEventListener("click", (e) => {
   if (handleAccessAdminActionClick(e)) return;
   const target = e.target;
-  if (!(target instanceof HTMLElement)) return;
+  if (!(target instanceof Element)) return;
   const previewBtn = target.closest("[data-preview-email]");
   if (previewBtn instanceof HTMLElement) {
     startAccessProfilePreview(previewBtn.dataset.previewEmail || "");
