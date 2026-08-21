@@ -1810,17 +1810,11 @@ function markToolsSeen() {
 }
 
 function renderAboutTools() {
-  // Solo el super admin publica; el resto solo ve Descargar.
-  const canUpload = isPrimarySuperAdmin() && !getViewAsProfile();
   for (const id of ["sql", "bat"]) {
     const tool = (cachedTools || []).find((t) => t.id === id);
     const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
     const desc = card?.querySelector("[data-tool-desc]");
     const btn = card?.querySelector(`[data-tool-download="${id}"]`);
-    const uploadWrap = card?.querySelector(`[data-tool-upload-wrap="${id}"]`);
-    const urlBtn = card?.querySelector(`[data-tool-url="${id}"]`);
-    uploadWrap?.classList.toggle("hidden", !canUpload);
-    urlBtn?.classList.toggle("hidden", !canUpload);
 
     if (!tool?.available) {
       if (desc) {
@@ -1853,42 +1847,28 @@ async function refreshAboutTools({ silent = false } = {}) {
     renderAboutTools();
     if (!silent) setAboutToolsStatus("");
   } catch (err) {
-    cachedTools = [];
+    // Si el listado falla, igual ofrecemos descarga (paquetes van en el deploy).
+    cachedTools = [
+      { id: "sql", name: "ST2.SQL", available: true, version: "deploy", fileName: "st2-sql.exe", sizeBytes: 0 },
+      { id: "bat", name: "ST2.BAT", available: true, version: "deploy", fileName: "st2-bat.bat", sizeBytes: 0 },
+    ];
     renderAboutTools();
-    if (!silent) setAboutToolsStatus(err?.message || "No se pudieron cargar las herramientas.", true);
+    if (!silent) setAboutToolsStatus("");
   }
 }
 
 async function downloadTool(toolId) {
   const btn = document.querySelector(`[data-tool-download="${toolId}"]`);
   if (!btn || btn.disabled) return;
-  setAboutToolsStatus("Preparando descarga…");
-  try {
-    const res = await fetch(`/api/tools/${encodeURIComponent(toolId)}/download`, { credentials: "include" });
-    if (!res.ok) {
-      let msg = "No se pudo descargar.";
-      try {
-        const data = await res.json();
-        if (data?.error) msg = data.error;
-      } catch { /* ignore */ }
-      throw new Error(msg);
-    }
-    const blob = await res.blob();
-    const cd = res.headers.get("content-disposition") || "";
-    const match = /filename\*?=(?:UTF-8''|")?([^\";]+)/i.exec(cd);
-    const name = match ? decodeURIComponent(match[1].replace(/"/g, "")) : `${toolId}.bin`;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    setAboutToolsStatus(`Descarga lista: ${name}`);
-  } catch (err) {
-    setAboutToolsStatus(err?.message || "No se pudo descargar.", true);
-  }
+  // Link directo: el .exe ~70MB no cabe bien en fetch+blob (memoria / timeouts).
+  setAboutToolsStatus("Iniciando descarga…");
+  const a = document.createElement("a");
+  a.href = `/api/tools/${encodeURIComponent(toolId)}/download?t=${Date.now()}`;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setAboutToolsStatus("Descarga iniciada");
 }
 
 async function uploadTool(toolId, file) {
@@ -2230,25 +2210,10 @@ function xhrJson(method, url, bodyObj) {
 function bindAboutToolsUi() {
   if (toolsBound) return;
   toolsBound = true;
-  bindToolUrlDialog();
   document.querySelectorAll("[data-tool-download]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const id = btn.getAttribute("data-tool-download");
       if (id) void downloadTool(id);
-    });
-  });
-  document.querySelectorAll("[data-tool-upload]").forEach((input) => {
-    input.addEventListener("change", () => {
-      const id = input.getAttribute("data-tool-upload");
-      const file = input.files?.[0];
-      input.value = "";
-      if (id && file) void uploadTool(id, file);
-    });
-  });
-  document.querySelectorAll("[data-tool-url]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const id = btn.getAttribute("data-tool-url");
-      if (id) promptToolFromUrl(id);
     });
   });
 }

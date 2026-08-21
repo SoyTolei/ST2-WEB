@@ -100,13 +100,11 @@ try
     app.Logger.LogInformation(
         "ST2 tools bundled roots: {Roots}",
         string.Join(" | ", tools.BundledPackageRoots.DefaultIfEmpty("(ninguno)")));
-    var seeded = tools.SeedFromBundled();
-    if (seeded > 0)
-        app.Logger.LogInformation("ST2 tools: {Count} paquete(s) en volume/imagen", seeded);
+    // No copiar el .exe de ~70MB al volume en el arranque: se sirve directo desde la imagen.
 }
 catch (Exception ex)
 {
-    app.Logger.LogWarning(ex, "No se pudieron preparar herramientas desde tools-packages");
+    app.Logger.LogWarning(ex, "No se pudieron registrar tools-packages");
 }
 
 app.UseForwardedHeaders();

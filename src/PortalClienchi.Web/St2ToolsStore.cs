@@ -72,21 +72,43 @@ public sealed class St2ToolsStore
 
     public IReadOnlyList<St2ToolPackageDto> List()
     {
-        lock (_gate)
+        var list = new List<St2ToolPackageDto>(ToolIds.Length);
+        foreach (var id in ToolIds)
         {
-            EnsureRoot();
-            var map = ReadManifestUnlocked();
-            var list = new List<St2ToolPackageDto>(ToolIds.Length);
-            foreach (var id in ToolIds)
+            try
             {
-                // La imagen (tools-packages) manda: así Descargar aparece aunque falle el seed al volume.
+                // Prioridad: archivos embebidos en la imagen (sin tocar el volume).
                 if (TryFindBundledFile(id, out var bundled))
+                {
                     list.Add(ToDtoFromBundled(id, bundled));
-                else
-                    list.Add(ToDto(id, map.GetValueOrDefault(id)));
+                    continue;
+                }
             }
-            return list;
+            catch
+            {
+                // seguir con volume / vacío
+            }
+
+            try
+            {
+                lock (_gate)
+                {
+                    try { EnsureRoot(); } catch { /* volume opcional para listar */ }
+                    var map = ReadManifestUnlocked();
+                    list.Add(ToDto(id, map.GetValueOrDefault(id)));
+                }
+            }
+            catch
+            {
+                list.Add(new St2ToolPackageDto
+                {
+                    Id = id,
+                    Name = ToolNames.GetValueOrDefault(id) ?? id.ToUpperInvariant(),
+                    Available = false,
+                });
+            }
         }
+        return list;
     }
 
     public bool TryOpen(string toolId, out string fullPath, out St2ToolPackageDto? meta)
@@ -96,7 +118,7 @@ public sealed class St2ToolsStore
         if (!TryNormalizeId(toolId, out var id))
             return false;
 
-        lock (_gate)
+        try
         {
             if (TryFindBundledFile(id, out var bundled))
             {
@@ -104,19 +126,33 @@ public sealed class St2ToolsStore
                 meta = ToDtoFromBundled(id, bundled);
                 return true;
             }
+        }
+        catch
+        {
+            // volume fallback
+        }
 
-            var map = ReadManifestUnlocked();
-            if (map.TryGetValue(id, out var entry)
-                && entry is not null
-                && !string.IsNullOrWhiteSpace(entry.FileName))
+        lock (_gate)
+        {
+            try
             {
-                var path = Path.Combine(_root, id, entry.FileName);
-                if (File.Exists(path))
+                var map = ReadManifestUnlocked();
+                if (map.TryGetValue(id, out var entry)
+                    && entry is not null
+                    && !string.IsNullOrWhiteSpace(entry.FileName))
                 {
-                    fullPath = path;
-                    meta = ToDto(id, entry);
-                    return true;
+                    var path = Path.Combine(_root, id, entry.FileName);
+                    if (File.Exists(path))
+                    {
+                        fullPath = path;
+                        meta = ToDto(id, entry);
+                        return true;
+                    }
                 }
+            }
+            catch
+            {
+                return false;
             }
 
             return false;

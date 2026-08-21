@@ -21,33 +21,40 @@ public static class St2ToolsEndpoints
             if (!TryRequireUser(ctx, out _, out var error))
                 return error!;
 
+            // Nunca devolver 500 acá: el Acerca de necesita poder mostrar Descargar.
+            IReadOnlyList<St2ToolPackageDto> tools;
             try
             {
-                var tools = store.List();
-                var lastError = store.ReadLastError();
-                if (lastError is { Length: > 2000 })
-                    lastError = lastError[..2000] + "…";
-
-                return Results.Ok(new
-                {
-                    tools,
-                    dataDir = store.RootPath,
-                    bundledRoots = store.BundledPackageRoots,
-                    lastError,
-                    reached = true,
-                });
+                tools = store.List();
             }
             catch (Exception ex)
             {
                 try { store.WriteLastError("list", ex); } catch { /* ignore */ }
-                return Results.Json(new
+                tools = St2ToolsStore.ToolIds.Select(id => new St2ToolPackageDto
                 {
-                    error = "No se pudo listar herramientas: " + ex.Message,
-                    exceptionType = ex.GetType().FullName,
-                    dataDir = store.RootPath,
-                    reached = true,
-                }, statusCode: StatusCodes.Status500InternalServerError);
+                    Id = id,
+                    Name = id.Equals("sql", StringComparison.OrdinalIgnoreCase) ? "ST2.SQL" : "ST2.BAT",
+                    Available = false,
+                }).ToList();
             }
+
+            string? lastError = null;
+            try
+            {
+                lastError = store.ReadLastError();
+                if (lastError is { Length: > 2000 })
+                    lastError = lastError[..2000] + "…";
+            }
+            catch { /* ignore */ }
+
+            return Results.Ok(new
+            {
+                tools,
+                dataDir = store.RootPath,
+                bundledRoots = store.BundledPackageRoots,
+                lastError,
+                reached = true,
+            });
         });
 
         app.MapGet("/api/tools/diag", (HttpContext ctx, St2ToolsStore store) =>
@@ -85,12 +92,21 @@ public static class St2ToolsEndpoints
             if (!TryRequireUser(ctx, out _, out var error))
                 return error!;
 
-            if (!store.TryOpen(toolId, out var path, out var meta) || meta is null)
-                return Results.NotFound(new { error = "Todavía no hay un paquete publicado para esa herramienta." });
+            try
+            {
+                if (!store.TryOpen(toolId, out var path, out var meta) || meta is null)
+                    return Results.NotFound(new { error = "Todavía no hay un paquete publicado para esa herramienta." });
 
-            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-            // octet-stream evita que el proxy bloquee descargas .bat/.exe
-            return Results.File(stream, "application/octet-stream", meta.FileName, enableRangeProcessing: true);
+                var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var downloadName = string.IsNullOrWhiteSpace(meta.FileName) ? $"st2-{toolId}.bin" : meta.FileName;
+                return Results.File(stream, "application/octet-stream", downloadName, enableRangeProcessing: true);
+            }
+            catch (Exception ex)
+            {
+                try { store.WriteLastError(toolId, ex); } catch { /* ignore */ }
+                return Results.Json(new { error = "No se pudo abrir el paquete: " + ex.Message },
+                    statusCode: StatusCodes.Status500InternalServerError);
+            }
         });
 
         // Rutas "kit" bajo /api/planillas (mismo estilo que el resto de la app; evita WAF sobre /upload*).
