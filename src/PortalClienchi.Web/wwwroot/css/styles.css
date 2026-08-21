@@ -2276,7 +2276,7 @@ body.portal-tab-active .tab-icon {
 .st2-tool-url-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1200;
+  z-index: 1400;
   display: flex;
   align-items: center;
   justify-content: center;
