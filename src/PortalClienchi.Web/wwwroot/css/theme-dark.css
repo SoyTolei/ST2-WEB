@@ -427,8 +427,12 @@ html.st2-theme-dark .plan-sistema-badge {
 }
 
 html.st2-theme-dark .plan-module-sticky-head {
-  background: #1a2130 !important;
+  background-color: #1a2130 !important;
+  background-image: none !important;
   border-color: #334155 !important;
+  box-shadow:
+    0 12px 0 0 #1a2130,
+    0 14px 18px -8px rgba(0, 0, 0, 0.45);
 }
 
 html.st2-theme-dark .plan-inline-icon {
