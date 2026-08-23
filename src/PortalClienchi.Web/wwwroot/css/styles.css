@@ -2130,8 +2130,19 @@ body.portal-tab-active .tab-icon {
   line-height: 1.35;
 }
 
-.st2-about-abbr span {
+.st2-about-abbr {
+  font-weight: 700;
+}
+
+.st2-about-abbr-s,
+.st2-about-abbr-t,
+.st2-about-abbr-2 {
   font-weight: 800;
+  color: #d64000;
+}
+
+.st2-about-abbr-2 {
+  color: #ff7a33;
 }
 
 .st2-about-notice-text {

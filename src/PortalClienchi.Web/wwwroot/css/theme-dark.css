@@ -151,8 +151,13 @@ html.st2-theme-dark .st2-about-busy-card {
   border-color: #5b3d28;
 }
 
-html.st2-theme-dark .st2-about-abbr span,
-html.st2-theme-dark .st2-about-aside {
+html.st2-theme-dark .st2-about-abbr-s,
+html.st2-theme-dark .st2-about-abbr-t,
+html.st2-theme-dark .st2-about-abbr-2 {
+  color: #fb923c;
+}
+
+html.st2-theme-dark .st2-about-abbr-2 {
   color: #fdba74;
 }
 
