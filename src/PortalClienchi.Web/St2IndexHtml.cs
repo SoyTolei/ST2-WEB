@@ -21,6 +21,8 @@ public static class St2IndexHtml
         "planillas-borrado-bases.js",
         "blanqueo-alerts.js",
         "borrado-alerts.js",
+        "access-alerts.js",
+        "st2-toast-greet.js",
         "module-access.js",
         "pdf-portal.js",
     ];

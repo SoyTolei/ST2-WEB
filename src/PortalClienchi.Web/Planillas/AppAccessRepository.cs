@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using Microsoft.Data.Sqlite;
 
 namespace PortalClienchi.Web.Planillas;
@@ -437,6 +438,11 @@ public sealed class AppAccessRepository
 
         return list;
     }
+
+    public IReadOnlyList<AppAccessRecordDto> ListPending() =>
+        ListAll()
+            .Where(item => string.Equals(item.Status, StatusPending, StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
     public IReadOnlyList<AppAccessRecordDto> ListDirectory()
     {

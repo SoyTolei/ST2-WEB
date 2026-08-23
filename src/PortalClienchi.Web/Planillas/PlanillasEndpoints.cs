@@ -687,6 +687,25 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true, email = email.Trim().ToLowerInvariant(), removed });
         });
 
+        app.MapGet("/api/access/alerts", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo) =>
+        {
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
+                return denied!;
+
+            var pending = accessRepo.ListPending();
+            return Results.Ok(new
+            {
+                mode = "confirm",
+                count = pending.Count,
+                items = pending.Select(item => new
+                {
+                    email = item.Email,
+                    displayName = item.DisplayName,
+                    createdAt = item.FirstSeenAt,
+                }),
+            });
+        });
+
         app.MapPost("/api/access/registrations/decision", (
             HttpContext ctx,
             IConfiguration config,

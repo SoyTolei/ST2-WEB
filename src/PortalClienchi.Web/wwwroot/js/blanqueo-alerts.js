@@ -5,6 +5,7 @@ import {
   isViewingAsProfile,
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
+import { syncStackedToastGreetings } from "./st2-toast-greet.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -189,72 +190,6 @@ export async function markBlanqueoAlertsSeen(ids = null) {
   renderBlanqueoAlertUi();
 }
 
-function firstNameFromEmail(email) {
-  const local = String(email || "").split("@")[0] || "";
-  const first = local.split(/[._\-]+/).filter(Boolean)[0] || "";
-  if (!first) return "";
-  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
-}
-
-const TOAST_FOOD_MARK = "{{toast-food}}";
-const TOAST_FOOD_KEY = "st2-toast-food-pizza-used";
-const TOAST_FOOD_EMOJIS = [
-  "🍕", // primero siempre
-  "🍔", "🍟", "🌮", "🍣", "🍩", "🍦", "🥐", "🍜", "🥗", "🍪", "🍉",
-  "🌭", "🍝", "🧁", "🍓", "🥑", "🧀",
-];
-
-function nextFoodEmoji() {
-  try {
-    if (sessionStorage.getItem(TOAST_FOOD_KEY) !== "1") {
-      sessionStorage.setItem(TOAST_FOOD_KEY, "1");
-      return TOAST_FOOD_EMOJIS[0];
-    }
-  } catch {
-    return TOAST_FOOD_EMOJIS[0];
-  }
-  const rest = TOAST_FOOD_EMOJIS.slice(1);
-  return rest[Math.floor(Math.random() * rest.length)] || "🍕";
-}
-
-function foodForToast(text) {
-  const key = `st2-toast-food:${String(text || "").slice(0, 160)}`;
-  try {
-    const cached = sessionStorage.getItem(key);
-    if (cached) return cached;
-    const food = nextFoodEmoji();
-    sessionStorage.setItem(key, food);
-    return food;
-  } catch {
-    return nextFoodEmoji();
-  }
-}
-
-/** Saludo personal con emoji de comida en el toast. */
-function greetRequester(message) {
-  const name = firstNameFromEmail(getPlanUserEmail());
-  if (!name || !message) return message;
-  const body = message.charAt(0).toLowerCase() + message.slice(1);
-  return `Hola ${name}! ${TOAST_FOOD_MARK} ${body}`;
-}
-
-function escapeToastHtml(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function setToastText(el, text) {
-  if (!el) return;
-  const food = foodForToast(text);
-  el.innerHTML = escapeToastHtml(text).replace(
-    /\{\{toast-food\}\}/g,
-    `<span class="toast-emoji" aria-hidden="true">${food}</span>`,
-  );
-}
-
 function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
@@ -263,7 +198,7 @@ function summarizeAlerts(alerts) {
       : `Tenés ${n} blanqueos para confirmar o revisar`;
     return {
       tone: "warn",
-      text: greetRequester(text),
+      text,
       counts: { pending: n },
     };
   }
@@ -295,7 +230,7 @@ function summarizeAlerts(alerts) {
       : `Tenés ${counts.ready} blanqueos de clave confirmados`;
   }
 
-  return { tone, text: greetRequester(text), counts };
+  return { tone, text, counts };
 }
 
 export function renderBlanqueoAlertUi() {
@@ -330,17 +265,19 @@ export function renderBlanqueoAlertUi() {
     if (count === 0 || !summary || hideToast || hideForSistema) {
       toast.classList.add("hidden");
       toast.setAttribute("aria-hidden", "true");
+      delete toast.dataset.toastBody;
     } else {
       if (toastCount) {
         toastCount.textContent = label;
         toastCount.setAttribute("aria-hidden", "false");
       }
-      setToastText(toastText, summary.text);
+      toast.dataset.toastBody = summary.text;
       toast.classList.add(summary.tone === "bad" ? "is-bad" : summary.tone === "warn" ? "is-warn" : "is-ok");
       toast.classList.remove("hidden");
       toast.setAttribute("aria-hidden", "false");
     }
   }
+  syncStackedToastGreetings();
 }
 
 function pollIntervalMs() {

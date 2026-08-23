@@ -15,6 +15,10 @@ import {
   startBorradoAlertsPolling,
   renderBorradoAlertUi,
 } from "./borrado-alerts.js";
+import {
+  startAccessAlertsPolling,
+  renderAccessAlertUi,
+} from "./access-alerts.js";
 
 const HERO_EASTER_EMAIL = "yohana.colacci@thomsonreuters.com";
 
@@ -1398,9 +1402,11 @@ export function initPlanillas() {
     }
     startBlanqueoAlertsPolling();
     startBorradoAlertsPolling();
+    startAccessAlertsPolling();
     startModuleAccessPolling();
     renderBlanqueoAlertUi();
     renderBorradoAlertUi();
+    renderAccessAlertUi();
     document.addEventListener("st2:modules-access-changed", () => {
       updateSistemaUi();
     });

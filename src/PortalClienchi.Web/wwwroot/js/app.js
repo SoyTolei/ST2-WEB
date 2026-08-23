@@ -1,6 +1,7 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
+import { notifyAccessChanged } from "./access-alerts.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1526,6 +1527,7 @@ async function decideAccessAdminEmail(email, action) {
     }
     await loadAccessAdminRegistrations({ silent: true, force: true });
     setAccessAdminUpdatedHint(action === "approve" ? `Aprobado: ${name}` : `Rechazado: ${name}`);
+    notifyAccessChanged();
   } catch {
     setAccessAdminUpdatedHint("No se pudo contactar al servidor.");
   }
@@ -1565,6 +1567,7 @@ async function deleteAccessAdminEmail(email) {
     updateAccessAdminSummaryLine();
     renderAccessAdminTable();
     setAccessAdminUpdatedHint(`Eliminado: ${email}`);
+    notifyAccessChanged();
   } catch {
     setAccessAdminUpdatedHint("No se pudo contactar al servidor.");
   }
@@ -2495,6 +2498,14 @@ accessAdminFilterButtons.forEach((btn) => {
     });
     renderAccessAdminTable();
   });
+});
+document.addEventListener("st2:open-admin-from-alert", () => {
+  accessAdminFilter = "pending";
+  accessAdminFilterButtons.forEach((b) => {
+    b.classList.toggle("is-active", b.dataset.filter === "pending");
+  });
+  document.querySelector('.tab-btn[data-tab="admin"]')?.click();
+  void loadAccessAdminRegistrations({ silent: true, force: true });
 });
 accessAdminSearch?.addEventListener("input", () => {
   accessAdminQuery = accessAdminSearch.value || "";
