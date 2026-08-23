@@ -108,6 +108,7 @@ let accessNameEditEmailValue = "";
 let accessNameEditAutoValue = "";
 let accessNameEditSaving = false;
 const accessModulesOverlay = document.getElementById("st2-access-modules-overlay");
+const accessModulesTitle = document.getElementById("st2-access-modules-title");
 const accessModulesEmail = document.getElementById("st2-access-modules-email");
 const accessModulesName = document.getElementById("st2-access-modules-name");
 const accessModulesPreview = document.getElementById("st2-access-modules-preview");
@@ -130,6 +131,7 @@ const viewAsBannerText = document.getElementById("st2-view-as-banner-text");
 const viewAsExitBtn = document.getElementById("st2-view-as-exit");
 let accessModulesEmailValue = "";
 let accessModulesSaving = false;
+let accessModulesAfterApprove = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
 const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
 const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
@@ -1528,6 +1530,9 @@ async function decideAccessAdminEmail(email, action) {
     await loadAccessAdminRegistrations({ silent: true, force: true });
     setAccessAdminUpdatedHint(action === "approve" ? `Aprobado: ${name}` : `Rechazado: ${name}`);
     notifyAccessChanged();
+    if (action === "approve") {
+      openAccessModulesModal(email, { afterApprove: true });
+    }
   } catch {
     setAccessAdminUpdatedHint("No se pudo contactar al servidor.");
   }
@@ -2572,7 +2577,11 @@ accessAdminBody?.addEventListener("click", (e) => {
 function closeAccessModulesModal() {
   accessModulesOverlay?.classList.add("hidden");
   accessModulesEmailValue = "";
+  accessModulesAfterApprove = false;
   if (accessModulesError) accessModulesError.textContent = "";
+  if (accessModulesTitle) accessModulesTitle.textContent = "Módulos habilitados";
+  if (accessModulesSave) accessModulesSave.textContent = "Guardar";
+  if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
 }
 
 const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
@@ -2623,13 +2632,19 @@ function syncViewAsBanner() {
   document.body.classList.toggle("st2-viewing-as-profile", show);
 }
 
-function openAccessModulesModal(email) {
+function openAccessModulesModal(email, { afterApprove = false } = {}) {
   if (!accessModulesOverlay || !email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   const mods = current?.modules || {};
   const isPrimary = String(email).trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
   accessModulesEmailValue = email;
+  accessModulesAfterApprove = !!afterApprove;
   const displayName = formatAccessDisplayName(email, current?.displayNameOverride);
+  if (accessModulesTitle) {
+    accessModulesTitle.textContent = afterApprove ? "¿Qué módulos ve?" : "Módulos habilitados";
+  }
+  if (accessModulesSave) accessModulesSave.textContent = afterApprove ? "Listo" : "Guardar";
+  if (accessModulesCancel) accessModulesCancel.textContent = afterApprove ? "Después" : "Cancelar";
   if (accessModulesName) accessModulesName.textContent = displayName;
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
@@ -2756,8 +2771,10 @@ async function saveAccessModules() {
           }
         : item
     );
+    const fromApprove = accessModulesAfterApprove;
     closeAccessModulesModal();
     renderAccessAdminTable();
+    if (fromApprove) setAccessAdminUpdatedHint("Aprobado. Módulos guardados.");
   } catch (err) {
     if (accessModulesError) accessModulesError.textContent = err?.message || "No se pudo guardar.";
   } finally {
