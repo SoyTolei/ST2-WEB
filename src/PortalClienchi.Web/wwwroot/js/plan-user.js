@@ -38,7 +38,10 @@ function syncPasswordFieldVisibility(emailInput, wrapEl, passInput) {
 }
 
 const EMAIL_HINT = "Correo inválido.";
+const PENDING_COPY = "Tu acceso quedó pendiente de aprobación. Podés esperar acá hasta que te habiliten, o volver más tarde con el mismo correo.";
 let lastPendingAccess = null;
+let pendingPollTimer = null;
+let pendingRetryFn = null;
 
 function accessFormEl() {
   return document.getElementById("st2-access-form");
@@ -49,19 +52,44 @@ function accessPendingEl() {
 }
 
 function showAccessFormState() {
+  stopPendingPoll();
   accessFormEl()?.classList.remove("hidden");
   accessPendingEl()?.classList.add("hidden");
 }
 
-function showAccessPendingState(email, message) {
+function setPendingError(message) {
+  const err = document.getElementById("st2-access-pending-error");
+  if (!err) return;
+  const text = String(message || "").trim();
+  err.textContent = text;
+  err.classList.toggle("hidden", !text);
+}
+
+function showAccessPendingState(email) {
   const box = accessPendingEl();
   const mailEl = document.getElementById("st2-access-pending-email");
   const textEl = document.getElementById("st2-access-pending-text");
   accessFormEl()?.classList.add("hidden");
   if (box) box.classList.remove("hidden");
   if (mailEl) mailEl.textContent = email || "";
-  if (textEl && message) textEl.textContent = message;
+  if (textEl) textEl.textContent = PENDING_COPY;
+  setPendingError("");
   lockAppShell();
+  startPendingPoll();
+}
+
+function startPendingPoll() {
+  stopPendingPoll();
+  pendingPollTimer = window.setInterval(() => {
+    void pendingRetryFn?.(true);
+  }, 14000);
+}
+
+function stopPendingPoll() {
+  if (pendingPollTimer) {
+    window.clearInterval(pendingPollTimer);
+    pendingPollTimer = null;
+  }
 }
 
 function updateSessionEmailDisplay() {
@@ -141,7 +169,6 @@ function showAccessGate(resolve) {
   const error = document.getElementById("st2-access-error");
   const submit = document.getElementById("st2-access-submit");
   const retry = document.getElementById("st2-access-retry");
-  const other = document.getElementById("st2-access-other");
   if (!gate || !input || !submit) {
     resolve(null);
     return;
@@ -154,7 +181,7 @@ function showAccessGate(resolve) {
   syncPasswordFieldVisibility(input, passWrap, passInput);
   if (error) error.textContent = "";
   if (lastPendingAccess) {
-    showAccessPendingState(lastPendingAccess.email, lastPendingAccess.message);
+    showAccessPendingState(lastPendingAccess.email);
     lastPendingAccess = null;
   } else {
     input.focus();
@@ -179,10 +206,7 @@ function showAccessGate(resolve) {
     const email = data.email || fallbackEmail || "";
     if (status === "pending" || (response.status === 403 && status !== "rejected" && status !== "password_required")) {
       if (email) localStorage.setItem("st2_plan_user_hint", email);
-      showAccessPendingState(
-        email,
-        data.error || "Tu acceso tiene que ser aprobado. Cuando te habiliten, volvé a entrar con el mismo correo."
-      );
+      showAccessPendingState(email);
       if (submit) submit.disabled = false;
       return;
     }
@@ -245,7 +269,7 @@ function showAccessGate(resolve) {
     }
   };
 
-  const onRetry = async () => {
+  const onRetry = async (silent = false) => {
     const email = document.getElementById("st2-access-pending-email")?.textContent?.trim()
       || localStorage.getItem("st2_plan_user_hint")
       || "";
@@ -261,37 +285,31 @@ function showAccessGate(resolve) {
       passInput?.focus();
       return;
     }
-    if (retry) retry.disabled = true;
+    if (!silent && retry) retry.disabled = true;
     try {
       const { response, data } = await postAccessSession(email);
       await applySessionResult(response, data, email);
     } catch {
-      showAccessPendingState(email, "No se pudo contactar al servidor. Probá de nuevo en un momento.");
+      showAccessPendingState(email);
+      setPendingError("No se pudo contactar al servidor. Probá de nuevo en un momento.");
     } finally {
       if (retry) retry.disabled = false;
     }
   };
-
-  const onOther = () => {
-    showAccessFormState();
-    if (error) error.textContent = "";
-    if (passInput) passInput.value = "";
-    syncPasswordFieldVisibility(input, passWrap, passInput);
-    input.focus();
-    input.select();
-  };
+  pendingRetryFn = onRetry;
 
   const onEmailInput = () => {
     syncPasswordFieldVisibility(input, passWrap, passInput);
   };
 
   const cleanup = () => {
+    stopPendingPoll();
+    pendingRetryFn = null;
     submit.removeEventListener("click", onSubmit);
     input.removeEventListener("keydown", onKey);
     passInput?.removeEventListener("keydown", onKey);
     input.removeEventListener("input", onEmailInput);
     retry?.removeEventListener("click", onRetry);
-    other?.removeEventListener("click", onOther);
     submit.disabled = false;
   };
 
@@ -303,8 +321,7 @@ function showAccessGate(resolve) {
   input.addEventListener("keydown", onKey);
   passInput?.addEventListener("keydown", onKey);
   input.addEventListener("input", onEmailInput);
-  retry?.addEventListener("click", onRetry);
-  other?.addEventListener("click", onOther);
+  retry?.addEventListener("click", () => { void onRetry(false); });
 }
 
 export function getPlanUserEmail() {
@@ -350,7 +367,6 @@ export async function syncPlanUserSession() {
     if (status === "pending" || (response.status === 403 && status !== "rejected")) {
       lastPendingAccess = {
         email: data.email || hint,
-        message: data.error || "Tu acceso tiene que ser aprobado. Cuando te habiliten, volvé a entrar con el mismo correo.",
       };
       return null;
     }

@@ -3897,19 +3897,21 @@ body.st2-access-pending .st2-app-root {
 }
 
 .st2-access-card {
-  width: min(420px, 96vw);
+  width: min(440px, 96vw);
   background: #fff;
-  border-radius: 14px;
-  padding: 28px 30px 24px;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.28);
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 16px;
+  padding: 28px 30px 22px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow:
+    0 22px 56px rgba(15, 23, 42, 0.28),
+    inset 0 3px 0 #d64000;
 }
 
 .st2-access-brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .st2-access-icon {
@@ -3922,6 +3924,23 @@ body.st2-access-pending .st2-app-root {
   font-weight: 700;
   color: var(--dark);
   letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.st2-access-title-st {
+  font-weight: 650;
+}
+
+.st2-access-title-two {
+  color: #d64000;
+  font-weight: 800;
+}
+
+.st2-access-title-web {
+  font-size: 0.72em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #64748b;
 }
 
 .st2-access-hint {
@@ -3994,42 +4013,45 @@ body.st2-access-pending .st2-app-root {
 }
 
 .st2-access-pending-kicker {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #c2410c;
 }
 
 .st2-access-pending-text {
-  margin: 0 0 10px;
+  margin: 0 0 14px;
   font-size: 0.9rem;
-  line-height: 1.45;
+  line-height: 1.5;
   color: #334155;
 }
 
 .st2-access-pending-email {
-  margin: 0 0 14px;
+  display: inline-block;
+  max-width: 100%;
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed #fdba74;
+  background: #fff7ed;
   font-size: 0.82rem;
   font-weight: 650;
-  color: #0f172a;
+  color: #9a3412;
   word-break: break-all;
 }
 
-.st2-access-other {
-  width: 100%;
-  margin-top: 8px;
-  border: 0;
-  background: none;
-  color: #64748b;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
+.st2-access-pending .st2-access-submit {
+  margin-top: 0;
 }
 
-.st2-access-other:hover {
-  color: #0f172a;
+.st2-access-pending-note {
+  margin: 12px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #64748b;
+  text-align: center;
 }
 
 .st2-access-foot {

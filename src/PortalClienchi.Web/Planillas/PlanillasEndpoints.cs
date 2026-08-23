@@ -898,7 +898,7 @@ public static class PlanillasEndpoints
             {
                 email,
                 status = AppAccessRepository.StatusPending,
-                error = "Tu acceso quedó pendiente de aprobación. Cuando te habiliten, volvé a ingresar con el mismo correo.",
+                error = "Tu acceso quedó pendiente de aprobación. Podés esperar en la página o volver más tarde con el mismo correo.",
             }, statusCode: StatusCodes.Status403Forbidden);
         }
 

@@ -169,12 +169,22 @@ html.st2-theme-dark .st2-access-admin-dialog {
 }
 
 html.st2-theme-dark .st2-access-pending-text,
-html.st2-theme-dark .st2-access-other {
+html.st2-theme-dark .st2-access-pending-note {
   color: #94a3b8;
 }
 
 html.st2-theme-dark .st2-access-pending-email {
-  color: #e8eef7;
+  background: #3a1d12;
+  border-color: #c2410c;
+  color: #fdba74;
+}
+
+html.st2-theme-dark .st2-access-title-two {
+  color: #fb923c;
+}
+
+html.st2-theme-dark .st2-access-title-web {
+  color: #94a3b8;
 }
 
 html.st2-theme-dark .st2-access-admin-kpi,

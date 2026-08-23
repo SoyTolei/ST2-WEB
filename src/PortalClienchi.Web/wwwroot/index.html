@@ -2016,7 +2016,9 @@
     <div class="st2-access-card">
       <div class="st2-access-brand">
         <img src="/st2.ico" alt="" width="40" height="40" class="st2-access-icon"/>
-        <h2 id="st2-access-title" class="st2-access-title">ST2</h2>
+        <h2 id="st2-access-title" class="st2-access-title">
+          <span class="st2-access-title-st">ST</span><span class="st2-access-title-two">2</span><span class="st2-access-title-web">-WEB</span>
+        </h2>
       </div>
       <div id="st2-access-form">
         <p class="st2-access-hint">Ingresá tu correo corporativo para continuar.</p>
@@ -2030,11 +2032,12 @@
         <button type="button" id="st2-access-submit" class="st2-access-submit">Entrar</button>
       </div>
       <div id="st2-access-pending" class="st2-access-pending hidden">
-        <p class="st2-access-pending-kicker">Solicitud enviada</p>
-        <p id="st2-access-pending-text" class="st2-access-pending-text">Tu acceso tiene que ser aprobado. Cuando te habiliten, volvé a entrar con el mismo correo.</p>
+        <p class="st2-access-pending-kicker">Solicitud enviada al administrador</p>
+        <p id="st2-access-pending-text" class="st2-access-pending-text">Tu acceso quedó pendiente de aprobación. Podés esperar acá hasta que te habiliten, o volver más tarde con el mismo correo.</p>
         <p id="st2-access-pending-email" class="st2-access-pending-email"></p>
         <button type="button" id="st2-access-retry" class="st2-access-submit">Ya me habilitaron</button>
-        <button type="button" id="st2-access-other" class="st2-access-other">Usar otro correo</button>
+        <p class="st2-access-pending-note">Si dejás esta pantalla abierta, se actualiza sola.</p>
+        <p id="st2-access-pending-error" class="st2-access-error hidden" role="alert"></p>
       </div>
     </div>
   </div>
