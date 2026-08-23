@@ -3939,10 +3939,12 @@ body.st2-access-pending .st2-app-root {
 
 .st2-access-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 22px;
+  gap: 8px;
+  margin: 0 auto 22px;
+  text-align: center;
 }
 
 .st2-access-icon {
@@ -3951,10 +3953,12 @@ body.st2-access-pending .st2-app-root {
 
 .st2-access-title {
   margin: 0;
-  font-size: 1.35rem;
+  display: inline-flex;
+  align-items: flex-start;
+  font-size: 1.55rem;
   font-weight: 700;
   color: var(--dark);
-  letter-spacing: -0.02em;
+  letter-spacing: 0.02em;
   line-height: 1;
 }
 
@@ -3965,6 +3969,10 @@ body.st2-access-pending .st2-app-root {
 .st2-access-title-two {
   color: #d64000;
   font-weight: 800;
+  font-size: 0.58em;
+  line-height: 1;
+  margin-left: 1px;
+  transform: translateY(-0.18em);
 }
 
 .st2-access-hint {
@@ -3972,6 +3980,7 @@ body.st2-access-pending .st2-app-root {
   font-size: 0.86rem;
   line-height: 1.45;
   color: var(--text-muted);
+  text-align: center;
 }
 
 .st2-access-label {

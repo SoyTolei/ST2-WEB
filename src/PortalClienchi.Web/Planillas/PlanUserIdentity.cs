@@ -13,21 +13,9 @@ public static class PlanUserIdentity
 
     private static readonly string[] AllowedDomains = ["thomsonreuters.com"];
 
-    /// <summary>
-    /// Tokens que no se aceptan como parte del nombre (evita test.upload, admin.user, etc.).
-    /// </summary>
-    private static readonly HashSet<string> BlockedLocalTokens = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "test", "testing", "tester", "upload", "uploads", "admin", "administrator",
-        "user", "users", "usuario", "demo", "dummy", "fake", "sample", "example",
-        "temp", "tmp", "prueba", "guest", "root", "support", "info", "noreply",
-        "no-reply", "mailer", "service", "system", "bot", "null", "undefined",
-        "foo", "bar", "baz", "asdf", "qwerty", "xxx", "abc", "aaa",
-    };
-
-    // nombre.apellido  |  nombre.segundo.apellido  (solo letras; segmentos de 2+ chars)
+    /// <summary>nombre.apellido @ thomsonreuters.com (letras, segmentos de 2+).</summary>
     private static readonly Regex LocalNamePattern = new(
-        @"^[a-z]{2,}(?:\.[a-z]{2,})+$",
+        @"^[a-z]{2,}\.[a-z]{2,}$",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     public static string? ValidateAndNormalize(string? email)
@@ -63,12 +51,6 @@ public static class PlanUserIdentity
         local = local.Trim().ToLowerInvariant();
         if (!LocalNamePattern.IsMatch(local))
             return false;
-
-        foreach (var token in local.Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            if (BlockedLocalTokens.Contains(token))
-                return false;
-        }
 
         return true;
     }

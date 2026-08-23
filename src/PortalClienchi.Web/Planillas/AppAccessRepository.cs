@@ -134,8 +134,15 @@ public sealed class AppAccessRepository
         var existing = Find(email);
         if (existing is not null)
         {
-            if (existing.Status is StatusApproved or StatusRejected)
-                return existing.Status;
+            if (existing.Status is StatusApproved)
+                return StatusApproved;
+
+            if (existing.Status is StatusRejected)
+            {
+                SetStatus(email, StatusPending);
+                TouchActivity(email);
+                return StatusPending;
+            }
 
             TouchActivity(email);
             return StatusPending;

@@ -6,14 +6,7 @@ let appUnlocked = false;
 const SESSION_OPTS = { credentials: "include" };
 const ALLOWED_DOMAIN = "thomsonreuters.com";
 const SUPER_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
-const LOCAL_NAME_PATTERN = /^[a-z]{2,}(?:\.[a-z]{2,})+$/;
-const BLOCKED_LOCAL_TOKENS = new Set([
-  "test", "testing", "tester", "upload", "uploads", "admin", "administrator",
-  "user", "users", "usuario", "demo", "dummy", "fake", "sample", "example",
-  "temp", "tmp", "prueba", "guest", "root", "support", "info", "noreply",
-  "no-reply", "mailer", "service", "system", "bot", "null", "undefined",
-  "foo", "bar", "baz", "asdf", "qwerty", "xxx", "abc", "aaa",
-]);
+const LOCAL_NAME_PATTERN = /^[a-z]{2,}\.[a-z]{2,}$/;
 
 function isAllowedEmail(email) {
   const normalized = email.trim().toLowerCase();
@@ -23,8 +16,7 @@ function isAllowedEmail(email) {
   const domain = normalized.slice(at + 1);
   if (!local || local.includes(" ") || local.includes("@")) return false;
   if (domain !== ALLOWED_DOMAIN) return false;
-  if (!LOCAL_NAME_PATTERN.test(local)) return false;
-  return !local.split(".").some((token) => BLOCKED_LOCAL_TOKENS.has(token));
+  return LOCAL_NAME_PATTERN.test(local);
 }
 
 function isSuperAdminEmail(email) {
@@ -37,7 +29,7 @@ function syncPasswordFieldVisibility(emailInput, wrapEl, passInput) {
   if (!needsPass && passInput) passInput.value = "";
 }
 
-const EMAIL_HINT = "Correo inválido.";
+const EMAIL_HINT = "Usá nombre.apellido@thomsonreuters.com";
 const PENDING_COPY = "Tu acceso quedó pendiente de aprobación. Podés esperar acá hasta que te habiliten, o volver más tarde con el mismo correo.";
 let lastPendingAccess = null;
 let pendingPollTimer = null;
