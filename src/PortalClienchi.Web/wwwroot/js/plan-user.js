@@ -29,7 +29,7 @@ function syncPasswordFieldVisibility(emailInput, wrapEl, passInput) {
   if (!needsPass && passInput) passInput.value = "";
 }
 
-const EMAIL_HINT = "Usá nombre.apellido@thomsonreuters.com";
+const EMAIL_HINT = "Incorrecto.";
 const PENDING_COPY = "Tu acceso quedó pendiente de aprobación. Podés esperar acá hasta que te habiliten, o volver más tarde con el mismo correo.";
 let lastPendingAccess = null;
 let pendingPollTimer = null;
