@@ -1859,11 +1859,11 @@ function markToolsSeen() {
 function renderAboutTools() {
   const copy = {
     sql: {
-      desc: "App de escritorio · backups, restauración, consultas y traza SQL",
+      desc: "Backups y restauración automática de bases, queries y scripts.",
       file: "ST2 - Herramientas SQL.zip",
     },
     bat: {
-      desc: "Herramienta TEC · Verificación, Registro de componentes, automatización.",
+      desc: "Automatización de procesos, habilitación, verificación de permisos y registro de componentes.",
       file: "ST2-PS.zip",
     },
   };
