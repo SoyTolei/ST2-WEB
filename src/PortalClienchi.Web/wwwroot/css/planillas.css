@@ -117,54 +117,34 @@
   animation: st2SuiteDriftUp 8.6s ease-in-out infinite 6.8s;
 }
 
-.st2-suite-float--portrait,
-.st2-suite-float--portrait2,
-.st2-suite-float--portrait3,
-.st2-suite-float--portrait4,
-.st2-suite-float--portrait5 {
-  object-fit: cover;
-  border-radius: 3px;
-  background: #f4efe6;
+.st2-suite-float--crest4 {
+  right: 32%;
+  top: 18%;
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  animation: st2SuiteDriftL 10.2s ease-in-out infinite 1.6s;
+}
+
+.st2-suite-float--crest5 {
+  left: 58%;
+  top: 48%;
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+  animation: st2SuiteDriftR 9.4s ease-in-out infinite 5s;
 }
 
 .st2-suite-float--portrait {
-  left: 3%;
-  top: 34%;
-  width: 16px;
-  height: 16px;
-  animation: st2SuiteDriftR 10.4s ease-in-out infinite 0.8s;
-}
-
-.st2-suite-float--portrait2 {
-  right: 3%;
-  top: 8%;
-  width: 14px;
-  height: 14px;
-  animation: st2SuiteDriftL 11.6s ease-in-out infinite 2.2s;
-}
-
-.st2-suite-float--portrait3 {
-  left: 46%;
-  top: 4%;
-  width: 13px;
-  height: 13px;
-  animation: st2SuiteDriftUp 9.1s ease-in-out infinite 4.1s;
-}
-
-.st2-suite-float--portrait4 {
-  right: 20%;
-  top: 42%;
-  width: 15px;
-  height: 15px;
-  animation: st2SuiteDriftL 10.8s ease-in-out infinite 5.6s;
-}
-
-.st2-suite-float--portrait5 {
-  left: 62%;
-  top: 84%;
-  width: 12px;
-  height: 12px;
-  animation: st2SuiteDriftR 8.9s ease-in-out infinite 7.3s;
+  left: 48%;
+  top: 28%;
+  width: 18px;
+  height: 18px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #f4efe6;
+  z-index: 1;
+  animation: st2SuitePortraitRare 26s ease-in-out infinite 9s;
 }
 
 .st2-suite-float--bike {
@@ -179,6 +159,20 @@
   top: 82%;
   font-size: 0.78rem;
   animation: st2SuiteDriftL 11s ease-in-out infinite 4.5s;
+}
+
+.st2-suite-float--bike3 {
+  left: 68%;
+  top: 12%;
+  font-size: 0.84rem;
+  animation: st2SuiteDriftUp 9.6s ease-in-out infinite 2.4s;
+}
+
+.st2-suite-float--bike4 {
+  right: 42%;
+  top: 56%;
+  font-size: 0.7rem;
+  animation: st2SuiteDriftR 10.8s ease-in-out infinite 6.1s;
 }
 
 .st2-suite-float--web {
@@ -253,6 +247,34 @@
   50% { opacity: 0.38; transform: translateY(-3px) scale(1); }
   86% { opacity: 0.26; }
   100% { opacity: 0; transform: translateY(-6px) scale(0.92); }
+}
+
+@keyframes st2SuitePortraitRare {
+  0%, 82% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.55) rotate(-22deg);
+    filter: blur(2.5px) drop-shadow(0 1px 1px rgba(15, 23, 42, 0.1));
+  }
+  86% {
+    opacity: 0.82;
+    transform: translateY(-4px) scale(1.18) rotate(8deg);
+    filter: blur(0) drop-shadow(0 2px 4px rgba(15, 23, 42, 0.22));
+  }
+  91% {
+    opacity: 0.7;
+    transform: translateY(-1px) scale(1) rotate(-3deg);
+    filter: blur(0) drop-shadow(0 2px 3px rgba(15, 23, 42, 0.16));
+  }
+  96% {
+    opacity: 0.22;
+    transform: translateY(-8px) scale(0.78) rotate(14deg);
+    filter: blur(1px) drop-shadow(0 1px 1px rgba(15, 23, 42, 0.1));
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.5) rotate(28deg);
+    filter: blur(2px);
+  }
 }
 
 .st2-suite-sig-mark {
