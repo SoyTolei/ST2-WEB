@@ -2584,6 +2584,36 @@ body.portal-tab-active .tab-icon {
   background: #9a3412;
 }
 
+.st2-tool-url-btn--danger {
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #fff;
+}
+
+.st2-tool-url-btn--danger:hover {
+  background: #b91c1c;
+}
+
+.st2-confirm-overlay {
+  z-index: 2700;
+}
+
+.st2-confirm-detail {
+  margin: -6px 0 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed #fdba74;
+  background: #fff7ed;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #9a3412;
+  word-break: break-all;
+}
+
+.st2-confirm-detail.hidden {
+  display: none;
+}
+
 .about-btn {
   position: relative;
   border-color: rgba(255, 122, 51, 0.45);

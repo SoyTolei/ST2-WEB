@@ -1499,7 +1499,15 @@ async function decideAccessAdminEmail(email, action) {
   if (!email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   const name = formatAccessDisplayName(email, current?.displayNameOverride);
-  if (action === "reject" && !confirm(`¿Rechazar el acceso de ${name}?\n${email}`)) return;
+  if (action === "reject") {
+    const ok = await confirmSt2({
+      title: "Rechazar acceso",
+      body: `¿Rechazar el acceso de ${name}?`,
+      detail: email,
+      confirmLabel: "Rechazar",
+    });
+    if (!ok) return;
+  }
   try {
     const response = await fetch("/api/access/registrations/decision", {
       method: "POST",
@@ -1527,7 +1535,13 @@ async function deleteAccessAdminEmail(email) {
   if (!email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   const name = formatAccessDisplayName(email, current?.displayNameOverride);
-  if (!confirm(`¿Eliminar el acceso de ${name}?\n${email}`)) return;
+  const ok = await confirmSt2({
+    title: "Eliminar acceso",
+    body: `¿Eliminar el acceso de ${name}? Esta acción no se puede deshacer.`,
+    detail: email,
+    confirmLabel: "Eliminar",
+  });
+  if (!ok) return;
 
   try {
     const response = await fetch(`/api/access/registrations?email=${encodeURIComponent(email)}`, {
@@ -2149,6 +2163,58 @@ function hideSt2Message() {
   const overlay = document.getElementById("st2-msg-overlay");
   overlay?.classList.add("hidden");
   overlay?.setAttribute("aria-hidden", "true");
+}
+
+let st2ConfirmBound = false;
+let st2ConfirmResolver = null;
+
+function hideSt2Confirm(result = false) {
+  const overlay = document.getElementById("st2-confirm-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+  const resolve = st2ConfirmResolver;
+  st2ConfirmResolver = null;
+  resolve?.(!!result);
+}
+
+function bindSt2Confirm() {
+  if (st2ConfirmBound) return;
+  st2ConfirmBound = true;
+  document.getElementById("st2-confirm-cancel")?.addEventListener("click", () => hideSt2Confirm(false));
+  document.getElementById("st2-confirm-ok")?.addEventListener("click", () => hideSt2Confirm(true));
+  document.getElementById("st2-confirm-overlay")?.addEventListener("click", (e) => {
+    if (e.target?.id === "st2-confirm-overlay") hideSt2Confirm(false);
+  });
+  document.addEventListener("keydown", (e) => {
+    const overlay = document.getElementById("st2-confirm-overlay");
+    if (e.key !== "Escape" || overlay?.classList.contains("hidden")) return;
+    hideSt2Confirm(false);
+  });
+}
+
+function confirmSt2({ title, body, detail = "", confirmLabel = "Confirmar" } = {}) {
+  bindSt2Confirm();
+  const overlay = document.getElementById("st2-confirm-overlay");
+  const titleEl = document.getElementById("st2-confirm-title");
+  const bodyEl = document.getElementById("st2-confirm-body");
+  const detailEl = document.getElementById("st2-confirm-detail");
+  const okBtn = document.getElementById("st2-confirm-ok");
+  if (!overlay) return Promise.resolve(false);
+  if (st2ConfirmResolver) hideSt2Confirm(false);
+  if (titleEl) titleEl.textContent = title || "Confirmar";
+  if (bodyEl) bodyEl.textContent = body || "";
+  if (detailEl) {
+    const text = String(detail || "").trim();
+    detailEl.textContent = text;
+    detailEl.classList.toggle("hidden", !text);
+  }
+  if (okBtn) okBtn.textContent = confirmLabel;
+  overlay.classList.remove("hidden");
+  overlay.setAttribute("aria-hidden", "false");
+  okBtn?.focus();
+  return new Promise((resolve) => {
+    st2ConfirmResolver = resolve;
+  });
 }
 
 function openToolUrlDialog(toolId, { lead = "", fileName = "", url = "" } = {}) {

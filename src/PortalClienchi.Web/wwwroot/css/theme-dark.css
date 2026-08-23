@@ -96,6 +96,12 @@ html.st2-theme-dark .st2-tool-url-btn--ghost {
   color: var(--text-muted);
 }
 
+html.st2-theme-dark .st2-confirm-detail {
+  background: #3a1d12;
+  border-color: #c2410c;
+  color: #fdba74;
+}
+
 html.st2-theme-dark .st2-about-notice {
   background: linear-gradient(180deg, #2a2118 0%, #241c16 100%);
   border-color: #5b3d28;
