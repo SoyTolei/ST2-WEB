@@ -927,6 +927,9 @@ html.st2-theme-dark .blanqueo-filter-month,
 html.st2-theme-dark .blanqueo-filter-portal,
 html.st2-theme-dark .blanqueo-filter-search,
 html.st2-theme-dark .blanqueo-filter-mine,
+html.st2-theme-dark .borrado-field label,
+html.st2-theme-dark .borrado-filter-month,
+html.st2-theme-dark .borrado-filter-search,
 html.st2-theme-dark .borrado-filter-mine,
 html.st2-theme-dark .pdf-portal-label,
 html.st2-theme-dark .pdf-fmt-field,
@@ -1053,8 +1056,20 @@ html.st2-theme-dark .st2-access-admin-delete {
   color: #e8eef7 !important;
 }
 
-html.st2-theme-dark .borrado-filter-mine {
-  background: #1e293b !important;
-  border-color: #3d4b61 !important;
-  color: #e2e8f0 !important;
+html.st2-theme-dark .borrado-bases-checks {
+  background: #151b26;
+  border-color: #334155;
+}
+
+html.st2-theme-dark .borrado-check {
+  background: #1a2130;
+  border-color: #3d4b61;
+  color: #e2e8f0;
+}
+
+html.st2-theme-dark .borrado-check:hover,
+html.st2-theme-dark .borrado-check:has(input:checked) {
+  background: #3f1d2a;
+  border-color: #be123c;
+  color: #fecdd3;
 }

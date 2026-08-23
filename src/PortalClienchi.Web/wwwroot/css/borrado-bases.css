@@ -39,31 +39,46 @@
 }
 
 .borrado-accent-form {
-  background: linear-gradient(90deg, #be123c, #fb7185);
+  background: #be123c;
 }
 
 .borrado-accent-list {
-  background: linear-gradient(90deg, #9f1239, #e11d48);
+  background: #9f1239;
 }
 
 .borrado-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 1rem;
+  gap: 10px 14px;
+  align-items: end;
 }
 
 .borrado-field label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
-  color: var(--text-muted, #64748b);
+  color: #475569;
+  margin-bottom: 4px;
 }
 
 .borrado-field input[type="text"],
 .borrado-field textarea {
   width: 100%;
   box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  background: #fff;
+  color: inherit;
+}
+
+.borrado-field input[type="text"]:focus,
+.borrado-field textarea:focus {
+  outline: none;
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.25);
 }
 
 .borrado-field-bases {
@@ -76,19 +91,46 @@
   color: var(--text-muted, #94a3b8);
 }
 
+.borrado-bases-checks {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem 1.1rem;
-  padding: 0.35rem 0;
+  gap: 8px;
+  padding: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 }
 
 .borrado-check {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.9rem;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #334155;
   cursor: pointer;
   user-select: none;
+}
+
+.borrado-check:hover {
+  border-color: #fda4af;
+  background: #fff1f2;
+}
+
+.borrado-check:has(input:checked) {
+  border-color: #be123c;
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.borrado-check input {
+  margin: 0;
+  accent-color: #be123c;
 }
 
 .borrado-field-ejercicios.hidden,
@@ -114,6 +156,10 @@
   display: flex;
   justify-content: flex-end;
   align-items: end;
+}
+
+.borrado-field-actions .btn {
+  min-width: 120px;
 }
 
 .borrado-filter-bar {
