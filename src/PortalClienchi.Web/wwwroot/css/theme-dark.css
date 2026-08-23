@@ -922,7 +922,6 @@ html.st2-theme-dark .st2-suite-float {
 }
 
 html.st2-theme-dark .blanqueo-field label,
-html.st2-theme-dark .blanqueo-clave-hint,
 html.st2-theme-dark .blanqueo-filter-month,
 html.st2-theme-dark .blanqueo-filter-portal,
 html.st2-theme-dark .blanqueo-filter-search,
@@ -938,6 +937,56 @@ html.st2-theme-dark .planillas-app label,
 html.st2-theme-dark .plan-field label,
 html.st2-theme-dark .plan-gestor-field-label {
   color: #d6dee9 !important;
+}
+
+html.st2-theme-dark .blanqueo-clave-hint {
+  background: linear-gradient(180deg, #1e293b 0%, #162033 100%) !important;
+  border-color: #64748b !important;
+  color: #e2e8f0 !important;
+}
+
+html.st2-theme-dark .blanqueo-clave-hint-label {
+  color: #f1f5f9;
+}
+
+html.st2-theme-dark .blanqueo-clave-hint-note {
+  color: #cbd5e1;
+}
+
+html.st2-theme-dark .blanqueo-clave-code {
+  background: #0f172a;
+  border-color: #94a3b8;
+  color: #f8fafc;
+}
+
+html.st2-theme-dark .blanqueo-clave-code:hover {
+  background: #1e293b;
+  border-color: #cbd5e1;
+}
+
+html.st2-theme-dark .blanqueo-pill.note {
+  background: #3b2a14;
+  color: #fdba74;
+  border-color: #d97706;
+}
+
+html.st2-theme-dark .blanqueo-clave-pill--custom {
+  background: #3b2a14;
+  border-color: #f59e0b;
+  color: #fdba74;
+}
+
+html.st2-theme-dark .blanqueo-clave-pill--custom:hover,
+html.st2-theme-dark .blanqueo-clave-pill--custom:focus-visible {
+  background: #4a3418;
+  border-color: #fbbf24;
+}
+
+html.st2-theme-dark .borrado-filter-month select,
+html.st2-theme-dark .borrado-filter-search input {
+  background: #151c28;
+  color: #e8eef7;
+  border-color: #3d4b61;
 }
 
 html.st2-theme-dark .st2-access-admin-dialog,

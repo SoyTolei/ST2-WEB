@@ -26,16 +26,15 @@
 <body class="st2-access-pending">
   <div id="st2-app-root" class="st2-app-root">
   <header class="app-header">
-    <button type="button" class="brand brand-home-btn" id="homeBtn" aria-label="Volver al inicio">
-      <span class="brand-mark" aria-hidden="true">
-        <img src="/st2.ico" alt="" class="brand-icon" width="40" height="40"/>
-      </span>
-      <span class="brand-wordmark" aria-hidden="true">
-        <span class="brand-logo"><span class="brand-st">ST</span><span class="brand-two">2</span></span>
-      </span>
-    </button>
-    <div class="app-header-right">
-      <span id="st2-session-email" class="st2-session-email hidden" aria-label="Usuario conectado"></span>
+    <div class="app-header-left">
+      <button type="button" class="brand brand-home-btn" id="homeBtn" aria-label="Volver al inicio">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="/st2.ico" alt="" class="brand-icon" width="40" height="40"/>
+        </span>
+        <span class="brand-wordmark" aria-hidden="true">
+          <span class="brand-logo"><span class="brand-st">ST</span><span class="brand-two">2</span></span>
+        </span>
+      </button>
       <button type="button" id="themeToggleBtn" class="theme-switch" role="switch" aria-checked="false" title="Cambiar a modo oscuro" aria-label="Cambiar a modo oscuro">
         <span class="theme-switch-track">
           <span class="theme-switch-knob" aria-hidden="true">
@@ -44,6 +43,9 @@
           </span>
         </span>
       </button>
+    </div>
+    <div class="app-header-right">
+      <span id="st2-session-email" class="st2-session-email hidden" aria-label="Usuario conectado"></span>
       <button type="button" id="aboutBtn" class="btn-ghost about-btn" title="Acerca de, y descargas de la suite" aria-label="Acerca de ST2, y descargas de la suite">
         Acerca de ST2
         <span id="about-tools-badge" class="about-tools-badge hidden" aria-hidden="true">Nuevo</span>
@@ -476,7 +478,7 @@
                   <span class="blanqueo-clave-hint-emoji" aria-hidden="true">⚠️</span>
                   <span class="blanqueo-clave-hint-label">Por defecto la clave generada es</span>
                   <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code" title="Clic para copiar la clave" data-copy-hint="Clic para copiar">Sueldo.2026</button>
-                  <span class="blanqueo-clave-hint-note">salvo que en Aclaración indiquen otra.</span>
+                  <span class="blanqueo-clave-hint-note">salvo que en aclaración se indique otra.</span>
                 </p>
                 <div class="blanqueo-filter-bar">
                   <label class="blanqueo-filter-month">

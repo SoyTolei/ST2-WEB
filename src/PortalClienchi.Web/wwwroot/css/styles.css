@@ -42,6 +42,19 @@ html, body {
   box-shadow: 0 8px 24px rgba(15, 18, 28, 0.18);
 }
 
+.app-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.app-header-left .theme-switch {
+  flex-shrink: 0;
+  padding-left: 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 .app-header::after {
   content: "";
   position: absolute;
