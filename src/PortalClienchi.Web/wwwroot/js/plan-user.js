@@ -82,7 +82,7 @@ function startPendingPoll() {
   stopPendingPoll();
   pendingPollTimer = window.setInterval(() => {
     void pendingRetryFn?.(true);
-  }, 14000);
+  }, 5000);
 }
 
 function stopPendingPoll() {
