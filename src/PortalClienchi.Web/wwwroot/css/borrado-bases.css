@@ -82,7 +82,8 @@
 }
 
 .borrado-field-bases {
-  grid-column: 1 / -1;
+  grid-column: 1;
+  min-width: 0;
 }
 
 .borrado-optional {
@@ -152,9 +153,8 @@
 }
 
 .borrado-field-actions {
-  grid-column: 1 / -1;
+  grid-column: 2;
   display: flex;
-  justify-content: flex-end;
   align-items: end;
 }
 
@@ -787,5 +787,10 @@ button.borrado-base-pill:focus-visible .borrado-base-pill-action {
 @media (max-width: 720px) {
   .borrado-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .borrado-field-bases,
+  .borrado-field-actions {
+    grid-column: 1;
   }
 }
