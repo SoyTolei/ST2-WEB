@@ -70,7 +70,8 @@ export function formatToastMessage(body, { greet = false } = {}) {
   const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
   const name = firstNameFromEmail(getPlanUserEmail());
   if (greet && name) return `Hola ${name}! ${TOAST_FOOD_MARK} ${lowered}`;
-  return `${TOAST_FOOD_MARK} ${lowered}`;
+  const rest = lowered.replace(/^tenés\s+/i, "");
+  return `${TOAST_FOOD_MARK} También tenés ${rest}`;
 }
 
 /** El saludo “Hola …” solo en el primer toast visible. */
