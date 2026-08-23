@@ -3910,8 +3910,9 @@ body.st2-access-pending .st2-app-root {
 .st2-access-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 22px;
 }
 
 .st2-access-icon {
@@ -3934,13 +3935,6 @@ body.st2-access-pending .st2-app-root {
 .st2-access-title-two {
   color: #d64000;
   font-weight: 800;
-}
-
-.st2-access-title-web {
-  font-size: 0.72em;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #64748b;
 }
 
 .st2-access-hint {
@@ -4013,7 +4007,7 @@ body.st2-access-pending .st2-app-root {
 }
 
 .st2-access-pending-kicker {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -4021,17 +4015,11 @@ body.st2-access-pending .st2-app-root {
   color: #c2410c;
 }
 
-.st2-access-pending-text {
-  margin: 0 0 14px;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #334155;
-}
-
 .st2-access-pending-email {
-  display: inline-block;
-  max-width: 100%;
-  margin: 0 0 16px;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 14px;
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px dashed #fdba74;
@@ -4040,6 +4028,13 @@ body.st2-access-pending .st2-app-root {
   font-weight: 650;
   color: #9a3412;
   word-break: break-all;
+}
+
+.st2-access-pending-text {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #334155;
 }
 
 .st2-access-pending .st2-access-submit {
