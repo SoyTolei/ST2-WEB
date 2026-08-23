@@ -103,16 +103,11 @@ html.st2-theme-dark .st2-about-notice {
 }
 
 html.st2-theme-dark .st2-about-notice-text,
-html.st2-theme-dark .st2-about-feedback,
 html.st2-theme-dark .st2-about-tool-desc,
 html.st2-theme-dark .st2-about-tools-hint,
 html.st2-theme-dark .st2-about-tool-size,
 html.st2-theme-dark .st2-about-updated {
   color: var(--text-muted);
-}
-
-html.st2-theme-dark .st2-about-feedback {
-  border-top-color: #334155;
 }
 
 html.st2-theme-dark .about-tools-badge {
