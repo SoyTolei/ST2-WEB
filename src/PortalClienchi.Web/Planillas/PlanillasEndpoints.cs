@@ -910,7 +910,9 @@ public static class PlanillasEndpoints
 
         var rec = accessRepo.Find(email);
         var status = rec?.Status ?? "";
-        if (rec is null || string.Equals(status, AppAccessRepository.StatusPending, StringComparison.OrdinalIgnoreCase))
+        if (rec is null
+            || string.Equals(status, AppAccessRepository.StatusPending, StringComparison.OrdinalIgnoreCase)
+            || string.Equals(status, AppAccessRepository.StatusRejected, StringComparison.OrdinalIgnoreCase))
         {
             accessRepo.RequestAccess(email);
             return Results.Json(new
@@ -918,16 +920,6 @@ public static class PlanillasEndpoints
                 email,
                 status = AppAccessRepository.StatusPending,
                 error = "Tu acceso quedó pendiente de aprobación. Podés esperar en la página o volver más tarde con el mismo correo.",
-            }, statusCode: StatusCodes.Status403Forbidden);
-        }
-
-        if (string.Equals(status, AppAccessRepository.StatusRejected, StringComparison.OrdinalIgnoreCase))
-        {
-            return Results.Json(new
-            {
-                email,
-                status = AppAccessRepository.StatusRejected,
-                error = "Este correo no está autorizado. Pedile acceso a quien administra ST2.",
             }, statusCode: StatusCodes.Status403Forbidden);
         }
 
