@@ -2562,6 +2562,15 @@ body.portal-tab-active .tab-icon {
 
 .about-btn {
   position: relative;
+  border-color: rgba(255, 122, 51, 0.45);
+  color: #ffe8d6;
+  background: rgba(255, 122, 51, 0.12);
+}
+
+.about-btn:hover {
+  border-color: rgba(255, 166, 87, 0.7);
+  background: rgba(255, 122, 51, 0.22);
+  color: #fff;
 }
 
 .about-tools-badge {

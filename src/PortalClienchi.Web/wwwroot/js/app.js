@@ -1857,13 +1857,13 @@ function syncAboutToolsBadge() {
 
   const sig = newToolsSignature(newer);
   const bannerOpen = hasNew && !aboutRouteOpen && sig !== readBannerDismissedSignature();
-  let msg = "Hay una versión nueva de herramientas. Abrí Herramientas para descargarla.";
+  let msg = "Hay una versión nueva de herramientas. Abrí Acerca de ST2 para descargarla.";
   if (newer.length === 1) {
-    msg = `Hay una versión nueva de ${toolDisplayName(newer[0].id)}. Abrí Herramientas para descargarla.`;
+    msg = `Hay una versión nueva de ${toolDisplayName(newer[0].id)}. Abrí Acerca de ST2 para descargarla.`;
   } else if (newer.length > 1) {
     const names = newer.map((t) => toolDisplayName(t.id));
     const last = names.pop();
-    msg = `Hay una versión nueva de ${names.join(", ")} y ${last}. Abrí Herramientas para descargarla.`;
+    msg = `Hay una versión nueva de ${names.join(", ")} y ${last}. Abrí Acerca de ST2 para descargarla.`;
   }
   setToolsBannerVisible(bannerOpen, msg);
 }
@@ -2347,7 +2347,7 @@ function showAbout({ history = "push" } = {}) {
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
   aboutRouteOpen = true;
-  document.title = "ST2 · Herramientas";
+  document.title = "ST2 · Acerca de";
   if (history !== "none") {
     const current = normalizeShellPath(window.location.pathname);
     if (!isHerramientasPath(current)) pathBeforeAbout = current || "/";
