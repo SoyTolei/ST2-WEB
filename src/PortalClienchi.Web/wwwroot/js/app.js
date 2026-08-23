@@ -1397,6 +1397,14 @@ function renderAccessAdminTable() {
     const modHtml = modBadges.length
       ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
       : `<span class="st2-access-admin-mod-empty" title="Sin módulos extra">—</span>`;
+    const ownerActions = isPrimarySuperAdmin();
+    const extraActions = item.isPending
+      ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
+             <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
+      : `${ownerActions ? `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>` : ""}
+        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos habilitados" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
+        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
+        ${ownerActions ? `<button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>` : ""}`;
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
@@ -1408,13 +1416,7 @@ function renderAccessAdminTable() {
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       <td class="st2-access-admin-actions-cell">
-        ${item.isPending
-          ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
-             <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
-          : `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>
-        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos habilitados" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
-        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
-        <button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>`}
+        ${extraActions}
       </td>
     </tr>`;
   }).join("");
@@ -1463,10 +1465,9 @@ async function saveAccessNameEdit(displayName) {
       body: JSON.stringify({ email, displayName: value || null }),
     });
     const data = await response.json().catch(() => ({}));
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
       closeAccessNameEditModal();
-      showAccessAdminLogin();
-      if (accessAdminError) accessAdminError.textContent = "Sesión expirada. Volvé a ingresar.";
+      setAccessAdminUpdatedHint("No tenés permiso para editar el nombre.");
       return;
     }
     if (!response.ok) {
@@ -1507,9 +1508,8 @@ async function decideAccessAdminEmail(email, action) {
       body: JSON.stringify({ email, action }),
     });
     const data = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      showAccessAdminLogin();
-      if (accessAdminError) accessAdminError.textContent = "Sesión expirada. Volvé a ingresar.";
+    if (response.status === 401 || response.status === 403) {
+      setAccessAdminUpdatedHint("No tenés permiso para esa acción.");
       return;
     }
     if (!response.ok) {
@@ -1535,9 +1535,8 @@ async function deleteAccessAdminEmail(email) {
       credentials: "include",
     });
     const data = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      showAccessAdminLogin();
-      if (accessAdminError) accessAdminError.textContent = "Sesión expirada. Volvé a ingresar.";
+    if (response.status === 401 || response.status === 403) {
+      setAccessAdminUpdatedHint("Solo el dueño de ST2 puede quitar un acceso.");
       return;
     }
     if (!response.ok) {
@@ -1593,29 +1592,9 @@ async function activateAdminTab() {
     return;
   }
 
-  showAccessAdminLogin();
-
-  try {
-    const response = await fetch("/api/access/admin/session", { credentials: "include" });
-    if (response.status === 404) {
-      if (accessAdminError) {
-        accessAdminError.textContent = "Panel no configurado en el servidor (faltan ST2_ACCESS_ADMIN_USER y ST2_ACCESS_ADMIN_PASSWORD).";
-      }
-      accessAdminUser?.focus();
-      return;
-    }
-    const data = await response.json().catch(() => ({}));
-    if (data.authenticated) {
-      showAccessAdminPanel();
-      void loadAccessAdminRegistrations();
-      startAccessAdminPolling();
-      return;
-    }
-  } catch {
-    /* login manual */
-  }
-
-  accessAdminUser?.focus();
+  showAccessAdminPanel();
+  void loadAccessAdminRegistrations();
+  startAccessAdminPolling();
 }
 
 function leaveAdminTab() {
@@ -1696,9 +1675,8 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
       return;
     }
     const data = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      showAccessAdminLogin();
-      if (accessAdminError) accessAdminError.textContent = "Sesión expirada. Volvé a ingresar.";
+    if (response.status === 401 || response.status === 403) {
+      accessAdminStatus.textContent = "No tenés permiso para ver este panel.";
       return;
     }
     if (!response.ok) {
@@ -2493,6 +2471,7 @@ accessAdminBody?.addEventListener("click", (e) => {
   if (!(target instanceof Element)) return;
   const previewBtn = target.closest("[data-preview-email]");
   if (previewBtn instanceof HTMLElement) {
+    if (!isPrimarySuperAdmin()) return;
     startAccessProfilePreview(previewBtn.dataset.previewEmail || "");
     return;
   }
@@ -2508,6 +2487,7 @@ accessAdminBody?.addEventListener("click", (e) => {
   }
   const deleteBtn = target.closest("[data-delete-email]");
   if (deleteBtn instanceof HTMLElement) {
+    if (!isPrimarySuperAdmin()) return;
     void deleteAccessAdminEmail(deleteBtn.dataset.deleteEmail || "");
   }
 });
@@ -2521,6 +2501,7 @@ function closeAccessModulesModal() {
 const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 
 function startAccessProfilePreview(email, modulesOverride = null) {
+  if (!isPrimarySuperAdmin()) return;
   if (!email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   if (!current || current.isPending) return;
@@ -2594,10 +2575,14 @@ function openAccessModulesModal(email) {
   }
   if (accessModSt2Admin) {
     accessModSt2Admin.checked = isPrimary || !!current?.isSt2Admin;
-    accessModSt2Admin.disabled = isPrimary;
+    accessModSt2Admin.disabled = isPrimary || !isPrimarySuperAdmin();
   }
   if (accessModSt2AdminWrap) {
     accessModSt2AdminWrap.classList.toggle("is-primary-locked", isPrimary);
+    accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
+  }
+  if (accessModulesPreview) {
+    accessModulesPreview.classList.toggle("hidden", !isPrimarySuperAdmin());
   }
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
@@ -2670,7 +2655,7 @@ async function saveAccessModules() {
         borradoBases: !!accessModBorradoBases?.checked,
         borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
         borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
-        st2Admin: !!accessModSt2Admin?.checked,
+        st2Admin: isPrimarySuperAdmin() ? !!accessModSt2Admin?.checked : undefined,
       }),
     });
     const data = await response.json().catch(() => ({}));
@@ -2708,6 +2693,7 @@ accessModulesClose?.addEventListener("click", closeAccessModulesModal);
 accessModulesCancel?.addEventListener("click", closeAccessModulesModal);
 accessModulesSave?.addEventListener("click", () => { void saveAccessModules(); });
 accessModulesPreview?.addEventListener("click", () => {
+  if (!isPrimarySuperAdmin()) return;
   previewAccessModulesProfile();
 });
 accessModulesOverlay?.addEventListener("click", (e) => {

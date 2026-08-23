@@ -544,12 +544,15 @@ public static class PlanillasEndpoints
             });
         });
 
-        app.MapGet("/api/access/admin/session", (HttpContext ctx, IConfiguration config) =>
+        app.MapGet("/api/access/admin/session", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo) =>
         {
-            if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.Json(new { error = "Panel no configurado.", authenticated = false }, statusCode: StatusCodes.Status404NotFound);
-
-            return Results.Ok(new { authenticated = St2AccessAdminAuth.IsAuthenticated(config, ctx) });
+            var role = AccessPanelGate.Resolve(ctx, config, accessRepo);
+            return Results.Ok(new
+            {
+                authenticated = role != AccessPanelGate.Role.None,
+                owner = role == AccessPanelGate.Role.Owner,
+                manager = role == AccessPanelGate.Role.Manager,
+            });
         });
 
         app.MapPost("/api/access/admin/session", async (HttpContext ctx, IConfiguration config, CancellationToken ct) =>
@@ -587,11 +590,8 @@ public static class PlanillasEndpoints
 
         app.MapGet("/api/access/registrations", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo, ModuleAccessRepository modules) =>
         {
-            if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.NotFound();
-
-            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
-                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
+                return denied!;
 
             try
             {
@@ -673,11 +673,8 @@ public static class PlanillasEndpoints
             ModuleAccessRepository modules,
             string? email) =>
         {
-            if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.NotFound();
-
-            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
-                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied, ownerOnly: true))
+                return denied!;
 
             if (string.IsNullOrWhiteSpace(email))
                 return Results.BadRequest(new { error = "Falta el correo." });
@@ -696,11 +693,8 @@ public static class PlanillasEndpoints
             AppAccessRepository accessRepo,
             AccessDecisionRequest body) =>
         {
-            if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.NotFound();
-
-            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
-                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
+                return denied!;
 
             var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
             if (email is null)
@@ -724,18 +718,18 @@ public static class PlanillasEndpoints
 
         app.MapPut("/api/access/registrations/modules", (HttpContext ctx, IConfiguration config, ModuleAccessRepository modules, AppAccessRepository accessRepo, ModuleAccessUpdateRequest body) =>
         {
-            if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.NotFound();
-
-            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
-                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out var role, out var denied))
+                return denied!;
 
             try
             {
                 var flags = modules.Upsert(body);
                 var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
                 var isSt2Admin = St2SuperAdmin.Is(email);
-                if (body.St2Admin is not null && email is not null && !St2SuperAdmin.Is(email))
+                if (body.St2Admin is not null
+                    && email is not null
+                    && !St2SuperAdmin.Is(email)
+                    && role == AccessPanelGate.Role.Owner)
                 {
                     accessRepo.SetSt2Admin(email, body.St2Admin.Value);
                     isSt2Admin = body.St2Admin.Value;
@@ -777,11 +771,8 @@ public static class PlanillasEndpoints
             BorradoBasesRepository borradoBasesRepo,
             CancellationToken ct) =>
         {
-            if (!St2AccessAdminAuth.IsConfigured(config))
-                return Results.NotFound();
-
-            if (!St2AccessAdminAuth.IsAuthenticated(config, ctx))
-                return Results.Json(new { error = "Acceso denegado." }, statusCode: StatusCodes.Status401Unauthorized);
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
+                return denied!;
 
             var body = await ctx.Request.ReadFromJsonAsync<AccessDisplayNameRequest>(cancellationToken: ct).ConfigureAwait(false);
             if (body is null || string.IsNullOrWhiteSpace(body.Email))
