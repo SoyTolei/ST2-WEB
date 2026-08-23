@@ -103,11 +103,16 @@ html.st2-theme-dark .st2-about-notice {
 }
 
 html.st2-theme-dark .st2-about-notice-text,
+html.st2-theme-dark .st2-about-feedback,
 html.st2-theme-dark .st2-about-tool-desc,
 html.st2-theme-dark .st2-about-tools-hint,
 html.st2-theme-dark .st2-about-tool-size,
 html.st2-theme-dark .st2-about-updated {
   color: var(--text-muted);
+}
+
+html.st2-theme-dark .st2-about-feedback {
+  border-top-color: #334155;
 }
 
 html.st2-theme-dark .about-tools-badge {
@@ -697,6 +702,47 @@ html.st2-theme-dark .plan-gestor-date-wrap input[type="date"] {
 
 html.st2-theme-dark .plan-gestor-filter-month {
   color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .plan-gestor-filter-bar {
+  background: #151c28 !important;
+  border-color: #3d4b61 !important;
+}
+
+html.st2-theme-dark .plan-gestor-btn-tool,
+html.st2-theme-dark .plan-gestor-page-btn {
+  background: #1a2130 !important;
+  color: #e8eef7 !important;
+  border-color: #3d4b61 !important;
+}
+
+html.st2-theme-dark .plan-gestor-btn-tool:hover,
+html.st2-theme-dark .plan-gestor-page-btn:hover {
+  background: #243044 !important;
+}
+
+html.st2-theme-dark #op-gestor-pagina-label,
+html.st2-theme-dark .plan-gestor-hint,
+html.st2-theme-dark .plan-gestor-empty-row td {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .blanqueo-mail-copy {
+  color: #7dd3fc;
+}
+
+html.st2-theme-dark .blanqueo-mail-copy:hover {
+  color: #bae6fd;
+}
+
+html.st2-theme-dark .borrado-preview-confirm {
+  background: #3f1219 !important;
+  border-color: #fb7185 !important;
+  color: #fecdd3 !important;
+}
+
+html.st2-theme-dark .borrado-preview-confirm:hover {
+  background: #4c1d24 !important;
 }
 
 html.st2-theme-dark .blanqueo-preview-confirm {

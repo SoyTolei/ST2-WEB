@@ -2239,6 +2239,15 @@ body.portal-tab-active .tab-icon {
   transition: width 0.15s ease;
 }
 
+.st2-about-feedback {
+  margin: 0 0 22px;
+  padding: 12px 2px 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #6b7280;
+  border-top: 1px dashed #e2e6ef;
+}
+
 .st2-about-tools {
   margin: 0 0 4px;
 }
