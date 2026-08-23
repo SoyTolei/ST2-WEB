@@ -44,9 +44,9 @@
           </span>
         </span>
       </button>
-      <button type="button" id="aboutBtn" class="btn-ghost about-btn">
-        Acerca de
-        <span id="about-tools-badge" class="about-tools-badge hidden" aria-hidden="true">!</span>
+      <button type="button" id="aboutBtn" class="btn-ghost about-btn" title="SQL, BAT y más" aria-label="Herramientas">
+        Herramientas
+        <span id="about-tools-badge" class="about-tools-badge hidden" aria-hidden="true">Nuevo</span>
       </button>
     </div>
   </header>
@@ -57,6 +57,11 @@
   <div id="st2-modules-banner" class="st2-modules-banner hidden" role="status" aria-live="polite" hidden>
     <p id="st2-modules-banner-text" class="st2-modules-banner-text">Se habilitó un módulo nuevo. Recargá para verlo en Planillas.</p>
     <button type="button" id="st2-modules-reload" class="st2-modules-banner-reload">Recargar</button>
+  </div>
+  <div id="st2-tools-banner" class="st2-tools-banner hidden" role="status" aria-live="polite" hidden>
+    <p id="st2-tools-banner-text" class="st2-tools-banner-text">Hay una versión nueva de herramientas. Abrí Herramientas para descargarla.</p>
+    <button type="button" id="st2-tools-banner-open" class="st2-tools-banner-open">Ver</button>
+    <button type="button" id="st2-tools-banner-dismiss" class="st2-tools-banner-dismiss">Cerrar</button>
   </div>
   <div id="st2-view-as-banner" class="st2-view-as-banner hidden" role="status" aria-live="polite" hidden>
     <p id="st2-view-as-banner-text" class="st2-view-as-banner-text">Viendo el perfil de otro usuario</p>
@@ -1672,6 +1677,7 @@
                 <span class="st2-about-tool-desc" data-tool-desc>App de escritorio · backups, restauración, consultas y traza SQL</span>
               </div>
               <div class="st2-about-tool-actions">
+                <span class="st2-about-tool-new" data-tool-new="sql" hidden>Nueva</span>
                 <span class="st2-about-tool-size" data-tool-size="sql" hidden></span>
                 <button type="button" class="st2-about-tool-dl" data-tool-download="sql" disabled>Pronto</button>
               </div>
@@ -1682,6 +1688,7 @@
                 <span class="st2-about-tool-desc" data-tool-desc>Herramienta TEC · Verificación, Registro de componentes, automatización.</span>
               </div>
               <div class="st2-about-tool-actions">
+                <span class="st2-about-tool-new" data-tool-new="bat" hidden>Nueva</span>
                 <span class="st2-about-tool-size" data-tool-size="bat" hidden></span>
                 <button type="button" class="st2-about-tool-dl" data-tool-download="bat" disabled>Pronto</button>
               </div>

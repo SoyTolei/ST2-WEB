@@ -110,6 +110,10 @@ html.st2-theme-dark .st2-about-updated {
   color: var(--text-muted);
 }
 
+html.st2-theme-dark .about-tools-badge {
+  box-shadow: 0 0 0 2px #151922;
+}
+
 html.st2-theme-dark .st2-about-tool {
   background: #1a2130;
   border-color: #2b3445;

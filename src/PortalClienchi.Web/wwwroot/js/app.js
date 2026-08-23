@@ -1758,10 +1758,14 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
 }
 
 const TOOLS_SEEN_KEY = "st2-tools-seen-versions";
+const TOOLS_BANNER_DISMISSED_KEY = "st2-tools-banner-dismissed";
 const aboutToolsBadge = document.getElementById("about-tools-badge");
 const aboutToolsStatus = document.getElementById("st2-about-tools-status");
+const toolsBanner = document.getElementById("st2-tools-banner");
+const toolsBannerText = document.getElementById("st2-tools-banner-text");
 let cachedTools = [];
 let toolsBound = false;
+let toolsBannerBound = false;
 
 function readSeenToolVersions() {
   try {
@@ -1791,13 +1795,77 @@ function setAboutToolsStatus(msg, isError = false) {
   aboutToolsStatus.classList.toggle("is-error", !!isError && !!msg);
 }
 
-function syncAboutToolsBadge() {
-  if (!aboutToolsBadge) return;
+function listNewTools() {
   const seen = readSeenToolVersions();
-  const hasNew = (cachedTools || []).some((t) => t?.available && t.version && seen[t.id] !== t.version);
-  aboutToolsBadge.classList.toggle("hidden", !hasNew);
-  aboutToolsBadge.setAttribute("aria-hidden", hasNew ? "false" : "true");
-  aboutToolsBadge.title = hasNew ? "Hay una versión nueva de herramientas" : "";
+  return (cachedTools || []).filter((t) => t?.available && t.version && seen[t.id] !== t.version);
+}
+
+function isToolVersionNew(id) {
+  return listNewTools().some((t) => t.id === id);
+}
+
+function newToolsSignature(tools) {
+  return (tools || [])
+    .map((t) => `${t.id}:${t.version}`)
+    .sort()
+    .join("|");
+}
+
+function toolDisplayName(id) {
+  if (id === "sql") return "ST2.SQL";
+  if (id === "bat") return "ST2.BAT";
+  return id;
+}
+
+function readBannerDismissedSignature() {
+  try {
+    return localStorage.getItem(TOOLS_BANNER_DISMISSED_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function writeBannerDismissedSignature(sig) {
+  try {
+    if (sig) localStorage.setItem(TOOLS_BANNER_DISMISSED_KEY, sig);
+    else localStorage.removeItem(TOOLS_BANNER_DISMISSED_KEY);
+  } catch { /* ignore */ }
+}
+
+function setToolsBannerVisible(show, message) {
+  if (!toolsBanner) return;
+  if (message && toolsBannerText) toolsBannerText.textContent = message;
+  toolsBanner.classList.toggle("hidden", !show);
+  toolsBanner.toggleAttribute("hidden", !show);
+  document.body.classList.toggle("st2-has-tools-update", !!show);
+}
+
+function dismissToolsBanner() {
+  const sig = newToolsSignature(listNewTools());
+  if (sig) writeBannerDismissedSignature(sig);
+  setToolsBannerVisible(false);
+}
+
+function syncAboutToolsBadge() {
+  const newer = listNewTools();
+  const hasNew = newer.length > 0;
+  if (aboutToolsBadge) {
+    aboutToolsBadge.classList.toggle("hidden", !hasNew);
+    aboutToolsBadge.setAttribute("aria-hidden", hasNew ? "false" : "true");
+    aboutToolsBadge.title = hasNew ? "Hay una versión nueva de herramientas" : "";
+  }
+
+  const sig = newToolsSignature(newer);
+  const bannerOpen = hasNew && !aboutRouteOpen && sig !== readBannerDismissedSignature();
+  let msg = "Hay una versión nueva de herramientas. Abrí Herramientas para descargarla.";
+  if (newer.length === 1) {
+    msg = `Hay una versión nueva de ${toolDisplayName(newer[0].id)}. Abrí Herramientas para descargarla.`;
+  } else if (newer.length > 1) {
+    const names = newer.map((t) => toolDisplayName(t.id));
+    const last = names.pop();
+    msg = `Hay una versión nueva de ${names.join(", ")} y ${last}. Abrí Herramientas para descargarla.`;
+  }
+  setToolsBannerVisible(bannerOpen, msg);
 }
 
 function markToolsSeen() {
@@ -1806,6 +1874,7 @@ function markToolsSeen() {
     if (t?.available && t.version) next[t.id] = t.version;
   }
   writeSeenToolVersions(next);
+  writeBannerDismissedSignature("");
   syncAboutToolsBadge();
 }
 
@@ -1826,12 +1895,14 @@ function renderAboutTools() {
     const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
     const desc = card?.querySelector("[data-tool-desc]");
     const sizeEl = card?.querySelector(`[data-tool-size="${id}"]`);
+    const newEl = card?.querySelector(`[data-tool-new="${id}"]`);
     const btn = card?.querySelector(`[data-tool-download="${id}"]`);
     const meta = copy[id];
 
     if (desc) desc.textContent = meta.desc;
 
     if (!tool?.available) {
+      if (newEl) newEl.hidden = true;
       if (sizeEl) {
         sizeEl.hidden = true;
         sizeEl.textContent = "";
@@ -1845,6 +1916,7 @@ function renderAboutTools() {
     }
 
     const label = tool.fileName || meta.file;
+    if (newEl) newEl.hidden = !isToolVersionNew(id);
     if (sizeEl) {
       if (tool.sizeBytes) {
         sizeEl.hidden = false;
@@ -2252,6 +2324,15 @@ function bindAboutToolsUi() {
       if (id) void downloadTool(id);
     });
   });
+  if (!toolsBannerBound) {
+    toolsBannerBound = true;
+    document.getElementById("st2-tools-banner-open")?.addEventListener("click", () => {
+      showAbout();
+    });
+    document.getElementById("st2-tools-banner-dismiss")?.addEventListener("click", () => {
+      dismissToolsBanner();
+    });
+  }
 }
 
 function showAbout({ history = "push" } = {}) {
@@ -2260,18 +2341,19 @@ function showAbout({ history = "push" } = {}) {
   applyAboutUpdated();
   bindAboutToolsUi();
   void refreshAboutTools().then(() => {
-    markToolsSeen();
+    dismissToolsBanner();
     if (isSt2SuperAdmin()) void refreshToolsDiagHint();
   });
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
   aboutRouteOpen = true;
-  document.title = "ST2 · Acerca de";
+  document.title = "ST2 · Herramientas";
   if (history !== "none") {
     const current = normalizeShellPath(window.location.pathname);
-    if (current !== "/about") pathBeforeAbout = current || "/";
+    if (!isHerramientasPath(current)) pathBeforeAbout = current || "/";
     syncAboutHistory(history);
   }
+  syncAboutToolsBadge();
   aboutCloseBtn?.focus();
 }
 
@@ -2279,9 +2361,10 @@ function hideAbout({ history = "restore" } = {}) {
   aboutOverlay?.classList.add("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "true");
   aboutRouteOpen = false;
-  const onAboutPath = normalizeShellPath(window.location.pathname) === "/about";
+  markToolsSeen();
+  const onAboutPath = isHerramientasPath(normalizeShellPath(window.location.pathname));
   if (history !== "none" && onAboutPath) {
-    const fallback = pathBeforeAbout && pathBeforeAbout !== "/about" ? pathBeforeAbout : "/";
+    const fallback = pathBeforeAbout && !isHerramientasPath(pathBeforeAbout) ? pathBeforeAbout : "/";
     const tab = tabFromPath(fallback);
     document.title = titleForTab(tab);
     if (!shellRouteSyncing) {
@@ -2298,6 +2381,11 @@ function hideAbout({ history = "restore" } = {}) {
   aboutBtn?.focus();
 }
 
+function isHerramientasPath(pathname) {
+  const p = normalizeShellPath(pathname);
+  return p === "/about" || p === "/herramientas";
+}
+
 function syncAboutHistory(mode = "push") {
   if (shellRouteSyncing || mode === "none") return;
   const current = normalizeShellPath(window.location.pathname);
@@ -2307,15 +2395,16 @@ function syncAboutHistory(mode = "push") {
     portalId: activePortalId,
     about: true,
   };
-  if (mode === "replace" || current === "/about") {
-    window.history.replaceState(state, "", "/about");
+  const dest = current === "/about" ? "/about" : "/herramientas";
+  if (mode === "replace" || isHerramientasPath(current)) {
+    window.history.replaceState(state, "", dest);
   } else {
-    window.history.pushState(state, "", "/about");
+    window.history.pushState(state, "", dest);
   }
 }
 
 function applyAboutFromPath() {
-  if (normalizeShellPath(window.location.pathname) === "/about") {
+  if (isHerramientasPath(window.location.pathname)) {
     showAbout({ history: "none" });
     return true;
   }
@@ -3493,7 +3582,7 @@ function syncTabHistory(tabId, mode = "push") {
 
 function navigateTab(tabId, { history = "push" } = {}) {
   if (!tabId) return;
-  if (aboutRouteOpen || normalizeShellPath(window.location.pathname) === "/about") {
+  if (aboutRouteOpen || isHerramientasPath(window.location.pathname)) {
     hideAbout({ history: "restore" });
   }
   if (tabId === ADMIN_TAB_ID && !isSt2SuperAdmin()) {
