@@ -3320,6 +3320,31 @@ body.portal-tab-active .tab-icon {
   color: #334155;
 }
 
+.st2-access-admin-mod.mod-opor {
+  background: #a21caf;
+  color: #fff;
+}
+
+.st2-access-admin-mod.mod-pdf {
+  background: #0e7490;
+  color: #fff;
+}
+
+.st2-access-admin-mod.mod-blanqueo {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.st2-access-admin-mod.mod-bases {
+  background: #be123c;
+  color: #fff;
+}
+
+.st2-access-admin-mod.mod-admin {
+  background: #c2410c;
+  color: #fff;
+}
+
 .st2-access-modules-dialog {
   width: min(420px, 96vw);
 }

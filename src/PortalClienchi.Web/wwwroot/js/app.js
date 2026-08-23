@@ -1372,30 +1372,30 @@ function renderAccessAdminTable() {
     const mods = item.modules || {};
     const modBadges = [];
     if (mods.oportunidad) {
-      modBadges.push({ label: "OPOR", title: "Oportunidad de Venta" });
+      modBadges.push({ label: "OPOR", title: "Oportunidad de Venta", cls: "mod-opor" });
     }
     if (mods.pdfPortal) {
-      modBadges.push({ label: "PDF", title: "Generador PDF-Portal" });
+      modBadges.push({ label: "PDF", title: "Generador PDF-Portal", cls: "mod-pdf" });
     }
     if (mods.blanqueoConfirm && mods.blanqueoLoad) {
-      modBadges.push({ label: "BLANQUEOS✓+", title: "Blanqueo Claves: confirma y carga" });
+      modBadges.push({ label: "BLANQUEOS✓+", title: "Blanqueo Claves: confirma y carga", cls: "mod-blanqueo" });
     } else if (mods.blanqueoConfirm) {
-      modBadges.push({ label: "BLANQUEOS✓", title: "Blanqueo Claves: solo confirma" });
+      modBadges.push({ label: "BLANQUEOS✓", title: "Blanqueo Claves: solo confirma", cls: "mod-blanqueo" });
     } else if (mods.blanqueoLoad || mods.blanqueo) {
-      modBadges.push({ label: "BLANQUEOS", title: "Blanqueo Claves: puede cargar" });
+      modBadges.push({ label: "BLANQUEOS", title: "Blanqueo Claves: puede cargar", cls: "mod-blanqueo" });
     }
     if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
-      modBadges.push({ label: "BASES✓+", title: "Borrado de bases: confirma y carga" });
+      modBadges.push({ label: "BASES✓+", title: "Borrado de Bases Web: confirma y carga", cls: "mod-bases" });
     } else if (mods.borradoBasesConfirm) {
-      modBadges.push({ label: "BASES✓", title: "Borrado de bases: solo confirma" });
+      modBadges.push({ label: "BASES✓", title: "Borrado de Bases Web: solo confirma", cls: "mod-bases" });
     } else if (mods.borradoBasesLoad || mods.borradoBases) {
-      modBadges.push({ label: "BASES", title: "Borrado de bases: puede cargar" });
+      modBadges.push({ label: "BASES", title: "Borrado de Bases Web: puede cargar", cls: "mod-bases" });
     }
     if (item.isSt2Admin) {
-      modBadges.push({ label: "ADMIN", title: "ADMIN WEB" });
+      modBadges.push({ label: "ADMIN", title: "ADMIN WEB", cls: "mod-admin" });
     }
     const modHtml = modBadges.length
-      ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
+      ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod ${escapeHtml(b.cls || "")}" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
       : `<span class="st2-access-admin-mod-empty" title="Sin módulos extra">—</span>`;
     const ownerActions = isPrimarySuperAdmin();
     const extraActions = item.isPending

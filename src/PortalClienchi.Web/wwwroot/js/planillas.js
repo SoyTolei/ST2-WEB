@@ -294,7 +294,7 @@ function titleForView(name) {
     case "oportunidadGestor": return "ST2 · Oportunidad";
     case "pdfPortal": return "ST2 · Generador PDF";
     case "blanqueo": return "ST2 · Blanqueo";
-    case "borradoBases": return "ST2 · Borrado de bases";
+    case "borradoBases": return "ST2 · Borrado de Bases Web";
     default: return "ST2";
   }
 }

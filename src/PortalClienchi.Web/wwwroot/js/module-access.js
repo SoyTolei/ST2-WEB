@@ -12,7 +12,7 @@ const MODULE_LABELS = {
   blanqueo: "Blanqueo Claves",
   blanqueoConfirm: "puede confirmar blanqueo",
   blanqueoLoad: "puede cargar blanqueo",
-  borradoBases: "Borrado de bases",
+  borradoBases: "Borrado de Bases Web",
   borradoBasesConfirm: "puede confirmar borrado",
   borradoBasesLoad: "puede cargar borrado",
 };

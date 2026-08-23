@@ -26,17 +26,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 18px 20px 14px;
+  padding: 10px 8px 2px;
   font-size: 0.82rem;
   color: var(--text-muted);
-  border-top: 1px solid var(--border);
-  margin-top: auto;
-  max-width: min(1200px, 98vw);
+  border-top: 0;
+  margin-top: 4px;
+  max-width: 100%;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
   cursor: default;
   user-select: none;
+  overflow: visible;
 }
 
 .st2-suite-sig {
@@ -45,35 +44,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 0;
   text-align: center;
-  max-width: 28rem;
-  padding: 8px 6px 4px;
-  overflow: hidden;
+  max-width: none;
+  padding: 18px 72px 16px;
+  overflow: visible;
 }
 
 .st2-suite-sig::after {
   content: "";
   position: absolute;
-  inset: 6% 4%;
+  inset: -8px -40px;
   z-index: 1;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.45s ease;
   background: radial-gradient(
-    ellipse 78% 86% at 50% 48%,
-    color-mix(in srgb, var(--panel) 86%, transparent) 0%,
-    color-mix(in srgb, var(--panel) 52%, transparent) 48%,
-    transparent 74%
+    ellipse 90% 70% at 50% 50%,
+    color-mix(in srgb, var(--panel) 78%, transparent) 0%,
+    color-mix(in srgb, var(--panel) 28%, transparent) 55%,
+    transparent 78%
   );
 }
 
 .st2-suite-sig-stage {
   position: absolute;
-  inset: 0;
+  inset: -12px -88px;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
+  overflow: visible;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.5s ease, visibility 0.5s ease;
@@ -347,7 +346,8 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   box-shadow: 0 2px 16px rgba(26, 31, 46, 0.1);
-  padding: var(--plan-card-pad-top) var(--plan-card-pad-x) 40px;
+  padding: var(--plan-card-pad-top) var(--plan-card-pad-x) 16px;
+  overflow: visible;
 }
 
 .planillas-hero {
@@ -525,7 +525,7 @@
   border-radius: 16px;
   padding: 12px 16px;
   width: 100%;
-  margin: 0 0 20px;
+  margin: 0;
 }
 
 .plan-modulos-grid {
