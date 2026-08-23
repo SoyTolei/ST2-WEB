@@ -69,7 +69,7 @@ export function formatToastMessage(body, { greet = false } = {}) {
   if (!msg) return msg;
   const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
   const name = firstNameFromEmail(getPlanUserEmail());
-  if (greet && name) return `Hola ${name}! ${TOAST_FOOD_MARK} ${lowered}`;
+  if (greet && name) return `${TOAST_FOOD_MARK} Hola ${name}! ${lowered}`;
   const rest = lowered.replace(/^tenés\s+/i, "");
   return `${TOAST_FOOD_MARK} También tenés ${rest}`;
 }
