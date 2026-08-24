@@ -181,7 +181,7 @@ function parseFlagsFromApi(m) {
  */
 export async function refreshModuleFlags({ force = false, baseline = false, detectNew = false } = {}) {
   try {
-    if (localStorage.getItem(FORCE_KEY) === "1" || isPrimarySuperAdmin()) {
+    if (localStorage.getItem(FORCE_KEY) === "1" || (isPrimarySuperAdmin() && !readViewAs())) {
       cachedFlags = fullFlags();
       cachedSt2Admin = true;
       lastLoadedAt = Date.now();
@@ -189,7 +189,7 @@ export async function refreshModuleFlags({ force = false, baseline = false, dete
       return getCachedModuleFlags();
     }
   } catch {
-    if (isPrimarySuperAdmin()) {
+    if (isPrimarySuperAdmin() && !readViewAs()) {
       cachedFlags = fullFlags();
       cachedSt2Admin = true;
       if (baseline || !knownFlags) knownFlags = cloneFlags(cachedFlags);

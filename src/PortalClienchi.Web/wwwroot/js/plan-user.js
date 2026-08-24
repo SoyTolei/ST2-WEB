@@ -120,22 +120,33 @@ document.addEventListener("st2:access-ready", () => {
 export async function ensureAppAccess() {
   if (accessPromise) return accessPromise;
 
-  const already = applyBootSession();
-  if (already && document.body.classList.contains("st2-access-ok")) {
-    return already;
-  }
+  accessPromise = (async () => {
+    const first = applyBootSession();
+    if (first) return first;
 
-  accessPromise = new Promise((resolve) => {
-    const done = () => {
-      document.removeEventListener("st2:access-ready", done);
-      resolve(applyBootSession());
-    };
-    document.addEventListener("st2:access-ready", done);
-    const now = applyBootSession();
-    if (now && document.body.classList.contains("st2-access-ok")) {
-      done();
-    }
-  }).finally(() => {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        const email = applyBootSession();
+        if (!email) return;
+        settled = true;
+        window.clearInterval(poll);
+        document.removeEventListener("st2:access-ready", finish);
+        resolve(email);
+      };
+      document.addEventListener("st2:access-ready", finish);
+      const poll = window.setInterval(finish, 100);
+      finish();
+      window.setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        window.clearInterval(poll);
+        document.removeEventListener("st2:access-ready", finish);
+        resolve(applyBootSession());
+      }, 8000);
+    });
+  })().finally(() => {
     accessPromise = null;
   });
 

@@ -541,6 +541,7 @@
 
 .plan-pill-btn.active {
   color: #fff;
+  background: var(--primary);
 }
 
 .plan-pill-beta {

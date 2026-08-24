@@ -3,6 +3,7 @@
   const SUPER = "leonel.gallo@thomsonreuters.com";
   const DOMAIN = "thomsonreuters.com";
   const LOCAL_OK = /^[a-z]{2,}\.[a-z]{2,}$/;
+  const VIEW_AS_KEY = "st2-view-as-profile-v1";
 
   function $(id) {
     return document.getElementById(id);
@@ -46,7 +47,47 @@
     if (mail) mail.textContent = email || "";
   }
 
-  function unlock(email) {
+  function readViewAs() {
+    try {
+      const raw = sessionStorage.getItem(VIEW_AS_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data?.email) return null;
+      return data;
+    } catch {
+      return null;
+    }
+  }
+
+  function paintChrome(email, freshLogin) {
+    if (freshLogin || !isSuper(email)) {
+      try { sessionStorage.removeItem(VIEW_AS_KEY); } catch { /* ignore */ }
+    }
+    const viewAs = isSuper(email) ? readViewAs() : null;
+    const banner = $("st2-view-as-banner");
+    const bannerText = $("st2-view-as-banner-text");
+    const showVa = !!viewAs;
+    banner?.classList.toggle("hidden", !showVa);
+    banner?.toggleAttribute("hidden", !showVa);
+    if (showVa && bannerText) {
+      bannerText.textContent = `Vista previa: cómo ve ST2 ${viewAs.displayName || viewAs.email}`;
+    }
+    document.body.classList.toggle("st2-viewing-as-profile", showVa);
+
+    const admin = $("tabAdminBtn");
+    const showAdmin = isSuper(email) && !showVa;
+    admin?.classList.toggle("hidden", !showAdmin);
+    admin?.setAttribute("aria-hidden", showAdmin ? "false" : "true");
+
+    const mail = $("st2-session-email");
+    if (mail) {
+      mail.textContent = email;
+      mail.title = email;
+      mail.classList.remove("hidden");
+    }
+  }
+
+  function unlock(email, freshLogin) {
     window.__ST2_SESSION_EMAIL = email;
     document.body.classList.remove("st2-access-pending");
     document.body.classList.add("st2-access-ok");
@@ -56,6 +97,7 @@
     } catch {
       /* ignore */
     }
+    paintChrome(email, !!freshLogin);
     document.dispatchEvent(new CustomEvent("st2:access-ready", { detail: { email } }));
   }
 
@@ -98,7 +140,7 @@
       setError("No se pudo confirmar la sesión.");
       return;
     }
-    unlock(data.email);
+    unlock(data.email, true);
   }
 
   function postSession(email, password) {
@@ -146,7 +188,7 @@
   async function tryCookie() {
     try {
       const { data } = await fetchJson("/api/planillas/session", {}, 4000);
-      if (data?.email) unlock(data.email);
+      if (data?.email) unlock(data.email, false);
     } catch {
       /* el usuario entra a mano */
     }
