@@ -494,6 +494,31 @@
   background: rgba(220, 38, 38, 0.1);
 }
 
+.blanqueo-ready-toast.is-tools {
+  border-color: #c4b5fd;
+  background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.16);
+}
+
+.blanqueo-ready-toast.is-tools .blanqueo-ready-toast-dot {
+  background: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.22);
+  animation: st2-tools-dot-pulse 1.8s ease-in-out infinite;
+}
+
+.blanqueo-ready-toast.is-tools .blanqueo-ready-toast-count,
+.blanqueo-ready-toast.is-tools .blanqueo-ready-toast-btn {
+  background: #4f46e5;
+}
+
+.blanqueo-ready-toast.is-tools .blanqueo-ready-toast-btn:hover {
+  background: #4338ca;
+}
+
+.blanqueo-ready-toast.is-tools .blanqueo-ready-toast-text {
+  color: #3730a3;
+}
+
 .blanqueo-ready-toast.hidden {
   display: none !important;
 }

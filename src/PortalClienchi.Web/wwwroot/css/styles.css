@@ -288,6 +288,11 @@ body.portal-tab-active.st2-has-update .st2-modules-banner {
   background: #ccfbf1;
 }
 
+@keyframes st2-tools-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.22); }
+  50% { box-shadow: 0 0 0 7px rgba(79, 70, 229, 0.08); }
+}
+
 .st2-tools-banner {
   position: fixed;
   top: 64px;
@@ -301,10 +306,20 @@ body.portal-tab-active.st2-has-update .st2-modules-banner {
   flex-wrap: wrap;
   min-height: 62px;
   padding: 14px 20px;
-  background: linear-gradient(90deg, #9a3412 0%, #c2410c 55%, #ea580c 100%);
-  color: #fff7ed;
-  box-shadow: 0 8px 22px rgba(194, 65, 12, 0.32);
+  background: linear-gradient(90deg, #312e81 0%, #4f46e5 55%, #6366f1 100%);
+  color: #eef2ff;
+  box-shadow: 0 8px 22px rgba(79, 70, 229, 0.32);
   text-align: center;
+}
+
+.st2-tools-banner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #c7d2fe;
+  box-shadow: 0 0 0 4px rgba(199, 210, 254, 0.28);
+  animation: st2-tools-dot-pulse 1.8s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 body.st2-has-update .st2-tools-banner {
@@ -360,11 +375,11 @@ body.portal-tab-active.st2-has-update.st2-has-modules-update .st2-tools-banner {
 
 .st2-tools-banner-open {
   background: #fff;
-  color: #9a3412;
+  color: #3730a3;
 }
 
 .st2-tools-banner-open:hover {
-  background: #ffedd5;
+  background: #e0e7ff;
 }
 
 .st2-tools-banner-dismiss {

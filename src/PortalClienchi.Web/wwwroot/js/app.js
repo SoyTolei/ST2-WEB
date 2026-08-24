@@ -1,8 +1,8 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
-import { ensureAppAccess } from "./plan-user.js";
+import { ensureAppAccess, getPlanUserEmail } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
-import { syncStackedToastGreetings } from "./st2-toast-greet.js";
+import { firstNameFromEmail } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1825,19 +1825,25 @@ function toolDisplayName(id) {
   return id;
 }
 
+function toolPackageLabel(id) {
+  if (id === "sql") return "ST2 - Herramientas SQL";
+  if (id === "bat") return "ST2.BAT";
+  return toolDisplayName(id);
+}
+
 function toolsUpdateMessage(newer) {
   const list = newer || [];
   if (!list.length) return "";
-  const withDate = (t) => {
-    const when = formatToolUpdatedAt(t.updatedAtUtc);
-    return when ? `${toolDisplayName(t.id)} (${when})` : toolDisplayName(t.id);
-  };
-  if (list.length === 1) {
-    return `Hay una versión nueva de ${withDate(list[0])}. Abrí Acerca de ST2 para descargarla.`;
+  const names = list.map((t) => toolPackageLabel(t.id));
+  let body;
+  if (names.length === 1) {
+    body = `hay una versión nueva para descargar de ${names[0]}.`;
+  } else {
+    const last = names.pop();
+    body = `hay una versión nueva para descargar de ${names.join(", ")} y ${last}.`;
   }
-  const names = list.map(withDate);
-  const last = names.pop();
-  return `Hay una versión nueva de ${names.join(", ")} y ${last}. Abrí Acerca de ST2 para descargarla.`;
+  const name = firstNameFromEmail(getPlanUserEmail());
+  return name ? `Hola ${name}! ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
 }
 
 function setToolsBannerVisible(show, message) {
@@ -1858,20 +1864,16 @@ function renderToolsToast(newer, message) {
   if (!show) {
     toast.classList.add("hidden");
     toast.setAttribute("aria-hidden", "true");
-    delete toast.dataset.toastBody;
-    syncStackedToastGreetings();
     return;
   }
   if (toastCount) {
     toastCount.textContent = String(n);
     toastCount.setAttribute("aria-hidden", n > 1 ? "false" : "true");
+    toastCount.classList.toggle("hidden", n < 2);
   }
-  const body = message || "Hay una versión nueva de herramientas.";
-  toast.dataset.toastBody = body;
+  if (toastText) toastText.textContent = message || "";
   toast.classList.remove("hidden");
   toast.setAttribute("aria-hidden", "false");
-  if (toastText && !toastText.textContent) toastText.textContent = body;
-  syncStackedToastGreetings();
 }
 
 function syncAboutToolsBadge() {
