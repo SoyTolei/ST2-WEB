@@ -485,9 +485,11 @@ public sealed class St2ToolsStore
 
             var file = Directory.EnumerateFiles(dir)
                 .Where(f => AllowedExtensions.Contains(Path.GetExtension(f)))
-                // Preferir .zip (el navegador confía más que en .exe/.bat sueltos).
-                .OrderByDescending(f => Path.GetExtension(f).Equals(".zip", StringComparison.OrdinalIgnoreCase))
-                .ThenByDescending(f => new FileInfo(f).LastWriteTimeUtc)
+                .Select(f => new FileInfo(f))
+                .Where(info => info.Length > 0)
+                .OrderByDescending(info => info.Length)
+                .ThenByDescending(info => info.LastWriteTimeUtc)
+                .Select(info => info.FullName)
                 .FirstOrDefault();
             if (file is null)
                 continue;
@@ -568,9 +570,13 @@ public sealed class St2ToolsStore
 
     private St2ToolPackageDto ToDto(string id, ManifestEntry? entry)
     {
-        var available = entry is not null
-            && !string.IsNullOrWhiteSpace(entry.FileName)
-            && File.Exists(Path.Combine(_root, id, entry.FileName));
+        var path = entry is not null && !string.IsNullOrWhiteSpace(entry.FileName)
+            ? Path.Combine(_root, id, entry.FileName)
+            : "";
+        var available = !string.IsNullOrWhiteSpace(path) && File.Exists(path);
+        var updated = available ? (entry!.UpdatedAtUtc ?? "") : "";
+        if (available && string.IsNullOrWhiteSpace(updated))
+            updated = File.GetLastWriteTimeUtc(path).ToString("o");
 
         return new St2ToolPackageDto
         {
@@ -578,8 +584,8 @@ public sealed class St2ToolsStore
             Name = ToolNames.GetValueOrDefault(id) ?? id.ToUpperInvariant(),
             Version = available ? (entry!.Version ?? "") : "",
             FileName = available ? (entry!.FileName ?? "") : "",
-            SizeBytes = available ? entry!.SizeBytes : 0,
-            UpdatedAtUtc = available ? (entry!.UpdatedAtUtc ?? "") : "",
+            SizeBytes = available ? (entry!.SizeBytes > 0 ? entry.SizeBytes : new FileInfo(path).Length) : 0,
+            UpdatedAtUtc = updated,
             ContentType = available ? (entry!.ContentType ?? "application/octet-stream") : "application/octet-stream",
             Available = available,
         };

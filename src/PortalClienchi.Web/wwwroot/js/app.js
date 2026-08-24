@@ -1759,7 +1759,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
   }
 }
 
-const TOOLS_SEEN_KEY = "st2-tools-seen-versions";
+const TOOLS_SEEN_KEY = "st2-tools-downloaded-versions";
 const aboutToolsBadge = document.getElementById("about-tools-badge");
 const aboutToolsStatus = document.getElementById("st2-about-tools-status");
 const toolsBanner = document.getElementById("st2-tools-banner");
@@ -1798,18 +1798,23 @@ function setAboutToolsStatus(msg, isError = false) {
 
 function listNewTools() {
   const seen = readSeenToolVersions();
-  return (cachedTools || []).filter((t) => t?.available && t.version && seen[t.id] !== t.version);
+  return (cachedTools || []).filter((t) => {
+    if (!t?.available) return false;
+    const stamp = toolIdentity(t);
+    return !!stamp && seen[t.id] !== stamp;
+  });
+}
+
+function toolIdentity(t) {
+  return String(t?.version || t?.updatedAtUtc || t?.UpdatedAtUtc || t?.sizeBytes || "").trim();
 }
 
 function isToolVersionNew(id) {
   return listNewTools().some((t) => t.id === id);
 }
 
-function formatToolUpdatedAt(iso) {
-  const raw = String(iso || "").trim();
-  if (!raw) return "";
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return "";
+function formatDateTimeAr(d) {
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return "";
   return d.toLocaleString("es-AR", {
     day: "numeric",
     month: "short",
@@ -1817,6 +1822,29 @@ function formatToolUpdatedAt(iso) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function parseToolUpdatedAt(tool) {
+  const raw = String(tool?.updatedAtUtc || tool?.UpdatedAtUtc || "").trim();
+  if (raw) {
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+  const ver = String(tool?.version || tool?.Version || "");
+  const m = ver.match(/^(\d{4})\.(\d{2})\.(\d{2})\.(\d{2})(\d{2})/);
+  if (!m) return null;
+  const d = new Date(Date.UTC(
+    Number(m[1]),
+    Number(m[2]) - 1,
+    Number(m[3]),
+    Number(m[4]),
+    Number(m[5]),
+  ));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatToolUpdatedAt(tool) {
+  return formatDateTimeAr(parseToolUpdatedAt(tool));
 }
 
 function toolDisplayName(id) {
@@ -1834,13 +1862,17 @@ function toolPackageLabel(id) {
 function toolsUpdateMessage(newer) {
   const list = newer || [];
   if (!list.length) return "";
-  const names = list.map((t) => toolPackageLabel(t.id));
+  const named = list.map((t) => {
+    const when = formatToolUpdatedAt(t);
+    const label = toolPackageLabel(t.id);
+    return when ? `${label} (${when})` : label;
+  });
   let body;
-  if (names.length === 1) {
-    body = `hay una versión nueva para descargar de ${names[0]}.`;
+  if (named.length === 1) {
+    body = `hay una versión nueva para descargar de ${named[0]}.`;
   } else {
-    const last = names.pop();
-    body = `hay una versión nueva para descargar de ${names.join(", ")} y ${last}.`;
+    const last = named.pop();
+    body = `hay una versión nueva para descargar de ${named.join(", ")} y ${last}.`;
   }
   const name = firstNameFromEmail(getPlanUserEmail());
   return name ? `Hola ${name}! ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
@@ -1893,9 +1925,18 @@ function syncAboutToolsBadge() {
 function markToolsSeen() {
   const next = { ...readSeenToolVersions() };
   for (const t of cachedTools || []) {
-    if (t?.available && t.version) next[t.id] = t.version;
+    const stamp = toolIdentity(t);
+    if (t?.available && stamp) next[t.id] = stamp;
   }
   writeSeenToolVersions(next);
+  syncAboutToolsBadge();
+}
+
+function markToolSeen(id) {
+  const t = (cachedTools || []).find((x) => x.id === id);
+  const stamp = toolIdentity(t);
+  if (!t?.available || !stamp) return;
+  writeSeenToolVersions({ ...readSeenToolVersions(), [id]: stamp });
   syncAboutToolsBadge();
 }
 
@@ -1943,15 +1984,10 @@ function renderAboutTools() {
 
     const label = tool.fileName || meta.file;
     if (newEl) newEl.hidden = !isToolVersionNew(id);
-    const when = formatToolUpdatedAt(tool.updatedAtUtc);
+    const when = formatToolUpdatedAt(tool);
     if (dateEl) {
-      if (when) {
-        dateEl.hidden = false;
-        dateEl.textContent = `Subido ${when}`;
-      } else {
-        dateEl.hidden = true;
-        dateEl.textContent = "";
-      }
+      dateEl.hidden = !when;
+      dateEl.textContent = when ? `Subido ${when}` : "";
     }
     if (sizeEl) {
       const size = tool.sizeBytes ? formatToolSize(tool.sizeBytes) : "";
@@ -1984,7 +2020,7 @@ async function refreshAboutTools({ silent = false } = {}) {
       {
         id: "sql",
         name: "ST2.SQL",
-        available: true,
+        available: false,
         version: "",
         fileName: "ST2 - Herramientas SQL.zip",
         sizeBytes: 0,
@@ -1992,7 +2028,7 @@ async function refreshAboutTools({ silent = false } = {}) {
       {
         id: "bat",
         name: "ST2.BAT",
-        available: true,
+        available: false,
         version: "",
         fileName: "ST2-PS.zip",
         sizeBytes: 0,
@@ -2014,6 +2050,7 @@ async function downloadTool(toolId) {
   document.body.appendChild(a);
   a.click();
   a.remove();
+  markToolSeen(toolId);
   setAboutToolsStatus("Descarga iniciada");
 }
 
@@ -2450,7 +2487,7 @@ function hideAbout({ history = "restore" } = {}) {
   aboutOverlay?.classList.add("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "true");
   aboutRouteOpen = false;
-  markToolsSeen();
+  syncAboutToolsBadge();
   const onAboutPath = isHerramientasPath(normalizeShellPath(window.location.pathname));
   if (history !== "none" && onAboutPath) {
     const fallback = pathBeforeAbout && !isHerramientasPath(pathBeforeAbout) ? pathBeforeAbout : "/";
