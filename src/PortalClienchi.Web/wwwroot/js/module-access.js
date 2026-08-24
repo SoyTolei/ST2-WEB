@@ -110,10 +110,8 @@ export function getViewAsProfile() {
   return readViewAs();
 }
 
-export function alertsPreviewQuery() {
-  const viewAs = readViewAs();
-  if (!viewAs?.email) return "";
-  return `as=${encodeURIComponent(viewAs.email)}`;
+export function isViewingAsProfile() {
+  return !!readViewAs();
 }
 
 export function startViewAsProfile({ email, displayName, modules }) {

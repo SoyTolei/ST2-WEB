@@ -124,18 +124,6 @@ public static class BlanqueoEndpoints
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
-            St2ViewAs.TryApply(ctx, modules, ref email, ref flags);
-            if (!flags.Blanqueo)
-            {
-                return Results.Ok(new
-                {
-                    mode = "requester",
-                    count = 0,
-                    items = Array.Empty<object>(),
-                    claveBlanqueo = BlanqueoClave.Actual,
-                });
-            }
-
             // Quien confirma ve la cola de pendientes; el resto, avisos personales.
             if (flags.BlanqueoConfirm)
             {
