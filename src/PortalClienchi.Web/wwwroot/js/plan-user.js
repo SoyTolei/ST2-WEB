@@ -104,39 +104,37 @@ export function isAppAccessGranted() {
 
 let accessGateCleanup = null;
 
+function applyBootSession() {
+  const email = window.__ST2_SESSION_EMAIL;
+  if (!email) return null;
+  cachedEmail = email;
+  appUnlocked = true;
+  updatePlanUserBadge();
+  return email;
+}
+
+document.addEventListener("st2:access-ready", () => {
+  applyBootSession();
+});
+
 export async function ensureAppAccess() {
   if (accessPromise) return accessPromise;
 
+  const already = applyBootSession();
+  if (already && document.body.classList.contains("st2-access-ok")) {
+    return already;
+  }
+
   accessPromise = new Promise((resolve) => {
-    let settled = false;
-    const finish = (email) => {
-      if (settled) return;
-      settled = true;
-      accessGateCleanup?.();
-      accessGateCleanup = null;
-      if (email) {
-        cachedEmail = email;
-        updatePlanUserBadge();
-        unlockAppShell();
-      }
-      resolve(email || null);
+    const done = () => {
+      document.removeEventListener("st2:access-ready", done);
+      resolve(applyBootSession());
     };
-
-    // El formulario tiene que responder ya: no esperar el GET de sesión.
-    showAccessGate(finish);
-
-    void syncPlanUserSession()
-      .then((email) => {
-        if (email) {
-          finish(email);
-          return;
-        }
-        if (lastPendingAccess) {
-          showAccessPendingState(lastPendingAccess.email);
-          lastPendingAccess = null;
-        }
-      })
-      .catch(() => {});
+    document.addEventListener("st2:access-ready", done);
+    const now = applyBootSession();
+    if (now && document.body.classList.contains("st2-access-ok")) {
+      done();
+    }
   }).finally(() => {
     accessPromise = null;
   });

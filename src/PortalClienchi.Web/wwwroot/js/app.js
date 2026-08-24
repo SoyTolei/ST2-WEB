@@ -3904,16 +3904,16 @@ document.getElementById("thomGateOpenBtn")?.addEventListener("click", () => focu
 document.getElementById("thomGateCloseBtn")?.addEventListener("click", () => closeThomPopup());
 document.getElementById("thomOpenBtn")?.addEventListener("click", openThomBrowserTab);
 document.getElementById("thomProxyOpenBtn")?.addEventListener("click", openThomBrowserTab);
-document.getElementById("aiReloadBtn").addEventListener("click", () => {
+document.getElementById("aiReloadBtn")?.addEventListener("click", () => {
   if (isEmbedFrameEmpty(aiFrame)) loadEmbedFrame("ai", { force: true });
   else aiFrame.contentWindow?.location.reload();
 });
-document.getElementById("aiOpenBtn").addEventListener("click", () => {
+document.getElementById("aiOpenBtn")?.addEventListener("click", () => {
   if (appConfig?.aiPlatformUrl) window.open(appConfig.aiPlatformUrl, "_blank", "noopener");
 });
 
-searchInput.addEventListener("input", scheduleSearch);
-typeFilter.addEventListener("change", runSearch);
+searchInput?.addEventListener("input", scheduleSearch);
+typeFilter?.addEventListener("change", runSearch);
 
 document.querySelectorAll("[data-portal-suggest]").forEach((btn) => {
   btn.addEventListener("click", () => {

@@ -900,7 +900,7 @@ public static class PlanillasEndpoints
             return Results.Ok(new { email, status = "ok" });
         }
 
-        var rec = accessRepo.Find(email);
+        var rec = TryFindAccess(accessRepo, email);
         var status = rec?.Status ?? "";
         if (rec is null
             || string.Equals(status, AppAccessRepository.StatusPending, StringComparison.OrdinalIgnoreCase)
@@ -918,6 +918,18 @@ public static class PlanillasEndpoints
         PlanUserIdentity.SetCookie(ctx, email);
         QueueSessionBookkeeping(accessRepo, email);
         return Results.Ok(new { email, status = "ok" });
+    }
+
+    private static AppAccessRecordDto? TryFindAccess(AppAccessRepository accessRepo, string email)
+    {
+        try
+        {
+            return accessRepo.Find(email);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static void QueueSessionBookkeeping(AppAccessRepository accessRepo, string email)
