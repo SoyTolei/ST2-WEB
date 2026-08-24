@@ -616,8 +616,8 @@
 }
 
 .blanqueo-modulos-box {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   padding: 10px 12px;
   border: 1px solid #cbd5e1;
@@ -626,17 +626,27 @@
 }
 
 .blanqueo-mod-check {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 10px;
+  min-height: 4.35rem;
+  padding: 8px 6px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #fff;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
   color: #334155;
   cursor: pointer;
+}
+
+.blanqueo-mod-check span {
+  display: block;
+  text-align: center;
 }
 
 .blanqueo-mod-check:hover {
@@ -652,6 +662,7 @@
 
 .blanqueo-mod-check input {
   margin: 0;
+  flex-shrink: 0;
   accent-color: #0284c7;
 }
 
@@ -706,9 +717,18 @@
   margin-bottom: 10px;
 }
 
+@media (max-width: 900px) {
+  .blanqueo-modulos-box {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 720px) {
   .blanqueo-form-grid {
     grid-template-columns: 1fr;
+  }
+  .blanqueo-modulos-box {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

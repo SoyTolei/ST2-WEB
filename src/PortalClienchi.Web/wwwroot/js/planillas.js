@@ -20,7 +20,10 @@ import {
   renderAccessAlertUi,
 } from "./access-alerts.js";
 
-const HERO_EASTER_EMAIL = "yohana.colacci@thomsonreuters.com";
+const HERO_EASTER_EMAILS = [
+  "yohana.colacci@thomsonreuters.com",
+  "yohanaelizabeth.orellana@thomsonreuters.com",
+];
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -1368,7 +1371,8 @@ function syncPlanillasHeroEaster() {
   const el = document.getElementById("planillas-hero-easter");
   if (!el) return;
   const email = effectivePlanillasEmail();
-  const show = email === HERO_EASTER_EMAIL;
+  const local = email.split("@")[0] || "";
+  const show = HERO_EASTER_EMAILS.includes(email) || local.includes("yohana");
   el.classList.toggle("is-hidden", !show);
   el.setAttribute("aria-hidden", show ? "false" : "true");
 }
