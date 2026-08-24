@@ -779,7 +779,7 @@ function getAboutUpdatedLabel() {
   const meta = document.querySelector('meta[name="st2-updated-label"]');
   if (meta?.content?.trim()) return meta.content.trim();
   const current = aboutUpdatedEl?.textContent?.trim();
-  return current || "Última actualización";
+  return current || "Última actualización de la web";
 }
 
 function applyAboutUpdated() {

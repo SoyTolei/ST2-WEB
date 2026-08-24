@@ -76,7 +76,7 @@ public static class St2IndexHtml
 
         html = html.Replace("</head>", sb + "</head>", StringComparison.OrdinalIgnoreCase);
         html = html.Replace(
-            "<p id=\"st2-about-updated\" class=\"st2-about-updated\" aria-live=\"polite\">Última actualización</p>",
+            "<p id=\"st2-about-updated\" class=\"st2-about-updated\" aria-live=\"polite\">Última actualización de la web</p>",
             $"<p id=\"st2-about-updated\" class=\"st2-about-updated\" aria-live=\"polite\">{WebUtility.HtmlEncode(St2WebBuild.GetUpdatedLabel())}</p>",
             StringComparison.Ordinal);
         html = html.Replace("/css/styles.css", $"/css/styles.css?v={v}", StringComparison.Ordinal);
