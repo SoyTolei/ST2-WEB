@@ -16,7 +16,7 @@ public static class BlanqueoEndpoints
     {
         ["OnBalance"] = new(StringComparer.OrdinalIgnoreCase) { "Blanqueo", "MFA", "Blanqueo + MFA" },
         ["Onvio"] = new(StringComparer.OrdinalIgnoreCase) { "Blanqueo", "MFA", "Blanqueo + MFA" },
-        ["PortalCliente"] = new(StringComparer.OrdinalIgnoreCase) { "Activación", "Cambio de contraseña" },
+        ["PortalCliente"] = new(StringComparer.OrdinalIgnoreCase) { "Activación", "Cambio de contraseña", BlanqueoModulos.TipoHabilitacion },
     };
 
     public static void MapBlanqueoEndpoints(this WebApplication app)
@@ -229,6 +229,9 @@ public static class BlanqueoEndpoints
                 NroCliente = body.NroCliente.Trim(),
                 Correo = body.Correo.Trim(),
                 TipoSolicitud = NormalizeTipo(body.TipoSolicitud),
+                ModulosDetalle = BlanqueoModulos.EsHabilitacion(NormalizeTipo(body.TipoSolicitud))
+                    ? BlanqueoModulos.NormalizeList(body.ModulosDetalle)
+                    : null,
             };
 
             var updated = repo.UpdateOwnerFields(id, normalized);
@@ -320,6 +323,9 @@ public static class BlanqueoEndpoints
         NroCliente = body.NroCliente.Trim(),
         Correo = body.Correo.Trim(),
         TipoSolicitud = NormalizeTipo(body.TipoSolicitud),
+        ModulosDetalle = BlanqueoModulos.EsHabilitacion(NormalizeTipo(body.TipoSolicitud))
+            ? BlanqueoModulos.NormalizeList(body.ModulosDetalle)
+            : null,
     };
 
     private static string NormalizePortal(string? portal)
@@ -352,6 +358,13 @@ public static class BlanqueoEndpoints
             return "Blanqueo + MFA";
         if (value.Equals("Blanqueo + MFA", StringComparison.OrdinalIgnoreCase))
             return "Blanqueo + MFA";
+        if (value.Equals("Habilitacion de Modulos", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("Habilitación de Modulos", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("Habilitacion de Módulos", StringComparison.OrdinalIgnoreCase)
+            || value.Equals(BlanqueoModulos.TipoHabilitacion, StringComparison.OrdinalIgnoreCase)
+            || value.Equals("Habilitacion", StringComparison.OrdinalIgnoreCase)
+            || value.Equals("Habilitación", StringComparison.OrdinalIgnoreCase))
+            return BlanqueoModulos.TipoHabilitacion;
         if (value.Equals("Blanqueo", StringComparison.OrdinalIgnoreCase))
             return "Blanqueo";
         return value;
@@ -366,6 +379,7 @@ public static class BlanqueoEndpoints
             NroCliente = body.NroCliente,
             Correo = body.Correo,
             TipoSolicitud = body.TipoSolicitud,
+            ModulosDetalle = body.ModulosDetalle,
         });
     }
 
@@ -389,9 +403,16 @@ public static class BlanqueoEndpoints
             {
                 "OnBalance" => "En On Balance elegí Blanqueo, MFA o Blanqueo + MFA.",
                 "Onvio" => "En ONVIO elegí Blanqueo, MFA o Blanqueo + MFA.",
-                "PortalCliente" => "En Portal Cliente elegí Activación o Cambio de contraseña.",
+                "PortalCliente" => "En Portal Cliente elegí Activación, Cambio de contraseña o Habilitación de Módulos.",
                 _ => "Elegí un tipo de solicitud válido para la plataforma.",
             };
+
+        if (BlanqueoModulos.EsHabilitacion(tipo))
+        {
+            var mods = BlanqueoModulos.Parse(body.ModulosDetalle);
+            if (mods.Count == 0)
+                return "En Habilitación de Módulos elegí al menos uno: Sueldos SQL, Sueldos WEB, ONVIO, Bejerman SQL o Contabilidad WEB.";
+        }
 
         return null;
     }

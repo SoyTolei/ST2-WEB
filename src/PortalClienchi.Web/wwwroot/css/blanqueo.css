@@ -598,6 +598,114 @@
   max-width: 280px;
 }
 
+.blanqueo-field-modulos {
+  grid-column: 1 / -1;
+}
+
+.blanqueo-field-modulos.hidden,
+.blanqueo-edit-modulos.hidden {
+  display: none;
+}
+
+.blanqueo-modulos-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.blanqueo-modulos-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.blanqueo-mod-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+}
+
+.blanqueo-mod-check:hover {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+.blanqueo-mod-check:has(input:checked) {
+  border-color: #0ea5e9;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.blanqueo-mod-check input {
+  margin: 0;
+  accent-color: #0284c7;
+}
+
+.blanqueo-hab-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  vertical-align: middle;
+}
+
+.blanqueo-hab-pill {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.16rem 0.5rem;
+  border: 1px dashed #fb7185;
+  border-radius: 999px;
+  background: #fecdd3;
+  color: #be123c;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: help;
+}
+
+.blanqueo-hab-pill:hover,
+.blanqueo-hab-pill:focus-visible {
+  background: #fda4af;
+  border-color: #e11d48;
+  border-style: solid;
+  outline: none;
+}
+
+.blanqueo-hab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.85rem;
+  height: 0.85rem;
+  padding: 0 0.2rem;
+  border-radius: 999px;
+  background: #9f1239;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.blanqueo-edit-modulos {
+  grid-column: 1 / -1;
+  margin-bottom: 10px;
+}
+
 @media (max-width: 720px) {
   .blanqueo-form-grid {
     grid-template-columns: 1fr;

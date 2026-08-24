@@ -475,6 +475,16 @@
                       <option value="Blanqueo + MFA">Blanqueo + MFA</option>
                     </select>
                   </div>
+                  <div id="blanqueo-modulos-field" class="blanqueo-field blanqueo-field-modulos hidden" aria-hidden="true">
+                    <span class="blanqueo-modulos-label">Módulos a habilitar</span>
+                    <div class="blanqueo-modulos-box" role="group" aria-label="Módulos a habilitar">
+                      <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-modulo" value="Sueldos SQL"/> Sueldos SQL</label>
+                      <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-modulo" value="Sueldos WEB"/> Sueldos WEB</label>
+                      <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-modulo" value="ONVIO"/> ONVIO</label>
+                      <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-modulo" value="Bejerman SQL"/> Bejerman SQL</label>
+                      <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-modulo" value="Contabilidad WEB"/> Contabilidad WEB</label>
+                    </div>
+                  </div>
                   <div class="blanqueo-field blanqueo-field-actions">
                     <button type="button" id="blanqueo-add" class="btn btn-primary">Agregar</button>
                   </div>
@@ -1824,6 +1834,16 @@
           <option value="MFA">MFA</option>
           <option value="Blanqueo + MFA">Blanqueo + MFA</option>
         </select>
+        <div id="blanqueo-edit-modulos-field" class="blanqueo-edit-modulos hidden" aria-hidden="true">
+          <span class="plan-user-label">Módulos a habilitar</span>
+          <div class="blanqueo-modulos-box" role="group" aria-label="Módulos a habilitar">
+            <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-edit-modulo" value="Sueldos SQL"/> Sueldos SQL</label>
+            <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-edit-modulo" value="Sueldos WEB"/> Sueldos WEB</label>
+            <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-edit-modulo" value="ONVIO"/> ONVIO</label>
+            <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-edit-modulo" value="Bejerman SQL"/> Bejerman SQL</label>
+            <label class="blanqueo-mod-check"><input type="checkbox" name="blanqueo-edit-modulo" value="Contabilidad WEB"/> Contabilidad WEB</label>
+          </div>
+        </div>
       </div>
       <div class="plan-user-actions">
         <button type="button" id="blanqueo-edit-cancel" class="plan-gestor-btn-tool">Cancelar</button>

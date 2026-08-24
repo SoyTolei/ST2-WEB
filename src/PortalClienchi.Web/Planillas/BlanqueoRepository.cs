@@ -30,7 +30,7 @@ public sealed class BlanqueoRepository
         cmd.CommandText = """
             SELECT id, portal, nro_caso, nro_cliente, correo, fecha_solicitud,
                    solicitado_por_email, solicitado_por_nombre, tipo_solicitud,
-                   listo, aclaracion, fecha_creacion
+                   listo, aclaracion, fecha_creacion, modulos_detalle
             FROM blanqueo_solicitudes
             ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) DESC, id DESC
             """;
@@ -47,7 +47,7 @@ public sealed class BlanqueoRepository
         cmd.CommandText = """
             SELECT id, portal, nro_caso, nro_cliente, correo, fecha_solicitud,
                    solicitado_por_email, solicitado_por_nombre, tipo_solicitud,
-                   listo, aclaracion, fecha_creacion
+                   listo, aclaracion, fecha_creacion, modulos_detalle
             FROM blanqueo_solicitudes WHERE id = $id
             """;
         cmd.Parameters.AddWithValue("$id", id);
@@ -62,9 +62,9 @@ public sealed class BlanqueoRepository
         cmd.CommandText = """
             INSERT INTO blanqueo_solicitudes
                 (portal, nro_caso, nro_cliente, correo, fecha_solicitud,
-                 solicitado_por_email, solicitado_por_nombre, tipo_solicitud, listo, aclaracion)
+                 solicitado_por_email, solicitado_por_nombre, tipo_solicitud, listo, aclaracion, modulos_detalle)
             VALUES
-                ($portal, $caso, $cliente, $correo, $fecha, $email, $nombre, $tipo, 0, NULL)
+                ($portal, $caso, $cliente, $correo, $fecha, $email, $nombre, $tipo, 0, NULL, $modulos)
             """;
         cmd.Parameters.AddWithValue("$portal", req.Portal.Trim());
         cmd.Parameters.AddWithValue("$caso", req.NroCaso.Trim());
@@ -74,6 +74,7 @@ public sealed class BlanqueoRepository
         cmd.Parameters.AddWithValue("$email", email.Trim().ToLowerInvariant());
         cmd.Parameters.AddWithValue("$nombre", displayName.Trim());
         cmd.Parameters.AddWithValue("$tipo", req.TipoSolicitud.Trim());
+        cmd.Parameters.AddWithValue("$modulos", (object?)req.ModulosDetalle ?? DBNull.Value);
         cmd.ExecuteNonQuery();
 
         var id = (int)LastInsertRowId(conn);
@@ -88,6 +89,7 @@ public sealed class BlanqueoRepository
             SolicitadoPorEmail = email.Trim().ToLowerInvariant(),
             SolicitadoPorNombre = displayName.Trim(),
             TipoSolicitud = req.TipoSolicitud.Trim(),
+            ModulosDetalle = req.ModulosDetalle,
             Listo = false,
             Aclaracion = null,
             FechaCreacion = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture),
@@ -116,9 +118,9 @@ public sealed class BlanqueoRepository
             cmd.CommandText = """
                 INSERT INTO blanqueo_solicitudes
                     (portal, nro_caso, nro_cliente, correo, fecha_solicitud,
-                     solicitado_por_email, solicitado_por_nombre, tipo_solicitud, listo, aclaracion)
+                     solicitado_por_email, solicitado_por_nombre, tipo_solicitud, listo, aclaracion, modulos_detalle)
                 VALUES
-                    ($portal, $caso, $cliente, $correo, $fecha, $email, $nombre, $tipo, $listo, $aclaracion)
+                    ($portal, $caso, $cliente, $correo, $fecha, $email, $nombre, $tipo, $listo, $aclaracion, $modulos)
                 """;
             cmd.Parameters.AddWithValue("$portal", row.Portal);
             cmd.Parameters.AddWithValue("$caso", row.NroCaso);
@@ -130,6 +132,7 @@ public sealed class BlanqueoRepository
             cmd.Parameters.AddWithValue("$tipo", row.TipoSolicitud);
             cmd.Parameters.AddWithValue("$listo", row.Listo ? 1 : 0);
             cmd.Parameters.AddWithValue("$aclaracion", (object?)row.Aclaracion ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$modulos", (object?)row.ModulosDetalle ?? DBNull.Value);
             cmd.ExecuteNonQuery();
             existing.Add(fp);
             inserted++;
@@ -281,7 +284,7 @@ public sealed class BlanqueoRepository
         using var upd = conn.CreateCommand();
         upd.CommandText = """
             UPDATE blanqueo_solicitudes
-            SET portal = $portal, nro_caso = $caso, nro_cliente = $cliente, correo = $correo, tipo_solicitud = $tipo
+            SET portal = $portal, nro_caso = $caso, nro_cliente = $cliente, correo = $correo, tipo_solicitud = $tipo, modulos_detalle = $modulos
             WHERE id = $id
             """;
         upd.Parameters.AddWithValue("$id", id);
@@ -290,6 +293,7 @@ public sealed class BlanqueoRepository
         upd.Parameters.AddWithValue("$cliente", req.NroCliente.Trim());
         upd.Parameters.AddWithValue("$correo", req.Correo.Trim());
         upd.Parameters.AddWithValue("$tipo", req.TipoSolicitud.Trim());
+        upd.Parameters.AddWithValue("$modulos", (object?)req.ModulosDetalle ?? DBNull.Value);
         if (upd.ExecuteNonQuery() <= 0)
             return null;
         return GetById(id);
@@ -553,6 +557,7 @@ public sealed class BlanqueoRepository
             """;
         cmd.ExecuteNonQuery();
         EnsurePortalColumn(conn);
+        EnsureModulosColumn(conn);
         EnsureAlertsTable(conn);
     }
 
@@ -611,6 +616,22 @@ public sealed class BlanqueoRepository
         alter.ExecuteNonQuery();
     }
 
+    private static void EnsureModulosColumn(SqliteConnection conn)
+    {
+        using var info = conn.CreateCommand();
+        info.CommandText = "PRAGMA table_info(blanqueo_solicitudes)";
+        using var r = info.ExecuteReader();
+        while (r.Read())
+        {
+            if (r.GetString(1).Equals("modulos_detalle", StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        using var alter = conn.CreateCommand();
+        alter.CommandText = "ALTER TABLE blanqueo_solicitudes ADD COLUMN modulos_detalle TEXT NULL";
+        alter.ExecuteNonQuery();
+    }
+
     private void EnsureWritable(string dir)
     {
         try
@@ -641,6 +662,7 @@ public sealed class BlanqueoRepository
         Listo = r.GetInt32(9) != 0,
         Aclaracion = r.IsDBNull(10) ? null : r.GetString(10),
         FechaCreacion = r.FieldCount > 11 && !r.IsDBNull(11) ? r.GetString(11) : "",
+        ModulosDetalle = r.FieldCount > 12 && !r.IsDBNull(12) ? r.GetString(12) : null,
     };
 
     private SqliteConnection Open()

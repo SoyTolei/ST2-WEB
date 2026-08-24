@@ -18,8 +18,9 @@ const FORCE_KEY = "st2-blanqueo-force";
 const TIPOS_POR_PORTAL = {
   OnBalance: ["Blanqueo", "MFA", "Blanqueo + MFA"],
   Onvio: ["Blanqueo", "MFA", "Blanqueo + MFA"],
-  PortalCliente: ["Activación", "Cambio de contraseña"],
+  PortalCliente: ["Activación", "Cambio de contraseña", "Habilitación de Módulos"],
 };
+const TIPO_HABILITACION = "Habilitación de Módulos";
 const PORTALES = ["OnBalance", "Onvio", "PortalCliente"];
 const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
@@ -202,10 +203,14 @@ export function initBlanqueoModule() {
   document.getElementById("blanqueo-portal")?.addEventListener("change", () => {
     syncTipoOptions("blanqueo-tipo", getFormPortal());
     syncClaveVisibility();
+    syncModulosField();
   });
+  document.getElementById("blanqueo-tipo")?.addEventListener("change", () => syncModulosField());
   document.getElementById("blanqueo-edit-portal")?.addEventListener("change", () => {
     syncTipoOptions("blanqueo-edit-tipo", getEditPortal());
+    syncEditModulosField();
   });
+  document.getElementById("blanqueo-edit-tipo")?.addEventListener("change", () => syncEditModulosField());
 
   document.getElementById("blanqueo-export")?.addEventListener("click", () => {
     void exportExcel();
@@ -233,6 +238,7 @@ export function initBlanqueoModule() {
   syncSolicitanteBadge();
   syncTipoOptions("blanqueo-tipo", getFormPortal());
   syncClaveVisibility();
+  syncModulosField();
   syncCorreoRows();
 }
 
@@ -388,7 +394,9 @@ function clearForm({ keepCaso = false } = {}) {
     syncTipoOptions("blanqueo-tipo", "OnBalance");
   }
   resetCorreoRows();
+  clearModulosChecks("blanqueo-modulo");
   syncClaveVisibility();
+  syncModulosField();
 }
 
 function resetCorreoRows() {
@@ -490,6 +498,65 @@ function syncTipoOptions(selectId, portal, preferred = "") {
   sel.value = tipos.includes(current) ? current : tipos[0];
 }
 
+function isHabilitacionTipo(tipo) {
+  return String(tipo || "").trim() === TIPO_HABILITACION;
+}
+
+function syncModulosField() {
+  const show = getFormPortal() === "PortalCliente" && isHabilitacionTipo(document.getElementById("blanqueo-tipo")?.value);
+  const field = document.getElementById("blanqueo-modulos-field");
+  field?.classList.toggle("hidden", !show);
+  field?.setAttribute("aria-hidden", show ? "false" : "true");
+  if (!show) clearModulosChecks("blanqueo-modulo");
+}
+
+function syncEditModulosField(selected = null) {
+  const show = getEditPortal() === "PortalCliente" && isHabilitacionTipo(document.getElementById("blanqueo-edit-tipo")?.value);
+  const field = document.getElementById("blanqueo-edit-modulos-field");
+  field?.classList.toggle("hidden", !show);
+  field?.setAttribute("aria-hidden", show ? "false" : "true");
+  if (!show) {
+    clearModulosChecks("blanqueo-edit-modulo");
+    return;
+  }
+  if (selected != null) setModulosChecks("blanqueo-edit-modulo", selected);
+}
+
+function clearModulosChecks(name) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach((el) => {
+    el.checked = false;
+  });
+}
+
+function setModulosChecks(name, raw) {
+  const picked = parseModulos(raw);
+  document.querySelectorAll(`input[name="${name}"]`).forEach((el) => {
+    el.checked = picked.includes(el.value);
+  });
+}
+
+function collectModulos(name) {
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map((el) => el.value);
+}
+
+function parseModulos(raw) {
+  return String(raw || "")
+    .split(/[|,\n;]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function formatTipoCell(item) {
+  const tipo = item.tipoSolicitud || "—";
+  if (!isHabilitacionTipo(tipo)) return escapeHtml(tipo);
+  const mods = parseModulos(item.modulosDetalle);
+  if (!mods.length) return escapeHtml(tipo);
+  const detail = mods.map((m) => `- ${m}`).join("\n");
+  const tip = escapeAttr(`Habilitación de:\n${detail}`);
+  const n = mods.length;
+  return `<span class="blanqueo-hab-wrap"><button type="button" class="blanqueo-hab-pill" title="${tip}" aria-label="Módulos: ${escapeAttr(mods.join(", "))}"><span class="blanqueo-hab-pill-label">Hab. módulos</span></button><span class="blanqueo-hab-count" aria-hidden="true">${n}</span></span>`;
+}
+
 function syncClaveVisibility() {
   const hint = document.getElementById("blanqueo-clave-hint");
   if (!hint) return;
@@ -510,6 +577,7 @@ async function createSolicitud() {
   const nroCliente = document.getElementById("blanqueo-cliente")?.value.trim() || "";
   const correos = collectCorreos();
   const tipoSolicitud = document.getElementById("blanqueo-tipo")?.value.trim() || "";
+  const modulos = collectModulos("blanqueo-modulo");
 
   if (!nroCaso || !nroCliente || !correos.length) {
     setStatus("Completá caso, cliente y al menos un correo.", true);
@@ -517,6 +585,10 @@ async function createSolicitud() {
   }
   if (!tiposForPortal(portal).includes(tipoSolicitud)) {
     setStatus("Elegí un tipo de solicitud válido para esa plataforma.", true);
+    return;
+  }
+  if (isHabilitacionTipo(tipoSolicitud) && !modulos.length) {
+    setStatus("Elegí al menos un módulo a habilitar.", true);
     return;
   }
 
@@ -533,6 +605,7 @@ async function createSolicitud() {
           nroCliente,
           correo,
           tipoSolicitud,
+          modulosDetalle: isHabilitacionTipo(tipoSolicitud) ? modulos.join("|") : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -752,6 +825,7 @@ function normalizeBlanqueoItem(raw) {
     solicitadoPorEmail: src.solicitadoPorEmail ?? src.SolicitadoPorEmail ?? "",
     solicitadoPorNombre: src.solicitadoPorNombre ?? src.SolicitadoPorNombre ?? "",
     tipoSolicitud: src.tipoSolicitud ?? src.TipoSolicitud ?? "",
+    modulosDetalle: src.modulosDetalle ?? src.ModulosDetalle ?? null,
     listo: !!(src.listo ?? src.Listo),
     aclaracion: src.aclaracion ?? src.Aclaracion ?? null,
   };
@@ -775,6 +849,8 @@ function getFilteredItems() {
         item.nroCliente,
         item.solicitadoPorNombre,
         item.aclaracion,
+        item.tipoSolicitud,
+        item.modulosDetalle,
         portalLabel(item.portal),
       ].map((x) => String(x || "").toLowerCase()).join(" ");
       if (!hay.includes(q)) return false;
@@ -897,7 +973,7 @@ function buildRow(item) {
     <td class="blanqueo-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>
     ${mailCell}
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
-    <td class="blanqueo-col-tipo">${escapeHtml(item.tipoSolicitud)}</td>
+    <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
     <td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
     <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>
   `;
@@ -932,14 +1008,14 @@ function buildRow(item) {
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave]")) return;
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill")) return;
     selectedId = item.id;
     applyFilters();
   });
 
   row.addEventListener("dblclick", (e) => {
     e.preventDefault();
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave]")) return;
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill")) return;
     selectedId = item.id;
     applyFilters();
     if (!canConfirm) return;
@@ -1144,6 +1220,7 @@ function openEditModal(item) {
   if (cliente) cliente.value = item.nroCliente || "";
   if (correo) correo.value = item.correo || "";
   syncTipoOptions("blanqueo-edit-tipo", portalValue, item.tipoSolicitud || "");
+  syncEditModulosField(item.modulosDetalle || "");
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   caso?.focus();
@@ -1163,9 +1240,14 @@ async function saveEdit() {
   const nroCliente = document.getElementById("blanqueo-edit-cliente")?.value.trim() || "";
   const correo = document.getElementById("blanqueo-edit-correo")?.value.trim() || "";
   const tipoSolicitud = document.getElementById("blanqueo-edit-tipo")?.value.trim() || "";
+  const modulos = collectModulos("blanqueo-edit-modulo");
 
   if (!tiposForPortal(portal).includes(tipoSolicitud)) {
     setStatus("Elegí un tipo de solicitud válido para esa plataforma.", true);
+    return;
+  }
+  if (isHabilitacionTipo(tipoSolicitud) && !modulos.length) {
+    setStatus("Elegí al menos un módulo a habilitar.", true);
     return;
   }
 
@@ -1173,7 +1255,14 @@ async function saveEdit() {
     const res = await planUserFetch(`/api/planillas/blanqueo/${editingId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ portal, nroCaso, nroCliente, correo, tipoSolicitud }),
+      body: JSON.stringify({
+        portal,
+        nroCaso,
+        nroCliente,
+        correo,
+        tipoSolicitud,
+        modulosDetalle: isHabilitacionTipo(tipoSolicitud) ? modulos.join("|") : null,
+      }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
@@ -1276,4 +1365,8 @@ function escapeHtml(value) {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/'/g, "&#39;");
 }

@@ -984,6 +984,7 @@ html.st2-theme-dark .st2-suite-float {
 }
 
 html.st2-theme-dark .blanqueo-field label,
+html.st2-theme-dark .blanqueo-modulos-label,
 html.st2-theme-dark .blanqueo-filter-month,
 html.st2-theme-dark .blanqueo-filter-portal,
 html.st2-theme-dark .blanqueo-filter-search,
@@ -1183,4 +1184,37 @@ html.st2-theme-dark .borrado-check:has(input:checked) {
   background: #3f1d2a;
   border-color: #be123c;
   color: #fecdd3;
+}
+
+html.st2-theme-dark .blanqueo-modulos-box {
+  background: #151b26;
+  border-color: #334155;
+}
+
+html.st2-theme-dark .blanqueo-mod-check {
+  background: #1a2130;
+  border-color: #3d4b61;
+  color: #e2e8f0;
+}
+
+html.st2-theme-dark .blanqueo-mod-check:hover {
+  background: #243044;
+  border-color: #64748b;
+}
+
+html.st2-theme-dark .blanqueo-mod-check:has(input:checked) {
+  background: #0c4a6e;
+  border-color: #38bdf8;
+  color: #e0f2fe;
+}
+
+html.st2-theme-dark .blanqueo-hab-pill {
+  background: #4c0519;
+  border-color: #fb7185;
+  color: #fecdd3;
+}
+
+html.st2-theme-dark .blanqueo-hab-pill:hover,
+html.st2-theme-dark .blanqueo-hab-pill:focus-visible {
+  background: #881337;
 }

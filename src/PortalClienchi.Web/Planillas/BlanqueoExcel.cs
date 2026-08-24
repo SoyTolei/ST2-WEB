@@ -15,6 +15,7 @@ public static class BlanqueoExcel
         "NroCliente",
         "Correo",
         "Solicitud",
+        "Modulos",
         "SolicitadoPorNombre",
         "Listo",
         "Aclaracion",
@@ -36,9 +37,10 @@ public static class BlanqueoExcel
             detalle.Cell(row, 4).Value = item.NroCliente;
             detalle.Cell(row, 5).Value = item.Correo;
             detalle.Cell(row, 6).Value = item.TipoSolicitud;
-            detalle.Cell(row, 7).Value = item.SolicitadoPorNombre;
-            detalle.Cell(row, 8).Value = item.Listo ? "Sí" : "No";
-            detalle.Cell(row, 9).Value = item.Aclaracion ?? "";
+            detalle.Cell(row, 7).Value = item.ModulosDetalle?.Replace('|', ',') ?? "";
+            detalle.Cell(row, 8).Value = item.SolicitadoPorNombre;
+            detalle.Cell(row, 9).Value = item.Listo ? "Sí" : "No";
+            detalle.Cell(row, 10).Value = item.Aclaracion ?? "";
             row++;
         }
 
@@ -99,9 +101,10 @@ public static class BlanqueoExcel
         ws.Cell(2, 4).Value = "7890";
         ws.Cell(2, 5).Value = "cliente@ejemplo.com";
         ws.Cell(2, 6).Value = "Blanqueo";
-        ws.Cell(2, 7).Value = "Leonel Gallo";
-        ws.Cell(2, 8).Value = "Sí";
-        ws.Cell(2, 9).Value = "";
+        ws.Cell(2, 7).Value = "";
+        ws.Cell(2, 8).Value = "Leonel Gallo";
+        ws.Cell(2, 9).Value = "Sí";
+        ws.Cell(2, 10).Value = "";
 
         ws.Row(1).Style.Font.Bold = true;
         ws.SheetView.FreezeRows(1);
@@ -113,7 +116,8 @@ public static class BlanqueoExcel
         help.Cell(3, 1).Value = "SolicitadoPorNombre: nombre y apellido tal cual en Accesos (se asocia el mail solo).";
         help.Cell(4, 1).Value = "Plataforma: On Balance | ONVIO | Portal Cliente";
         help.Cell(5, 1).Value = "Listo: Sí / No · Aclaracion: vacío | No registrado | otra nota";
-        help.Cell(6, 1).Value = "La hoja Resumen mensual del export se ignora al importar.";
+        help.Cell(6, 1).Value = "Portal Cliente · Habilitación de Módulos: en Modulos usá Sueldos SQL | Sueldos WEB | ONVIO | Bejerman SQL | Contabilidad WEB";
+        help.Cell(7, 1).Value = "La hoja Resumen mensual del export se ignora al importar.";
         help.Columns().AdjustToContents();
 
         using var ms = new MemoryStream();
@@ -188,6 +192,17 @@ public static class BlanqueoExcel
                 continue;
             }
 
+            string? modulos = null;
+            if (BlanqueoModulos.EsHabilitacion(tipo))
+            {
+                modulos = BlanqueoModulos.NormalizeList(Cell("modulos"));
+                if (modulos is null)
+                {
+                    errors.Add($"Fila {r}: Habilitación de Módulos requiere al menos un módulo en la columna Modulos.");
+                    continue;
+                }
+            }
+
             var fecha = ReadFechaCell(ws, r, headerMap);
             if (fecha is null)
             {
@@ -235,6 +250,7 @@ public static class BlanqueoExcel
                 SolicitadoPorNombre = nombreSol.Trim(),
                 Listo = listo,
                 Aclaracion = aclaracion,
+                ModulosDetalle = modulos,
             });
         }
 
@@ -268,6 +284,8 @@ public static class BlanqueoExcel
                 map["nrocliente"] = c;
             else if (Matches(raw, "correo", "email", "mail", "e-mail"))
                 map["correo"] = c;
+            else if (Matches(raw, "modulos", "modulo"))
+                map["modulos"] = c;
             else if (Matches(raw, "solicitud", "tipo", "tiposolicitud"))
                 map["solicitud"] = c;
             else if (Matches(raw, "solicitadopornombre", "solicitante", "nombre", "solicitadopor", "agente", "agent"))
@@ -337,6 +355,9 @@ public static class BlanqueoExcel
             || v.Equals("Cambio de password", StringComparison.OrdinalIgnoreCase)
             || v.Contains("contrase", StringComparison.OrdinalIgnoreCase))
             return "Cambio de contraseña";
+        if (v.Equals(BlanqueoModulos.TipoHabilitacion, StringComparison.OrdinalIgnoreCase)
+            || v.Contains("habilit", StringComparison.OrdinalIgnoreCase))
+            return portal is "PortalCliente" ? BlanqueoModulos.TipoHabilitacion : null;
 
         return null;
     }
@@ -561,4 +582,5 @@ public sealed class BlanqueoHistoricalRow
     public string SolicitadoPorNombre { get; set; } = "";
     public bool Listo { get; set; }
     public string? Aclaracion { get; set; }
+    public string? ModulosDetalle { get; set; }
 }

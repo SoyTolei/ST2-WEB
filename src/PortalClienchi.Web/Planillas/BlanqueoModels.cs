@@ -11,6 +11,7 @@ public sealed class BlanqueoRecordDto
     public string SolicitadoPorEmail { get; set; } = "";
     public string SolicitadoPorNombre { get; set; } = "";
     public string TipoSolicitud { get; set; } = "";
+    public string? ModulosDetalle { get; set; }
     public bool Listo { get; set; }
     public string? Aclaracion { get; set; }
     /// <summary>UTC ISO de alta (para ordenar: lo más nuevo al final).</summary>
@@ -24,6 +25,7 @@ public sealed class BlanqueoCreateRequest
     public string NroCliente { get; set; } = "";
     public string Correo { get; set; } = "";
     public string TipoSolicitud { get; set; } = "";
+    public string? ModulosDetalle { get; set; }
 }
 
 public sealed class BlanqueoUpdateRequest
@@ -33,6 +35,71 @@ public sealed class BlanqueoUpdateRequest
     public string NroCliente { get; set; } = "";
     public string Correo { get; set; } = "";
     public string TipoSolicitud { get; set; } = "";
+    public string? ModulosDetalle { get; set; }
+}
+
+public static class BlanqueoModulos
+{
+    public const string TipoHabilitacion = "Habilitación de Módulos";
+
+    public static readonly string[] Permitidos =
+    [
+        "Sueldos SQL",
+        "Sueldos WEB",
+        "ONVIO",
+        "Bejerman SQL",
+        "Contabilidad WEB",
+    ];
+
+    public static bool EsHabilitacion(string? tipo) =>
+        string.Equals((tipo ?? "").Trim(), TipoHabilitacion, StringComparison.OrdinalIgnoreCase);
+
+    public static string? NormalizeList(string? raw)
+    {
+        var picked = Parse(raw);
+        return picked.Count == 0 ? null : string.Join('|', picked);
+    }
+
+    public static List<string> Parse(string? raw)
+    {
+        var text = (raw ?? "").Trim();
+        if (text.Length == 0)
+            return [];
+
+        var parts = text.Split(['|', ',', ';', '\n', '\r'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var list = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var part in parts)
+        {
+            var canon = Match(part);
+            if (canon is null || !seen.Add(canon))
+                continue;
+            list.Add(canon);
+        }
+        return list;
+    }
+
+    public static string? Match(string? value)
+    {
+        var v = (value ?? "").Trim();
+        if (v.Length == 0) return null;
+        foreach (var opt in Permitidos)
+        {
+            if (opt.Equals(v, StringComparison.OrdinalIgnoreCase))
+                return opt;
+        }
+        if (v.Equals("SueldosSql", StringComparison.OrdinalIgnoreCase) || v.Equals("Sueldos SQL", StringComparison.OrdinalIgnoreCase))
+            return "Sueldos SQL";
+        if (v.Equals("SueldosWeb", StringComparison.OrdinalIgnoreCase) || v.Equals("Sueldos WEB", StringComparison.OrdinalIgnoreCase))
+            return "Sueldos WEB";
+        if (v.Equals("BejermanSql", StringComparison.OrdinalIgnoreCase) || v.Equals("Bejerman SQL", StringComparison.OrdinalIgnoreCase))
+            return "Bejerman SQL";
+        if (v.Equals("ContabilidadWeb", StringComparison.OrdinalIgnoreCase) || v.Equals("Contabilidad WEB", StringComparison.OrdinalIgnoreCase))
+            return "Contabilidad WEB";
+        if (v.Equals("Onvio", StringComparison.OrdinalIgnoreCase))
+            return "ONVIO";
+        return null;
+    }
 }
 
 public sealed class BlanqueoPatchRequest
