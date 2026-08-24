@@ -32,6 +32,14 @@ const PLANILLAS_EASTER_EGGS = [
     motion: "still",
     size: "lg",
   },
+  {
+    email: "gisela.crosenzi@thomsonreuters.com",
+    src: "/img/gisela-corner.gif?v=1",
+    motion: "still",
+    balloons: true,
+    birthdayMonth: 8,
+    birthdayDay: 25,
+  },
 ];
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
@@ -1376,6 +1384,73 @@ function effectivePlanillasEmail() {
   return String(getPlanUserEmail() || "").trim().toLowerCase();
 }
 
+function isEggBirthday(egg) {
+  if (!egg?.birthdayMonth || !egg?.birthdayDay) return false;
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+    }).formatToParts(new Date());
+    const month = Number(parts.find((p) => p.type === "month")?.value);
+    const day = Number(parts.find((p) => p.type === "day")?.value);
+    return month === egg.birthdayMonth && day === egg.birthdayDay;
+  } catch {
+    const now = new Date();
+    return now.getMonth() + 1 === egg.birthdayMonth && now.getDate() === egg.birthdayDay;
+  }
+}
+
+let balloonTimer = null;
+let balloonLayer = null;
+
+function stopEasterBalloons() {
+  if (balloonTimer) {
+    window.clearTimeout(balloonTimer);
+    balloonTimer = null;
+  }
+  balloonLayer?.replaceChildren();
+}
+
+function spawnEasterBalloon() {
+  if (!balloonLayer) return;
+  const colors = ["#f43f5e", "#3b82f6", "#f59e0b", "#ec4899", "#22c55e", "#a855f7"];
+  const el = document.createElement("span");
+  el.className = "st2-x-balloon";
+  el.style.left = `${8 + Math.random() * 84}%`;
+  el.style.setProperty("--st2-balloon-color", colors[Math.floor(Math.random() * colors.length)]);
+  el.style.setProperty("--st2-balloon-drift", `${Math.round((Math.random() * 2 - 1) * 48)}px`);
+  el.style.setProperty("--st2-balloon-dur", `${7 + Math.random() * 4}s`);
+  el.innerHTML = `<span class="st2-x-balloon-body"></span><span class="st2-x-balloon-string"></span>`;
+  balloonLayer.appendChild(el);
+  window.setTimeout(() => el.remove(), 12000);
+}
+
+function scheduleEasterBalloon() {
+  spawnEasterBalloon();
+  if (Math.random() < 0.35) spawnEasterBalloon();
+  balloonTimer = window.setTimeout(scheduleEasterBalloon, 7000 + Math.random() * 8000);
+}
+
+function syncEasterBalloons(egg) {
+  const on = !!(egg?.balloons && isEggBirthday(egg));
+  if (!on) {
+    stopEasterBalloons();
+    balloonLayer?.classList.add("hidden");
+    return;
+  }
+  if (!balloonLayer) {
+    balloonLayer = document.createElement("div");
+    balloonLayer.id = "st2-x-balloons";
+    balloonLayer.className = "st2-x-balloons";
+    balloonLayer.setAttribute("aria-hidden", "true");
+    document.body.appendChild(balloonLayer);
+  }
+  balloonLayer.classList.remove("hidden");
+  if (!balloonTimer) scheduleEasterBalloon();
+}
+
 function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === email);
@@ -1397,9 +1472,11 @@ function syncPlanillasHeroEaster() {
     el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-still", egg?.motion === "still");
     el.classList.toggle("is-lg", egg?.size === "lg");
+    el.classList.toggle("is-smooth", egg?.motion === "still");
     el.classList.toggle("is-hidden", !show);
     el.setAttribute("aria-hidden", show ? "false" : "true");
   });
+  syncEasterBalloons(show ? egg : null);
 }
 
 export function initPlanillas() {

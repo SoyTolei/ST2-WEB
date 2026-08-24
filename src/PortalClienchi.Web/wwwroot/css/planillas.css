@@ -448,6 +448,71 @@
   animation: planillas-easter-wag 1.15s ease-in-out infinite;
 }
 
+.planillas-hero-easter.is-smooth,
+.planillas-corner-easter.is-smooth {
+  image-rendering: auto;
+}
+
+.st2-x-balloons {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.st2-x-balloons.hidden {
+  display: none !important;
+}
+
+.st2-x-balloon {
+  position: absolute;
+  bottom: -48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: st2-x-balloon-rise var(--st2-balloon-dur, 8s) linear forwards;
+}
+
+.st2-x-balloon-body {
+  width: 18px;
+  height: 22px;
+  border-radius: 50% 50% 50% 50% / 42% 42% 58% 58%;
+  background: var(--st2-balloon-color, #f43f5e);
+  box-shadow: inset -3px -4px 0 rgba(15, 23, 42, 0.12);
+}
+
+.st2-x-balloon-body::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  margin: -2px auto 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 5px solid var(--st2-balloon-color, #f43f5e);
+}
+
+.st2-x-balloon-string {
+  width: 1px;
+  height: 28px;
+  background: rgba(100, 116, 139, 0.65);
+}
+
+@keyframes st2-x-balloon-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--st2-balloon-drift, 20px), calc(-100vh - 80px), 0);
+    opacity: 0;
+  }
+}
+
 @keyframes planillas-easter-wag {
   0%,
   100% {
