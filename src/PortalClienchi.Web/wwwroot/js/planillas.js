@@ -20,10 +20,8 @@ import {
   renderAccessAlertUi,
 } from "./access-alerts.js";
 
-const HERO_EASTER_EMAILS = [
-  "yohana.colacci@thomsonreuters.com",
-  "yohanaelizabeth.orellana@thomsonreuters.com",
-];
+const HERO_EASTER_EMAIL = "yohana.colacci@thomsonreuters.com";
+const HERO_EASTER_SRC = "/img/yohana-corner.png?v=6";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -1368,13 +1366,24 @@ function effectivePlanillasEmail() {
 }
 
 function syncPlanillasHeroEaster() {
-  const el = document.getElementById("planillas-hero-easter");
-  if (!el) return;
-  const email = effectivePlanillasEmail();
-  const local = email.split("@")[0] || "";
-  const show = HERO_EASTER_EMAILS.includes(email) || local.includes("yohana");
-  el.classList.toggle("is-hidden", !show);
-  el.setAttribute("aria-hidden", show ? "false" : "true");
+  const show = effectivePlanillasEmail() === HERO_EASTER_EMAIL;
+  document.querySelectorAll(".planillas-view .planillas-card").forEach((card) => {
+    if (!card.querySelector(".planillas-hero-easter") && !card.querySelector(".planillas-corner-easter")) {
+      const img = document.createElement("img");
+      img.className = "planillas-corner-easter is-hidden";
+      img.src = HERO_EASTER_SRC;
+      img.alt = "";
+      img.width = 48;
+      img.height = 48;
+      img.decoding = "async";
+      img.setAttribute("aria-hidden", "true");
+      card.prepend(img);
+    }
+  });
+  document.querySelectorAll(".planillas-hero-easter, .planillas-corner-easter").forEach((el) => {
+    el.classList.toggle("is-hidden", !show);
+    el.setAttribute("aria-hidden", show ? "false" : "true");
+  });
 }
 
 export function initPlanillas() {
