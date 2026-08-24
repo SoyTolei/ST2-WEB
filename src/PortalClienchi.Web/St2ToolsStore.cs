@@ -571,7 +571,7 @@ public sealed class St2ToolsStore
         {
             Id = id,
             Name = ToolNames.GetValueOrDefault(id) ?? id.ToUpperInvariant(),
-            Version = info.LastWriteTimeUtc.ToString("yyyy.MM.dd"),
+            Version = VersionStamp(info),
             FileName = CanonicalDownloadName(id, info.Name),
             SizeBytes = info.Length,
             UpdatedAtUtc = info.LastWriteTimeUtc.ToString("o"),
@@ -579,6 +579,9 @@ public sealed class St2ToolsStore
             Available = true,
         };
     }
+
+    private static string VersionStamp(FileInfo info) =>
+        $"{info.LastWriteTimeUtc:yyyy.MM.dd.HHmm}-{info.Length}";
 
     /// <summary>Nombres canónicos que ve el usuario al descargar.</summary>
     public static string CanonicalDownloadName(string id, string? actualName = null)

@@ -2,6 +2,7 @@ import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
+import { syncStackedToastGreetings } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1360,9 +1361,9 @@ function renderAccessAdminTable() {
     if (item.isUnseenNew) {
       badges.push('<span class="st2-access-admin-new-user" title="Primer ingreso hoy">Nuevo</span>');
     }
-    if (item.isActive) {
-      badges.push('<span class="st2-access-admin-live" title="Activo ahora"><span class="st2-access-admin-live-dot" aria-hidden="true"></span></span>');
-    }
+    const liveHtml = item.isActive
+      ? '<span class="st2-access-admin-live" title="Activo ahora"><span class="st2-access-admin-live-dot" aria-hidden="true"></span></span>'
+      : "";
     const badgeHtml = badges.length
       ? `<span class="st2-access-admin-email-badges">${badges.join("")}</span>`
       : "";
@@ -1411,6 +1412,7 @@ function renderAccessAdminTable() {
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
+          ${liveHtml}
           <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
         </div>
@@ -1758,7 +1760,6 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
 }
 
 const TOOLS_SEEN_KEY = "st2-tools-seen-versions";
-const TOOLS_BANNER_DISMISSED_KEY = "st2-tools-banner-dismissed";
 const aboutToolsBadge = document.getElementById("about-tools-badge");
 const aboutToolsStatus = document.getElementById("st2-about-tools-status");
 const toolsBanner = document.getElementById("st2-tools-banner");
@@ -1804,11 +1805,17 @@ function isToolVersionNew(id) {
   return listNewTools().some((t) => t.id === id);
 }
 
-function newToolsSignature(tools) {
-  return (tools || [])
-    .map((t) => `${t.id}:${t.version}`)
-    .sort()
-    .join("|");
+function formatToolUpdatedAt(iso) {
+  const raw = String(iso || "").trim();
+  if (!raw) return "";
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString("es-AR", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function toolDisplayName(id) {
@@ -1817,19 +1824,19 @@ function toolDisplayName(id) {
   return id;
 }
 
-function readBannerDismissedSignature() {
-  try {
-    return localStorage.getItem(TOOLS_BANNER_DISMISSED_KEY) || "";
-  } catch {
-    return "";
+function toolsUpdateMessage(newer) {
+  const list = newer || [];
+  if (!list.length) return "";
+  const withDate = (t) => {
+    const when = formatToolUpdatedAt(t.updatedAtUtc);
+    return when ? `${toolDisplayName(t.id)} (${when})` : toolDisplayName(t.id);
+  };
+  if (list.length === 1) {
+    return `Hay una versión nueva de ${withDate(list[0])}. Abrí Acerca de ST2 para descargarla.`;
   }
-}
-
-function writeBannerDismissedSignature(sig) {
-  try {
-    if (sig) localStorage.setItem(TOOLS_BANNER_DISMISSED_KEY, sig);
-    else localStorage.removeItem(TOOLS_BANNER_DISMISSED_KEY);
-  } catch { /* ignore */ }
+  const names = list.map(withDate);
+  const last = names.pop();
+  return `Hay una versión nueva de ${names.join(", ")} y ${last}. Abrí Acerca de ST2 para descargarla.`;
 }
 
 function setToolsBannerVisible(show, message) {
@@ -1840,10 +1847,30 @@ function setToolsBannerVisible(show, message) {
   document.body.classList.toggle("st2-has-tools-update", !!show);
 }
 
-function dismissToolsBanner() {
-  const sig = newToolsSignature(listNewTools());
-  if (sig) writeBannerDismissedSignature(sig);
-  setToolsBannerVisible(false);
+function renderToolsToast(newer, message) {
+  const toast = document.getElementById("tools-ready-toast");
+  const toastText = document.getElementById("tools-ready-toast-text");
+  const toastCount = document.getElementById("tools-ready-toast-count");
+  if (!toast) return;
+  const n = (newer || []).length;
+  const show = n > 0 && !aboutRouteOpen;
+  if (!show) {
+    toast.classList.add("hidden");
+    toast.setAttribute("aria-hidden", "true");
+    delete toast.dataset.toastBody;
+    syncStackedToastGreetings();
+    return;
+  }
+  if (toastCount) {
+    toastCount.textContent = String(n);
+    toastCount.setAttribute("aria-hidden", n > 1 ? "false" : "true");
+  }
+  const body = message || "Hay una versión nueva de herramientas.";
+  toast.dataset.toastBody = body;
+  toast.classList.remove("hidden");
+  toast.setAttribute("aria-hidden", "false");
+  if (toastText && !toastText.textContent) toastText.textContent = body;
+  syncStackedToastGreetings();
 }
 
 function syncAboutToolsBadge() {
@@ -1855,17 +1882,9 @@ function syncAboutToolsBadge() {
     aboutToolsBadge.title = hasNew ? "Hay una versión nueva de herramientas" : "";
   }
 
-  const sig = newToolsSignature(newer);
-  const bannerOpen = hasNew && !aboutRouteOpen && sig !== readBannerDismissedSignature();
-  let msg = "Hay una versión nueva de herramientas. Abrí Acerca de ST2 para descargarla.";
-  if (newer.length === 1) {
-    msg = `Hay una versión nueva de ${toolDisplayName(newer[0].id)}. Abrí Acerca de ST2 para descargarla.`;
-  } else if (newer.length > 1) {
-    const names = newer.map((t) => toolDisplayName(t.id));
-    const last = names.pop();
-    msg = `Hay una versión nueva de ${names.join(", ")} y ${last}. Abrí Acerca de ST2 para descargarla.`;
-  }
-  setToolsBannerVisible(bannerOpen, msg);
+  const msg = toolsUpdateMessage(newer);
+  setToolsBannerVisible(hasNew && !aboutRouteOpen, msg);
+  renderToolsToast(newer, msg);
 }
 
 function markToolsSeen() {
@@ -1874,7 +1893,6 @@ function markToolsSeen() {
     if (t?.available && t.version) next[t.id] = t.version;
   }
   writeSeenToolVersions(next);
-  writeBannerDismissedSignature("");
   syncAboutToolsBadge();
 }
 
@@ -1918,9 +1936,13 @@ function renderAboutTools() {
     const label = tool.fileName || meta.file;
     if (newEl) newEl.hidden = !isToolVersionNew(id);
     if (sizeEl) {
-      if (tool.sizeBytes) {
+      const when = formatToolUpdatedAt(tool.updatedAtUtc);
+      const size = tool.sizeBytes ? formatToolSize(tool.sizeBytes) : "";
+      const bits = [when, size].filter(Boolean);
+      if (bits.length) {
         sizeEl.hidden = false;
-        sizeEl.textContent = formatToolSize(tool.sizeBytes);
+        sizeEl.textContent = bits.join(" · ");
+        sizeEl.title = when ? `Subido ${when}` : "";
       } else {
         sizeEl.hidden = true;
         sizeEl.textContent = "";
@@ -2381,24 +2403,24 @@ function bindAboutToolsUi() {
     document.getElementById("st2-tools-banner-open")?.addEventListener("click", () => {
       showAbout();
     });
-    document.getElementById("st2-tools-banner-dismiss")?.addEventListener("click", () => {
-      dismissToolsBanner();
+    document.getElementById("tools-ready-toast-open")?.addEventListener("click", () => {
+      showAbout();
     });
   }
 }
 
 function showAbout({ history = "push" } = {}) {
+  aboutRouteOpen = true;
   const webMeta = document.getElementById("st2-about-web-meta");
   if (webMeta) webMeta.textContent = getAboutVersionLabel();
   applyAboutUpdated();
   bindAboutToolsUi();
   void refreshAboutTools().then(() => {
-    dismissToolsBanner();
+    markToolsSeen();
     if (isSt2SuperAdmin()) void refreshToolsDiagHint();
   });
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
-  aboutRouteOpen = true;
   document.title = "ST2 · Acerca de";
   if (history !== "none") {
     const current = normalizeShellPath(window.location.pathname);
@@ -2413,7 +2435,6 @@ function hideAbout({ history = "restore" } = {}) {
   aboutOverlay?.classList.add("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "true");
   aboutRouteOpen = false;
-  markToolsSeen();
   const onAboutPath = isHerramientasPath(normalizeShellPath(window.location.pathname));
   if (history !== "none" && onAboutPath) {
     const fallback = pathBeforeAbout && !isHerramientasPath(pathBeforeAbout) ? pathBeforeAbout : "/";

@@ -12,6 +12,7 @@ const STACKED_TOAST_IDS = [
   "blanqueo-ready-toast",
   "borrado-ready-toast",
   "access-ready-toast",
+  "tools-ready-toast",
 ];
 
 export function firstNameFromEmail(email) {

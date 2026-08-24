@@ -3603,6 +3603,8 @@ body.portal-tab-active .tab-icon {
   min-height: 18px;
   padding: 1px 2px;
   box-sizing: border-box;
+  flex-shrink: 0;
+  order: -1;
 }
 
 .st2-access-admin-live-dot {
