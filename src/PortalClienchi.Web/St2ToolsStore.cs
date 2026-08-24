@@ -585,9 +585,17 @@ public sealed class St2ToolsStore
     {
         var ext = Path.GetExtension(actualName ?? "").ToLowerInvariant();
         if (id.Equals("sql", StringComparison.OrdinalIgnoreCase))
-            return ext == ".zip" ? "ST2 - Herramientas SQL.zip" : "ST2 - Herramientas SQL.exe";
+        {
+            if (ext is ".zip" or ".7z" or ".rar" or ".exe" or ".msi")
+                return $"ST2 - Herramientas SQL{ext}";
+            return "ST2 - Herramientas SQL.zip";
+        }
         if (id.Equals("bat", StringComparison.OrdinalIgnoreCase))
-            return ext == ".zip" ? "ST2-PS.zip" : "ST2-PS.bat";
+        {
+            if (ext is ".zip" or ".7z" or ".rar" or ".exe" or ".bat" or ".cmd")
+                return $"ST2-PS{ext}";
+            return "ST2-PS.zip";
+        }
         return string.IsNullOrWhiteSpace(actualName) ? $"st2-{id}.bin" : Path.GetFileName(actualName);
     }
 
