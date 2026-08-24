@@ -1927,28 +1927,23 @@ function toolPackageLabel(id) {
 function toolsUpdateMessage(newer) {
   const list = newer || [];
   if (!list.length) return "";
-  const named = list.map((t) => {
-    const when = uploadedLabelFor(t.id, t).replace(/^Subido\s+/i, "");
-    const label = toolPackageLabel(t.id);
-    return when ? `${label} (${when})` : label;
-  });
+  const names = list.map((t) => toolPackageLabel(t.id));
   let body;
-  if (named.length === 1) {
-    body = `hay una versión nueva para descargar de ${named[0]}.`;
+  if (names.length === 1) {
+    body = `hay una versión nueva para descargar de ${names[0]}.`;
   } else {
-    const last = named.pop();
-    body = `hay una versión nueva para descargar de ${named.join(", ")} y ${last}.`;
+    const last = names.pop();
+    body = `hay una versión nueva para descargar de ${names.join(", ")} y ${last}.`;
   }
   const name = firstNameFromEmail(getPlanUserEmail());
   return name ? `Hola ${name}! ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
 }
 
-function setToolsBannerVisible(show, message) {
+function hideToolsTopBanner() {
   if (!toolsBanner) return;
-  if (message && toolsBannerText) toolsBannerText.textContent = message;
-  toolsBanner.classList.toggle("hidden", !show);
-  toolsBanner.toggleAttribute("hidden", !show);
-  document.body.classList.toggle("st2-has-tools-update", !!show);
+  toolsBanner.classList.add("hidden");
+  toolsBanner.setAttribute("hidden", "");
+  document.body.classList.remove("st2-has-tools-update");
 }
 
 function renderToolsToast(newer, message) {
@@ -1983,7 +1978,7 @@ function syncAboutToolsBadge() {
   }
 
   const msg = toolsUpdateMessage(newer);
-  setToolsBannerVisible(hasNew && !aboutRouteOpen, msg);
+  hideToolsTopBanner();
   renderToolsToast(newer, msg);
 }
 
