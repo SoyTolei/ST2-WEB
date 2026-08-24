@@ -418,6 +418,25 @@
   }
 }
 
+.planillas-hero-easter.is-wag,
+.planillas-corner-easter.is-wag {
+  transform-origin: 20% 90%;
+  animation: planillas-easter-wag 1.15s ease-in-out infinite;
+}
+
+@keyframes planillas-easter-wag {
+  0%,
+  100% {
+    transform: rotate(-6deg) translateY(0);
+  }
+  35% {
+    transform: rotate(8deg) translateY(-2px);
+  }
+  70% {
+    transform: rotate(-4deg) translateY(-1px);
+  }
+}
+
 .planillas-hero h2 {
   margin: 0;
   font-size: 1.65rem;

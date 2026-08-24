@@ -20,8 +20,18 @@ import {
   renderAccessAlertUi,
 } from "./access-alerts.js";
 
-const HERO_EASTER_EMAIL = "yohana.colacci@thomsonreuters.com";
-const HERO_EASTER_SRC = "/img/yohana-corner.png?v=6";
+const PLANILLAS_EASTER_EGGS = [
+  {
+    email: "yohana.colacci@thomsonreuters.com",
+    src: "/img/yohana-corner.png?v=6",
+    motion: "bob",
+  },
+  {
+    email: "belen.foschiatti@thomsonreuters.com",
+    src: "/img/belen-corner.gif?v=1",
+    motion: "wag",
+  },
+];
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -1366,12 +1376,13 @@ function effectivePlanillasEmail() {
 }
 
 function syncPlanillasHeroEaster() {
-  const show = effectivePlanillasEmail() === HERO_EASTER_EMAIL;
+  const email = effectivePlanillasEmail();
+  const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === email);
+  const show = !!egg;
   document.querySelectorAll(".planillas-view .plan-module-sticky-head").forEach((head) => {
     if (head.querySelector(".planillas-corner-easter")) return;
     const img = document.createElement("img");
     img.className = "planillas-corner-easter is-hidden";
-    img.src = HERO_EASTER_SRC;
     img.alt = "";
     img.width = 44;
     img.height = 44;
@@ -1380,6 +1391,8 @@ function syncPlanillasHeroEaster() {
     head.appendChild(img);
   });
   document.querySelectorAll(".planillas-hero-easter, .planillas-corner-easter").forEach((el) => {
+    if (egg) el.src = egg.src;
+    el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-hidden", !show);
     el.setAttribute("aria-hidden", show ? "false" : "true");
   });
