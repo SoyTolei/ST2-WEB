@@ -1393,6 +1393,7 @@ function syncPlanillasHeroEaster() {
   });
   document.querySelectorAll(".planillas-hero-easter, .planillas-corner-easter").forEach((el) => {
     if (egg) el.src = egg.src;
+    else el.removeAttribute("src");
     el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-still", egg?.motion === "still");
     el.classList.toggle("is-lg", egg?.size === "lg");

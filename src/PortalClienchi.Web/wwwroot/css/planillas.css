@@ -374,8 +374,6 @@
   height: auto;
   pointer-events: none;
   z-index: 2;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
   filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
   user-select: none;
   opacity: 1;
@@ -388,12 +386,19 @@
   top: -18px;
   left: 4px;
   width: 108px;
+  image-rendering: auto;
 }
 
 .planillas-corner-easter.is-lg {
   top: -2px;
   right: 6px;
   width: 86px;
+  image-rendering: auto;
+}
+
+.planillas-hero-easter.is-hidden,
+.planillas-corner-easter.is-hidden {
+  display: none !important;
 }
 
 .plan-module-sticky-head:has(.planillas-corner-easter.is-lg:not(.is-hidden)) {
@@ -409,12 +414,16 @@
   height: auto;
   pointer-events: none;
   z-index: 4;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
   filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
   user-select: none;
   transform-origin: 50% 85%;
   animation: planillas-hero-easter-bob 2.6s ease-in-out infinite;
+}
+
+.planillas-hero-easter:not(.is-lg),
+.planillas-corner-easter:not(.is-lg) {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 @keyframes planillas-hero-easter-bob {
