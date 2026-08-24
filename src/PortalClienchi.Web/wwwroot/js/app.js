@@ -2020,7 +2020,7 @@ async function refreshAboutTools({ silent = false } = {}) {
       {
         id: "sql",
         name: "ST2.SQL",
-        available: false,
+        available: true,
         version: "",
         fileName: "ST2 - Herramientas SQL.zip",
         sizeBytes: 0,
@@ -2028,7 +2028,7 @@ async function refreshAboutTools({ silent = false } = {}) {
       {
         id: "bat",
         name: "ST2.BAT",
-        available: false,
+        available: true,
         version: "",
         fileName: "ST2-PS.zip",
         sizeBytes: 0,

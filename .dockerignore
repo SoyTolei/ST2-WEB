@@ -3,7 +3,10 @@
 publish/
 publish-win64/
 *.zip
+!tools-packages/
+!tools-packages/**
 !tools-packages/**/*.zip
+!tools-packages/**/*.7z
 **/.vs/
 **/*.user
 appsettings.local.json

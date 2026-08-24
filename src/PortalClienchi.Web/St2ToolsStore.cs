@@ -93,7 +93,6 @@ public sealed class St2ToolsStore
             {
                 lock (_gate)
                 {
-                    try { EnsureRoot(); } catch { /* volume opcional para listar */ }
                     var map = ReadManifestUnlocked();
                     list.Add(ToDto(id, map.GetValueOrDefault(id)));
                 }
@@ -483,14 +482,20 @@ public sealed class St2ToolsStore
             if (!Directory.Exists(dir))
                 continue;
 
-            var file = Directory.EnumerateFiles(dir)
+            var infos = Directory.EnumerateFiles(dir)
                 .Where(f => AllowedExtensions.Contains(Path.GetExtension(f)))
                 .Select(f => new FileInfo(f))
+                .ToList();
+            var file = infos
                 .Where(info => info.Length > 0)
                 .OrderByDescending(info => info.Length)
                 .ThenByDescending(info => info.LastWriteTimeUtc)
                 .Select(info => info.FullName)
-                .FirstOrDefault();
+                .FirstOrDefault()
+                ?? infos
+                    .OrderByDescending(info => info.LastWriteTimeUtc)
+                    .Select(info => info.FullName)
+                    .FirstOrDefault();
             if (file is null)
                 continue;
 
