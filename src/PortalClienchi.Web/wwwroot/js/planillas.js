@@ -38,6 +38,7 @@ const PLANILLAS_EASTER_EGGS = [
     motion: "still",
     balloons: true,
     birthdayMonth: 8,
+    birthdayFromDay: 24,
     birthdayDay: 25,
   },
 ];
@@ -1384,22 +1385,30 @@ function effectivePlanillasEmail() {
   return String(getPlanUserEmail() || "").trim().toLowerCase();
 }
 
-function isEggBirthday(egg) {
-  if (!egg?.birthdayMonth || !egg?.birthdayDay) return false;
+function argentinaMonthDay() {
   try {
     const parts = new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/Argentina/Buenos_Aires",
-      year: "numeric",
       month: "numeric",
       day: "numeric",
     }).formatToParts(new Date());
-    const month = Number(parts.find((p) => p.type === "month")?.value);
-    const day = Number(parts.find((p) => p.type === "day")?.value);
-    return month === egg.birthdayMonth && day === egg.birthdayDay;
+    return {
+      month: Number(parts.find((p) => p.type === "month")?.value),
+      day: Number(parts.find((p) => p.type === "day")?.value),
+    };
   } catch {
     const now = new Date();
-    return now.getMonth() + 1 === egg.birthdayMonth && now.getDate() === egg.birthdayDay;
+    return { month: now.getMonth() + 1, day: now.getDate() };
   }
+}
+
+function isEggBirthdayWindow(egg) {
+  if (!egg?.birthdayMonth || !egg?.birthdayDay) return true;
+  const { month, day } = argentinaMonthDay();
+  if (month !== egg.birthdayMonth) return false;
+  const from = egg.birthdayFromDay || egg.birthdayDay;
+  const to = egg.birthdayDay;
+  return day >= from && day <= to;
 }
 
 let balloonTimer = null;
@@ -1434,7 +1443,7 @@ function scheduleEasterBalloon() {
 }
 
 function syncEasterBalloons(egg) {
-  const on = !!(egg?.balloons && isEggBirthday(egg));
+  const on = !!(egg?.balloons && isEggBirthdayWindow(egg));
   if (!on) {
     stopEasterBalloons();
     balloonLayer?.classList.add("hidden");
@@ -1454,7 +1463,7 @@ function syncEasterBalloons(egg) {
 function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === email);
-  const show = !!egg;
+  const show = !!egg && isEggBirthdayWindow(egg);
   document.querySelectorAll(".planillas-view .plan-module-sticky-head").forEach((head) => {
     if (head.querySelector(".planillas-corner-easter")) return;
     const img = document.createElement("img");
