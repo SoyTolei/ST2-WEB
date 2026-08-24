@@ -2,7 +2,7 @@ import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
-import { firstNameFromEmail } from "./st2-toast-greet.js";
+import { firstNameFromEmail, setToastText, TOAST_FOOD_MARK } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1963,7 +1963,7 @@ function renderToolsToast(newer, message) {
     toastCount.setAttribute("aria-hidden", n > 1 ? "false" : "true");
     toastCount.classList.toggle("hidden", n < 2);
   }
-  if (toastText) toastText.textContent = message || "";
+  if (toastText) setToastText(toastText, `${TOAST_FOOD_MARK} ${message || ""}`.trim());
   toast.classList.remove("hidden");
   toast.setAttribute("aria-hidden", "false");
 }
