@@ -26,7 +26,11 @@ export const PLAN_ICONS = {
 
 export function injectModuleHeaders() {
   document.querySelectorAll("[data-plan-icon]").forEach((el) => {
+    if (el.dataset.iconReady === "1") return;
     const key = el.dataset.planIcon;
-    if (PLAN_ICONS[key]) el.innerHTML = PLAN_ICONS[key];
+    if (PLAN_ICONS[key]) {
+      el.innerHTML = PLAN_ICONS[key];
+      el.dataset.iconReady = "1";
+    }
   });
 }

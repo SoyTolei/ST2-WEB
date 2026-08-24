@@ -1419,7 +1419,10 @@ export function initPlanillas() {
   syncBorradoBasesModuleVisibility();
   syncPlanillasHeroEaster();
   document.addEventListener("st2:session-changed", syncPlanillasHeroEaster);
-  document.addEventListener("st2:view-as-changed", syncPlanillasHeroEaster);
+  document.addEventListener("st2:view-as-changed", () => {
+    syncPlanillasHeroEaster();
+    updateSistemaUi();
+  });
   showView("menu", { history: "none" });
 
   return Promise.all([refreshModuleFlags({ baseline: true }), loadConfig()]).then(async () => {

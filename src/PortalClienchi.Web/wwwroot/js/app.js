@@ -2,6 +2,8 @@ import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
+import { notifyBlanqueoChanged } from "./blanqueo-alerts.js";
+import { notifyBorradoChanged } from "./borrado-alerts.js";
 import { firstNameFromEmail, setToastText, TOAST_FOOD_MARK } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
@@ -2598,7 +2600,7 @@ document.addEventListener("st2:session-changed", () => {
 });
 viewAsExitBtn?.addEventListener("click", () => {
   clearViewAsProfile();
-  window.location.reload();
+  applyProfilePreviewUi();
 });
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
@@ -2710,8 +2712,18 @@ function startAccessProfilePreview(email, modulesOverride = null) {
     displayName,
     modules: modulesOverride || current.modules || {},
   });
-  window.location.hash = "#/planillas";
-  window.location.reload();
+  applyProfilePreviewUi();
+}
+
+function applyProfilePreviewUi() {
+  closeAccessModulesModal();
+  syncViewAsBanner();
+  syncAdminTabVisibility();
+  notifyAccessChanged();
+  notifyBlanqueoChanged();
+  notifyBorradoChanged();
+  navigateTab("planillas", { history: "replace" });
+  goPlanillasHome({ history: "replace" });
 }
 
 function modulesFromAccessForm() {

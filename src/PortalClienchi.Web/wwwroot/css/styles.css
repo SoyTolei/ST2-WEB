@@ -2636,6 +2636,9 @@ body.portal-tab-active .tab-icon {
 
 .about-btn {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border-color: rgba(255, 122, 51, 0.45);
   color: #ffe8d6;
   background: rgba(255, 122, 51, 0.12);
@@ -2648,22 +2651,21 @@ body.portal-tab-active .tab-icon {
 }
 
 .about-tools-badge {
-  position: absolute;
-  top: -7px;
-  right: -10px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 6px;
+  position: static;
+  flex-shrink: 0;
+  min-width: 0;
+  height: 18px;
+  padding: 0 7px;
   border-radius: 999px;
   background: #dc2626;
   color: #fff;
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 16px;
+  line-height: 18px;
   text-align: center;
-  box-shadow: 0 0 0 2px #fff;
+  box-shadow: none;
   white-space: nowrap;
 }
 

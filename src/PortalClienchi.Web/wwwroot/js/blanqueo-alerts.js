@@ -3,6 +3,7 @@ import {
   canSeeBlanqueoModule,
   canConfirmBlanqueoModule,
   isViewingAsProfile,
+  alertsPreviewQuery,
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
@@ -62,16 +63,9 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
 
   refreshInFlight = (async () => {
     try {
-      if (isViewingAsProfile() && !canConfirmBlanqueoModule()) {
-        cachedAlerts = [];
-        alertMode = "requester";
-        lastRefreshAt = Date.now();
-        renderBlanqueoAlertUi();
-        return cachedAlerts;
-      }
-
-      const alertsUrl = isViewingAsProfile() && canConfirmBlanqueoModule()
-        ? "/api/planillas/blanqueo/alerts?mode=confirm"
+      const qs = alertsPreviewQuery();
+      const alertsUrl = qs
+        ? `/api/planillas/blanqueo/alerts?${qs}`
         : "/api/planillas/blanqueo/alerts";
       const res = await planUserFetch(alertsUrl);
       if (res.status === 401 || res.status === 403) {
@@ -163,6 +157,10 @@ function normalizeAlert(raw) {
 }
 
 export async function markBlanqueoAlertsSeen(ids = null) {
+  if (isViewingAsProfile()) {
+    renderBlanqueoAlertUi();
+    return;
+  }
   if (alertMode === "confirm") {
     const sig = pendingSignature(cachedAlerts);
     confirmToastDismissedSig = sig;

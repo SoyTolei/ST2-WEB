@@ -3,6 +3,7 @@ import {
   canSeeBorradoBasesModule,
   canConfirmBorradoBasesModule,
   isViewingAsProfile,
+  alertsPreviewQuery,
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
@@ -62,17 +63,9 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
 
   refreshInFlight = (async () => {
     try {
-      // Vista previa de perfil: simular alertas como las vería esa persona.
-      if (isViewingAsProfile() && !canConfirmBorradoBasesModule()) {
-        cachedAlerts = [];
-        alertMode = "requester";
-        lastRefreshAt = Date.now();
-        renderBorradoAlertUi();
-        return cachedAlerts;
-      }
-
-      const alertsUrl = isViewingAsProfile() && canConfirmBorradoBasesModule()
-        ? "/api/planillas/borrado-bases/alerts?mode=confirm"
+      const qs = alertsPreviewQuery();
+      const alertsUrl = qs
+        ? `/api/planillas/borrado-bases/alerts?${qs}`
         : "/api/planillas/borrado-bases/alerts";
       const res = await planUserFetch(alertsUrl);
       if (res.status === 401 || res.status === 403) {
@@ -165,6 +158,10 @@ function normalizeAlert(raw) {
 }
 
 export async function markBorradoAlertsSeen(ids = null) {
+  if (isViewingAsProfile()) {
+    renderBorradoAlertUi();
+    return;
+  }
   if (alertMode === "confirm") {
     const sig = pendingSignature(cachedAlerts);
     confirmToastDismissedSig = sig;
