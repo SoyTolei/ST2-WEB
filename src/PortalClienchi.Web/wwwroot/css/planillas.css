@@ -384,11 +384,20 @@
   animation: planillas-hero-easter-bob 2.6s ease-in-out infinite;
 }
 
-.planillas-hero-easter.is-hidden,
-.planillas-corner-easter.is-hidden {
-  opacity: 0;
-  visibility: hidden;
-  animation: none;
+.planillas-hero-easter.is-lg {
+  top: -18px;
+  left: 4px;
+  width: 108px;
+}
+
+.planillas-corner-easter.is-lg {
+  top: -2px;
+  right: 6px;
+  width: 86px;
+}
+
+.plan-module-sticky-head:has(.planillas-corner-easter.is-lg:not(.is-hidden)) {
+  padding-right: calc(var(--plan-card-pad-x) + 82px);
 }
 
 .planillas-corner-easter {

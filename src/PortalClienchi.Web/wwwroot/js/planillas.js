@@ -30,6 +30,7 @@ const PLANILLAS_EASTER_EGGS = [
     email: "belen.foschiatti@thomsonreuters.com",
     src: "/img/belen-corner.gif?v=2",
     motion: "still",
+    size: "lg",
   },
 ];
 
@@ -1394,6 +1395,7 @@ function syncPlanillasHeroEaster() {
     if (egg) el.src = egg.src;
     el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-still", egg?.motion === "still");
+    el.classList.toggle("is-lg", egg?.size === "lg");
     el.classList.toggle("is-hidden", !show);
     el.setAttribute("aria-hidden", show ? "false" : "true");
   });
