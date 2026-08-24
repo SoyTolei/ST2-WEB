@@ -418,6 +418,12 @@
   }
 }
 
+.planillas-hero-easter.is-still,
+.planillas-corner-easter.is-still {
+  animation: none;
+  transform: none;
+}
+
 .planillas-hero-easter.is-wag,
 .planillas-corner-easter.is-wag {
   transform-origin: 20% 90%;

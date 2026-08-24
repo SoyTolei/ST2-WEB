@@ -28,8 +28,8 @@ const PLANILLAS_EASTER_EGGS = [
   },
   {
     email: "belen.foschiatti@thomsonreuters.com",
-    src: "/img/belen-corner.gif?v=1",
-    motion: "wag",
+    src: "/img/belen-corner.gif?v=2",
+    motion: "still",
   },
 ];
 
@@ -1393,6 +1393,7 @@ function syncPlanillasHeroEaster() {
   document.querySelectorAll(".planillas-hero-easter, .planillas-corner-easter").forEach((el) => {
     if (egg) el.src = egg.src;
     el.classList.toggle("is-wag", egg?.motion === "wag");
+    el.classList.toggle("is-still", egg?.motion === "still");
     el.classList.toggle("is-hidden", !show);
     el.setAttribute("aria-hidden", show ? "false" : "true");
   });
