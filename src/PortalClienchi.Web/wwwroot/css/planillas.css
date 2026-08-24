@@ -365,6 +365,31 @@
   overflow: visible;
 }
 
+.planillas-hero.is-easter-banner {
+  padding: 10px 12px 12px;
+}
+
+.planillas-hero.is-easter-banner h2,
+.planillas-hero.is-easter-banner p,
+.planillas-hero.is-easter-banner .accent-bar {
+  display: none !important;
+}
+
+.planillas-hero-easter.is-hero-banner {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  display: block;
+  animation: none;
+  transform: none;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: none;
+}
+
 .planillas-hero-easter {
   position: absolute;
   top: -14px;
@@ -418,6 +443,17 @@
   user-select: none;
   transform-origin: 50% 85%;
   animation: planillas-hero-easter-bob 2.6s ease-in-out infinite;
+}
+
+.planillas-corner-easter.is-smooth {
+  width: 96px;
+  top: 0;
+  animation: none;
+  transform: none;
+}
+
+.plan-module-sticky-head:has(.planillas-corner-easter.is-smooth:not(.is-hidden)) {
+  padding-right: calc(var(--plan-card-pad-x) + 96px);
 }
 
 .planillas-hero-easter:not(.is-lg),
