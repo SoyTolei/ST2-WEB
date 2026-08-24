@@ -143,14 +143,21 @@ function waitForAccessGate() {
 async function postAccessSession(email, password = "") {
   const payload = { email };
   if (isSuperAdminEmail(email)) payload.password = password || "";
-  const response = await fetch("/api/planillas/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-    credentials: "include",
-  });
-  const data = await response.json().catch(() => ({}));
-  return { response, data };
+  const ctrl = new AbortController();
+  const timer = window.setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const response = await fetch("/api/planillas/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      credentials: "include",
+      signal: ctrl.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    return { response, data };
+  } finally {
+    window.clearTimeout(timer);
+  }
 }
 
 function showAccessGate(resolve) {
@@ -184,8 +191,6 @@ function showAccessGate(resolve) {
     cachedEmail = email;
     localStorage.setItem("st2_plan_user_hint", email);
     if (passInput) passInput.value = "";
-    await refreshPlanUserSession();
-    if (!cachedEmail) return false;
     cleanup();
     unlockAppShell();
     updatePlanUserBadge();
@@ -255,9 +260,14 @@ function showAccessGate(resolve) {
     try {
       const { response, data } = await postAccessSession(email, password);
       await applySessionResult(response, data, email);
-    } catch {
-      if (error) error.textContent = "No se pudo contactar al servidor.";
-      submit.disabled = false;
+    } catch (err) {
+      if (error) {
+        error.textContent = err?.name === "AbortError"
+          ? "El servidor tardó demasiado. Probá de nuevo."
+          : "No se pudo contactar al servidor.";
+      }
+    } finally {
+      if (submit) submit.disabled = false;
     }
   };
 

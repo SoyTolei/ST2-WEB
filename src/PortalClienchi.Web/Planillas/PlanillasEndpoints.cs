@@ -450,8 +450,6 @@ public static class PlanillasEndpoints
                 return Results.Ok(new { email = (string?)null, status = "anon" });
             }
 
-            accessRepo.RecordAccess(email);
-            blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { email, status = "ok" });
         });
 
@@ -904,7 +902,6 @@ public static class PlanillasEndpoints
             accessRepo.EnsureApproved(email);
             PlanUserIdentity.SetCookie(ctx, email);
             accessRepo.RecordAccess(email);
-            blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { email, status = "ok" });
         }
 
@@ -925,7 +922,6 @@ public static class PlanillasEndpoints
 
         PlanUserIdentity.SetCookie(ctx, email);
         accessRepo.RecordAccess(email);
-        blanqueoRepo.AssociatePendingRequester(email);
         return Results.Ok(new { email, status = "ok" });
     }
 
