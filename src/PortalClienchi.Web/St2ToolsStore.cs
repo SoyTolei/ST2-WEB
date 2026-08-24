@@ -11,6 +11,7 @@ public sealed class St2ToolPackageDto
     public string FileName { get; set; } = "";
     public long SizeBytes { get; set; }
     public string UpdatedAtUtc { get; set; } = "";
+    public string UploadedLabel { get; set; } = "";
     public string ContentType { get; set; } = "application/octet-stream";
     public bool Available { get; set; }
 }
@@ -591,6 +592,7 @@ public sealed class St2ToolsStore
             FileName = available ? (entry!.FileName ?? "") : "",
             SizeBytes = available ? (entry!.SizeBytes > 0 ? entry.SizeBytes : new FileInfo(path).Length) : 0,
             UpdatedAtUtc = updated,
+            UploadedLabel = TryFormatUploaded(updated),
             ContentType = available ? (entry!.ContentType ?? "application/octet-stream") : "application/octet-stream",
             Available = available,
         };
@@ -609,6 +611,7 @@ public sealed class St2ToolsStore
             FileName = CanonicalDownloadName(id, info.Name),
             SizeBytes = info.Length,
             UpdatedAtUtc = published.ToUniversalTime().ToString("o"),
+            UploadedLabel = St2BundledToolDates.FormatAr(published.ToUniversalTime()),
             ContentType = GuessContentType(ext),
             Available = true,
         };
@@ -631,6 +634,14 @@ public sealed class St2ToolsStore
             return "ST2-PS.zip";
         }
         return string.IsNullOrWhiteSpace(actualName) ? $"st2-{id}.bin" : Path.GetFileName(actualName);
+    }
+
+    private static string TryFormatUploaded(string? iso)
+    {
+        if (string.IsNullOrWhiteSpace(iso)) return "";
+        return DateTime.TryParse(iso, null, System.Globalization.DateTimeStyles.RoundtripKind, out var dt)
+            ? St2BundledToolDates.FormatAr(dt)
+            : "";
     }
 
     private Dictionary<string, ManifestEntry> ReadManifestUnlocked()

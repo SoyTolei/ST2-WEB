@@ -27,9 +27,16 @@ public static class St2IndexHtml
         "pdf-portal.js",
     ];
 
-    public static string Inject(string html, string build)
+    public static string Inject(string html, string build, IWebHostEnvironment env)
     {
         var v = build.Length > 7 ? build[..7] : build;
+        var dates = St2BundledToolDates.Load(env);
+        dates.TryGetValue("sql", out var sqlPub);
+        dates.TryGetValue("bat", out var batPub);
+        var sqlLabel = string.IsNullOrWhiteSpace(sqlPub.LabelAr) ? "" : sqlPub.LabelAr;
+        var batLabel = string.IsNullOrWhiteSpace(batPub.LabelAr) ? "" : batPub.LabelAr;
+        var sqlStamp = sqlPub.Utc == default ? "" : sqlPub.Utc.ToString("o");
+        var batStamp = batPub.Utc == default ? "" : batPub.Utc.ToString("o");
         var sb = new StringBuilder();
         sb.AppendLine("<script type=\"importmap\">");
         sb.AppendLine("{");
@@ -56,6 +63,16 @@ public static class St2IndexHtml
         sb.AppendLine($"<meta name=\"st2-build\" content=\"{WebUtility.HtmlEncode(build)}\"/>");
         sb.AppendLine($"<meta name=\"st2-version-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetVersionLabel())}\"/>");
         sb.AppendLine($"<meta name=\"st2-updated-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetUpdatedLabel())}\"/>");
+        if (!string.IsNullOrWhiteSpace(sqlLabel))
+        {
+            sb.AppendLine($"<meta name=\"st2-tool-sql-uploaded\" content=\"{WebUtility.HtmlEncode(sqlLabel)}\"/>");
+            sb.AppendLine($"<meta name=\"st2-tool-sql-stamp\" content=\"{WebUtility.HtmlEncode(sqlStamp)}\"/>");
+        }
+        if (!string.IsNullOrWhiteSpace(batLabel))
+        {
+            sb.AppendLine($"<meta name=\"st2-tool-bat-uploaded\" content=\"{WebUtility.HtmlEncode(batLabel)}\"/>");
+            sb.AppendLine($"<meta name=\"st2-tool-bat-stamp\" content=\"{WebUtility.HtmlEncode(batStamp)}\"/>");
+        }
 
         html = html.Replace("</head>", sb + "</head>", StringComparison.OrdinalIgnoreCase);
         html = html.Replace(
@@ -69,6 +86,20 @@ public static class St2IndexHtml
         html = html.Replace("/css/pdf-portal.css", $"/css/pdf-portal.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/theme-dark.css", $"/css/theme-dark.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);
+        if (!string.IsNullOrWhiteSpace(sqlLabel))
+        {
+            html = html.Replace(
+                """<span class="st2-about-tool-date" data-tool-date="sql" hidden></span>""",
+                $"""<span class="st2-about-tool-date" data-tool-date="sql">Subido {WebUtility.HtmlEncode(sqlLabel)}</span>""",
+                StringComparison.Ordinal);
+        }
+        if (!string.IsNullOrWhiteSpace(batLabel))
+        {
+            html = html.Replace(
+                """<span class="st2-about-tool-date" data-tool-date="bat" hidden></span>""",
+                $"""<span class="st2-about-tool-date" data-tool-date="bat">Subido {WebUtility.HtmlEncode(batLabel)}</span>""",
+                StringComparison.Ordinal);
+        }
         html = html.Replace("<link rel=\"stylesheet\" href=\"/css/planillas.css", $"<link rel=\"modulepreload\" href=\"/js/planillas.js?v={v}\"/><link rel=\"modulepreload\" href=\"/js/planillas-icons.js?v={v}\"/><link rel=\"stylesheet\" href=\"/css/planillas.css", StringComparison.Ordinal);
         return html;
     }
@@ -77,6 +108,6 @@ public static class St2IndexHtml
     {
         var path = Path.Combine(env.WebRootPath, "index.html");
         var html = await File.ReadAllTextAsync(path, ct).ConfigureAwait(false);
-        return Inject(html, St2WebBuild.GetBuild());
+        return Inject(html, St2WebBuild.GetBuild(), env);
     }
 }

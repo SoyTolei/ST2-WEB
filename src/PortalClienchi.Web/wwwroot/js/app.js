@@ -1759,7 +1759,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
   }
 }
 
-const TOOLS_SEEN_KEY = "st2-tools-downloaded-versions";
+const TOOLS_SEEN_KEY = "st2-tools-notice-v3";
 const aboutToolsBadge = document.getElementById("about-tools-badge");
 const aboutToolsStatus = document.getElementById("st2-about-tools-status");
 const toolsBanner = document.getElementById("st2-tools-banner");
@@ -1796,9 +1796,74 @@ function setAboutToolsStatus(msg, isError = false) {
   aboutToolsStatus.classList.toggle("is-error", !!isError && !!msg);
 }
 
+function normalizeTool(t) {
+  if (!t || typeof t !== "object") return t;
+  return {
+    id: t.id || t.Id,
+    name: t.name || t.Name,
+    available: t.available ?? t.Available,
+    version: t.version || t.Version || "",
+    fileName: t.fileName || t.FileName || "",
+    sizeBytes: t.sizeBytes ?? t.SizeBytes ?? 0,
+    updatedAtUtc: t.updatedAtUtc || t.UpdatedAtUtc || "",
+    uploadedLabel: t.uploadedLabel || t.UploadedLabel || "",
+  };
+}
+
+function metaToolLabel(id) {
+  return String(document.querySelector(`meta[name="st2-tool-${id}-uploaded"]`)?.content || "").trim();
+}
+
+function metaToolStamp(id) {
+  return String(document.querySelector(`meta[name="st2-tool-${id}-stamp"]`)?.content || "").trim();
+}
+
+function toolsFromMeta() {
+  return ["sql", "bat"]
+    .map((id) => {
+      const stamp = metaToolStamp(id);
+      const uploadedLabel = metaToolLabel(id);
+      if (!stamp && !uploadedLabel) return null;
+      return {
+        id,
+        available: true,
+        version: stamp,
+        updatedAtUtc: stamp,
+        uploadedLabel,
+      };
+    })
+    .filter(Boolean);
+}
+
+function toolsForNotice() {
+  const api = (cachedTools || []).filter((t) => t?.available && toolIdentity(t));
+  return api.length ? api : toolsFromMeta();
+}
+
+function paintToolDatesFromMeta() {
+  for (const id of ["sql", "bat"]) {
+    const label = uploadedLabelFor(id, null);
+    const el = document.querySelector(`[data-tool-date="${id}"]`);
+    if (!el || !label) continue;
+    el.hidden = false;
+    el.removeAttribute("hidden");
+    el.textContent = label;
+  }
+}
+
+function uploadedLabelFor(id, tool) {
+  const raw = String(tool?.uploadedLabel || "").trim();
+  if (raw) return raw.startsWith("Subido") ? raw : `Subido ${raw}`;
+  const when = formatToolUpdatedAt(tool);
+  if (when) return `Subido ${when}`;
+  const meta = metaToolLabel(id);
+  if (meta) return meta.startsWith("Subido") ? meta : `Subido ${meta}`;
+  return "";
+}
+
 function listNewTools() {
   const seen = readSeenToolVersions();
-  return (cachedTools || []).filter((t) => {
+  return toolsForNotice().filter((t) => {
     if (!t?.available) return false;
     const stamp = toolIdentity(t);
     return !!stamp && seen[t.id] !== stamp;
@@ -1863,7 +1928,7 @@ function toolsUpdateMessage(newer) {
   const list = newer || [];
   if (!list.length) return "";
   const named = list.map((t) => {
-    const when = formatToolUpdatedAt(t);
+    const when = uploadedLabelFor(t.id, t).replace(/^Subido\s+/i, "");
     const label = toolPackageLabel(t.id);
     return when ? `${label} (${when})` : label;
   });
@@ -1966,9 +2031,11 @@ function renderAboutTools() {
 
     if (!tool?.available) {
       if (newEl) newEl.hidden = true;
+      const fallbackDate = uploadedLabelFor(id, tool);
       if (dateEl) {
-        dateEl.hidden = true;
-        dateEl.textContent = "";
+        dateEl.hidden = !fallbackDate;
+        if (fallbackDate) dateEl.removeAttribute("hidden");
+        dateEl.textContent = fallbackDate;
       }
       if (sizeEl) {
         sizeEl.hidden = true;
@@ -1984,10 +2051,11 @@ function renderAboutTools() {
 
     const label = tool.fileName || meta.file;
     if (newEl) newEl.hidden = !isToolVersionNew(id);
-    const when = formatToolUpdatedAt(tool);
+    const when = uploadedLabelFor(id, tool);
     if (dateEl) {
       dateEl.hidden = !when;
-      dateEl.textContent = when ? `Subido ${when}` : "";
+      if (when) dateEl.removeAttribute("hidden");
+      dateEl.textContent = when;
     }
     if (sizeEl) {
       const size = tool.sizeBytes ? formatToolSize(tool.sizeBytes) : "";
@@ -2012,28 +2080,12 @@ function renderAboutTools() {
 async function refreshAboutTools({ silent = false } = {}) {
   try {
     const data = await apiGet("/api/tools");
-    cachedTools = Array.isArray(data?.tools) ? data.tools : [];
+    const raw = Array.isArray(data?.tools) ? data.tools : Array.isArray(data?.Tools) ? data.Tools : [];
+    cachedTools = raw.map(normalizeTool);
     renderAboutTools();
     if (!silent) setAboutToolsStatus("");
   } catch (err) {
-    cachedTools = [
-      {
-        id: "sql",
-        name: "ST2.SQL",
-        available: true,
-        version: "",
-        fileName: "ST2 - Herramientas SQL.zip",
-        sizeBytes: 0,
-      },
-      {
-        id: "bat",
-        name: "ST2.BAT",
-        available: true,
-        version: "",
-        fileName: "ST2-PS.zip",
-        sizeBytes: 0,
-      },
-    ];
+    cachedTools = toolsFromMeta();
     renderAboutTools();
     if (!silent) setAboutToolsStatus("");
   }
@@ -3880,6 +3932,8 @@ setPreviewIdle(true);
 
 async function bootstrapApp() {
   applyAboutUpdated();
+  paintToolDatesFromMeta();
+  syncAboutToolsBadge();
   await ensureAppAccess();
   syncAdminTabVisibility();
   syncViewAsBanner();
