@@ -798,6 +798,31 @@ html.st2-theme-dark .blanqueo-ready-toast.is-bad .blanqueo-ready-toast-x {
   color: #fecaca !important;
 }
 
+html.st2-theme-dark .blanqueo-ready-toast.is-tools {
+  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%) !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-text {
+  color: #e0e7ff !important;
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-dot {
+  background: #a5b4fc;
+  box-shadow: 0 0 0 4px rgba(165, 180, 252, 0.28);
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-count,
+html.st2-theme-dark .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-btn {
+  background: #6366f1;
+  color: #eef2ff;
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-btn:hover {
+  background: #818cf8;
+}
+
 html.st2-theme-dark .thom-portal-seg {
   background: #151c28 !important;
   border-color: rgba(234, 88, 12, 0.45) !important;
