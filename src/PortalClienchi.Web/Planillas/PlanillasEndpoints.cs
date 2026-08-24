@@ -438,7 +438,7 @@ public static class PlanillasEndpoints
             }
         });
 
-        app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
+        app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
             if (email is null)
@@ -885,11 +885,7 @@ public static class PlanillasEndpoints
     }
 
     private static bool CanEnter(string email, AppAccessRepository accessRepo)
-    {
-        if (St2SuperAdmin.Is(email))
-            accessRepo.EnsureApproved(email);
-        return accessRepo.IsApprovedForApp(email);
-    }
+        => accessRepo.IsApprovedForApp(email);
 
     private static IResult OpenUserSession(
         HttpContext ctx,
@@ -899,9 +895,8 @@ public static class PlanillasEndpoints
     {
         if (St2SuperAdmin.Is(email))
         {
-            accessRepo.EnsureApproved(email);
             PlanUserIdentity.SetCookie(ctx, email);
-            accessRepo.RecordAccess(email);
+            QueueSessionBookkeeping(accessRepo, email);
             return Results.Ok(new { email, status = "ok" });
         }
 
@@ -921,8 +916,25 @@ public static class PlanillasEndpoints
         }
 
         PlanUserIdentity.SetCookie(ctx, email);
-        accessRepo.RecordAccess(email);
+        QueueSessionBookkeeping(accessRepo, email);
         return Results.Ok(new { email, status = "ok" });
+    }
+
+    private static void QueueSessionBookkeeping(AppAccessRepository accessRepo, string email)
+    {
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                if (St2SuperAdmin.Is(email))
+                    accessRepo.EnsureApproved(email);
+                accessRepo.RecordAccess(email);
+            }
+            catch
+            {
+                // El login ya quedó abierto; el conteo puede reintentarse en el heartbeat.
+            }
+        });
     }
 
     internal static string PublicBaseUrl(HttpRequest request)

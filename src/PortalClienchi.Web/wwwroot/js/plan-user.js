@@ -140,24 +140,31 @@ function waitForAccessGate() {
   });
 }
 
-async function postAccessSession(email, password = "") {
-  const payload = { email };
-  if (isSuperAdminEmail(email)) payload.password = password || "";
+async function fetchSession(opts = {}, timeoutMs = 8000) {
   const ctrl = new AbortController();
-  const timer = window.setTimeout(() => ctrl.abort(), 15000);
+  const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const response = await fetch("/api/planillas/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
       credentials: "include",
+      cache: "no-store",
       signal: ctrl.signal,
+      ...opts,
     });
     const data = await response.json().catch(() => ({}));
     return { response, data };
   } finally {
     window.clearTimeout(timer);
   }
+}
+
+async function postAccessSession(email, password = "") {
+  const payload = { email };
+  if (isSuperAdminEmail(email)) payload.password = password || "";
+  return fetchSession({
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  }, 12000);
 }
 
 function showAccessGate(resolve) {
@@ -332,8 +339,7 @@ export function getPlanUserEmail() {
 
 export async function refreshPlanUserSession() {
   try {
-    const response = await fetch("/api/planillas/session", SESSION_OPTS);
-    const data = await response.json().catch(() => ({}));
+    const { data } = await fetchSession(SESSION_OPTS, 5000);
     cachedEmail = data.email || null;
   } catch {
     cachedEmail = null;
@@ -344,22 +350,14 @@ export async function refreshPlanUserSession() {
 
 /** Re-establece la cookie de sesión desde el correo guardado en el navegador. */
 export async function syncPlanUserSession() {
-  const hint = localStorage.getItem("st2_plan_user_hint");
-  if (!hint) return refreshPlanUserSession();
+  const fromCookie = await refreshPlanUserSession();
+  if (fromCookie) return fromCookie;
 
-  // Super-admin: no reabrir sesión solo con el mail guardado; hace falta cookie o contraseña.
-  if (isSuperAdminEmail(hint)) {
-    return refreshPlanUserSession();
-  }
+  const hint = localStorage.getItem("st2_plan_user_hint");
+  if (!hint || isSuperAdminEmail(hint)) return null;
 
   try {
-    const response = await fetch("/api/planillas/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: hint }),
-      credentials: "include",
-    });
-    const data = await response.json().catch(() => ({}));
+    const { response, data } = await postAccessSession(hint);
     if (response.ok) {
       cachedEmail = data.email || null;
       updatePlanUserBadge();
@@ -373,9 +371,9 @@ export async function syncPlanUserSession() {
       return null;
     }
   } catch {
-    /* fallback a GET */
+    /* el gate pide el correo de nuevo */
   }
-  return refreshPlanUserSession();
+  return null;
 }
 
 export async function ensurePlanUser({ forcePrompt = false } = {}) {
