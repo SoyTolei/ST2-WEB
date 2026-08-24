@@ -1992,14 +1992,6 @@ function markToolsSeen() {
   syncAboutToolsBadge();
 }
 
-function markToolSeen(id) {
-  const t = (cachedTools || []).find((x) => x.id === id);
-  const stamp = toolIdentity(t);
-  if (!t?.available || !stamp) return;
-  writeSeenToolVersions({ ...readSeenToolVersions(), [id]: stamp });
-  syncAboutToolsBadge();
-}
-
 function renderAboutTools() {
   const copy = {
     sql: {
@@ -2097,7 +2089,7 @@ async function downloadTool(toolId) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  markToolSeen(toolId);
+  markToolsSeen();
   setAboutToolsStatus("Descarga iniciada");
 }
 
