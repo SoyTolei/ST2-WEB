@@ -8,10 +8,6 @@ public static class St2IndexHtml
     private static readonly string[] JsModules =
     [
         "app.js",
-        "access-name-dict.js",
-        "plan-text-preview.js",
-        "planillas-referral-legal.js",
-        "planillas-tab-badge.js",
         "planillas.js",
         "planillas-referral.js",
         "planillas-oportunidad.js",
@@ -89,7 +85,6 @@ public static class St2IndexHtml
         html = html.Replace("/css/borrado-bases.css", $"/css/borrado-bases.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/pdf-portal.css", $"/css/pdf-portal.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/theme-dark.css", $"/css/theme-dark.css?v={v}", StringComparison.Ordinal);
-        html = html.Replace("/js/st2-access-boot.js", $"/js/st2-access-boot.js?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);
         if (!string.IsNullOrWhiteSpace(sqlLabel))
         {

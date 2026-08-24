@@ -34,9 +34,6 @@ public static class St2AccessMiddleware
         if (path.Equals("/api/live", StringComparison.OrdinalIgnoreCase) && HttpMethods.IsGet(method))
             return true;
 
-        if (path.Equals("/api/version", StringComparison.OrdinalIgnoreCase) && HttpMethods.IsGet(method))
-            return true;
-
         // Capturas públicas (links en TXT de planillas); token opaco.
         var value = path.Value ?? "";
         if (!HttpMethods.IsGet(method))
@@ -91,17 +88,7 @@ public static class St2AccessMiddleware
                 return;
             }
 
-            if (accessRepo is not null)
-            {
-                var repo = accessRepo;
-                var captured = email;
-                _ = Task.Run(() =>
-                {
-                    try { repo.TouchActivity(captured); }
-                    catch { /* no bloquear la API por el conteo */ }
-                });
-            }
-
+            accessRepo?.TouchActivity(email);
             await next(ctx).ConfigureAwait(false);
         });
 }

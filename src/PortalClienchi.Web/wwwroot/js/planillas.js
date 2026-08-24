@@ -1423,9 +1423,6 @@ export function initPlanillas() {
     syncPlanillasHeroEaster();
     updateSistemaUi();
   });
-  document.addEventListener("st2:access-ready", () => {
-    requestAnimationFrame(() => refreshSistemaIndicator());
-  });
   showView("menu", { history: "none" });
 
   return Promise.all([refreshModuleFlags({ baseline: true }), loadConfig()]).then(async () => {

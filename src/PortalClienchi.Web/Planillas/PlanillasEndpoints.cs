@@ -438,7 +438,7 @@ public static class PlanillasEndpoints
             }
         });
 
-        app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo) =>
+        app.MapGet("/api/planillas/session", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
             if (email is null)
@@ -450,6 +450,8 @@ public static class PlanillasEndpoints
                 return Results.Ok(new { email = (string?)null, status = "anon" });
             }
 
+            accessRepo.RecordAccess(email);
+            blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { email, status = "ok" });
         });
 
@@ -885,7 +887,11 @@ public static class PlanillasEndpoints
     }
 
     private static bool CanEnter(string email, AppAccessRepository accessRepo)
-        => accessRepo.IsApprovedForApp(email);
+    {
+        if (St2SuperAdmin.Is(email))
+            accessRepo.EnsureApproved(email);
+        return accessRepo.IsApprovedForApp(email);
+    }
 
     private static IResult OpenUserSession(
         HttpContext ctx,
@@ -895,12 +901,14 @@ public static class PlanillasEndpoints
     {
         if (St2SuperAdmin.Is(email))
         {
+            accessRepo.EnsureApproved(email);
             PlanUserIdentity.SetCookie(ctx, email);
-            QueueSessionBookkeeping(accessRepo, email);
+            accessRepo.RecordAccess(email);
+            blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { email, status = "ok" });
         }
 
-        var rec = TryFindAccess(accessRepo, email);
+        var rec = accessRepo.Find(email);
         var status = rec?.Status ?? "";
         if (rec is null
             || string.Equals(status, AppAccessRepository.StatusPending, StringComparison.OrdinalIgnoreCase)
@@ -916,37 +924,9 @@ public static class PlanillasEndpoints
         }
 
         PlanUserIdentity.SetCookie(ctx, email);
-        QueueSessionBookkeeping(accessRepo, email);
+        accessRepo.RecordAccess(email);
+        blanqueoRepo.AssociatePendingRequester(email);
         return Results.Ok(new { email, status = "ok" });
-    }
-
-    private static AppAccessRecordDto? TryFindAccess(AppAccessRepository accessRepo, string email)
-    {
-        try
-        {
-            return accessRepo.Find(email);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static void QueueSessionBookkeeping(AppAccessRepository accessRepo, string email)
-    {
-        _ = Task.Run(() =>
-        {
-            try
-            {
-                if (St2SuperAdmin.Is(email))
-                    accessRepo.EnsureApproved(email);
-                accessRepo.RecordAccess(email);
-            }
-            catch
-            {
-                // El login ya quedó abierto; el conteo puede reintentarse en el heartbeat.
-            }
-        });
     }
 
     internal static string PublicBaseUrl(HttpRequest request)

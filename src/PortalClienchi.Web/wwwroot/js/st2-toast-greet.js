@@ -1,4 +1,5 @@
 import { getPlanUserEmail } from "./plan-user.js";
+import { getViewAsProfile } from "./module-access.js";
 
 export const TOAST_FOOD_MARK = "{{toast-food}}";
 const TOAST_FOOD_KEY = "st2-toast-food-pizza-used";
@@ -13,19 +14,6 @@ const STACKED_TOAST_IDS = [
   "borrado-ready-toast",
   "access-ready-toast",
 ];
-
-function toastUserEmail() {
-  try {
-    const raw = sessionStorage.getItem("st2-view-as-profile-v1");
-    if (raw) {
-      const data = JSON.parse(raw);
-      if (data?.email) return String(data.email);
-    }
-  } catch {
-    /* ignore */
-  }
-  return getPlanUserEmail();
-}
 
 export function firstNameFromEmail(email) {
   const local = String(email || "").split("@")[0] || "";
@@ -81,7 +69,7 @@ export function formatToastMessage(body, { greet = false } = {}) {
   const msg = String(body || "").trim();
   if (!msg) return msg;
   const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
-  const name = firstNameFromEmail(toastUserEmail());
+  const name = firstNameFromEmail(getViewAsProfile()?.email || getPlanUserEmail());
   if (greet && name) return `${TOAST_FOOD_MARK} Hola ${name}! ${lowered}`;
   const rest = lowered.replace(/^tenés\s+/i, "");
   return `${TOAST_FOOD_MARK} También tenés ${rest}`;

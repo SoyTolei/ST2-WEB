@@ -102,50 +102,16 @@ export function isAppAccessGranted() {
   return appUnlocked && !!cachedEmail;
 }
 
-let accessGateCleanup = null;
-
-function applyBootSession() {
-  const email = window.__ST2_SESSION_EMAIL;
-  if (!email) return null;
-  cachedEmail = email;
-  appUnlocked = true;
-  updatePlanUserBadge();
-  return email;
-}
-
-document.addEventListener("st2:access-ready", () => {
-  applyBootSession();
-});
-
 export async function ensureAppAccess() {
   if (accessPromise) return accessPromise;
 
   accessPromise = (async () => {
-    const first = applyBootSession();
-    if (first) return first;
-
-    return new Promise((resolve) => {
-      let settled = false;
-      const finish = () => {
-        if (settled) return;
-        const email = applyBootSession();
-        if (!email) return;
-        settled = true;
-        window.clearInterval(poll);
-        document.removeEventListener("st2:access-ready", finish);
-        resolve(email);
-      };
-      document.addEventListener("st2:access-ready", finish);
-      const poll = window.setInterval(finish, 100);
-      finish();
-      window.setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        window.clearInterval(poll);
-        document.removeEventListener("st2:access-ready", finish);
-        resolve(applyBootSession());
-      }, 8000);
-    });
+    const synced = await syncPlanUserSession();
+    if (synced) {
+      unlockAppShell();
+      return synced;
+    }
+    return waitForAccessGate();
   })().finally(() => {
     accessPromise = null;
   });
@@ -168,31 +134,23 @@ function lockAppShell() {
   document.getElementById("st2-access-gate")?.classList.remove("hidden");
 }
 
-async function fetchSession(opts = {}, timeoutMs = 8000) {
-  const ctrl = new AbortController();
-  const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const response = await fetch("/api/planillas/session", {
-      credentials: "include",
-      cache: "no-store",
-      signal: ctrl.signal,
-      ...opts,
-    });
-    const data = await response.json().catch(() => ({}));
-    return { response, data };
-  } finally {
-    window.clearTimeout(timer);
-  }
+function waitForAccessGate() {
+  return new Promise((resolve) => {
+    showAccessGate(resolve);
+  });
 }
 
 async function postAccessSession(email, password = "") {
   const payload = { email };
   if (isSuperAdminEmail(email)) payload.password = password || "";
-  return fetchSession({
+  const response = await fetch("/api/planillas/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  }, 12000);
+    credentials: "include",
+  });
+  const data = await response.json().catch(() => ({}));
+  return { response, data };
 }
 
 function showAccessGate(resolve) {
@@ -223,9 +181,15 @@ function showAccessGate(resolve) {
   }
 
   const finishOk = async (email) => {
+    cachedEmail = email;
     localStorage.setItem("st2_plan_user_hint", email);
     if (passInput) passInput.value = "";
-    resolve(email);
+    await refreshPlanUserSession();
+    if (!cachedEmail) return false;
+    cleanup();
+    unlockAppShell();
+    updatePlanUserBadge();
+    resolve(cachedEmail);
     return true;
   };
 
@@ -291,14 +255,9 @@ function showAccessGate(resolve) {
     try {
       const { response, data } = await postAccessSession(email, password);
       await applySessionResult(response, data, email);
-    } catch (err) {
-      if (error) {
-        error.textContent = err?.name === "AbortError"
-          ? "El servidor tardó demasiado. Probá de nuevo."
-          : "No se pudo contactar al servidor.";
-      }
-    } finally {
-      if (submit) submit.disabled = false;
+    } catch {
+      if (error) error.textContent = "No se pudo contactar al servidor.";
+      submit.disabled = false;
     }
   };
 
@@ -344,14 +303,12 @@ function showAccessGate(resolve) {
     input.removeEventListener("input", onEmailInput);
     retry?.removeEventListener("click", onRetry);
     submit.disabled = false;
-    if (accessGateCleanup === cleanup) accessGateCleanup = null;
   };
 
   const onKey = (e) => {
     if (e.key === "Enter") onSubmit();
   };
 
-  accessGateCleanup = cleanup;
   submit.addEventListener("click", onSubmit);
   input.addEventListener("keydown", onKey);
   passInput?.addEventListener("keydown", onKey);
@@ -365,7 +322,8 @@ export function getPlanUserEmail() {
 
 export async function refreshPlanUserSession() {
   try {
-    const { data } = await fetchSession(SESSION_OPTS, 5000);
+    const response = await fetch("/api/planillas/session", SESSION_OPTS);
+    const data = await response.json().catch(() => ({}));
     cachedEmail = data.email || null;
   } catch {
     cachedEmail = null;
@@ -376,14 +334,22 @@ export async function refreshPlanUserSession() {
 
 /** Re-establece la cookie de sesión desde el correo guardado en el navegador. */
 export async function syncPlanUserSession() {
-  const fromCookie = await refreshPlanUserSession();
-  if (fromCookie) return fromCookie;
-
   const hint = localStorage.getItem("st2_plan_user_hint");
-  if (!hint || isSuperAdminEmail(hint)) return null;
+  if (!hint) return refreshPlanUserSession();
+
+  // Super-admin: no reabrir sesión solo con el mail guardado; hace falta cookie o contraseña.
+  if (isSuperAdminEmail(hint)) {
+    return refreshPlanUserSession();
+  }
 
   try {
-    const { response, data } = await postAccessSession(hint);
+    const response = await fetch("/api/planillas/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: hint }),
+      credentials: "include",
+    });
+    const data = await response.json().catch(() => ({}));
     if (response.ok) {
       cachedEmail = data.email || null;
       updatePlanUserBadge();
@@ -397,9 +363,9 @@ export async function syncPlanUserSession() {
       return null;
     }
   } catch {
-    /* el gate pide el correo de nuevo */
+    /* fallback a GET */
   }
-  return null;
+  return refreshPlanUserSession();
 }
 
 export async function ensurePlanUser({ forcePrompt = false } = {}) {

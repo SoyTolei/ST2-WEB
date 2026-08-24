@@ -596,11 +596,6 @@ public sealed class AppAccessRepository
             pragma.CommandText = "PRAGMA journal_mode=WAL;";
             pragma.ExecuteNonQuery();
         }
-        using (var busy = conn.CreateCommand())
-        {
-            busy.CommandText = "PRAGMA busy_timeout=5000;";
-            busy.ExecuteNonQuery();
-        }
 
         return conn;
     }
