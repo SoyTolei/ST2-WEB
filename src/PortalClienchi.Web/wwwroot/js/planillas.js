@@ -34,8 +34,9 @@ const PLANILLAS_EASTER_EGGS = [
   },
   {
     email: "gisela.crosenzi@thomsonreuters.com",
-    src: "/img/gisela-corner.gif?v=1",
+    src: "/img/gisela-corner.gif?v=2",
     motion: "still",
+    size: "lg",
     balloons: true,
     birthdayMonth: 8,
     birthdayFromDay: 24,
@@ -1424,22 +1425,29 @@ function stopEasterBalloons() {
 
 function spawnEasterBalloon() {
   if (!balloonLayer) return;
-  const colors = ["#f43f5e", "#3b82f6", "#f59e0b", "#ec4899", "#22c55e", "#a855f7"];
+  const colors = ["#f43f5e", "#3b82f6", "#f59e0b", "#ec4899", "#22c55e", "#a855f7", "#06b6d4", "#fb7185"];
   const el = document.createElement("span");
+  const scale = 0.85 + Math.random() * 0.7;
   el.className = "st2-x-balloon";
-  el.style.left = `${8 + Math.random() * 84}%`;
+  el.style.left = `${4 + Math.random() * 92}%`;
   el.style.setProperty("--st2-balloon-color", colors[Math.floor(Math.random() * colors.length)]);
-  el.style.setProperty("--st2-balloon-drift", `${Math.round((Math.random() * 2 - 1) * 48)}px`);
-  el.style.setProperty("--st2-balloon-dur", `${7 + Math.random() * 4}s`);
+  el.style.setProperty("--st2-balloon-drift", `${Math.round((Math.random() * 2 - 1) * 72)}px`);
+  el.style.setProperty("--st2-balloon-dur", `${5.5 + Math.random() * 3.5}s`);
+  el.style.setProperty("--st2-balloon-scale", scale.toFixed(2));
   el.innerHTML = `<span class="st2-x-balloon-body"></span><span class="st2-x-balloon-string"></span>`;
   balloonLayer.appendChild(el);
-  window.setTimeout(() => el.remove(), 12000);
+  window.setTimeout(() => el.remove(), 11000);
+}
+
+function spawnEasterBalloonBurst(count) {
+  for (let i = 0; i < count; i += 1) {
+    window.setTimeout(() => spawnEasterBalloon(), i * 90);
+  }
 }
 
 function scheduleEasterBalloon() {
-  spawnEasterBalloon();
-  if (Math.random() < 0.35) spawnEasterBalloon();
-  balloonTimer = window.setTimeout(scheduleEasterBalloon, 7000 + Math.random() * 8000);
+  spawnEasterBalloonBurst(3 + Math.floor(Math.random() * 3));
+  balloonTimer = window.setTimeout(scheduleEasterBalloon, 1800 + Math.random() * 1600);
 }
 
 function syncEasterBalloons(egg) {
@@ -1457,7 +1465,10 @@ function syncEasterBalloons(egg) {
     document.body.appendChild(balloonLayer);
   }
   balloonLayer.classList.remove("hidden");
-  if (!balloonTimer) scheduleEasterBalloon();
+  if (!balloonTimer) {
+    spawnEasterBalloonBurst(10);
+    scheduleEasterBalloon();
+  }
 }
 
 function syncPlanillasHeroEaster() {
