@@ -1813,6 +1813,7 @@ function formatToolUpdatedAt(iso) {
   return d.toLocaleString("es-AR", {
     day: "numeric",
     month: "short",
+    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -1914,6 +1915,7 @@ function renderAboutTools() {
     const desc = card?.querySelector("[data-tool-desc]");
     const sizeEl = card?.querySelector(`[data-tool-size="${id}"]`);
     const newEl = card?.querySelector(`[data-tool-new="${id}"]`);
+    const dateEl = card?.querySelector(`[data-tool-date="${id}"]`);
     const btn = card?.querySelector(`[data-tool-download="${id}"]`);
     const meta = copy[id];
 
@@ -1921,6 +1923,10 @@ function renderAboutTools() {
 
     if (!tool?.available) {
       if (newEl) newEl.hidden = true;
+      if (dateEl) {
+        dateEl.hidden = true;
+        dateEl.textContent = "";
+      }
       if (sizeEl) {
         sizeEl.hidden = true;
         sizeEl.textContent = "";
@@ -1935,13 +1941,21 @@ function renderAboutTools() {
 
     const label = tool.fileName || meta.file;
     if (newEl) newEl.hidden = !isToolVersionNew(id);
+    const when = formatToolUpdatedAt(tool.updatedAtUtc);
+    if (dateEl) {
+      if (when) {
+        dateEl.hidden = false;
+        dateEl.textContent = `Subido ${when}`;
+      } else {
+        dateEl.hidden = true;
+        dateEl.textContent = "";
+      }
+    }
     if (sizeEl) {
-      const when = formatToolUpdatedAt(tool.updatedAtUtc);
       const size = tool.sizeBytes ? formatToolSize(tool.sizeBytes) : "";
-      const bits = [when, size].filter(Boolean);
-      if (bits.length) {
+      if (size) {
         sizeEl.hidden = false;
-        sizeEl.textContent = bits.join(" · ");
+        sizeEl.textContent = size;
         sizeEl.title = when ? `Subido ${when}` : "";
       } else {
         sizeEl.hidden = true;
@@ -2416,7 +2430,6 @@ function showAbout({ history = "push" } = {}) {
   applyAboutUpdated();
   bindAboutToolsUi();
   void refreshAboutTools().then(() => {
-    markToolsSeen();
     if (isSt2SuperAdmin()) void refreshToolsDiagHint();
   });
   aboutOverlay?.classList.remove("hidden");
@@ -2435,6 +2448,7 @@ function hideAbout({ history = "restore" } = {}) {
   aboutOverlay?.classList.add("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "true");
   aboutRouteOpen = false;
+  markToolsSeen();
   const onAboutPath = isHerramientasPath(normalizeShellPath(window.location.pathname));
   if (history !== "none" && onAboutPath) {
     const fallback = pathBeforeAbout && !isHerramientasPath(pathBeforeAbout) ? pathBeforeAbout : "/";

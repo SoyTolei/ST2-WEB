@@ -2341,7 +2341,18 @@ body.portal-tab-active .tab-icon {
   gap: 6px;
 }
 
-.st2-about-tool-size {
+.st2-about-tool-date {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #475569;
+  letter-spacing: 0.01em;
+}
+
+.st2-about-tool-date[hidden] {
+  display: none !important;
+}
   font-size: 0.68rem;
   font-weight: 600;
   color: #94a3b8;

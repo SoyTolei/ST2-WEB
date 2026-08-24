@@ -498,6 +498,28 @@ public sealed class St2ToolsStore
         return false;
     }
 
+    private DateTime BundledPublishedAt(string id, FileInfo info)
+    {
+        foreach (var root in _bundledPackageRoots)
+        {
+            var path = Path.Combine(root, "published.json");
+            if (!File.Exists(path))
+                continue;
+            try
+            {
+                var json = File.ReadAllText(path);
+                var map = JsonSerializer.Deserialize<Dictionary<string, string>>(json, JsonOpts);
+                if (map is not null && map.TryGetValue(id, out var raw) && DateTime.TryParse(raw, null, System.Globalization.DateTimeStyles.RoundtripKind, out var dt))
+                    return dt.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(dt, DateTimeKind.Utc) : dt.ToUniversalTime();
+            }
+            catch
+            {
+                // fallback mtime
+            }
+        }
+        return info.LastWriteTimeUtc;
+    }
+
     private void EnsureRoot()
     {
         try
@@ -567,21 +589,19 @@ public sealed class St2ToolsStore
     {
         var info = new FileInfo(filePath);
         var ext = info.Extension;
+        var published = BundledPublishedAt(id, info);
         return new St2ToolPackageDto
         {
             Id = id,
             Name = ToolNames.GetValueOrDefault(id) ?? id.ToUpperInvariant(),
-            Version = VersionStamp(info),
+            Version = $"{published:yyyy.MM.dd.HHmm}-{info.Length}",
             FileName = CanonicalDownloadName(id, info.Name),
             SizeBytes = info.Length,
-            UpdatedAtUtc = info.LastWriteTimeUtc.ToString("o"),
+            UpdatedAtUtc = published.ToUniversalTime().ToString("o"),
             ContentType = GuessContentType(ext),
             Available = true,
         };
     }
-
-    private static string VersionStamp(FileInfo info) =>
-        $"{info.LastWriteTimeUtc:yyyy.MM.dd.HHmm}-{info.Length}";
 
     /// <summary>Nombres canónicos que ve el usuario al descargar.</summary>
     public static string CanonicalDownloadName(string id, string? actualName = null)
