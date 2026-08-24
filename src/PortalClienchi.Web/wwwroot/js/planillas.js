@@ -1367,18 +1367,17 @@ function effectivePlanillasEmail() {
 
 function syncPlanillasHeroEaster() {
   const show = effectivePlanillasEmail() === HERO_EASTER_EMAIL;
-  document.querySelectorAll(".planillas-view .planillas-card").forEach((card) => {
-    if (!card.querySelector(".planillas-hero-easter") && !card.querySelector(".planillas-corner-easter")) {
-      const img = document.createElement("img");
-      img.className = "planillas-corner-easter is-hidden";
-      img.src = HERO_EASTER_SRC;
-      img.alt = "";
-      img.width = 48;
-      img.height = 48;
-      img.decoding = "async";
-      img.setAttribute("aria-hidden", "true");
-      card.prepend(img);
-    }
+  document.querySelectorAll(".planillas-view .plan-module-sticky-head").forEach((head) => {
+    if (head.querySelector(".planillas-corner-easter")) return;
+    const img = document.createElement("img");
+    img.className = "planillas-corner-easter is-hidden";
+    img.src = HERO_EASTER_SRC;
+    img.alt = "";
+    img.width = 44;
+    img.height = 44;
+    img.decoding = "async";
+    img.setAttribute("aria-hidden", "true");
+    head.appendChild(img);
   });
   document.querySelectorAll(".planillas-hero-easter, .planillas-corner-easter").forEach((el) => {
     el.classList.toggle("is-hidden", !show);

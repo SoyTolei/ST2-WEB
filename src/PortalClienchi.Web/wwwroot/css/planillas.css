@@ -393,13 +393,13 @@
 
 .planillas-corner-easter {
   position: absolute;
-  top: -10px;
-  right: 14px;
+  top: 2px;
+  right: 10px;
   left: auto;
-  width: 48px;
+  width: 44px;
   height: auto;
   pointer-events: none;
-  z-index: 51;
+  z-index: 4;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
@@ -757,6 +757,7 @@
   top: calc(-1 * var(--plan-view-pad-y, 12px));
   z-index: 50;
   isolation: isolate;
+  overflow: visible;
   background-color: var(--white);
   background-image: none;
   backdrop-filter: none;
@@ -767,6 +768,10 @@
   box-shadow:
     0 12px 0 0 var(--white),
     0 14px 18px -8px rgba(15, 18, 28, 0.22);
+}
+
+.plan-module-sticky-head:has(.planillas-corner-easter:not(.is-hidden)) {
+  padding-right: calc(var(--plan-card-pad-x) + 40px);
 }
 
 .plan-module-sticky-head .plan-module-header-bar {
