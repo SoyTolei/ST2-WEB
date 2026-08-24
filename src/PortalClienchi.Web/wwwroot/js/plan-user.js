@@ -102,17 +102,42 @@ export function isAppAccessGranted() {
   return appUnlocked && !!cachedEmail;
 }
 
+let accessGateCleanup = null;
+
 export async function ensureAppAccess() {
   if (accessPromise) return accessPromise;
 
-  accessPromise = (async () => {
-    const synced = await syncPlanUserSession();
-    if (synced) {
-      unlockAppShell();
-      return synced;
-    }
-    return waitForAccessGate();
-  })().finally(() => {
+  accessPromise = new Promise((resolve) => {
+    let settled = false;
+    const finish = (email) => {
+      if (settled) return;
+      settled = true;
+      accessGateCleanup?.();
+      accessGateCleanup = null;
+      if (email) {
+        cachedEmail = email;
+        updatePlanUserBadge();
+        unlockAppShell();
+      }
+      resolve(email || null);
+    };
+
+    // El formulario tiene que responder ya: no esperar el GET de sesión.
+    showAccessGate(finish);
+
+    void syncPlanUserSession()
+      .then((email) => {
+        if (email) {
+          finish(email);
+          return;
+        }
+        if (lastPendingAccess) {
+          showAccessPendingState(lastPendingAccess.email);
+          lastPendingAccess = null;
+        }
+      })
+      .catch(() => {});
+  }).finally(() => {
     accessPromise = null;
   });
 
@@ -132,12 +157,6 @@ function lockAppShell() {
   document.body.classList.add("st2-access-pending");
   document.body.classList.remove("st2-access-ok");
   document.getElementById("st2-access-gate")?.classList.remove("hidden");
-}
-
-function waitForAccessGate() {
-  return new Promise((resolve) => {
-    showAccessGate(resolve);
-  });
 }
 
 async function fetchSession(opts = {}, timeoutMs = 8000) {
@@ -195,13 +214,9 @@ function showAccessGate(resolve) {
   }
 
   const finishOk = async (email) => {
-    cachedEmail = email;
     localStorage.setItem("st2_plan_user_hint", email);
     if (passInput) passInput.value = "";
-    cleanup();
-    unlockAppShell();
-    updatePlanUserBadge();
-    resolve(cachedEmail);
+    resolve(email);
     return true;
   };
 
@@ -320,12 +335,14 @@ function showAccessGate(resolve) {
     input.removeEventListener("input", onEmailInput);
     retry?.removeEventListener("click", onRetry);
     submit.disabled = false;
+    if (accessGateCleanup === cleanup) accessGateCleanup = null;
   };
 
   const onKey = (e) => {
     if (e.key === "Enter") onSubmit();
   };
 
+  accessGateCleanup = cleanup;
   submit.addEventListener("click", onSubmit);
   input.addEventListener("keydown", onKey);
   passInput?.addEventListener("keydown", onKey);

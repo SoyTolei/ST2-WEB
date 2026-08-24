@@ -589,13 +589,17 @@ public sealed class AppAccessRepository
 
     private SqliteConnection Open()
     {
-        var conn = new SqliteConnection($"Data Source={_dbPath};Cache=Shared;Default Timeout=5");
-        conn.DefaultTimeout = 5;
+        var conn = new SqliteConnection($"Data Source={_dbPath}");
         conn.Open();
         using (var pragma = conn.CreateCommand())
         {
-            pragma.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;";
+            pragma.CommandText = "PRAGMA journal_mode=WAL;";
             pragma.ExecuteNonQuery();
+        }
+        using (var busy = conn.CreateCommand())
+        {
+            busy.CommandText = "PRAGMA busy_timeout=5000;";
+            busy.ExecuteNonQuery();
         }
 
         return conn;
