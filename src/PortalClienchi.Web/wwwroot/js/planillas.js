@@ -19,7 +19,7 @@ import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
 } from "./access-alerts.js";
-import { PLANILLAS_EASTER_EGGS } from "./planillas-easter-eggs.js";
+import { PLANILLAS_EASTER_EGGS, isEggBirthdayWindow } from "./planillas-easter-eggs.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -1362,32 +1362,6 @@ function effectivePlanillasEmail() {
   const viewAs = getViewAsProfile();
   if (viewAs?.email) return String(viewAs.email).trim().toLowerCase();
   return String(getPlanUserEmail() || "").trim().toLowerCase();
-}
-
-function argentinaMonthDay() {
-  try {
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "America/Argentina/Buenos_Aires",
-      month: "numeric",
-      day: "numeric",
-    }).formatToParts(new Date());
-    return {
-      month: Number(parts.find((p) => p.type === "month")?.value),
-      day: Number(parts.find((p) => p.type === "day")?.value),
-    };
-  } catch {
-    const now = new Date();
-    return { month: now.getMonth() + 1, day: now.getDate() };
-  }
-}
-
-function isEggBirthdayWindow(egg) {
-  if (!egg?.birthdayMonth || !egg?.birthdayDay) return true;
-  const { month, day } = argentinaMonthDay();
-  if (month !== egg.birthdayMonth) return false;
-  const from = egg.birthdayFromDay || egg.birthdayDay;
-  const to = egg.birthdayDay;
-  return day >= from && day <= to;
 }
 
 let balloonTimer = null;

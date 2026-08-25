@@ -114,11 +114,12 @@ export function isViewingAsProfile() {
   return !!readViewAs();
 }
 
-export function startViewAsProfile({ email, displayName, modules }) {
+export function startViewAsProfile({ email, displayName, modules, st2Admin = false }) {
   const payload = {
     email: String(email || "").trim().toLowerCase(),
     displayName: String(displayName || "").trim() || email,
     modules: cloneFlags(parseFlagsFromApi(modules || {})),
+    st2Admin: !!st2Admin,
   };
   sessionStorage.setItem(VIEW_AS_KEY, JSON.stringify(payload));
   try {
@@ -134,21 +135,29 @@ export function clearViewAsProfile() {
 }
 
 export function isPrimarySuperAdmin(email = getPlanUserEmail()) {
+  const viewAs = readViewAs();
+  if (viewAs?.email) {
+    return String(viewAs.email).trim().toLowerCase() === SUPER_ADMIN_EMAIL;
+  }
   return String(email || "").trim().toLowerCase() === SUPER_ADMIN_EMAIL;
 }
 
 /**
  * Panel Admin / privilegios de administración.
- * Mientras se previsualiza otro perfil, se comporta como ese usuario (sin admin).
+ * En “ver como”, usa el flag ADMIN WEB del perfil previsualizado.
  */
 export function isSt2SuperAdmin(email = getPlanUserEmail()) {
-  if (readViewAs()) return false;
+  const viewAs = readViewAs();
+  if (viewAs) {
+    if (String(viewAs.email || "").trim().toLowerCase() === SUPER_ADMIN_EMAIL) return true;
+    return !!viewAs.st2Admin;
+  }
   const target = String(email || "").trim().toLowerCase();
   const me = String(getPlanUserEmail() || "").trim().toLowerCase();
   if (target && target !== me) {
     return target === SUPER_ADMIN_EMAIL;
   }
-  if (isPrimarySuperAdmin(me)) return true;
+  if (String(me).trim().toLowerCase() === SUPER_ADMIN_EMAIL) return true;
   return !!cachedSt2Admin;
 }
 

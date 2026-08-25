@@ -34,3 +34,38 @@ export const PLANILLAS_EASTER_EGGS = [
     birthdayDay: 25,
   },
 ];
+
+function argentinaMonthDay() {
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      month: "numeric",
+      day: "numeric",
+    }).formatToParts(new Date());
+    return {
+      month: Number(parts.find((p) => p.type === "month")?.value),
+      day: Number(parts.find((p) => p.type === "day")?.value),
+    };
+  } catch {
+    const now = new Date();
+    return { month: now.getMonth() + 1, day: now.getDate() };
+  }
+}
+
+/** Sin mes/día el huevo queda siempre activo. Con fechas, solo en esa ventana (Argentina). */
+export function isEggBirthdayWindow(egg) {
+  if (!egg?.birthdayMonth || !egg?.birthdayDay) return true;
+  const { month, day } = argentinaMonthDay();
+  if (month !== egg.birthdayMonth) return false;
+  const from = egg.birthdayFromDay || egg.birthdayDay;
+  const to = egg.birthdayDay;
+  return day >= from && day <= to;
+}
+
+export function isBirthdayGreetingForEmail(email) {
+  const key = String(email || "").trim().toLowerCase();
+  if (!key) return false;
+  const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === key);
+  if (!egg?.birthdayMonth || !egg?.birthdayDay) return false;
+  return isEggBirthdayWindow(egg);
+}

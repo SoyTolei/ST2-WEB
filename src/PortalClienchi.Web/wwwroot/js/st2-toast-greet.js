@@ -1,4 +1,6 @@
 import { getPlanUserEmail } from "./plan-user.js";
+import { getViewAsProfile } from "./module-access.js";
+import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js";
 
 export const TOAST_FOOD_MARK = "{{toast-food}}";
 const TOAST_FOOD_KEY = "st2-toast-food-pizza-used";
@@ -64,12 +66,26 @@ export function setToastText(el, text) {
   );
 }
 
+export function toastUserEmail() {
+  const viewAs = getViewAsProfile();
+  if (viewAs?.email) return String(viewAs.email).trim().toLowerCase();
+  return String(getPlanUserEmail() || "").trim().toLowerCase();
+}
+
+export function greetLine(name) {
+  if (!name) return "";
+  if (isBirthdayGreetingForEmail(toastUserEmail())) {
+    return `Hola ${name}! Feliz cumpleaños`;
+  }
+  return `Hola ${name}!`;
+}
+
 export function formatToastMessage(body, { greet = false } = {}) {
   const msg = String(body || "").trim();
   if (!msg) return msg;
   const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
-  const name = firstNameFromEmail(getPlanUserEmail());
-  if (greet && name) return `${TOAST_FOOD_MARK} Hola ${name}! ${lowered}`;
+  const name = firstNameFromEmail(toastUserEmail());
+  if (greet && name) return `${TOAST_FOOD_MARK} ${greetLine(name)}, ${lowered}`;
   const rest = lowered.replace(/^tenés\s+/i, "");
   return `${TOAST_FOOD_MARK} También tenés ${rest}`;
 }

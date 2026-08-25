@@ -2,7 +2,7 @@ import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
-import { firstNameFromEmail, setToastText, TOAST_FOOD_MARK } from "./st2-toast-greet.js";
+import { firstNameFromEmail, setToastText, TOAST_FOOD_MARK, greetLine, toastUserEmail } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1935,8 +1935,9 @@ function toolsUpdateMessage(newer) {
     const last = names.pop();
     body = `hay una versión nueva para descargar de ${names.join(", ")} y ${last}.`;
   }
-  const name = firstNameFromEmail(getPlanUserEmail());
-  return name ? `Hola ${name}! ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
+  const name = firstNameFromEmail(toastUserEmail());
+  const greet = greetLine(name);
+  return greet ? `${greet}, ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
 }
 
 function hideToolsTopBanner() {
@@ -2709,6 +2710,7 @@ function startAccessProfilePreview(email, modulesOverride = null) {
     email: current.email,
     displayName,
     modules: modulesOverride || current.modules || {},
+    st2Admin: !!current.isSt2Admin,
   });
   window.location.hash = "#/planillas";
   window.location.reload();
