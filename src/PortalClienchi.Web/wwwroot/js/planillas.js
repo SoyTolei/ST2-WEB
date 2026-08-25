@@ -25,6 +25,7 @@ const PLANILLAS_EASTER_EGGS = [
     email: "yohana.colacci@thomsonreuters.com",
     src: "/img/yohana-corner.png?v=6",
     motion: "bob",
+    peekSrc: "/img/yohana-titan.gif?v=1",
   },
   {
     email: "belen.foschiatti@thomsonreuters.com",
@@ -1510,6 +1511,14 @@ function syncPlanillasHeroEaster() {
     el.setAttribute("aria-hidden", show ? "false" : "true");
   });
   syncEasterBalloons(show ? egg : null);
+  const titan = document.getElementById("planillas-hero-titan");
+  const peek = !!(show && egg?.peekSrc);
+  if (titan) {
+    if (peek) titan.src = egg.peekSrc;
+    else titan.removeAttribute("src");
+    titan.classList.toggle("is-hidden", !peek);
+    titan.setAttribute("aria-hidden", peek ? "false" : "true");
+  }
 }
 
 export function initPlanillas() {
