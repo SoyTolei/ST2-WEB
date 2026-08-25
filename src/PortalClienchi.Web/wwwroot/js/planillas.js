@@ -19,32 +19,7 @@ import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
 } from "./access-alerts.js";
-
-const PLANILLAS_EASTER_EGGS = [
-  {
-    email: "yohana.colacci@thomsonreuters.com",
-    src: "/img/yohana-corner.png?v=6",
-    motion: "bob",
-    peekSrc: "/img/yohana-titan.webm?v=1",
-  },
-  {
-    email: "belen.foschiatti@thomsonreuters.com",
-    src: "/img/belen-corner.gif?v=2",
-    motion: "still",
-    size: "lg",
-    behindTitle: true,
-  },
-  {
-    email: "gisela.crosenzi@thomsonreuters.com",
-    src: "/img/gisela-corner.gif?v=4",
-    motion: "still",
-    heroBanner: true,
-    balloons: true,
-    birthdayMonth: 8,
-    birthdayFromDay: 24,
-    birthdayDay: 25,
-  },
-];
+import { PLANILLAS_EASTER_EGGS } from "./planillas-easter-eggs.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 

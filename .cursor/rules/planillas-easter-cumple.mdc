@@ -1,0 +1,32 @@
+---
+description: Receta del easter egg de cumpleaños de Gisela para clonar en otros cumple
+globs: "**/planillas-easter-eggs.js,**/planillas.js,**/planillas.css"
+alwaysApply: false
+---
+
+# Cumpleaños tipo Gisela
+
+Cuando pidan un cumple nuevo en Planillas, clonar el de Gisela. No reinventar globos ni el banner.
+
+## Dónde está
+
+- Receta viva: `src/PortalClienchi.Web/wwwroot/js/planillas-easter-eggs.js` (`GISELA_BIRTHDAY_EGG`).
+- Lógica: `syncPlanillasHeroEaster`, `isEggBirthdayWindow`, globos en `planillas.js`.
+- Estilos: `.planillas-hero.is-easter-banner`, `.planillas-hero-easter.is-hero-banner`, `.st2-x-balloons` en `planillas.css`.
+- Gif: `wwwroot/img/gisela-corner.gif`.
+
+## Cómo clonar
+
+1. Copiar `GISELA_BIRTHDAY_EGG` en `PLANILLAS_EASTER_EGGS` (o reutilizar el objeto si es la misma persona).
+2. Cambiar `email`, `src`, `birthdayMonth` (1–12), `birthdayFromDay` y `birthdayDay`.
+3. La ventana usa **fecha de Argentina**. Si no hay `birthdayMonth`/`birthdayDay`, el huevo queda siempre activo (como Yohana/Belén).
+4. Poner el gif en `wwwroot/img`. Comprimir si pesa mucho (Gisela se rompió a 23MB; quedó ~640px de ancho).
+5. Subir `?v=` del `src` cuando cambie el archivo.
+
+## Qué hace ese modo
+
+- `heroBanner: true`: en el menú de Planillas el gif **reemplaza** título, subtítulo y raya naranja.
+- En otras vistas del módulo, el mismo gif va en la esquina del header (Volver al menú), clase `is-smooth`.
+- `balloons: true`: globos tipo X. En el menú llenan la pantalla; en el resto de vistas `body.st2-balloons-sides` los deja a los costados, detrás de `.planillas-card`.
+
+No mezclar con `behindTitle` (caminata de Belén) ni con `peekSrc` (titán de Yohana) salvo que lo pidan.
