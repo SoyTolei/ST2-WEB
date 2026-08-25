@@ -426,7 +426,7 @@
   width: 168px;
   z-index: 1;
   margin-left: 0;
-  animation: planillas-hero-easter-walk 18s linear infinite;
+  animation: planillas-hero-easter-walk 36.24s cubic-bezier(0.5, 0, 0.18, 1) infinite;
   filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.16));
 }
 
@@ -436,16 +436,23 @@
   left: -180px;
   width: 168px;
   transform: none;
-  animation: planillas-hero-easter-walk 18s linear infinite;
+  animation: planillas-hero-easter-walk 36.24s cubic-bezier(0.5, 0, 0.18, 1) infinite;
 }
 
 @keyframes planillas-hero-easter-walk {
-  0% {
-    left: -180px;
-  }
-  100% {
-    left: calc(100% + 8px);
-  }
+  0% { left: -180px; }
+  12% { left: 3%; }
+  16.66% { left: 3%; }
+  28.66% { left: 21%; }
+  33.33% { left: 21%; }
+  45.33% { left: 39%; }
+  50% { left: 39%; }
+  62% { left: 57%; }
+  66.66% { left: 57%; }
+  78.66% { left: 75%; }
+  83.33% { left: 75%; }
+  95.33% { left: calc(100% + 12px); }
+  100% { left: calc(100% + 12px); }
 }
 
 .planillas-corner-easter.is-lg {
