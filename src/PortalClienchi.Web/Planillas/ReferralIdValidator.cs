@@ -34,23 +34,6 @@ public static class ReferralIdValidator
         if (common is not null)
             return common;
 
-        if (c.RequiresCollationSql)
-        {
-            if (c.Collation == ReferralIdConstants.PlaceholderCollation || string.IsNullOrWhiteSpace(c.Collation))
-                return "Adjuntaste backup de bases: seleccioná la Collation SQL.";
-            if (c.SqlServer == ReferralIdConstants.PlaceholderSqlServer || string.IsNullOrWhiteSpace(c.SqlServer))
-                return "Adjuntaste backup de bases: seleccioná la versión de SQL Server.";
-        }
-
-        if (c.EsTecnico)
-        {
-            if (!c.MamConfigured)
-                return "Abrí MAM y marcá al menos una opción (o «No utiliza MAM»).";
-
-            if (!c.SdkConfigured)
-                return "Abrí SDK y marcá al menos una opción (o «No utiliza SDK»).";
-        }
-
         if (!c.PlanillaConfigured)
             return "Completá la planilla técnica (todas las opciones obligatorias).";
 

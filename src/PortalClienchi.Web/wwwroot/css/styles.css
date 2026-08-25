@@ -135,6 +135,8 @@ html, body {
 }
 
 .brand-logo {
+  display: inline-flex;
+  align-items: flex-start;
   font-size: 28px;
   font-weight: 650;
   letter-spacing: 0.06em;
@@ -148,8 +150,12 @@ html, body {
 
 .brand-two {
   color: #ff7a33;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 0.58em;
+  line-height: 1;
   letter-spacing: 0.02em;
+  margin-left: 1px;
+  transform: translateY(-0.18em);
 }
 
 .app-header-right {
@@ -3957,8 +3963,11 @@ body.st2-access-pending .st2-app-root {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: rgba(15, 23, 42, 0.42);
-  backdrop-filter: blur(3px);
+  background:
+    radial-gradient(90% 70% at 12% 0%, rgba(214, 64, 0, 0.28) 0%, transparent 46%),
+    radial-gradient(80% 60% at 100% 100%, rgba(13, 148, 136, 0.22) 0%, transparent 48%),
+    rgba(8, 13, 24, 0.58);
+  backdrop-filter: blur(8px);
 }
 
 .st2-access-gate.hidden {
@@ -3967,12 +3976,14 @@ body.st2-access-pending .st2-app-root {
 
 .st2-access-card {
   width: min(440px, 96vw);
-  background: #fff;
-  border-radius: 16px;
-  padding: 28px 30px 22px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fffaf7 72%, #fff 100%);
+  border-radius: 20px;
+  padding: 32px 32px 26px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
   box-shadow:
-    0 22px 56px rgba(15, 23, 42, 0.28),
+    0 28px 64px rgba(15, 23, 42, 0.38),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
     inset 0 3px 0 #d64000;
 }
 
@@ -3987,7 +3998,8 @@ body.st2-access-pending .st2-app-root {
 }
 
 .st2-access-icon {
-  border-radius: 8px;
+  border-radius: 10px;
+  box-shadow: 0 10px 22px rgba(13, 148, 136, 0.22);
 }
 
 .st2-access-title {
@@ -4059,20 +4071,22 @@ body.st2-access-pending .st2-app-root {
 
 .st2-access-submit {
   width: 100%;
-  margin-top: 14px;
+  margin-top: 16px;
   border: none;
-  border-radius: 8px;
-  padding: 11px 16px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.98rem;
+  font-weight: 700;
   color: #fff;
-  background: var(--primary);
+  background: linear-gradient(180deg, #e85a12 0%, #d64000 100%);
   cursor: pointer;
-  transition: filter 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 8px 18px rgba(214, 64, 0, 0.28);
+  transition: filter 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
 }
 
 .st2-access-submit:hover:not(:disabled) {
-  filter: brightness(1.05);
+  filter: brightness(1.06);
+  transform: translateY(-1px);
 }
 
 .st2-access-submit:disabled {

@@ -81,8 +81,8 @@ function syncPerfilUi() {
     hint.classList.toggle("is-tecnico", esTecnico);
     hint.classList.toggle("is-otra", !esTecnico);
     hint.innerHTML = esTecnico
-      ? 'Si el referral es de la mesa <strong>técnica</strong>. MAM y SDK son <strong>obligatorios</strong>. Si no abrís la planilla técnica, al generar se autocompletan los checks obligatorios.'
-      : 'Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar la planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompletan los checks obligatorios.';
+      ? 'Si el referral es de la mesa <strong>técnica</strong>. La planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompleta sola. MAM y SDK también son <strong>opcionales</strong>; si no los marcás, no van al TXT.'
+      : 'Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar la planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompleta sola.';
   }
 
   const planBadge = document.getElementById("ref-planilla-badge");
@@ -95,15 +95,15 @@ function syncPerfilUi() {
   const sdkBadge = document.getElementById("ref-sdk-badge");
   for (const badge of [mamBadge, sdkBadge]) {
     if (!badge) continue;
-    badge.textContent = "Obligatorio";
-    badge.className = "plan-check-badge is-required";
+    badge.textContent = "Opcional";
+    badge.className = "plan-check-badge is-optional";
   }
 
   // MAM, SDK y Traza SQL solo aplican a mesa técnica.
   document.getElementById("ref-wrap-mam")?.classList.toggle("hidden", !esTecnico);
   document.getElementById("ref-wrap-sdk")?.classList.toggle("hidden", !esTecnico);
-  document.getElementById("ref-wrap-mam")?.classList.remove("is-optional-card");
-  document.getElementById("ref-wrap-sdk")?.classList.remove("is-optional-card");
+  document.getElementById("ref-wrap-mam")?.classList.add("is-optional-card");
+  document.getElementById("ref-wrap-sdk")?.classList.add("is-optional-card");
 
   const trazaCard = document.getElementById("ref-card-traza");
   const trazaPanel = document.getElementById("ref-traza-panel");
@@ -238,9 +238,7 @@ function buildReferralPills() {
 }
 
 function updateSqlPanel() {
-  // Collation/SQL se muestra con el panel de backup (ya no depende de elegir una base).
-  const backup = !!document.getElementById("ref-adj-backup")?.checked;
-  document.getElementById("ref-sql-panel")?.classList.toggle("hidden", !backup);
+  document.getElementById("ref-sql-panel")?.classList.remove("hidden");
 }
 
 function updateCheckStatuses() {

@@ -112,7 +112,6 @@ const accessModulesOverlay = document.getElementById("st2-access-modules-overlay
 const accessModulesTitle = document.getElementById("st2-access-modules-title");
 const accessModulesEmail = document.getElementById("st2-access-modules-email");
 const accessModulesName = document.getElementById("st2-access-modules-name");
-const accessModulesPreview = document.getElementById("st2-access-modules-preview");
 const accessModulesError = document.getElementById("st2-access-modules-error");
 const accessModulesClose = document.getElementById("st2-access-modules-close");
 const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
@@ -2782,9 +2781,6 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
     accessModSt2AdminWrap.classList.toggle("is-primary-locked", isPrimary);
     accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
   }
-  if (accessModulesPreview) {
-    accessModulesPreview.classList.toggle("hidden", !isPrimarySuperAdmin());
-  }
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
 }
@@ -2911,10 +2907,6 @@ async function saveAccessModules() {
 accessModulesClose?.addEventListener("click", closeAccessModulesModal);
 accessModulesCancel?.addEventListener("click", closeAccessModulesModal);
 accessModulesSave?.addEventListener("click", () => { void saveAccessModules(); });
-accessModulesPreview?.addEventListener("click", () => {
-  if (!isPrimarySuperAdmin()) return;
-  previewAccessModulesProfile();
-});
 accessModulesOverlay?.addEventListener("click", (e) => {
   if (e.target === accessModulesOverlay) closeAccessModulesModal();
 });

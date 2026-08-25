@@ -816,7 +816,7 @@
                   <button type="button" class="plan-segment-btn" id="ref-perfil-tecnico" data-perfil="tecnico">Técnico</button>
                 </div>
               </div>
-              <p class="plan-ref-hint plan-ref-perfil-hint is-otra" id="ref-perfil-hint">Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar la planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompletan los checks obligatorios.</p>
+              <p class="plan-ref-hint plan-ref-perfil-hint is-otra" id="ref-perfil-hint">Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar la planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompleta sola.</p>
               <div class="plan-check-cards">
                 <div class="plan-check-wrap planilla">
                   <span class="plan-check-mark" id="ref-planilla-status">○</span>
@@ -827,7 +827,7 @@
                         <strong>Planilla Técnica</strong>
                         <span class="plan-check-badge is-auto" id="ref-planilla-badge">Se completa sola</span>
                       </span>
-                      <small>Datos para el equipo técnico</small>
+                      <small>Opcional; si no la abrís se completa sola</small>
                     </span>
                   </button>
                 </div>
@@ -838,7 +838,7 @@
                     <span class="plan-check-btn-copy">
                       <span class="plan-check-btn-head">
                         <strong>MAM</strong>
-                        <span class="plan-check-badge is-required" id="ref-mam-badge">Obligatorio</span>
+                        <span class="plan-check-badge is-optional" id="ref-mam-badge">Opcional</span>
                       </span>
                       <small>Modificaciones a Medida</small>
                     </span>
@@ -851,7 +851,7 @@
                     <span class="plan-check-btn-copy">
                       <span class="plan-check-btn-head">
                         <strong>SDK</strong>
-                        <span class="plan-check-badge is-required" id="ref-sdk-badge">Obligatorio</span>
+                        <span class="plan-check-badge is-optional" id="ref-sdk-badge">Opcional</span>
                       </span>
                       <small>Integraciones y desarrollo</small>
                     </span>
@@ -860,6 +860,15 @@
               </div>
               <p class="plan-ref-title">Adjuntos</p>
               <div class="plan-adj-stack">
+                <div id="ref-sql-panel" class="plan-backup-sql">
+                  <p class="plan-backup-detail-title">Collation y SQL Server</p>
+                  <p class="plan-backup-sql-hint">Opcional. Aclara el entorno, aunque no adjuntés backup de bases.</p>
+                  <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si tomaste el backup con <strong>ST2 → Herramientas SQL</strong>, podés ver la collation y la versión en el nombre del archivo <strong>.zip</strong>.</p>
+                  <div class="plan-form-2col plan-form-2col-tight">
+                    <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
+                    <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
+                  </div>
+                </div>
                 <button type="button" class="plan-adj-card tone-orange" id="ref-card-pantallas" data-adj="pantallas">
                   <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Capturas / Imágenes / Video / PDF / TXT</span>
                   <span class="card-mark" id="ref-mark-pantallas">○</span>
@@ -914,14 +923,6 @@
                 </button>
                 <input type="checkbox" id="ref-adj-backup" class="hidden"/>
                 <div id="ref-backup-panel" class="plan-backup-detail hidden">
-                  <div id="ref-sql-panel" class="plan-backup-sql">
-                    <p class="plan-backup-detail-title">Collation y SQL Server</p>
-                    <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si tomaste el backup con <strong>ST2 → Herramientas SQL</strong>, podés ver la collation y la versión de SQL Server en el nombre del archivo <strong>.zip</strong>.</p>
-                    <div class="plan-form-2col plan-form-2col-tight">
-                      <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
-                      <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
-                    </div>
-                  </div>
                   <p class="plan-backup-detail-title">Bases incluidas en el backup</p>
                   <div class="plan-backup-bases-grid">
                     <button type="button" class="plan-backup-base-card" id="ref-card-backup-manager"><span>Manager</span><span class="card-mark" id="ref-mark-backup-manager">○</span></button>
@@ -2017,10 +2018,6 @@
       <div id="st2-access-modules-profile" class="st2-access-modules-profile">
         <div class="st2-access-modules-profile-top">
           <span class="st2-access-modules-profile-label">Perfil</span>
-          <button type="button" id="st2-access-modules-preview" class="st2-access-modules-preview" title="Ver como ve este perfil">
-            <svg class="st2-access-modules-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg>
-            Ver como
-          </button>
         </div>
         <input id="st2-access-modules-name" class="st2-access-modules-name-input" type="text" maxlength="80" autocomplete="name" aria-label="Nombre para mostrar"/>
         <span id="st2-access-modules-email" class="st2-access-modules-email"></span>
