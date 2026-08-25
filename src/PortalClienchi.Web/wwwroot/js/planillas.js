@@ -25,7 +25,7 @@ const PLANILLAS_EASTER_EGGS = [
     email: "yohana.colacci@thomsonreuters.com",
     src: "/img/yohana-corner.png?v=6",
     motion: "bob",
-    peekSrc: "/img/yohana-titan.gif?v=1",
+    peekSrc: "/img/yohana-titan.gif?v=2",
   },
   {
     email: "belen.foschiatti@thomsonreuters.com",
