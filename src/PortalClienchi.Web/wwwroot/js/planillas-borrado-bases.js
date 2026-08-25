@@ -124,6 +124,9 @@ export function initBorradoBasesModule() {
     if (check) check.dataset.userTouched = "1";
     applyFilters();
   });
+  document.getElementById("borrado-export")?.addEventListener("click", () => {
+    void exportExcel();
+  });
   document.getElementById("borrado-preview-confirm")?.addEventListener("change", (e) => {
     const on = !!e.target?.checked;
     try {
@@ -307,6 +310,13 @@ function syncMineFilterVisibility() {
   } else if (show && check && check.dataset.userTouched !== "1") {
     check.checked = true;
   }
+  syncConfirmToolsVisibility();
+}
+
+function syncConfirmToolsVisibility() {
+  const exportBtn = document.getElementById("borrado-export");
+  if (exportBtn) exportBtn.classList.toggle("hidden", !canConfirm);
+  syncLoadFormVisibility();
 }
 
 function syncDetalleFieldsVisibility() {
@@ -600,6 +610,30 @@ function applyFilters() {
   const statusEl = document.getElementById("borrado-status");
   if (statusEl && !statusEl.classList.contains("is-error")) {
     setStatus(filtered.length ? `${filtered.length} solicitud(es).` : "Sin solicitudes con ese filtro.");
+  }
+}
+
+async function exportExcel() {
+  if (!canConfirm) return;
+  setStatus("Generando Excel…");
+  try {
+    const res = await planUserFetch("/api/planillas/borrado-bases/export");
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || data.detail || `Error ${res.status}`);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `borrado-bases-export-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    setStatus("Excel exportado (solicitudes + resumen mensual).");
+  } catch (err) {
+    setStatus(err?.message || "No se pudo exportar.", true);
   }
 }
 

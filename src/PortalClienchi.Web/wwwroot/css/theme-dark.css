@@ -1398,3 +1398,75 @@ html.st2-theme-dark .blanqueo-hab-pill:hover,
 html.st2-theme-dark .blanqueo-hab-pill:focus-visible {
   background: #881337;
 }
+
+html.st2-theme-dark .blanqueo-filter-mine,
+html.st2-theme-dark .borrado-filter-mine {
+  background: #151c28 !important;
+  border-color: #4b5a73 !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .blanqueo-correo-add {
+  background: #1e3a8a !important;
+  border-color: #2563eb !important;
+  color: #93c5fd !important;
+}
+
+html.st2-theme-dark .blanqueo-correo-add:hover {
+  background: #1d4ed8 !important;
+  color: #fff !important;
+}
+
+html.st2-theme-dark .blanqueo-correo-remove {
+  background: #4c0519 !important;
+  border-color: #fb7185 !important;
+  color: #fecdd3 !important;
+}
+
+html.st2-theme-dark .blanqueo-correo-remove:hover {
+  background: #881337 !important;
+  color: #fff !important;
+}
+
+html.st2-theme-dark #planillas-transferencia .plan-mesas {
+  background: #151c28 !important;
+  border-color: #4b5a73 !important;
+}
+
+html.st2-theme-dark #planillas-transferencia .plan-capturas-card,
+html.st2-theme-dark #planillas-transferencia .plan-ticket-card {
+  background: #151c28 !important;
+  border: 1px solid #4b5a73 !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark #planillas-transferencia .plan-capturas-card.selected,
+html.st2-theme-dark #planillas-transferencia .plan-ticket-card.selected {
+  background: #3a1d12 !important;
+  border-color: #ea580c !important;
+}
+
+html.st2-theme-dark #planillas-transferencia input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html.st2-theme-dark #planillas-transferencia textarea {
+  background: #0f172a !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+html.st2-theme-dark #planillas-transferencia .plan-ia-btn,
+html.st2-theme-dark #planillas-transferencia .btn-secondary {
+  background: #151c28 !important;
+  border-color: #4b5a73 !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark #planillas-transferencia .plan-ia-undo-btn {
+  background: #151c28 !important;
+  border-color: #4b5a73 !important;
+  color: #cbd5e1 !important;
+}
+
+html.st2-theme-dark .borrado-list-footer,
+html.st2-theme-dark .blanqueo-list-footer {
+  border-top-color: #334155 !important;
+}

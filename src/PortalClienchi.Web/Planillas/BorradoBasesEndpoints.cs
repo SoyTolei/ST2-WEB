@@ -22,6 +22,19 @@ public static class BorradoBasesEndpoints
             });
         });
 
+        app.MapGet("/api/planillas/borrado-bases/export", (HttpContext ctx, BorradoBasesRepository repo, ModuleAccessRepository modules) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
+                return error!;
+
+            var bytes = BorradoBasesExcel.BuildExportWorkbook(repo.LoadAll());
+            var name = $"borrado-bases-export-{DateTime.Now:yyyyMMdd-HHmm}.xlsx";
+            return Results.File(
+                bytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                name);
+        });
+
         app.MapPost("/api/planillas/borrado-bases", (
             HttpContext ctx,
             BorradoBasesCreateRequest body,

@@ -899,19 +899,19 @@ function applyFilters() {
 function syncMonthStat(filtered) {
   const el = document.getElementById("blanqueo-month-stat");
   if (!el) return;
+  const list = Array.isArray(filtered) ? filtered : getFilteredItems();
   const monthSel = document.getElementById("blanqueo-filter-month")?.value || "all";
-  if (monthSel === "all") {
-    const n = Array.isArray(filtered) ? filtered.length : getFilteredItems().length;
-    el.textContent = n === 1 ? "Todos los meses: 1 blanqueo" : `Todos los meses: ${n} blanqueos`;
-    el.title = "Total con el filtro actual (todos los meses)";
-    return;
-  }
-
-  const key = monthSel;
-  const n = items.filter((item) => monthKeyFromIso(item.fechaSolicitud) === key).length;
-  const label = monthLabelFromKey(key);
-  el.textContent = n === 1 ? `${label}: 1 blanqueo` : `${label}: ${n} blanqueos`;
-  el.title = `Cantidad en ${label}`;
+  const prefix = monthSel === "all" ? "Todos los meses" : monthLabelFromKey(monthSel);
+  const n = list.length;
+  const listos = list.filter((item) => item.listo).length;
+  const noReg = list.filter((item) => isNoRegistrado(item.aclaracion)).length;
+  const total = n === 1 ? `${prefix}: 1 blanqueo` : `${prefix}: ${n} blanqueos`;
+  const listosTxt = listos === 1 ? "1 listo" : `${listos} listos`;
+  const noRegTxt = noReg === 1 ? "1 no registrado" : `${noReg} no registrados`;
+  el.textContent = `${total} · ${listosTxt} · ${noRegTxt}`;
+  el.title = monthSel === "all"
+    ? "Totales con el filtro actual (todos los meses)"
+    : `Cantidad en ${prefix} con el filtro actual`;
 }
 
 function monthLabelFromKey(key) {
