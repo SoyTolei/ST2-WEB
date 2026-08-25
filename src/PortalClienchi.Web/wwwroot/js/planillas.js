@@ -1491,10 +1491,17 @@ function syncPlanillasHeroEaster() {
   const peek = !!(show && egg?.peekSrc);
   hero?.classList.toggle("has-titan-peek", peek);
   if (titan) {
+    const srcEl = document.getElementById("planillas-hero-titan-src");
+    titan.muted = true;
+    titan.defaultMuted = true;
+    titan.playsInline = true;
+    titan.loop = true;
     if (peek) {
       if (titan.dataset.peekSrc !== egg.peekSrc) {
-        titan.src = egg.peekSrc;
+        if (srcEl) srcEl.src = egg.peekSrc;
+        else titan.src = egg.peekSrc;
         titan.dataset.peekSrc = egg.peekSrc;
+        titan.load();
       }
     } else {
       titan.pause();
@@ -1513,7 +1520,7 @@ function bindTitanPeekHover() {
   hero.dataset.titanPeekBound = "1";
   hero.addEventListener("mouseenter", () => {
     const titan = document.getElementById("planillas-hero-titan");
-    if (!titan || titan.classList.contains("is-hidden") || !titan.src) return;
+    if (!titan || titan.classList.contains("is-hidden") || !titan.dataset.peekSrc) return;
     titan.play().catch(() => {});
   });
   hero.addEventListener("mouseleave", () => {

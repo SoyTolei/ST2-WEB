@@ -1,32 +1,32 @@
 ---
-description: Receta del easter egg de cumpleaños de Gisela para clonar en otros cumple
+description: Receta de cumpleaños en Planillas (banner gif + globos, fechas Argentina)
 globs: "**/planillas-easter-eggs.js,**/planillas.js,**/planillas.css"
 alwaysApply: false
 ---
 
-# Cumpleaños tipo Gisela
+# Cumpleaños en Planillas
 
-Cuando pidan un cumple nuevo en Planillas, clonar el de Gisela. No reinventar globos ni el banner.
+Plantilla reutilizable: gif grande en el título, globos, ventana de fechas. No está atada a una persona.
 
 ## Dónde está
 
-- Receta viva: `src/PortalClienchi.Web/wwwroot/js/planillas-easter-eggs.js` (`GISELA_BIRTHDAY_EGG`).
+- Lista y receta: `src/PortalClienchi.Web/wwwroot/js/planillas-easter-eggs.js` (`PLANILLAS_BIRTHDAY_RECIPE`).
 - Lógica: `syncPlanillasHeroEaster`, `isEggBirthdayWindow`, globos en `planillas.js`.
-- Estilos: `.planillas-hero.is-easter-banner`, `.planillas-hero-easter.is-hero-banner`, `.st2-x-balloons` en `planillas.css`.
-- Gif: `wwwroot/img/gisela-corner.gif`.
+- Estilos: `.planillas-hero.is-easter-banner`, `.st2-x-balloons` en `planillas.css`.
 
-## Cómo clonar
+Hoy Gisela usa esa receta (24–25 ago). Para otro cumple, el usuario dirá quién; no inventar fechas.
 
-1. Copiar `GISELA_BIRTHDAY_EGG` en `PLANILLAS_EASTER_EGGS` (o reutilizar el objeto si es la misma persona).
-2. Cambiar `email`, `src`, `birthdayMonth` (1–12), `birthdayFromDay` y `birthdayDay`.
-3. La ventana usa **fecha de Argentina**. Si no hay `birthdayMonth`/`birthdayDay`, el huevo queda siempre activo (como Yohana/Belén).
-4. Poner el gif en `wwwroot/img`. Comprimir si pesa mucho (Gisela se rompió a 23MB; quedó ~640px de ancho).
-5. Subir `?v=` del `src` cuando cambie el archivo.
+## Cómo agregar uno
 
-## Qué hace ese modo
+1. Otro objeto en `PLANILLAS_EASTER_EGGS` con `...PLANILLAS_BIRTHDAY_RECIPE`.
+2. `email`, `src`, `birthdayMonth` (1–12), `birthdayFromDay`, `birthdayDay`.
+3. Fechas en **Argentina**. Sin mes/día el huevo queda siempre activo.
+4. Gif en `wwwroot/img`, no pesado (evitar 20MB). Subir `?v=` si cambia el archivo.
 
-- `heroBanner: true`: en el menú de Planillas el gif **reemplaza** título, subtítulo y raya naranja.
-- En otras vistas del módulo, el mismo gif va en la esquina del header (Volver al menú), clase `is-smooth`.
-- `balloons: true`: globos tipo X. En el menú llenan la pantalla; en el resto de vistas `body.st2-balloons-sides` los deja a los costados, detrás de `.planillas-card`.
+## Qué hace
 
-No mezclar con `behindTitle` (caminata de Belén) ni con `peekSrc` (titán de Yohana) salvo que lo pidan.
+- `heroBanner`: el gif reemplaza título/subtítulo en el menú.
+- En módulos, el mismo gif en la esquina del header.
+- `balloons`: globos; en vistas internas van a los costados (`st2-balloons-sides`).
+
+No mezclar con `behindTitle` (Belén) ni `peekSrc` (Yohana) salvo pedido.

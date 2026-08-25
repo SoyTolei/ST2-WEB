@@ -115,7 +115,11 @@
         <div id="planillas-menu" class="planillas-view">
           <div class="planillas-card">
             <div class="planillas-hero">
-              <video id="planillas-hero-titan" class="planillas-hero-titan is-hidden" muted loop playsinline preload="none" aria-hidden="true"></video>
+              <div class="planillas-hero-titan-clip" aria-hidden="true">
+                <video id="planillas-hero-titan" class="planillas-hero-titan is-hidden" muted loop playsinline preload="metadata" aria-hidden="true">
+                  <source id="planillas-hero-titan-src" type="video/webm"/>
+                </video>
+              </div>
               <img id="planillas-hero-easter" class="planillas-hero-easter is-hidden" alt="" width="54" height="54" decoding="async" aria-hidden="true"/>
               <h2>Sistema de Planillas</h2>
               <p>Transferencias, Referral I+D, oportunidades, blanqueo y borrado de bases web</p>

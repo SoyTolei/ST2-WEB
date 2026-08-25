@@ -366,15 +366,20 @@
   z-index: 1;
 }
 
-.planillas-hero.has-titan-peek {
-  overflow: hidden;
-}
-
 .planillas-hero.has-titan-peek h2,
 .planillas-hero.has-titan-peek p,
 .planillas-hero.has-titan-peek .accent-bar {
   position: relative;
   z-index: 3;
+}
+
+.planillas-hero-titan-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .planillas-hero-titan {
@@ -387,7 +392,6 @@
   display: block;
   object-fit: cover;
   object-position: center bottom;
-  z-index: 0;
   pointer-events: none;
   user-select: none;
   transform: translate(-50%, 100%);
@@ -395,7 +399,7 @@
 }
 
 .planillas-hero.has-titan-peek:hover .planillas-hero-titan:not(.is-hidden) {
-  transform: translate(-50%, 12%);
+  transform: translate(-50%, 8%);
 }
 
 .planillas-hero-titan.is-hidden {
@@ -429,13 +433,13 @@
 
 .planillas-hero-easter {
   position: absolute;
-  top: -14px;
+  top: -12px;
   left: 8px;
   right: auto;
   width: 54px;
   height: auto;
   pointer-events: none;
-  z-index: 2;
+  z-index: 4;
   filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18));
   user-select: none;
   opacity: 1;

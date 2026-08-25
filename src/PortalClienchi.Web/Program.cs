@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using PortalClienchi.Core.Configuration;
@@ -145,8 +146,11 @@ app.Use(async (ctx, next) =>
 });
 
 app.UseDefaultFiles();
+var staticTypes = new FileExtensionContentTypeProvider();
+staticTypes.Mappings[".webm"] = "video/webm";
 app.UseStaticFiles(new StaticFileOptions
 {
+    ContentTypeProvider = staticTypes,
     OnPrepareResponse = ctx =>
     {
         var file = ctx.File.Name;

@@ -1,20 +1,14 @@
 /**
- * Huevos de Planillas. El de Gisela es la receta de cumpleaños:
- * gif grande en el título del menú, globos, y el mismo gif chico
- * en “Volver al menú” de cada módulo. Ventana en fecha Argentina.
+ * Huevos de Planillas.
  *
- * Para otro cumple: copiar GISELA_BIRTHDAY_EGG, cambiar email, src,
- * mes y días. Poner el gif en wwwroot/img (ideal ~640px de ancho).
+ * Receta de CUMPLEAÑOS (banner gif + globos, fechas Argentina):
+ * copiar PLANILLAS_BIRTHDAY_RECIPE y poner email, src, mes y días.
+ * Más adelante se pueden sumar varias fechas; si no hay mes/día, queda siempre on.
  */
-export const GISELA_BIRTHDAY_EGG = {
-  email: "gisela.crosenzi@thomsonreuters.com",
-  src: "/img/gisela-corner.gif?v=4",
+export const PLANILLAS_BIRTHDAY_RECIPE = {
   motion: "still",
   heroBanner: true,
   balloons: true,
-  birthdayMonth: 8,
-  birthdayFromDay: 24,
-  birthdayDay: 25,
 };
 
 export const PLANILLAS_EASTER_EGGS = [
@@ -22,7 +16,7 @@ export const PLANILLAS_EASTER_EGGS = [
     email: "yohana.colacci@thomsonreuters.com",
     src: "/img/yohana-corner.png?v=6",
     motion: "bob",
-    peekSrc: "/img/yohana-titan.webm?v=1",
+    peekSrc: "/img/yohana-titan.webm?v=2",
   },
   {
     email: "belen.foschiatti@thomsonreuters.com",
@@ -31,5 +25,12 @@ export const PLANILLAS_EASTER_EGGS = [
     size: "lg",
     behindTitle: true,
   },
-  GISELA_BIRTHDAY_EGG,
+  {
+    ...PLANILLAS_BIRTHDAY_RECIPE,
+    email: "gisela.crosenzi@thomsonreuters.com",
+    src: "/img/gisela-corner.gif?v=4",
+    birthdayMonth: 8,
+    birthdayFromDay: 24,
+    birthdayDay: 25,
+  },
 ];
