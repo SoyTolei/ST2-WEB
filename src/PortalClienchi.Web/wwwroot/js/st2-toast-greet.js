@@ -75,7 +75,7 @@ export function toastUserEmail() {
 export function greetLine(name) {
   if (!name) return "";
   if (isBirthdayGreetingForEmail(toastUserEmail())) {
-    return `Hola ${name}! Feliz cumpleaños`;
+    return `Hola ${name}! Feliz Cumpleaños! 🎂`;
   }
   return `Hola ${name}!`;
 }
@@ -85,7 +85,11 @@ export function formatToastMessage(body, { greet = false } = {}) {
   if (!msg) return msg;
   const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
   const name = firstNameFromEmail(toastUserEmail());
-  if (greet && name) return `${TOAST_FOOD_MARK} ${greetLine(name)}, ${lowered}`;
+  if (greet && name) {
+    const line = greetLine(name);
+    if (isBirthdayGreetingForEmail(toastUserEmail())) return `${line} ${lowered}`;
+    return `${TOAST_FOOD_MARK} ${line} ${lowered}`;
+  }
   const rest = lowered.replace(/^tenés\s+/i, "");
   return `${TOAST_FOOD_MARK} También tenés ${rest}`;
 }

@@ -3480,11 +3480,28 @@ body.portal-tab-active .tab-icon {
   pointer-events: none;
 }
 
-.st2-access-modules-name {
+.st2-access-modules-name,
+.st2-access-modules-name-input {
   font-size: 1rem;
   font-weight: 700;
   color: #0f172a;
   line-height: 1.25;
+}
+
+.st2-access-modules-name-input {
+  width: 100%;
+  margin: 2px 0 0;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.st2-access-modules-name-input:focus {
+  outline: none;
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18);
 }
 
 .st2-access-modules-email {

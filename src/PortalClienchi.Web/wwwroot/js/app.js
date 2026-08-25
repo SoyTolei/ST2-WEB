@@ -1406,8 +1406,7 @@ function renderAccessAdminTable() {
       ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
              <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
       : `${ownerActions ? `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>` : ""}
-        <button type="button" class="st2-access-admin-modules" data-modules-email="${escapeHtml(item.email)}" title="Módulos habilitados" aria-label="Módulos de ${escapeHtml(displayName)}">☰</button>
-        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-edit-email="${escapeHtml(item.email)}" title="${item.displayNameOverride ? "Nombre editado — clic para cambiar" : "Editar nombre"}" aria-label="Editar nombre de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
+        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-modules-email="${escapeHtml(item.email)}" title="Editar perfil y módulos" aria-label="Editar perfil y módulos de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
         ${ownerActions ? `<button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>` : ""}`;
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
@@ -1937,7 +1936,7 @@ function toolsUpdateMessage(newer) {
   }
   const name = firstNameFromEmail(toastUserEmail());
   const greet = greetLine(name);
-  return greet ? `${greet}, ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
+  return greet ? `${greet} ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
 }
 
 function hideToolsTopBanner() {
@@ -2599,7 +2598,7 @@ document.addEventListener("st2:session-changed", () => {
 });
 viewAsExitBtn?.addEventListener("click", () => {
   clearViewAsProfile();
-  window.location.reload();
+  window.location.assign("/admin");
 });
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
@@ -2674,11 +2673,6 @@ accessAdminBody?.addEventListener("click", (e) => {
   const modulesBtn = target.closest("[data-modules-email]");
   if (modulesBtn instanceof HTMLElement) {
     openAccessModulesModal(modulesBtn.dataset.modulesEmail || "");
-    return;
-  }
-  const editBtn = target.closest("[data-edit-email]");
-  if (editBtn instanceof HTMLElement) {
-    editAccessAdminDisplayName(editBtn.dataset.editEmail || "");
     return;
   }
   const deleteBtn = target.closest("[data-delete-email]");
@@ -2760,7 +2754,7 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   }
   if (accessModulesSave) accessModulesSave.textContent = afterApprove ? "Listo" : "Guardar";
   if (accessModulesCancel) accessModulesCancel.textContent = afterApprove ? "Después" : "Cancelar";
-  if (accessModulesName) accessModulesName.textContent = displayName;
+  if (accessModulesName) accessModulesName.value = displayName;
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
   if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
@@ -2848,6 +2842,21 @@ async function saveAccessModules() {
   if (accessModulesSave) accessModulesSave.disabled = true;
   if (accessModulesError) accessModulesError.textContent = "";
   try {
+    const nameValue = String(accessModulesName?.value || "").trim();
+    const autoName = parseAccessNameFromEmail(accessModulesEmailValue).display;
+    const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;
+    const nameRes = await fetch("/api/access/registrations", {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: accessModulesEmailValue,
+        displayName: nameOverride,
+      }),
+    });
+    const nameData = await nameRes.json().catch(() => ({}));
+    if (!nameRes.ok) throw new Error(nameData.error || "No se pudo guardar el nombre.");
+
     const response = await fetch("/api/access/registrations/modules", {
       method: "PUT",
       credentials: "include",
@@ -2872,6 +2881,7 @@ async function saveAccessModules() {
       item.email === accessModulesEmailValue
         ? {
             ...item,
+            displayNameOverride: nameOverride,
             isSt2Admin: !!(data.isSt2Admin ?? accessModSt2Admin?.checked),
             modules: {
               oportunidad: !!mods.oportunidad,

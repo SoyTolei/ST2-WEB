@@ -1114,8 +1114,14 @@ html.st2-theme-dark .st2-access-modules-profile {
   border-left-color: #fb923c !important;
 }
 
-html.st2-theme-dark .st2-access-modules-name {
+html.st2-theme-dark .st2-access-modules-name,
+html.st2-theme-dark .st2-access-modules-name-input {
   color: #f8fafc !important;
+}
+
+html.st2-theme-dark .st2-access-modules-name-input {
+  background: #1a2130 !important;
+  border-color: #3d4b61 !important;
 }
 
 html.st2-theme-dark .st2-access-modules-preview {
