@@ -409,6 +409,7 @@
 
 .planillas-hero.is-easter-behind {
   padding-top: 28px;
+  overflow: hidden;
 }
 
 .planillas-hero.is-easter-behind h2,
@@ -419,22 +420,32 @@
 }
 
 .planillas-hero-easter.is-behind-title {
-  left: 50%;
+  left: -180px;
   right: auto;
-  top: -6px;
+  top: 4px;
   width: 168px;
   z-index: 1;
   margin-left: 0;
-  transform: translateX(-50%);
+  animation: planillas-hero-easter-walk 18s linear infinite;
   filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.16));
 }
 
 .planillas-hero-easter.is-behind-title.is-still,
 .planillas-hero-easter.is-behind-title.is-lg {
-  top: -6px;
-  left: 50%;
+  top: 4px;
+  left: -180px;
   width: 168px;
-  transform: translateX(-50%);
+  transform: none;
+  animation: planillas-hero-easter-walk 18s linear infinite;
+}
+
+@keyframes planillas-hero-easter-walk {
+  0% {
+    left: -180px;
+  }
+  100% {
+    left: calc(100% + 8px);
+  }
 }
 
 .planillas-corner-easter.is-lg {
