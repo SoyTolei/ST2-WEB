@@ -407,11 +407,34 @@
   animation: planillas-hero-easter-bob 2.6s ease-in-out infinite;
 }
 
-.planillas-hero-easter.is-lg {
-  top: -18px;
-  left: 4px;
-  width: 108px;
-  image-rendering: auto;
+.planillas-hero.is-easter-behind {
+  padding-top: 28px;
+}
+
+.planillas-hero.is-easter-behind h2,
+.planillas-hero.is-easter-behind p,
+.planillas-hero.is-easter-behind .accent-bar {
+  position: relative;
+  z-index: 2;
+}
+
+.planillas-hero-easter.is-behind-title {
+  left: 50%;
+  right: auto;
+  top: -6px;
+  width: 168px;
+  z-index: 1;
+  margin-left: 0;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.16));
+}
+
+.planillas-hero-easter.is-behind-title.is-still,
+.planillas-hero-easter.is-behind-title.is-lg {
+  top: -6px;
+  left: 50%;
+  width: 168px;
+  transform: translateX(-50%);
 }
 
 .planillas-corner-easter.is-lg {
@@ -446,16 +469,16 @@
 }
 
 .planillas-corner-easter.is-smooth {
-  width: 72px;
-  top: 4px;
-  right: 12px;
+  width: 108px;
+  top: 2px;
+  right: 10px;
   animation: none;
   transform: none;
   filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.16));
 }
 
 .plan-module-sticky-head:has(.planillas-corner-easter.is-smooth:not(.is-hidden)) {
-  padding-right: calc(var(--plan-card-pad-x) + 78px);
+  padding-right: calc(var(--plan-card-pad-x) + 112px);
 }
 
 .planillas-hero-easter:not(.is-lg),

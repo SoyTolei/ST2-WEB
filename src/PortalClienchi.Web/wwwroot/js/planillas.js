@@ -31,6 +31,7 @@ const PLANILLAS_EASTER_EGGS = [
     src: "/img/belen-corner.gif?v=2",
     motion: "still",
     size: "lg",
+    behindTitle: true,
   },
   {
     email: "gisela.crosenzi@thomsonreuters.com",
@@ -1480,8 +1481,9 @@ function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === email);
   const show = !!egg && isEggBirthdayWindow(egg);
-  const heroBanner = !!(show && egg?.heroBanner);
+  const behindTitle = !!(show && egg?.behindTitle && !heroBanner);
   document.querySelector(".planillas-hero")?.classList.toggle("is-easter-banner", heroBanner);
+  document.querySelector(".planillas-hero")?.classList.toggle("is-easter-behind", behindTitle);
   document.querySelectorAll(".planillas-view .plan-module-sticky-head").forEach((head) => {
     if (head.querySelector(".planillas-corner-easter")) return;
     const img = document.createElement("img");
@@ -1499,8 +1501,9 @@ function syncPlanillasHeroEaster() {
     else el.removeAttribute("src");
     el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-still", egg?.motion === "still");
-    el.classList.toggle("is-lg", !isHero && egg?.size === "lg");
+    el.classList.toggle("is-lg", egg?.size === "lg" && !heroBanner);
     el.classList.toggle("is-hero-banner", isHero && heroBanner);
+    el.classList.toggle("is-behind-title", isHero && behindTitle);
     el.classList.toggle("is-smooth", !!(show && egg?.heroBanner));
     el.classList.toggle("is-hidden", !show);
     el.setAttribute("aria-hidden", show ? "false" : "true");
