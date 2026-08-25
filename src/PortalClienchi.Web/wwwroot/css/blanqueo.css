@@ -12,7 +12,7 @@
   max-width: none;
 }
 
-.planillas-card:has(#planillas-blanqueo:not(.hidden)) {
+#planillas-blanqueo > .planillas-card {
   max-width: min(1840px, 99.5vw);
   --plan-card-pad-x: 20px;
 }

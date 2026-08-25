@@ -238,7 +238,6 @@ html.st2-theme-dark .plan-check-card,
 html.st2-theme-dark .plan-op-card,
 html.st2-theme-dark .plan-op-cargar-panel,
 html.st2-theme-dark .plan-op-metodo-well,
-html.st2-theme-dark .plan-check-cards,
 html.st2-theme-dark .plan-gestor-panel,
 html.st2-theme-dark .plan-user-dialog,
 html.st2-theme-dark .plan-ref-modal,
@@ -459,32 +458,36 @@ html.st2-theme-dark .blanqueo-table tr:hover td {
 }
 
 html.st2-theme-dark .plan-onvio-card.tone-slate,
+html.st2-theme-dark .plan-adj-card.tone-slate,
+html.st2-theme-dark .plan-onvio-card.tone-green,
+html.st2-theme-dark .plan-adj-card.tone-green,
+html.st2-theme-dark .plan-onvio-card.tone-orange,
+html.st2-theme-dark .plan-adj-card.tone-orange,
+html.st2-theme-dark .plan-onvio-card.tone-purple,
+html.st2-theme-dark .plan-adj-card.tone-purple,
+html.st2-theme-dark .plan-onvio-card.tone-blue,
+html.st2-theme-dark .plan-adj-card.tone-blue {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+}
+
 html.st2-theme-dark .plan-adj-card.tone-slate {
-  background: #1e293b !important;
   border-color: #475569 !important;
 }
 
-html.st2-theme-dark .plan-onvio-card.tone-green,
 html.st2-theme-dark .plan-adj-card.tone-green {
-  background: #052e16 !important;
-  border-color: #166534 !important;
+  border-color: #15803d !important;
 }
 
-html.st2-theme-dark .plan-onvio-card.tone-orange,
 html.st2-theme-dark .plan-adj-card.tone-orange {
-  background: #431407 !important;
   border-color: #c2410c !important;
 }
 
-html.st2-theme-dark .plan-onvio-card.tone-purple,
 html.st2-theme-dark .plan-adj-card.tone-purple {
-  background: #3b0764 !important;
   border-color: #7e22ce !important;
 }
 
-html.st2-theme-dark .plan-onvio-card.tone-blue,
 html.st2-theme-dark .plan-adj-card.tone-blue {
-  background: #172554 !important;
   border-color: #2563eb !important;
 }
 
@@ -621,33 +624,64 @@ html.st2-theme-dark .portal-sistema-pill.active {
   color: #fff;
 }
 
+html.st2-theme-dark .plan-check-cards {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html.st2-theme-dark .plan-check-wrap.planilla,
+html.st2-theme-dark .plan-check-wrap.mam,
+html.st2-theme-dark .plan-check-wrap.sdk {
+  background: #151c28 !important;
+}
+
 html.st2-theme-dark .plan-check-wrap.planilla {
-  background: #2e1065 !important;
-  border-color: #7c3aed !important;
+  border-color: #6d28d9 !important;
 }
 
 html.st2-theme-dark .plan-check-wrap.mam {
-  background: #1e3a8a !important;
-  border-color: #3b82f6 !important;
+  border-color: #2563eb !important;
 }
 
 html.st2-theme-dark .plan-check-wrap.sdk {
-  background: #713f12 !important;
   border-color: #d97706 !important;
 }
 
 html.st2-theme-dark .plan-check-badge {
-  background: #334155 !important;
+  background: #243044 !important;
   color: #e2e8f0 !important;
-  border-color: #475569 !important;
+  border-color: #3d4b61 !important;
 }
 
-html.st2-theme-dark .plan-backup-detail,
-html.st2-theme-dark .plan-backup-sql,
+html.st2-theme-dark .plan-backup-detail {
+  background: #151c28 !important;
+  border-color: #3d4b61 !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .plan-backup-sql {
+  background: transparent !important;
+  border-color: #3d4b61 !important;
+  color: #e8eef7 !important;
+}
+
 html.st2-theme-dark .plan-backup-sql-hint {
-  background: #172554 !important;
-  border-color: #1d4ed8 !important;
-  color: #dbeafe !important;
+  background: #151c28 !important;
+  border-color: #3d4b61 !important;
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .plan-select {
+  background: #151c28 !important;
+  color: #e8eef7 !important;
+  border: 1px solid #3d4b61 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+html.st2-theme-dark .plan-select:focus {
+  border-color: #ea580c !important;
 }
 
 html.st2-theme-dark .plan-backup-base-card {

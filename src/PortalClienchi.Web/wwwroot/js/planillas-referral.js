@@ -76,15 +76,6 @@ function syncPerfilUi() {
   otra?.classList.toggle("active", !esTecnico);
   tecnico?.classList.toggle("active", esTecnico);
 
-  const hint = document.getElementById("ref-perfil-hint");
-  if (hint) {
-    hint.classList.toggle("is-tecnico", esTecnico);
-    hint.classList.toggle("is-otra", !esTecnico);
-    hint.innerHTML = esTecnico
-      ? 'Si el referral es de la mesa <strong>técnica</strong>. La planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompleta sola. MAM y SDK también son <strong>opcionales</strong>; si no los marcás, no van al TXT.'
-      : 'Si el referral es de la mesa <strong>Flex, SaaS o SJ</strong>. Completar la planilla técnica es <strong>opcional</strong>: si no la abrís, al generar se autocompleta sola.';
-  }
-
   const planBadge = document.getElementById("ref-planilla-badge");
   if (planBadge) {
     planBadge.textContent = esTecnico ? "Opcional" : "Se completa sola";
