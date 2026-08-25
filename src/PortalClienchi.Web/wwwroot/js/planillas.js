@@ -1481,6 +1481,7 @@ function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === email);
   const show = !!egg && isEggBirthdayWindow(egg);
+  const heroBanner = !!(show && egg?.heroBanner);
   const behindTitle = !!(show && egg?.behindTitle && !heroBanner);
   document.querySelector(".planillas-hero")?.classList.toggle("is-easter-banner", heroBanner);
   document.querySelector(".planillas-hero")?.classList.toggle("is-easter-behind", behindTitle);
