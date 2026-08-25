@@ -446,14 +446,16 @@
 }
 
 .planillas-corner-easter.is-smooth {
-  width: 96px;
-  top: 0;
+  width: 72px;
+  top: 4px;
+  right: 12px;
   animation: none;
   transform: none;
+  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.16));
 }
 
 .plan-module-sticky-head:has(.planillas-corner-easter.is-smooth:not(.is-hidden)) {
-  padding-right: calc(var(--plan-card-pad-x) + 96px);
+  padding-right: calc(var(--plan-card-pad-x) + 78px);
 }
 
 .planillas-hero-easter:not(.is-lg),
@@ -495,6 +497,21 @@
   z-index: 90;
   pointer-events: none;
   overflow: hidden;
+}
+
+body.st2-balloons-sides .st2-x-balloons {
+  z-index: 1;
+}
+
+body.st2-balloons-sides .planillas-card {
+  position: relative;
+  z-index: 3;
+}
+
+body.st2-balloons-sides .st2-x-balloon-body {
+  width: 18px;
+  height: 22px;
+  opacity: 0.72;
 }
 
 .st2-x-balloons.hidden {

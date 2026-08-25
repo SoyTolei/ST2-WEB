@@ -34,7 +34,7 @@ const PLANILLAS_EASTER_EGGS = [
   },
   {
     email: "gisela.crosenzi@thomsonreuters.com",
-    src: "/img/gisela-corner.gif?v=3",
+    src: "/img/gisela-corner.gif?v=4",
     motion: "still",
     heroBanner: true,
     balloons: true,
@@ -344,6 +344,7 @@ function showView(name, { history = "push" } = {}) {
     if (!el) return;
     el.classList.toggle("hidden", key !== name);
   });
+  document.body.classList.toggle("st2-balloons-sides", name !== "menu");
   injectModuleHeaders();
   document.title = titleForView(name);
   syncHistory(name, history);
@@ -1429,9 +1430,13 @@ function spawnEasterBalloon() {
   const el = document.createElement("span");
   const scale = 0.85 + Math.random() * 0.7;
   el.className = "st2-x-balloon";
-  el.style.left = `${4 + Math.random() * 92}%`;
+  const sides = document.body.classList.contains("st2-balloons-sides");
+  const left = sides
+    ? (Math.random() < 0.5 ? 1 + Math.random() * 8 : 90 + Math.random() * 8)
+    : 4 + Math.random() * 92;
+  el.style.left = `${left}%`;
   el.style.setProperty("--st2-balloon-color", colors[Math.floor(Math.random() * colors.length)]);
-  el.style.setProperty("--st2-balloon-drift", `${Math.round((Math.random() * 2 - 1) * 72)}px`);
+  el.style.setProperty("--st2-balloon-drift", `${Math.round((Math.random() * 2 - 1) * (sides ? 18 : 72))}px`);
   el.style.setProperty("--st2-balloon-dur", `${5.5 + Math.random() * 3.5}s`);
   el.style.setProperty("--st2-balloon-scale", scale.toFixed(2));
   el.innerHTML = `<span class="st2-x-balloon-body"></span><span class="st2-x-balloon-string"></span>`;
