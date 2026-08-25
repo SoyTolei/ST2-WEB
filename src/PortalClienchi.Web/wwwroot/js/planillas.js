@@ -25,7 +25,7 @@ const PLANILLAS_EASTER_EGGS = [
     email: "yohana.colacci@thomsonreuters.com",
     src: "/img/yohana-corner.png?v=6",
     motion: "bob",
-    peekSrc: "/img/yohana-titan.gif?v=4",
+    peekSrc: "/img/yohana-titan.webm?v=1",
   },
   {
     email: "belen.foschiatti@thomsonreuters.com",
@@ -1511,14 +1511,46 @@ function syncPlanillasHeroEaster() {
     el.setAttribute("aria-hidden", show ? "false" : "true");
   });
   syncEasterBalloons(show ? egg : null);
+  const hero = document.querySelector("#planillas-menu .planillas-hero");
   const titan = document.getElementById("planillas-hero-titan");
   const peek = !!(show && egg?.peekSrc);
+  hero?.classList.toggle("has-titan-peek", peek);
   if (titan) {
-    if (peek) titan.src = egg.peekSrc;
-    else titan.removeAttribute("src");
+    if (peek) {
+      if (titan.dataset.peekSrc !== egg.peekSrc) {
+        titan.src = egg.peekSrc;
+        titan.dataset.peekSrc = egg.peekSrc;
+      }
+    } else {
+      titan.pause();
+      titan.removeAttribute("src");
+      titan.load();
+    }
     titan.classList.toggle("is-hidden", !peek);
     titan.setAttribute("aria-hidden", peek ? "false" : "true");
   }
+  bindTitanPeekHover();
+}
+
+function bindTitanPeekHover() {
+  const hero = document.querySelector("#planillas-menu .planillas-hero");
+  if (!hero || hero.dataset.titanPeekBound === "1") return;
+  hero.dataset.titanPeekBound = "1";
+  hero.addEventListener("mouseenter", () => {
+    const titan = document.getElementById("planillas-hero-titan");
+    if (!titan || titan.classList.contains("is-hidden") || !titan.src) return;
+    titan.play().catch(() => {});
+  });
+  hero.addEventListener("mouseleave", () => {
+    const titan = document.getElementById("planillas-hero-titan");
+    if (!titan) return;
+    titan.pause();
+    try {
+      titan.currentTime = 0;
+    } catch {
+      /* ignore */
+    }
+  });
 }
 
 export function initPlanillas() {

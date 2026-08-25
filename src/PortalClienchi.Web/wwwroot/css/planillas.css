@@ -366,17 +366,36 @@
   z-index: 1;
 }
 
+.planillas-hero.has-titan-peek {
+  overflow: hidden;
+}
+
+.planillas-hero.has-titan-peek h2,
+.planillas-hero.has-titan-peek p,
+.planillas-hero.has-titan-peek .accent-bar {
+  position: relative;
+  z-index: 3;
+}
+
 .planillas-hero-titan {
   position: absolute;
-  right: 10px;
-  bottom: 8px;
-  width: 148px;
+  left: 50%;
+  bottom: 0;
+  width: min(560px, 94%);
   height: auto;
-  z-index: 2;
+  max-height: 118%;
+  display: block;
+  object-fit: cover;
+  object-position: center bottom;
+  z-index: 0;
   pointer-events: none;
   user-select: none;
-  transform: none;
-  animation: none;
+  transform: translate(-50%, 100%);
+  transition: transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.planillas-hero.has-titan-peek:hover .planillas-hero-titan:not(.is-hidden) {
+  transform: translate(-50%, 12%);
 }
 
 .planillas-hero-titan.is-hidden {
@@ -762,8 +781,6 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-modulos-well {
-  position: relative;
-  overflow: hidden;
   background: #fafafa;
   border: 2px solid var(--border);
   border-radius: 16px;
