@@ -471,24 +471,98 @@ html.st2-theme-dark .plan-adj-card.tone-blue {
   color: #e8eef7 !important;
 }
 
-html.st2-theme-dark .plan-adj-card.tone-slate {
-  border-color: #475569 !important;
+html.st2-theme-dark .plan-adj-card.tone-slate,
+html.st2-theme-dark .plan-onvio-card.tone-slate {
+  border-color: #64748b !important;
 }
 
-html.st2-theme-dark .plan-adj-card.tone-green {
+html.st2-theme-dark .plan-adj-card.tone-green,
+html.st2-theme-dark .plan-onvio-card.tone-green {
   border-color: #15803d !important;
 }
 
-html.st2-theme-dark .plan-adj-card.tone-orange {
+html.st2-theme-dark .plan-adj-card.tone-orange,
+html.st2-theme-dark .plan-onvio-card.tone-orange {
   border-color: #c2410c !important;
 }
 
-html.st2-theme-dark .plan-adj-card.tone-purple {
+html.st2-theme-dark .plan-adj-card.tone-purple,
+html.st2-theme-dark .plan-onvio-card.tone-purple {
   border-color: #7e22ce !important;
 }
 
-html.st2-theme-dark .plan-adj-card.tone-blue {
+html.st2-theme-dark .plan-adj-card.tone-blue,
+html.st2-theme-dark .plan-onvio-card.tone-blue {
   border-color: #2563eb !important;
+}
+
+html.st2-theme-dark .plan-onvio-state,
+html.st2-theme-dark .plan-onvio-card .card-mark {
+  background: #334155 !important;
+  color: #e8eef7 !important;
+  border-color: #64748b !important;
+}
+
+html.st2-theme-dark .plan-onvio-card.selected {
+  background: #243044 !important;
+}
+
+html.st2-theme-dark .plan-onvio-card.selected .plan-onvio-state,
+html.st2-theme-dark .plan-onvio-card.selected .card-mark {
+  background: #16a34a !important;
+  color: #fff !important;
+  border-color: #22c55e !important;
+}
+
+html.st2-theme-dark .plan-inline-icon.slate {
+  background: #334155 !important;
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
+}
+
+html.st2-theme-dark .plan-inline-icon.blue {
+  background: #1e3a8a !important;
+  color: #93c5fd !important;
+  border-color: #1d4ed8 !important;
+}
+
+html.st2-theme-dark .plan-inline-icon.orange,
+html.st2-theme-dark .plan-inline-icon.primary {
+  background: #7c2d12 !important;
+  color: #fdba74 !important;
+  border-color: #c2410c !important;
+}
+
+html.st2-theme-dark .plan-inline-icon.green {
+  background: #14532d !important;
+  color: #86efac !important;
+  border-color: #15803d !important;
+}
+
+html.st2-theme-dark .plan-inline-icon.purple {
+  background: #3b0764 !important;
+  color: #c4b5fd !important;
+  border-color: #7e22ce !important;
+}
+
+html.st2-theme-dark .plan-well-box {
+  background: #151c28 !important;
+  border: 1px solid #4b5a73 !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .plan-well-box input,
+html.st2-theme-dark .plan-well-box select,
+html.st2-theme-dark .plan-well-box textarea {
+  background: #0f172a !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+html.st2-theme-dark .plan-well-box input:focus,
+html.st2-theme-dark .plan-well-box select:focus,
+html.st2-theme-dark .plan-well-box textarea:focus {
+  border-color: #ea580c !important;
 }
 
 html.st2-theme-dark .plan-capturas-browse,
@@ -648,10 +722,51 @@ html.st2-theme-dark .plan-check-wrap.sdk {
   border-color: #d97706 !important;
 }
 
-html.st2-theme-dark .plan-check-badge {
+html.st2-theme-dark .plan-check-btn.planilla,
+html.st2-theme-dark .plan-check-btn.mam,
+html.st2-theme-dark .plan-check-btn.sdk {
+  background: transparent !important;
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .plan-check-btn small {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .plan-check-btn .plan-check-badge,
+html.st2-theme-dark .plan-check-btn .plan-check-badge.is-required,
+html.st2-theme-dark .plan-check-btn .plan-check-badge.is-optional,
+html.st2-theme-dark .plan-check-btn .plan-check-badge.is-auto {
   background: #243044 !important;
-  color: #e2e8f0 !important;
+  color: #cbd5e1 !important;
   border-color: #3d4b61 !important;
+}
+
+html.st2-theme-dark .plan-check-btn-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #243044;
+}
+
+html.st2-theme-dark .plan-check-btn-icon svg {
+  stroke: #e8eef7;
+}
+
+html.st2-theme-dark .plan-check-btn.planilla .plan-check-btn-icon {
+  background: #3b0764;
+}
+
+html.st2-theme-dark .plan-check-btn.mam .plan-check-btn-icon {
+  background: #1e3a8a;
+}
+
+html.st2-theme-dark .plan-check-btn.sdk .plan-check-btn-icon {
+  background: #7c2d12;
+}
+
+html.st2-theme-dark .plan-check-mark {
+  color: #94a3b8 !important;
 }
 
 html.st2-theme-dark .plan-backup-detail {
@@ -708,7 +823,6 @@ html.st2-theme-dark .plan-mam-sql-section {
   border-color: #1e3a8a !important;
 }
 
-html.st2-theme-dark .plan-well-box,
 html.st2-theme-dark .plan-ref-modal,
 html.st2-theme-dark .plan-ref-modal-header,
 html.st2-theme-dark .plan-ref-modal-back,
