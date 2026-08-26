@@ -457,6 +457,7 @@ public static class PlanillasEndpoints
             {
                 email,
                 status = "ok",
+                displayName = string.IsNullOrWhiteSpace(rec?.DisplayName) ? null : rec!.DisplayName!.Trim(),
                 birthdayMmDd = rec?.BirthdayMmDd,
                 birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec?.BirthdayMmDd),
             });
@@ -925,12 +926,14 @@ public static class PlanillasEndpoints
             PlanUserIdentity.SetCookie(ctx, email);
             accessRepo.RecordAccess(email);
             blanqueoRepo.AssociatePendingRequester(email);
+            var adminRec = accessRepo.Find(email);
             return Results.Ok(new
             {
                 email,
                 status = "ok",
-                birthdayMmDd = accessRepo.Find(email)?.BirthdayMmDd,
-                birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(accessRepo.Find(email)?.BirthdayMmDd),
+                displayName = string.IsNullOrWhiteSpace(adminRec?.DisplayName) ? null : adminRec!.DisplayName!.Trim(),
+                birthdayMmDd = adminRec?.BirthdayMmDd,
+                birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(adminRec?.BirthdayMmDd),
             });
         }
 
@@ -956,6 +959,7 @@ public static class PlanillasEndpoints
         {
             email,
             status = "ok",
+            displayName = string.IsNullOrWhiteSpace(rec.DisplayName) ? null : rec.DisplayName.Trim(),
             birthdayMmDd = rec.BirthdayMmDd,
             birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec.BirthdayMmDd),
         });

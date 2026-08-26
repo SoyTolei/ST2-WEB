@@ -1,6 +1,7 @@
 import { setSessionBirthdayMmDd } from "./planillas-easter-eggs.js";
 
 let cachedEmail = null;
+let cachedDisplayName = null;
 let modalPromise = null;
 let accessPromise = null;
 let appUnlocked = false;
@@ -322,14 +323,25 @@ export function getPlanUserEmail() {
   return cachedEmail;
 }
 
+export function getPlanUserDisplayName() {
+  return cachedDisplayName;
+}
+
+function applySessionIdentity(data) {
+  cachedEmail = data?.email || null;
+  const name = String(data?.displayName ?? data?.DisplayName ?? "").trim();
+  cachedDisplayName = name || null;
+  setSessionBirthdayMmDd(data?.birthdayMmDd || "");
+}
+
 export async function refreshPlanUserSession() {
   try {
     const response = await fetch("/api/planillas/session", SESSION_OPTS);
     const data = await response.json().catch(() => ({}));
-    cachedEmail = data.email || null;
-    setSessionBirthdayMmDd(data.birthdayMmDd || "");
+    applySessionIdentity(data);
   } catch {
     cachedEmail = null;
+    cachedDisplayName = null;
     setSessionBirthdayMmDd("");
   }
   updatePlanUserBadge();
@@ -355,8 +367,7 @@ export async function syncPlanUserSession() {
     });
     const data = await response.json().catch(() => ({}));
     if (response.ok) {
-      cachedEmail = data.email || null;
-      setSessionBirthdayMmDd(data.birthdayMmDd || "");
+      applySessionIdentity(data);
       updatePlanUserBadge();
       return cachedEmail;
     }
@@ -393,6 +404,8 @@ export async function ensurePlanUser({ forcePrompt = false } = {}) {
 export async function clearPlanUserSession() {
   await fetch("/api/planillas/session", { method: "DELETE", ...SESSION_OPTS });
   cachedEmail = null;
+  cachedDisplayName = null;
+  setSessionBirthdayMmDd("");
   updatePlanUserBadge();
   lockAppShell();
   return ensureAppAccess();
@@ -520,8 +533,7 @@ function showPlanUserModal(resolve) {
       return;
     }
 
-    cachedEmail = data.email;
-    setSessionBirthdayMmDd(data.birthdayMmDd || "");
+    applySessionIdentity(data);
     localStorage.setItem("st2_plan_user_hint", data.email);
     if (passInput) passInput.value = "";
     await refreshPlanUserSession();

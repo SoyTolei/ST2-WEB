@@ -1,8 +1,10 @@
 /**
  * Easter egg: contador de agua (solo menú principal de Planillas).
  * Perfil: jorgeeduardo.teti@thomsonreuters.com
+ *
+ * El progreso en “ver como” usa otra clave de storage: no toca el de Jorge real.
  */
-import { getPlanUserEmail } from "./plan-user.js";
+import { getPlanUserEmail, getPlanUserDisplayName } from "./plan-user.js";
 import { getViewAsProfile } from "./module-access.js";
 import { setToastText } from "./st2-toast-greet.js";
 
@@ -19,11 +21,22 @@ const MAX_LEVEL = LEVELS.length - 1;
 const FILL_GIF_MS = 1800;
 /** Cada ~2.5 h (entre 2 y 3). */
 const PROMPT_MS = (2.5 * 60 * 60 * 1000);
-const STORAGE_KEY = "st2-agua-egg-v1";
+const STORAGE_LIVE = "st2-agua-egg-live-v1";
+const STORAGE_VIEWAS = "st2-agua-egg-viewas-v1";
+const VIEWAS_ARMED = "st2-agua-viewas-armed-v1";
 
 let started = false;
 let promptTimer = 0;
 let animating = false;
+
+function isViewAsTarget() {
+  const viewAs = getViewAsProfile();
+  return String(viewAs?.email || "").trim().toLowerCase() === TARGET_EMAIL;
+}
+
+function storageKey() {
+  return isViewAsTarget() ? STORAGE_VIEWAS : STORAGE_LIVE;
+}
 
 function argentinaDayKey() {
   try {
@@ -41,7 +54,7 @@ function argentinaDayKey() {
 function readState() {
   const day = argentinaDayKey();
   try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    const raw = JSON.parse(localStorage.getItem(storageKey()) || "null");
     if (raw && raw.day === day) {
       return {
         day,
@@ -55,7 +68,16 @@ function readState() {
 
 function writeState(state) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(storageKey(), JSON.stringify(state));
+  } catch { /* ignore */ }
+}
+
+/** Reinicia solo el progreso de “ver como” (no el de Jorge en su PC). */
+export function resetAguaEggViewAsProgress() {
+  try {
+    localStorage.removeItem(STORAGE_VIEWAS);
+    // Limpia la clave vieja compartida si quedó de pruebas anteriores.
+    localStorage.removeItem("st2-agua-egg-v1");
   } catch { /* ignore */ }
 }
 
@@ -67,6 +89,19 @@ function effectiveEmail() {
 
 export function isAguaEggUser() {
   return effectiveEmail() === TARGET_EMAIL;
+}
+
+/** Primer nombre desde el display del admin / ver como; nunca del local del mail. */
+function aguaFirstName() {
+  const viewAs = getViewAsProfile();
+  const raw = isViewAsTarget()
+    ? String(viewAs?.displayName || "").trim()
+    : String(getPlanUserDisplayName() || "").trim();
+  const first = raw.split(/\s+/).filter(Boolean)[0] || "";
+  if (first) {
+    return first.charAt(0).toUpperCase() + first.slice(1);
+  }
+  return "Jorge";
 }
 
 function bottleBtn() {
@@ -107,9 +142,12 @@ function syncBottleUi() {
   if (!on) return;
   const state = readState();
   img.src = LEVELS[state.level];
-  btn.title = state.level >= MAX_LEVEL
+  const tip = isViewAsTarget()
+    ? "Agua (ver como) · doble clic reinicia la prueba"
+    : null;
+  btn.title = tip || (state.level >= MAX_LEVEL
     ? "Meta de agua del día cumplida"
-    : `Agua de hoy · ${state.level}/${MAX_LEVEL}`;
+    : `Agua de hoy · ${state.level}/${MAX_LEVEL}`);
   btn.classList.toggle("is-full", state.level >= MAX_LEVEL);
 }
 
@@ -132,7 +170,7 @@ function showToast() {
   const text = document.getElementById("agua-ready-toast-text");
   if (!toast || !text) return;
 
-  const name = "Jorge";
+  const name = aguaFirstName();
   const body = state.level >= MAX_LEVEL
     ? `${name}, ¡hoy ya cumpliste el agua! 💧`
     : `Hola ${name}, ¿tomaste agua hoy? 💧`;
@@ -178,7 +216,6 @@ async function playFillAnimation(fromLevel, toLevel) {
   overlay.setAttribute("aria-hidden", "false");
 
   if (gif) {
-    // Cache-bust para que el GIF se reinicie en cada click.
     gif.src = `${FILL_GIF.split("?")[0]}?v=${Date.now()}`;
     overlay.classList.add("has-gif");
     await wait(FILL_GIF_MS);
@@ -243,10 +280,19 @@ function bindOnce() {
   bottleBtn()?.addEventListener("click", () => {
     void drinkOnce();
   });
+  bottleBtn()?.addEventListener("dblclick", (e) => {
+    if (!isViewAsTarget()) return;
+    e.preventDefault();
+    e.stopPropagation();
+    resetAguaEggViewAsProgress();
+    hideToast();
+    syncBottleUi();
+    window.setTimeout(() => showToast(), 400);
+  });
   overlayEl()?.addEventListener("click", (e) => {
     if (e.target === overlayEl() && !animating) {
       overlayEl()?.classList.add("hidden");
-      overlayEl()?.classList.remove("is-open", "is-filling", "is-swap", "is-done");
+      overlayEl()?.classList.remove("is-open", "is-filling", "is-swap", "is-done", "has-gif");
     }
   });
 }
@@ -254,6 +300,21 @@ function bindOnce() {
 /** Llamar al init y al volver al menú / cambio de sesión. */
 export function syncAguaEgg() {
   bindOnce();
+
+  // Una sola vez al entrar en ver como: progreso de prueba limpio (Jorge real no se toca).
+  if (isViewAsTarget()) {
+    try {
+      if (sessionStorage.getItem(VIEWAS_ARMED) !== "1") {
+        resetAguaEggViewAsProgress();
+        sessionStorage.setItem(VIEWAS_ARMED, "1");
+      }
+    } catch {
+      resetAguaEggViewAsProgress();
+    }
+  } else {
+    try { sessionStorage.removeItem(VIEWAS_ARMED); } catch { /* ignore */ }
+  }
+
   syncBottleUi();
   if (!isAguaEggUser()) {
     hideToast();
@@ -266,7 +327,6 @@ export function syncAguaEgg() {
 
   schedulePrompt();
   const state = readState();
-  // Primer ingreso del día (o hace rato): avisar sin esperar el intervalo completo.
   if (!state.lastPromptAt || Date.now() - state.lastPromptAt >= PROMPT_MS * 0.85) {
     window.setTimeout(() => showToast(), 1800);
   }
