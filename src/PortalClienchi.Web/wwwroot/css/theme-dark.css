@@ -1217,10 +1217,10 @@ html.st2-theme-dark .borrado-pill.ok {
 
 html.st2-theme-dark .blanqueo-pill.ok-note,
 html.st2-theme-dark .borrado-pill.ok-note {
-  background: #3b2a14;
-  color: #fde68a;
-  border-color: #34d399;
-  box-shadow: inset 3px 0 0 #34d399;
+  background: #059669;
+  color: #ecfdf5;
+  border: 1px dashed #6ee7b7;
+  box-shadow: none;
 }
 
 html.st2-theme-dark .blanqueo-pill.bad,
@@ -1523,8 +1523,8 @@ html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-listo-nota td,
 html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-listo-nota td,
 html.st2-theme-dark .plan-gestor-table tbody tr.borrado-row-listo-nota td,
 html.st2-theme-dark .borrado-table tbody tr.borrado-row-listo-nota td {
-  background: rgba(245, 158, 11, 0.22) !important;
-  color: #fde68a !important;
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #bbf7d0 !important;
 }
 
 html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-noreg td,

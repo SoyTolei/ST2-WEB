@@ -1113,8 +1113,8 @@
 }
 
 .blanqueo-row-listo-nota td {
-  background: rgba(245, 158, 11, 0.16);
-  color: #78350f;
+  background: rgba(16, 185, 129, 0.16);
+  color: #14532d;
 }
 
 .blanqueo-row-listo-nota td:first-child {
@@ -1151,10 +1151,10 @@
 }
 
 .blanqueo-pill.ok-note {
-  background: #fef3c7;
-  color: #92400e;
-  border: 1px solid #047857;
-  box-shadow: inset 3px 0 0 #047857;
+  background: #059669;
+  color: #fff;
+  border: 1px dashed #a7f3d0;
+  box-shadow: none;
 }
 
 .blanqueo-pill.note {
