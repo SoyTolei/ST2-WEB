@@ -1,4 +1,4 @@
-import { getPlanUserEmail } from "./plan-user.js";
+import { getPlanUserEmail, getPlanUserDisplayName } from "./plan-user.js";
 import { getViewAsProfile } from "./module-access.js";
 import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js";
 
@@ -21,6 +21,17 @@ export function firstNameFromEmail(email) {
   const first = local.split(/[._\-]+/).filter(Boolean)[0] || "";
   if (!first) return "";
   return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
+/** Primer nombre del display (admin / ver como); si no hay, cae al correo. */
+export function toastFirstName() {
+  const viewAs = getViewAsProfile();
+  const display = String(viewAs?.displayName || getPlanUserDisplayName() || "").trim();
+  const fromDisplay = display.split(/\s+/).filter(Boolean)[0] || "";
+  if (fromDisplay) {
+    return fromDisplay.charAt(0).toUpperCase() + fromDisplay.slice(1);
+  }
+  return firstNameFromEmail(toastUserEmail());
 }
 
 function nextFoodEmoji() {
@@ -84,7 +95,7 @@ export function formatToastMessage(body, { greet = false } = {}) {
   const msg = String(body || "").trim();
   if (!msg) return msg;
   const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
-  const name = firstNameFromEmail(toastUserEmail());
+  const name = toastFirstName();
   if (greet && name) {
     const line = greetLine(name);
     if (isBirthdayGreetingForEmail(toastUserEmail())) return `${line} ${lowered}`;
