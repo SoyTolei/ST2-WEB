@@ -575,6 +575,7 @@ public sealed class BlanqueoRepository
         EnsurePortalColumn(conn);
         EnsureModulosColumn(conn);
         EnsureConfirmadoColumn(conn);
+        BackfillConfirmadoHistoricoAlexis(conn);
         EnsureAlertsTable(conn);
     }
 
@@ -592,6 +593,54 @@ public sealed class BlanqueoRepository
         using var alter = conn.CreateCommand();
         alter.CommandText = "ALTER TABLE blanqueo_solicitudes ADD COLUMN confirmado_por_nombre TEXT NULL";
         alter.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Una sola vez: listos históricos sin “Confirmado por” → Alexis Ruiz (único confirmador hasta ahora).
+    /// De acá en más PatchConfirm guarda el nombre real de quien marca listo.
+    /// </summary>
+    private void BackfillConfirmadoHistoricoAlexis(SqliteConnection conn)
+    {
+        using (var meta = conn.CreateCommand())
+        {
+            meta.CommandText = """
+                CREATE TABLE IF NOT EXISTS blanqueo_meta (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+                """;
+            meta.ExecuteNonQuery();
+        }
+
+        using (var check = conn.CreateCommand())
+        {
+            check.CommandText = "SELECT value FROM blanqueo_meta WHERE key = 'backfill_confirmado_alexis_v1'";
+            if (check.ExecuteScalar() is not null)
+                return;
+        }
+
+        const string alexis = "Alexis Ruiz";
+        using (var upd = conn.CreateCommand())
+        {
+            upd.CommandText = """
+                UPDATE blanqueo_solicitudes
+                SET confirmado_por_nombre = $nombre
+                WHERE listo = 1
+                  AND (confirmado_por_nombre IS NULL OR trim(confirmado_por_nombre) = '')
+                """;
+            upd.Parameters.AddWithValue("$nombre", alexis);
+            var n = upd.ExecuteNonQuery();
+            _logger.LogInformation(
+                "Backfill Confirmado por → {Nombre} en {Count} blanqueos listos históricos",
+                alexis,
+                n);
+        }
+
+        using var mark = conn.CreateCommand();
+        mark.CommandText = """
+            INSERT INTO blanqueo_meta (key, value) VALUES ('backfill_confirmado_alexis_v1', '1')
+            """;
+        mark.ExecuteNonQuery();
     }
 
     private static void EnsureAlertsTable(SqliteConnection conn)
