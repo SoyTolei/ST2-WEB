@@ -12,7 +12,11 @@ const LEVELS = [
   "/img/agua/botella-1.png?v=1",
   "/img/agua/botella-2.png?v=1",
 ];
+/** GIF de llenado: dejar el archivo en wwwroot/img/agua/llenar.gif */
+const FILL_GIF = "/img/agua/llenar.gif?v=1";
 const MAX_LEVEL = LEVELS.length - 1;
+/** Duración aproximada del gif en pantalla antes de mostrar el nivel final. */
+const FILL_GIF_MS = 1800;
 /** Cada ~2.5 h (entre 2 y 3). */
 const PROMPT_MS = (2.5 * 60 * 60 * 1000);
 const STORAGE_KEY = "st2-agua-egg-v1";
@@ -89,6 +93,10 @@ function stageTo() {
   return document.getElementById("st2-agua-stage-to");
 }
 
+function stageGif() {
+  return document.getElementById("st2-agua-stage-gif");
+}
+
 function syncBottleUi() {
   const btn = bottleBtn();
   const img = bottleImg();
@@ -160,23 +168,35 @@ async function playFillAnimation(fromLevel, toLevel) {
   const overlay = overlayEl();
   const from = stageFrom();
   const to = stageTo();
+  const gif = stageGif();
   if (!overlay || !from || !to) return;
 
   from.src = LEVELS[fromLevel];
   to.src = LEVELS[toLevel];
-  overlay.classList.remove("hidden", "is-done");
+  overlay.classList.remove("hidden", "is-done", "is-swap", "has-gif");
   overlay.classList.add("is-open", "is-filling");
   overlay.setAttribute("aria-hidden", "false");
 
-  await wait(120);
-  overlay.classList.add("is-swap");
-  await wait(900);
-  overlay.classList.add("is-done");
-  await wait(700);
+  if (gif) {
+    // Cache-bust para que el GIF se reinicie en cada click.
+    gif.src = `${FILL_GIF.split("?")[0]}?v=${Date.now()}`;
+    overlay.classList.add("has-gif");
+    await wait(FILL_GIF_MS);
+    overlay.classList.add("is-swap");
+    await wait(500);
+  } else {
+    await wait(120);
+    overlay.classList.add("is-swap");
+    await wait(900);
+  }
 
-  overlay.classList.remove("is-open", "is-filling", "is-swap", "is-done");
+  overlay.classList.add("is-done");
+  await wait(650);
+
+  overlay.classList.remove("is-open", "is-filling", "is-swap", "is-done", "has-gif");
   overlay.classList.add("hidden");
   overlay.setAttribute("aria-hidden", "true");
+  if (gif) gif.removeAttribute("src");
 }
 
 async function drinkOnce() {

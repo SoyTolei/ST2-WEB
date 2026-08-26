@@ -4115,3 +4115,28 @@ html.st2-theme-dark .blanqueo-ready-toast.is-agua .blanqueo-ready-toast-text,
 html.st2-theme-dark .blanqueo-ready-toast.is-agua .blanqueo-ready-toast-x {
   color: #e0f2fe;
 }
+
+.st2-agua-stage-gif {
+  opacity: 0;
+  z-index: 4;
+  transform: scale(1);
+}
+
+.st2-agua-overlay.has-gif .st2-agua-stage-gif {
+  opacity: 1;
+}
+
+.st2-agua-overlay.has-gif .st2-agua-stage-from,
+.st2-agua-overlay.has-gif .st2-agua-stage-to,
+.st2-agua-overlay.has-gif .st2-agua-fill-wave {
+  opacity: 0;
+}
+
+.st2-agua-overlay.has-gif.is-swap .st2-agua-stage-gif {
+  opacity: 0;
+}
+
+.st2-agua-overlay.has-gif.is-swap .st2-agua-stage-to {
+  opacity: 1;
+  transform: scale(1);
+}
