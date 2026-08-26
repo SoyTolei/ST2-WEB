@@ -2274,7 +2274,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   color: #6b7280;
   margin-top: 1px;
 }
-/* SÃ­/No: estado claro sin pelear con el color del card */
+/* SÃÂ­/No: estado claro sin pelear con el color del card */
 .plan-onvio-card .card-mark,
 .plan-onvio-state {
   flex-shrink: 0;
@@ -3632,7 +3632,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-sql-copy:hover { background: #eff6ff; }
 .plan-sql-copy:disabled { opacity: 0.6; cursor: default; }
 
-/* LEGAL Referral hub â estÃ©tica portal ST2 */
+/* LEGAL Referral hub Ã¢ÂÂ estÃÂ©tica portal ST2 */
 .plan-legal-hub-root {
   display: flex;
   flex-direction: column;
@@ -3819,7 +3819,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   color: var(--primary);
 }
 
-/* LEGAL â plantillas y formulario (estilo ST2 referral) */
+/* LEGAL Ã¢ÂÂ plantillas y formulario (estilo ST2 referral) */
 .plan-legal-form-panel .plan-ref-title { margin-top: 0; }
 .plan-legal-form-panel .plan-form-grid { margin-bottom: 0; }
 .plan-legal-form-actions {
@@ -3949,19 +3949,19 @@ body.st2-balloons-sides .st2-x-balloon-body {
   .plan-op-metodo-well { gap: 8px 16px; }
 }
 
-/* Contador de agua (easter Jorge)  solo menú principal */
+/* Contador de agua (easter Jorge) Â solo menÃº principal */
 .planillas-hero:has(#st2-agua-bottle:not(.hidden)) {
-  padding-left: 88px;
+  padding-left: 118px;
 }
 
 .st2-agua-bottle {
   position: absolute;
   top: 50%;
-  left: 10px;
+  left: 8px;
   transform: translateY(-50%);
   z-index: 6;
-  width: 72px;
-  height: 72px;
+  width: 104px;
+  height: 104px;
   padding: 0;
   border: 0;
   border-radius: 0;
