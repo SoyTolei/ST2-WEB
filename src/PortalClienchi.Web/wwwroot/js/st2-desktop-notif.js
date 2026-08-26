@@ -1,6 +1,7 @@
 const NOTIF_PREF_KEY = "st2-desktop-notif-v1";
 let lastBlanqueoSig = "";
 let lastBorradoSig = "";
+let lastWebUpdateBuild = "";
 
 export function desktopNotifSupported() {
   return typeof window !== "undefined" && "Notification" in window;
@@ -32,10 +33,10 @@ export function setDesktopNotifEnabled(on) {
   } catch { /* ignore */ }
 }
 
-function showDesktopNotif(title, body, tag) {
+function showDesktopNotif(title, body, tag, { allowWhileVisible = false, onClick } = {}) {
   if (!desktopNotifSupported() || Notification.permission !== "granted" || !notifEnabled()) return;
-  // Solo si la pestaña no está a la vista (evita spam encima del toast).
-  if (!document.hidden) return;
+  // Blanqueo/borrado: solo con pestaña oculta (evita spam encima del toast).
+  if (!allowWhileVisible && !document.hidden) return;
   try {
     const n = new Notification(title, {
       body,
@@ -45,6 +46,7 @@ function showDesktopNotif(title, body, tag) {
     });
     n.onclick = () => {
       try { window.focus(); } catch { /* ignore */ }
+      try { onClick?.(); } catch { /* ignore */ }
       n.close();
     };
   } catch { /* ignore */ }
@@ -69,5 +71,26 @@ export function notifyBorradoDesktop(count, signature) {
     if (!ok) return;
     const title = count === 1 ? "1 borrado pendiente" : `${count} borrados pendientes`;
     showDesktopNotif("ST2 · Borrado de bases", title, `borrado-${sig}`);
+  });
+}
+
+/** Aviso de versión nueva de la web (una vez por build). */
+export function notifyWebUpdateDesktop(build) {
+  const stamp = String(build || "").trim().toLowerCase().slice(0, 12);
+  if (!stamp || stamp === lastWebUpdateBuild) return;
+  lastWebUpdateBuild = stamp;
+  void ensureDesktopNotifPermission().then((ok) => {
+    if (!ok) return;
+    showDesktopNotif(
+      "ST2 · Actualización",
+      "Hay una versión nueva. Tocá para recargar.",
+      `web-update-${stamp}`,
+      {
+        allowWhileVisible: true,
+        onClick: () => {
+          try { window.location.reload(); } catch { /* ignore */ }
+        },
+      },
+    );
   });
 }
