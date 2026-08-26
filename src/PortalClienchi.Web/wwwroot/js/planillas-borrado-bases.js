@@ -842,11 +842,14 @@ function renderTable(filtered) {
 function buildRow(item) {
   const row = document.createElement("tr");
   if (selectedId === item.id) row.classList.add("selected");
-  if (item.listo) row.classList.add("borrado-row-listo");
-  if (item.aclaracion) row.classList.add("borrado-row-aclaracion");
-  if (item.aclaracion && /✗/.test(String(item.aclaracion)) && item.listo) {
-    row.classList.add("borrado-row-partial");
-  }
+  const { nota } = parseAclaracion(item.aclaracion);
+  const hasNota = !!String(nota || "").trim();
+  const hasAclaracion = !!String(item.aclaracion || "").trim();
+  const partial = !!(item.listo && item.aclaracion && /✗/.test(String(item.aclaracion)));
+  if (partial) row.classList.add("borrado-row-partial");
+  else if (item.listo && hasNota) row.classList.add("borrado-row-listo-nota");
+  else if (item.listo) row.classList.add("borrado-row-listo");
+  else if (hasAclaracion) row.classList.add("borrado-row-aclaracion");
 
   const nro = String(item.nroEmpresa || "").trim();
   const nombre = String(item.nombreEmpresa || "").trim();
@@ -1100,17 +1103,20 @@ function isPartialListo(item) {
 }
 
 function formatEstadoCell(item) {
+  const { resultado, nota } = parseAclaracion(item.aclaracion);
   if (item.listo) {
     if (isPartialListo(item)) {
-      return '<span class="borrado-pill partial" title="Algunas bases quedaron pendientes">Parcial ⚡</span>';
+      return '<span class="borrado-pill partial" title="Algunas bases quedaron pendientes">Parcial</span>';
     }
-    return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada ✓</span>';
+    if (String(nota || "").trim()) {
+      return '<span class="borrado-pill ok-note" title="Eliminada con observación">Eliminada · nota</span>';
+    }
+    return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada</span>';
   }
-  const { resultado, nota } = parseAclaracion(item.aclaracion);
   if (!resultado && !nota) {
-    return '<span class="borrado-estado-pending" title="Pendiente de confirmación">Pendiente ⏳</span>';
+    return '<span class="borrado-estado-pending" title="Pendiente de confirmación">Pendiente</span>';
   }
-  return "—";
+  return '<span class="borrado-pill note" title="Con observación">Nota</span>';
 }
 
 function formatResultadoHtml(resultado) {

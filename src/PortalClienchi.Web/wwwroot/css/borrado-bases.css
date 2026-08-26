@@ -652,33 +652,48 @@ button.borrado-base-pill:focus-visible .borrado-base-pill-action {
 
 .borrado-pill {
   display: inline-block;
-  max-width: 11rem;
+  max-width: 12rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0.15rem 0.5rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 999px;
   font-size: 0.72rem;
-  font-weight: 650;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
 }
 
 .borrado-pill.ok {
-  background: #dcfce7;
-  color: #166534;
+  background: #059669;
+  color: #fff;
+  border: 1px solid #047857;
+}
+
+.borrado-pill.ok-note {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #047857;
+  box-shadow: inset 3px 0 0 #047857;
 }
 
 .borrado-pill.partial {
-  background: #fef3c7;
-  color: #b45309;
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #b91c1c;
 }
 
 .borrado-pill.note {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px dashed #d97706;
+  border-radius: 4px;
+  font-weight: 600;
 }
 
 .borrado-pill.bad {
   background: #fee2e2;
   color: #991b1b;
+  border: 1px solid #fecaca;
 }
 
 .borrado-col-aclaracion {
@@ -746,7 +761,7 @@ button.borrado-base-pill:focus-visible .borrado-base-pill-action {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  padding: 0.15rem 0.45rem;
+  padding: 0.15rem 0.5rem;
   border-radius: 999px;
   background: #f1f5f9;
   color: #64748b;
@@ -756,24 +771,35 @@ button.borrado-base-pill:focus-visible .borrado-base-pill-action {
   white-space: nowrap;
 }
 
-.borrado-row-listo {
-  background: color-mix(in srgb, #dcfce7 35%, transparent);
+.borrado-row-listo td {
+  background: rgba(16, 185, 129, 0.22);
+  color: #14532d;
 }
 
 .borrado-row-listo td:first-child {
-  box-shadow: inset 3px 0 0 #059669;
+  box-shadow: inset 5px 0 0 #047857;
 }
 
-.borrado-row-aclaracion:not(.borrado-row-listo) {
-  background: color-mix(in srgb, #fef3c7 40%, transparent);
+.borrado-row-listo-nota td {
+  background: rgba(245, 158, 11, 0.16);
+  color: #78350f;
+}
+
+.borrado-row-listo-nota td:first-child {
+  box-shadow: inset 5px 0 0 #047857;
+}
+
+.borrado-row-aclaracion:not(.borrado-row-listo):not(.borrado-row-listo-nota):not(.borrado-row-partial) td {
+  background: rgba(245, 158, 11, 0.1);
 }
 
 .borrado-row-partial td {
-  background: color-mix(in srgb, #fee2e2 45%, transparent);
+  background: rgba(239, 68, 68, 0.18);
+  color: #7f1d1d;
 }
 
 .borrado-row-partial td:first-child {
-  box-shadow: inset 3px 0 0 #dc2626;
+  box-shadow: inset 5px 0 0 #b91c1c;
 }
 
 .borrado-ctx {

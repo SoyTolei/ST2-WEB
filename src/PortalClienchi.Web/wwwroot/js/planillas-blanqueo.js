@@ -1022,9 +1022,12 @@ function renderTable(filtered) {
 function buildRow(item) {
   const row = document.createElement("tr");
   if (selectedId === item.id) row.classList.add("selected");
-  if (item.listo) row.classList.add("blanqueo-row-listo");
-  if (item.aclaracion) row.classList.add("blanqueo-row-aclaracion");
-  if (isNoRegistrado(item.aclaracion) && !item.listo) row.classList.add("blanqueo-row-noreg");
+  const hasAclaracion = !!String(item.aclaracion || "").trim();
+  const noReg = isNoRegistrado(item.aclaracion) && !item.listo;
+  if (noReg) row.classList.add("blanqueo-row-noreg");
+  else if (item.listo && hasAclaracion) row.classList.add("blanqueo-row-listo-nota");
+  else if (item.listo) row.classList.add("blanqueo-row-listo");
+  else if (hasAclaracion) row.classList.add("blanqueo-row-aclaracion");
 
   const mailCell = canConfirm
     ? `<td class="blanqueo-col-correo">
@@ -1194,13 +1197,20 @@ function formatAclaracionCell(item) {
 }
 
 function formatEstadoCell(item) {
+  const aclaracion = String(item.aclaracion || "").trim();
   if (item.listo) {
+    if (aclaracion) {
+      return '<span class="blanqueo-pill ok-note" title="Listo con aclaración">Listo · nota</span>';
+    }
     return '<span class="blanqueo-pill ok">Listo</span>';
   }
-  if (!String(item.aclaracion || "").trim()) {
+  if (isNoRegistrado(aclaracion)) {
+    return '<span class="blanqueo-pill bad" title="No registrado">No registrado</span>';
+  }
+  if (!aclaracion) {
     return '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
   }
-  return "—";
+  return '<span class="blanqueo-pill note" title="Con aclaración">Nota</span>';
 }
 
 function showCtx(x, y, item) {
