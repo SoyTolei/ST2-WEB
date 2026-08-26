@@ -44,7 +44,10 @@ public sealed class ModuleAccessRepository
         if (!St2SuperAdmin.Is(normalized))
             return dbFlags;
 
-        // Super admin: todo excepto Blanqueo (sale de la DB / panel Accesos).
+        // Local: full admin. Producción: Blanqueo desde Accesos.
+        if (St2SuperAdmin.IsDevelopmentHost())
+            return St2SuperAdmin.AbsoluteFullFlags();
+
         var flags = St2SuperAdmin.FullFlags();
         flags.Blanqueo = dbFlags.Blanqueo;
         flags.BlanqueoConfirm = dbFlags.BlanqueoConfirm;
@@ -67,8 +70,15 @@ public sealed class ModuleAccessRepository
 
         using var conn = Open();
         foreach (var email in list)
+        {
             if (St2SuperAdmin.Is(email))
             {
+                if (St2SuperAdmin.IsDevelopmentHost())
+                {
+                    map[email] = St2SuperAdmin.AbsoluteFullFlags();
+                    continue;
+                }
+
                 var dbFlags = ReadFlags(conn, email);
                 var flags = St2SuperAdmin.FullFlags();
                 flags.Blanqueo = dbFlags.Blanqueo;
@@ -80,6 +90,7 @@ public sealed class ModuleAccessRepository
             {
                 map[email] = ReadFlags(conn, email);
             }
+        }
         return map;
     }
 

@@ -30,10 +30,9 @@ function fullFlags() {
   return {
     oportunidad: true,
     pdfPortal: true,
-    // Blanqueo no va forzado: sale del panel Accesos / API.
-    blanqueo: false,
-    blanqueoConfirm: false,
-    blanqueoLoad: false,
+    blanqueo: true,
+    blanqueoConfirm: true,
+    blanqueoLoad: true,
     borradoBases: true,
     borradoBasesConfirm: true,
     borradoBasesLoad: true,
@@ -165,16 +164,6 @@ export function isSt2SuperAdmin(email = getPlanUserEmail()) {
 export function getCachedModuleFlags() {
   const viewAs = readViewAs();
   if (viewAs?.modules) return cloneFlags(viewAs.modules);
-  if (isPrimarySuperAdmin()) {
-    const base = fullFlags();
-    const db = cachedFlags || emptyFlags();
-    return {
-      ...base,
-      blanqueo: !!db.blanqueo,
-      blanqueoConfirm: !!db.blanqueoConfirm,
-      blanqueoLoad: !!db.blanqueoLoad,
-    };
-  }
   return cachedFlags || emptyFlags();
 }
 
@@ -198,21 +187,15 @@ function parseFlagsFromApi(m) {
  */
 export async function refreshModuleFlags({ force = false, baseline = false, detectNew = false } = {}) {
   try {
-    if (localStorage.getItem(FORCE_KEY) === "1" || isPrimarySuperAdmin()) {
+    // Solo override manual; el super admin pide flags al API (local full vs prod).
+    if (localStorage.getItem(FORCE_KEY) === "1") {
       cachedFlags = fullFlags();
       cachedSt2Admin = true;
       lastLoadedAt = Date.now();
       if (baseline || !knownFlags) knownFlags = cloneFlags(cachedFlags);
       return getCachedModuleFlags();
     }
-  } catch {
-    if (isPrimarySuperAdmin()) {
-      cachedFlags = fullFlags();
-      cachedSt2Admin = true;
-      if (baseline || !knownFlags) knownFlags = cloneFlags(cachedFlags);
-      return getCachedModuleFlags();
-    }
-  }
+  } catch { /* ignore */ }
 
   if (!getPlanUserEmail()) {
     cachedFlags = emptyFlags();
@@ -252,8 +235,12 @@ export async function refreshModuleFlags({ force = false, baseline = false, dete
         }
       }
     } catch {
-      // No pisar flags buenos por un fallo momentáneo de red.
-      if (!cachedFlags) cachedFlags = emptyFlags();
+      if (!cachedFlags && isPrimarySuperAdmin()) {
+        cachedFlags = fullFlags();
+        cachedSt2Admin = true;
+      } else if (!cachedFlags) {
+        cachedFlags = emptyFlags();
+      }
     } finally {
       loadPromise = null;
     }
@@ -269,7 +256,6 @@ export function startModuleAccessPolling() {
 
   const tick = () => {
     if (document.visibilityState === "hidden") return;
-    if (isPrimarySuperAdmin()) return;
     if (readViewAs()) return;
     void refreshModuleFlags({ force: true, detectNew: true }).then((flags) => {
       document.dispatchEvent(new CustomEvent("st2:modules-flags-refreshed", {
