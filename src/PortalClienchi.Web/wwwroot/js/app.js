@@ -4009,12 +4009,11 @@ function buildsDiffer(loaded, live) {
   return a.slice(0, 7) !== b.slice(0, 7);
 }
 
-function setUpdateAvailable(show) {
-  const chip = document.getElementById("st2-update-reload");
-  if (chip) {
-    chip.classList.toggle("hidden", !show);
-    chip.toggleAttribute("hidden", !show);
-  }
+function setUpdateBannerVisible(show) {
+  const banner = document.getElementById("st2-update-banner");
+  if (!banner) return;
+  banner.classList.toggle("hidden", !show);
+  banner.toggleAttribute("hidden", !show);
   document.body.classList.toggle("st2-has-update", !!show);
 }
 
@@ -4023,10 +4022,10 @@ function applyLiveBuild(liveBuild) {
   if (!live) return;
   lastLiveBuild = live;
   if (!buildsDiffer(loadedAppBuild(), live)) {
-    setUpdateAvailable(false);
+    setUpdateBannerVisible(false);
     return;
   }
-  setUpdateAvailable(true);
+  setUpdateBannerVisible(true);
   notifyWebUpdateDesktop(live);
 }
 
