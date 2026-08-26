@@ -112,6 +112,14 @@ function bottleImg() {
   return document.getElementById("st2-agua-bottle-img");
 }
 
+function aguaWidget() {
+  return document.getElementById("st2-agua-widget");
+}
+
+function meterFill() {
+  return document.getElementById("st2-agua-meter-fill");
+}
+
 function toastEl() {
   return document.getElementById("agua-ready-toast");
 }
@@ -133,15 +141,23 @@ function stageGif() {
 }
 
 function syncBottleUi() {
+  const widget = aguaWidget();
   const btn = bottleBtn();
   const img = bottleImg();
+  const fill = meterFill();
   const on = isAguaEggUser() && isOnPlanillasMenu();
-  if (!btn || !img) return;
-  btn.classList.toggle("hidden", !on);
-  btn.setAttribute("aria-hidden", on ? "false" : "true");
+  if (!widget || !btn || !img) return;
+  widget.classList.toggle("hidden", !on);
+  widget.setAttribute("aria-hidden", on ? "false" : "true");
   if (!on) return;
   const state = readState();
   img.src = LEVELS[state.level];
+  const pct = MAX_LEVEL > 0 ? Math.round((state.level / MAX_LEVEL) * 100) : 0;
+  if (fill) {
+    fill.style.height = `${pct}%`;
+    fill.classList.toggle("is-full", state.level >= MAX_LEVEL);
+  }
+  widget.dataset.level = String(state.level);
   const tip = isViewAsTarget()
     ? "Agua (ver como) · doble clic reinicia la prueba"
     : null;

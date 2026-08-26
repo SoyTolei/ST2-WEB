@@ -2274,7 +2274,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   color: #6b7280;
   margin-top: 1px;
 }
-/* SÃÂÃÂ­/No: estado claro sin pelear con el color del card */
+/* SÃÂÃÂÃÂÃÂ­/No: estado claro sin pelear con el color del card */
 .plan-onvio-card .card-mark,
 .plan-onvio-state {
   flex-shrink: 0;
@@ -3632,7 +3632,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-sql-copy:hover { background: #eff6ff; }
 .plan-sql-copy:disabled { opacity: 0.6; cursor: default; }
 
-/* LEGAL Referral hub ÃÂ¢ÃÂÃÂ estÃÂÃÂ©tica portal ST2 */
+/* LEGAL Referral hub ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ estÃÂÃÂÃÂÃÂ©tica portal ST2 */
 .plan-legal-hub-root {
   display: flex;
   flex-direction: column;
@@ -3819,7 +3819,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   color: var(--primary);
 }
 
-/* LEGAL ÃÂ¢ÃÂÃÂ plantillas y formulario (estilo ST2 referral) */
+/* LEGAL ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ plantillas y formulario (estilo ST2 referral) */
 .plan-legal-form-panel .plan-ref-title { margin-top: 0; }
 .plan-legal-form-panel .plan-form-grid { margin-bottom: 0; }
 .plan-legal-form-actions {
@@ -3949,17 +3949,27 @@ body.st2-balloons-sides .st2-x-balloon-body {
   .plan-op-metodo-well { gap: 8px 16px; }
 }
 
-/* Contador de agua (easter Jorge) ÃÂ solo menÃÂº principal */
-.planillas-hero:has(#st2-agua-bottle:not(.hidden)) {
-  padding-left: 168px;
+/* Contador de agua (easter Jorge) — solo menú principal */
+.planillas-hero:has(#st2-agua-widget:not(.hidden)) {
+  padding-left: 188px;
 }
 
-.st2-agua-bottle {
+.st2-agua-widget {
   position: absolute;
   top: 50%;
   left: 4px;
   transform: translateY(-50%);
   z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.st2-agua-widget.hidden {
+  display: none !important;
+}
+
+.st2-agua-bottle {
   width: 148px;
   height: 148px;
   padding: 0;
@@ -3973,13 +3983,9 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .st2-agua-bottle:hover,
 .st2-agua-bottle:focus-visible {
-  transform: translateY(-50%) scale(1.08);
+  transform: scale(1.08);
   box-shadow: none;
   outline: none;
-}
-
-.st2-agua-bottle.hidden {
-  display: none !important;
 }
 
 .st2-agua-bottle img {
@@ -3993,6 +3999,46 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .st2-agua-bottle.is-full {
   filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.75));
+}
+
+.st2-agua-meter {
+  position: relative;
+  width: 10px;
+  height: 118px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+.st2-agua-meter-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #7dd3fc 0%, #0ea5e9 55%, #0284c7 100%);
+  transition: height 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.45);
+}
+
+.st2-agua-meter-fill.is-full {
+  background: linear-gradient(180deg, #a5f3fc 0%, #22d3ee 40%, #0891b2 100%);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.65);
+}
+
+.st2-agua-meter-tick {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: var(--tick, 50%);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .blanqueo-ready-toast.is-agua {
