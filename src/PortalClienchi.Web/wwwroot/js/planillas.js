@@ -20,6 +20,7 @@ import {
   renderAccessAlertUi,
 } from "./access-alerts.js";
 import { PLANILLAS_EASTER_EGGS, isEggBirthdayWindow } from "./planillas-easter-eggs.js";
+import { syncAguaEgg } from "./planillas-agua-egg.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -325,7 +326,10 @@ function showView(name, { history = "push" } = {}) {
   injectModuleHeaders();
   document.title = titleForView(name);
   syncHistory(name, history);
-  if (name === "menu") renderBlanqueoAlertUi();
+  if (name === "menu") {
+    renderBlanqueoAlertUi();
+  }
+  syncAguaEgg();
 }
 
 function setSistemaIndicator(index) {
@@ -1525,14 +1529,18 @@ export function initPlanillas() {
   initBorradoBasesModule();
   syncBorradoBasesModuleVisibility();
   syncPlanillasHeroEaster();
+  syncAguaEgg();
   document.addEventListener("st2:session-changed", syncPlanillasHeroEaster);
   document.addEventListener("st2:view-as-changed", syncPlanillasHeroEaster);
+  document.addEventListener("st2:session-changed", syncAguaEgg);
+  document.addEventListener("st2:view-as-changed", syncAguaEgg);
   showView("menu", { history: "none" });
 
   return Promise.all([refreshModuleFlags({ baseline: true }), loadConfig()]).then(async () => {
     updatePlanBuildBadge(planillasConfig?.webBuild);
     updateSistemaUi();
     syncPlanillasHeroEaster();
+    syncAguaEgg();
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }

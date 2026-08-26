@@ -3948,3 +3948,170 @@ body.st2-balloons-sides .st2-x-balloon-body {
   .plan-op-cargar-panel { padding: 18px 16px; }
   .plan-op-metodo-well { gap: 8px 16px; }
 }
+
+/* Contador de agua (easter Jorge) — solo menú principal */
+.st2-agua-bottle {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 6;
+  width: 76px;
+  height: 76px;
+  padding: 4px;
+  border: 0;
+  border-radius: 16px;
+  background: #0b1220;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.st2-agua-bottle:hover,
+.st2-agua-bottle:focus-visible {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
+  outline: none;
+}
+
+.st2-agua-bottle.hidden {
+  display: none !important;
+}
+
+.st2-agua-bottle img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.st2-agua-bottle.is-full {
+  box-shadow: 0 0 0 2px #38bdf8, 0 6px 16px rgba(14, 165, 233, 0.35);
+}
+
+.blanqueo-ready-toast.is-agua {
+  border-color: #7dd3fc;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-dot {
+  background: #0ea5e9;
+}
+
+.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-btn {
+  background: #0284c7;
+  color: #fff;
+}
+
+.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-btn:hover {
+  background: #0369a1;
+}
+
+.st2-agua-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(2, 8, 23, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.st2-agua-overlay.hidden {
+  display: none !important;
+}
+
+.st2-agua-stage {
+  position: relative;
+  width: min(220px, 56vw);
+  height: min(220px, 56vw);
+  border-radius: 28px;
+  background: #0b1220;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.st2-agua-stage-img {
+  position: absolute;
+  inset: 10%;
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.st2-agua-stage-from {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+}
+
+.st2-agua-stage-to {
+  opacity: 0;
+  transform: scale(0.92) translateY(8px);
+  z-index: 2;
+}
+
+.st2-agua-overlay.is-swap .st2-agua-stage-from {
+  opacity: 0;
+  transform: scale(1.05) translateY(-6px);
+}
+
+.st2-agua-overlay.is-swap .st2-agua-stage-to {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.st2-agua-fill-wave {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 12%;
+  height: 0%;
+  border-radius: 0 0 18px 18px;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.15), rgba(14, 165, 233, 0.45));
+  pointer-events: none;
+  z-index: 3;
+  transition: height 0.7s ease;
+}
+
+.st2-agua-overlay.is-filling .st2-agua-fill-wave {
+  height: 58%;
+}
+
+.st2-agua-overlay.is-done .st2-agua-fill-wave {
+  height: 0%;
+  opacity: 0;
+  transition: height 0.35s ease, opacity 0.35s ease;
+}
+
+.st2-agua-overlay-caption {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #e0f2fe;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.st2-agua-overlay.is-open .st2-agua-overlay-caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-agua {
+  background: linear-gradient(180deg, #0c1a28 0%, #102433 100%);
+  border-color: #0284c7;
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-agua .blanqueo-ready-toast-text,
+html.st2-theme-dark .blanqueo-ready-toast.is-agua .blanqueo-ready-toast-x {
+  color: #e0f2fe;
+}

@@ -173,6 +173,21 @@
               </div>
             </div>
 
+            <div id="agua-ready-toast" class="blanqueo-ready-toast is-agua hidden" role="status" aria-live="polite" aria-hidden="true">
+              <div class="blanqueo-ready-toast-main">
+                <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
+                <p id="agua-ready-toast-text" class="blanqueo-ready-toast-text">¿Tomaste agua hoy?</p>
+              </div>
+              <div class="blanqueo-ready-toast-actions">
+                <button type="button" id="agua-ready-toast-open" class="blanqueo-ready-toast-btn">¡Sí!</button>
+                <button type="button" id="agua-ready-toast-dismiss" class="blanqueo-ready-toast-x" aria-label="Descartar">×</button>
+              </div>
+            </div>
+
+            <button type="button" id="st2-agua-bottle" class="st2-agua-bottle hidden" title="Agua de hoy" aria-label="Contador de agua de hoy" aria-hidden="true">
+              <img id="st2-agua-bottle-img" src="/img/agua/botella-0.png?v=1" alt="" width="72" height="72" decoding="async"/>
+            </button>
+
             <p class="planillas-section-title">Elija el sistema</p>
             <div class="plan-sistema-well">
               <div class="plan-sistema-grid">
@@ -2115,6 +2130,15 @@
         <p id="st2-access-pending-error" class="st2-access-error hidden" role="alert"></p>
       </div>
     </div>
+  </div>
+
+  <div id="st2-agua-overlay" class="st2-agua-overlay hidden" role="dialog" aria-modal="true" aria-label="Tomaste agua" aria-hidden="true">
+    <div class="st2-agua-stage" aria-hidden="true">
+      <img id="st2-agua-stage-from" class="st2-agua-stage-img st2-agua-stage-from" alt="" decoding="async"/>
+      <img id="st2-agua-stage-to" class="st2-agua-stage-img st2-agua-stage-to" alt="" decoding="async"/>
+      <div class="st2-agua-fill-wave" aria-hidden="true"></div>
+    </div>
+    <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
   <script src="/js/app.js" type="module"></script>
