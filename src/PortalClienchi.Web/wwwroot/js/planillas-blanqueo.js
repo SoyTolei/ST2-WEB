@@ -1045,8 +1045,8 @@ function buildRow(item) {
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
     <td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
-    <td class="blanqueo-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
     <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>
+    <td class="blanqueo-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
   `;
 
   row.querySelector(".blanqueo-hab-pill")?.addEventListener("click", (e) => {

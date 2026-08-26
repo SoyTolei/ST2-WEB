@@ -120,9 +120,9 @@ public sealed class BlanqueoRepository
             cmd.CommandText = """
                 INSERT INTO blanqueo_solicitudes
                     (portal, nro_caso, nro_cliente, correo, fecha_solicitud,
-                     solicitado_por_email, solicitado_por_nombre, tipo_solicitud, listo, aclaracion, modulos_detalle)
+                     solicitado_por_email, solicitado_por_nombre, tipo_solicitud, listo, aclaracion, modulos_detalle, confirmado_por_nombre)
                 VALUES
-                    ($portal, $caso, $cliente, $correo, $fecha, $email, $nombre, $tipo, $listo, $aclaracion, $modulos)
+                    ($portal, $caso, $cliente, $correo, $fecha, $email, $nombre, $tipo, $listo, $aclaracion, $modulos, $confirmado)
                 """;
             cmd.Parameters.AddWithValue("$portal", row.Portal);
             cmd.Parameters.AddWithValue("$caso", row.NroCaso);
@@ -135,6 +135,7 @@ public sealed class BlanqueoRepository
             cmd.Parameters.AddWithValue("$listo", row.Listo ? 1 : 0);
             cmd.Parameters.AddWithValue("$aclaracion", (object?)row.Aclaracion ?? DBNull.Value);
             cmd.Parameters.AddWithValue("$modulos", (object?)row.ModulosDetalle ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$confirmado", (object?)row.ConfirmadoPorNombre ?? DBNull.Value);
             cmd.ExecuteNonQuery();
             existing.Add(fp);
             inserted++;

@@ -875,8 +875,8 @@ function buildRow(item) {
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="borrado-col-listo">${formatEstadoCell(item)}</td>
-    <td class="borrado-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
     <td class="borrado-col-aclaracion">${formatAclaracionCell(aclaracion)}</td>
+    <td class="borrado-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
   `;
 
   row.querySelector("[data-borrado-copy-cliente]")?.addEventListener("click", (e) => {

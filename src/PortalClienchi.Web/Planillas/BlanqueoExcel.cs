@@ -18,8 +18,8 @@ public static class BlanqueoExcel
         "Modulos",
         "SolicitadoPorNombre",
         "Listo",
-        "ConfirmadoPor",
         "Aclaracion",
+        "ConfirmadoPor",
     ];
 
     public static byte[] BuildExportWorkbook(IReadOnlyList<BlanqueoRecordDto> items)
@@ -41,8 +41,8 @@ public static class BlanqueoExcel
             detalle.Cell(row, 7).Value = item.ModulosDetalle?.Replace('|', ',') ?? "";
             detalle.Cell(row, 8).Value = item.SolicitadoPorNombre;
             detalle.Cell(row, 9).Value = item.Listo ? "Sí" : "No";
-            detalle.Cell(row, 10).Value = item.ConfirmadoPorNombre ?? "";
-            detalle.Cell(row, 11).Value = item.Aclaracion ?? "";
+            detalle.Cell(row, 10).Value = item.Aclaracion ?? "";
+            detalle.Cell(row, 11).Value = item.ConfirmadoPorNombre ?? "";
             row++;
         }
 
@@ -106,8 +106,8 @@ public static class BlanqueoExcel
         ws.Cell(2, 7).Value = "";
         ws.Cell(2, 8).Value = "Leonel Gallo";
         ws.Cell(2, 9).Value = "Sí";
-        ws.Cell(2, 10).Value = "Alexis Ruiz";
-        ws.Cell(2, 11).Value = "";
+        ws.Cell(2, 10).Value = "";
+        ws.Cell(2, 11).Value = "Alexis Ruiz";
 
         ws.Row(1).Style.Font.Bold = true;
         ws.SheetView.FreezeRows(1);
@@ -232,6 +232,7 @@ public static class BlanqueoExcel
             var listoRaw = Cell("listo");
             var listo = ParseBool(listoRaw);
             var aclaracion = NullIfEmpty(Cell("aclaracion"));
+            var confirmadoPor = NullIfEmpty(Cell("confirmadopor"));
 
             // Misma semántica que en vivo: Listo (verde) y No registrado (rojo) se respetan;
             // si vienen juntos, gana No registrado.
@@ -239,7 +240,11 @@ public static class BlanqueoExcel
             {
                 listo = false;
                 aclaracion = "No registrado";
+                confirmadoPor = null;
             }
+
+            if (!listo)
+                confirmadoPor = null;
 
             rows.Add(new BlanqueoHistoricalRow
             {
@@ -253,6 +258,7 @@ public static class BlanqueoExcel
                 SolicitadoPorNombre = nombreSol.Trim(),
                 Listo = listo,
                 Aclaracion = aclaracion,
+                ConfirmadoPorNombre = confirmadoPor,
                 ModulosDetalle = modulos,
             });
         }
@@ -293,7 +299,9 @@ public static class BlanqueoExcel
                 map["solicitud"] = c;
             else if (Matches(raw, "solicitadopornombre", "solicitante", "nombre", "solicitadopor", "agente", "agent"))
                 map["solicitadonombre"] = c;
-            else if (Matches(raw, "listo", "estado", "confirmado"))
+            else if (raw is "confirmadopor" or "confirmadoporombre" || raw.Contains("confirmadopor"))
+                map["confirmadopor"] = c;
+            else if (Matches(raw, "listo", "estado") || raw == "confirmado")
                 map["listo"] = c;
             else if (Matches(raw, "aclaracion", "observacion", "nota", "comentario"))
                 map["aclaracion"] = c;
@@ -585,5 +593,6 @@ public sealed class BlanqueoHistoricalRow
     public string SolicitadoPorNombre { get; set; } = "";
     public bool Listo { get; set; }
     public string? Aclaracion { get; set; }
+    public string? ConfirmadoPorNombre { get; set; }
     public string? ModulosDetalle { get; set; }
 }
