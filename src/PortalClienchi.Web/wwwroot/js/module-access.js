@@ -164,6 +164,7 @@ export function isSt2SuperAdmin(email = getPlanUserEmail()) {
 export function getCachedModuleFlags() {
   const viewAs = readViewAs();
   if (viewAs?.modules) return cloneFlags(viewAs.modules);
+  if (isPrimarySuperAdmin()) return fullFlags();
   return cachedFlags || emptyFlags();
 }
 
@@ -187,15 +188,21 @@ function parseFlagsFromApi(m) {
  */
 export async function refreshModuleFlags({ force = false, baseline = false, detectNew = false } = {}) {
   try {
-    // Solo override manual; el super admin pide flags al API (local full vs prod).
-    if (localStorage.getItem(FORCE_KEY) === "1") {
+    if (localStorage.getItem(FORCE_KEY) === "1" || isPrimarySuperAdmin()) {
       cachedFlags = fullFlags();
       cachedSt2Admin = true;
       lastLoadedAt = Date.now();
       if (baseline || !knownFlags) knownFlags = cloneFlags(cachedFlags);
       return getCachedModuleFlags();
     }
-  } catch { /* ignore */ }
+  } catch {
+    if (isPrimarySuperAdmin()) {
+      cachedFlags = fullFlags();
+      cachedSt2Admin = true;
+      if (baseline || !knownFlags) knownFlags = cloneFlags(cachedFlags);
+      return getCachedModuleFlags();
+    }
+  }
 
   if (!getPlanUserEmail()) {
     cachedFlags = emptyFlags();
@@ -235,12 +242,8 @@ export async function refreshModuleFlags({ force = false, baseline = false, dete
         }
       }
     } catch {
-      if (!cachedFlags && isPrimarySuperAdmin()) {
-        cachedFlags = fullFlags();
-        cachedSt2Admin = true;
-      } else if (!cachedFlags) {
-        cachedFlags = emptyFlags();
-      }
+      // No pisar flags buenos por un fallo momentáneo de red.
+      if (!cachedFlags) cachedFlags = emptyFlags();
     } finally {
       loadPromise = null;
     }
@@ -256,6 +259,7 @@ export function startModuleAccessPolling() {
 
   const tick = () => {
     if (document.visibilityState === "hidden") return;
+    if (isPrimarySuperAdmin()) return;
     if (readViewAs()) return;
     void refreshModuleFlags({ force: true, detectNew: true }).then((flags) => {
       document.dispatchEvent(new CustomEvent("st2:modules-flags-refreshed", {

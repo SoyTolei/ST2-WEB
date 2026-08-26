@@ -12,8 +12,7 @@ public static class St2SuperAdmin
             && string.Equals(normalized, PrimaryEmail, StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>Acceso total (localhost / Development).</summary>
-    public static ModuleAccessFlagsDto AbsoluteFullFlags() => new()
+    public static ModuleAccessFlagsDto FullFlags() => new()
     {
         Oportunidad = true,
         PdfPortal = true,
@@ -24,28 +23,4 @@ public static class St2SuperAdmin
         BorradoBasesConfirm = true,
         BorradoBasesLoad = true,
     };
-
-    /// <summary>
-    /// Base de producción: Blanqueo sale del panel Accesos
-    /// (Leonel aún no tiene permisos reales de proceso).
-    /// </summary>
-    public static ModuleAccessFlagsDto FullFlags() => new()
-    {
-        Oportunidad = true,
-        PdfPortal = true,
-        Blanqueo = false,
-        BlanqueoConfirm = false,
-        BlanqueoLoad = false,
-        BorradoBases = true,
-        BorradoBasesConfirm = true,
-        BorradoBasesLoad = true,
-    };
-
-    public static bool IsDevelopmentHost()
-    {
-        var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-            ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
-            ?? "";
-        return env.Equals("Development", StringComparison.OrdinalIgnoreCase);
-    }
 }

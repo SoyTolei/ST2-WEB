@@ -39,20 +39,11 @@ public sealed class ModuleAccessRepository
         if (normalized is null)
             return new ModuleAccessFlagsDto();
 
+        if (St2SuperAdmin.Is(normalized))
+            return St2SuperAdmin.FullFlags();
+
         using var conn = Open();
-        var dbFlags = ReadFlags(conn, normalized);
-        if (!St2SuperAdmin.Is(normalized))
-            return dbFlags;
-
-        // Local: full admin. Producción: Blanqueo desde Accesos.
-        if (St2SuperAdmin.IsDevelopmentHost())
-            return St2SuperAdmin.AbsoluteFullFlags();
-
-        var flags = St2SuperAdmin.FullFlags();
-        flags.Blanqueo = dbFlags.Blanqueo;
-        flags.BlanqueoConfirm = dbFlags.BlanqueoConfirm;
-        flags.BlanqueoLoad = dbFlags.BlanqueoLoad;
-        return flags;
+        return ReadFlags(conn, normalized);
     }
 
     public IReadOnlyDictionary<string, ModuleAccessFlagsDto> GetFlagsForEmails(IEnumerable<string> emails)
@@ -70,27 +61,7 @@ public sealed class ModuleAccessRepository
 
         using var conn = Open();
         foreach (var email in list)
-        {
-            if (St2SuperAdmin.Is(email))
-            {
-                if (St2SuperAdmin.IsDevelopmentHost())
-                {
-                    map[email] = St2SuperAdmin.AbsoluteFullFlags();
-                    continue;
-                }
-
-                var dbFlags = ReadFlags(conn, email);
-                var flags = St2SuperAdmin.FullFlags();
-                flags.Blanqueo = dbFlags.Blanqueo;
-                flags.BlanqueoConfirm = dbFlags.BlanqueoConfirm;
-                flags.BlanqueoLoad = dbFlags.BlanqueoLoad;
-                map[email] = flags;
-            }
-            else
-            {
-                map[email] = ReadFlags(conn, email);
-            }
-        }
+            map[email] = St2SuperAdmin.Is(email) ? St2SuperAdmin.FullFlags() : ReadFlags(conn, email);
         return map;
     }
 
@@ -298,34 +269,6 @@ public sealed class ModuleAccessRepository
 
         EnsureBlanqueoLoadDefaults();
         EnsureBorradoBasesDefaults();
-        EnsureRevokePrimaryBlanqueo();
-    }
-
-    /// <summary>Leonel sin Blanqueo hasta que el proceso real lo habilite en Accesos.</summary>
-    private void EnsureRevokePrimaryBlanqueo()
-    {
-        lock (_gate)
-        {
-            using var conn = Open();
-            using (var check = conn.CreateCommand())
-            {
-                check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'revoked_primary_blanqueo_v1'";
-                var existing = check.ExecuteScalar() as string;
-                if (string.Equals(existing, "1", StringComparison.Ordinal))
-                    return;
-            }
-
-            WriteModule(conn, St2SuperAdmin.PrimaryEmail, PlanModuleIds.Blanqueo, false, false);
-            WriteModule(conn, St2SuperAdmin.PrimaryEmail, PlanModuleIds.BlanqueoLoad, false, false);
-
-            using var mark = conn.CreateCommand();
-            mark.CommandText = """
-                INSERT INTO module_access_meta (key, value) VALUES ('revoked_primary_blanqueo_v1', '1')
-                ON CONFLICT(key) DO UPDATE SET value = excluded.value
-                """;
-            mark.ExecuteNonQuery();
-            _logger.LogInformation("Blanqueo deshabilitado para {Email} (proceso pendiente)", St2SuperAdmin.PrimaryEmail);
-        }
     }
 
     /// <summary>
