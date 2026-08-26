@@ -16,14 +16,23 @@ const LEVELS = [
 ];
 /** GIF de llenado: dejar el archivo en wwwroot/img/agua/llenar.gif */
 const FILL_GIF = "/img/agua/llenar.gif?v=2";
-const MAX_LEVEL = LEVELS.length - 1;
+/** Tres tragos para completar el objetivo del día. */
+const MAX_LEVEL = 3;
 /** Duración aproximada del gif en pantalla antes de mostrar el nivel final. */
 const FILL_GIF_MS = 1800;
 /** Cada ~2.5 h (entre 2 y 3). */
 const PROMPT_MS = (2.5 * 60 * 60 * 1000);
-const STORAGE_LIVE = "st2-agua-egg-live-v1";
-const STORAGE_VIEWAS = "st2-agua-egg-viewas-v1";
+const STORAGE_LIVE = "st2-agua-egg-live-v2";
+const STORAGE_VIEWAS = "st2-agua-egg-viewas-v2";
 const VIEWAS_ARMED = "st2-agua-viewas-armed-v1";
+
+/** Mapea trago → imagen (0 vacía, 1 media, 2+ llena). */
+function bottleSrc(level) {
+  const n = Math.max(0, Number(level) || 0);
+  if (n <= 0) return LEVELS[0];
+  if (n === 1) return LEVELS[1];
+  return LEVELS[2];
+}
 
 let started = false;
 let promptTimer = 0;
@@ -76,7 +85,7 @@ function writeState(state) {
 export function resetAguaEggViewAsProgress() {
   try {
     localStorage.removeItem(STORAGE_VIEWAS);
-    // Limpia la clave vieja compartida si quedó de pruebas anteriores.
+    localStorage.removeItem("st2-agua-egg-viewas-v1");
     localStorage.removeItem("st2-agua-egg-v1");
   } catch { /* ignore */ }
 }
@@ -151,12 +160,13 @@ function syncBottleUi() {
   widget.setAttribute("aria-hidden", on ? "false" : "true");
   if (!on) return;
   const state = readState();
-  img.src = LEVELS[state.level];
+  img.src = bottleSrc(state.level);
   const pct = MAX_LEVEL > 0 ? Math.round((state.level / MAX_LEVEL) * 100) : 0;
   if (fill) {
     fill.style.height = `${pct}%`;
     fill.classList.toggle("is-full", state.level >= MAX_LEVEL);
   }
+  widget.classList.toggle("is-done", state.level >= MAX_LEVEL);
   widget.dataset.level = String(state.level);
   const tip = isViewAsTarget()
     ? "Agua (ver como) · doble clic reinicia la prueba"
@@ -225,8 +235,8 @@ async function playFillAnimation(fromLevel, toLevel) {
   const gif = stageGif();
   if (!overlay || !from || !to) return;
 
-  from.src = LEVELS[fromLevel];
-  to.src = LEVELS[toLevel];
+  from.src = bottleSrc(fromLevel);
+  to.src = bottleSrc(toLevel);
   overlay.classList.remove("hidden", "is-done", "is-swap", "has-gif");
   overlay.classList.add("is-open", "is-filling");
   overlay.setAttribute("aria-hidden", "false");
