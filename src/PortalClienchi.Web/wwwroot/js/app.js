@@ -1933,10 +1933,10 @@ function toolsUpdateMessage(newer) {
   const names = list.map((t) => toolPackageLabel(t.id));
   let body;
   if (names.length === 1) {
-    body = `hay una versión nueva para descargar de ${names[0]}. Recordá borrar de la PC la versión anterior.`;
+    body = `hay una versión nueva de ${names[0]} para descargar.`;
   } else {
     const last = names.pop();
-    body = `hay una versión nueva para descargar de ${names.join(", ")} y ${last}. Recordá borrar de la PC la versión anterior.`;
+    body = `hay versiones nuevas de ${names.join(", ")} y de ${last} para descargar.`;
   }
   const name = toastFirstName();
   const greet = greetLine(name);
