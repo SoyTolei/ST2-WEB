@@ -1933,10 +1933,10 @@ function toolsUpdateMessage(newer) {
   const names = list.map((t) => toolPackageLabel(t.id));
   let body;
   if (names.length === 1) {
-    body = `hay una versión nueva para descargar de ${names[0]}.`;
+    body = `hay una versión nueva para descargar de ${names[0]}. Recordá borrar de la PC la versión anterior.`;
   } else {
     const last = names.pop();
-    body = `hay una versión nueva para descargar de ${names.join(", ")} y ${last}.`;
+    body = `hay una versión nueva para descargar de ${names.join(", ")} y ${last}. Recordá borrar de la PC la versión anterior.`;
   }
   const name = toastFirstName();
   const greet = greetLine(name);
@@ -1988,23 +1988,21 @@ function syncAboutToolsBadge() {
 
 function markToolsSeen() {
   const next = { ...readSeenToolVersions() };
-  for (const t of cachedTools || []) {
+  for (const t of toolsForNotice()) {
     const stamp = toolIdentity(t);
     if (t?.available && stamp) next[t.id] = stamp;
   }
   writeSeenToolVersions(next);
   syncAboutToolsBadge();
+  renderAboutTools();
 }
 
+/** Una descarga (SQL o BAT) marca el aviso del home como visto. */
 function markToolSeen(toolId) {
   const id = String(toolId || "").trim();
   if (!id) return;
-  const next = { ...readSeenToolVersions() };
-  const tool = (cachedTools || []).find((t) => t.id === id);
-  const stamp = toolIdentity(tool) || metaToolStamp(id);
-  if (stamp) next[id] = stamp;
-  writeSeenToolVersions(next);
-  syncAboutToolsBadge();
+  // Con descargar cualquiera de las dos, se da por actuado el cartel.
+  markToolsSeen();
 }
 
 function renderAboutTools() {
