@@ -102,15 +102,20 @@ public static class BorradoBasesEndpoints
             int id,
             BorradoBasesPatchRequest body,
             BorradoBasesRepository repo,
-            ModuleAccessRepository modules) =>
+            ModuleAccessRepository modules,
+            AppAccessRepository accessRepo) =>
         {
-            if (!TryAuthorize(ctx, modules, requireConfirm: true, out _, out _, out var error))
+            if (!TryAuthorize(ctx, modules, requireConfirm: true, out var email, out _, out var error))
                 return error!;
 
             if (body.Aclaracion is not null && body.Aclaracion.Trim().Length > 280)
                 return Results.BadRequest(new { error = "La aclaración es demasiado larga (máx. 280)." });
 
-            var updated = repo.PatchConfirm(id, body);
+            var access = accessRepo.Find(email!);
+            var nombre = !string.IsNullOrWhiteSpace(access?.DisplayName)
+                ? access!.DisplayName!.Trim()
+                : DisplayNameFromEmail(email!);
+            var updated = repo.PatchConfirm(id, body, email, nombre);
             if (updated is null)
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
 

@@ -17,6 +17,7 @@ public static class BorradoBasesExcel
         "Ejercicios",
         "SolicitadoPorNombre",
         "Listo",
+        "ConfirmadoPor",
         "Aclaracion",
     ];
 
@@ -40,7 +41,8 @@ public static class BorradoBasesExcel
             detalle.Cell(row, 8).Value = item.EjerciciosDetalle ?? "";
             detalle.Cell(row, 9).Value = item.SolicitadoPorNombre;
             detalle.Cell(row, 10).Value = item.Listo ? "Sí" : "No";
-            detalle.Cell(row, 11).Value = item.Aclaracion ?? "";
+            detalle.Cell(row, 11).Value = item.ConfirmadoPorNombre ?? "";
+            detalle.Cell(row, 12).Value = item.Aclaracion ?? "";
             row++;
         }
 

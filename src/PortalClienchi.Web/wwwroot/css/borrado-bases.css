@@ -379,6 +379,19 @@
   padding-right: 10px;
 }
 
+.borrado-table .borrado-th-confirmado,
+.borrado-table .borrado-col-confirmado {
+  width: 7.5rem;
+  max-width: 8.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.78rem;
+  color: #64748b;
+  padding-left: 6px;
+  padding-right: 8px;
+}
+
 .borrado-table .borrado-th-aclaracion,
 .borrado-table .borrado-col-aclaracion {
   width: 100%;
@@ -747,8 +760,20 @@ button.borrado-base-pill:focus-visible .borrado-base-pill-action {
   background: color-mix(in srgb, #dcfce7 35%, transparent);
 }
 
+.borrado-row-listo td:first-child {
+  box-shadow: inset 3px 0 0 #059669;
+}
+
 .borrado-row-aclaracion:not(.borrado-row-listo) {
-  background: color-mix(in srgb, #e0e7ff 28%, transparent);
+  background: color-mix(in srgb, #fef3c7 40%, transparent);
+}
+
+.borrado-row-partial td {
+  background: color-mix(in srgb, #fee2e2 45%, transparent);
+}
+
+.borrado-row-partial td:first-child {
+  box-shadow: inset 3px 0 0 #dc2626;
 }
 
 .borrado-ctx {

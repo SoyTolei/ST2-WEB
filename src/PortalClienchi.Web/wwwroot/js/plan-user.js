@@ -1,3 +1,5 @@
+import { setSessionBirthdayMmDd } from "./planillas-easter-eggs.js";
+
 let cachedEmail = null;
 let modalPromise = null;
 let accessPromise = null;
@@ -325,8 +327,10 @@ export async function refreshPlanUserSession() {
     const response = await fetch("/api/planillas/session", SESSION_OPTS);
     const data = await response.json().catch(() => ({}));
     cachedEmail = data.email || null;
+    setSessionBirthdayMmDd(data.birthdayMmDd || "");
   } catch {
     cachedEmail = null;
+    setSessionBirthdayMmDd("");
   }
   updatePlanUserBadge();
   return cachedEmail;
@@ -352,6 +356,7 @@ export async function syncPlanUserSession() {
     const data = await response.json().catch(() => ({}));
     if (response.ok) {
       cachedEmail = data.email || null;
+      setSessionBirthdayMmDd(data.birthdayMmDd || "");
       updatePlanUserBadge();
       return cachedEmail;
     }
@@ -516,6 +521,7 @@ function showPlanUserModal(resolve) {
     }
 
     cachedEmail = data.email;
+    setSessionBirthdayMmDd(data.birthdayMmDd || "");
     localStorage.setItem("st2_plan_user_hint", data.email);
     if (passInput) passInput.value = "";
     await refreshPlanUserSession();

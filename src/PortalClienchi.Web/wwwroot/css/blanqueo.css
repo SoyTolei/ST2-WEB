@@ -1069,6 +1069,17 @@
   white-space: nowrap;
 }
 
+.blanqueo-table .blanqueo-th-confirmado,
+.blanqueo-table .blanqueo-col-confirmado {
+  width: 7.5rem;
+  max-width: 8.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
 .blanqueo-estado-pending {
   display: inline-flex;
   align-items: center;

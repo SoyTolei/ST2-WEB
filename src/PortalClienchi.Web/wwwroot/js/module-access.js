@@ -30,9 +30,10 @@ function fullFlags() {
   return {
     oportunidad: true,
     pdfPortal: true,
-    blanqueo: true,
-    blanqueoConfirm: true,
-    blanqueoLoad: true,
+    // Blanqueo no va forzado: sale del panel Accesos / API.
+    blanqueo: false,
+    blanqueoConfirm: false,
+    blanqueoLoad: false,
     borradoBases: true,
     borradoBasesConfirm: true,
     borradoBasesLoad: true,
@@ -164,7 +165,16 @@ export function isSt2SuperAdmin(email = getPlanUserEmail()) {
 export function getCachedModuleFlags() {
   const viewAs = readViewAs();
   if (viewAs?.modules) return cloneFlags(viewAs.modules);
-  if (isPrimarySuperAdmin()) return fullFlags();
+  if (isPrimarySuperAdmin()) {
+    const base = fullFlags();
+    const db = cachedFlags || emptyFlags();
+    return {
+      ...base,
+      blanqueo: !!db.blanqueo,
+      blanqueoConfirm: !!db.blanqueoConfirm,
+      blanqueoLoad: !!db.blanqueoLoad,
+    };
+  }
   return cachedFlags || emptyFlags();
 }
 

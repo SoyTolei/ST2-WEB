@@ -18,6 +18,7 @@ public static class BlanqueoExcel
         "Modulos",
         "SolicitadoPorNombre",
         "Listo",
+        "ConfirmadoPor",
         "Aclaracion",
     ];
 
@@ -40,7 +41,8 @@ public static class BlanqueoExcel
             detalle.Cell(row, 7).Value = item.ModulosDetalle?.Replace('|', ',') ?? "";
             detalle.Cell(row, 8).Value = item.SolicitadoPorNombre;
             detalle.Cell(row, 9).Value = item.Listo ? "Sí" : "No";
-            detalle.Cell(row, 10).Value = item.Aclaracion ?? "";
+            detalle.Cell(row, 10).Value = item.ConfirmadoPorNombre ?? "";
+            detalle.Cell(row, 11).Value = item.Aclaracion ?? "";
             row++;
         }
 
@@ -104,7 +106,8 @@ public static class BlanqueoExcel
         ws.Cell(2, 7).Value = "";
         ws.Cell(2, 8).Value = "Leonel Gallo";
         ws.Cell(2, 9).Value = "Sí";
-        ws.Cell(2, 10).Value = "";
+        ws.Cell(2, 10).Value = "Alexis Ruiz";
+        ws.Cell(2, 11).Value = "";
 
         ws.Row(1).Style.Font.Bold = true;
         ws.SheetView.FreezeRows(1);

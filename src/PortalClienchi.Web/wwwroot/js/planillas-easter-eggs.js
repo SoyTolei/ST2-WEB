@@ -3,7 +3,8 @@
  *
  * Receta de CUMPLEAÑOS (banner gif + globos, fechas Argentina):
  * copiar PLANILLAS_BIRTHDAY_RECIPE y poner email, src, mes y días.
- * Más adelante se pueden sumar varias fechas; si no hay mes/día, queda siempre on.
+ * También podés cargar el cumpleaños en ADMIN → ficha del usuario (DD/MM):
+ * eso activa el saludo sin tocar este archivo. El gif/banner sigue acá.
  */
 export const PLANILLAS_BIRTHDAY_RECIPE = {
   motion: "still",
@@ -35,6 +36,8 @@ export const PLANILLAS_EASTER_EGGS = [
   },
 ];
 
+const SESSION_BDAY_KEY = "st2-session-birthday-mmdd";
+
 function argentinaMonthDay() {
   try {
     const parts = new Intl.DateTimeFormat("en-CA", {
@@ -62,10 +65,34 @@ export function isEggBirthdayWindow(egg) {
   return day >= from && day <= to;
 }
 
+export function setSessionBirthdayMmDd(mmDd) {
+  const v = String(mmDd || "").trim();
+  try {
+    if (!v) sessionStorage.removeItem(SESSION_BDAY_KEY);
+    else sessionStorage.setItem(SESSION_BDAY_KEY, v);
+  } catch { /* ignore */ }
+}
+
+export function getSessionBirthdayMmDd() {
+  try {
+    return sessionStorage.getItem(SESSION_BDAY_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function isMmDdToday(mmDd) {
+  const m = /^(\d{2})-(\d{2})$/.exec(String(mmDd || "").trim());
+  if (!m) return false;
+  const { month, day } = argentinaMonthDay();
+  return Number(m[1]) === month && Number(m[2]) === day;
+}
+
 export function isBirthdayGreetingForEmail(email) {
   const key = String(email || "").trim().toLowerCase();
   if (!key) return false;
   const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === key);
-  if (!egg?.birthdayMonth || !egg?.birthdayDay) return false;
-  return isEggBirthdayWindow(egg);
+  if (egg?.birthdayMonth && egg?.birthdayDay && isEggBirthdayWindow(egg)) return true;
+  // Cumpleaños cargado en ADMIN (solo aplica al usuario de la sesión actual).
+  return isMmDdToday(getSessionBirthdayMmDd());
 }

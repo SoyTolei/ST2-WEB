@@ -6,6 +6,7 @@ import {
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
+import { notifyBlanqueoDesktop } from "./st2-desktop-notif.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -93,6 +94,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
         } else if (stored && stored === sig) {
           confirmToastDismissedSig = sig;
         }
+        notifyBlanqueoDesktop(cachedAlerts.length, sig);
       }
       lastRefreshAt = Date.now();
     } catch {

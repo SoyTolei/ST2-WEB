@@ -26,7 +26,7 @@ public sealed class BorradoBasesRepository
         id, nro_caso, nro_cliente, nro_empresa, nombre_empresa, cuit,
         iva, sueldos, contabilidad, iva_detalle, sueldos_detalle, ejercicios_detalle,
         fecha_solicitud, solicitado_por_email, solicitado_por_nombre,
-        listo, aclaracion, fecha_creacion
+        listo, aclaracion, fecha_creacion, confirmado_por_nombre
         """;
 
     public IReadOnlyList<BorradoBasesRecordDto> LoadAll()
@@ -121,7 +121,7 @@ public sealed class BorradoBasesRepository
         return GetById(id);
     }
 
-    public BorradoBasesRecordDto? PatchConfirm(int id, BorradoBasesPatchRequest req)
+    public BorradoBasesRecordDto? PatchConfirm(int id, BorradoBasesPatchRequest req, string? confirmedByEmail = null, string? confirmedByNombre = null)
     {
         var current = GetById(id);
         if (current is null)
@@ -140,21 +140,34 @@ public sealed class BorradoBasesRepository
 
         var wasListo = current.Listo;
         var prevAclaracion = current.Aclaracion;
+        string? confirmadoPor = current.ConfirmadoPorNombre;
+        if (listo && !wasListo)
+        {
+            confirmadoPor = string.IsNullOrWhiteSpace(confirmedByNombre)
+                ? (string.IsNullOrWhiteSpace(confirmedByEmail) ? null : BorradoBasesEndpoints.DisplayNameFromEmail(confirmedByEmail))
+                : confirmedByNombre.Trim();
+        }
+        else if (!listo)
+        {
+            confirmadoPor = null;
+        }
 
         using var conn = Open();
         using var upd = conn.CreateCommand();
         upd.CommandText = """
             UPDATE borrado_bases_solicitudes
-            SET listo = $listo, aclaracion = $aclaracion
+            SET listo = $listo, aclaracion = $aclaracion, confirmado_por_nombre = $confirmado
             WHERE id = $id
             """;
         upd.Parameters.AddWithValue("$id", id);
         upd.Parameters.AddWithValue("$listo", listo ? 1 : 0);
         upd.Parameters.AddWithValue("$aclaracion", (object?)aclaracion ?? DBNull.Value);
+        upd.Parameters.AddWithValue("$confirmado", (object?)confirmadoPor ?? DBNull.Value);
         upd.ExecuteNonQuery();
 
         current.Listo = listo;
         current.Aclaracion = aclaracion;
+        current.ConfirmadoPorNombre = confirmadoPor;
         SyncRequesterAlert(conn, current, wasListo, prevAclaracion);
         return current;
     }
@@ -431,6 +444,7 @@ public sealed class BorradoBasesRepository
         EnsureColumn(conn, "iva_detalle", "TEXT NULL");
         EnsureColumn(conn, "sueldos_detalle", "TEXT NULL");
         EnsureColumn(conn, "cuit", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumn(conn, "confirmado_por_nombre", "TEXT NULL");
         MigrateCuilToCuit(conn);
         EnsureAlertsTable(conn);
     }
@@ -537,6 +551,7 @@ public sealed class BorradoBasesRepository
         Listo = !r.IsDBNull(15) && r.GetInt32(15) != 0,
         Aclaracion = r.IsDBNull(16) ? null : r.GetString(16),
         FechaCreacion = r.IsDBNull(17) ? "" : FormatFechaCreacion(r.GetValue(17)),
+        ConfirmadoPorNombre = r.FieldCount > 18 && !r.IsDBNull(18) ? r.GetString(18) : null,
     };
 
     private static string FormatFechaCreacion(object value)

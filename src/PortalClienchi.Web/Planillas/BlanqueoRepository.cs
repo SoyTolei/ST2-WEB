@@ -30,7 +30,8 @@ public sealed class BlanqueoRepository
         cmd.CommandText = """
             SELECT id, portal, nro_caso, nro_cliente, correo, fecha_solicitud,
                    solicitado_por_email, solicitado_por_nombre, tipo_solicitud,
-                   listo, aclaracion, fecha_creacion, modulos_detalle
+                   listo, aclaracion, fecha_creacion, modulos_detalle,
+                   confirmado_por_nombre
             FROM blanqueo_solicitudes
             ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) DESC, id DESC
             """;
@@ -47,7 +48,8 @@ public sealed class BlanqueoRepository
         cmd.CommandText = """
             SELECT id, portal, nro_caso, nro_cliente, correo, fecha_solicitud,
                    solicitado_por_email, solicitado_por_nombre, tipo_solicitud,
-                   listo, aclaracion, fecha_creacion, modulos_detalle
+                   listo, aclaracion, fecha_creacion, modulos_detalle,
+                   confirmado_por_nombre
             FROM blanqueo_solicitudes WHERE id = $id
             """;
         cmd.Parameters.AddWithValue("$id", id);
@@ -299,7 +301,7 @@ public sealed class BlanqueoRepository
         return GetById(id);
     }
 
-    public BlanqueoRecordDto? PatchConfirm(int id, BlanqueoPatchRequest req)
+    public BlanqueoRecordDto? PatchConfirm(int id, BlanqueoPatchRequest req, string? confirmedByEmail = null, string? confirmedByNombre = null)
     {
         var current = GetById(id);
         if (current is null)
@@ -327,21 +329,34 @@ public sealed class BlanqueoRepository
 
         var wasListo = current.Listo;
         var prevAclaracion = current.Aclaracion;
+        string? confirmadoPor = current.ConfirmadoPorNombre;
+        if (listo && !wasListo)
+        {
+            confirmadoPor = string.IsNullOrWhiteSpace(confirmedByNombre)
+                ? (string.IsNullOrWhiteSpace(confirmedByEmail) ? null : BlanqueoEndpoints.DisplayNameFromEmail(confirmedByEmail))
+                : confirmedByNombre.Trim();
+        }
+        else if (!listo)
+        {
+            confirmadoPor = null;
+        }
 
         using var conn = Open();
         using var upd = conn.CreateCommand();
         upd.CommandText = """
             UPDATE blanqueo_solicitudes
-            SET listo = $listo, aclaracion = $aclaracion
+            SET listo = $listo, aclaracion = $aclaracion, confirmado_por_nombre = $confirmado
             WHERE id = $id
             """;
         upd.Parameters.AddWithValue("$id", id);
         upd.Parameters.AddWithValue("$listo", listo ? 1 : 0);
         upd.Parameters.AddWithValue("$aclaracion", (object?)aclaracion ?? DBNull.Value);
+        upd.Parameters.AddWithValue("$confirmado", (object?)confirmadoPor ?? DBNull.Value);
         upd.ExecuteNonQuery();
 
         current.Listo = listo;
         current.Aclaracion = aclaracion;
+        current.ConfirmadoPorNombre = confirmadoPor;
 
         SyncRequesterAlert(conn, current, wasListo, prevAclaracion);
 
@@ -558,7 +573,24 @@ public sealed class BlanqueoRepository
         cmd.ExecuteNonQuery();
         EnsurePortalColumn(conn);
         EnsureModulosColumn(conn);
+        EnsureConfirmadoColumn(conn);
         EnsureAlertsTable(conn);
+    }
+
+    private static void EnsureConfirmadoColumn(SqliteConnection conn)
+    {
+        using var info = conn.CreateCommand();
+        info.CommandText = "PRAGMA table_info(blanqueo_solicitudes)";
+        using var r = info.ExecuteReader();
+        while (r.Read())
+        {
+            if (r.GetString(1).Equals("confirmado_por_nombre", StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        using var alter = conn.CreateCommand();
+        alter.CommandText = "ALTER TABLE blanqueo_solicitudes ADD COLUMN confirmado_por_nombre TEXT NULL";
+        alter.ExecuteNonQuery();
     }
 
     private static void EnsureAlertsTable(SqliteConnection conn)
@@ -663,6 +695,7 @@ public sealed class BlanqueoRepository
         Aclaracion = r.IsDBNull(10) ? null : r.GetString(10),
         FechaCreacion = r.FieldCount > 11 && !r.IsDBNull(11) ? r.GetString(11) : "",
         ModulosDetalle = r.FieldCount > 12 && !r.IsDBNull(12) ? r.GetString(12) : null,
+        ConfirmadoPorNombre = r.FieldCount > 13 && !r.IsDBNull(13) ? r.GetString(13) : null,
     };
 
     private SqliteConnection Open()

@@ -183,6 +183,20 @@ export function initBlanqueoModule() {
     if (e.target === e.currentTarget) hideNoteModal();
   });
 
+  document.getElementById("blanqueo-mod-pop-close")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    hideModPop();
+  });
+  document.getElementById("blanqueo-mod-pop-copy")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    void copyModPopText();
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target?.closest?.("#blanqueo-mod-pop") || e.target?.closest?.(".blanqueo-hab-pill")) return;
+    hideModPop();
+  });
+  document.addEventListener("scroll", () => hideModPop(), true);
+
   const ctx = document.getElementById("blanqueo-ctx");
   ctx?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -552,9 +566,64 @@ function formatTipoCell(item) {
   const mods = parseModulos(item.modulosDetalle);
   if (!mods.length) return escapeHtml(tipo);
   const detail = mods.map((m) => `- ${m}`).join("\n");
-  const tip = escapeAttr(`Habilitación de:\n${detail}`);
   const n = mods.length;
-  return `<span class="blanqueo-hab-wrap"><button type="button" class="blanqueo-hab-pill" title="${tip}" aria-label="Módulos: ${escapeAttr(mods.join(", "))}"><span class="blanqueo-hab-pill-label">Hab. módulos</span></button><span class="blanqueo-hab-count" aria-hidden="true">${n}</span></span>`;
+  return `<span class="blanqueo-hab-wrap"><button type="button" class="blanqueo-hab-pill" aria-label="Módulos: ${escapeAttr(mods.join(", "))}" aria-haspopup="dialog" data-blanqueo-mod-detail="${escapeAttr(detail)}"><span class="blanqueo-hab-pill-label">Hab. módulos</span></button><span class="blanqueo-hab-count" aria-hidden="true">${n}</span></span>`;
+}
+
+function hideModPop() {
+  const pop = document.getElementById("blanqueo-mod-pop");
+  if (!pop) return;
+  pop.classList.add("hidden");
+  pop.setAttribute("aria-hidden", "true");
+}
+
+function showModPop(anchor, detail) {
+  const pop = document.getElementById("blanqueo-mod-pop");
+  const text = document.getElementById("blanqueo-mod-pop-text");
+  const copyBtn = document.getElementById("blanqueo-mod-pop-copy");
+  if (!pop || !anchor) return;
+  hideCtx();
+  if (text) text.textContent = detail || "—";
+  if (copyBtn) {
+    copyBtn.classList.remove("is-copied");
+    copyBtn.setAttribute("data-copy-hint", "Copiar");
+    copyBtn.textContent = "Copiar";
+  }
+  pop.classList.remove("hidden");
+  pop.setAttribute("aria-hidden", "false");
+  const rect = anchor.getBoundingClientRect();
+  const pad = 8;
+  const w = pop.offsetWidth || 280;
+  const h = pop.offsetHeight || 140;
+  let left = rect.left;
+  let top = rect.bottom + 6;
+  if (left + w > window.innerWidth - pad) left = window.innerWidth - w - pad;
+  if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
+  pop.style.left = `${Math.max(pad, left)}px`;
+  pop.style.top = `${Math.max(pad, top)}px`;
+}
+
+async function copyModPopText() {
+  const text = document.getElementById("blanqueo-mod-pop-text")?.textContent || "";
+  const btn = document.getElementById("blanqueo-mod-pop-copy");
+  try {
+    await navigator.clipboard.writeText(text);
+    if (btn) {
+      btn.classList.add("is-copied");
+      btn.textContent = "Copiado";
+      btn.setAttribute("data-copy-hint", "Copiado");
+      const prev = Number(btn.dataset.copyFlashTimer || 0);
+      if (prev) window.clearTimeout(prev);
+      btn.dataset.copyFlashTimer = String(window.setTimeout(() => {
+        btn.classList.remove("is-copied");
+        btn.textContent = "Copiar";
+        btn.setAttribute("data-copy-hint", "Copiar");
+        delete btn.dataset.copyFlashTimer;
+      }, 1400));
+    }
+  } catch {
+    setStatus(text, false);
+  }
 }
 
 function syncClaveVisibility() {
@@ -828,6 +897,7 @@ function normalizeBlanqueoItem(raw) {
     modulosDetalle: src.modulosDetalle ?? src.ModulosDetalle ?? null,
     listo: !!(src.listo ?? src.Listo),
     aclaracion: src.aclaracion ?? src.Aclaracion ?? null,
+    confirmadoPorNombre: src.confirmadoPorNombre ?? src.ConfirmadoPorNombre ?? null,
   };
 }
 
@@ -929,7 +999,7 @@ function renderTable(filtered) {
   if (!filtered.length) {
     const row = document.createElement("tr");
     row.className = "plan-gestor-empty-row";
-    row.innerHTML = `<td colspan="9">No hay solicitudes con ese filtro.</td>`;
+    row.innerHTML = `<td colspan="10">No hay solicitudes con ese filtro.</td>`;
     tbody.appendChild(row);
     return;
   }
@@ -975,8 +1045,16 @@ function buildRow(item) {
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
     <td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
+    <td class="blanqueo-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
     <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>
   `;
+
+  row.querySelector(".blanqueo-hab-pill")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    showModPop(btn, btn.getAttribute("data-blanqueo-mod-detail") || "");
+  });
 
   row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
     e.preventDefault();

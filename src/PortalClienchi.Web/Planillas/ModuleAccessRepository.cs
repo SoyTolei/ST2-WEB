@@ -39,11 +39,17 @@ public sealed class ModuleAccessRepository
         if (normalized is null)
             return new ModuleAccessFlagsDto();
 
-        if (St2SuperAdmin.Is(normalized))
-            return St2SuperAdmin.FullFlags();
-
         using var conn = Open();
-        return ReadFlags(conn, normalized);
+        var dbFlags = ReadFlags(conn, normalized);
+        if (!St2SuperAdmin.Is(normalized))
+            return dbFlags;
+
+        // Super admin: todo excepto Blanqueo (sale de la DB / panel Accesos).
+        var flags = St2SuperAdmin.FullFlags();
+        flags.Blanqueo = dbFlags.Blanqueo;
+        flags.BlanqueoConfirm = dbFlags.BlanqueoConfirm;
+        flags.BlanqueoLoad = dbFlags.BlanqueoLoad;
+        return flags;
     }
 
     public IReadOnlyDictionary<string, ModuleAccessFlagsDto> GetFlagsForEmails(IEnumerable<string> emails)
@@ -61,7 +67,19 @@ public sealed class ModuleAccessRepository
 
         using var conn = Open();
         foreach (var email in list)
-            map[email] = St2SuperAdmin.Is(email) ? St2SuperAdmin.FullFlags() : ReadFlags(conn, email);
+            if (St2SuperAdmin.Is(email))
+            {
+                var dbFlags = ReadFlags(conn, email);
+                var flags = St2SuperAdmin.FullFlags();
+                flags.Blanqueo = dbFlags.Blanqueo;
+                flags.BlanqueoConfirm = dbFlags.BlanqueoConfirm;
+                flags.BlanqueoLoad = dbFlags.BlanqueoLoad;
+                map[email] = flags;
+            }
+            else
+            {
+                map[email] = ReadFlags(conn, email);
+            }
         return map;
     }
 
@@ -269,6 +287,34 @@ public sealed class ModuleAccessRepository
 
         EnsureBlanqueoLoadDefaults();
         EnsureBorradoBasesDefaults();
+        EnsureRevokePrimaryBlanqueo();
+    }
+
+    /// <summary>Leonel sin Blanqueo hasta que el proceso real lo habilite en Accesos.</summary>
+    private void EnsureRevokePrimaryBlanqueo()
+    {
+        lock (_gate)
+        {
+            using var conn = Open();
+            using (var check = conn.CreateCommand())
+            {
+                check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'revoked_primary_blanqueo_v1'";
+                var existing = check.ExecuteScalar() as string;
+                if (string.Equals(existing, "1", StringComparison.Ordinal))
+                    return;
+            }
+
+            WriteModule(conn, St2SuperAdmin.PrimaryEmail, PlanModuleIds.Blanqueo, false, false);
+            WriteModule(conn, St2SuperAdmin.PrimaryEmail, PlanModuleIds.BlanqueoLoad, false, false);
+
+            using var mark = conn.CreateCommand();
+            mark.CommandText = """
+                INSERT INTO module_access_meta (key, value) VALUES ('revoked_primary_blanqueo_v1', '1')
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                """;
+            mark.ExecuteNonQuery();
+            _logger.LogInformation("Blanqueo deshabilitado para {Email} (proceso pendiente)", St2SuperAdmin.PrimaryEmail);
+        }
     }
 
     /// <summary>

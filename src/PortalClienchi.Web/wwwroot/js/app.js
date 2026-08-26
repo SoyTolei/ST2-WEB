@@ -112,6 +112,7 @@ const accessModulesOverlay = document.getElementById("st2-access-modules-overlay
 const accessModulesTitle = document.getElementById("st2-access-modules-title");
 const accessModulesEmail = document.getElementById("st2-access-modules-email");
 const accessModulesName = document.getElementById("st2-access-modules-name");
+const accessModulesBirthday = document.getElementById("st2-access-modules-birthday");
 const accessModulesError = document.getElementById("st2-access-modules-error");
 const accessModulesClose = document.getElementById("st2-access-modules-close");
 const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
@@ -1159,10 +1160,14 @@ function normalizeAccessAdminItems(items) {
     const isRejected = !!(item.isRejected ?? item.IsRejected) || status === "rejected";
     const isNewToday = !!(item.isNewToday ?? item.IsNewToday);
     const displayNameOverride = (item.displayName ?? item.DisplayName ?? "").trim() || null;
+    const birthdayDisplay = (item.birthdayDisplay ?? item.BirthdayDisplay ?? "").trim() || null;
+    const birthdayMmDd = (item.birthdayMmDd ?? item.BirthdayMmDd ?? "").trim() || null;
     const modules = item.modules || item.Modules || {};
     return {
       email,
       displayNameOverride,
+      birthdayDisplay,
+      birthdayMmDd,
       firstSeenAt: item.firstSeenAt || item.FirstSeenAt || "",
       lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
       lastLoginAt: item.lastLoginAt || item.LastLoginAt || "",
@@ -1991,6 +1996,17 @@ function markToolsSeen() {
   syncAboutToolsBadge();
 }
 
+function markToolSeen(toolId) {
+  const id = String(toolId || "").trim();
+  if (!id) return;
+  const next = { ...readSeenToolVersions() };
+  const tool = (cachedTools || []).find((t) => t.id === id);
+  const stamp = toolIdentity(tool) || metaToolStamp(id);
+  if (stamp) next[id] = stamp;
+  writeSeenToolVersions(next);
+  syncAboutToolsBadge();
+}
+
 function renderAboutTools() {
   const copy = {
     sql: {
@@ -2088,7 +2104,7 @@ async function downloadTool(toolId) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  markToolsSeen();
+  markToolSeen(toolId);
   setAboutToolsStatus("Descarga iniciada");
 }
 
@@ -2754,6 +2770,9 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   if (accessModulesSave) accessModulesSave.textContent = afterApprove ? "Listo" : "Guardar";
   if (accessModulesCancel) accessModulesCancel.textContent = afterApprove ? "Después" : "Cancelar";
   if (accessModulesName) accessModulesName.value = displayName;
+  if (accessModulesBirthday) {
+    accessModulesBirthday.value = current?.birthdayDisplay || "";
+  }
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
   if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
@@ -2841,6 +2860,7 @@ async function saveAccessModules() {
     const nameValue = String(accessModulesName?.value || "").trim();
     const autoName = parseAccessNameFromEmail(accessModulesEmailValue).display;
     const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;
+    const birthdayRaw = String(accessModulesBirthday?.value || "").trim();
     const nameRes = await fetch("/api/access/registrations", {
       method: "PATCH",
       credentials: "include",
@@ -2848,6 +2868,8 @@ async function saveAccessModules() {
       body: JSON.stringify({
         email: accessModulesEmailValue,
         displayName: nameOverride,
+        birthdayMmDd: birthdayRaw || null,
+        clearBirthday: !birthdayRaw,
       }),
     });
     const nameData = await nameRes.json().catch(() => ({}));
@@ -2878,6 +2900,8 @@ async function saveAccessModules() {
         ? {
             ...item,
             displayNameOverride: nameOverride,
+            birthdayDisplay: nameData.birthdayDisplay || null,
+            birthdayMmDd: nameData.birthdayMmDd || null,
             isSt2Admin: !!(data.isSt2Admin ?? accessModSt2Admin?.checked),
             modules: {
               oportunidad: !!mods.oportunidad,

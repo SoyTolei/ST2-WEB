@@ -556,6 +556,7 @@
                         <th class="blanqueo-th-solicitante">Solicitado por</th>
                         <th class="blanqueo-th-tipo">Solicitud</th>
                         <th class="blanqueo-th-listo" title="Confirmado, pendiente u observación">Estado</th>
+                        <th class="blanqueo-th-confirmado">Confirmado por</th>
                         <th class="blanqueo-th-aclaracion">Aclaración</th>
                       </tr>
                     </thead>
@@ -588,6 +589,15 @@
                 <hr/>
                 <button type="button" data-blanqueo-ctx="editar">Editar</button>
                 <button type="button" data-blanqueo-ctx="eliminar">Eliminar</button>
+              </div>
+
+              <div id="blanqueo-mod-pop" class="borrado-base-pop blanqueo-mod-pop hidden" role="dialog" aria-labelledby="blanqueo-mod-pop-title" aria-hidden="true">
+                <div class="borrado-base-pop-head">
+                  <strong id="blanqueo-mod-pop-title" class="borrado-base-pop-title">Módulos a habilitar</strong>
+                  <button type="button" id="blanqueo-mod-pop-close" class="borrado-base-pop-close" aria-label="Cerrar">×</button>
+                </div>
+                <p id="blanqueo-mod-pop-text" class="borrado-base-pop-text"></p>
+                <button type="button" id="blanqueo-mod-pop-copy" class="borrado-base-pop-copy" data-copy-hint="Copiar">Copiar</button>
               </div>
 
               <p id="blanqueo-status" class="plan-status-bar hidden" role="status"></p>
@@ -690,6 +700,7 @@
                         <th class="borrado-th-bases">Bases</th>
                         <th class="borrado-th-solicitante">Solicitado por</th>
                         <th class="borrado-th-listo" title="Doble clic confirma / quita listo (si tenés permiso). Eliminada, Pendiente u observación en Aclaración">Estado</th>
+                        <th class="borrado-th-confirmado">Confirmado por</th>
                         <th class="borrado-th-aclaracion">Aclaración</th>
                       </tr>
                     </thead>
@@ -2029,6 +2040,9 @@
         <input id="st2-access-modules-name" class="st2-access-modules-name-input" type="text" maxlength="80" autocomplete="name" aria-label="Nombre para mostrar"/>
         <span id="st2-access-modules-email" class="st2-access-modules-email"></span>
       </div>
+      <label class="st2-access-admin-label" for="st2-access-modules-birthday">Cumpleaños</label>
+      <input id="st2-access-modules-birthday" type="text" class="st2-access-admin-input" inputmode="numeric" placeholder="DD/MM" maxlength="5" autocomplete="off" spellcheck="false" title="Día y mes, ej. 25/08"/>
+      <p class="st2-access-name-edit-hint">Opcional. Sirve para saludos y huevos de cumpleaños (calendario Argentina).</p>
       <label class="st2-access-modules-check st2-access-modules-check-main">
         <input id="st2-mod-oportunidad" type="checkbox"/>
         <span>💼 Oportunidad de Venta</span>

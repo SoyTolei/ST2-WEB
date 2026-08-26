@@ -12,13 +12,17 @@ public static class St2SuperAdmin
             && string.Equals(normalized, PrimaryEmail, StringComparison.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Acceso total salvo Blanqueo: ese módulo sigue el panel Accesos
+    /// (Leonel aún no tiene permisos reales de proceso).
+    /// </summary>
     public static ModuleAccessFlagsDto FullFlags() => new()
     {
         Oportunidad = true,
         PdfPortal = true,
-        Blanqueo = true,
-        BlanqueoConfirm = true,
-        BlanqueoLoad = true,
+        Blanqueo = false,
+        BlanqueoConfirm = false,
+        BlanqueoLoad = false,
         BorradoBases = true,
         BorradoBasesConfirm = true,
         BorradoBasesLoad = true,

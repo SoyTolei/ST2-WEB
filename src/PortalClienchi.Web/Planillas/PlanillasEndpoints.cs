@@ -452,7 +452,14 @@ public static class PlanillasEndpoints
 
             accessRepo.RecordAccess(email);
             blanqueoRepo.AssociatePendingRequester(email);
-            return Results.Ok(new { email, status = "ok" });
+            var rec = accessRepo.Find(email);
+            return Results.Ok(new
+            {
+                email,
+                status = "ok",
+                birthdayMmDd = rec?.BirthdayMmDd,
+                birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec?.BirthdayMmDd),
+            });
         });
 
         app.MapPost("/api/planillas/session/heartbeat", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
@@ -623,6 +630,8 @@ public static class PlanillasEndpoints
                         item.LoginCount,
                         item.DisplayName,
                         item.LastLoginAt,
+                        birthdayMmDd = item.BirthdayMmDd,
+                        birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(item.BirthdayMmDd),
                         status,
                         isActive = status == AppAccessRepository.StatusApproved
                             && AppAccessRepository.IsRecentlyActive(item.LastSeenAt, activeWindow),
@@ -801,17 +810,28 @@ public static class PlanillasEndpoints
             if (updated <= 0)
                 return Results.NotFound(new { error = "No se encontró ese acceso." });
 
+            if (body.BirthdayMmDd is not null || body.ClearBirthday)
+            {
+                var bday = body.ClearBirthday ? null : body.BirthdayMmDd;
+                if (!body.ClearBirthday && bday is not null && AppAccessRepository.NormalizeBirthday(bday) is null && !string.IsNullOrWhiteSpace(bday))
+                    return Results.BadRequest(new { error = "Cumpleaños inválido. Usá DD/MM (ej. 25/08)." });
+                accessRepo.UpdateBirthday(body.Email, body.ClearBirthday ? null : bday);
+            }
+
             var email = body.Email.Trim().ToLowerInvariant();
             var displayName = string.IsNullOrWhiteSpace(body.DisplayName) ? null : body.DisplayName.Trim();
             blanqueoRepo.AssociatePendingRequester(email, displayName);
             blanqueoRepo.SyncRequesterDisplayName(email, displayName);
             borradoBasesRepo.SyncRequesterDisplayName(email, displayName);
 
+            var rec = accessRepo.Find(email);
             return Results.Ok(new
             {
                 ok = true,
                 email,
                 displayName,
+                birthdayMmDd = rec?.BirthdayMmDd,
+                birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec?.BirthdayMmDd),
             });
         });
 
@@ -905,7 +925,13 @@ public static class PlanillasEndpoints
             PlanUserIdentity.SetCookie(ctx, email);
             accessRepo.RecordAccess(email);
             blanqueoRepo.AssociatePendingRequester(email);
-            return Results.Ok(new { email, status = "ok" });
+            return Results.Ok(new
+            {
+                email,
+                status = "ok",
+                birthdayMmDd = accessRepo.Find(email)?.BirthdayMmDd,
+                birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(accessRepo.Find(email)?.BirthdayMmDd),
+            });
         }
 
         var rec = accessRepo.Find(email);
@@ -926,7 +952,13 @@ public static class PlanillasEndpoints
         PlanUserIdentity.SetCookie(ctx, email);
         accessRepo.RecordAccess(email);
         blanqueoRepo.AssociatePendingRequester(email);
-        return Results.Ok(new { email, status = "ok" });
+        return Results.Ok(new
+        {
+            email,
+            status = "ok",
+            birthdayMmDd = rec.BirthdayMmDd,
+            birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec.BirthdayMmDd),
+        });
     }
 
     internal static string PublicBaseUrl(HttpRequest request)

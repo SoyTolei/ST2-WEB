@@ -1470,3 +1470,32 @@ html.st2-theme-dark .borrado-list-footer,
 html.st2-theme-dark .blanqueo-list-footer {
   border-top-color: #334155 !important;
 }
+
+html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-listo td,
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-listo td,
+html.st2-theme-dark .plan-gestor-table tbody tr.borrado-row-listo td,
+html.st2-theme-dark .borrado-table tbody tr.borrado-row-listo td {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #bbf7d0 !important;
+}
+
+html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-noreg:not(.blanqueo-row-listo) td,
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:not(.blanqueo-row-listo) td,
+html.st2-theme-dark .plan-gestor-table tbody tr.borrado-row-partial td,
+html.st2-theme-dark .borrado-table tbody tr.borrado-row-partial td {
+  background: rgba(239, 68, 68, 0.16) !important;
+  color: #fecaca !important;
+}
+
+html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-noreg) td,
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-noreg) td,
+html.st2-theme-dark .plan-gestor-table tbody tr.borrado-row-aclaracion:not(.borrado-row-listo):not(.borrado-row-partial) td,
+html.st2-theme-dark .borrado-table tbody tr.borrado-row-aclaracion:not(.borrado-row-listo):not(.borrado-row-partial) td {
+  background: rgba(245, 158, 11, 0.14) !important;
+  color: #fde68a !important;
+}
+
+html.st2-theme-dark .blanqueo-col-confirmado,
+html.st2-theme-dark .borrado-col-confirmado {
+  color: #94a3b8 !important;
+}

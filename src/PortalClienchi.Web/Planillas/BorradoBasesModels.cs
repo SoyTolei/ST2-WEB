@@ -22,6 +22,8 @@ public sealed class BorradoBasesRecordDto
     public string SolicitadoPorNombre { get; set; } = "";
     public bool Listo { get; set; }
     public string? Aclaracion { get; set; }
+    /// <summary>Nombre de quien marcó listo.</summary>
+    public string? ConfirmadoPorNombre { get; set; }
     /// <summary>UTC ISO de alta (para ordenar: lo más nuevo al final).</summary>
     public string FechaCreacion { get; set; } = "";
 }

@@ -546,6 +546,7 @@ function normalizeItem(raw) {
     solicitadoPorNombre: src.solicitadoPorNombre ?? src.SolicitadoPorNombre ?? "",
     listo: !!(src.listo ?? src.Listo),
     aclaracion: src.aclaracion ?? src.Aclaracion ?? null,
+    confirmadoPorNombre: src.confirmadoPorNombre ?? src.ConfirmadoPorNombre ?? null,
   };
 }
 
@@ -818,7 +819,7 @@ function renderTable(filtered) {
   if (!filtered.length) {
     const row = document.createElement("tr");
     row.className = "plan-gestor-empty-row";
-    row.innerHTML = `<td colspan="9">No hay solicitudes con ese filtro.</td>`;
+    row.innerHTML = `<td colspan="10">No hay solicitudes con ese filtro.</td>`;
     tbody.appendChild(row);
     return;
   }
@@ -843,6 +844,9 @@ function buildRow(item) {
   if (selectedId === item.id) row.classList.add("selected");
   if (item.listo) row.classList.add("borrado-row-listo");
   if (item.aclaracion) row.classList.add("borrado-row-aclaracion");
+  if (item.aclaracion && /✗/.test(String(item.aclaracion)) && item.listo) {
+    row.classList.add("borrado-row-partial");
+  }
 
   const nro = String(item.nroEmpresa || "").trim();
   const nombre = String(item.nombreEmpresa || "").trim();
@@ -871,6 +875,7 @@ function buildRow(item) {
     <td class="borrado-col-bases">${formatBasesPills(item)}</td>
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="borrado-col-listo">${formatEstadoCell(item)}</td>
+    <td class="borrado-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
     <td class="borrado-col-aclaracion">${formatAclaracionCell(aclaracion)}</td>
   `;
 

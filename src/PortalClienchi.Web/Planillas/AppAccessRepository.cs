@@ -94,6 +94,64 @@ public sealed class AppAccessRepository
         return cmd.ExecuteNonQuery();
     }
 
+    /// <summary>Cumpleaños como MM-DD (ej. 08-25). Null limpia.</summary>
+    public int UpdateBirthday(string email, string? birthdayMmDd)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return 0;
+
+        var value = NormalizeBirthday(birthdayMmDd);
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE app_access
+            SET birthday_mmdd = $bday
+            WHERE lower(email) = lower($email)
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        cmd.Parameters.AddWithValue("$bday", (object?)value ?? DBNull.Value);
+        return cmd.ExecuteNonQuery();
+    }
+
+    public static string? NormalizeBirthday(string? raw)
+    {
+        var v = (raw ?? "").Trim();
+        if (v.Length == 0) return null;
+        // DD/MM o MM-DD
+        var dmy = System.Text.RegularExpressions.Regex.Match(v, @"^(\d{1,2})[/\-.](\d{1,2})$");
+        if (!dmy.Success) return null;
+        if (!int.TryParse(dmy.Groups[1].Value, out var a) || !int.TryParse(dmy.Groups[2].Value, out var b))
+            return null;
+        int day;
+        int month;
+        // Si el primero > 12, es día; si el segundo > 12, es mes/día invertido raro → inválido
+        if (a > 12)
+        {
+            day = a;
+            month = b;
+        }
+        else if (b > 12)
+        {
+            month = a;
+            day = b;
+        }
+        else
+        {
+            // Preferimos DD/MM (AR)
+            day = a;
+            month = b;
+        }
+        if (month is < 1 or > 12 || day is < 1 or > 31) return null;
+        return $"{month:00}-{day:00}";
+    }
+
+    public static string? FormatBirthdayDisplay(string? mmDd)
+    {
+        var m = System.Text.RegularExpressions.Regex.Match(mmDd ?? "", @"^(\d{2})-(\d{2})$");
+        if (!m.Success) return null;
+        return $"{m.Groups[2].Value}/{m.Groups[1].Value}";
+    }
+
     public const string StatusPending = "pending";
     public const string StatusApproved = "approved";
     public const string StatusRejected = "rejected";
@@ -117,7 +175,7 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd
             FROM app_access
             WHERE lower(email) = lower($email)
             LIMIT 1
@@ -423,7 +481,7 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd
             FROM app_access
             ORDER BY last_seen_at DESC
             """;
@@ -453,7 +511,7 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd
             FROM app_access
             ORDER BY email COLLATE NOCASE
             """;
@@ -485,6 +543,7 @@ public sealed class AppAccessRepository
         EnsureColumn(conn, "app_access", "last_login_at", "TEXT NULL");
         EnsureColumn(conn, "app_access", "status", "TEXT NOT NULL DEFAULT 'approved'");
         EnsureColumn(conn, "app_access", "is_st2_admin", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(conn, "app_access", "birthday_mmdd", "TEXT NULL");
         using (var backfill = conn.CreateCommand())
         {
             backfill.CommandText = """
@@ -551,6 +610,7 @@ public sealed class AppAccessRepository
             DisplayName = reader.IsDBNull(4) ? null : reader.GetString(4),
             LastLoginAt = reader.FieldCount > 5 && !reader.IsDBNull(5) ? reader.GetString(5) : null,
             Status = status.Trim().ToLowerInvariant(),
+            BirthdayMmDd = reader.FieldCount > 7 && !reader.IsDBNull(7) ? reader.GetString(7) : null,
         };
     }
 
@@ -619,6 +679,8 @@ public sealed class AppAccessRecordDto
     public string? DisplayName { get; init; }
     public string? LastLoginAt { get; init; }
     public string Status { get; init; } = AppAccessRepository.StatusApproved;
+    /// <summary>MM-DD opcional (calendario Argentina para cumpleaños).</summary>
+    public string? BirthdayMmDd { get; init; }
 }
 
 public sealed class AccessSummaryDto
@@ -644,4 +706,7 @@ public sealed class AccessDisplayNameRequest
 {
     public string Email { get; set; } = "";
     public string? DisplayName { get; set; }
+    /// <summary>DD/MM o MM-DD. Enviar vacío + ClearBirthday para borrar.</summary>
+    public string? BirthdayMmDd { get; set; }
+    public bool ClearBirthday { get; set; }
 }
