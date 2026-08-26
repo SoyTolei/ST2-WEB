@@ -1070,6 +1070,17 @@
   white-space: nowrap;
 }
 
+.blanqueo-table .blanqueo-col-estado-span {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.blanqueo-table .blanqueo-col-estado-span .blanqueo-pill.bad {
+  display: inline-flex;
+  min-width: 8.5rem;
+  justify-content: center;
+}
+
 .blanqueo-table .blanqueo-th-confirmado,
 .blanqueo-table .blanqueo-col-confirmado {
   width: 7.5rem;

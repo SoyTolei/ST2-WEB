@@ -1039,6 +1039,13 @@ function buildRow(item) {
       </td>`
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
 
+  const estadoAclaracionCells = noReg
+    ? `<td class="blanqueo-col-listo blanqueo-col-estado-span" colspan="2" title="No registrado">
+        <span class="blanqueo-pill bad">No registrado</span>
+      </td>`
+    : `<td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
+    <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>`;
+
   row.innerHTML = `
     <td class="blanqueo-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">${escapeHtml(portalShort(item.portal))}</td>
@@ -1047,8 +1054,7 @@ function buildRow(item) {
     ${mailCell}
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
-    <td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
-    <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>
+    ${estadoAclaracionCells}
     <td class="blanqueo-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
   `;
 
@@ -1188,6 +1194,8 @@ function formatAclaracionCell(item) {
       return formatClaveCopyPill(claveExtra, "Clic para copiar la clave de la aclaración", { custom: true });
     }
     const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
+    // "No registrado" se unifica en Estado+Aclaración (colspan); acá no se repite.
+    if (cls === "bad") return "—";
     return `<span class="blanqueo-pill ${cls}" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
   }
   if (item?.listo && isBlanqueoConClave(item)) {
