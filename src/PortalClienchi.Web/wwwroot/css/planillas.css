@@ -2274,7 +2274,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   color: #6b7280;
   margin-top: 1px;
 }
-/* Sí/No: estado claro sin pelear con el color del card */
+/* SÃ­/No: estado claro sin pelear con el color del card */
 .plan-onvio-card .card-mark,
 .plan-onvio-state {
   flex-shrink: 0;
@@ -3632,7 +3632,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-sql-copy:hover { background: #eff6ff; }
 .plan-sql-copy:disabled { opacity: 0.6; cursor: default; }
 
-/* LEGAL Referral hub — estética portal ST2 */
+/* LEGAL Referral hub â estÃ©tica portal ST2 */
 .plan-legal-hub-root {
   display: flex;
   flex-direction: column;
@@ -3819,7 +3819,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   color: var(--primary);
 }
 
-/* LEGAL — plantillas y formulario (estilo ST2 referral) */
+/* LEGAL â plantillas y formulario (estilo ST2 referral) */
 .plan-legal-form-panel .plan-ref-title { margin-top: 0; }
 .plan-legal-form-panel .plan-form-grid { margin-bottom: 0; }
 .plan-legal-form-actions {
@@ -3949,27 +3949,32 @@ body.st2-balloons-sides .st2-x-balloon-body {
   .plan-op-metodo-well { gap: 8px 16px; }
 }
 
-/* Contador de agua (easter Jorge) � solo men� principal */
+/* Contador de agua (easter Jorge)  solo menú principal */
+.planillas-hero:has(#st2-agua-bottle:not(.hidden)) {
+  padding-left: 88px;
+}
+
 .st2-agua-bottle {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
   z-index: 6;
-  width: 76px;
-  height: 76px;
-  padding: 4px;
+  width: 72px;
+  height: 72px;
+  padding: 0;
   border: 0;
-  border-radius: 16px;
-  background: #0b1220;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.28);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease;
 }
 
 .st2-agua-bottle:hover,
 .st2-agua-bottle:focus-visible {
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.35);
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: none;
   outline: none;
 }
 
@@ -3983,10 +3988,11 @@ body.st2-balloons-sides .st2-x-balloon-body {
   object-fit: contain;
   image-rendering: pixelated;
   pointer-events: none;
+  background: transparent;
 }
 
 .st2-agua-bottle.is-full {
-  box-shadow: 0 0 0 2px #38bdf8, 0 6px 16px rgba(14, 165, 233, 0.35);
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.75));
 }
 
 .blanqueo-ready-toast.is-agua {
@@ -4026,12 +4032,12 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .st2-agua-stage {
   position: relative;
-  width: min(220px, 56vw);
-  height: min(220px, 56vw);
-  border-radius: 28px;
-  background: #0b1220;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-  overflow: hidden;
+  width: min(240px, 62vw);
+  height: min(240px, 62vw);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .st2-agua-stage-img {

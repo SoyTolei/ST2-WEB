@@ -8,12 +8,12 @@ import { setToastText } from "./st2-toast-greet.js";
 
 const TARGET_EMAIL = "jorgeeduardo.teti@thomsonreuters.com";
 const LEVELS = [
-  "/img/agua/botella-0.png?v=1",
-  "/img/agua/botella-1.png?v=1",
-  "/img/agua/botella-2.png?v=1",
+  "/img/agua/botella-0.png?v=2",
+  "/img/agua/botella-1.png?v=2",
+  "/img/agua/botella-2.png?v=2",
 ];
 /** GIF de llenado: dejar el archivo en wwwroot/img/agua/llenar.gif */
-const FILL_GIF = "/img/agua/llenar.gif?v=1";
+const FILL_GIF = "/img/agua/llenar.gif?v=2";
 const MAX_LEVEL = LEVELS.length - 1;
 /** Duración aproximada del gif en pantalla antes de mostrar el nivel final. */
 const FILL_GIF_MS = 1800;
