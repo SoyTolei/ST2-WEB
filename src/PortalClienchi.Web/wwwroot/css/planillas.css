@@ -3987,7 +3987,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 /* Contador de agua (easter Jorge) — solo menú principal */
 .planillas-hero:has(#st2-agua-widget:not(.hidden)) {
-  padding-left: 172px;
+  padding-left: 118px;
 }
 
 .st2-agua-widget {
@@ -3996,7 +3996,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   left: 10px;
   transform: translateY(-50%);
   z-index: 6;
-  width: 158px;
+  width: 78px;
   height: 148px;
 }
 
@@ -4007,8 +4007,8 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .st2-agua-bottle {
   position: absolute;
   top: 0;
-  left: 10px;
-  width: 148px;
+  left: 13px;
+  width: 65px;
   height: 148px;
   padding: 0;
   border: 0;
@@ -4026,9 +4026,11 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .st2-agua-bottle img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: left center;
   image-rendering: pixelated;
   pointer-events: none;
   background: transparent;
