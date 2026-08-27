@@ -34,6 +34,13 @@ export const PLANILLAS_EASTER_EGGS = [
     behindTitle: true,
   },
   {
+    email: "aylen.cristaldo@thomsonreuters.com",
+    src: "/img/aylenglobo-corner.gif?v=1",
+    motion: "still",
+    size: "lg",
+    behindTitle: true,
+  },
+  {
     ...PLANILLAS_BIRTHDAY_RECIPE,
     email: "gisela.crosenzi@thomsonreuters.com",
     src: "/img/cumpleaños-easteregg.gif?v=1",
