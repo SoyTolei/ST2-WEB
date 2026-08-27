@@ -291,15 +291,15 @@ function canOpenRoute(route) {
 
 function titleForView(name) {
   switch (name) {
-    case "transferencia": return "ST2 · Transferencia";
-    case "referral": return "ST2 · Referral I+D";
+    case "transferencia": return "ST² · Transferencia";
+    case "referral": return "ST² · Referral I+D";
     case "oportunidadMenu":
     case "oportunidadCargar":
-    case "oportunidadGestor": return "ST2 · Oportunidad";
-    case "pdfPortal": return "ST2 · Generador PDF";
-    case "blanqueo": return "ST2 · Blanqueo";
-    case "borradoBases": return "ST2 · Borrado de Bases Web";
-    default: return "ST2";
+    case "oportunidadGestor": return "ST² · Oportunidad";
+    case "pdfPortal": return "ST² · Generador PDF";
+    case "blanqueo": return "ST² · Blanqueo";
+    case "borradoBases": return "ST² · Borrado de Bases Web";
+    default: return "ST² · Suite Web";
   }
 }
 

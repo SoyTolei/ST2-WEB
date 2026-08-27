@@ -735,12 +735,21 @@ body.st2-balloons-sides .st2-x-balloon-body {
   margin: 0;
 }
 
+.planillas-hero-copy {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  text-align: center;
+}
+
 .planillas-hero-head {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 14px;
   flex-wrap: wrap;
+  text-align: left;
 }
 
 .planillas-hero-st2-mark {
@@ -774,9 +783,9 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .planillas-hero-title-lines {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 2px;
-  text-align: center;
+  text-align: left;
 }
 
 .planillas-hero-title-main {
@@ -797,11 +806,12 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .planillas-hero-tagline {
-  margin: 8px 0 0;
+  margin: 14px 0 0;
   color: var(--text-muted);
   font-size: 0.9rem;
   line-height: 1.45;
-  max-width: 28rem;
+  max-width: 32rem;
+  text-align: center;
 }
 
 @keyframes planillas-hero-st2-float {

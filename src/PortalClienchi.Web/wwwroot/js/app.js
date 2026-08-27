@@ -2526,7 +2526,7 @@ function showAbout({ history = "push" } = {}) {
   });
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
-  document.title = "ST2 · Acerca de";
+  document.title = "ST² · Acerca de";
   if (history !== "none") {
     const current = normalizeShellPath(window.location.pathname);
     if (!isHerramientasPath(current)) pathBeforeAbout = current || "/";
@@ -3779,11 +3779,12 @@ function pathForTab(tabId) {
 }
 
 function titleForTab(tabId) {
-  if (tabId === ADMIN_TAB_ID) return "ST2 · ADMIN";
-  if (tabId === "thom") return "ST2 · THOM";
-  if (tabId === "ai") return "ST2 · AI Platform";
-  if (tabId === "portal") return "ST2 · Portal Cliente";
-  return "ST2";
+  if (tabId === ADMIN_TAB_ID) return "ST² · ADMIN";
+  if (tabId === "thom") return "ST² · THOM";
+  if (tabId === "ai") return "ST² · AI Platform";
+  if (tabId === "portal") return "ST² · Portal Cliente";
+  if (tabId === "planillas") return "ST² · Suite Web";
+  return "ST² · Suite Web";
 }
 
 let shellRouteSyncing = false;
