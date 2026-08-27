@@ -330,8 +330,9 @@ body.portal-tab-active.st2-has-update .st2-modules-banner {
 }
 
 @keyframes st2-tools-dot-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.22); }
-  50% { box-shadow: 0 0 0 7px rgba(79, 70, 229, 0.08); }
+  0%, 44% { opacity: 1; }
+  50%, 94% { opacity: 0.18; }
+  100% { opacity: 1; }
 }
 
 .st2-tools-banner {
@@ -354,13 +355,20 @@ body.portal-tab-active.st2-has-update .st2-modules-banner {
 }
 
 .st2-tools-banner-dot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #c7d2fe;
-  box-shadow: 0 0 0 4px rgba(199, 210, 254, 0.28);
-  animation: st2-tools-dot-pulse 1.8s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(199, 210, 254, 0.28);
+  animation: st2-tools-dot-pulse 1.35s step-end infinite;
   flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-tools-banner-dot {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 body.st2-has-update .st2-tools-banner {
