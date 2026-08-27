@@ -41,7 +41,7 @@ export const PLANILLAS_EASTER_EGGS = [
   },
   {
     email: "yohanaelizabeth.orellana@thomsonreuters.com",
-    src: "/img/yohannaboca-corner.gif?v=1",
+    src: "/img/yohannaboca-corner.gif?v=2",
     motion: "still",
     side: "left",
   },
