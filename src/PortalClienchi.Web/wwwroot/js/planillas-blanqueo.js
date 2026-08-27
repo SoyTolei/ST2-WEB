@@ -1040,8 +1040,8 @@ function buildRow(item) {
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
 
   const estadoAclaracionCells = noReg
-    ? `<td class="blanqueo-col-listo blanqueo-col-estado-span" colspan="2" title="No registrado">
-        <span class="blanqueo-pill bad">No registrado</span>
+    ? `<td class="blanqueo-col-estado-span" colspan="2" title="No registrado">
+        <span class="blanqueo-pill bad blanqueo-pill-noreg">No registrado</span>
       </td>`
     : `<td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
     <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>`;
