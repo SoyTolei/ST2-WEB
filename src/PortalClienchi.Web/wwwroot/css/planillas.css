@@ -3987,17 +3987,18 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 /* Contador de agua (easter Jorge) — solo menú principal */
 .planillas-hero:has(#st2-agua-widget:not(.hidden)) {
-  padding-left: 118px;
+  padding-left: 104px;
 }
 
 .st2-agua-widget {
   position: absolute;
   top: 50%;
-  left: 10px;
+  left: 12px;
   transform: translateY(-50%);
   z-index: 6;
-  width: 78px;
-  height: 148px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
 }
 
 .st2-agua-widget.hidden {
@@ -4005,11 +4006,8 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .st2-agua-bottle {
-  position: absolute;
-  top: 0;
-  left: 13px;
-  width: 65px;
-  height: 148px;
+  width: auto;
+  height: 132px;
   padding: 0;
   border: 0;
   border-radius: 0;
@@ -4018,6 +4016,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   cursor: default;
   pointer-events: none;
   transition: filter 0.18s ease;
+  flex-shrink: 0;
 }
 
 .st2-agua-bottle.is-viewas-test {
@@ -4027,10 +4026,9 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .st2-agua-bottle img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: left center;
+  width: auto;
+  height: 132px;
+  max-width: none;
   image-rendering: pixelated;
   pointer-events: none;
   background: transparent;
@@ -4045,16 +4043,16 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .st2-agua-meter {
-  position: absolute;
-  left: 0;
-  bottom: 14px;
-  width: 9px;
-  height: 82px;
+  position: relative;
+  width: 8px;
+  height: 90px;
+  margin-bottom: 6px;
   border-radius: 999px;
   background: rgba(148, 163, 184, 0.28);
   border: 1px solid rgba(14, 165, 233, 0.35);
   overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
 }
 
 .st2-agua-meter-fill {
