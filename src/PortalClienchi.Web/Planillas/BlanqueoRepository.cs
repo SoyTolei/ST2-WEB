@@ -579,6 +579,7 @@ public sealed class BlanqueoRepository
         EnsureModulosColumn(conn);
         EnsureConfirmadoColumn(conn);
         BackfillConfirmadoHistoricoAlexis(conn);
+        BackfillNoRegistradoAlexis(conn);
         EnsureAlertsTable(conn);
     }
 
@@ -642,6 +643,54 @@ public sealed class BlanqueoRepository
         using var mark = conn.CreateCommand();
         mark.CommandText = """
             INSERT INTO blanqueo_meta (key, value) VALUES ('backfill_confirmado_alexis_v1', '1')
+            """;
+        mark.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Una sola vez: “No registrado” históricos sin gestor → Alexis Ruiz.
+    /// </summary>
+    private void BackfillNoRegistradoAlexis(SqliteConnection conn)
+    {
+        using (var meta = conn.CreateCommand())
+        {
+            meta.CommandText = """
+                CREATE TABLE IF NOT EXISTS blanqueo_meta (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+                """;
+            meta.ExecuteNonQuery();
+        }
+
+        using (var check = conn.CreateCommand())
+        {
+            check.CommandText = "SELECT value FROM blanqueo_meta WHERE key = 'backfill_noreg_alexis_v1'";
+            if (check.ExecuteScalar() is not null)
+                return;
+        }
+
+        const string alexis = "Alexis Ruiz";
+        using (var upd = conn.CreateCommand())
+        {
+            upd.CommandText = """
+                UPDATE blanqueo_solicitudes
+                SET confirmado_por_nombre = $nombre
+                WHERE listo = 0
+                  AND lower(trim(coalesce(aclaracion, ''))) = 'no registrado'
+                  AND (confirmado_por_nombre IS NULL OR trim(confirmado_por_nombre) = '')
+                """;
+            upd.Parameters.AddWithValue("$nombre", alexis);
+            var n = upd.ExecuteNonQuery();
+            _logger.LogInformation(
+                "Backfill Gestionado por → {Nombre} en {Count} blanqueos no registrados históricos",
+                alexis,
+                n);
+        }
+
+        using var mark = conn.CreateCommand();
+        mark.CommandText = """
+            INSERT INTO blanqueo_meta (key, value) VALUES ('backfill_noreg_alexis_v1', '1')
             """;
         mark.ExecuteNonQuery();
     }
