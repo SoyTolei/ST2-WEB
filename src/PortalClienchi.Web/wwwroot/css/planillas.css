@@ -3998,8 +3998,8 @@ body.st2-balloons-sides .st2-x-balloon-body {
   z-index: 6;
   display: flex;
   flex-direction: row;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-end;
+  gap: 2px;
 }
 
 .st2-agua-widget.hidden {
@@ -4046,6 +4046,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   position: relative;
   width: 9px;
   height: 72px;
+  margin-bottom: 8px;
   border-radius: 999px;
   background: rgba(148, 163, 184, 0.28);
   border: 1px solid rgba(14, 165, 233, 0.35);
@@ -4086,6 +4087,16 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .blanqueo-ready-toast.is-agua {
   border-color: #7dd3fc;
   background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-main {
+  flex: 0 1 auto;
+}
+
+.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-actions {
+  flex-shrink: 0;
 }
 
 .blanqueo-ready-toast.is-agua .blanqueo-ready-toast-dot {
