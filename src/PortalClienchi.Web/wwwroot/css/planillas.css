@@ -488,6 +488,14 @@
   animation: planillas-hero-easter-walk 36.24s cubic-bezier(0.5, 0, 0.18, 1) infinite;
 }
 
+.planillas-hero-easter.is-behind-title.is-xl {
+  top: -2px;
+  left: -220px;
+  width: 280px;
+  transform: none;
+  animation: planillas-hero-easter-walk-xl 36.24s cubic-bezier(0.5, 0, 0.18, 1) infinite;
+}
+
 @keyframes planillas-hero-easter-walk {
   0% { left: -180px; }
   12% { left: 3%; }
@@ -504,10 +512,33 @@
   100% { left: calc(100% + 12px); }
 }
 
+@keyframes planillas-hero-easter-walk-xl {
+  0% { left: -220px; }
+  12% { left: 2%; }
+  16.66% { left: 2%; }
+  28.66% { left: 18%; }
+  33.33% { left: 18%; }
+  45.33% { left: 36%; }
+  50% { left: 36%; }
+  62% { left: 54%; }
+  66.66% { left: 54%; }
+  78.66% { left: 72%; }
+  83.33% { left: 72%; }
+  95.33% { left: calc(100% + 16px); }
+  100% { left: calc(100% + 16px); }
+}
+
 .planillas-corner-easter.is-lg {
   top: -2px;
   right: 6px;
   width: 86px;
+  image-rendering: auto;
+}
+
+.planillas-corner-easter.is-xl {
+  top: -10px;
+  right: 4px;
+  width: 148px;
   image-rendering: auto;
 }
 
@@ -518,6 +549,11 @@
 
 .plan-module-sticky-head:has(.planillas-corner-easter.is-lg:not(.is-hidden)) {
   padding-right: calc(var(--plan-card-pad-x) + 82px);
+}
+
+.plan-module-sticky-head:has(.planillas-corner-easter.is-xl:not(.is-hidden)) {
+  padding-right: calc(var(--plan-card-pad-x) + 148px);
+  min-height: 72px;
 }
 
 .planillas-corner-easter {

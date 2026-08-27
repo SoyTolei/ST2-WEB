@@ -1456,7 +1456,8 @@ function syncPlanillasHeroEaster() {
     else el.removeAttribute("src");
     el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-still", egg?.motion === "still");
-    el.classList.toggle("is-lg", egg?.size === "lg" && !heroBanner);
+    el.classList.toggle("is-lg", (egg?.size === "lg" || egg?.size === "xl") && !heroBanner);
+    el.classList.toggle("is-xl", egg?.size === "xl" && !heroBanner);
     el.classList.toggle("is-hero-banner", isHero && heroBanner);
     el.classList.toggle("is-behind-title", isHero && behindTitle);
     el.classList.toggle("is-smooth", !!(show && egg?.heroBanner));

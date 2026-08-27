@@ -28,9 +28,9 @@ export const PLANILLAS_EASTER_EGGS = [
   },
   {
     email: "gisela.crosenzi@thomsonreuters.com",
-    src: "/img/gisella-corner.gif?v=2",
+    src: "/img/gisella-corner.gif?v=3",
     motion: "still",
-    size: "lg",
+    size: "xl",
     behindTitle: true,
   },
   {
@@ -38,7 +38,6 @@ export const PLANILLAS_EASTER_EGGS = [
     email: "gisela.crosenzi@thomsonreuters.com",
     src: "/img/cumpleaños-easteregg.gif?v=1",
     birthdayMonth: 8,
-    birthdayFromDay: 24,
     birthdayDay: 25,
   },
 ];
