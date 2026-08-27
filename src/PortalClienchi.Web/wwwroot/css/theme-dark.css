@@ -228,6 +228,16 @@ html.st2-theme-dark .plan-legal-beta-banner {
 
 /* ── Planillas: cascarón, campos y recuadros ── */
 html.st2-theme-dark .planillas-hero,
+html.st2-theme-dark .planillas-hero-title-main,
+html.st2-theme-dark .planillas-hero-st2-mark {
+  color: #e8eef7;
+}
+
+html.st2-theme-dark .planillas-hero-title-sub {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .planillas-hero,
 html.st2-theme-dark .plan-sistema-well,
 html.st2-theme-dark .plan-modulos-well,
 html.st2-theme-dark .plan-capturas-card,
