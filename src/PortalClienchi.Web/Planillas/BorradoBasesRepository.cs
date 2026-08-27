@@ -140,16 +140,19 @@ public sealed class BorradoBasesRepository
 
         var wasListo = current.Listo;
         var prevAclaracion = current.Aclaracion;
-        string? confirmadoPor = current.ConfirmadoPorNombre;
-        if (listo && !wasListo)
-        {
-            confirmadoPor = string.IsNullOrWhiteSpace(confirmedByNombre)
-                ? (string.IsNullOrWhiteSpace(confirmedByEmail) ? null : BorradoBasesEndpoints.DisplayNameFromEmail(confirmedByEmail))
-                : confirmedByNombre.Trim();
-        }
-        else if (!listo)
+        var resolved = listo || !string.IsNullOrWhiteSpace(aclaracion);
+        string? confirmadoPor;
+        if (!resolved)
         {
             confirmadoPor = null;
+        }
+        else
+        {
+            confirmadoPor = string.IsNullOrWhiteSpace(confirmedByNombre)
+                ? (string.IsNullOrWhiteSpace(confirmedByEmail)
+                    ? current.ConfirmadoPorNombre
+                    : BorradoBasesEndpoints.DisplayNameFromEmail(confirmedByEmail))
+                : confirmedByNombre.Trim();
         }
 
         using var conn = Open();
@@ -446,7 +449,55 @@ public sealed class BorradoBasesRepository
         EnsureColumn(conn, "cuit", "TEXT NOT NULL DEFAULT ''");
         EnsureColumn(conn, "confirmado_por_nombre", "TEXT NULL");
         MigrateCuilToCuit(conn);
+        BackfillGestionadoHistoricoAlexis(conn);
         EnsureAlertsTable(conn);
+    }
+
+    /// <summary>
+    /// Una sola vez: gestionados históricos (listo u observación) sin nombre → Alexis Ruiz.
+    /// </summary>
+    private void BackfillGestionadoHistoricoAlexis(SqliteConnection conn)
+    {
+        using (var meta = conn.CreateCommand())
+        {
+            meta.CommandText = """
+                CREATE TABLE IF NOT EXISTS borrado_meta (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+                """;
+            meta.ExecuteNonQuery();
+        }
+
+        using (var check = conn.CreateCommand())
+        {
+            check.CommandText = "SELECT value FROM borrado_meta WHERE key = 'backfill_gestionado_alexis_v1'";
+            if (check.ExecuteScalar() is not null)
+                return;
+        }
+
+        const string alexis = "Alexis Ruiz";
+        using (var upd = conn.CreateCommand())
+        {
+            upd.CommandText = """
+                UPDATE borrado_bases_solicitudes
+                SET confirmado_por_nombre = $nombre
+                WHERE (confirmado_por_nombre IS NULL OR trim(confirmado_por_nombre) = '')
+                  AND (listo = 1 OR (aclaracion IS NOT NULL AND trim(aclaracion) != ''))
+                """;
+            upd.Parameters.AddWithValue("$nombre", alexis);
+            var n = upd.ExecuteNonQuery();
+            _logger.LogInformation(
+                "Backfill Gestionado por → {Nombre} en {Count} borrados históricos",
+                alexis,
+                n);
+        }
+
+        using var mark = conn.CreateCommand();
+        mark.CommandText = """
+            INSERT INTO borrado_meta (key, value) VALUES ('backfill_gestionado_alexis_v1', '1')
+            """;
+        mark.ExecuteNonQuery();
     }
 
     private static void EnsureAlertsTable(SqliteConnection conn)

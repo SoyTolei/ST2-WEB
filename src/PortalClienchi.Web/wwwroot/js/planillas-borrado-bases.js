@@ -879,7 +879,7 @@ function buildRow(item) {
     <td class="borrado-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="borrado-col-listo">${formatEstadoCell(item)}</td>
     <td class="borrado-col-aclaracion">${formatAclaracionCell(aclaracion)}</td>
-    <td class="borrado-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
+    <td class="borrado-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${formatGestionadoPorCell(item)}</td>
   `;
 
   row.querySelector("[data-borrado-copy-cliente]")?.addEventListener("click", (e) => {
@@ -1100,6 +1100,13 @@ function isPartialListo(item) {
   if (!item?.listo) return false;
   const { resultado } = parseAclaracion(item.aclaracion);
   return /✗/.test(String(resultado || ""));
+}
+
+function formatGestionadoPorCell(item) {
+  const nombre = String(item.confirmadoPorNombre || "").trim();
+  const gestionado = !!item?.listo || !!String(item?.aclaracion || "").trim();
+  if (!gestionado) return "—";
+  return escapeHtml(nombre || "—");
 }
 
 function formatEstadoCell(item) {
