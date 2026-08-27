@@ -528,21 +528,6 @@
   100% { left: calc(100% + 16px); }
 }
 
-.planillas-corner-easter.is-side-left {
-  left: 12px;
-  right: auto;
-  top: 50%;
-  width: 44px;
-  max-height: 44px;
-  object-fit: contain;
-  margin-top: -22px;
-  image-rendering: auto;
-}
-
-.plan-module-sticky-head:has(.planillas-corner-easter.is-side-left:not(.is-hidden)) {
-  padding-left: calc(var(--plan-card-pad-x) + 52px);
-}
-
 .planillas-hero.is-easter-side-left {
   padding-left: 72px;
 }
@@ -550,9 +535,9 @@
 .planillas-hero-easter.is-side-left {
   left: 12px;
   top: 50%;
-  width: 48px;
-  max-height: 48px;
-  margin-top: -24px;
+  width: 64px;
+  max-height: 64px;
+  margin-top: -32px;
   object-fit: contain;
   image-rendering: auto;
 }
