@@ -20,7 +20,7 @@ const FILL_GIF = "/img/agua/llenar.gif?v=2";
 const MAX_LEVEL = 3;
 /** Duración aproximada del gif en pantalla antes de mostrar el nivel final. */
 const FILL_GIF_MS = 1800;
-/** Cada ~2.5 h (entre 2 y 3). */
+/** Cada 2 h 30 min después de responder en la notificación. */
 const PROMPT_MS = (2.5 * 60 * 60 * 1000);
 const STORAGE_LIVE = "st2-agua-egg-live-v2";
 const STORAGE_VIEWAS = "st2-agua-egg-viewas-v2";
@@ -175,6 +175,7 @@ function syncBottleUi() {
     ? "Meta de agua del día cumplida"
     : `Agua de hoy · ${state.level}/${MAX_LEVEL}`);
   btn.classList.toggle("is-full", state.level >= MAX_LEVEL);
+  btn.classList.toggle("is-viewas-test", isViewAsTarget());
 }
 
 function isOnPlanillasMenu() {
@@ -215,13 +216,19 @@ function schedulePrompt() {
 
   const state = readState();
   const elapsed = Date.now() - (state.lastPromptAt || 0);
-  const jitter = (Math.random() * 60 - 30) * 60 * 1000; // ±30 min
-  const wait = Math.max(15_000, PROMPT_MS + jitter - elapsed);
+  const wait = Math.max(15_000, PROMPT_MS - elapsed);
 
   promptTimer = window.setTimeout(() => {
     showToast();
     schedulePrompt();
   }, wait);
+}
+
+function markPromptAnswered() {
+  const state = readState();
+  state.lastPromptAt = Date.now();
+  writeState(state);
+  schedulePrompt();
 }
 
 function wait(ms) {
@@ -295,15 +302,7 @@ function bindOnce() {
   started = true;
 
   document.getElementById("agua-ready-toast-open")?.addEventListener("click", () => {
-    void drinkOnce();
-  });
-  document.getElementById("agua-ready-toast-dismiss")?.addEventListener("click", () => {
-    hideToast();
-    const state = readState();
-    state.lastPromptAt = Date.now();
-    writeState(state);
-  });
-  bottleBtn()?.addEventListener("click", () => {
+    markPromptAnswered();
     void drinkOnce();
   });
   bottleBtn()?.addEventListener("dblclick", (e) => {
