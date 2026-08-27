@@ -29,7 +29,7 @@ export const PLANILLAS_EASTER_EGGS = [
   {
     ...PLANILLAS_BIRTHDAY_RECIPE,
     email: "gisela.crosenzi@thomsonreuters.com",
-    src: "/img/gisela-corner.gif?v=4",
+    src: "/img/cumpleaños-easteregg.gif?v=1",
     birthdayMonth: 8,
     birthdayFromDay: 24,
     birthdayDay: 25,
