@@ -1168,6 +1168,8 @@ function isBlanqueoConClave(item) {
   return /blanqueo/i.test(String(item?.tipoSolicitud || ""));
 }
 
+const BLANQUEO_CLAVE_PREVIA = "Sueldo.20261";
+
 /** Pastilla con la clave: punteada, “Copiar” al hover, clic copia. */
 function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custom = false } = {}) {
   const value = String(clave || "").trim();
@@ -1180,18 +1182,27 @@ function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custo
   </button>`;
 }
 
-/** Extrae la clave de aclaraciones tipo "Clave: Sueldo.20261". */
-function parseClaveFromAclaracion(aclaracion) {
-  const m = String(aclaracion || "").trim().match(/^clave\s*:\s*(.+)$/i);
-  return m ? m[1].trim() : "";
+function aclaracionTieneClavePrevia(aclaracion) {
+  return String(aclaracion || "").toLowerCase().includes(BLANQUEO_CLAVE_PREVIA.toLowerCase());
+}
+
+function tooltipClavePrevia(aclaracion) {
+  const real = String(aclaracion || "").trim();
+  if (!real || real.toLowerCase() === BLANQUEO_CLAVE_PREVIA.toLowerCase()) {
+    return "Ya fue blanqueada anteriormente con esta clave. Clic para copiar.";
+  }
+  return `Ya fue blanqueada anteriormente con esta clave.\n\nAclaración: ${real}\n\nClic para copiar.`;
 }
 
 function formatAclaracionCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (aclaracion) {
-    const claveExtra = parseClaveFromAclaracion(aclaracion);
-    if (claveExtra) {
-      return formatClaveCopyPill(claveExtra, "Clic para copiar la clave de la aclaración", { custom: true });
+    if (aclaracionTieneClavePrevia(aclaracion)) {
+      return formatClaveCopyPill(
+        BLANQUEO_CLAVE_PREVIA,
+        tooltipClavePrevia(aclaracion),
+        { custom: true },
+      );
     }
     const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
     // "No registrado" se unifica en Estado+Aclaración (colspan); acá no se repite.
