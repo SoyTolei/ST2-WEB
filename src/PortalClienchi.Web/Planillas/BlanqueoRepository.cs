@@ -330,16 +330,19 @@ public sealed class BlanqueoRepository
 
         var wasListo = current.Listo;
         var prevAclaracion = current.Aclaracion;
-        string? confirmadoPor = current.ConfirmadoPorNombre;
-        if (listo && !wasListo)
-        {
-            confirmadoPor = string.IsNullOrWhiteSpace(confirmedByNombre)
-                ? (string.IsNullOrWhiteSpace(confirmedByEmail) ? null : BlanqueoEndpoints.DisplayNameFromEmail(confirmedByEmail))
-                : confirmedByNombre.Trim();
-        }
-        else if (!listo)
+        var resolved = listo || !string.IsNullOrWhiteSpace(aclaracion);
+        string? confirmadoPor;
+        if (!resolved)
         {
             confirmadoPor = null;
+        }
+        else
+        {
+            confirmadoPor = string.IsNullOrWhiteSpace(confirmedByNombre)
+                ? (string.IsNullOrWhiteSpace(confirmedByEmail)
+                    ? current.ConfirmadoPorNombre
+                    : BlanqueoEndpoints.DisplayNameFromEmail(confirmedByEmail))
+                : confirmedByNombre.Trim();
         }
 
         using var conn = Open();

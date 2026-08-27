@@ -1039,11 +1039,7 @@ function buildRow(item) {
       </td>`
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
 
-  const estadoAclaracionCells = noReg
-    ? `<td class="blanqueo-col-estado-span" colspan="2" title="No registrado">
-        <span class="blanqueo-pill bad blanqueo-pill-noreg">No registrado</span>
-      </td>`
-    : `<td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
+  const estadoAclaracionCells = `<td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
     <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>`;
 
   row.innerHTML = `
@@ -1055,7 +1051,7 @@ function buildRow(item) {
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
     ${estadoAclaracionCells}
-    <td class="blanqueo-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${escapeHtml(item.listo ? (item.confirmadoPorNombre || "—") : "—")}</td>
+    <td class="blanqueo-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${formatGestionadoPorCell(item)}</td>
   `;
 
   row.querySelector(".blanqueo-hab-pill")?.addEventListener("click", (e) => {
@@ -1205,7 +1201,7 @@ function formatAclaracionCell(item) {
       );
     }
     const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
-    // "No registrado" se unifica en Estado+Aclaración (colspan); acá no se repite.
+    // "No registrado" va en Estado; acá queda vacío.
     if (cls === "bad") return "—";
     return `<span class="blanqueo-pill ${cls}" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
   }
@@ -1213,6 +1209,13 @@ function formatAclaracionCell(item) {
     return formatClaveCopyPill(claveDefault(), "Clic para copiar la clave genérica") || "—";
   }
   return "—";
+}
+
+function formatGestionadoPorCell(item) {
+  const nombre = String(item.confirmadoPorNombre || "").trim();
+  const gestionado = !!item?.listo || !!String(item?.aclaracion || "").trim();
+  if (!gestionado) return "—";
+  return escapeHtml(nombre || "—");
 }
 
 function formatEstadoCell(item) {
