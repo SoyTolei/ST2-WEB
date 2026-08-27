@@ -19,7 +19,7 @@ import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
 } from "./access-alerts.js";
-import { PLANILLAS_EASTER_EGGS, isEggBirthdayWindow } from "./planillas-easter-eggs.js";
+import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js";
 import { syncAguaEgg } from "./planillas-agua-egg.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
@@ -1433,7 +1433,7 @@ function syncEasterBalloons(egg) {
 
 function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
-  const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === email);
+  const egg = resolvePlanillasEgg(email);
   const show = !!egg && isEggBirthdayWindow(egg);
   const heroBanner = !!(show && egg?.heroBanner);
   const behindTitle = !!(show && egg?.behindTitle && !heroBanner);

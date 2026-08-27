@@ -27,6 +27,13 @@ export const PLANILLAS_EASTER_EGGS = [
     behindTitle: true,
   },
   {
+    email: "gisela.crosenzi@thomsonreuters.com",
+    src: "/img/gisella-corner.gif?v=2",
+    motion: "still",
+    size: "lg",
+    behindTitle: true,
+  },
+  {
     ...PLANILLAS_BIRTHDAY_RECIPE,
     email: "gisela.crosenzi@thomsonreuters.com",
     src: "/img/cumpleaños-easteregg.gif?v=1",
@@ -35,6 +42,18 @@ export const PLANILLAS_EASTER_EGGS = [
     birthdayDay: 25,
   },
 ];
+
+/** Prioriza banner de cumpleaños en su ventana; si no, el huevo “siempre” (paseo, etc.). */
+export function resolvePlanillasEgg(email) {
+  const key = String(email || "").trim().toLowerCase();
+  if (!key) return null;
+  const matches = PLANILLAS_EASTER_EGGS.filter((item) => item.email === key);
+  if (!matches.length) return null;
+  const birthday = matches.find((e) => e.birthdayMonth && e.birthdayDay && isEggBirthdayWindow(e));
+  if (birthday) return birthday;
+  const always = matches.find((e) => !e.birthdayMonth || !e.birthdayDay);
+  return always || null;
+}
 
 const SESSION_BDAY_KEY = "st2-session-birthday-mmdd";
 
@@ -91,8 +110,10 @@ function isMmDdToday(mmDd) {
 export function isBirthdayGreetingForEmail(email) {
   const key = String(email || "").trim().toLowerCase();
   if (!key) return false;
-  const egg = PLANILLAS_EASTER_EGGS.find((item) => item.email === key);
-  if (egg?.birthdayMonth && egg?.birthdayDay && isEggBirthdayWindow(egg)) return true;
+  const birthdayEgg = PLANILLAS_EASTER_EGGS.find(
+    (item) => item.email === key && item.birthdayMonth && item.birthdayDay,
+  );
+  if (birthdayEgg && isEggBirthdayWindow(birthdayEgg)) return true;
   // Cumpleaños cargado en ADMIN (solo aplica al usuario de la sesión actual).
   return isMmDdToday(getSessionBirthdayMmDd());
 }
