@@ -529,17 +529,28 @@
 }
 
 .planillas-hero.is-easter-side-left {
-  padding-left: 72px;
+  padding-left: 96px;
 }
 
 .planillas-hero-easter.is-side-left {
   left: 12px;
   top: 50%;
-  width: 64px;
-  max-height: 64px;
-  margin-top: -32px;
+  width: 88px;
+  max-height: 88px;
+  margin-top: -44px;
   object-fit: contain;
   image-rendering: auto;
+}
+
+.planillas-corner-easter.is-md {
+  top: 0;
+  right: 8px;
+  width: 68px;
+  image-rendering: auto;
+}
+
+.plan-module-sticky-head:has(.planillas-corner-easter.is-md:not(.is-hidden)) {
+  padding-right: calc(var(--plan-card-pad-x) + 64px);
 }
 
 .planillas-corner-easter.is-lg {

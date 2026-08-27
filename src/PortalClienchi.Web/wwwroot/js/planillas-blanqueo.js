@@ -9,6 +9,7 @@ import {
   isViewingAsProfile,
 } from "./module-access.js";
 import { notifyBlanqueoChanged } from "./blanqueo-alerts.js";
+import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
  * Override: localStorage.setItem("st2-blanqueo-force", "1")
@@ -37,6 +38,16 @@ let fechaSortDir = "desc";
 let monthFilterTouched = false;
 let listLoadGen = 0;
 let scrollListToEndOnce = false;
+
+const liveList = createPlanillasLiveList({
+  viewId: "planillas-blanqueo",
+  reload: (opts) => reloadList(opts),
+  isBusy: isBlanqueoUiBusy,
+});
+
+export function stopBlanqueoLiveRefresh() {
+  liveList.stop();
+}
 
 export function canSeeBlanqueoModule(email = getPlanUserEmail()) {
   if (isViewingAsProfile()) return canSeeFromAccess();
@@ -272,6 +283,7 @@ export async function openBlanqueoModule() {
   syncClaveVisibility();
   setStatus("Cargando solicitudes…");
   await reloadList();
+  liveList.start();
 }
 
 function ensureConfirmViewDefault() {
@@ -693,7 +705,7 @@ async function createSolicitud() {
   }
 }
 
-async function reloadList() {
+async function reloadList({ silent = false } = {}) {
   const gen = ++listLoadGen;
   try {
     const res = await planUserFetch("/api/planillas/blanqueo");
@@ -704,17 +716,20 @@ async function reloadList() {
       throw new Error("Demasiadas solicitudes (429). Esperá unos segundos y reabrí Blanqueo.");
     }
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
-    items = (Array.isArray(data.items) ? data.items : []).map(normalizeBlanqueoItem);
+    const nextItems = (Array.isArray(data.items) ? data.items : []).map(normalizeBlanqueoItem);
+    const changed = listFingerprint(nextItems) !== listFingerprint(items);
+    items = nextItems;
     applyEffectiveAccess(data);
     syncMineFilterVisibility();
     syncLoadFormVisibility();
     syncClaveUi(data.claveBlanqueo);
     rebuildMonthOptions();
-    applyFilters();
+    if (!silent || changed) applyFilters();
   } catch (err) {
     if (gen !== listLoadGen) return;
     // No vaciar el listado si falló un refresh en background; solo avisar.
     if (!items.length) applyFilters();
+    if (silent) return;
     const msg = String(err?.message || "");
     setStatus(
       msg.includes("429")
@@ -723,6 +738,19 @@ async function reloadList() {
       true,
     );
   }
+}
+
+function listFingerprint(list) {
+  return list.map((i) => `${i.id}:${i.listo ? 1 : 0}:${i.aclaracion || ""}:${i.confirmadoPorNombre || ""}`).join("|");
+}
+
+function isBlanqueoUiBusy() {
+  if (editingId) return true;
+  for (const id of ["blanqueo-edit-overlay", "blanqueo-note-overlay", "blanqueo-delete-overlay"]) {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains("hidden")) return true;
+  }
+  return false;
 }
 
 function syncClaveUi(clave) {

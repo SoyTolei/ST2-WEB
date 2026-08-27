@@ -9,6 +9,7 @@ import {
   isViewingAsProfile,
 } from "./module-access.js";
 import { notifyBorradoChanged } from "./borrado-alerts.js";
+import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
  * Override: localStorage.setItem("st2-borrado-bases-force", "1")
@@ -29,6 +30,16 @@ let fechaSortDir = "desc";
 let monthFilterTouched = false;
 let listLoadGen = 0;
 let scrollListToEndOnce = false;
+
+const liveList = createPlanillasLiveList({
+  viewId: "planillas-borrado-bases",
+  reload: (opts) => reloadList(opts),
+  isBusy: isBorradoUiBusy,
+});
+
+export function stopBorradoLiveRefresh() {
+  liveList.stop();
+}
 /** @type {number | null} */
 let pendingListoId = null;
 
@@ -237,6 +248,7 @@ export async function openBorradoBasesModule() {
   monthFilterTouched = false;
   setStatus("Cargando solicitudes…");
   await reloadList();
+  liveList.start();
 }
 
 function ensureConfirmViewDefault() {
@@ -456,7 +468,7 @@ async function createSolicitud() {
   }
 }
 
-async function reloadList() {
+async function reloadList({ silent = false } = {}) {
   const gen = ++listLoadGen;
   try {
     const res = await planUserFetch("/api/planillas/borrado-bases");
@@ -464,17 +476,33 @@ async function reloadList() {
     const data = await res.json().catch(() => ({}));
     if (gen !== listLoadGen) return;
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
-    items = (Array.isArray(data.items) ? data.items : []).map(normalizeItem);
+    const nextItems = (Array.isArray(data.items) ? data.items : []).map(normalizeItem);
+    const changed = listFingerprint(nextItems) !== listFingerprint(items);
+    items = nextItems;
     applyEffectiveAccess(data);
     syncMineFilterVisibility();
     syncLoadFormVisibility();
     rebuildMonthOptions();
-    applyFilters();
+    if (!silent || changed) applyFilters();
   } catch (err) {
     if (gen !== listLoadGen) return;
     if (!items.length) applyFilters();
+    if (silent) return;
     setStatus(err?.message || "No se pudo cargar el listado.", true);
   }
+}
+
+function listFingerprint(list) {
+  return list.map((i) => `${i.id}:${i.listo ? 1 : 0}:${i.aclaracion || ""}:${i.confirmadoPorNombre || ""}`).join("|");
+}
+
+function isBorradoUiBusy() {
+  if (editingId) return true;
+  for (const id of ["borrado-edit-overlay", "borrado-note-overlay", "borrado-delete-overlay"]) {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains("hidden")) return true;
+  }
+  return false;
 }
 
 function rebuildMonthOptions() {

@@ -38,14 +38,14 @@ export const PLANILLAS_EASTER_EGGS = [
     src: "/img/aylenglobo-corner.gif?v=3",
     motion: "still",
     side: "left",
-    size: "lg",
+    size: "md",
   },
   {
     email: "yohanaelizabeth.orellana@thomsonreuters.com",
     src: "/img/yohannaboca-corner.gif?v=2",
     motion: "still",
     side: "left",
-    size: "lg",
+    size: "md",
   },
   {
     ...PLANILLAS_BIRTHDAY_RECIPE,

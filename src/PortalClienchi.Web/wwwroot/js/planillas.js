@@ -3,8 +3,8 @@ import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from 
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
-import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule } from "./planillas-blanqueo.js";
-import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule } from "./planillas-borrado-bases.js";
+import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
 import { refreshModuleFlags, canSeeOportunidadModule, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { getPlanUserEmail } from "./plan-user.js";
 import {
@@ -318,6 +318,8 @@ function syncHistory(name, mode = "push") {
 }
 
 function showView(name, { history = "push" } = {}) {
+  if (name !== "blanqueo") stopBlanqueoLiveRefresh();
+  if (name !== "borradoBases") stopBorradoLiveRefresh();
   Object.entries(views).forEach(([key, el]) => {
     if (!el) return;
     el.classList.toggle("hidden", key !== name);
@@ -1459,6 +1461,7 @@ function syncPlanillasHeroEaster() {
     el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-still", egg?.motion === "still");
     el.classList.toggle("is-side-left", isHero && sideLeft);
+    el.classList.toggle("is-md", !isHero && egg?.size === "md" && !heroBanner);
     el.classList.toggle("is-lg", !isHero && (egg?.size === "lg" || egg?.size === "xl") && !heroBanner);
     el.classList.toggle("is-xl", !isHero && egg?.size === "xl" && !heroBanner);
     el.classList.toggle("is-hero-banner", isHero && heroBanner);
