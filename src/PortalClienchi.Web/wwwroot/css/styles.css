@@ -83,7 +83,7 @@ html, body {
 .brand-home-btn {
   border: 1px solid transparent;
   background: transparent;
-  padding: 5px 12px 5px 5px;
+  padding: 5px;
   margin: 0;
   border-radius: 12px;
   cursor: pointer;
@@ -125,37 +125,6 @@ html, body {
   width: 28px;
   height: 28px;
   image-rendering: -webkit-optimize-contrast;
-}
-
-.brand-wordmark {
-  display: inline-flex;
-  align-items: center;
-  padding-left: 12px;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.brand-logo {
-  display: inline-flex;
-  align-items: flex-start;
-  font-size: 28px;
-  font-weight: 650;
-  letter-spacing: 0.06em;
-  line-height: 1;
-}
-
-.brand-st {
-  color: #f3f5f8;
-  font-weight: 600;
-}
-
-.brand-two {
-  color: #ff7a33;
-  font-weight: 800;
-  font-size: 0.58em;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  margin-left: 1px;
-  transform: translateY(-0.18em);
 }
 
 .app-header-right {
@@ -2017,11 +1986,6 @@ body.embed-active .brand-icon,
 body.portal-tab-active .brand-icon {
   width: 24px;
   height: 24px;
-}
-
-body.embed-active .brand-logo,
-body.portal-tab-active .brand-logo {
-  font-size: 24px;
 }
 
 body.embed-active .tab-bar {
