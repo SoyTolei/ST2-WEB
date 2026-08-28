@@ -20,6 +20,10 @@ export const PLANILLAS_EASTER_EGGS = [
     peekSrc: "/img/yohana-titan.webm?v=2",
   },
   {
+    email: "franco.zanna@thomsonreuters.com",
+    peekSrc: "/img/franco-titan.webm?v=1",
+  },
+  {
     email: "belen.foschiatti@thomsonreuters.com",
     src: "/img/belen-corner.gif?v=2",
     motion: "still",

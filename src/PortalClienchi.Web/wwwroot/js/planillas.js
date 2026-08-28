@@ -1436,10 +1436,11 @@ function syncEasterBalloons(egg) {
 function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = resolvePlanillasEgg(email);
-  const show = !!egg && isEggBirthdayWindow(egg);
-  const heroBanner = !!(show && egg?.heroBanner);
-  const behindTitle = !!(show && egg?.behindTitle && !heroBanner);
-  const sideLeft = !!(show && egg?.side === "left");
+  const showEgg = !!egg && isEggBirthdayWindow(egg);
+  const showVisual = showEgg && !!egg?.src;
+  const heroBanner = !!(showEgg && egg?.heroBanner);
+  const behindTitle = !!(showEgg && egg?.behindTitle && !heroBanner);
+  const sideLeft = !!(showEgg && egg?.side === "left");
   document.querySelector(".planillas-hero")?.classList.toggle("is-easter-banner", heroBanner);
   document.querySelector(".planillas-hero")?.classList.toggle("is-easter-behind", behindTitle);
   document.querySelector(".planillas-hero")?.classList.toggle("is-easter-side-left", sideLeft);
@@ -1456,7 +1457,7 @@ function syncPlanillasHeroEaster() {
   });
   document.querySelectorAll(".planillas-hero-easter, .planillas-corner-easter").forEach((el) => {
     const isHero = el.classList.contains("planillas-hero-easter");
-    if (egg) el.src = egg.src;
+    if (showVisual && egg?.src) el.src = egg.src;
     else el.removeAttribute("src");
     el.classList.toggle("is-wag", egg?.motion === "wag");
     el.classList.toggle("is-still", egg?.motion === "still");
@@ -1466,14 +1467,14 @@ function syncPlanillasHeroEaster() {
     el.classList.toggle("is-xl", !isHero && egg?.size === "xl" && !heroBanner);
     el.classList.toggle("is-hero-banner", isHero && heroBanner);
     el.classList.toggle("is-behind-title", isHero && behindTitle);
-    el.classList.toggle("is-smooth", !!(show && egg?.heroBanner));
-    el.classList.toggle("is-hidden", !show);
-    el.setAttribute("aria-hidden", show ? "false" : "true");
+    el.classList.toggle("is-smooth", !!(showEgg && egg?.heroBanner));
+    el.classList.toggle("is-hidden", !showVisual);
+    el.setAttribute("aria-hidden", showVisual ? "false" : "true");
   });
-  syncEasterBalloons(show ? egg : null);
+  syncEasterBalloons(showEgg ? egg : null);
   const hero = document.querySelector("#planillas-menu .planillas-hero");
   const titan = document.getElementById("planillas-hero-titan");
-  const peek = !!(show && egg?.peekSrc);
+  const peek = !!(showEgg && egg?.peekSrc);
   hero?.classList.toggle("has-titan-peek", peek);
   if (titan) {
     const srcEl = document.getElementById("planillas-hero-titan-src");
