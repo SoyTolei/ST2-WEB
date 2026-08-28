@@ -202,11 +202,24 @@ export function initBlanqueoModule() {
     e.preventDefault();
     void copyModPopText();
   });
+  document.getElementById("blanqueo-aclaracion-pop-close")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    hideAclaracionPop();
+  });
+  document.getElementById("blanqueo-aclaracion-pop-copy")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    void copyAclaracionPopText();
+  });
   document.addEventListener("click", (e) => {
     if (e.target?.closest?.("#blanqueo-mod-pop") || e.target?.closest?.(".blanqueo-hab-pill")) return;
+    if (e.target?.closest?.("#blanqueo-aclaracion-pop") || e.target?.closest?.(".blanqueo-clave-previa-pill")) return;
     hideModPop();
+    hideAclaracionPop();
   });
-  document.addEventListener("scroll", () => hideModPop(), true);
+  document.addEventListener("scroll", () => {
+    hideModPop();
+    hideAclaracionPop();
+  }, true);
 
   const ctx = document.getElementById("blanqueo-ctx");
   ctx?.addEventListener("click", (e) => {
@@ -618,6 +631,63 @@ function showModPop(anchor, detail) {
 async function copyModPopText() {
   const text = document.getElementById("blanqueo-mod-pop-text")?.textContent || "";
   const btn = document.getElementById("blanqueo-mod-pop-copy");
+  try {
+    await navigator.clipboard.writeText(text);
+    if (btn) {
+      btn.classList.add("is-copied");
+      btn.textContent = "Copiado";
+      btn.setAttribute("data-copy-hint", "Copiado");
+      const prev = Number(btn.dataset.copyFlashTimer || 0);
+      if (prev) window.clearTimeout(prev);
+      btn.dataset.copyFlashTimer = String(window.setTimeout(() => {
+        btn.classList.remove("is-copied");
+        btn.textContent = "Copiar";
+        btn.setAttribute("data-copy-hint", "Copiar");
+        delete btn.dataset.copyFlashTimer;
+      }, 1400));
+    }
+  } catch {
+    setStatus(text, false);
+  }
+}
+
+function hideAclaracionPop() {
+  const pop = document.getElementById("blanqueo-aclaracion-pop");
+  if (!pop) return;
+  pop.classList.add("hidden");
+  pop.setAttribute("aria-hidden", "true");
+}
+
+function showAclaracionPop(anchor, detail) {
+  const pop = document.getElementById("blanqueo-aclaracion-pop");
+  const text = document.getElementById("blanqueo-aclaracion-pop-text");
+  const copyBtn = document.getElementById("blanqueo-aclaracion-pop-copy");
+  if (!pop || !anchor) return;
+  hideCtx();
+  hideModPop();
+  if (text) text.textContent = detail || "—";
+  if (copyBtn) {
+    copyBtn.classList.remove("is-copied");
+    copyBtn.setAttribute("data-copy-hint", "Copiar");
+    copyBtn.textContent = "Copiar";
+  }
+  pop.classList.remove("hidden");
+  pop.setAttribute("aria-hidden", "false");
+  const rect = anchor.getBoundingClientRect();
+  const pad = 8;
+  const w = pop.offsetWidth || 280;
+  const h = pop.offsetHeight || 140;
+  let left = rect.left;
+  let top = rect.bottom + 6;
+  if (left + w > window.innerWidth - pad) left = window.innerWidth - w - pad;
+  if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
+  pop.style.left = `${Math.max(pad, left)}px`;
+  pop.style.top = `${Math.max(pad, top)}px`;
+}
+
+async function copyAclaracionPopText() {
+  const text = document.getElementById("blanqueo-aclaracion-pop-text")?.textContent || "";
+  const btn = document.getElementById("blanqueo-aclaracion-pop-copy");
   try {
     await navigator.clipboard.writeText(text);
     if (btn) {
@@ -1089,6 +1159,13 @@ function buildRow(item) {
     showModPop(btn, btn.getAttribute("data-blanqueo-mod-detail") || "");
   });
 
+  row.querySelector(".blanqueo-clave-previa-pill")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    showAclaracionPop(btn, btn.getAttribute("data-blanqueo-aclaracion-detail") || "");
+  });
+
   row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1119,14 +1196,14 @@ function buildRow(item) {
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill")) return;
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
     selectedId = item.id;
     applyFilters();
   });
 
   row.addEventListener("dblclick", (e) => {
     e.preventDefault();
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill")) return;
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
     selectedId = item.id;
     applyFilters();
     if (!canConfirm) return;
@@ -1210,23 +1287,25 @@ function aclaracionTieneClavePrevia(aclaracion) {
   return String(aclaracion || "").toLowerCase().includes(BLANQUEO_CLAVE_PREVIA.toLowerCase());
 }
 
-function tooltipClavePrevia(aclaracion) {
+function aclaracionPreviaDetalle(aclaracion) {
   const real = String(aclaracion || "").trim();
   if (!real || real.toLowerCase() === BLANQUEO_CLAVE_PREVIA.toLowerCase()) {
-    return "Ya fue blanqueada anteriormente con esta clave. Clic para copiar.";
+    return "Ya fue blanqueada anteriormente con esta clave.";
   }
-  return `Ya fue blanqueada anteriormente con esta clave.\n\nAclaración: ${real}\n\nClic para copiar.`;
+  return real;
+}
+
+function formatClavePreviaPill(aclaracion) {
+  const detail = aclaracionPreviaDetalle(aclaracion);
+  const tip = "Clic para ver la aclaración";
+  return `<button type="button" class="blanqueo-clave-previa-pill" title="${escapeAttr(tip)}" aria-label="Ver aclaración de ${escapeAttr(BLANQUEO_CLAVE_PREVIA)}" aria-haspopup="dialog" data-blanqueo-aclaracion-detail="${escapeAttr(detail)}"><span class="blanqueo-clave-previa-pill-label">${escapeHtml(BLANQUEO_CLAVE_PREVIA)}</span><span class="blanqueo-clave-previa-pill-action" aria-hidden="true">ver</span></button>`;
 }
 
 function formatAclaracionCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (aclaracion) {
     if (aclaracionTieneClavePrevia(aclaracion)) {
-      return formatClaveCopyPill(
-        BLANQUEO_CLAVE_PREVIA,
-        tooltipClavePrevia(aclaracion),
-        { custom: true },
-      );
+      return formatClavePreviaPill(aclaracion);
     }
     const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
     // "No registrado" va en Estado; acá queda vacío.
