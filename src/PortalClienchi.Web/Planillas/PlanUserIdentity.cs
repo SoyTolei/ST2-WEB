@@ -214,4 +214,14 @@ public sealed class PlanUserSessionRequest
     /// <summary>Solo requerido para el super-admin.</summary>
     [JsonPropertyName("password")]
     public string? Password { get; set; }
+
+    /// <summary>Pista de equipo/navegador enviada por el cliente (el hostname real no está disponible en web).</summary>
+    [JsonPropertyName("clientHint")]
+    public string? ClientHint { get; set; }
+}
+
+public sealed class PlanUserHeartbeatRequest
+{
+    [JsonPropertyName("clientHint")]
+    public string? ClientHint { get; set; }
 }

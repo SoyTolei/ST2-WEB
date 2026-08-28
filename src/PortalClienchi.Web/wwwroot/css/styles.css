@@ -3223,6 +3223,75 @@ body.portal-tab-active .tab-icon {
   text-align: right;
 }
 
+.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(1),
+.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(1) {
+  width: 22%;
+}
+
+.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(2),
+.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(2) {
+  width: 26%;
+}
+
+.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(3),
+.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(3) {
+  width: 11%;
+}
+
+.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(4),
+.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(4) {
+  width: 7%;
+}
+
+.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(5),
+.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(5) {
+  width: 14%;
+  min-width: 0;
+  text-align: left;
+  font-size: 0.72rem;
+  color: #475569;
+  word-break: break-word;
+}
+
+.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(6),
+.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(6) {
+  width: 148px;
+  min-width: 148px;
+  text-align: right;
+}
+
+.st2-access-admin-host {
+  font-size: 0.72rem;
+  color: #475569;
+  word-break: break-word;
+}
+
+.st2-access-admin-preset {
+  flex: 0 0 auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.st2-access-admin-preset:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.st2-access-modules-email-input {
+  margin-top: 6px;
+}
+
+.st2-access-admin-th-host.hidden,
+.st2-access-admin-preset.hidden {
+  display: none;
+}
+
 .st2-access-admin-th-actions {
   text-align: right !important;
 }

@@ -1,5 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
-import { ensureAppAccess, getPlanUserEmail } from "./plan-user.js";
+import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
@@ -112,6 +112,7 @@ let accessNameEditSaving = false;
 const accessModulesOverlay = document.getElementById("st2-access-modules-overlay");
 const accessModulesTitle = document.getElementById("st2-access-modules-title");
 const accessModulesEmail = document.getElementById("st2-access-modules-email");
+const accessModulesEmailInput = document.getElementById("st2-access-modules-email-input");
 const accessModulesName = document.getElementById("st2-access-modules-name");
 const accessModulesBirthday = document.getElementById("st2-access-modules-birthday");
 const accessModulesError = document.getElementById("st2-access-modules-error");
@@ -137,6 +138,7 @@ const viewAsExitBtn = document.getElementById("st2-view-as-exit");
 let accessModulesEmailValue = "";
 let accessModulesSaving = false;
 let accessModulesAfterApprove = false;
+let accessModulesPresetMode = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
 const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
 const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
@@ -144,6 +146,9 @@ const accessAdminKpiActive = document.getElementById("st2-access-admin-kpi-activ
 const accessAdminKpiPending = document.getElementById("st2-access-admin-kpi-pending");
 const accessAdminKpiToday = document.getElementById("st2-access-admin-kpi-today");
 const accessAdminInbox = document.getElementById("st2-access-admin-inbox");
+const accessAdminTable = document.querySelector("#st2-access-admin-table-wrap .st2-access-admin-table");
+const accessAdminThHost = document.getElementById("st2-access-admin-th-host");
+const accessAdminPresetBtn = document.getElementById("st2-access-admin-preset");
 const thomFrame = document.getElementById("thomFrame");
 const thomEmbedLoading = document.getElementById("thomEmbedLoading");
 const thomDirectGate = document.getElementById("thomDirectGate");
@@ -1185,6 +1190,10 @@ function normalizeAccessAdminItems(items) {
       isNewToday,
       isUnseenNew: isNewToday && !hasAdminSeenAccessEmail(email),
       isReturning: !!(item.isReturning ?? item.IsReturning),
+      lastClientLabel: (item.lastClientLabel ?? item.LastClientLabel ?? "").trim() || null,
+      lastClientIp: (item.lastClientIp ?? item.LastClientIp ?? "").trim() || null,
+      lastClientHost: (item.lastClientHost ?? item.LastClientHost ?? "").trim() || null,
+      lastClientHint: (item.lastClientHint ?? item.LastClientHint ?? "").trim() || null,
       modules: {
         oportunidad: !!(modules.oportunidad ?? modules.Oportunidad),
         pdfPortal: !!(modules.pdfPortal ?? modules.PdfPortal),
@@ -1333,6 +1342,13 @@ function setAccessAdminUpdatedHint(text) {
   accessAdminUpdated.classList.remove("hidden");
 }
 
+function syncAccessAdminHostColumn() {
+  const show = isPrimarySuperAdmin();
+  accessAdminPresetBtn?.classList.toggle("hidden", !show);
+  accessAdminThHost?.classList.toggle("hidden", !show);
+  accessAdminTable?.classList.toggle("st2-access-admin-table--with-host", show);
+}
+
 function getFilteredAccessAdminItems() {
   const q = accessAdminQuery.trim().toLowerCase();
   return accessAdminItemsCache.filter((item) => {
@@ -1342,13 +1358,16 @@ function getFilteredAccessAdminItems() {
     if (q) {
       const email = item.email.toLowerCase();
       const name = formatAccessDisplayName(item.email, item.displayNameOverride).toLowerCase();
-      if (!email.includes(q) && !name.includes(q)) return false;
+      const host = String(item.lastClientLabel || item.lastClientHost || item.lastClientHint || item.lastClientIp || "").toLowerCase();
+      if (!email.includes(q) && !name.includes(q) && !host.includes(q)) return false;
     }
     return true;
   });
 }
 
 function renderAccessAdminTable() {
+  syncAccessAdminHostColumn();
+  const showHost = isPrimarySuperAdmin();
   const items = getFilteredAccessAdminItems();
   if (!accessAdminBody) return;
 
@@ -1418,6 +1437,15 @@ function renderAccessAdminTable() {
     const modHtml = modBadges.length
       ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod ${escapeHtml(b.cls || "")}" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
       : `<span class="st2-access-admin-mod-empty" title="Sin módulos extra">—</span>`;
+    const hostLabel = item.lastClientLabel || item.lastClientHost || item.lastClientHint || item.lastClientIp || "—";
+    const hostTitle = [
+      item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
+      item.lastClientHint ? `Cliente: ${item.lastClientHint}` : "",
+      item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
+    ].filter(Boolean).join("\n") || hostLabel;
+    const hostCell = showHost
+      ? `<td class="st2-access-admin-host" title="${escapeHtml(hostTitle)}">${escapeHtml(hostLabel)}</td>`
+      : "";
     const ownerActions = isPrimarySuperAdmin();
     const extraActions = item.isPending
       ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
@@ -1436,6 +1464,7 @@ function renderAccessAdminTable() {
       <td class="st2-access-admin-mods-cell">${modHtml}</td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
+      ${hostCell}
       <td class="st2-access-admin-actions-cell">
         ${extraActions}
       </td>
@@ -1633,6 +1662,7 @@ async function activateAdminTab() {
   }
 
   showAccessAdminPanel();
+  syncAccessAdminHostColumn();
   void loadAccessAdminRegistrations();
   startAccessAdminPolling();
 }
@@ -2630,6 +2660,9 @@ accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
   void loadAccessAdminRegistrations({ silent: true, force: true });
 });
+accessAdminPresetBtn?.addEventListener("click", () => {
+  openAccessPresetModal();
+});
 accessAdminSubmit?.addEventListener("click", () => { void submitAccessAdminLogin(); });
 accessAdminPass?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") void submitAccessAdminLogin();
@@ -2712,6 +2745,10 @@ function closeAccessModulesModal() {
   accessModulesOverlay?.classList.add("hidden");
   accessModulesEmailValue = "";
   accessModulesAfterApprove = false;
+  accessModulesPresetMode = false;
+  accessModulesEmail?.classList.remove("hidden");
+  accessModulesEmailInput?.classList.add("hidden");
+  if (accessModulesEmailInput) accessModulesEmailInput.value = "";
   if (accessModulesError) accessModulesError.textContent = "";
   if (accessModulesTitle) accessModulesTitle.textContent = "Módulos habilitados";
   if (accessModulesSave) accessModulesSave.textContent = "Guardar";
@@ -2769,6 +2806,9 @@ function syncViewAsBanner() {
 
 function openAccessModulesModal(email, { afterApprove = false } = {}) {
   if (!accessModulesOverlay || !email) return;
+  accessModulesPresetMode = false;
+  accessModulesEmail?.classList.remove("hidden");
+  accessModulesEmailInput?.classList.add("hidden");
   const current = accessAdminItemsCache.find((item) => item.email === email);
   const mods = current?.modules || {};
   const isPrimary = String(email).trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
@@ -2824,6 +2864,45 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   accessModulesOverlay.classList.remove("hidden");
 }
 
+function openAccessPresetModal() {
+  if (!accessModulesOverlay || !isPrimarySuperAdmin()) return;
+  accessModulesPresetMode = true;
+  accessModulesAfterApprove = false;
+  accessModulesEmailValue = "";
+  if (accessModulesTitle) accessModulesTitle.textContent = "Cargar perfil";
+  if (accessModulesSave) accessModulesSave.textContent = "Crear perfil";
+  if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
+  if (accessModulesName) accessModulesName.value = "";
+  if (accessModulesBirthday) accessModulesBirthday.value = "";
+  if (accessModulesEmail) {
+    accessModulesEmail.textContent = "";
+    accessModulesEmail.classList.add("hidden");
+  }
+  if (accessModulesEmailInput) {
+    accessModulesEmailInput.value = "";
+    accessModulesEmailInput.classList.remove("hidden");
+  }
+  if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
+  if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
+  if (accessModOportunidad) accessModOportunidad.checked = false;
+  if (accessModPdf) accessModPdf.checked = false;
+  if (accessModPlanillasSqlOnvio) accessModPlanillasSqlOnvio.checked = true;
+  if (accessModPlanillasLegal) accessModPlanillasLegal.checked = true;
+  if (accessModPlanillasChile) accessModPlanillasChile.checked = true;
+  if (accessModBlanqueo) accessModBlanqueo.checked = false;
+  if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = false;
+  if (accessModBlanqueoLoad) accessModBlanqueoLoad.checked = false;
+  if (accessModBorradoBases) accessModBorradoBases.checked = false;
+  if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = false;
+  if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.checked = false;
+  if (accessModSt2Admin) accessModSt2Admin.checked = false;
+  if (accessModSt2Admin) accessModSt2Admin.disabled = false;
+  if (accessModSt2AdminWrap) accessModSt2AdminWrap.classList.remove("hidden");
+  if (accessModulesError) accessModulesError.textContent = "";
+  accessModulesOverlay.classList.remove("hidden");
+  accessModulesEmailInput?.focus();
+}
+
 accessModBlanqueoConfirm?.addEventListener("change", () => {
   if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
     accessModBlanqueo.checked = true;
@@ -2872,15 +2951,62 @@ accessModBorradoBases?.addEventListener("change", () => {
 });
 
 async function saveAccessModules() {
-  if (!accessModulesEmailValue || accessModulesSaving) return;
+  if (accessModulesSaving) return;
+  if (!accessModulesPresetMode && !accessModulesEmailValue) return;
+
   accessModulesSaving = true;
   if (accessModulesSave) accessModulesSave.disabled = true;
   if (accessModulesError) accessModulesError.textContent = "";
+
+  const modulesBody = {
+    oportunidad: !!accessModOportunidad?.checked,
+    pdfPortal: !!accessModPdf?.checked,
+    planillasSqlOnvio: !!accessModPlanillasSqlOnvio?.checked,
+    planillasLegal: !!accessModPlanillasLegal?.checked,
+    planillasChile: !!accessModPlanillasChile?.checked,
+    blanqueo: !!accessModBlanqueo?.checked,
+    blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
+    blanqueoLoad: !!accessModBlanqueoLoad?.checked,
+    borradoBases: !!accessModBorradoBases?.checked,
+    borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
+    borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
+    st2Admin: isPrimarySuperAdmin() ? !!accessModSt2Admin?.checked : undefined,
+  };
+
   try {
     const nameValue = String(accessModulesName?.value || "").trim();
+    const birthdayRaw = String(accessModulesBirthday?.value || "").trim();
+
+    if (accessModulesPresetMode) {
+      const email = String(accessModulesEmailInput?.value || "").trim().toLowerCase();
+      if (!email) throw new Error("Ingresá el correo del perfil.");
+      const autoName = parseAccessNameFromEmail(email).display;
+      const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;
+
+      const response = await fetch("/api/access/registrations/preset", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          displayName: nameOverride,
+          birthdayMmDd: birthdayRaw || null,
+          clearBirthday: !birthdayRaw,
+          ...modulesBody,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
+
+      closeAccessModulesModal();
+      await loadAccessAdminRegistrations({ silent: true, force: true });
+      setAccessAdminUpdatedHint(`Perfil precargado: ${email}`);
+      notifyAccessChanged();
+      return;
+    }
+
     const autoName = parseAccessNameFromEmail(accessModulesEmailValue).display;
     const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;
-    const birthdayRaw = String(accessModulesBirthday?.value || "").trim();
     const nameRes = await fetch("/api/access/registrations", {
       method: "PATCH",
       credentials: "include",
@@ -2901,18 +3027,7 @@ async function saveAccessModules() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: accessModulesEmailValue,
-        oportunidad: !!accessModOportunidad?.checked,
-        pdfPortal: !!accessModPdf?.checked,
-        planillasSqlOnvio: !!accessModPlanillasSqlOnvio?.checked,
-        planillasLegal: !!accessModPlanillasLegal?.checked,
-        planillasChile: !!accessModPlanillasChile?.checked,
-        blanqueo: !!accessModBlanqueo?.checked,
-        blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
-        blanqueoLoad: !!accessModBlanqueoLoad?.checked,
-        borradoBases: !!accessModBorradoBases?.checked,
-        borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
-        borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
-        st2Admin: isPrimarySuperAdmin() ? !!accessModSt2Admin?.checked : undefined,
+        ...modulesBody,
       }),
     });
     const data = await response.json().catch(() => ({}));
@@ -4088,7 +4203,12 @@ startUpdateChecker();
 
 function startSessionHeartbeat() {
   const ping = () => {
-    fetch("/api/planillas/session/heartbeat", { method: "POST", credentials: "include" })
+    fetch("/api/planillas/session/heartbeat", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientHint: buildPlanClientHint() }),
+    })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.webBuild) applyLiveBuild(data.webBuild);

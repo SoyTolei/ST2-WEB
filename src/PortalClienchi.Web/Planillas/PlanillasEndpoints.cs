@@ -463,6 +463,7 @@ public static class PlanillasEndpoints
 
             accessRepo.RecordAccess(email);
             blanqueoRepo.AssociatePendingRequester(email);
+            accessRepo.UpdateClientPresence(email, ctx);
             var rec = accessRepo.Find(email);
             return Results.Ok(new
             {
@@ -474,13 +475,29 @@ public static class PlanillasEndpoints
             });
         });
 
-        app.MapPost("/api/planillas/session/heartbeat", (HttpContext ctx, AppAccessRepository accessRepo, BlanqueoRepository blanqueoRepo) =>
+        app.MapPost("/api/planillas/session/heartbeat", async (
+            HttpContext ctx,
+            AppAccessRepository accessRepo,
+            BlanqueoRepository blanqueoRepo,
+            CancellationToken ct) =>
         {
             var email = PlanUserIdentity.GetFromRequest(ctx);
             if (email is null)
                 return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
+            string? clientHint = null;
+            try
+            {
+                var body = await ctx.Request.ReadFromJsonAsync<PlanUserHeartbeatRequest>(cancellationToken: ct).ConfigureAwait(false);
+                clientHint = body?.ClientHint;
+            }
+            catch
+            {
+                /* cuerpo opcional */
+            }
+
             accessRepo.TouchActivity(email);
+            accessRepo.UpdateClientPresence(email, ctx, clientHint);
             blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { ok = true, webBuild = St2WebBuild.GetBuild() });
         });
@@ -528,7 +545,7 @@ public static class PlanillasEndpoints
                 }
             }
 
-            return OpenUserSession(ctx, email, accessRepo, blanqueoRepo);
+            return OpenUserSession(ctx, email, accessRepo, blanqueoRepo, body.ClientHint);
         });
 
         app.MapDelete("/api/planillas/session", (HttpContext ctx) =>
@@ -630,6 +647,7 @@ public static class PlanillasEndpoints
                     flagsMap = new Dictionary<string, ModuleAccessFlagsDto>(StringComparer.OrdinalIgnoreCase);
                 }
 
+                var showClientMeta = CanUsePrimaryAdminFeatures(ctx, config, accessRepo);
                 var mapped = items.Select(item =>
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);
@@ -657,6 +675,12 @@ public static class PlanillasEndpoints
                         isRejected = status == AppAccessRepository.StatusRejected,
                         loggedInToday = AppAccessRepository.IsLoggedInToday(item.LastLoginAt),
                         isSt2Admin = St2SuperAdmin.Is(item.Email) || accessRepo.IsSt2Admin(item.Email),
+                        lastClientIp = showClientMeta ? item.LastClientIp : null,
+                        lastClientHost = showClientMeta ? item.LastClientHost : null,
+                        lastClientHint = showClientMeta ? item.LastClientHint : null,
+                        lastClientLabel = showClientMeta
+                            ? AppAccessClientInfo.BuildDisplayLabel(item.LastClientHost, item.LastClientHint, item.LastClientIp)
+                            : null,
                         modules = new
                         {
                             oportunidad = flags.Oportunidad,
@@ -812,6 +836,85 @@ public static class PlanillasEndpoints
             }
         });
 
+        app.MapPost("/api/access/registrations/preset", (
+            HttpContext ctx,
+            IConfiguration config,
+            AppAccessRepository accessRepo,
+            ModuleAccessRepository modules,
+            AccessPresetRequest body) =>
+        {
+            if (!CanUsePrimaryAdminFeatures(ctx, config, accessRepo))
+                return Results.Json(new { error = "Solo el super-admin puede precargar perfiles." }, statusCode: StatusCodes.Status403Forbidden);
+
+            try
+            {
+                var email = PlanUserIdentity.ValidateAndNormalize(body.Email)
+                    ?? throw new ArgumentException("Correo inválido.");
+
+                var rec = accessRepo.CreatePresetProfile(
+                    email,
+                    body.DisplayName,
+                    body.BirthdayMmDd,
+                    body.ClearBirthday);
+
+                var flags = modules.Upsert(new ModuleAccessUpdateRequest
+                {
+                    Email = email,
+                    Oportunidad = body.Oportunidad,
+                    PdfPortal = body.PdfPortal,
+                    Blanqueo = body.Blanqueo,
+                    BlanqueoConfirm = body.BlanqueoConfirm,
+                    BlanqueoLoad = body.BlanqueoLoad,
+                    BorradoBases = body.BorradoBases,
+                    BorradoBasesConfirm = body.BorradoBasesConfirm,
+                    BorradoBasesLoad = body.BorradoBasesLoad,
+                    PlanillasSqlOnvio = body.PlanillasSqlOnvio,
+                    PlanillasLegal = body.PlanillasLegal,
+                    PlanillasChile = body.PlanillasChile,
+                });
+
+                var isSt2Admin = St2SuperAdmin.Is(email);
+                if (body.St2Admin is not null && !St2SuperAdmin.Is(email))
+                {
+                    accessRepo.SetSt2Admin(email, body.St2Admin.Value);
+                    isSt2Admin = body.St2Admin.Value;
+                }
+                else
+                {
+                    isSt2Admin = St2SuperAdmin.Is(email) || accessRepo.IsSt2Admin(email);
+                }
+
+                return Results.Ok(new
+                {
+                    ok = true,
+                    email,
+                    displayName = rec.DisplayName,
+                    birthdayMmDd = rec.BirthdayMmDd,
+                    birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec.BirthdayMmDd),
+                    status = rec.Status,
+                    isSt2Admin,
+                    modules = new
+                    {
+                        oportunidad = flags.Oportunidad,
+                        pdfPortal = flags.PdfPortal,
+                        blanqueo = flags.Blanqueo,
+                        blanqueoConfirm = flags.BlanqueoConfirm,
+                        blanqueoLoad = flags.BlanqueoLoad,
+                        borradoBases = flags.BorradoBases,
+                        borradoBasesConfirm = flags.BorradoBasesConfirm,
+                        borradoBasesLoad = flags.BorradoBasesLoad,
+                        planillasSqlOnvio = flags.PlanillasSqlOnvio,
+                        planillasLegal = flags.PlanillasLegal,
+                        planillasChile = flags.PlanillasChile,
+                    },
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+        });
+
         app.MapPatch("/api/access/registrations", async (
             HttpContext ctx,
             IConfiguration config,
@@ -934,11 +1037,21 @@ public static class PlanillasEndpoints
         return accessRepo.IsApprovedForApp(email);
     }
 
+    private static bool CanUsePrimaryAdminFeatures(HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo)
+    {
+        if (St2SuperAdmin.Is(PlanUserIdentity.GetFromRequest(ctx)))
+            return true;
+
+        return AccessPanelGate.Resolve(ctx, config, accessRepo) == AccessPanelGate.Role.Owner
+            && St2AccessAdminAuth.IsAuthenticated(config, ctx);
+    }
+
     private static IResult OpenUserSession(
         HttpContext ctx,
         string email,
         AppAccessRepository accessRepo,
-        BlanqueoRepository blanqueoRepo)
+        BlanqueoRepository blanqueoRepo,
+        string? clientHint = null)
     {
         if (St2SuperAdmin.Is(email))
         {
@@ -946,6 +1059,7 @@ public static class PlanillasEndpoints
             PlanUserIdentity.SetCookie(ctx, email);
             accessRepo.RecordAccess(email);
             blanqueoRepo.AssociatePendingRequester(email);
+            accessRepo.UpdateClientPresence(email, ctx, clientHint);
             var adminRec = accessRepo.Find(email);
             return Results.Ok(new
             {
@@ -975,6 +1089,7 @@ public static class PlanillasEndpoints
         PlanUserIdentity.SetCookie(ctx, email);
         accessRepo.RecordAccess(email);
         blanqueoRepo.AssociatePendingRequester(email);
+        accessRepo.UpdateClientPresence(email, ctx, clientHint);
         return Results.Ok(new
         {
             email,

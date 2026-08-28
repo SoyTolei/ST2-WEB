@@ -175,7 +175,8 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent
             FROM app_access
             WHERE lower(email) = lower($email)
             LIMIT 1
@@ -245,6 +246,64 @@ public sealed class AppAccessRepository
 
         if (!string.Equals(existing.Status, StatusApproved, StringComparison.OrdinalIgnoreCase))
             SetStatus(email, StatusApproved);
+    }
+
+    public void UpdateClientPresence(string email, HttpContext? ctx, string? clientHint = null)
+    {
+        if (!StorageReady || AppAccessExclusions.IsExcluded(email))
+            return;
+
+        var ip = ctx is null ? null : AppAccessClientInfo.GetClientIp(ctx);
+        var userAgent = ctx is null ? null : AppAccessClientInfo.GetUserAgent(ctx);
+        var hint = AppAccessClientInfo.NormalizeClientHint(clientHint);
+        var host = AppAccessClientInfo.TryResolveHost(ip) ?? hint;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE app_access
+            SET last_client_ip = $ip,
+                last_client_host = $host,
+                last_client_hint = $hint,
+                last_user_agent = $ua
+            WHERE lower(email) = lower($email)
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        cmd.Parameters.AddWithValue("$ip", (object?)ip ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$host", (object?)host ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$hint", (object?)hint ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$ua", (object?)userAgent ?? DBNull.Value);
+        cmd.ExecuteNonQuery();
+    }
+
+    public AppAccessRecordDto CreatePresetProfile(
+        string email,
+        string? displayName,
+        string? birthdayMmDd,
+        bool clearBirthday)
+    {
+        if (!StorageReady)
+            throw new InvalidOperationException("El almacenamiento de accesos no está disponible.");
+
+        var normalized = PlanUserIdentity.ValidateAndNormalize(email)
+            ?? throw new ArgumentException("Correo inválido.");
+
+        EnsureApproved(normalized);
+
+        if (!string.IsNullOrWhiteSpace(displayName))
+            UpdateDisplayName(normalized, displayName.Trim());
+
+        if (clearBirthday)
+            UpdateBirthday(normalized, null);
+        else if (!string.IsNullOrWhiteSpace(birthdayMmDd))
+        {
+            var bday = NormalizeBirthday(birthdayMmDd);
+            if (bday is null)
+                throw new ArgumentException("Cumpleaños inválido. Usá DD/MM.");
+            UpdateBirthday(normalized, bday);
+        }
+
+        return Find(normalized) ?? throw new InvalidOperationException("No se pudo crear el perfil precargado.");
     }
 
     public int SetStatus(string email, string status)
@@ -481,7 +540,8 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent
             FROM app_access
             ORDER BY last_seen_at DESC
             """;
@@ -511,7 +571,8 @@ public sealed class AppAccessRepository
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd
+            SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent
             FROM app_access
             ORDER BY email COLLATE NOCASE
             """;
@@ -544,6 +605,10 @@ public sealed class AppAccessRepository
         EnsureColumn(conn, "app_access", "status", "TEXT NOT NULL DEFAULT 'approved'");
         EnsureColumn(conn, "app_access", "is_st2_admin", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(conn, "app_access", "birthday_mmdd", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "last_client_ip", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "last_client_host", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "last_client_hint", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "last_user_agent", "TEXT NULL");
         using (var backfill = conn.CreateCommand())
         {
             backfill.CommandText = """
@@ -611,6 +676,10 @@ public sealed class AppAccessRepository
             LastLoginAt = reader.FieldCount > 5 && !reader.IsDBNull(5) ? reader.GetString(5) : null,
             Status = status.Trim().ToLowerInvariant(),
             BirthdayMmDd = reader.FieldCount > 7 && !reader.IsDBNull(7) ? reader.GetString(7) : null,
+            LastClientIp = reader.FieldCount > 8 && !reader.IsDBNull(8) ? reader.GetString(8) : null,
+            LastClientHost = reader.FieldCount > 9 && !reader.IsDBNull(9) ? reader.GetString(9) : null,
+            LastClientHint = reader.FieldCount > 10 && !reader.IsDBNull(10) ? reader.GetString(10) : null,
+            LastUserAgent = reader.FieldCount > 11 && !reader.IsDBNull(11) ? reader.GetString(11) : null,
         };
     }
 
@@ -681,6 +750,10 @@ public sealed class AppAccessRecordDto
     public string Status { get; init; } = AppAccessRepository.StatusApproved;
     /// <summary>MM-DD opcional (calendario Argentina para cumpleaños).</summary>
     public string? BirthdayMmDd { get; init; }
+    public string? LastClientIp { get; init; }
+    public string? LastClientHost { get; init; }
+    public string? LastClientHint { get; init; }
+    public string? LastUserAgent { get; init; }
 }
 
 public sealed class AccessSummaryDto
@@ -700,6 +773,26 @@ public sealed class AccessDecisionRequest
 
     [System.Text.Json.Serialization.JsonPropertyName("action")]
     public string Action { get; set; } = "";
+}
+
+public sealed class AccessPresetRequest
+{
+    public string Email { get; set; } = "";
+    public string? DisplayName { get; set; }
+    public string? BirthdayMmDd { get; set; }
+    public bool ClearBirthday { get; set; }
+    public bool? Oportunidad { get; set; }
+    public bool? PdfPortal { get; set; }
+    public bool? Blanqueo { get; set; }
+    public bool? BlanqueoConfirm { get; set; }
+    public bool? BlanqueoLoad { get; set; }
+    public bool? BorradoBases { get; set; }
+    public bool? BorradoBasesConfirm { get; set; }
+    public bool? BorradoBasesLoad { get; set; }
+    public bool? PlanillasSqlOnvio { get; set; }
+    public bool? PlanillasLegal { get; set; }
+    public bool? PlanillasChile { get; set; }
+    public bool? St2Admin { get; set; }
 }
 
 public sealed class AccessDisplayNameRequest

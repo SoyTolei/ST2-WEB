@@ -1782,6 +1782,7 @@
               <button type="button" class="st2-access-admin-filter" data-filter="today">Hoy</button>
             </div>
             <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
+            <button type="button" id="st2-access-admin-preset" class="st2-access-admin-preset hidden" title="Precargar perfil aprobado con módulos">Cargar perfil</button>
           </div>
           <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
             <table class="st2-access-admin-table">
@@ -1795,6 +1796,7 @@
                   <th id="st2-access-admin-th-logins" class="st2-access-admin-th-sort" data-sort="loginCount" title="Días distintos en los que abrió ST2 (no cuenta F5 el mismo día). Clic para ordenar." aria-sort="none" tabindex="0" role="columnheader">
                     Ingresos <span class="st2-access-admin-sort-mark" aria-hidden="true"></span>
                   </th>
+                  <th id="st2-access-admin-th-host" class="st2-access-admin-th-host hidden" title="Equipo o terminal (hostname vía DNS reverso cuando es posible)">Equipo</th>
                   <th class="st2-access-admin-th-actions">Acciones</th>
                 </tr>
               </thead>
@@ -2181,6 +2183,7 @@
           <span class="st2-access-modules-profile-label">Perfil</span>
         </div>
         <input id="st2-access-modules-name" class="st2-access-modules-name-input" type="text" maxlength="80" autocomplete="name" aria-label="Nombre para mostrar"/>
+        <input id="st2-access-modules-email-input" type="email" class="st2-access-admin-input st2-access-modules-email-input hidden" autocomplete="off" spellcheck="false" placeholder="correo@thomsonreuters.com" aria-label="Correo del perfil"/>
         <span id="st2-access-modules-email" class="st2-access-modules-email"></span>
       </div>
       <label class="st2-access-admin-label" for="st2-access-modules-birthday">Cumpleaños</label>

@@ -11,6 +11,30 @@ const ALLOWED_DOMAIN = "thomsonreuters.com";
 const SUPER_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 const LOCAL_NAME_PATTERN = /^[a-z]{2,}\.[a-z]{2,}$/;
 
+export function buildPlanClientHint() {
+  const parts = [];
+  try {
+    if (navigator.userAgentData?.platform) parts.push(navigator.userAgentData.platform);
+    else if (navigator.platform) parts.push(navigator.platform);
+  } catch {
+    /* ignore */
+  }
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) parts.push(tz);
+  } catch {
+    /* ignore */
+  }
+  const hint = parts.filter(Boolean).join(" · ");
+  return hint.slice(0, 160);
+}
+
+function buildSessionPayload(email, password = "") {
+  const payload = { email, clientHint: buildPlanClientHint() };
+  if (isSuperAdminEmail(email)) payload.password = password || "";
+  return payload;
+}
+
 function isAllowedEmail(email) {
   const normalized = email.trim().toLowerCase();
   const at = normalized.lastIndexOf("@");
@@ -144,12 +168,10 @@ function waitForAccessGate() {
 }
 
 async function postAccessSession(email, password = "") {
-  const payload = { email };
-  if (isSuperAdminEmail(email)) payload.password = password || "";
   const response = await fetch("/api/planillas/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(buildSessionPayload(email, password)),
     credentials: "include",
   });
   const data = await response.json().catch(() => ({}));
@@ -362,7 +384,7 @@ export async function syncPlanUserSession() {
     const response = await fetch("/api/planillas/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: hint }),
+      body: JSON.stringify(buildSessionPayload(hint)),
       credentials: "include",
     });
     const data = await response.json().catch(() => ({}));
@@ -493,7 +515,7 @@ function showPlanUserModal(resolve) {
 
     let response;
     try {
-      const payload = { email };
+      const payload = buildSessionPayload(email);
       if (isSuperAdminEmail(email)) payload.password = password;
       response = await fetch("/api/planillas/session", {
         method: "POST",
