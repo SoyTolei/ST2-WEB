@@ -84,8 +84,8 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: 54px;
+  height: 54px;
   padding: 0;
   margin: 0;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -119,8 +119,8 @@ html, body {
 }
 
 .brand-icon {
-  width: 38px;
-  height: 38px;
+  width: 46px;
+  height: 46px;
   image-rendering: -webkit-optimize-contrast;
   pointer-events: none;
 }
@@ -1976,15 +1976,15 @@ body.portal-tab-active .app-header {
 
 body.embed-active .brand-home-btn,
 body.portal-tab-active .brand-home-btn {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 12px;
 }
 
 body.embed-active .brand-icon,
 body.portal-tab-active .brand-icon {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
 }
 
 body.embed-active .tab-bar {
