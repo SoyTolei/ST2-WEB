@@ -198,10 +198,6 @@ export function initBlanqueoModule() {
     e.preventDefault();
     hideModPop();
   });
-  document.getElementById("blanqueo-mod-pop-copy")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    void copyModPopText();
-  });
   document.getElementById("blanqueo-aclaracion-pop-close")?.addEventListener("click", (e) => {
     e.preventDefault();
     hideAclaracionPop();
@@ -590,9 +586,9 @@ function formatTipoCell(item) {
   if (!isHabilitacionTipo(tipo)) return escapeHtml(tipo);
   const mods = parseModulos(item.modulosDetalle);
   if (!mods.length) return escapeHtml(tipo);
-  const detail = mods.map((m) => `- ${m}`).join("\n");
   const n = mods.length;
-  return `<span class="blanqueo-hab-wrap"><button type="button" class="blanqueo-hab-pill" aria-label="Módulos: ${escapeAttr(mods.join(", "))}" aria-haspopup="dialog" data-blanqueo-mod-detail="${escapeAttr(detail)}"><span class="blanqueo-hab-pill-label">Hab. módulos</span></button><span class="blanqueo-hab-count" aria-hidden="true">${n}</span></span>`;
+  const modsJson = escapeAttr(JSON.stringify(mods));
+  return `<span class="blanqueo-hab-wrap"><button type="button" class="blanqueo-hab-pill" title="Clic para ver módulos" aria-label="Ver módulos a habilitar" aria-haspopup="dialog" data-blanqueo-mod-list="${modsJson}"><span class="blanqueo-hab-pill-label">Hab. módulos</span><span class="blanqueo-hab-pill-action" aria-hidden="true">ver</span></button><span class="blanqueo-hab-count" aria-hidden="true">${n}</span></span>`;
 }
 
 function hideModPop() {
@@ -602,17 +598,17 @@ function hideModPop() {
   pop.setAttribute("aria-hidden", "true");
 }
 
-function showModPop(anchor, detail) {
+function showModPop(anchor, mods = []) {
   const pop = document.getElementById("blanqueo-mod-pop");
-  const text = document.getElementById("blanqueo-mod-pop-text");
-  const copyBtn = document.getElementById("blanqueo-mod-pop-copy");
+  const list = document.getElementById("blanqueo-mod-pop-list");
   if (!pop || !anchor) return;
   hideCtx();
-  if (text) text.textContent = detail || "—";
-  if (copyBtn) {
-    copyBtn.classList.remove("is-copied");
-    copyBtn.setAttribute("data-copy-hint", "Copiar");
-    copyBtn.textContent = "Copiar";
+  hideAclaracionPop();
+  const items = Array.isArray(mods) ? mods : parseModulos(mods);
+  if (list) {
+    list.innerHTML = items.length
+      ? items.map((m) => `<li>${escapeHtml(m)}</li>`).join("")
+      : "<li>—</li>";
   }
   pop.classList.remove("hidden");
   pop.setAttribute("aria-hidden", "false");
@@ -626,29 +622,6 @@ function showModPop(anchor, detail) {
   if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
   pop.style.left = `${Math.max(pad, left)}px`;
   pop.style.top = `${Math.max(pad, top)}px`;
-}
-
-async function copyModPopText() {
-  const text = document.getElementById("blanqueo-mod-pop-text")?.textContent || "";
-  const btn = document.getElementById("blanqueo-mod-pop-copy");
-  try {
-    await navigator.clipboard.writeText(text);
-    if (btn) {
-      btn.classList.add("is-copied");
-      btn.textContent = "Copiado";
-      btn.setAttribute("data-copy-hint", "Copiado");
-      const prev = Number(btn.dataset.copyFlashTimer || 0);
-      if (prev) window.clearTimeout(prev);
-      btn.dataset.copyFlashTimer = String(window.setTimeout(() => {
-        btn.classList.remove("is-copied");
-        btn.textContent = "Copiar";
-        btn.setAttribute("data-copy-hint", "Copiar");
-        delete btn.dataset.copyFlashTimer;
-      }, 1400));
-    }
-  } catch {
-    setStatus(text, false);
-  }
 }
 
 function hideAclaracionPop() {
@@ -1156,7 +1129,13 @@ function buildRow(item) {
     e.preventDefault();
     e.stopPropagation();
     const btn = e.currentTarget;
-    showModPop(btn, btn.getAttribute("data-blanqueo-mod-detail") || "");
+    let mods = [];
+    try {
+      mods = JSON.parse(btn.getAttribute("data-blanqueo-mod-list") || "[]");
+    } catch {
+      mods = [];
+    }
+    showModPop(btn, mods);
   });
 
   row.querySelector(".blanqueo-clave-previa-pill")?.addEventListener("click", (e) => {

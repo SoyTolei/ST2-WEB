@@ -799,6 +799,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .blanqueo-hab-pill {
   display: inline-flex;
   align-items: center;
+  gap: 0;
   margin: 0;
   padding: 0.16rem 0.5rem;
   border: 1px dashed #fb7185;
@@ -809,7 +810,8 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  cursor: help;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease, padding 0.15s ease;
 }
 
 .blanqueo-hab-pill:hover,
@@ -818,6 +820,52 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   border-color: #e11d48;
   border-style: solid;
   outline: none;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 0 rgba(190, 18, 60, 0.18);
+}
+
+.blanqueo-hab-pill-label {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.blanqueo-hab-pill-action {
+  display: inline-block;
+  max-width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9f1239;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+  transition: opacity 0.15s ease, max-width 0.15s ease, margin-left 0.15s ease;
+}
+
+.blanqueo-hab-pill:hover .blanqueo-hab-pill-action,
+.blanqueo-hab-pill:focus-visible .blanqueo-hab-pill-action {
+  max-width: 2.5rem;
+  margin-left: 0.28rem;
+  opacity: 1;
+  color: #881337;
+}
+
+.blanqueo-mod-pop-list {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #334155;
+  max-height: min(10rem, 38vh);
+  overflow: auto;
+}
+
+.blanqueo-mod-pop-list li + li {
+  margin-top: 0.28rem;
 }
 
 .blanqueo-hab-count {
