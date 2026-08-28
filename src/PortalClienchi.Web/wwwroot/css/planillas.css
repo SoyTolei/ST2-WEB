@@ -1398,8 +1398,8 @@ a.plan-modulo-btn.plan-modulo-link:visited {
 }
 
 .plan-mesas {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 3px;
   padding: 4px;
   background: #f1f5f9;
@@ -1409,6 +1409,8 @@ a.plan-modulo-btn.plan-modulo-link:visited {
 
 .plan-mesa-btn {
   appearance: none;
+  flex: 1 1 0;
+  min-width: 7.5rem;
   border: 0;
   border-radius: 7px;
   padding: 11px 10px;
