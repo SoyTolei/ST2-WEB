@@ -22,5 +22,8 @@ public static class St2SuperAdmin
         BorradoBases = true,
         BorradoBasesConfirm = true,
         BorradoBasesLoad = true,
+        PlanillasSqlOnvio = true,
+        PlanillasLegal = true,
+        PlanillasChile = true,
     };
 }

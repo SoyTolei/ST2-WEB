@@ -96,7 +96,7 @@ public static class PlanillasEndpoints
                 referral = new
                 {
                     productos = ChileConstants.ReferralProductos.Select(p => new { id = p.Id, label = p.Label }),
-                    hyperrentaVersiones = ChileConstants.HyperrentaVersiones,
+                    hyperrentaVersiones = ChileConstants.HyperrentaVersiones.Select(v => new { id = v.Id, label = v.Label }),
                     hyperrentaModulos = ChileConstants.HyperrentaModulos,
                     tiposBase = ChileConstants.TiposBase,
                 },
@@ -559,6 +559,9 @@ public static class PlanillasEndpoints
                     borradoBases = flags.BorradoBases,
                     borradoBasesConfirm = flags.BorradoBasesConfirm,
                     borradoBasesLoad = flags.BorradoBasesLoad,
+                    planillasSqlOnvio = flags.PlanillasSqlOnvio,
+                    planillasLegal = flags.PlanillasLegal,
+                    planillasChile = flags.PlanillasChile,
                 },
             });
         });
@@ -664,6 +667,9 @@ public static class PlanillasEndpoints
                             borradoBases = flags.BorradoBases,
                             borradoBasesConfirm = flags.BorradoBasesConfirm,
                             borradoBasesLoad = flags.BorradoBasesLoad,
+                            planillasSqlOnvio = flags.PlanillasSqlOnvio,
+                            planillasLegal = flags.PlanillasLegal,
+                            planillasChile = flags.PlanillasChile,
                         },
                     };
                 }).ToList();
@@ -794,6 +800,9 @@ public static class PlanillasEndpoints
                         borradoBases = flags.BorradoBases,
                         borradoBasesConfirm = flags.BorradoBasesConfirm,
                         borradoBasesLoad = flags.BorradoBasesLoad,
+                        planillasSqlOnvio = flags.PlanillasSqlOnvio,
+                        planillasLegal = flags.PlanillasLegal,
+                        planillasChile = flags.PlanillasChile,
                     },
                 });
             }

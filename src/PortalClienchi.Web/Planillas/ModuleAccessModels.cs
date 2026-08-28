@@ -10,6 +10,9 @@ public static class PlanModuleIds
     public const string BorradoBases = "borrado_bases";
     /// <summary>Puede usar el formulario de alta de borrado de bases.</summary>
     public const string BorradoBasesLoad = "borrado_bases_load";
+    public const string PlanillasSqlOnvio = "planillas_sql_onvio";
+    public const string PlanillasLegal = "planillas_legal";
+    public const string PlanillasChile = "planillas_chile";
 
     public static readonly string[] All =
     [
@@ -19,6 +22,9 @@ public static class PlanModuleIds
         BlanqueoLoad,
         BorradoBases,
         BorradoBasesLoad,
+        PlanillasSqlOnvio,
+        PlanillasLegal,
+        PlanillasChile,
     ];
 }
 
@@ -34,6 +40,9 @@ public sealed class ModuleAccessFlagsDto
     public bool BorradoBasesConfirm { get; set; }
     /// <summary>Formulario de nueva solicitud de borrado. Confirmadores suelen tenerlo en false.</summary>
     public bool BorradoBasesLoad { get; set; }
+    public bool PlanillasSqlOnvio { get; set; } = true;
+    public bool PlanillasLegal { get; set; } = true;
+    public bool PlanillasChile { get; set; } = true;
 }
 
 public sealed class ModuleAccessUpdateRequest
@@ -47,6 +56,9 @@ public sealed class ModuleAccessUpdateRequest
     public bool? BorradoBases { get; set; }
     public bool? BorradoBasesConfirm { get; set; }
     public bool? BorradoBasesLoad { get; set; }
+    public bool? PlanillasSqlOnvio { get; set; }
+    public bool? PlanillasLegal { get; set; }
+    public bool? PlanillasChile { get; set; }
     /// <summary>Puede ver la pestaña Admin ST2 (además del super-admin primario).</summary>
     public bool? St2Admin { get; set; }
 }

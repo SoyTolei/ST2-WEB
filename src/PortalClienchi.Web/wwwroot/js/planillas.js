@@ -5,7 +5,7 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
-import { refreshModuleFlags, canSeeOportunidadModule, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
+import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
@@ -99,6 +99,30 @@ function isChile() {
 /** Oportunidad, PDF y Blanqueo no aplican a LEGAL ni Chile. */
 function hidesCommercialModules(id = sistemaActual) {
   return id === "Legal" || id === "Chile";
+}
+
+const SISTEMA_ORDER = ["BejermanSql", "OnvioWeb", "Legal", "Chile"];
+
+function canSeeSistema(id) {
+  if (!id) return false;
+  if (id === "BejermanSql" || id === "OnvioWeb") return canSeePlanillasSqlOnvio();
+  if (id === "Legal") return canSeePlanillasLegal() && !isSistemaPlaceholder("Legal");
+  if (id === "Chile") return canSeePlanillasChile();
+  return false;
+}
+
+function getVisibleSistemas() {
+  return SISTEMA_ORDER.filter(canSeeSistema);
+}
+
+function ensureAllowedSistema() {
+  if (canSeeSistema(sistemaActual)) return;
+  const visible = getVisibleSistemas();
+  if (visible.length > 0) {
+    sistemaActual = visible[0];
+    rememberSistema(sistemaActual);
+    normalizeMesaForSistema();
+  }
 }
 
 function syncSistemaDataset() {
@@ -209,11 +233,12 @@ function normalizeSistemaId(id) {
 function readRememberedSistema() {
   try {
     const saved = normalizeSistemaId(localStorage.getItem(SISTEMA_STORAGE_KEY));
-    if (saved) return saved;
+    if (saved && canSeeSistema(saved)) return saved;
   } catch {
     /* ignore */
   }
-  return "BejermanSql";
+  const visible = getVisibleSistemas();
+  return visible[0] || "BejermanSql";
 }
 
 function normalizePath(pathname) {
@@ -294,10 +319,10 @@ function canOpenRoute(route) {
   if (route.requires === "borrado-bases") return canSeeBorradoBasesModule() && !hidesCommercialModules();
   const sys = route.sistema || sistemaActual;
   if (route.requires === "transferencia") {
-    return !!sys && !isSistemaPlaceholder(sys);
+    return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys);
   }
   if (route.requires === "referral") {
-    return !!sys && !isSistemaPlaceholder(sys);
+    return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys);
   }
   return true;
 }
@@ -350,7 +375,7 @@ function showView(name, { history = "push" } = {}) {
 function setSistemaIndicator(index) {
   const grid = document.querySelector(".plan-sistema-grid");
   const indicator = els.sistemaIndicator();
-  const btn = [...els.sistemaBtns()][index];
+  const btn = [...els.sistemaBtns()].filter((el) => !el.classList.contains("hidden"))[index];
   if (!grid || !indicator || !btn) return;
 
   const gridRect = grid.getBoundingClientRect();
@@ -362,17 +387,23 @@ function setSistemaIndicator(index) {
 }
 
 function refreshSistemaIndicator() {
-  const index = SISTEMA_INDEX[sistemaActual] ?? 0;
-  setSistemaIndicator(index);
+  const buttons = [...els.sistemaBtns()].filter((btn) => !btn.classList.contains("hidden"));
+  const idx = buttons.findIndex((btn) => btn.dataset.planSistema === sistemaActual);
+  setSistemaIndicator(idx >= 0 ? idx : 0);
 }
 
 function updateSistemaUi() {
-  const index = SISTEMA_INDEX[sistemaActual] ?? 0;
+  ensureAllowedSistema();
   els.sistemaBtns().forEach((btn) => {
-    const active = btn.dataset.planSistema === sistemaActual;
+    const id = btn.dataset.planSistema;
+    const allowed = canSeeSistema(id);
+    btn.classList.toggle("hidden", !allowed);
+    btn.toggleAttribute("hidden", !allowed);
+    btn.disabled = !allowed;
+    const active = id === sistemaActual;
     btn.classList.toggle("active", active);
   });
-  setSistemaIndicator(index);
+  refreshSistemaIndicator();
   syncSistemaDataset();
 
   const transferBtn = document.getElementById("plan-modulo-transferencia");
@@ -420,7 +451,7 @@ function updateSistemaUi() {
 
 function selectSistema(id) {
   const normalized = normalizeSistemaId(id);
-  if (!normalized) return;
+  if (!normalized || !canSeeSistema(normalized)) return;
   sistemaActual = normalized;
   rememberSistema(normalized);
   normalizeMesaForSistema();
@@ -1107,7 +1138,7 @@ async function revealView(name, historyMode = "push") {
   }
 
   if (name === "transferencia") {
-    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) {
+    if (!sistemaActual || !canSeeSistema(sistemaActual) || isSistemaPlaceholder(sistemaActual)) {
       showView("menu", { history: "replace" });
       return;
     }
@@ -1117,7 +1148,7 @@ async function revealView(name, historyMode = "push") {
   }
 
   if (name === "referral") {
-    if (!sistemaActual || isSistemaPlaceholder(sistemaActual)) {
+    if (!sistemaActual || !canSeeSistema(sistemaActual) || isSistemaPlaceholder(sistemaActual)) {
       showView("menu", { history: "replace" });
       return;
     }

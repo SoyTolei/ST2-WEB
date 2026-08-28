@@ -2176,9 +2176,16 @@ a.plan-modulo-btn.plan-modulo-link:visited {
   align-items: flex-start;
 }
 
-.plan-chile-modulos-checks {
-  flex: 1;
-  min-width: 0;
+.plan-chile-modulos-track {
+  flex-wrap: wrap;
+}
+
+.plan-chile-adj-row {
+  align-items: flex-start;
+}
+
+.plan-chile-adj-row + .plan-chile-adj-row {
+  margin-top: 0.65rem;
 }
 
 .plan-chile-version-field {

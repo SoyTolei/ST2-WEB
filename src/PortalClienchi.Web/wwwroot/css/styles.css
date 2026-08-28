@@ -3435,6 +3435,15 @@ body.portal-tab-active .tab-icon {
   width: min(420px, 96vw);
 }
 
+.st2-access-modules-section-title {
+  margin: 14px 0 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
 .st2-access-modules-profile {
   display: flex;
   flex-direction: column;

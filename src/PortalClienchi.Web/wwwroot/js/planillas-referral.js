@@ -5,6 +5,7 @@ import {
   buildChileReferralPanel,
   resetChileReferral,
   buildChileReferralPayload,
+  syncChileReferralCards,
 } from "./planillas-referral-chile.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 
@@ -217,6 +218,7 @@ function updateReferralPanels() {
   }
   if (chile) buildChileReferralPanel();
   syncReferralCards();
+  if (chile) syncChileReferralCards();
 }
 
 function buildReferralPills() {
@@ -380,6 +382,7 @@ function syncReferralCards() {
     ["ref-card-traza", "ref-adj-traza", "ref-mark-traza"],
     ["ref-card-backup", "ref-adj-backup", "ref-mark-backup"],
     ["ref-card-chile-pantallas", "ref-chile-pantallas", "ref-mark-chile-pantallas"],
+    ["ref-card-chile-bases", "ref-chile-bases-check", "ref-mark-chile-bases"],
   ].forEach(([cardId, checkId, markId]) => syncCardVisual(cardId, checkId, markId));
   [
     ["ref-card-backup-manager", "ref-backup-manager", "ref-mark-backup-manager"],
@@ -536,6 +539,9 @@ function bindReferralEvents() {
 
   bindAdjCard("ref-card-chile-pantallas", "ref-chile-pantallas", "ref-mark-chile-pantallas", () => {
     document.getElementById("ref-chile-capturas")?.classList.toggle("hidden", !document.getElementById("ref-chile-pantallas").checked);
+  });
+  bindAdjCard("ref-card-chile-bases", "ref-chile-bases-check", "ref-mark-chile-bases", () => {
+    syncChileReferralCards();
   });
 
   setupPlaceholder("ref-descripcion", REF_DESC_PH);
@@ -1246,7 +1252,7 @@ function resetReferralForm() {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
-  ["ref-capturas-panel", "ref-traza-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel", "ref-chile-capturas"].forEach((id) => {
+  ["ref-capturas-panel", "ref-traza-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel", "ref-chile-capturas", "ref-chile-bases-panel"].forEach((id) => {
     document.getElementById(id)?.classList.add("hidden");
   });
   revokeCapturaThumbUrls(document.getElementById("ref-capturas-chips"));

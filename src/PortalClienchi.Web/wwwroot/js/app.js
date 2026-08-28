@@ -126,6 +126,9 @@ const accessModBlanqueoLoad = document.getElementById("st2-mod-blanqueo-load");
 const accessModBorradoBases = document.getElementById("st2-mod-borrado-bases");
 const accessModBorradoBasesConfirm = document.getElementById("st2-mod-borrado-bases-confirm");
 const accessModBorradoBasesLoad = document.getElementById("st2-mod-borrado-bases-load");
+const accessModPlanillasSqlOnvio = document.getElementById("st2-mod-planillas-sql-onvio");
+const accessModPlanillasLegal = document.getElementById("st2-mod-planillas-legal");
+const accessModPlanillasChile = document.getElementById("st2-mod-planillas-chile");
 const accessModSt2Admin = document.getElementById("st2-mod-st2-admin");
 const accessModSt2AdminWrap = document.getElementById("st2-mod-st2-admin-wrap");
 const viewAsBanner = document.getElementById("st2-view-as-banner");
@@ -1195,6 +1198,15 @@ function normalizeAccessAdminItems(items) {
         borradoBasesLoad: modules.borradoBasesLoad == null && modules.BorradoBasesLoad == null
           ? !!(modules.borradoBases ?? modules.BorradoBases) && !(modules.borradoBasesConfirm ?? modules.BorradoBasesConfirm)
           : !!(modules.borradoBasesLoad ?? modules.BorradoBasesLoad),
+        planillasSqlOnvio: modules.planillasSqlOnvio == null && modules.PlanillasSqlOnvio == null
+          ? true
+          : !!(modules.planillasSqlOnvio ?? modules.PlanillasSqlOnvio),
+        planillasLegal: modules.planillasLegal == null && modules.PlanillasLegal == null
+          ? true
+          : !!(modules.planillasLegal ?? modules.PlanillasLegal),
+        planillasChile: modules.planillasChile == null && modules.PlanillasChile == null
+          ? true
+          : !!(modules.planillasChile ?? modules.PlanillasChile),
       },
     };
   });
@@ -2777,6 +2789,15 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
   if (accessModOportunidad) accessModOportunidad.checked = !!mods.oportunidad;
   if (accessModPdf) accessModPdf.checked = !!mods.pdfPortal;
+  if (accessModPlanillasSqlOnvio) {
+    accessModPlanillasSqlOnvio.checked = mods.planillasSqlOnvio == null ? true : !!mods.planillasSqlOnvio;
+  }
+  if (accessModPlanillasLegal) {
+    accessModPlanillasLegal.checked = mods.planillasLegal == null ? true : !!mods.planillasLegal;
+  }
+  if (accessModPlanillasChile) {
+    accessModPlanillasChile.checked = mods.planillasChile == null ? true : !!mods.planillasChile;
+  }
   if (accessModBlanqueo) accessModBlanqueo.checked = !!mods.blanqueo;
   if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = !!mods.blanqueoConfirm;
   if (accessModBlanqueoLoad) {
@@ -2882,6 +2903,9 @@ async function saveAccessModules() {
         email: accessModulesEmailValue,
         oportunidad: !!accessModOportunidad?.checked,
         pdfPortal: !!accessModPdf?.checked,
+        planillasSqlOnvio: !!accessModPlanillasSqlOnvio?.checked,
+        planillasLegal: !!accessModPlanillasLegal?.checked,
+        planillasChile: !!accessModPlanillasChile?.checked,
         blanqueo: !!accessModBlanqueo?.checked,
         blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
         blanqueoLoad: !!accessModBlanqueoLoad?.checked,
@@ -2905,6 +2929,9 @@ async function saveAccessModules() {
             modules: {
               oportunidad: !!mods.oportunidad,
               pdfPortal: !!mods.pdfPortal,
+              planillasSqlOnvio: !!mods.planillasSqlOnvio,
+              planillasLegal: !!mods.planillasLegal,
+              planillasChile: !!mods.planillasChile,
               blanqueo: !!mods.blanqueo,
               blanqueoConfirm: !!mods.blanqueoConfirm,
               blanqueoLoad: !!mods.blanqueoLoad,

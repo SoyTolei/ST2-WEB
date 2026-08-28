@@ -36,6 +36,9 @@ function fullFlags() {
     borradoBases: true,
     borradoBasesConfirm: true,
     borradoBasesLoad: true,
+    planillasSqlOnvio: true,
+    planillasLegal: true,
+    planillasChile: true,
   };
 }
 
@@ -49,6 +52,9 @@ function emptyFlags() {
     borradoBases: false,
     borradoBasesConfirm: false,
     borradoBasesLoad: false,
+    planillasSqlOnvio: false,
+    planillasLegal: false,
+    planillasChile: false,
   };
 }
 
@@ -178,6 +184,9 @@ function parseFlagsFromApi(m) {
     borradoBases: !!m.borradoBases,
     borradoBasesConfirm: !!m.borradoBasesConfirm,
     borradoBasesLoad: m.borradoBasesLoad == null ? !m.borradoBasesConfirm : !!m.borradoBasesLoad,
+    planillasSqlOnvio: m.planillasSqlOnvio == null ? true : !!m.planillasSqlOnvio,
+    planillasLegal: m.planillasLegal == null ? true : !!m.planillasLegal,
+    planillasChile: m.planillasChile == null ? true : !!m.planillasChile,
   };
 }
 
@@ -304,4 +313,16 @@ export function canConfirmBorradoBasesModule() {
 
 export function canLoadBorradoBasesModule() {
   return !!getCachedModuleFlags().borradoBasesLoad;
+}
+
+export function canSeePlanillasSqlOnvio() {
+  return !!getCachedModuleFlags().planillasSqlOnvio;
+}
+
+export function canSeePlanillasLegal() {
+  return !!getCachedModuleFlags().planillasLegal;
+}
+
+export function canSeePlanillasChile() {
+  return !!getCachedModuleFlags().planillasChile;
 }

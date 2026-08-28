@@ -23,11 +23,15 @@ public static class ChileConstants
         ReferralProductos.Select(p => p.Id),
         StringComparer.OrdinalIgnoreCase);
 
-    public static readonly string[] HyperrentaVersiones =
+    public static readonly (string Id, string Label, string ExportLabel)[] HyperrentaVersiones =
     [
-        "Enterprise (mod Rad SQL)",
-        "Plus (todos los módulos en Access)",
+        ("ENTERPRISE", "Enterprise", "Enterprise (mod Rad SQL)"),
+        ("PLUS", "Plus", "Plus"),
     ];
+
+    public static readonly HashSet<string> HyperrentaVersionIds = new(
+        HyperrentaVersiones.Select(v => v.Id),
+        StringComparer.OrdinalIgnoreCase);
 
     public static readonly string[] HyperrentaModulos =
     [
@@ -68,6 +72,20 @@ public static class ChileConstants
         {
             if (string.Equals(productoId, id.Trim(), StringComparison.OrdinalIgnoreCase))
                 return label;
+        }
+
+        return id.Trim();
+    }
+
+    public static string HyperrentaVersionExportLabel(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            return string.Empty;
+
+        foreach (var (versionId, _, exportLabel) in HyperrentaVersiones)
+        {
+            if (string.Equals(versionId, id.Trim(), StringComparison.OrdinalIgnoreCase))
+                return exportLabel;
         }
 
         return id.Trim();

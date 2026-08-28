@@ -132,9 +132,6 @@ public sealed class ReferralIdService
             caso.Chile.Clave = req.Chile.Clave?.Trim() ?? "";
             caso.Chile.SistemaOperativo = req.Chile.SistemaOperativo?.Trim() ?? "";
             caso.Chile.VersionMotorSql = req.Chile.VersionMotorSql?.Trim() ?? "";
-            caso.Chile.ContactoNombre = req.Chile.ContactoNombre?.Trim() ?? "";
-            caso.Chile.ContactoTelefono = req.Chile.ContactoTelefono?.Trim() ?? "";
-            caso.Chile.ContactoCorreo = req.Chile.ContactoCorreo?.Trim() ?? "";
             caso.Chile.AdjuntaPantallas = req.Chile.AdjuntaPantallas;
         }
         caso.Onvio.TicketAvisoOmitido = req.TicketAvisoOmitido;

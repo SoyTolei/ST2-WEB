@@ -71,7 +71,7 @@ public static class ReferralIdTextBuilder
 
         if (string.Equals(ch.Producto, "HYPERRENTA", StringComparison.OrdinalIgnoreCase))
         {
-            partes.Add($"VERSIÓN: {ch.HyperrentaVersion.Trim()}");
+            partes.Add($"VERSIÓN: {ChileConstants.HyperrentaVersionExportLabel(ch.HyperrentaVersion)}");
             partes.Add($"MÓDULOS: {string.Join(", ", ch.HyperrentaModulos)}");
         }
         else
@@ -101,13 +101,6 @@ public static class ReferralIdTextBuilder
         partes.Add($"- Sistema operativo: {ch.SistemaOperativo.Trim()}");
         if (!string.IsNullOrWhiteSpace(ch.VersionMotorSql))
             partes.Add($"- Versión motor SQL: {ch.VersionMotorSql.Trim()}");
-
-        partes.Add("");
-        partes.Add("==========================================");
-        partes.Add("DATOS DE CONTACTO 📞");
-        partes.Add($"- Nombre: {ch.ContactoNombre.Trim()}");
-        partes.Add($"- Teléfono: {ch.ContactoTelefono.Trim()}");
-        partes.Add($"- Correo electrónico: {ch.ContactoCorreo.Trim()}");
 
         partes.Add($"- Se adjuntan {CapturasTextoHelper.BuildSiNoLabel(c.CapturasEnlaces, ch.AdjuntaPantallas)}: {(ch.AdjuntaPantallas ? "SÍ" : "NO")}");
     }

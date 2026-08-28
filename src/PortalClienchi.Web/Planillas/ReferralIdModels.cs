@@ -111,9 +111,6 @@ public sealed class ChileReferralState
     public string Clave { get; set; } = "";
     public string SistemaOperativo { get; set; } = "";
     public string VersionMotorSql { get; set; } = "";
-    public string ContactoNombre { get; set; } = "";
-    public string ContactoTelefono { get; set; } = "";
-    public string ContactoCorreo { get; set; } = "";
     public bool AdjuntaPantallas { get; set; }
 }
 
@@ -217,9 +214,6 @@ public sealed class ChileReferralDto
     public string? Clave { get; set; }
     public string? SistemaOperativo { get; set; }
     public string? VersionMotorSql { get; set; }
-    public string? ContactoNombre { get; set; }
-    public string? ContactoTelefono { get; set; }
-    public string? ContactoCorreo { get; set; }
     public bool AdjuntaPantallas { get; set; }
 }
 

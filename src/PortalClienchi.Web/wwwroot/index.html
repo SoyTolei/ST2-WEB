@@ -1051,19 +1051,32 @@
                 </div>
               </div>
 
-              <p class="plan-ref-title">Datos de contacto</p>
-              <div class="plan-well-box">
-                <div class="plan-form-grid">
-                  <div class="plan-field"><label for="ref-chile-contacto-nombre">Nombre</label><input id="ref-chile-contacto-nombre" type="text"/></div>
-                  <div class="plan-form-2col plan-form-2col-tight">
-                    <div class="plan-field"><label for="ref-chile-contacto-tel">Teléfono</label><input id="ref-chile-contacto-tel" type="tel"/></div>
-                    <div class="plan-field"><label for="ref-chile-contacto-correo">Correo electrónico</label><input id="ref-chile-contacto-correo" type="email"/></div>
-                  </div>
-                </div>
-              </div>
-
               <p class="plan-ref-title">Adjuntos</p>
               <div class="plan-adj-stack">
+                <div id="ref-chile-adj-bases-wrap" class="plan-chile-adj-bases hidden">
+                  <button type="button" class="plan-adj-card tone-blue" id="ref-card-chile-bases" data-adj="bases">
+                    <span class="plan-adj-label">
+                      <span class="plan-inline-icon blue" data-plan-icon="backup"></span>
+                      <span class="plan-adj-backup-text">
+                        <strong>Base de datos</strong>
+                        <small>Tipo de base y si va adjunta</small>
+                      </span>
+                    </span>
+                    <span class="card-mark" id="ref-mark-chile-bases">○</span>
+                  </button>
+                  <input type="checkbox" id="ref-chile-bases-check" class="hidden"/>
+                  <div id="ref-chile-bases-panel" class="plan-backup-detail hidden">
+                    <p class="plan-backup-detail-title">Datos de la base</p>
+                    <div class="plan-bej-row plan-chile-adj-row">
+                      <span class="plan-bej-label">Tipo de base</span>
+                      <div class="plan-segment-track" id="ref-chile-tipo-base-pills"></div>
+                    </div>
+                    <div class="plan-bej-row plan-chile-adj-row">
+                      <span class="plan-bej-label">Base adjunta</span>
+                      <div class="plan-segment-track" id="ref-chile-base-adjunta-pills"></div>
+                    </div>
+                  </div>
+                </div>
                 <button type="button" class="plan-adj-card tone-orange" id="ref-card-chile-pantallas" data-adj="pantallas">
                   <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Capturas / Imágenes / Video / PDF / TXT</span>
                   <span class="card-mark" id="ref-mark-chile-pantallas">○</span>
@@ -2173,6 +2186,20 @@
       <label class="st2-access-admin-label" for="st2-access-modules-birthday">Cumpleaños</label>
       <input id="st2-access-modules-birthday" type="text" class="st2-access-admin-input" inputmode="numeric" placeholder="DD/MM" maxlength="5" autocomplete="off" spellcheck="false" title="Día y mes, ej. 25/08"/>
       <p class="st2-access-name-edit-hint">Opcional. Sirve para saludos y huevos de cumpleaños (calendario Argentina).</p>
+      <p class="st2-access-modules-section-title">Sistemas Planillas</p>
+      <label class="st2-access-modules-check st2-access-modules-check-main">
+        <input id="st2-mod-planillas-sql-onvio" type="checkbox"/>
+        <span>🗄️ Bejerman SQL / ONVIO</span>
+      </label>
+      <label class="st2-access-modules-check st2-access-modules-check-main">
+        <input id="st2-mod-planillas-legal" type="checkbox"/>
+        <span>⚖️ LEGAL</span>
+      </label>
+      <label class="st2-access-modules-check st2-access-modules-check-main">
+        <input id="st2-mod-planillas-chile" type="checkbox"/>
+        <span>🇨🇱 Chile</span>
+      </label>
+      <p class="st2-access-modules-section-title">Módulos</p>
       <label class="st2-access-modules-check st2-access-modules-check-main">
         <input id="st2-mod-oportunidad" type="checkbox"/>
         <span>💼 Oportunidad de Venta</span>

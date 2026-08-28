@@ -80,7 +80,7 @@ public static class ReferralIdValidator
             if (string.IsNullOrWhiteSpace(ch.HyperrentaVersion))
                 return "Seleccioná la versión de Hyperrenta.";
 
-            if (!ChileConstants.HyperrentaVersiones.Contains(ch.HyperrentaVersion))
+            if (!ChileConstants.HyperrentaVersionIds.Contains(ch.HyperrentaVersion))
                 return "Versión de Hyperrenta no válida.";
 
             if (ch.HyperrentaModulos.Count == 0)
@@ -123,15 +123,6 @@ public static class ReferralIdValidator
 
         if (string.IsNullOrWhiteSpace(ch.SistemaOperativo))
             return "Completá el sistema operativo.";
-
-        if (string.IsNullOrWhiteSpace(ch.ContactoNombre))
-            return "Completá el nombre de contacto.";
-
-        if (string.IsNullOrWhiteSpace(ch.ContactoTelefono))
-            return "Completá el teléfono de contacto.";
-
-        if (string.IsNullOrWhiteSpace(ch.ContactoCorreo))
-            return "Completá el correo electrónico de contacto.";
 
         return null;
     }

@@ -112,12 +112,19 @@ public sealed class ModuleAccessRepository
         if (borradoBasesLoad)
             borradoBases = true;
 
+        var planillasSqlOnvio = req.PlanillasSqlOnvio ?? current.PlanillasSqlOnvio;
+        var planillasLegal = req.PlanillasLegal ?? current.PlanillasLegal;
+        var planillasChile = req.PlanillasChile ?? current.PlanillasChile;
+
         WriteModule(conn, email, PlanModuleIds.Oportunidad, oportunidad, false);
         WriteModule(conn, email, PlanModuleIds.PdfPortal, pdfPortal, false);
         WriteModule(conn, email, PlanModuleIds.Blanqueo, blanqueo, blanqueoConfirm);
         WriteModule(conn, email, PlanModuleIds.BlanqueoLoad, blanqueoLoad, false);
         WriteModule(conn, email, PlanModuleIds.BorradoBases, borradoBases, borradoBasesConfirm);
         WriteModule(conn, email, PlanModuleIds.BorradoBasesLoad, borradoBasesLoad, false);
+        WriteModule(conn, email, PlanModuleIds.PlanillasSqlOnvio, planillasSqlOnvio, false);
+        WriteModule(conn, email, PlanModuleIds.PlanillasLegal, planillasLegal, false);
+        WriteModule(conn, email, PlanModuleIds.PlanillasChile, planillasChile, false);
 
         return ReadFlags(conn, email);
     }
@@ -177,6 +184,12 @@ public sealed class ModuleAccessRepository
                 borradoLoadExplicit = true;
                 flags.BorradoBasesLoad = view;
             }
+            else if (module.Equals(PlanModuleIds.PlanillasSqlOnvio, StringComparison.OrdinalIgnoreCase))
+                flags.PlanillasSqlOnvio = view;
+            else if (module.Equals(PlanModuleIds.PlanillasLegal, StringComparison.OrdinalIgnoreCase))
+                flags.PlanillasLegal = view;
+            else if (module.Equals(PlanModuleIds.PlanillasChile, StringComparison.OrdinalIgnoreCase))
+                flags.PlanillasChile = view;
         }
 
         // Legacy: sin fila blanqueo_load → confirmador = solo listado; el resto puede cargar.
@@ -192,7 +205,28 @@ public sealed class ModuleAccessRepository
         if (flags.BorradoBasesLoad)
             flags.BorradoBases = true;
 
+        // Legacy: sin filas de sistemas Planillas → todos visibles.
+        if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasSqlOnvio))
+            flags.PlanillasSqlOnvio = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasLegal))
+            flags.PlanillasLegal = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasChile))
+            flags.PlanillasChile = true;
+
         return flags;
+    }
+
+    private static bool HasModuleRow(SqliteConnection conn, string email, string module)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT 1 FROM module_access
+            WHERE lower(email) = lower($email) AND lower(module) = lower($module)
+            LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("$email", email);
+        cmd.Parameters.AddWithValue("$module", module);
+        return cmd.ExecuteScalar() is not null;
     }
 
     private static void WriteModule(SqliteConnection conn, string email, string module, bool canView, bool canConfirm)
@@ -269,6 +303,7 @@ public sealed class ModuleAccessRepository
 
         EnsureBlanqueoLoadDefaults();
         EnsureBorradoBasesDefaults();
+        EnsurePlanillasSistemaDefaults();
     }
 
     /// <summary>
@@ -371,6 +406,37 @@ public sealed class ModuleAccessRepository
                 """;
             mark.ExecuteNonQuery();
             _logger.LogInformation("Seed inicial de Borrado de bases aplicado");
+        }
+    }
+
+    /// <summary>Usuarios ya registrados ven todos los sistemas Planillas hasta que un admin restrinja.</summary>
+    private void EnsurePlanillasSistemaDefaults()
+    {
+        lock (_gate)
+        {
+            using var conn = Open();
+            using (var check = conn.CreateCommand())
+            {
+                check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'seeded_planillas_sistemas_v1'";
+                var existing = check.ExecuteScalar() as string;
+                if (string.Equals(existing, "1", StringComparison.Ordinal))
+                    return;
+            }
+
+            foreach (var email in LoadRegisteredEmails(conn))
+            {
+                WriteModule(conn, email, PlanModuleIds.PlanillasSqlOnvio, true, false);
+                WriteModule(conn, email, PlanModuleIds.PlanillasLegal, true, false);
+                WriteModule(conn, email, PlanModuleIds.PlanillasChile, true, false);
+            }
+
+            using var mark = conn.CreateCommand();
+            mark.CommandText = """
+                INSERT INTO module_access_meta (key, value) VALUES ('seeded_planillas_sistemas_v1', '1')
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                """;
+            mark.ExecuteNonQuery();
+            _logger.LogInformation("Defaults de sistemas Planillas aplicados (SQL/ONVIO, LEGAL, Chile)");
         }
     }
 
