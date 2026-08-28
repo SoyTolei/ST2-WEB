@@ -1414,6 +1414,12 @@ html.st2-theme-dark .blanqueo-hab-pill {
 html.st2-theme-dark .blanqueo-hab-pill:hover,
 html.st2-theme-dark .blanqueo-hab-pill:focus-visible {
   background: #881337;
+  color: #fecdd3;
+}
+
+html.st2-theme-dark .blanqueo-hab-pill:hover .blanqueo-hab-pill-action,
+html.st2-theme-dark .blanqueo-hab-pill:focus-visible .blanqueo-hab-pill-action {
+  color: #fff;
 }
 
 html.st2-theme-dark .blanqueo-filter-mine,

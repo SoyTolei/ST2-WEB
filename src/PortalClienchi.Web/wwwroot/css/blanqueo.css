@@ -796,7 +796,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #9f1239;
+  color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
   white-space: nowrap;
@@ -805,10 +805,9 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-hab-pill:hover .blanqueo-hab-pill-action,
 .blanqueo-hab-pill:focus-visible .blanqueo-hab-pill-action {
-  max-width: 2.5rem;
+  max-width: 3rem;
   margin-left: 0.28rem;
   opacity: 1;
-  color: #881337;
 }
 
 .blanqueo-mod-pop-list {
