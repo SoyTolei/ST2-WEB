@@ -392,6 +392,15 @@ function refreshSistemaIndicator() {
   setSistemaIndicator(idx >= 0 ? idx : 0);
 }
 
+function syncSistemaGridColumns() {
+  const grid = document.querySelector(".plan-sistema-grid");
+  if (!grid) return;
+  const visibleCount = [...els.sistemaBtns()].filter((btn) => !btn.classList.contains("hidden")).length;
+  const cols = Math.max(visibleCount, 1);
+  grid.style.setProperty("--plan-sistema-cols", String(cols));
+  grid.dataset.visibleCount = String(cols);
+}
+
 function updateSistemaUi() {
   ensureAllowedSistema();
   els.sistemaBtns().forEach((btn) => {
@@ -403,6 +412,7 @@ function updateSistemaUi() {
     const active = id === sistemaActual;
     btn.classList.toggle("active", active);
   });
+  syncSistemaGridColumns();
   refreshSistemaIndicator();
   syncSistemaDataset();
 
