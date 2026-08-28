@@ -4142,8 +4142,14 @@ a.plan-modulo-btn.plan-modulo-link:visited {
   .plan-chile-soporte-grid { grid-template-columns: 1fr; }
   .plan-sistema-indicator { display: none; }
   .plan-mesas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: column;
     gap: 4px;
+  }
+
+  .plan-mesa-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
   }
   .plan-check-cards, .plan-onvio-grid, .plan-adj-grid, .plan-op-submenu, .plan-legal-cards, .plan-form-2col { grid-template-columns: 1fr; }
   .plan-check-wrap.mam, .plan-check-wrap.sdk { margin: 0; }
