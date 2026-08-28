@@ -134,8 +134,6 @@ const accessModPlanillasLegal = document.getElementById("st2-mod-planillas-legal
 const accessModPlanillasChile = document.getElementById("st2-mod-planillas-chile");
 const accessModSt2Admin = document.getElementById("st2-mod-st2-admin");
 const accessModSt2AdminWrap = document.getElementById("st2-mod-st2-admin-wrap");
-const accessModSuperAdmin = document.getElementById("st2-mod-super-admin");
-const accessModSuperAdminWrap = document.getElementById("st2-mod-super-admin-wrap");
 const accessModulesSqlGroup = document.getElementById("st2-access-modules-sql-group");
 const viewAsBanner = document.getElementById("st2-view-as-banner");
 const viewAsBannerText = document.getElementById("st2-view-as-banner-text");
@@ -1120,7 +1118,6 @@ function buildAccessClientKey(item) {
 
 function buildAccessAdminPermsCell(item) {
   const mods = item.modules || {};
-  const isSuperAdmin = String(item.email || "").trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
   const systems = [
     { key: "sql", label: "SQL", on: !!mods.planillasSqlOnvio, title: "Bejerman SQL / ONVIO" },
     { key: "leg", label: "LEG", on: !!mods.planillasLegal, title: "LEGAL" },
@@ -1131,9 +1128,7 @@ function buildAccessAdminPermsCell(item) {
   )).join("");
 
   const extras = [];
-  if (isSuperAdmin) extras.push({ label: "sadm", title: "Super-admin (dueño ST2)", cls: "role-sadm" });
-  if (item.isSt2Admin && !isSuperAdmin) extras.push({ label: "adm", title: "ADMIN WEB", cls: "role-adm" });
-  else if (isSuperAdmin) extras.push({ label: "adm", title: "ADMIN WEB (incluido en super-admin)", cls: "role-adm" });
+  if (item.isSt2Admin) extras.push({ label: "adm", title: "ADMIN WEB", cls: "role-adm" });
   if (mods.oportunidad) extras.push({ label: "op", title: "Oportunidad de Venta" });
   if (mods.pdfPortal) extras.push({ label: "pdf", title: "Generador PDF-Portal" });
   if (mods.blanqueoConfirm && mods.blanqueoLoad) {
@@ -2921,35 +2916,9 @@ function closeAccessModulesModal() {
   if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
 }
 
-const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
-
 function syncAccessSqlModulesGroup() {
   const on = !!accessModPlanillasSqlOnvio?.checked;
   accessModulesSqlGroup?.classList.toggle("is-disabled", !on);
-}
-
-function syncAccessRolesUI(email = accessModulesEmailValue) {
-  const isPrimary = String(email || "").trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
-  const canEditRoles = isPrimarySuperAdmin();
-
-  accessModSuperAdminWrap?.classList.toggle("hidden", !isPrimary);
-  if (accessModSuperAdmin) {
-    accessModSuperAdmin.checked = isPrimary;
-    accessModSuperAdmin.disabled = true;
-  }
-
-  accessModSt2AdminWrap?.classList.toggle("hidden", !canEditRoles);
-  if (accessModSt2Admin) {
-    if (isPrimary) {
-      accessModSt2Admin.checked = true;
-      accessModSt2Admin.disabled = true;
-    } else if (!accessModulesPresetMode) {
-      accessModSt2Admin.disabled = !canEditRoles;
-    } else {
-      accessModSt2Admin.disabled = false;
-    }
-  }
-  accessModSt2AdminWrap?.classList.toggle("is-primary-locked", isPrimary);
 }
 
 function startAccessProfilePreview(email, modulesOverride = null) {
@@ -3049,8 +3018,12 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   }
   if (accessModSt2Admin) {
     accessModSt2Admin.checked = isPrimary || !!current?.isSt2Admin;
+    accessModSt2Admin.disabled = isPrimary || !isPrimarySuperAdmin();
   }
-  syncAccessRolesUI(email);
+  if (accessModSt2AdminWrap) {
+    accessModSt2AdminWrap.classList.toggle("is-primary-locked", isPrimary);
+    accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
+  }
   syncAccessSqlModulesGroup();
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
@@ -3088,7 +3061,8 @@ function openAccessPresetModal() {
   if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = false;
   if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.checked = false;
   if (accessModSt2Admin) accessModSt2Admin.checked = false;
-  syncAccessRolesUI("");
+  if (accessModSt2Admin) accessModSt2Admin.disabled = false;
+  if (accessModSt2AdminWrap) accessModSt2AdminWrap.classList.remove("hidden");
   syncAccessSqlModulesGroup();
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
