@@ -20,6 +20,8 @@ import {
   bindEmbedEngagement,
 } from "./daily-tab-reminder.js";
 
+const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
+
 const searchInput = document.getElementById("searchInput");
 const typeFilter = document.getElementById("typeFilter");
 const resultsList = document.getElementById("resultsList");
@@ -132,6 +134,9 @@ const accessModPlanillasLegal = document.getElementById("st2-mod-planillas-legal
 const accessModPlanillasChile = document.getElementById("st2-mod-planillas-chile");
 const accessModSt2Admin = document.getElementById("st2-mod-st2-admin");
 const accessModSt2AdminWrap = document.getElementById("st2-mod-st2-admin-wrap");
+const accessModSuperAdmin = document.getElementById("st2-mod-super-admin");
+const accessModSuperAdminWrap = document.getElementById("st2-mod-super-admin-wrap");
+const accessModulesSqlGroup = document.getElementById("st2-access-modules-sql-group");
 const viewAsBanner = document.getElementById("st2-view-as-banner");
 const viewAsBannerText = document.getElementById("st2-view-as-banner-text");
 const viewAsExitBtn = document.getElementById("st2-view-as-exit");
@@ -1115,16 +1120,20 @@ function buildAccessClientKey(item) {
 
 function buildAccessAdminPermsCell(item) {
   const mods = item.modules || {};
+  const isSuperAdmin = String(item.email || "").trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
   const systems = [
-    { label: "SQL", on: !!mods.planillasSqlOnvio, title: "Bejerman SQL / ONVIO" },
-    { label: "LEG", on: !!mods.planillasLegal, title: "LEGAL" },
-    { label: "CL", on: !!mods.planillasChile, title: "Chile" },
+    { key: "sql", label: "SQL", on: !!mods.planillasSqlOnvio, title: "Bejerman SQL / ONVIO" },
+    { key: "leg", label: "LEG", on: !!mods.planillasLegal, title: "LEGAL" },
+    { key: "cl", label: "CL", on: !!mods.planillasChile, title: "Chile" },
   ];
   const sysHtml = systems.map((sys) => (
-    `<span class="st2-access-admin-perm-sys${sys.on ? " is-on" : ""}" title="${escapeHtml(sys.title)}${sys.on ? "" : " (sin acceso)"}">${escapeHtml(sys.label)}</span>`
+    `<span class="st2-access-admin-perm-sys st2-access-admin-perm-sys--${sys.key}${sys.on ? " is-on" : " is-off"}" title="${escapeHtml(sys.title)}${sys.on ? "" : " (sin acceso)"}">${escapeHtml(sys.label)}</span>`
   )).join("");
 
   const extras = [];
+  if (isSuperAdmin) extras.push({ label: "sadm", title: "Super-admin (dueño ST2)", cls: "role-sadm" });
+  if (item.isSt2Admin && !isSuperAdmin) extras.push({ label: "adm", title: "ADMIN WEB", cls: "role-adm" });
+  else if (isSuperAdmin) extras.push({ label: "adm", title: "ADMIN WEB (incluido en super-admin)", cls: "role-adm" });
   if (mods.oportunidad) extras.push({ label: "op", title: "Oportunidad de Venta" });
   if (mods.pdfPortal) extras.push({ label: "pdf", title: "Generador PDF-Portal" });
   if (mods.blanqueoConfirm && mods.blanqueoLoad) {
@@ -1138,13 +1147,12 @@ function buildAccessAdminPermsCell(item) {
     extras.push({ label: "bs+", title: "Borrado de Bases: confirma y carga" });
   } else if (mods.borradoBasesConfirm) {
     extras.push({ label: "bs✓", title: "Borrado de Bases: solo confirma" });
-  } else if (mods.borradoBasesLoad || mods.borradoBases) {
+  } else   if (mods.borradoBasesLoad || mods.borradoBases) {
     extras.push({ label: "bs", title: "Borrado de Bases Web" });
   }
-  if (item.isSt2Admin) extras.push({ label: "adm", title: "ADMIN WEB" });
 
   const extrasHtml = extras.length
-    ? `<div class="st2-access-admin-perm-extras" aria-label="Módulos extra">${extras.map((extra, idx) => `${idx ? '<span class="st2-access-admin-perm-sep" aria-hidden="true">·</span>' : ""}<span class="st2-access-admin-perm-extra" title="${escapeHtml(extra.title)}">${escapeHtml(extra.label)}</span>`).join("")}</div>`
+    ? `<div class="st2-access-admin-perm-extras" aria-label="Roles y módulos extra">${extras.map((extra, idx) => `${idx ? '<span class="st2-access-admin-perm-sep" aria-hidden="true">·</span>' : ""}<span class="st2-access-admin-perm-extra${extra.cls ? ` ${escapeHtml(extra.cls)}` : ""}" title="${escapeHtml(extra.title)}">${escapeHtml(extra.label)}</span>`).join("")}</div>`
     : "";
 
   return `<div class="st2-access-admin-perms">
@@ -2915,6 +2923,35 @@ function closeAccessModulesModal() {
 
 const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 
+function syncAccessSqlModulesGroup() {
+  const on = !!accessModPlanillasSqlOnvio?.checked;
+  accessModulesSqlGroup?.classList.toggle("is-disabled", !on);
+}
+
+function syncAccessRolesUI(email = accessModulesEmailValue) {
+  const isPrimary = String(email || "").trim().toLowerCase() === PRIMARY_ADMIN_EMAIL;
+  const canEditRoles = isPrimarySuperAdmin();
+
+  accessModSuperAdminWrap?.classList.toggle("hidden", !isPrimary);
+  if (accessModSuperAdmin) {
+    accessModSuperAdmin.checked = isPrimary;
+    accessModSuperAdmin.disabled = true;
+  }
+
+  accessModSt2AdminWrap?.classList.toggle("hidden", !canEditRoles);
+  if (accessModSt2Admin) {
+    if (isPrimary) {
+      accessModSt2Admin.checked = true;
+      accessModSt2Admin.disabled = true;
+    } else if (!accessModulesPresetMode) {
+      accessModSt2Admin.disabled = !canEditRoles;
+    } else {
+      accessModSt2Admin.disabled = false;
+    }
+  }
+  accessModSt2AdminWrap?.classList.toggle("is-primary-locked", isPrimary);
+}
+
 function startAccessProfilePreview(email, modulesOverride = null) {
   if (!isPrimarySuperAdmin()) return;
   if (!email) return;
@@ -3012,12 +3049,9 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   }
   if (accessModSt2Admin) {
     accessModSt2Admin.checked = isPrimary || !!current?.isSt2Admin;
-    accessModSt2Admin.disabled = isPrimary || !isPrimarySuperAdmin();
   }
-  if (accessModSt2AdminWrap) {
-    accessModSt2AdminWrap.classList.toggle("is-primary-locked", isPrimary);
-    accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
-  }
+  syncAccessRolesUI(email);
+  syncAccessSqlModulesGroup();
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
 }
@@ -3054,13 +3088,14 @@ function openAccessPresetModal() {
   if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = false;
   if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.checked = false;
   if (accessModSt2Admin) accessModSt2Admin.checked = false;
-  if (accessModSt2Admin) accessModSt2Admin.disabled = false;
-  if (accessModSt2AdminWrap) accessModSt2AdminWrap.classList.remove("hidden");
+  syncAccessRolesUI("");
+  syncAccessSqlModulesGroup();
   if (accessModulesError) accessModulesError.textContent = "";
   accessModulesOverlay.classList.remove("hidden");
   accessModulesEmailInput?.focus();
 }
 
+accessModPlanillasSqlOnvio?.addEventListener("change", syncAccessSqlModulesGroup);
 accessModBlanqueoConfirm?.addEventListener("change", () => {
   if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
     accessModBlanqueo.checked = true;

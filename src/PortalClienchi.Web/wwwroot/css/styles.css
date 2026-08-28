@@ -3367,15 +3367,56 @@ body.portal-tab-active .tab-icon {
   letter-spacing: 0.03em;
   padding: 1px 5px;
   border-radius: 4px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  opacity: 0.45;
+}
+
+.st2-access-admin-perm-sys.is-off {
+  border-color: #e2e8f0;
   background: #f8fafc;
   color: #94a3b8;
+  opacity: 0.55;
+}
+
+.st2-access-admin-perm-sys--sql.is-on {
+  border-color: #3b82f6;
+  background: #dbeafe;
+  color: #1d4ed8;
+  opacity: 1;
+}
+
+.st2-access-admin-perm-sys--leg.is-on {
+  border-color: #8b5cf6;
+  background: #ede9fe;
+  color: #6d28d9;
+  opacity: 1;
+}
+
+.st2-access-admin-perm-sys--cl.is-on {
+  border-color: #ef4444;
+  background: #fee2e2;
+  color: #b91c1c;
+  opacity: 1;
+}
+
+.st2-access-admin-perm-extra.role-sadm {
+  color: #c2410c;
+  font-weight: 700;
+}
+
+.st2-access-admin-perm-extra.role-adm {
+  color: #0f766e;
+  font-weight: 700;
 }
 
 .st2-access-admin-perm-sys.is-on {
+  /* fallback */
   border-color: #cbd5e1;
   background: #fff;
   color: #334155;
+  opacity: 1;
 }
 
 .st2-access-admin-perm-extras {
@@ -3429,6 +3470,10 @@ body.portal-tab-active .tab-icon {
   color: #64748b;
   line-height: 1.35;
 }
+
+.st2-access-admin-legend-sql { color: #2563eb; font-weight: 700; }
+.st2-access-admin-legend-leg { color: #7c3aed; font-weight: 700; }
+.st2-access-admin-legend-cl { color: #dc2626; font-weight: 700; }
 .st2-access-admin-edit {
   width: 32px;
   height: 32px;
@@ -3646,6 +3691,14 @@ body.portal-tab-active .tab-icon {
   border-radius: 8px;
   background: #fff;
   box-sizing: border-box;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.st2-access-modules-name-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
 }
 
 .st2-access-modules-name-input:focus {
@@ -3673,6 +3726,86 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-modules-check-main > span {
   font-weight: 700;
+}
+
+.st2-access-modules-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.st2-access-modules-check-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.st2-access-modules-check-icon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  display: block;
+}
+
+.st2-access-modules-check-icon-sql {
+  color: #2563eb;
+}
+
+.st2-access-modules-check-icon-leg {
+  font-size: 0.9rem;
+}
+
+.st2-access-modules-check-icon-cl {
+  font-size: 0.95rem;
+}
+
+.st2-access-modules-sql-group {
+  margin: 4px 0 14px;
+  padding: 10px 12px 4px;
+  border-radius: 10px;
+  border: 1px solid #bfdbfe;
+  border-left: 3px solid #3b82f6;
+  background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
+}
+
+.st2-access-modules-sql-group.is-disabled {
+  opacity: 0.48;
+  border-color: #e2e8f0;
+  border-left-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.st2-access-modules-group-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+}
+
+.st2-access-modules-group-hint {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.st2-access-modules-role-note {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.st2-access-modules-check-role.is-primary-locked {
+  opacity: 0.85;
 }
 
 .st2-access-modules-check-sub {

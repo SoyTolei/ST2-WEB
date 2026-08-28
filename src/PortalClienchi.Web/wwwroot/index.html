@@ -1804,7 +1804,7 @@
             </table>
           </div>
           <div class="st2-access-admin-panel-foot">
-            <p class="st2-access-admin-legend">Referral I+D y Transferencia: todos · Permisos: SQL/LEG/CL + módulos · Equipo: solo super-admin</p>
+            <p class="st2-access-admin-legend">Referral I+D y Transferencia: todos · Permisos: <span class="st2-access-admin-legend-sql">SQL</span>/<span class="st2-access-admin-legend-leg">LEG</span>/<span class="st2-access-admin-legend-cl">CL</span> + módulos · Roles: sadm/adm</p>
           </div>
         </div>
       </div>
@@ -2182,7 +2182,7 @@
         <div class="st2-access-modules-profile-top">
           <span class="st2-access-modules-profile-label">Perfil</span>
         </div>
-        <input id="st2-access-modules-name" class="st2-access-modules-name-input" type="text" maxlength="80" autocomplete="name" aria-label="Nombre para mostrar"/>
+        <input id="st2-access-modules-name" class="st2-access-modules-name-input st2-access-admin-input" type="text" maxlength="80" autocomplete="name" placeholder="Nombre visible" aria-label="Nombre para mostrar"/>
         <input id="st2-access-modules-email-input" type="email" class="st2-access-admin-input st2-access-modules-email-input hidden" autocomplete="off" spellcheck="false" placeholder="correo@thomsonreuters.com" aria-label="Correo del perfil"/>
         <span id="st2-access-modules-email" class="st2-access-modules-email"></span>
       </div>
@@ -2190,54 +2190,80 @@
       <input id="st2-access-modules-birthday" type="text" class="st2-access-admin-input" inputmode="numeric" placeholder="DD/MM" maxlength="5" autocomplete="off" spellcheck="false" title="Día y mes, ej. 25/08"/>
       <p class="st2-access-name-edit-hint">Opcional. Sirve para saludos y huevos de cumpleaños (calendario Argentina).</p>
       <p class="st2-access-modules-section-title">Sistemas Planillas</p>
-      <label class="st2-access-modules-check st2-access-modules-check-main">
+      <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-sys">
         <input id="st2-mod-planillas-sql-onvio" type="checkbox"/>
-        <span>🗄️ Bejerman SQL / ONVIO</span>
+        <span class="st2-access-modules-check-label">
+          <span class="st2-access-modules-check-icon st2-access-modules-check-icon-sql" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"><ellipse cx="12" cy="8" rx="8" ry="4"/><path d="M4 8v4c0 2.2 3.6 4 8 4s8-1.8 8-4V8M4 16v4c0 2.2 3.6 4 8 4s8-1.8 8-4v-4"/></svg></span>
+          <span>Bejerman SQL / ONVIO</span>
+        </span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-main">
+      <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-sys">
         <input id="st2-mod-planillas-legal" type="checkbox"/>
-        <span>⚖️ LEGAL</span>
+        <span class="st2-access-modules-check-label">
+          <span class="st2-access-modules-check-icon st2-access-modules-check-icon-leg" aria-hidden="true">⚖️</span>
+          <span>LEGAL</span>
+        </span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-main">
+      <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-sys">
         <input id="st2-mod-planillas-chile" type="checkbox"/>
-        <span>🇨🇱 Chile</span>
+        <span class="st2-access-modules-check-label">
+          <span class="st2-access-modules-check-icon st2-access-modules-check-icon-cl" aria-hidden="true">🇨🇱</span>
+          <span>Chile</span>
+        </span>
       </label>
-      <p class="st2-access-modules-section-title">Módulos</p>
-      <label class="st2-access-modules-check st2-access-modules-check-main">
+      <div id="st2-access-modules-sql-group" class="st2-access-modules-sql-group">
+        <p class="st2-access-modules-group-kicker">
+          <span class="st2-access-modules-check-icon st2-access-modules-check-icon-sql" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"><ellipse cx="12" cy="8" rx="8" ry="4"/><path d="M4 8v4c0 2.2 3.6 4 8 4s8-1.8 8-4V8M4 16v4c0 2.2 3.6 4 8 4s8-1.8 8-4v-4"/></svg></span>
+          Módulos Bejerman SQL / ONVIO
+        </p>
+        <p class="st2-access-modules-group-hint">Solo aplican si el usuario ve el sistema SQL/ONVIO.</p>
+      <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-sql-mod">
         <input id="st2-mod-oportunidad" type="checkbox"/>
         <span>💼 Oportunidad de Venta</span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-main">
+      <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-sql-mod">
         <input id="st2-mod-pdf" type="checkbox"/>
         <span>📄 Generador PDF-Portal</span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-main">
+      <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-sql-mod">
         <input id="st2-mod-blanqueo" type="checkbox"/>
         <span>🔑 Blanqueo Claves</span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-sub">
+      <label class="st2-access-modules-check st2-access-modules-check-sub st2-access-modules-check-sql-mod">
         <input id="st2-mod-blanqueo-confirm" type="checkbox"/>
         <span>✓ Puede confirmar</span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-sub">
+      <label class="st2-access-modules-check st2-access-modules-check-sub st2-access-modules-check-sql-mod">
         <input id="st2-mod-blanqueo-load" type="checkbox"/>
         <span>＋ Puede cargar</span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-main">
+      <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-sql-mod">
         <input id="st2-mod-borrado-bases" type="checkbox"/>
         <span>🗄️ Borrado de Bases Web</span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-sub">
+      <label class="st2-access-modules-check st2-access-modules-check-sub st2-access-modules-check-sql-mod">
         <input id="st2-mod-borrado-bases-confirm" type="checkbox"/>
         <span>✓ Puede confirmar</span>
       </label>
-      <label class="st2-access-modules-check st2-access-modules-check-sub">
+      <label class="st2-access-modules-check st2-access-modules-check-sub st2-access-modules-check-sql-mod">
         <input id="st2-mod-borrado-bases-load" type="checkbox"/>
         <span>＋ Puede cargar</span>
       </label>
-      <label id="st2-mod-st2-admin-wrap" class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-admin">
+      </div>
+      <p class="st2-access-modules-section-title">Roles</p>
+      <label id="st2-mod-super-admin-wrap" class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-role st2-access-modules-check-super hidden">
+        <input id="st2-mod-super-admin" type="checkbox" disabled/>
+        <span class="st2-access-modules-check-label">
+          <span class="st2-access-modules-check-icon" aria-hidden="true">👑</span>
+          <span>Super-admin <span class="st2-access-modules-role-note">(dueño ST2 · acceso total)</span></span>
+        </span>
+      </label>
+      <label id="st2-mod-st2-admin-wrap" class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-role st2-access-modules-check-admin">
         <input id="st2-mod-st2-admin" type="checkbox"/>
-        <span>🛡️ ADMIN WEB</span>
+        <span class="st2-access-modules-check-label">
+          <span class="st2-access-modules-check-icon" aria-hidden="true">🛡️</span>
+          <span>ADMIN WEB <span class="st2-access-modules-role-note">(panel de accesos)</span></span>
+        </span>
       </label>
       <p id="st2-access-modules-error" class="st2-access-admin-error" role="alert"></p>
       <div class="st2-access-modules-actions">

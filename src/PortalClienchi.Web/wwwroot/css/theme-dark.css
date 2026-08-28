@@ -1368,6 +1368,38 @@ html.st2-theme-dark .st2-access-modules-name-input {
   border-color: #3d4b61 !important;
 }
 
+html.st2-theme-dark .st2-access-modules-name-input {
+  color: #e8eef7 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-name-input::placeholder {
+  color: #7d8ba0 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sql-group {
+  background: linear-gradient(180deg, #172033 0%, #151b26 100%) !important;
+  border-color: #334155 !important;
+  border-left-color: #3b82f6 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sql-group.is-disabled {
+  background: #151b26 !important;
+  border-left-color: #475569 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-group-kicker {
+  color: #93c5fd !important;
+}
+
+html.st2-theme-dark .st2-access-modules-group-hint,
+html.st2-theme-dark .st2-access-modules-role-note {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-check-icon-sql {
+  color: #60a5fa !important;
+}
+
 html.st2-theme-dark .st2-access-modules-preview {
   background: #1e293b !important;
   color: #7dd3fc !important;
@@ -1435,16 +1467,54 @@ html.st2-theme-dark .st2-access-admin-mod-empty {
   color: #64748b !important;
 }
 
-html.st2-theme-dark .st2-access-admin-perm-sys {
+html.st2-theme-dark .st2-access-admin-perm-sys.is-off {
   background: #1a2230 !important;
   border-color: #334155 !important;
   color: #64748b !important;
+  opacity: 0.5 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-sys--sql.is-on {
+  background: #172554 !important;
+  border-color: #3b82f6 !important;
+  color: #93c5fd !important;
+  opacity: 1 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-sys--leg.is-on {
+  background: #2e1065 !important;
+  border-color: #8b5cf6 !important;
+  color: #c4b5fd !important;
+  opacity: 1 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-sys--cl.is-on {
+  background: #450a0a !important;
+  border-color: #ef4444 !important;
+  color: #fca5a5 !important;
+  opacity: 1 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-extra.role-sadm {
+  color: #fb923c !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-extra.role-adm {
+  color: #5eead4 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-sys {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #64748b !important;
+  opacity: 0.45 !important;
 }
 
 html.st2-theme-dark .st2-access-admin-perm-sys.is-on {
   background: #243044 !important;
   border-color: #475569 !important;
   color: #e2e8f0 !important;
+  opacity: 1 !important;
 }
 
 html.st2-theme-dark .st2-access-admin-perm-extras {
