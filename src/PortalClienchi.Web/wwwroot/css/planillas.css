@@ -883,7 +883,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .plan-pill-btn {
   position: relative;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   padding: 12px 8px;
   border-radius: 10px;
@@ -891,7 +891,11 @@ body.st2-balloons-sides .st2-x-balloon-body {
   font-weight: 600;
   color: var(--dark);
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
   z-index: 1;
   min-height: 54px;
   display: flex;
@@ -903,7 +907,14 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-pill-btn:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(214, 64, 0, 0.08);
+  border-color: rgba(214, 64, 0, 0.28);
+  box-shadow: 0 2px 12px rgba(214, 64, 0, 0.1);
+}
+
+.plan-pill-btn:active:not(.active) {
+  background: rgba(214, 64, 0, 0.14);
+  border-color: rgba(214, 64, 0, 0.38);
 }
 
 .plan-pill-btn.active {

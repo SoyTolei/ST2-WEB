@@ -313,15 +313,27 @@ html.st2-theme-dark .plan-gestor-ctx button:hover {
   background: #243044 !important;
 }
 
-html.st2-theme-dark .plan-pill-btn {
+html.st2-theme-dark .plan-pill-btn:not(.active) {
   background: transparent !important;
-  color: #94a3b8 !important;
-  border-color: transparent !important;
+  color: #c5d0de !important;
+  border: 1px solid transparent !important;
+  box-shadow: none;
 }
 
 html.st2-theme-dark .plan-pill-btn:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: #e2e8f0 !important;
+  background: rgba(249, 115, 22, 0.14) !important;
+  border-color: rgba(249, 115, 22, 0.52) !important;
+  color: #fff7ed !important;
+  box-shadow:
+    0 2px 14px rgba(234, 88, 12, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+html.st2-theme-dark .plan-pill-btn:active:not(.active) {
+  background: rgba(249, 115, 22, 0.22) !important;
+  border-color: rgba(249, 115, 22, 0.62) !important;
+  color: #fff !important;
+  box-shadow: none;
 }
 
 html.st2-theme-dark .plan-pill-btn.active {
