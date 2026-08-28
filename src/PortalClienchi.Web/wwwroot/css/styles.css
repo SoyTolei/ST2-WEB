@@ -113,17 +113,17 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .brand-icon {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   image-rendering: -webkit-optimize-contrast;
 }
 
@@ -1978,14 +1978,14 @@ body.portal-tab-active .app-header {
 
 body.embed-active .brand-mark,
 body.portal-tab-active .brand-mark {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
 }
 
 body.embed-active .brand-icon,
 body.portal-tab-active .brand-icon {
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
 }
 
 body.embed-active .tab-bar {
