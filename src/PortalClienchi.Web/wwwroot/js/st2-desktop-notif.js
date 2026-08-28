@@ -98,3 +98,41 @@ export function notifyWebUpdateDesktop(build) {
     );
   });
 }
+
+const lastClientChangeTags = new Set();
+
+/** Aviso cuando un usuario conecta desde otro equipo/terminal (solo super-admin). */
+export function notifyAdminClientChangeDesktop(displayName, email, previousLabel, nextLabel) {
+  const mail = String(email || "").trim().toLowerCase();
+  const next = String(nextLabel || "").trim();
+  const prev = String(previousLabel || "").trim();
+  if (!mail || !next || !prev || next === prev) return;
+
+  const tag = `client-${mail}-${next.slice(0, 40)}`;
+  if (lastClientChangeTags.has(tag)) return;
+  lastClientChangeTags.add(tag);
+  if (lastClientChangeTags.size > 80) {
+    const first = lastClientChangeTags.values().next().value;
+    if (first) lastClientChangeTags.delete(first);
+  }
+
+  const who = String(displayName || mail).trim() || mail;
+  const body = `${who}: ${next} (antes ${prev})`;
+  void ensureDesktopNotifPermission().then((ok) => {
+    if (!ok) return;
+    showDesktopNotif(
+      "ST2 · Equipo distinto",
+      body,
+      tag,
+      {
+        allowWhileVisible: true,
+        onClick: () => {
+          try {
+            window.location.hash = "#/admin";
+            window.dispatchEvent(new HashChangeEvent("hashchange"));
+          } catch { /* ignore */ }
+        },
+      },
+    );
+  });
+}

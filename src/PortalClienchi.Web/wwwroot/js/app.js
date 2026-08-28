@@ -2,7 +2,7 @@ import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
-import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
+import { notifyWebUpdateDesktop, notifyAdminClientChangeDesktop } from "./st2-desktop-notif.js";
 import { setToastText, TOAST_FOOD_MARK, greetLine, toastFirstName } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
@@ -1091,6 +1091,182 @@ let accessAdminItemsCache = [];
 let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
 let accessAdminFilter = "all";
 let accessAdminQuery = "";
+let accessAdminLastClientByEmail = new Map();
+let accessAdminClientWatchReady = false;
+let accessAdminClientWatchTimer = null;
+let accessAdminClientChangedEmails = new Set();
+let accessAdminClientWatchBusy = false;
+
+function formatAccessClientLabel(item) {
+  return item?.lastClientLabel
+    || item?.lastClientHost
+    || item?.lastClientHint
+    || item?.lastClientIp
+    || "";
+}
+
+function buildAccessClientKey(item) {
+  const host = String(item?.lastClientHost || "").trim().toLowerCase();
+  const ip = String(item?.lastClientIp || "").trim().toLowerCase();
+  const hint = String(item?.lastClientHint || "").trim().toLowerCase();
+  if (!host && !ip && !hint) return "";
+  return `${host}|${ip}|${hint}`;
+}
+
+function buildAccessAdminPermsCell(item) {
+  const mods = item.modules || {};
+  const systems = [
+    { label: "SQL", on: !!mods.planillasSqlOnvio, title: "Bejerman SQL / ONVIO" },
+    { label: "LEG", on: !!mods.planillasLegal, title: "LEGAL" },
+    { label: "CL", on: !!mods.planillasChile, title: "Chile" },
+  ];
+  const sysHtml = systems.map((sys) => (
+    `<span class="st2-access-admin-perm-sys${sys.on ? " is-on" : ""}" title="${escapeHtml(sys.title)}${sys.on ? "" : " (sin acceso)"}">${escapeHtml(sys.label)}</span>`
+  )).join("");
+
+  const extras = [];
+  if (mods.oportunidad) extras.push({ label: "op", title: "Oportunidad de Venta" });
+  if (mods.pdfPortal) extras.push({ label: "pdf", title: "Generador PDF-Portal" });
+  if (mods.blanqueoConfirm && mods.blanqueoLoad) {
+    extras.push({ label: "bl+", title: "Blanqueo Claves: confirma y carga" });
+  } else if (mods.blanqueoConfirm) {
+    extras.push({ label: "bl✓", title: "Blanqueo Claves: solo confirma" });
+  } else if (mods.blanqueoLoad || mods.blanqueo) {
+    extras.push({ label: "bl", title: "Blanqueo Claves" });
+  }
+  if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
+    extras.push({ label: "bs+", title: "Borrado de Bases: confirma y carga" });
+  } else if (mods.borradoBasesConfirm) {
+    extras.push({ label: "bs✓", title: "Borrado de Bases: solo confirma" });
+  } else if (mods.borradoBasesLoad || mods.borradoBases) {
+    extras.push({ label: "bs", title: "Borrado de Bases Web" });
+  }
+  if (item.isSt2Admin) extras.push({ label: "adm", title: "ADMIN WEB" });
+
+  const extrasHtml = extras.length
+    ? `<div class="st2-access-admin-perm-extras" aria-label="Módulos extra">${extras.map((extra, idx) => `${idx ? '<span class="st2-access-admin-perm-sep" aria-hidden="true">·</span>' : ""}<span class="st2-access-admin-perm-extra" title="${escapeHtml(extra.title)}">${escapeHtml(extra.label)}</span>`).join("")}</div>`
+    : "";
+
+  return `<div class="st2-access-admin-perms">
+    <div class="st2-access-admin-perm-line" aria-label="Sistemas Planillas">${sysHtml}</div>
+    ${extrasHtml}
+  </div>`;
+}
+
+function applyAccessAdminClientWatch(items, { notify = true, showHint = true } = {}) {
+  if (!isPrimarySuperAdmin() || accessAdminClientWatchBusy) return [];
+
+  accessAdminClientWatchBusy = true;
+  try {
+  const changes = [];
+  const nextMap = new Map();
+
+  for (const item of items) {
+    if (!item.email || item.isPending) continue;
+    const key = buildAccessClientKey(item);
+    if (!key) continue;
+    nextMap.set(item.email, {
+      key,
+      label: formatAccessClientLabel(item) || key,
+      displayName: formatAccessDisplayName(item.email, item.displayNameOverride),
+    });
+  }
+
+  if (!accessAdminClientWatchReady) {
+    accessAdminLastClientByEmail = nextMap;
+    accessAdminClientWatchReady = true;
+    return [];
+  }
+
+  for (const [email, next] of nextMap.entries()) {
+    const prev = accessAdminLastClientByEmail.get(email);
+    if (!prev || prev.key === next.key) continue;
+    changes.push({
+      email,
+      displayName: next.displayName,
+      previousLabel: prev.label,
+      nextLabel: next.label,
+    });
+  }
+
+  accessAdminLastClientByEmail = nextMap;
+
+  if (!notify || !changes.length) return changes;
+
+  accessAdminClientChangedEmails = new Set(changes.map((c) => c.email));
+  const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+
+  for (const change of changes) {
+    notifyAdminClientChangeDesktop(
+      change.displayName,
+      change.email,
+      change.previousLabel,
+      change.nextLabel,
+    );
+  }
+
+  if (showHint) {
+    const first = changes[0];
+    const label = changes.length === 1
+      ? `Equipo distinto: ${first.displayName} · ${first.nextLabel}`
+      : `${changes.length} cambios de equipo`;
+    setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+  }
+
+  return changes;
+  } finally {
+    accessAdminClientWatchBusy = false;
+  }
+}
+
+async function pollAccessAdminClientWatch() {
+  if (!isPrimarySuperAdmin()) return;
+  try {
+    const response = await fetch("/api/access/registrations", { credentials: "include" });
+    if (!response.ok) return;
+    const data = await response.json().catch(() => ({}));
+    const rawItems = Array.isArray(data.items) ? data.items : [];
+    const items = normalizeAccessAdminItems(rawItems);
+    const changes = applyAccessAdminClientWatch(items, { notify: true, showHint: false });
+
+    const onAdminTab = !!document.querySelector(`.tab-btn.active[data-tab="${ADMIN_TAB_ID}"]`);
+    if (changes.length && onAdminTab) {
+      const known = new Map(accessAdminItemsCache.map((item) => [item.email, item]));
+      let touched = false;
+      for (const item of items) {
+        if (!known.has(item.email)) continue;
+        known.set(item.email, { ...known.get(item.email), ...item });
+        touched = true;
+      }
+      if (touched) {
+        accessAdminItemsCache = sortAccessAdminItems([...known.values()]);
+        renderAccessAdminTable();
+      }
+      const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+      const first = changes[0];
+      const label = changes.length === 1
+        ? `Equipo distinto: ${first.displayName} · ${first.nextLabel}`
+        : `${changes.length} cambios de equipo`;
+      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+function startAccessAdminClientWatch() {
+  if (!isPrimarySuperAdmin() || accessAdminClientWatchTimer) return;
+  void pollAccessAdminClientWatch();
+  accessAdminClientWatchTimer = setInterval(() => {
+    void pollAccessAdminClientWatch();
+  }, 30000);
+}
+
+function stopAccessAdminClientWatch() {
+  if (!accessAdminClientWatchTimer) return;
+  clearInterval(accessAdminClientWatchTimer);
+  accessAdminClientWatchTimer = null;
+}
 
 function syncAdminTabVisibility() {
   const show = isSt2SuperAdmin();
@@ -1407,36 +1583,10 @@ function renderAccessAdminTable() {
       item.isPending ? "is-pending" : "",
       item.isActive ? "is-active" : "",
       item.isUnseenNew ? "is-new" : "",
+      accessAdminClientChangedEmails.has(item.email) ? "is-client-changed" : "",
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
-    const mods = item.modules || {};
-    const modBadges = [];
-    if (mods.oportunidad) {
-      modBadges.push({ label: "OPOR", title: "Oportunidad de Venta", cls: "mod-opor" });
-    }
-    if (mods.pdfPortal) {
-      modBadges.push({ label: "PDF", title: "Generador PDF-Portal", cls: "mod-pdf" });
-    }
-    if (mods.blanqueoConfirm && mods.blanqueoLoad) {
-      modBadges.push({ label: "BLANQUEOS✓+", title: "Blanqueo Claves: confirma y carga", cls: "mod-blanqueo" });
-    } else if (mods.blanqueoConfirm) {
-      modBadges.push({ label: "BLANQUEOS✓", title: "Blanqueo Claves: solo confirma", cls: "mod-blanqueo" });
-    } else if (mods.blanqueoLoad || mods.blanqueo) {
-      modBadges.push({ label: "BLANQUEOS", title: "Blanqueo Claves: puede cargar", cls: "mod-blanqueo" });
-    }
-    if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
-      modBadges.push({ label: "BASES✓+", title: "Borrado de Bases Web: confirma y carga", cls: "mod-bases" });
-    } else if (mods.borradoBasesConfirm) {
-      modBadges.push({ label: "BASES✓", title: "Borrado de Bases Web: solo confirma", cls: "mod-bases" });
-    } else if (mods.borradoBasesLoad || mods.borradoBases) {
-      modBadges.push({ label: "BASES", title: "Borrado de Bases Web: puede cargar", cls: "mod-bases" });
-    }
-    if (item.isSt2Admin) {
-      modBadges.push({ label: "ADMIN", title: "ADMIN WEB", cls: "mod-admin" });
-    }
-    const modHtml = modBadges.length
-      ? `<span class="st2-access-admin-mod-badges">${modBadges.map((b) => `<span class="st2-access-admin-mod ${escapeHtml(b.cls || "")}" title="${escapeHtml(b.title)}">${escapeHtml(b.label)}</span>`).join("")}</span>`
-      : `<span class="st2-access-admin-mod-empty" title="Sin módulos extra">—</span>`;
+    const permsHtml = buildAccessAdminPermsCell(item);
     const hostLabel = item.lastClientLabel || item.lastClientHost || item.lastClientHint || item.lastClientIp || "—";
     const hostTitle = [
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
@@ -1461,7 +1611,7 @@ function renderAccessAdminTable() {
           ${badgeHtml}
         </div>
       </td>
-      <td class="st2-access-admin-mods-cell">${modHtml}</td>
+      <td class="st2-access-admin-mods-cell">${permsHtml}</td>
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
       ${hostCell}
@@ -1470,6 +1620,7 @@ function renderAccessAdminTable() {
       </td>
     </tr>`;
   }).join("");
+  accessAdminClientChangedEmails.clear();
   accessAdminTableWrap?.classList.remove("hidden");
 }
 
@@ -1762,8 +1913,9 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     const allEmails = items.map((item) => item.email);
     const newActiveEmails = getNewActiveEmails(accessAdminLastActiveEmails, activeEmails);
     const newRegistrationEmails = getNewRegistrationEmails(accessAdminLastKnownEmails, allEmails);
+    const clientChanges = applyAccessAdminClientWatch(items, { notify: true, showHint: false });
 
-    if (auto && !force && snapshot === accessAdminLastSnapshot) {
+    if (auto && !force && snapshot === accessAdminLastSnapshot && !clientChanges.length) {
       return;
     }
 
@@ -1780,7 +1932,13 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
 
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
     const newPending = items.filter((item) => item.isPending && newRegistrationEmails.includes(item.email));
-    if (newPending.length > 0) {
+    if (clientChanges.length > 0) {
+      const first = clientChanges[0];
+      const label = clientChanges.length === 1
+        ? `Equipo distinto: ${first.displayName} · ${first.nextLabel}`
+        : `${clientChanges.length} cambios de equipo`;
+      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+    } else if (newPending.length > 0) {
       const label = newPending.length === 1
         ? `Nueva solicitud: ${newPending[0].email}`
         : `${newPending.length} solicitudes nuevas`;
@@ -4092,6 +4250,7 @@ async function bootstrapApp() {
   paintToolDatesFromMeta();
   syncAboutToolsBadge();
   await ensureAppAccess();
+  if (isPrimarySuperAdmin()) startAccessAdminClientWatch();
   syncAdminTabVisibility();
   syncViewAsBanner();
   bindAboutToolsUi();

@@ -1435,6 +1435,31 @@ html.st2-theme-dark .st2-access-admin-mod-empty {
   color: #64748b !important;
 }
 
+html.st2-theme-dark .st2-access-admin-perm-sys {
+  background: #1a2230 !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-sys.is-on {
+  background: #243044 !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-extras {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-table tr.is-client-changed {
+  animation-name: st2-access-client-flash-dark;
+}
+
+@keyframes st2-access-client-flash-dark {
+  0% { background: #3b2a18; }
+  100% { background: transparent; }
+}
+
 html.st2-theme-dark .st2-access-admin-edit,
 html.st2-theme-dark .st2-access-admin-modules,
 html.st2-theme-dark .st2-access-admin-preview,
