@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace PortalClienchi.Web;
@@ -61,6 +62,8 @@ public static class St2IndexHtml
         sb.AppendLine("}");
         sb.AppendLine("</script>");
         sb.AppendLine($"<meta name=\"st2-build\" content=\"{WebUtility.HtmlEncode(build)}\"/>");
+        var icoV = GetIconVersion(env, v);
+        sb.AppendLine($"<meta name=\"st2-icon\" content=\"/st2.ico?v={WebUtility.HtmlEncode(icoV)}\"/>");
         sb.AppendLine($"<meta name=\"st2-version-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetVersionLabel())}\"/>");
         sb.AppendLine($"<meta name=\"st2-updated-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetUpdatedLabel())}\"/>");
         if (!string.IsNullOrWhiteSpace(sqlLabel))
@@ -86,6 +89,7 @@ public static class St2IndexHtml
         html = html.Replace("/css/pdf-portal.css", $"/css/pdf-portal.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/theme-dark.css", $"/css/theme-dark.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);
+        html = html.Replace("/st2.ico", $"/st2.ico?v={icoV}", StringComparison.Ordinal);
         if (!string.IsNullOrWhiteSpace(sqlLabel))
         {
             html = html.Replace(
@@ -102,6 +106,23 @@ public static class St2IndexHtml
         }
         html = html.Replace("<link rel=\"stylesheet\" href=\"/css/planillas.css", $"<link rel=\"modulepreload\" href=\"/js/planillas.js?v={v}\"/><link rel=\"modulepreload\" href=\"/js/planillas-icons.js?v={v}\"/><link rel=\"stylesheet\" href=\"/css/planillas.css", StringComparison.Ordinal);
         return html;
+    }
+
+    private static string GetIconVersion(IWebHostEnvironment env, string fallback)
+    {
+        try
+        {
+            var path = Path.Combine(env.WebRootPath, "st2.ico");
+            if (!File.Exists(path))
+                return fallback;
+
+            var hash = SHA256.HashData(File.ReadAllBytes(path));
+            return Convert.ToHexString(hash)[..8].ToLowerInvariant();
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 
     public static async Task<string> LoadAsync(IWebHostEnvironment env, CancellationToken ct = default)

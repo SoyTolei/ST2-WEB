@@ -33,6 +33,10 @@ export function setDesktopNotifEnabled(on) {
   } catch { /* ignore */ }
 }
 
+function st2IconUrl() {
+  return document.querySelector('meta[name="st2-icon"]')?.content || "/st2.ico";
+}
+
 function showDesktopNotif(title, body, tag, { allowWhileVisible = false, onClick } = {}) {
   if (!desktopNotifSupported() || Notification.permission !== "granted" || !notifEnabled()) return;
   // Blanqueo/borrado: solo con pestaña oculta (evita spam encima del toast).
@@ -42,7 +46,7 @@ function showDesktopNotif(title, body, tag, { allowWhileVisible = false, onClick
       body,
       tag: tag || "st2-alert",
       renotify: true,
-      icon: "/st2.ico",
+      icon: st2IconUrl(),
     });
     n.onclick = () => {
       try { window.focus(); } catch { /* ignore */ }

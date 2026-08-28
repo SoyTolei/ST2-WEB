@@ -156,7 +156,8 @@ app.UseStaticFiles(new StaticFileOptions
         var file = ctx.File.Name;
         if (file.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
             || file.EndsWith(".js", StringComparison.OrdinalIgnoreCase)
-            || file.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
+            || file.EndsWith(".css", StringComparison.OrdinalIgnoreCase)
+            || file.EndsWith(".ico", StringComparison.OrdinalIgnoreCase))
         {
             ctx.Context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
             ctx.Context.Response.Headers.Pragma = "no-cache";
