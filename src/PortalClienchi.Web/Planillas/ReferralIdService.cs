@@ -107,6 +107,36 @@ public sealed class ReferralIdService
             caso.Legal.UsuarioOnePass = req.Legal.UsuarioOnePass?.Trim() ?? "";
             caso.Legal.Escritorio = req.Legal.Escritorio?.Trim() ?? "";
         }
+        if (req.Chile is not null)
+        {
+            caso.Chile.Producto = string.IsNullOrWhiteSpace(req.Chile.Producto)
+                ? ChileConstants.PlaceholderProducto
+                : req.Chile.Producto.Trim().ToUpperInvariant();
+            caso.Chile.HyperrentaVersion = req.Chile.HyperrentaVersion?.Trim() ?? "";
+            caso.Chile.HyperrentaModulos.Clear();
+            if (req.Chile.HyperrentaModulos is not null)
+            {
+                foreach (var modulo in req.Chile.HyperrentaModulos)
+                {
+                    var m = modulo?.Trim() ?? "";
+                    if (m.Length > 0 && ChileConstants.HyperrentaModulos.Contains(m))
+                        caso.Chile.HyperrentaModulos.Add(m);
+                }
+            }
+            caso.Chile.Version = req.Chile.Version?.Trim() ?? "";
+            caso.Chile.TipoBase = req.Chile.TipoBase?.Trim() ?? "";
+            caso.Chile.BaseAdjunta = req.Chile.BaseAdjunta;
+            caso.Chile.Anio = req.Chile.Anio?.Trim() ?? "";
+            caso.Chile.Rut = req.Chile.Rut?.Trim() ?? "";
+            caso.Chile.Usuario = req.Chile.Usuario?.Trim() ?? "";
+            caso.Chile.Clave = req.Chile.Clave?.Trim() ?? "";
+            caso.Chile.SistemaOperativo = req.Chile.SistemaOperativo?.Trim() ?? "";
+            caso.Chile.VersionMotorSql = req.Chile.VersionMotorSql?.Trim() ?? "";
+            caso.Chile.ContactoNombre = req.Chile.ContactoNombre?.Trim() ?? "";
+            caso.Chile.ContactoTelefono = req.Chile.ContactoTelefono?.Trim() ?? "";
+            caso.Chile.ContactoCorreo = req.Chile.ContactoCorreo?.Trim() ?? "";
+            caso.Chile.AdjuntaPantallas = req.Chile.AdjuntaPantallas;
+        }
         caso.Onvio.TicketAvisoOmitido = req.TicketAvisoOmitido;
         if (sistema == PlanillasSistema.Legal)
             caso.Legal.TicketAvisoOmitido = req.TicketAvisoOmitido;
@@ -142,6 +172,7 @@ public sealed class ReferralIdService
             PlanillasSistema.BejermanSql => caso.Adjuntos.Pantallas,
             PlanillasSistema.OnvioWeb => caso.Onvio.AdjuntaPantallas,
             PlanillasSistema.Legal => caso.Legal.AdjuntaPantallas,
+            PlanillasSistema.Chile => caso.Chile.AdjuntaPantallas,
             _ => false,
         };
 
@@ -201,6 +232,8 @@ public sealed class ReferralIdService
                 caso.Onvio.AdjuntaPantallas = true;
             else if (caso.Sistema == PlanillasSistema.Legal)
                 caso.Legal.AdjuntaPantallas = true;
+            else if (caso.Sistema == PlanillasSistema.Chile)
+                caso.Chile.AdjuntaPantallas = true;
         }
         finally
         {

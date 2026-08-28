@@ -15,6 +15,7 @@ public sealed class ReferralIdCase
     public PlanillaTecnicaState Planilla { get; } = new();
     public OnvioReferralState Onvio { get; } = new();
     public LegalReferralState Legal { get; } = new();
+    public ChileReferralState Chile { get; } = new();
     public AdjuntosState Adjuntos { get; } = new();
     public IReadOnlyList<TransferenciaCapturaEnlace> CapturasEnlaces { get; set; } = Array.Empty<TransferenciaCapturaEnlace>();
     public IReadOnlyList<TransferenciaCapturaEnlace> TrazaEnlaces { get; set; } = Array.Empty<TransferenciaCapturaEnlace>();
@@ -96,6 +97,26 @@ public sealed class OnvioReferralState
     public bool TicketAvisoOmitido { get; set; }
 }
 
+public sealed class ChileReferralState
+{
+    public string Producto { get; set; } = ChileConstants.PlaceholderProducto;
+    public string HyperrentaVersion { get; set; } = "";
+    public List<string> HyperrentaModulos { get; } = [];
+    public string Version { get; set; } = "";
+    public string TipoBase { get; set; } = "";
+    public bool? BaseAdjunta { get; set; }
+    public string Anio { get; set; } = "";
+    public string Rut { get; set; } = "";
+    public string Usuario { get; set; } = "";
+    public string Clave { get; set; } = "";
+    public string SistemaOperativo { get; set; } = "";
+    public string VersionMotorSql { get; set; } = "";
+    public string ContactoNombre { get; set; } = "";
+    public string ContactoTelefono { get; set; } = "";
+    public string ContactoCorreo { get; set; } = "";
+    public bool AdjuntaPantallas { get; set; }
+}
+
 public sealed class LegalReferralState
 {
     public string Produto { get; set; } = LegalConstants.PlaceholderProduto;
@@ -148,6 +169,7 @@ public sealed class ReferralGenerateRequest
     public PlanillaTecnicaDto? Planilla { get; set; }
     public OnvioReferralDto? Onvio { get; set; }
     public LegalReferralDto? Legal { get; set; }
+    public ChileReferralDto? Chile { get; set; }
     public AdjuntosDto? Adjuntos { get; set; }
     public List<CapturaEnlaceDto>? CapturasEnlaces { get; set; }
     public List<CapturaEnlaceDto>? TrazaEnlaces { get; set; }
@@ -179,6 +201,26 @@ public sealed class OnvioReferralDto
     public bool AdjuntaPantallas { get; set; }
     public string? UsuarioContador { get; set; }
     public string? Empresa { get; set; }
+}
+
+public sealed class ChileReferralDto
+{
+    public string? Producto { get; set; }
+    public string? HyperrentaVersion { get; set; }
+    public List<string>? HyperrentaModulos { get; set; }
+    public string? Version { get; set; }
+    public string? TipoBase { get; set; }
+    public bool? BaseAdjunta { get; set; }
+    public string? Anio { get; set; }
+    public string? Rut { get; set; }
+    public string? Usuario { get; set; }
+    public string? Clave { get; set; }
+    public string? SistemaOperativo { get; set; }
+    public string? VersionMotorSql { get; set; }
+    public string? ContactoNombre { get; set; }
+    public string? ContactoTelefono { get; set; }
+    public string? ContactoCorreo { get; set; }
+    public bool AdjuntaPantallas { get; set; }
 }
 
 public sealed class LegalReferralDto

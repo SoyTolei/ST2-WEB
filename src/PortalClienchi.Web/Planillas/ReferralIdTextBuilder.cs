@@ -27,6 +27,10 @@ public static class ReferralIdTextBuilder
             if (!string.IsNullOrWhiteSpace(c.Legal.ChaveRegistro))
                 partes.Add($"CLAVE DE REGISTRO: {c.Legal.ChaveRegistro.Trim()}");
         }
+        else if (c.Sistema == PlanillasSistema.Chile)
+        {
+            AppendChileDatosSistema(partes, c.Chile);
+        }
 
         partes.Add("");
         partes.Add("==========================================");
@@ -49,6 +53,8 @@ public static class ReferralIdTextBuilder
             AppendBejermanComprobaciones(partes, c);
         else if (c.Sistema == PlanillasSistema.Legal)
             AppendLegalComprobaciones(partes, c);
+        else if (c.Sistema == PlanillasSistema.Chile)
+            AppendChileDetalles(partes, c);
 
         partes.Add("");
         partes.Add("==========================================");
@@ -57,6 +63,53 @@ public static class ReferralIdTextBuilder
         partes.Add("==========================================");
 
         return string.Join(Environment.NewLine, partes);
+    }
+
+    private static void AppendChileDatosSistema(List<string> partes, ChileReferralState ch)
+    {
+        partes.Add($"PRODUCTO: {ChileConstants.ReferralProductoLabel(ch.Producto)}");
+
+        if (string.Equals(ch.Producto, "HYPERRENTA", StringComparison.OrdinalIgnoreCase))
+        {
+            partes.Add($"VERSIÓN: {ch.HyperrentaVersion.Trim()}");
+            partes.Add($"MÓDULOS: {string.Join(", ", ch.HyperrentaModulos)}");
+        }
+        else
+        {
+            partes.Add($"VERSIÓN: {ch.Version.Trim()}");
+            partes.Add($"TIPO DE BASE: {ch.TipoBase.Trim()}");
+            partes.Add($"BASE ADJUNTA: {(ch.BaseAdjunta == true ? "SÍ" : "NO")}");
+        }
+
+        partes.Add($"AÑO: {ch.Anio.Trim()}");
+        partes.Add($"RUT CON INCONVENIENTES: {ch.Rut.Trim()}");
+    }
+
+    private static void AppendChileDetalles(List<string> partes, ReferralIdCase c)
+    {
+        var ch = c.Chile;
+
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("INGRESO A SISTEMA 🔐");
+        partes.Add($"- Usuario: {ch.Usuario.Trim()}");
+        partes.Add($"- Clave: {ch.Clave.Trim()}");
+
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("ENTORNO 🖥️");
+        partes.Add($"- Sistema operativo: {ch.SistemaOperativo.Trim()}");
+        if (!string.IsNullOrWhiteSpace(ch.VersionMotorSql))
+            partes.Add($"- Versión motor SQL: {ch.VersionMotorSql.Trim()}");
+
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("DATOS DE CONTACTO 📞");
+        partes.Add($"- Nombre: {ch.ContactoNombre.Trim()}");
+        partes.Add($"- Teléfono: {ch.ContactoTelefono.Trim()}");
+        partes.Add($"- Correo electrónico: {ch.ContactoCorreo.Trim()}");
+
+        partes.Add($"- Se adjuntan {CapturasTextoHelper.BuildSiNoLabel(c.CapturasEnlaces, ch.AdjuntaPantallas)}: {(ch.AdjuntaPantallas ? "SÍ" : "NO")}");
     }
 
     private static void AppendOnvioComprobaciones(List<string> partes, ReferralIdCase c)
@@ -304,6 +357,18 @@ public static class ReferralIdTextBuilder
                 partes.Add("- Planilla de importación (Excel)");
             if (l.AdjuntaLogIntegracao)
                 partes.Add("- Log de integración");
+        }
+        else if (c.Sistema == PlanillasSistema.Chile)
+        {
+            hay = c.Chile.AdjuntaPantallas;
+            if (c.Chile.AdjuntaPantallas)
+            {
+                partes.Add(CapturasTextoHelper.BuildSeccionTitulo(c.CapturasEnlaces));
+                if (c.CapturasEnlaces.Count > 0)
+                    CapturasTextoHelper.AppendEnlacesCapturas(partes, c.CapturasEnlaces, indentar: false);
+                else
+                    partes.Add(BuildAdjuntosEnComentarios([CapturasTextoHelper.BuildComentariosItemLabel(c.CapturasEnlaces)]));
+            }
         }
 
         if (!hay)

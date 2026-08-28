@@ -93,6 +93,13 @@ public static class PlanillasEndpoints
             chile = new
             {
                 mesas = ChileConstants.Mesas.Select(m => new { id = m.Id, label = m.Label }),
+                referral = new
+                {
+                    productos = ChileConstants.ReferralProductos.Select(p => new { id = p.Id, label = p.Label }),
+                    hyperrentaVersiones = ChileConstants.HyperrentaVersiones,
+                    hyperrentaModulos = ChileConstants.HyperrentaModulos,
+                    tiposBase = ChileConstants.TiposBase,
+                },
             },
             oportunidad = new
             {

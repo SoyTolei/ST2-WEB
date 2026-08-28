@@ -1,5 +1,11 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
 import { initLegalReferralHub, openLegalReferralHub, resetLegalReferralHub } from "./planillas-referral-legal.js";
+import {
+  initChileReferral,
+  buildChileReferralPanel,
+  resetChileReferral,
+  buildChileReferralPayload,
+} from "./planillas-referral-chile.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 
 const REF_DESC_PH = "Detalle y/o descripción del caso";
@@ -12,6 +18,7 @@ let capturaFiles = [];
 let trazaFiles = [];
 let onvioCapturaFiles = [];
 let legalCapturaFiles = [];
+let chileCapturaFiles = [];
 let legalProdutoSel = null;
 let legalModuloSel = null;
 let legalAmbienteSel = null;
@@ -133,6 +140,7 @@ function loadReferralDialogs() {
 export function initReferralModule(context) {
   ctx = context;
   initLegalReferralHub(context);
+  initChileReferral(context);
   bindReferralEvents();
   void loadReferralDialogs();
 }
@@ -154,7 +162,11 @@ function sistemaLabel() {
     Legal: "LEGAL",
     Chile: "Chile",
   }[id] || "Bejerman SQL";
-  return id === "Legal" || id === "Chile" ? `${label} · beta` : label;
+  return id === "Legal" && ctx?.getConfig()?.legal?.beta ? `${label} · beta` : label;
+}
+
+function isChile() {
+  return ctx.getSistema() === "Chile";
 }
 
 function isBejerman() {
@@ -168,6 +180,7 @@ function isLegal() {
 function updateReferralPanels() {
   const bej = isBejerman();
   const legal = isLegal();
+  const chile = isChile();
   const standard = document.getElementById("ref-standard-flow");
 
   document.getElementById("plan-legal-beta-banner")?.classList.toggle(
@@ -175,11 +188,13 @@ function updateReferralPanels() {
     !(legal && ctx?.getConfig()?.legal?.beta),
   );
 
-  document.getElementById("ref-bejerman-panel")?.classList.toggle("hidden", !bej || legal);
+  document.getElementById("ref-bejerman-panel")?.classList.toggle("hidden", !bej || legal || chile);
+  document.getElementById("ref-chile-panel")?.classList.toggle("hidden", !chile);
 
   if (legal) {
     standard?.classList.add("hidden");
     document.getElementById("ref-bejerman-post")?.classList.add("hidden");
+    document.getElementById("ref-chile-post")?.classList.add("hidden");
     document.getElementById("ref-onvio-panel")?.classList.add("hidden");
     document.getElementById("ref-legal-panel")?.classList.add("hidden");
     return;
@@ -190,13 +205,17 @@ function updateReferralPanels() {
   document.getElementById("ref-legal-form")?.classList.add("hidden");
   standard?.classList.remove("hidden");
   document.getElementById("ref-bejerman-post")?.classList.toggle("hidden", !bej);
-  document.getElementById("ref-onvio-panel")?.classList.toggle("hidden", bej);
+  document.getElementById("ref-chile-post")?.classList.toggle("hidden", !chile);
+  document.getElementById("ref-onvio-panel")?.classList.toggle("hidden", bej || chile);
   document.getElementById("ref-legal-panel")?.classList.add("hidden");
   syncIaUndoBar("ref-btn-ia", "ref-btn-ia-undo", ctx.getConfig()?.referral?.iaConfigured);
-  buildReferralPills();
-  syncPerfilUi();
-  updateCheckStatuses();
-  updateSqlPanel();
+  if (bej) {
+    buildReferralPills();
+    syncPerfilUi();
+    updateCheckStatuses();
+    updateSqlPanel();
+  }
+  if (chile) buildChileReferralPanel();
   syncReferralCards();
 }
 
@@ -360,6 +379,7 @@ function syncReferralCards() {
     ["ref-card-pantallas", "ref-adj-pantallas", "ref-mark-pantallas"],
     ["ref-card-traza", "ref-adj-traza", "ref-mark-traza"],
     ["ref-card-backup", "ref-adj-backup", "ref-mark-backup"],
+    ["ref-card-chile-pantallas", "ref-chile-pantallas", "ref-mark-chile-pantallas"],
   ].forEach(([cardId, checkId, markId]) => syncCardVisual(cardId, checkId, markId));
   [
     ["ref-card-backup-manager", "ref-backup-manager", "ref-mark-backup-manager"],
@@ -510,9 +530,13 @@ function bindReferralEvents() {
   });
   bindOnvioCard("ref-card-legal-planilha", "ref-legal-planilha");
   bindOnvioCard("ref-card-legal-log", "ref-legal-log");
-  bindAdjCard("ref-card-legal-rep-ticket", "ref-legal-rep-ticket", null);
-  bindAdjCard("ref-card-legal-rep-homolog", "ref-legal-rep-homolog", null);
-  bindAdjCard("ref-card-legal-rep-usuario", "ref-legal-rep-usuario", null);
+  bindOnvioCard("ref-card-legal-rep-ticket", "ref-legal-rep-ticket");
+  bindOnvioCard("ref-card-legal-rep-homolog", "ref-legal-rep-homolog");
+  bindOnvioCard("ref-card-legal-rep-usuario", "ref-legal-rep-usuario");
+
+  bindAdjCard("ref-card-chile-pantallas", "ref-chile-pantallas", "ref-mark-chile-pantallas", () => {
+    document.getElementById("ref-chile-capturas")?.classList.toggle("hidden", !document.getElementById("ref-chile-pantallas").checked);
+  });
 
   setupPlaceholder("ref-descripcion", REF_DESC_PH);
   setupPlaceholder("ref-paso", REF_PASO_PH);
@@ -535,6 +559,7 @@ function bindReferralEvents() {
   setupCapturas("ref-capturas", capturaFiles);
   setupCapturas("ref-onvio-capt", onvioCapturaFiles);
   setupCapturas("ref-legal-capt", legalCapturaFiles);
+  setupCapturas("ref-chile-capt", chileCapturaFiles);
   setupTraza();
 
   document.getElementById("ref-btn-copiar")?.addEventListener("click", () => generarReferral(true));
@@ -615,6 +640,21 @@ function setReferralPantallasUi(checked) {
     card?.classList.toggle("selected", checked);
     applyCardMark(mark, checked);
     document.getElementById("ref-legal-capturas")?.classList.toggle("hidden", !checked);
+    return;
+  }
+
+  if (isChile()) {
+    const check = document.getElementById("ref-chile-pantallas");
+    if (!check) return;
+    check.checked = checked;
+    const card = document.getElementById("ref-card-chile-pantallas");
+    const mark = document.getElementById("ref-mark-chile-pantallas");
+    card?.classList.toggle("selected", checked);
+    if (mark) {
+      mark.textContent = checked ? "✓" : "○";
+      mark.style.color = checked ? "#16a34a" : "#94a3b8";
+    }
+    document.getElementById("ref-chile-capturas")?.classList.toggle("hidden", !checked);
     return;
   }
 
@@ -717,7 +757,9 @@ function refreshCapturasEstadoReferral(prefix, fileList) {
     ? "ref-capturas-estado"
     : prefix === "ref-legal-capt"
       ? "ref-legal-capt-estado"
-      : "ref-onvio-capt-estado";
+      : prefix === "ref-chile-capt"
+        ? "ref-chile-capt-estado"
+        : "ref-onvio-capt-estado";
   const estado = document.getElementById(estadoId);
   if (!estado) return;
   if (fileList.length === 0) {
@@ -762,6 +804,7 @@ function setupCapturas(prefix, fileList) {
 function getReferralCapturaFiles() {
   if (isBejerman()) return capturaFiles;
   if (isLegal()) return legalCapturaFiles;
+  if (isChile()) return chileCapturaFiles;
   return onvioCapturaFiles;
 }
 
@@ -965,6 +1008,8 @@ function buildPayload() {
       usuarioOnePass: document.getElementById("ref-legal-usuario")?.value.trim(),
       escritorio: document.getElementById("ref-legal-escritorio")?.value.trim(),
     };
+  } else if (isChile()) {
+    payload.chile = buildChileReferralPayload();
   } else {
     payload.onvio = {
       procesoFuncionaba: document.getElementById("ref-onvio-proceso")?.checked,
@@ -991,6 +1036,9 @@ function pickReferralCapturaFiles(payload) {
     } else if (isLegal()) {
       if (!payload.legal) payload.legal = {};
       payload.legal.adjuntaPantallas = true;
+    } else if (isChile()) {
+      if (!payload.chile) payload.chile = {};
+      payload.chile.adjuntaPantallas = true;
     } else {
       if (!payload.onvio) payload.onvio = {};
       payload.onvio.adjuntaPantallas = true;
@@ -1002,7 +1050,9 @@ function pickReferralCapturaFiles(payload) {
     ? !!payload.adjuntos?.pantallas
     : isLegal()
       ? !!payload.legal?.adjuntaPantallas
-      : !!payload.onvio?.adjuntaPantallas;
+      : isChile()
+        ? !!payload.chile?.adjuntaPantallas
+        : !!payload.onvio?.adjuntaPantallas;
   return marcado ? files : [];
 }
 
@@ -1044,7 +1094,9 @@ async function generarReferral(copiar) {
     ? !!payload.adjuntos?.pantallas
     : isLegal()
       ? !!payload.legal?.adjuntaPantallas
-      : !!payload.onvio?.adjuntaPantallas;
+      : isChile()
+        ? !!payload.chile?.adjuntaPantallas
+        : !!payload.onvio?.adjuntaPantallas;
 
   // LEGAL: si marcó capturas tiene que subirlas. Bejerman/Onvio permiten generar sin subir (van en comentarios).
   if (isLegal() && quierePantallas && files.length === 0) {
@@ -1161,6 +1213,7 @@ function setField(id, value, ph) {
 function resetReferralForm() {
   referralIaUndo?.clearSnapshot();
   if (isLegal()) resetLegalReferralHub();
+  resetChileReferral();
   versionSel = null;
   moduloSel = null;
   legalProdutoSel = null;
@@ -1170,6 +1223,7 @@ function resetReferralForm() {
   trazaFiles.length = 0;
   onvioCapturaFiles.length = 0;
   legalCapturaFiles.length = 0;
+  chileCapturaFiles.length = 0;
   ticketAvisoOmitido = false;
   mamState = {};
   sdkState = {};
@@ -1192,20 +1246,23 @@ function resetReferralForm() {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
-  ["ref-capturas-panel", "ref-traza-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel"].forEach((id) => {
+  ["ref-capturas-panel", "ref-traza-panel", "ref-backup-panel", "ref-onvio-capturas", "ref-onvio-ticket-panel", "ref-legal-capturas", "ref-legal-ticket-panel", "ref-chile-capturas"].forEach((id) => {
     document.getElementById(id)?.classList.add("hidden");
   });
   revokeCapturaThumbUrls(document.getElementById("ref-capturas-chips"));
   revokeCapturaThumbUrls(document.getElementById("ref-onvio-capt-chips"));
   revokeCapturaThumbUrls(document.getElementById("ref-legal-capt-chips"));
+  revokeCapturaThumbUrls(document.getElementById("ref-chile-capt-chips"));
   document.getElementById("ref-capturas-chips").innerHTML = "";
   document.getElementById("ref-traza-chips").innerHTML = "";
   document.getElementById("ref-onvio-capt-chips").innerHTML = "";
   document.getElementById("ref-legal-capt-chips").innerHTML = "";
+  document.getElementById("ref-chile-capt-chips").innerHTML = "";
   document.getElementById("ref-capturas-estado").textContent = "";
   document.getElementById("ref-traza-estado").textContent = "";
   document.getElementById("ref-onvio-capt-estado").textContent = "";
   document.getElementById("ref-legal-capt-estado").textContent = "";
+  document.getElementById("ref-chile-capt-estado").textContent = "";
   document.getElementById("ref-status").textContent = "";
   clearPlanTextPreview("ref-text-preview");
   updateReferralPanels();

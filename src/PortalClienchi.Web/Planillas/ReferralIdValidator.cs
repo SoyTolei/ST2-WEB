@@ -17,7 +17,7 @@ public static class ReferralIdValidator
             PlanillasSistema.Legal => PlanillasFeatureFlags.LegalEnabled
                 ? ValidateLegal(c)
                 : "El módulo LEGAL estará disponible en una próxima versión.",
-            PlanillasSistema.Chile => ValidateOnvio(c),
+            PlanillasSistema.Chile => ValidateChile(c),
             _ => "Sistema no válido.",
         };
     }
@@ -61,6 +61,77 @@ public static class ReferralIdValidator
 
         if (!c.Onvio.HayTicket && !c.Onvio.TicketAvisoOmitido)
             return CodeTicketConfirm;
+
+        return null;
+    }
+
+    private static string? ValidateChile(ReferralIdCase c)
+    {
+        var ch = c.Chile;
+
+        if (string.IsNullOrWhiteSpace(ch.Producto) || ch.Producto == ChileConstants.PlaceholderProducto)
+            return "Seleccioná el producto.";
+
+        if (!ChileConstants.ReferralProductoIds.Contains(ch.Producto))
+            return "Producto no válido.";
+
+        if (string.Equals(ch.Producto, "HYPERRENTA", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(ch.HyperrentaVersion))
+                return "Seleccioná la versión de Hyperrenta.";
+
+            if (!ChileConstants.HyperrentaVersiones.Contains(ch.HyperrentaVersion))
+                return "Versión de Hyperrenta no válida.";
+
+            if (ch.HyperrentaModulos.Count == 0)
+                return "Seleccioná al menos un módulo HR.";
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(ch.Version))
+                return "Completá la versión del producto.";
+
+            if (string.IsNullOrWhiteSpace(ch.TipoBase))
+                return "Seleccioná el tipo de base (Access o SQL).";
+
+            if (!ChileConstants.TiposBase.Contains(ch.TipoBase))
+                return "Tipo de base no válido.";
+
+            if (ch.BaseAdjunta is null)
+                return "Indicá si hay base adjunta (Sí o No).";
+
+            if (string.Equals(ch.TipoBase, "SQL", StringComparison.OrdinalIgnoreCase)
+                && string.IsNullOrWhiteSpace(ch.VersionMotorSql))
+                return "Completá la versión del motor SQL.";
+        }
+
+        if (string.IsNullOrWhiteSpace(ch.Anio))
+            return "Completá el año.";
+
+        if (string.IsNullOrWhiteSpace(ch.Rut))
+            return "Completá el RUT con inconvenientes.";
+
+        var common = ValidateCommonFields(c);
+        if (common is not null)
+            return common;
+
+        if (string.IsNullOrWhiteSpace(ch.Usuario))
+            return "Completá el usuario de ingreso al sistema.";
+
+        if (string.IsNullOrWhiteSpace(ch.Clave))
+            return "Completá la clave de ingreso al sistema.";
+
+        if (string.IsNullOrWhiteSpace(ch.SistemaOperativo))
+            return "Completá el sistema operativo.";
+
+        if (string.IsNullOrWhiteSpace(ch.ContactoNombre))
+            return "Completá el nombre de contacto.";
+
+        if (string.IsNullOrWhiteSpace(ch.ContactoTelefono))
+            return "Completá el teléfono de contacto.";
+
+        if (string.IsNullOrWhiteSpace(ch.ContactoCorreo))
+            return "Completá el correo electrónico de contacto.";
 
         return null;
     }

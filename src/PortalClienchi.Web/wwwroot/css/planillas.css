@@ -2172,6 +2172,23 @@ a.plan-modulo-btn.plan-modulo-link:visited {
   border: 1px solid #fed7aa;
   border-radius: 7px;
 }
+.plan-chile-modulos-row {
+  align-items: flex-start;
+}
+
+.plan-chile-modulos-checks {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-chile-version-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-chile-meta-row {
+  margin-top: 0.75rem;
+}
 .plan-ref-perfil-seg .plan-segment-btn {
   min-height: 28px;
   min-width: 0;
