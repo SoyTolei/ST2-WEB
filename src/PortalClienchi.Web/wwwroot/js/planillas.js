@@ -1463,8 +1463,10 @@ function syncPlanillasHeroEaster() {
     el.classList.toggle("is-still", egg?.motion === "still");
     el.classList.toggle("is-side-left", isHero && sideLeft);
     el.classList.toggle("is-md", !isHero && egg?.size === "md" && !heroBanner);
-    el.classList.toggle("is-lg", !isHero && (egg?.size === "lg" || egg?.size === "xl") && !heroBanner);
-    el.classList.toggle("is-xl", !isHero && egg?.size === "xl" && !heroBanner);
+    el.classList.toggle("is-lg", (!isHero && (egg?.size === "lg" || egg?.size === "xl") && !heroBanner)
+      || (isHero && behindTitle && egg?.size === "lg"));
+    el.classList.toggle("is-xl", (!isHero && egg?.size === "xl" && !heroBanner)
+      || (isHero && behindTitle && egg?.size === "xl"));
     el.classList.toggle("is-hero-banner", isHero && heroBanner);
     el.classList.toggle("is-behind-title", isHero && behindTitle);
     el.classList.toggle("is-smooth", !!(showEgg && egg?.heroBanner));

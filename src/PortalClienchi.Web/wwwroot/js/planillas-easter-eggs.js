@@ -32,7 +32,7 @@ export const PLANILLAS_EASTER_EGGS = [
   },
   {
     email: "gisela.crosenzi@thomsonreuters.com",
-    src: "/img/gisella-corner.gif?v=3",
+    src: "/img/gisella-corner.gif?v=4",
     motion: "still",
     size: "xl",
     behindTitle: true,
