@@ -90,6 +90,10 @@ public static class PlanillasEndpoints
                 }),
                 templatesCatalogUrl = "/data/legalone-templates-catalog.json",
             },
+            chile = new
+            {
+                mesas = ChileConstants.Mesas.Select(m => new { id = m.Id, label = m.Label }),
+            },
             oportunidad = new
             {
                 metodosContacto = new[] { "Telefónicamente", "WhatsApp", "Email" },

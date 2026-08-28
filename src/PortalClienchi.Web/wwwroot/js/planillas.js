@@ -25,11 +25,24 @@ import { syncAguaEgg } from "./planillas-agua-egg.js";
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
 const MESA_LABELS = {
-  TECNICO: "TECNICOS",
-  FLEX: "FLEX",
+  TECNICO: "Técnico",
+  FLEX: "Flex",
+  FUNCIONAL: "Funcional",
   SAAS: "SaaS",
-  SUELDOS: "Sueldos y Jornales",
+  SUELDOS: "Sueldos",
 };
+
+const DEFAULT_STANDARD_MESAS = [
+  { id: "TECNICO", label: "Técnico" },
+  { id: "FLEX", label: "Flex" },
+  { id: "SAAS", label: "SaaS" },
+  { id: "SUELDOS", label: "Sueldos" },
+];
+
+const FALLBACK_CHILE_MESAS = [
+  { id: "TECNICO", label: "Técnico" },
+  { id: "FUNCIONAL", label: "Funcional" },
+];
 
 const SISTEMA_LABELS = {
   BejermanSql: "Bejerman SQL",
@@ -144,7 +157,7 @@ const els = {
   numeroCliente: () => document.getElementById("plan-numero-cliente"),
   asunto: () => document.getElementById("plan-asunto"),
   descripcion: () => document.getElementById("plan-descripcion"),
-  mesaBtns: () => document.querySelectorAll("[data-mesa]"),
+  mesaBtns: () => document.querySelectorAll("#plan-standard-mesas [data-mesa]"),
   mesaHint: () => document.getElementById("plan-mesa-hint"),
   capturasCard: () => document.getElementById("plan-capturas-card"),
   capturasCheck: () => document.getElementById("plan-capturas-check"),
@@ -410,6 +423,7 @@ function selectSistema(id) {
   if (!normalized) return;
   sistemaActual = normalized;
   rememberSistema(normalized);
+  normalizeMesaForSistema();
   updateSistemaUi();
   updateTransferenciaPanels();
   if (!routeSyncing && normalizePath(window.location.pathname) === "/") {
@@ -437,6 +451,32 @@ function buildLegalTransPills() {
   ).join("");
 }
 
+function getStandardMesas() {
+  if (isChile()) {
+    return planillasConfig?.chile?.mesas?.length
+      ? planillasConfig.chile.mesas
+      : FALLBACK_CHILE_MESAS;
+  }
+  const ids = planillasConfig?.mesas || DEFAULT_STANDARD_MESAS.map((m) => m.id);
+  return ids.map((id) => ({
+    id,
+    label: MESA_LABELS[id] || id,
+  }));
+}
+
+function normalizeMesaForSistema() {
+  const allowed = new Set(getStandardMesas().map((m) => m.id));
+  if (mesaActual && !allowed.has(mesaActual)) mesaActual = null;
+}
+
+function buildStandardMesas() {
+  const row = document.getElementById("plan-standard-mesas");
+  if (!row) return;
+  row.innerHTML = getStandardMesas().map((m) =>
+    `<button type="button" class="plan-mesa-btn${mesaActual === m.id ? " active" : ""}" data-mesa="${m.id}">${m.label}</button>`
+  ).join("");
+}
+
 function buildLegalMesas() {
   const row = document.getElementById("plan-legal-mesas");
   const cfg = planillasConfig?.legal;
@@ -458,6 +498,8 @@ function updateTransferenciaPanels() {
     refreshLegalMesaUi();
     els.ticketWrap()?.classList.remove("hidden");
   } else {
+    normalizeMesaForSistema();
+    buildStandardMesas();
     refreshMesaUi();
   }
 }
@@ -510,7 +552,7 @@ function showTicketSection() {
     sistemaActual === "OnvioWeb" ||
     (sistemaActual === "BejermanSql" && (mesaActual === "SAAS" || mesaActual === "SUELDOS"));
 
-  if (mesaActual === "TECNICO" || mesaActual === "FLEX") show = false;
+  if (mesaActual === "TECNICO" || mesaActual === "FLEX" || mesaActual === "FUNCIONAL") show = false;
 
   wrap.classList.toggle("hidden", !show);
   if (!show) {
@@ -871,7 +913,9 @@ function validarCampos() {
       return false;
     }
     if (!mesaActual) {
-      alert("Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).");
+      alert(isChile()
+        ? "Elegí la mesa de destino (Técnico o Funcional)."
+        : "Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).");
       return false;
     }
   }
@@ -1244,8 +1288,9 @@ function bindEvents() {
     btn.addEventListener("click", () => goBackToPlanillasMenu());
   });
 
-  els.mesaBtns().forEach((btn) => {
-    btn.addEventListener("click", () => toggleMesa(btn.dataset.mesa));
+  document.getElementById("plan-standard-mesas")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-mesa]");
+    if (btn) toggleMesa(btn.dataset.mesa);
   });
 
   document.getElementById("plan-trans-legal-panel")?.addEventListener("click", (e) => {

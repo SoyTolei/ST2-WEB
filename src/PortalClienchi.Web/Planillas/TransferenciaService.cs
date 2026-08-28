@@ -198,11 +198,28 @@ public sealed class TransferenciaService
         if (sistema == PlanillasSistema.Legal)
             return ValidarLegalTransfer(req);
 
+        if (sistema == PlanillasSistema.Chile)
+            return ValidarChileTransfer(req);
+
         if (string.IsNullOrWhiteSpace(req.NumeroCliente))
             return "Completá el N° de Cliente.";
 
         if (string.IsNullOrWhiteSpace(req.Mesa))
             return "Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).";
+
+        return null;
+    }
+
+    private static string? ValidarChileTransfer(TransferenciaGenerateRequest req)
+    {
+        if (string.IsNullOrWhiteSpace(req.NumeroCliente))
+            return "Completá el N° de Cliente.";
+
+        if (string.IsNullOrWhiteSpace(req.Mesa))
+            return "Elegí la mesa de destino (Técnico o Funcional).";
+
+        if (!ChileConstants.MesaIds.Contains(req.Mesa.Trim()))
+            return "Elegí Técnico o Funcional.";
 
         return null;
     }

@@ -6,6 +6,7 @@ public static class TransferenciaTextBuilder
     {
         ["TECNICO"] = "la mesa TECNICA",
         ["FLEX"] = "la mesa FUNCIONAL",
+        ["FUNCIONAL"] = "la mesa FUNCIONAL",
         ["SAAS"] = "la mesa SAAS / ONVIO",
         ["SUELDOS"] = "la mesa de Sueldos y Jornales",
     };
