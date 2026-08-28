@@ -393,6 +393,14 @@ function updateSistemaUi() {
   syncBlanqueoModuleVisibility();
   syncBorradoBasesModuleVisibility();
   document.querySelector(".plan-modulos-grid")?.classList.toggle("is-compact", hideCommercial);
+  const chileWrap = document.getElementById("plan-chile-soporte-wrap");
+  const showChileLinks = isChile();
+  chileWrap?.classList.toggle("hidden", !showChileLinks);
+  chileWrap?.setAttribute("aria-hidden", showChileLinks ? "false" : "true");
+  document.querySelectorAll(".plan-chile-only").forEach((el) => {
+    el.classList.toggle("hidden", !showChileLinks);
+    el.setAttribute("aria-hidden", showChileLinks ? "false" : "true");
+  });
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
 }

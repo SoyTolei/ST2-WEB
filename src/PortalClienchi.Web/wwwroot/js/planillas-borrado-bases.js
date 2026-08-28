@@ -1169,14 +1169,33 @@ function formatResultadoHtml(resultado) {
   return `<span class="borrado-aclaracion-full">${escapeHtml(raw)}</span>`;
 }
 
+function shouldAclaracionUsePill(text) {
+  const raw = String(text || "").trim();
+  if (!raw) return false;
+  if (/[✓✗]/.test(raw)) return false;
+  if (/^Listo\b/i.test(raw) && raw.length < 60) return false;
+  return raw.length > 36 || raw.includes("\n");
+}
+
+function formatAclaracionNotaPill(label, detail) {
+  const text = String(detail || "").trim();
+  if (!text) return "";
+  const tip = text.length > 80 ? `${text.slice(0, 80)}…` : text;
+  return `<span class="borrado-base-cg"><button type="button" class="borrado-base-pill has-detail borrado-aclaracion-pill" title="${escapeAttr(tip)}" aria-label="Ver ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(text)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">ver</span></button></span>`;
+}
+
 function formatAclaracionCell(text) {
   const { resultado, nota } = parseAclaracion(text);
   if (!resultado && !nota) return "—";
   const parts = [];
-  if (resultado) parts.push(formatResultadoHtml(resultado));
-  if (nota) {
-    parts.push(`<span class="borrado-aclaracion-full borrado-aclaracion-nota">${escapeHtml(nota)}</span>`);
+  if (resultado) {
+    if (shouldAclaracionUsePill(resultado)) {
+      parts.push(formatAclaracionNotaPill("Aclaración", resultado));
+    } else {
+      parts.push(formatResultadoHtml(resultado));
+    }
   }
+  if (nota) parts.push(formatAclaracionNotaPill("Observación", nota));
   return `<div class="borrado-aclaracion-stack">${parts.join("")}</div>`;
 }
 

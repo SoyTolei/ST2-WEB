@@ -730,6 +730,19 @@ button.borrado-base-pill:focus-visible .borrado-base-pill-action {
   align-items: flex-start;
 }
 
+.borrado-aclaracion-pill {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px dashed #f59e0b;
+}
+
+button.borrado-aclaracion-pill:hover,
+button.borrado-aclaracion-pill:focus-visible {
+  background: #fef3c7;
+  border-color: #d97706;
+  border-style: solid;
+}
+
 .borrado-aclaracion-nota {
   color: #3730a3;
   background: #e0e7ff;

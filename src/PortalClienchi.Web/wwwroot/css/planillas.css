@@ -1069,6 +1069,29 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-modulo-btn.blanqueo { background: #1d4ed8; }
 .plan-modulo-btn.borrado-bases { background: #be123c; }
 
+a.plan-modulo-btn.plan-modulo-link {
+  text-decoration: none;
+  color: #fff;
+}
+
+a.plan-modulo-btn.plan-modulo-link:visited {
+  color: #fff;
+}
+
+.plan-modulo-btn.chile-saad { background: #0e7490; }
+.plan-modulo-btn.chile-hr { background: #7c3aed; }
+.plan-modulo-btn.chile-wiki { background: #b45309; }
+.plan-modulo-btn.chile-lp { background: #15803d; }
+
+.plan-chile-soporte-wrap {
+  margin-top: 4px;
+}
+
+.plan-chile-soporte-grid {
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  justify-content: center;
+}
+
 .plan-modulo-alert-badge {
   position: absolute;
   top: 8px;
@@ -4113,7 +4136,8 @@ body.st2-balloons-sides .st2-x-balloon-body {
   }
   .plan-sistema-grid,
   .plan-modulos-grid,
-  .plan-modulos-grid.is-compact { grid-template-columns: 1fr; }
+  .plan-modulos-grid.is-compact,
+  .plan-chile-soporte-grid { grid-template-columns: 1fr; }
   .plan-sistema-indicator { display: none; }
   .plan-mesas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
