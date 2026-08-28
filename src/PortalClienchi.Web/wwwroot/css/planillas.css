@@ -489,9 +489,9 @@
 }
 
 .planillas-hero-easter.is-behind-title.is-xl {
-  top: -2px;
-  left: -220px;
-  width: 280px;
+  top: -4px;
+  left: -248px;
+  width: 320px;
   transform: none;
   animation: planillas-hero-easter-walk-xl 36.24s cubic-bezier(0.5, 0, 0.18, 1) infinite;
 }
@@ -513,7 +513,7 @@
 }
 
 @keyframes planillas-hero-easter-walk-xl {
-  0% { left: -220px; }
+  0% { left: -248px; }
   12% { left: 2%; }
   16.66% { left: 2%; }
   28.66% { left: 18%; }
