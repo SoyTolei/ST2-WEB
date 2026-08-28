@@ -3385,6 +3385,7 @@ body.portal-tab-active .tab-icon {
   background: #dbeafe;
   color: #1d4ed8;
   opacity: 1;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
 }
 
 .st2-access-admin-perm-sys--leg.is-on {
@@ -3392,6 +3393,7 @@ body.portal-tab-active .tab-icon {
   background: #ede9fe;
   color: #6d28d9;
   opacity: 1;
+  box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25);
 }
 
 .st2-access-admin-perm-sys--cl.is-on {
@@ -3399,6 +3401,7 @@ body.portal-tab-active .tab-icon {
   background: #fee2e2;
   color: #b91c1c;
   opacity: 1;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
 }
 
 .st2-access-admin-perm-extra.role-sadm {
@@ -3409,14 +3412,6 @@ body.portal-tab-active .tab-icon {
 .st2-access-admin-perm-extra.role-adm {
   color: #0f766e;
   font-weight: 700;
-}
-
-.st2-access-admin-perm-sys.is-on {
-  /* fallback */
-  border-color: #cbd5e1;
-  background: #fff;
-  color: #334155;
-  opacity: 1;
 }
 
 .st2-access-admin-perm-extras {
@@ -3760,7 +3755,15 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-modules-check-icon-cl {
-  font-size: 0.95rem;
+  width: 1.35rem;
+  height: 0.9rem;
+}
+
+.st2-access-modules-check-icon-cl svg {
+  width: 1.35rem;
+  height: 0.9rem;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
 }
 
 .st2-access-modules-sql-group {
