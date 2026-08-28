@@ -1302,6 +1302,19 @@ html.st2-theme-dark .blanqueo-clave-pill--custom:focus-visible {
   border-color: #fbbf24;
 }
 
+html.st2-theme-dark button.borrado-aclaracion-pill {
+  background: #422006;
+  border-color: #f59e0b;
+  color: #fde68a;
+}
+
+html.st2-theme-dark button.borrado-aclaracion-pill:hover,
+html.st2-theme-dark button.borrado-aclaracion-pill:focus-visible {
+  background: #713f12;
+  border-color: #fbbf24;
+  color: #fff7ed;
+}
+
 html.st2-theme-dark .borrado-filter-month select,
 html.st2-theme-dark .borrado-filter-search input {
   background: #151c28;
