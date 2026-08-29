@@ -360,10 +360,7 @@ internal sealed class EmbedSiteProxy
 
             content = RewriteHtmlAttributeUrls(content, site);
             if (IsPortalWebSite(site))
-            {
                 content = RewritePortalWebpackPublicPath(content, site);
-                content = InjectPortalEmbedAuthScript(content, site);
-            }
             content = StripCrossOriginAttributes(content);
         }
         else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
@@ -432,33 +429,6 @@ internal sealed class EmbedSiteProxy
             RegexOptions.IgnoreCase);
         return content;
     }
-
-    private static string InjectPortalEmbedAuthScript(string content, string site)
-    {
-        var portalId = PortalIdFromEmbedSite(site);
-        if (portalId is null)
-            return content;
-
-        var earlyScript = PortalEmbedBridge.BuildEarlyScript(portalId, site);
-        var lateScript = PortalEmbedBridge.BuildLateScript(portalId, site);
-
-        content = Regex.Replace(
-            content,
-            @"<head(\s[^>]*)?>",
-            match => match.Value + earlyScript,
-            RegexOptions.IgnoreCase);
-
-        const string bodyMarker = "</body>";
-        if (content.Contains(bodyMarker, StringComparison.OrdinalIgnoreCase))
-            return content.Replace(bodyMarker, lateScript + bodyMarker, StringComparison.OrdinalIgnoreCase);
-
-        return content + lateScript;
-    }
-
-    private static string? PortalIdFromEmbedSite(string site) =>
-        site.Equals("portal-bejerman", StringComparison.OrdinalIgnoreCase) ? "bejerman"
-        : site.Equals("portal-legal", StringComparison.OrdinalIgnoreCase) ? "legal"
-        : null;
 
     private static string RewriteThomHelpPanelDefault(string content) =>
         content.Replace("caseId:\"\",isHelpOpen:!0", "caseId:\"\",isHelpOpen:!1", StringComparison.Ordinal);

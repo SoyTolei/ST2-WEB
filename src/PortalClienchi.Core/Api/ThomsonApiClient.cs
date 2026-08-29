@@ -29,11 +29,6 @@ public sealed class ThomsonApiClient : IDisposable
 
     public async Task LoginAsync(CancellationToken ct = default)
     {
-        await LoginAndGetSessionAsync(ct);
-    }
-
-    public async Task<PortalSession> LoginAndGetSessionAsync(CancellationToken ct = default)
-    {
         var body = new { email = _settings.Email.Trim().ToLowerInvariant(), password = _settings.Password };
         var response = await _http.PostAsJsonAsync("session", body, ct);
         response.EnsureSuccessStatusCode();
@@ -41,11 +36,6 @@ public sealed class ThomsonApiClient : IDisposable
             ?? throw new InvalidOperationException("Respuesta de login vacía.");
         _token = session.Token;
         _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
-        return new PortalSession
-        {
-            AuthToken = session.Token,
-            User = session.User,
-        };
     }
 
     public async Task<PagedKnowledgeResponse> FindByTypeAsync(

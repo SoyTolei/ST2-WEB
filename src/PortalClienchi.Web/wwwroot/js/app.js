@@ -209,41 +209,6 @@ function getPortalExternalUrl() {
   return url || null;
 }
 
-function applyPortalEmbedAuth(data) {
-  if (!data) return false;
-  const token = data.authToken || data.token;
-  if (!token) return false;
-  try {
-    localStorage.setItem("authToken", token);
-    if (data.user) {
-      localStorage.setItem("user", typeof data.user === "string" ? data.user : JSON.stringify(data.user));
-    }
-    const authState = { authToken: token, user: data.user || null, isAuthorized: true };
-    localStorage.setItem("persist:root", JSON.stringify({
-      auth: JSON.stringify(authState),
-      _persist: JSON.stringify({ version: -1, rehydrated: true }),
-    }));
-  } catch {
-    return false;
-  }
-  return true;
-}
-
-async function seedPortalEmbedSession() {
-  const cfg = getActivePortalConfig();
-  if (cfg?.hasEmbedCredentials === false) return false;
-
-  try {
-    const portalId = encodeURIComponent(cfg?.id || activePortalId || "bejerman");
-    const res = await fetch(`/api/portal-embed/session?portal=${portalId}`, { credentials: "include" });
-    if (!res.ok) return false;
-    const data = await res.json();
-    return applyPortalEmbedAuth(data);
-  } catch {
-    return false;
-  }
-}
-
 function initPortalPicker() {
   const portals = appConfig?.portals ?? [];
   if (!portals.length || !portalSistemaPills) return;
@@ -3710,10 +3675,6 @@ function onThomEmbedMessage(event) {
 }
 
 function loadEmbedFrame(kind, { force = false } = {}) {
-  void loadEmbedFrameAsync(kind, { force });
-}
-
-async function loadEmbedFrameAsync(kind, { force = false } = {}) {
   const frame = kind === "thom" ? thomFrame : kind === "portal" ? portalFrame : aiFrame;
   if (kind === "thom" && isThomWindowMode()) return;
   const url = getEmbedFrameUrl(kind);
@@ -3726,9 +3687,6 @@ async function loadEmbedFrameAsync(kind, { force = false } = {}) {
     hideThomDirectGate();
     showThomLoading();
     if (!isThomWindowMode()) scheduleThomBlankCheck();
-  }
-  if (kind === "portal") {
-    void seedPortalEmbedSession();
   }
   frame.src = url;
 }

@@ -34,7 +34,6 @@ var thomEmbedConfig = await ThomEmbedResolver.ResolveAsync(appSettings, builder.
 builder.Services.AddSingleton(appSettings);
 builder.Services.AddSingleton(thomEmbedConfig);
 builder.Services.AddSingleton<PortalRegistry>();
-builder.Services.AddSingleton<PortalEmbedSessionService>();
 builder.Services.AddSingleton<EmbedSiteProxy>();
 builder.Services.AddSingleton<LocalCapturaStore>();
 builder.Services.AddSingleton<TransferenciaService>();
@@ -266,9 +265,8 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
         {
             id = p.Id,
             label = p.Label,
-            portalBaseUrl = $"{runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? ""}/home",
+            portalBaseUrl = runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? "",
             embedPath = $"/embed/{embedSite}/auth/login",
-            hasEmbedCredentials = registry.HasCredentials(p.Id),
         };
     }),
     thomZoomFactor = settings.ThomZoomFactor,
@@ -281,53 +279,6 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
     webVersionLabel = St2WebBuild.GetVersionLabel(),
     webUpdatedLabel = St2WebBuild.GetUpdatedLabel(),
 }));
-
-app.MapGet("/api/portal-embed/session", async (
-    string? portal,
-    PortalEmbedSessionService sessions,
-    CancellationToken ct) =>
-{
-    if (!sessions.HasCredentials(portal))
-        return CredentialsMissing(portal);
-
-    try
-    {
-        var session = await sessions.GetSessionAsync(portal, ct);
-        if (session is null)
-        {
-            return Results.Problem(
-                title: "No se pudo iniciar sesión en el portal",
-                statusCode: StatusCodes.Status502BadGateway);
-        }
-
-        return Results.Ok(new
-        {
-            authToken = session.AuthToken,
-            token = session.AuthToken,
-            user = session.User,
-        });
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(
-            detail: ex.Message,
-            title: "Login del portal falló",
-            statusCode: StatusCodes.Status502BadGateway);
-    }
-});
-
-app.MapGet("/api/portal-embed/credentials", (string? portal, PortalRegistry registry) =>
-{
-    if (!registry.HasCredentials(portal))
-        return CredentialsMissing(portal);
-
-    var runtime = registry.Resolve(portal);
-    return Results.Ok(new
-    {
-        email = runtime.Settings.Email.Trim().ToLowerInvariant(),
-        password = runtime.Settings.Password,
-    });
-});
 
 app.MapGet("/api/types", () =>
     Enum.GetValues<KnowledgeType>()
