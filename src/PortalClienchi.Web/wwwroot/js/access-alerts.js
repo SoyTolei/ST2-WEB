@@ -224,7 +224,4 @@ function bindToastOnce() {
   document.getElementById("access-ready-toast-open")?.addEventListener("click", () => {
     document.dispatchEvent(new CustomEvent("st2:open-admin-from-alert"));
   });
-  document.getElementById("access-ready-toast-dismiss")?.addEventListener("click", () => {
-    markAccessAlertsSeen();
-  });
 }

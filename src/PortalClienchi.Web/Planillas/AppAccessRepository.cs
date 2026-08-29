@@ -199,9 +199,8 @@ public sealed class AppAccessRepository
 
             if (existing.Status is StatusRejected)
             {
-                SetStatus(email, StatusPending);
-                TouchActivity(email);
-                return StatusPending;
+                // Queda rechazado: no reabrir pending solo por reintentar el login.
+                return StatusRejected;
             }
 
             TouchActivity(email);

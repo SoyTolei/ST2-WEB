@@ -525,32 +525,32 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 }
 
 .blanqueo-ready-toast.is-warn {
-  border-color: #fcd34d;
-  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.14);
+  border-color: #7dd3fc;
+  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.12);
 }
 
 .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-dot {
-  background: #d97706;
-  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.22);
+  background: #0284c7;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.2);
 }
 
 .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-count,
 .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-btn {
-  background: #d97706;
+  background: #0284c7;
 }
 
 .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-btn:hover {
-  background: #b45309;
+  background: #0369a1;
 }
 
 .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-text,
 .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-x {
-  color: #92400e;
+  color: #0c4a6e;
 }
 
 .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-x:hover {
-  background: rgba(217, 119, 6, 0.12);
+  background: rgba(2, 132, 199, 0.12);
 }
 
 .blanqueo-ready-toast.is-bad {
@@ -583,27 +583,27 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 }
 
 .blanqueo-ready-toast.is-tools {
-  border-color: #c4b5fd;
-  background: linear-gradient(180deg, #f5f3ff 0%, #ede9fe 100%);
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.16);
+  border-color: #a5b4fc;
+  background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12);
 }
 
 .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-dot {
-  background: #4f46e5;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.22);
+  background: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
 }
 
 .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-count,
 .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-btn {
-  background: #4f46e5;
+  background: #6366f1;
 }
 
 .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-btn:hover {
-  background: #4338ca;
+  background: #4f46e5;
 }
 
 .blanqueo-ready-toast.is-tools .blanqueo-ready-toast-text {
-  color: #3730a3;
+  color: #312e81;
 }
 
 .blanqueo-ready-toast.hidden {

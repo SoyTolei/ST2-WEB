@@ -1583,8 +1583,8 @@ function setAccessAdminUpdatedHint(text) {
 }
 
 function syncAccessAdminHostColumn() {
-  const show = isPrimarySuperAdmin();
-  accessAdminPresetBtn?.classList.toggle("hidden", !show);
+  const show = isSt2SuperAdmin();
+  accessAdminPresetBtn?.classList.toggle("hidden", !isPrimarySuperAdmin());
   accessAdminThHost?.classList.toggle("hidden", !show);
   accessAdminTable?.classList.toggle("st2-access-admin-table--with-host", show);
 }
@@ -1623,7 +1623,7 @@ function getFilteredAccessAdminItems() {
 
 function renderAccessAdminTable() {
   syncAccessAdminHostColumn();
-  const showHost = isPrimarySuperAdmin();
+  const showHost = isSt2SuperAdmin();
   const items = getFilteredAccessAdminItems();
   if (!accessAdminBody) return;
 
@@ -2160,8 +2160,9 @@ function uploadedLabelFor(id, tool) {
 
 function listNewTools() {
   const seen = readSeenToolVersions();
+  // Avisos home: solo SQL. BAT queda en Acerca de (mesa técnica).
   return toolsForNotice().filter((t) => {
-    if (!t?.available) return false;
+    if (!t?.available || t.id === "bat") return false;
     const stamp = toolIdentity(t);
     return !!stamp && seen[t.id] !== stamp;
   });
@@ -2172,7 +2173,12 @@ function toolIdentity(t) {
 }
 
 function isToolVersionNew(id) {
-  return listNewTools().some((t) => t.id === id);
+  // Badge "Nueva" en Acerca de (incluye BAT). El toast home usa listNewTools() sin BAT.
+  const seen = readSeenToolVersions();
+  const t = toolsForNotice().find((x) => x.id === id);
+  if (!t?.available) return false;
+  const stamp = toolIdentity(t);
+  return !!stamp && seen[id] !== stamp;
 }
 
 function formatDateTimeAr(d) {

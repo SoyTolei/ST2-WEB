@@ -306,6 +306,7 @@ function showAccessGate(resolve) {
       return;
     }
     if (status === "rejected") {
+      try { localStorage.removeItem("st2_plan_user_hint"); } catch { /* ignore */ }
       showAccessFormState();
       if (error) error.textContent = data.error || "Este correo no está autorizado.";
       if (submit) submit.disabled = false;
@@ -472,7 +473,11 @@ export async function syncPlanUserSession() {
       return cachedEmail;
     }
     const status = String(data.status || "").toLowerCase();
-    if (status === "pending" || (response.status === 403 && status !== "rejected")) {
+    if (status === "rejected") {
+      try { localStorage.removeItem("st2_plan_user_hint"); } catch { /* ignore */ }
+      return null;
+    }
+    if (status === "pending" || response.status === 403) {
       lastPendingAccess = {
         email: data.email || hint,
       };

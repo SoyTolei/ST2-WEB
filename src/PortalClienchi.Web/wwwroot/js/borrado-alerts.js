@@ -343,7 +343,4 @@ function bindToastOnce() {
     document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
     document.dispatchEvent(new CustomEvent("st2:open-borrado-from-alert"));
   });
-  document.getElementById("borrado-ready-toast-dismiss")?.addEventListener("click", () => {
-    void markBorradoAlertsSeen();
-  });
 }

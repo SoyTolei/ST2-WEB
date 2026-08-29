@@ -649,7 +649,7 @@ public static class PlanillasEndpoints
                     flagsMap = new Dictionary<string, ModuleAccessFlagsDto>(StringComparer.OrdinalIgnoreCase);
                 }
 
-                var showClientMeta = CanUsePrimaryAdminFeatures(ctx, config, accessRepo);
+                var showClientMeta = true; // cualquier admin del panel ve Equipo
                 var mapped = items.Select(item =>
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);
@@ -774,7 +774,6 @@ public static class PlanillasEndpoints
             HttpContext ctx,
             IConfiguration config,
             AppAccessRepository accessRepo,
-            ModuleAccessRepository modules,
             AccessDecisionRequest body) =>
         {
             if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
@@ -787,11 +786,10 @@ public static class PlanillasEndpoints
             var action = (body.Action ?? "").Trim().ToLowerInvariant();
             if (action is "reject" or "rechazar")
             {
-                var removed = accessRepo.DeleteByEmail(email);
-                modules.DeleteByEmail(email);
-                if (removed <= 0)
+                // Marcar rechazado (no borrar): así no se recrea pending si el usuario sigue con la pantalla abierta.
+                if (accessRepo.SetStatus(email, AppAccessRepository.StatusRejected) <= 0)
                     return Results.NotFound(new { error = "No se encontró esa solicitud." });
-                return Results.Ok(new { ok = true, email, status = "removed" });
+                return Results.Ok(new { ok = true, email, status = AppAccessRepository.StatusRejected });
             }
 
             var status = action switch
@@ -1100,7 +1098,17 @@ public static class PlanillasEndpoints
             || string.Equals(status, AppAccessRepository.StatusPending, StringComparison.OrdinalIgnoreCase)
             || string.Equals(status, AppAccessRepository.StatusRejected, StringComparison.OrdinalIgnoreCase))
         {
-            accessRepo.RequestAccess(email);
+            var requested = accessRepo.RequestAccess(email);
+            if (string.Equals(requested, AppAccessRepository.StatusRejected, StringComparison.OrdinalIgnoreCase))
+            {
+                return Results.Json(new
+                {
+                    email,
+                    status = AppAccessRepository.StatusRejected,
+                    error = "Este correo no está autorizado.",
+                }, statusCode: StatusCodes.Status403Forbidden);
+            }
+
             return Results.Json(new
             {
                 email,

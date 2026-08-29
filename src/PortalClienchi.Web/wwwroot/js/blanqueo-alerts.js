@@ -339,7 +339,4 @@ function bindToastOnce() {
     document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
     document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
   });
-  document.getElementById("blanqueo-ready-toast-dismiss")?.addEventListener("click", () => {
-    void markBlanqueoAlertsSeen();
-  });
 }

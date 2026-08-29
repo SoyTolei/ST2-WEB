@@ -1024,13 +1024,28 @@ html.st2-theme-dark .blanqueo-ready-toast.is-ok .blanqueo-ready-toast-x {
 }
 
 html.st2-theme-dark .blanqueo-ready-toast.is-warn {
-  background: linear-gradient(180deg, #713f12 0%, #451a03 100%) !important;
-  border-color: #d97706 !important;
+  background: linear-gradient(180deg, #0c4a6e 0%, #082f49 100%) !important;
+  border-color: #38bdf8 !important;
 }
 
 html.st2-theme-dark .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-text,
 html.st2-theme-dark .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-x {
-  color: #fde68a !important;
+  color: #e0f2fe !important;
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-dot {
+  background: #7dd3fc;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.28);
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-count,
+html.st2-theme-dark .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-btn {
+  background: #0284c7;
+  color: #f0f9ff;
+}
+
+html.st2-theme-dark .blanqueo-ready-toast.is-warn .blanqueo-ready-toast-btn:hover {
+  background: #0ea5e9;
 }
 
 html.st2-theme-dark .blanqueo-ready-toast.is-bad {
