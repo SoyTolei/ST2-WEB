@@ -359,6 +359,8 @@ internal sealed class EmbedSiteProxy
             }
 
             content = RewriteHtmlAttributeUrls(content, site);
+            if (IsPortalWebSite(site))
+                content = RewritePortalWebpackPublicPath(content, site);
             content = StripCrossOriginAttributes(content);
         }
         else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
@@ -367,6 +369,8 @@ internal sealed class EmbedSiteProxy
             content = RewriteCloudFrontHosts(content);
             content = RewriteScriptOrStyleUrls(content, site);
             content = RewriteAbsoluteHostsPreservingOAuth(content);
+            if (IsPortalWebSite(site) && contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase))
+                content = RewritePortalWebpackPublicPath(content, site);
         }
         else
         {
@@ -405,6 +409,20 @@ internal sealed class EmbedSiteProxy
 
     private static string StripCrossOriginAttributes(string content) =>
         Regex.Replace(content, @"\s+crossorigin(=(['""])?(anonymous|use-credentials)\2)?", "", RegexOptions.IgnoreCase);
+
+    private static bool IsPortalWebSite(string site) =>
+        site.Equals("portal-bejerman", StringComparison.OrdinalIgnoreCase)
+        || site.Equals("portal-legal", StringComparison.OrdinalIgnoreCase);
+
+    private static string RewritePortalWebpackPublicPath(string content, string site)
+    {
+        var embed = $"/embed/{site}/";
+        return Regex.Replace(
+            content,
+            @"(\.p\s*=\s*"")/""",
+            $"$1{embed}\"",
+            RegexOptions.IgnoreCase);
+    }
 
     private static string RewriteThomHelpPanelDefault(string content) =>
         content.Replace("caseId:\"\",isHelpOpen:!0", "caseId:\"\",isHelpOpen:!1", StringComparison.Ordinal);

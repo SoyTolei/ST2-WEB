@@ -265,8 +265,8 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
         {
             id = p.Id,
             label = p.Label,
-            portalBaseUrl = runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? "",
-            embedPath = $"/embed/{embedSite}/",
+            portalBaseUrl = $"{runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? ""}/home",
+            embedPath = $"/embed/{embedSite}/home",
         };
     }),
     thomZoomFactor = settings.ThomZoomFactor,

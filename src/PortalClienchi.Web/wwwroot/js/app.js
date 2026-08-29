@@ -198,9 +198,9 @@ function getActivePortalConfig() {
 function getPortalEmbedPath() {
   const cfg = getActivePortalConfig();
   const path = String(cfg?.embedPath || "").trim();
-  if (path) return path.endsWith("/") ? path : `${path}/`;
+  if (path) return path;
   const site = activePortalId === "legal" ? "portal-legal" : "portal-bejerman";
-  return `/embed/${site}/`;
+  return `/embed/${site}/home`;
 }
 
 function getPortalExternalUrl() {
