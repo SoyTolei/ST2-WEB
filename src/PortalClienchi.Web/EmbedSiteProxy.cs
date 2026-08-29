@@ -23,7 +23,9 @@ internal sealed class EmbedSiteProxy
         ["thom"] = "https://css-latam.int.thomsonreuters.com",
         ["ai"] = "https://aiplatform.thomsonreuters.com",
         ["portal-bejerman"] = "https://clientes.thomsonreuters.com.ar",
+        ["portal-bejerman-api"] = "https://clientes.thomsonreuters.com.ar:3333",
         ["portal-legal"] = "https://portaldelcliente.thomsonreuters.com.ar",
+        ["portal-legal-api"] = "https://portaldelcliente.thomsonreuters.com.ar:3334",
         ["sso"] = "https://sso.thomsonreuters.com",
         ["aad"] = "https://login.microsoftonline.com",
         ["cf"] = "https://d3uc069fcn7uxw.cloudfront.net",
@@ -33,8 +35,22 @@ internal sealed class EmbedSiteProxy
         ["aoa"] = "https://aiopenarena.thomsonreuters.com",
     };
 
-    private static readonly Dictionary<string, string> HostToSite =
-        SiteBases.ToDictionary(kv => new Uri(kv.Value).Host, kv => kv.Key, StringComparer.OrdinalIgnoreCase);
+    private static readonly Dictionary<string, string> HostToSite = BuildHostToSite();
+
+    private static Dictionary<string, string> BuildHostToSite()
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (site, baseUrl) in SiteBases)
+        {
+            var uri = new Uri(baseUrl);
+            if (uri.IsDefaultPort)
+                map[uri.Host] = site;
+            else
+                map[$"{uri.Host}:{uri.Port}"] = site;
+        }
+
+        return map;
+    }
 
     private static readonly string[] BlockedResponseHeaders =
     [
@@ -130,7 +146,7 @@ internal sealed class EmbedSiteProxy
         if (uri.Host.Equals(ThomHost, StringComparison.OrdinalIgnoreCase))
             return $"{uri.AbsolutePath}{uri.Query}";
 
-        var site = ResolveSite(uri.Host) ?? uri.Host.Split('.')[0].ToLowerInvariant();
+        var site = ResolveSite(uri.Host, uri.Port) ?? uri.Host.Split('.')[0].ToLowerInvariant();
         return $"/embed/{site}{uri.AbsolutePath}{uri.Query}";
     }
 
@@ -550,18 +566,12 @@ internal sealed class EmbedSiteProxy
         content = content.Replace($"http://{ThomHost}", "", StringComparison.OrdinalIgnoreCase);
         content = content.Replace($"//{ThomHost}", "", StringComparison.OrdinalIgnoreCase);
 
-        foreach (var (site, baseUrl) in SiteBases)
+        foreach (var (site, baseUrl) in SiteBases.OrderByDescending(kv => kv.Value.Length))
         {
             if (site.Equals("thom", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            var uri = new Uri(baseUrl);
-            var embed = $"/embed/{site}";
-            content = content.Replace(baseUrl, embed, StringComparison.OrdinalIgnoreCase);
-            content = content.Replace(baseUrl.TrimEnd('/'), embed, StringComparison.OrdinalIgnoreCase);
-            content = content.Replace($"https://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
-            content = content.Replace($"http://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
-            content = content.Replace($"//{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
+            content = ReplaceBaseUrlWithEmbed(content, site, baseUrl);
         }
 
         return content;
@@ -577,7 +587,7 @@ internal sealed class EmbedSiteProxy
             if (absolute.Host.Equals(ThomHost, StringComparison.OrdinalIgnoreCase))
                 return absolute.PathAndQuery;
 
-            var site = ResolveSite(absolute.Host);
+            var site = ResolveSite(absolute.Host, absolute.Port);
             return site is null ? url : $"/embed/{site}{absolute.PathAndQuery}";
         }
 
@@ -586,15 +596,31 @@ internal sealed class EmbedSiteProxy
 
     private static string RewriteAbsoluteHosts(string content)
     {
-        foreach (var (site, baseUrl) in SiteBases)
+        foreach (var (site, baseUrl) in SiteBases.OrderByDescending(kv => kv.Value.Length))
+            content = ReplaceBaseUrlWithEmbed(content, site, baseUrl);
+
+        return content;
+    }
+
+    private static string ReplaceBaseUrlWithEmbed(string content, string site, string baseUrl)
+    {
+        var uri = new Uri(baseUrl);
+        var embed = $"/embed/{site}";
+        content = content.Replace(baseUrl, embed, StringComparison.OrdinalIgnoreCase);
+        content = content.Replace(baseUrl.TrimEnd('/'), embed, StringComparison.OrdinalIgnoreCase);
+
+        if (uri.IsDefaultPort)
         {
-            var uri = new Uri(baseUrl);
-            var embed = $"/embed/{site}";
-            content = content.Replace(baseUrl, embed, StringComparison.OrdinalIgnoreCase);
-            content = content.Replace(baseUrl.TrimEnd('/'), embed, StringComparison.OrdinalIgnoreCase);
             content = content.Replace($"https://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
             content = content.Replace($"http://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
             content = content.Replace($"//{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
+        }
+        else
+        {
+            var hostPort = $"{uri.Host}:{uri.Port}";
+            content = content.Replace($"https://{hostPort}", embed, StringComparison.OrdinalIgnoreCase);
+            content = content.Replace($"http://{hostPort}", embed, StringComparison.OrdinalIgnoreCase);
+            content = content.Replace($"//{hostPort}", embed, StringComparison.OrdinalIgnoreCase);
         }
 
         return content;
@@ -610,7 +636,7 @@ internal sealed class EmbedSiteProxy
 
         if (Uri.TryCreate(url, UriKind.Absolute, out var absolute))
         {
-            var site = ResolveSite(absolute.Host);
+            var site = ResolveSite(absolute.Host, absolute.Port);
             if (site is null)
                 return url;
             return $"/embed/{site}{absolute.PathAndQuery}";
@@ -622,8 +648,15 @@ internal sealed class EmbedSiteProxy
         return url;
     }
 
-    private static string? ResolveSite(string host)
+    private static string? ResolveSite(string host, int port = -1)
     {
+        if (port > 0 && !IsDefaultHttpPort(port))
+        {
+            var hostPort = $"{host}:{port}";
+            if (HostToSite.TryGetValue(hostPort, out var siteWithPort))
+                return siteWithPort;
+        }
+
         if (HostToSite.TryGetValue(host, out var site))
             return site;
         if (host.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase))
@@ -647,5 +680,9 @@ internal sealed class EmbedSiteProxy
 
     private static bool IsAllowedThomsonHost(string host) =>
         host.EndsWith(".thomsonreuters.com", StringComparison.OrdinalIgnoreCase)
-        || host.Equals("thomsonreuters.com", StringComparison.OrdinalIgnoreCase);
+        || host.Equals("thomsonreuters.com", StringComparison.OrdinalIgnoreCase)
+        || host.EndsWith(".thomsonreuters.com.ar", StringComparison.OrdinalIgnoreCase)
+        || host.Equals("thomsonreuters.com.ar", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsDefaultHttpPort(int port) => port is 80 or 443;
 }

@@ -1952,7 +1952,8 @@ body.embed-active.thom-tab-active .tab-bar {
 }
 
 #panel-thom.active,
-#panel-ai.active {
+#panel-ai.active,
+#panel-portal.active {
   display: flex;
   flex-direction: column;
   min-height: 0;
