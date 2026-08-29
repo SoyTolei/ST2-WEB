@@ -774,6 +774,7 @@ public static class PlanillasEndpoints
             HttpContext ctx,
             IConfiguration config,
             AppAccessRepository accessRepo,
+            ModuleAccessRepository modules,
             AccessDecisionRequest body) =>
         {
             if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
@@ -784,10 +785,18 @@ public static class PlanillasEndpoints
                 return Results.BadRequest(new { error = "Correo inválido." });
 
             var action = (body.Action ?? "").Trim().ToLowerInvariant();
+            if (action is "reject" or "rechazar")
+            {
+                var removed = accessRepo.DeleteByEmail(email);
+                modules.DeleteByEmail(email);
+                if (removed <= 0)
+                    return Results.NotFound(new { error = "No se encontró esa solicitud." });
+                return Results.Ok(new { ok = true, email, status = "removed" });
+            }
+
             var status = action switch
             {
                 "approve" or "aprobar" => AppAccessRepository.StatusApproved,
-                "reject" or "rechazar" => AppAccessRepository.StatusRejected,
                 _ => null,
             };
             if (status is null)

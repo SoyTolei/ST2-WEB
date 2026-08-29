@@ -1605,8 +1605,10 @@ function itemMatchesModFilters(item) {
 function getFilteredAccessAdminItems() {
   const q = accessAdminQuery.trim().toLowerCase();
   return accessAdminItemsCache.filter((item) => {
+    // Pendientes van solo al inbox; rechazados no se listan.
+    if (item.isRejected || item.isPending) return false;
     if (accessAdminFilter === "active" && !item.isActive) return false;
-    if (accessAdminFilter === "pending" && !item.isPending) return false;
+    if (accessAdminFilter === "pending") return false;
     if (accessAdminFilter === "today" && !item.loggedInToday) return false;
     if (!itemMatchesModFilters(item)) return false;
     if (q) {
@@ -1636,7 +1638,9 @@ function renderAccessAdminTable() {
   accessAdminToolbar?.classList.remove("hidden");
 
   if (!items.length) {
-    accessAdminStatus.textContent = "Sin resultados para este filtro.";
+    accessAdminStatus.textContent = accessAdminFilter === "pending"
+      ? "Las solicitudes pendientes están arriba, en la bandeja."
+      : "Sin resultados para este filtro.";
     accessAdminBody.innerHTML = "";
     accessAdminTableWrap?.classList.remove("hidden");
     return;

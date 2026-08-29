@@ -41,7 +41,7 @@
       </span>
       <span class="st2-boot-splash-suite">Suite Web</span>
     </div>
-    <p class="st2-boot-splash-status">Cargando…</p>
+    <p class="st2-boot-splash-status">Cargando<span class="st2-boot-splash-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></p>
   </div>
   <div id="st2-app-root" class="st2-app-root">
   <header class="app-header">
@@ -1855,7 +1855,7 @@
                 es el portal web interno para planillas, referrals y flujos de la mesa: pensado para agilizar el trabajo diario desde el navegador.
               </p>
               <p class="st2-about-notice-aside">(Por el momento, no constituye un producto oficial o licenciado por Thomson Reuters.)</p>
-              <div class="st2-about-signature" aria-label="× Tolei">
+              <div class="st2-about-signature" aria-label="× Leonel Gallo">
                 <a
                   href="https://tolei.dev"
                   class="st2-about-signature-handle"
@@ -1864,7 +1864,7 @@
                   title="Leonel Gallo · tolei.dev"
                 >
                   <span class="st2-about-signature-by" aria-hidden="true">×</span>
-                  <span class="st2-about-signature-at">Tolei</span>
+                  <span class="st2-about-signature-at">Leonel Gallo</span>
                 </a>
                 <span class="st2-about-signature-bike-track" aria-hidden="true">
                   <span class="st2-about-signature-bike st2-about-signature-bike--rear">🚲</span>
@@ -2297,15 +2297,14 @@
   <div id="st2-access-gate" class="st2-access-gate" role="dialog" aria-labelledby="st2-access-title" aria-modal="true">
     <div class="st2-access-card">
       <div class="st2-access-brand">
-        <img src="/st2.ico" alt="" width="40" height="40" class="st2-access-icon"/>
-        <h2 id="st2-access-title" class="st2-access-title" aria-label="ST2">
-          <span class="st2-access-title-st">ST</span><span class="st2-access-title-two">2</span>
+        <h2 id="st2-access-title" class="st2-access-title st2-access-title-mark" aria-label="ST2">
+          <span class="st2-access-title-st">ST</span><sup class="st2-access-title-sup">2</sup>
         </h2>
       </div>
       <div id="st2-access-form">
-        <p class="st2-access-hint">Ingresá tu correo corporativo para continuar.</p>
+        <p class="st2-access-hint">Ingresá tu correo para continuar.</p>
         <label class="st2-access-label" for="st2-access-email">Correo</label>
-        <input id="st2-access-email" type="email" class="st2-access-input" placeholder="" autocomplete="email" spellcheck="false"/>
+        <input id="st2-access-email" type="email" class="st2-access-input" placeholder="nombre.apellido@thomsonreuters.com" autocomplete="email" spellcheck="false"/>
         <div id="st2-access-pass-wrap" class="st2-access-pass-wrap hidden">
           <label class="st2-access-label" for="st2-access-pass">Contraseña</label>
           <input id="st2-access-pass" type="password" class="st2-access-input" autocomplete="current-password" spellcheck="false"/>

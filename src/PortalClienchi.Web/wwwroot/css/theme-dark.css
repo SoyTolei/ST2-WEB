@@ -180,11 +180,49 @@ html.st2-theme-dark .st2-about-abbr-2 {
   color: #fdba74;
 }
 
-html.st2-theme-dark .st2-access-card,
+html.st2-theme-dark .st2-access-card {
+  background: linear-gradient(180deg, #1e2738 0%, #151c28 100%);
+  color: #e8eef7;
+  border-color: rgba(251, 146, 60, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(214, 64, 0, 0.18),
+    0 0 52px rgba(214, 64, 0, 0.32),
+    0 28px 64px rgba(0, 0, 0, 0.55),
+    inset 0 3px 0 #d64000;
+}
+
 html.st2-theme-dark .st2-access-admin-dialog {
   background: linear-gradient(180deg, #1e2738 0%, #151c28 100%);
   color: var(--dark);
   border-color: #334155;
+}
+
+html.st2-theme-dark .st2-access-title,
+html.st2-theme-dark .st2-access-title-st {
+  color: #f1f5f9;
+}
+
+html.st2-theme-dark .st2-access-title-sup,
+html.st2-theme-dark .st2-access-title-two {
+  color: #fb923c;
+}
+
+html.st2-theme-dark .st2-access-hint {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-access-label {
+  color: #cbd5e1;
+}
+
+html.st2-theme-dark .st2-access-input {
+  background: #0b1220;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+html.st2-theme-dark .st2-access-input::placeholder {
+  color: #64748b;
 }
 
 html.st2-theme-dark .st2-access-pending-text,
@@ -192,16 +230,19 @@ html.st2-theme-dark .st2-access-pending-note {
   color: #94a3b8;
 }
 
-html.st2-theme-dark .st2-access-birthday-note {
-  color: #7d8ba0 !important;
-}
+html.st2-theme-dark .st2-access-pending-email {
   background: #3a1d12;
   border-color: #c2410c;
   color: #fdba74;
 }
 
-html.st2-theme-dark .st2-access-title-two {
-  color: #fb923c;
+html.st2-theme-dark .st2-access-birthday-note {
+  color: #7d8ba0 !important;
+}
+
+html.st2-theme-dark .st2-about-signature-by,
+html.st2-theme-dark .st2-about-signature-at {
+  color: #64748b !important;
 }
 
 html.st2-theme-dark .st2-access-admin-kpi,
