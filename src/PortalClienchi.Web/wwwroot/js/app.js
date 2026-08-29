@@ -2,7 +2,7 @@ import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
-import { notifyWebUpdateDesktop, notifyAdminClientChangeDesktop } from "./st2-desktop-notif.js";
+import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
@@ -1251,23 +1251,16 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
   if (!notify || !changes.length) return changes;
 
-  accessAdminClientChangedEmails = new Set(changes.map((c) => c.email));
-  const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-
-  for (const change of changes) {
-    notifyAdminClientChangeDesktop(
-      change.displayName,
-      change.email,
-      change.previousLabel,
-      change.nextLabel,
-    );
-  }
+  // Acumular atención en panel (⚠ en Equipo / pestaña ADMIN). Sin push de escritorio.
+  for (const c of changes) accessAdminClientChangedEmails.add(c.email);
+  syncAdminClientAttentionUi();
 
   if (showHint) {
+    const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
     const first = changes[0];
     const label = changes.length === 1
-      ? `Equipo distinto: ${first.displayName} · ${first.nextLabel}`
-      : `${changes.length} cambios de equipo`;
+      ? `⚠ Equipo distinto: ${first.displayName} · ${first.nextLabel}`
+      : `⚠ ${changes.length} cambios de equipo`;
     setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
   }
 
@@ -1303,8 +1296,8 @@ async function pollAccessAdminClientWatch() {
       const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
       const first = changes[0];
       const label = changes.length === 1
-        ? `Equipo distinto: ${first.displayName} · ${first.nextLabel}`
-        : `${changes.length} cambios de equipo`;
+        ? `⚠ Equipo distinto: ${first.displayName} · ${first.nextLabel}`
+        : `⚠ ${changes.length} cambios de equipo`;
       setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
     }
   } catch {
@@ -1324,6 +1317,31 @@ function stopAccessAdminClientWatch() {
   if (!accessAdminClientWatchTimer) return;
   clearInterval(accessAdminClientWatchTimer);
   accessAdminClientWatchTimer = null;
+}
+
+/** Cartelito ⚠ en pestaña ADMIN / columna Equipo cuando alguien cambió de terminal. */
+function syncAdminClientAttentionUi() {
+  const n = accessAdminClientChangedEmails.size;
+  tabAdminBtn?.classList.toggle("has-client-attention", n > 0 && isPrimarySuperAdmin());
+  if (n > 0) {
+    tabAdminBtn?.setAttribute("title", n === 1
+      ? "Un usuario cambió de equipo"
+      : `${n} usuarios cambiaron de equipo`);
+  } else if (tabAdminBtn && !tabAdminBtn.title?.includes("administración")) {
+    tabAdminBtn.title = "Panel de administración de accesos";
+  }
+  const thAttn = document.getElementById("st2-access-admin-host-attention");
+  if (thAttn) {
+    thAttn.classList.toggle("hidden", n === 0);
+    thAttn.setAttribute("aria-hidden", n === 0 ? "true" : "false");
+    thAttn.textContent = n > 0 ? "⚠" : "";
+  }
+}
+
+function clearAdminClientAttention() {
+  if (!accessAdminClientChangedEmails.size) return;
+  accessAdminClientChangedEmails.clear();
+  syncAdminClientAttentionUi();
 }
 
 function syncAdminTabVisibility() {
@@ -1687,7 +1705,11 @@ function renderAccessAdminTable() {
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
     const hostCell = showHost
-      ? `<td class="st2-access-admin-host" title="${escapeHtml(hostTitle)}">${escapeHtml(hostLabel)}</td>`
+      ? `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
+          accessAdminClientChangedEmails.has(item.email)
+            ? `<span class="st2-access-admin-host-attn" title="Cambió de equipo">⚠</span> `
+            : ""
+        }${escapeHtml(hostLabel)}</td>`
       : "";
     const ownerActions = isPrimarySuperAdmin();
     const extraActions = item.isPending
@@ -1713,7 +1735,7 @@ function renderAccessAdminTable() {
       </td>
     </tr>`;
   }).join("");
-  accessAdminClientChangedEmails.clear();
+  syncAdminClientAttentionUi();
   accessAdminTableWrap?.classList.remove("hidden");
 }
 
@@ -2028,8 +2050,8 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     if (clientChanges.length > 0) {
       const first = clientChanges[0];
       const label = clientChanges.length === 1
-        ? `Equipo distinto: ${first.displayName} · ${first.nextLabel}`
-        : `${clientChanges.length} cambios de equipo`;
+        ? `⚠ Equipo distinto: ${first.displayName} · ${first.nextLabel}`
+        : `⚠ ${clientChanges.length} cambios de equipo`;
       setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
     } else if (newPending.length > 0) {
       const label = newPending.length === 1
@@ -2233,7 +2255,7 @@ function toolsUpdateMessage(newer) {
   const hasSql = list.some((t) => t.id === "sql");
   const hasBat = list.some((t) => t.id === "bat");
   if (hasSql && !hasBat) {
-    return "hay una nueva versión del aplicativo «Herramientas SQL» para realizar backups, disponible para descargar.";
+    return 'hay una nueva versión del aplicativo para realizar backups "Herramientas SQL" para descargar.';
   }
   if (hasBat && !hasSql) {
     return "hay una nueva versión de ST2.BAT disponible para descargar.";
@@ -2361,7 +2383,7 @@ function renderAboutTools() {
       file: "ST2 - Herramientas SQL.zip",
     },
     bat: {
-      desc: "Automatización de procesos, habilitación, verificación de permisos y registro de componentes.",
+      desc: "Automatización de procesos, habilitación, verificación de permisos y registro de componentes. Más usado por la mesa técnica.",
       file: "ST2-PS.zip",
     },
   };
@@ -2443,6 +2465,14 @@ async function refreshAboutTools({ silent = false } = {}) {
 async function downloadTool(toolId) {
   const btn = document.querySelector(`[data-tool-download="${toolId}"]`);
   if (!btn || btn.disabled) return;
+  const label = toolId === "bat" ? "ST2.BAT" : "Herramientas SQL";
+  const ok = await confirmSt2({
+    title: `Descargar ${label}`,
+    body: "Antes de usar la versión nueva, borrá de la PC la versión anterior para no mezclar archivos viejos con los nuevos.",
+    detail: "Misma carpeta / accesos directos viejos suelen generar errores raros.",
+    confirmLabel: "Descargar",
+  });
+  if (!ok) return;
   // Link directo: el .exe ~70MB no cabe bien en fetch+blob (memoria / timeouts).
   setAboutToolsStatus("Iniciando descarga…");
   const a = document.createElement("a");
@@ -2452,7 +2482,7 @@ async function downloadTool(toolId) {
   a.click();
   a.remove();
   markToolSeen(toolId);
-  setAboutToolsStatus("Descarga iniciada");
+  setAboutToolsStatus("Descarga iniciada. Recordá borrar la versión anterior de la PC.");
 }
 
 async function uploadTool(toolId, file) {
@@ -4354,6 +4384,8 @@ function switchTab(tabId) {
     startEngagementTimer("ai");
   } else if (tabId === ADMIN_TAB_ID) {
     void activateAdminTab();
+    // Tras ver el panel, limpia el ⚠ (ya quedó el hint en pantalla).
+    window.setTimeout(() => clearAdminClientAttention(), 14000);
   }
 
   refreshBadges();
@@ -4508,8 +4540,7 @@ function applyLiveBuild(liveBuild) {
     return;
   }
   setUpdateBannerVisible(true);
-  // Notificación de escritorio solo al super-admin primario; el resto ve el cartel naranja.
-  if (isPrimarySuperAdmin()) notifyWebUpdateDesktop(live);
+  notifyWebUpdateDesktop(live);
 }
 
 async function checkAppVersion() {

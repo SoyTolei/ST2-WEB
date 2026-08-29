@@ -3370,6 +3370,41 @@ body.portal-tab-active .tab-icon {
   word-break: break-word;
 }
 
+.st2-access-admin-host.is-client-attn {
+  font-weight: 700;
+  color: #b45309;
+}
+
+.st2-access-admin-host-attn,
+.st2-access-admin-host-attn-th {
+  color: #d97706;
+  font-weight: 800;
+}
+
+.st2-access-admin-host-attn-th.hidden {
+  display: none !important;
+}
+
+@keyframes st2-admin-attn-blink {
+  0%, 44% { opacity: 1; }
+  50%, 94% { opacity: 0.25; }
+  100% { opacity: 1; }
+}
+
+.tab-btn-admin.has-client-attention::after {
+  content: "⚠";
+  margin-left: 4px;
+  font-size: 0.85em;
+  color: #f59e0b;
+  animation: st2-admin-attn-blink 1.35s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-btn-admin.has-client-attention::after {
+    animation: none;
+  }
+}
+
 .st2-access-admin-preset {
   flex: 0 0 auto;
   border: 1px solid #0f766e;

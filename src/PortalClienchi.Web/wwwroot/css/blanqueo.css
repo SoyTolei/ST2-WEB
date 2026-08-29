@@ -484,13 +484,13 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  margin: 0 0 6px;
-  padding: 4px 8px;
+  gap: 7px;
+  margin: 0 0 8px;
+  padding: 6px 9px;
   border-radius: 8px;
   border: 1px solid #a7f3d0;
   background: linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 100%);
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 3px 12px rgba(16, 185, 129, 0.11);
 }
 
 @keyframes st2-toast-dot-blink {
@@ -653,10 +653,10 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-ready-toast-text {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 650;
   color: #065f46;
-  line-height: 1.25;
+  line-height: 1.28;
 }
 
 .blanqueo-ready-toast-text .toast-emoji {
@@ -680,7 +680,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .blanqueo-ready-toast-btn {
   border: 0;
   border-radius: 5px;
-  padding: 3px 8px;
+  padding: 4px 8px;
   background: #047857;
   color: #fff;
   font: inherit;
