@@ -52,28 +52,24 @@ function detectBrowserLabel() {
         const n = String(b?.brand || "");
         return /edg|chrome|opera|chromium|firefox|safari/i.test(n) && !/not.?a.?brand/i.test(n);
       }) || brands[0];
-      const brand = String(pick?.brand || "").replace(/Chromium/i, "Chrome").trim();
-      const ver = String(pick?.version || "").split(".")[0];
-      if (brand && ver) return `${brand} ${ver}`;
-      if (brand) return brand;
+      let brand = String(pick?.brand || "").trim();
+      if (/edg/i.test(brand)) return "Edge";
+      if (/opera|opr/i.test(brand)) return "Opera";
+      if (/firefox/i.test(brand)) return "Firefox";
+      if (/chrome|chromium/i.test(brand)) return "Chrome";
+      if (/safari/i.test(brand)) return "Safari";
+      if (brand) return brand.replace(/^Google\s+/i, "");
     }
   } catch {
     /* ignore */
   }
 
   const ua = String(navigator.userAgent || "");
-  const rules = [
-    [/Edg(?:e|A|iOS)?\/(\d+)/i, "Edge"],
-    [/OPR\/(\d+)/i, "Opera"],
-    [/Firefox\/(\d+)/i, "Firefox"],
-    [/CriOS\/(\d+)/i, "Chrome"],
-    [/Chrome\/(\d+)/i, "Chrome"],
-    [/Version\/(\d+).*Safari/i, "Safari"],
-  ];
-  for (const [re, name] of rules) {
-    const m = ua.match(re);
-    if (m) return `${name} ${m[1]}`;
-  }
+  if (/Edg(?:e|A|iOS)?\//i.test(ua)) return "Edge";
+  if (/OPR\//i.test(ua)) return "Opera";
+  if (/Firefox\//i.test(ua)) return "Firefox";
+  if (/CriOS\//i.test(ua) || (/Chrome\//i.test(ua) && !/Chromium/i.test(ua))) return "Chrome";
+  if (/Safari\//i.test(ua) && /Version\//i.test(ua)) return "Safari";
   return "";
 }
 

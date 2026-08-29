@@ -64,7 +64,7 @@ public static class AppAccessClientInfo
         return value.Length <= MaxDeviceIdLength ? value : value[..MaxDeviceIdLength];
     }
 
-    /// <summary>Resumen corto del UA para la columna Equipo (Edge 128, Chrome 131, etc.).</summary>
+    /// <summary>Nombre del navegador para la columna Equipo (sin versión).</summary>
     public static string? SummarizeBrowser(string? userAgent)
     {
         if (string.IsNullOrWhiteSpace(userAgent))
@@ -73,23 +73,18 @@ public static class AppAccessClientInfo
         var ua = userAgent.Trim();
 
         // Orden importa: Edge/Opera/Chrome comparten "Chrome/" en el UA.
-        if (TryMatchBrowser(ua, "Edg(?:e|A|iOS)?/(\\d+)", "Edge", out var edge))
-            return edge;
-        if (TryMatchBrowser(ua, "OPR/(\\d+)", "Opera", out var opera))
-            return opera;
-        if (TryMatchBrowser(ua, "Firefox/(\\d+)", "Firefox", out var firefox))
-            return firefox;
-        if (TryMatchBrowser(ua, "CriOS/(\\d+)", "Chrome", out var crios))
-            return crios;
+        if (Regex.IsMatch(ua, "Edg(?:e|A|iOS)?/", RegexOptions.IgnoreCase))
+            return "Edge";
+        if (Regex.IsMatch(ua, "OPR/", RegexOptions.IgnoreCase))
+            return "Opera";
+        if (Regex.IsMatch(ua, "Firefox/", RegexOptions.IgnoreCase))
+            return "Firefox";
+        if (Regex.IsMatch(ua, "CriOS/", RegexOptions.IgnoreCase))
+            return "Chrome";
         if (ua.Contains("Chrome/", StringComparison.Ordinal) && !ua.Contains("Chromium", StringComparison.Ordinal))
-        {
-            if (TryMatchBrowser(ua, "Chrome/(\\d+)", "Chrome", out var chrome))
-                return chrome;
-        }
-        if (TryMatchBrowser(ua, "Version/(\\d+).*Safari/", "Safari", out var safari))
-            return safari;
-        if (ua.Contains("Safari/", StringComparison.Ordinal) && TryMatchBrowser(ua, "Version/(\\d+)", "Safari", out var safari2))
-            return safari2;
+            return "Chrome";
+        if (ua.Contains("Safari/", StringComparison.Ordinal) && Regex.IsMatch(ua, "Version/", RegexOptions.IgnoreCase))
+            return "Safari";
 
         return null;
     }
@@ -152,19 +147,6 @@ public static class AppAccessClientInfo
         if (id is null)
             return null;
         return id.Length <= 8 ? id : id[..8];
-    }
-
-    private static bool TryMatchBrowser(string ua, string pattern, string name, out string label)
-    {
-        var m = Regex.Match(ua, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        if (!m.Success)
-        {
-            label = "";
-            return false;
-        }
-
-        label = $"{name} {m.Groups[1].Value}";
-        return true;
     }
 
     private static bool IsUsableIp(string? ip)
