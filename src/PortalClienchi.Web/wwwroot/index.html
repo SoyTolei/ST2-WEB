@@ -35,8 +35,13 @@
   } catch (e) { /* ignore */ }
 </script>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">
-    <img src="/st2.ico" alt="" width="36" height="36" class="st2-boot-splash-icon"/>
-    <p class="st2-boot-splash-mark" aria-label="ST2"><span class="st2-boot-splash-st">ST</span><span class="st2-boot-splash-two">2</span></p>
+    <div class="st2-boot-splash-brand">
+      <span class="st2-boot-splash-st2-mark" aria-hidden="true">
+        <span class="st2-boot-splash-st">ST</span><sup class="st2-boot-splash-sup">2</sup>
+      </span>
+      <span class="st2-boot-splash-suite">Suite Web</span>
+    </div>
+    <p class="st2-boot-splash-status">Cargando…</p>
   </div>
   <div id="st2-app-root" class="st2-app-root">
   <header class="app-header">
@@ -147,7 +152,6 @@
                   </span>
                   <div class="planillas-hero-title-lines">
                     <h2 class="planillas-hero-title-main">Suite Web</h2>
-                    <p class="planillas-hero-title-sub">Soluciones Tecnológicas</p>
                   </div>
                 </div>
                 <p class="planillas-hero-tagline">Sistema de planillas automáticas y registro de solicitudes</p>
@@ -1845,10 +1849,10 @@
           <div class="st2-about-notice-row">
             <img src="/st2.ico" alt="" id="st2-about-icon" class="st2-about-icon" width="40" height="40"/>
             <div class="st2-about-notice-copy">
-              <p class="st2-about-notice-lead">Suite de Herramientas de Uso Interno</p>
-              <p class="st2-about-notice-text">
+              <p id="st2-about-notice-lead" class="st2-about-notice-lead">Suite Web de uso interno</p>
+              <p id="st2-about-notice-text" class="st2-about-notice-text">
                 <strong class="st2-about-abbr"><span class="st2-about-abbr-s">S</span>oluciones <span class="st2-about-abbr-t">T</span>ecnológicas <span class="st2-about-abbr-2">2</span></strong>
-                es un conjunto de herramientas pensadas para agilizar y automatizar los procesos diarios y repetitivos de la mesa: incluye desde un portal web con planillas y accesos rápidos, hasta herramientas de escritorio para backups, restauración de bases y diagnóstico de instalaciones.
+                es el portal web interno para planillas, referrals y flujos de la mesa: pensado para agilizar el trabajo diario desde el navegador.
               </p>
               <p class="st2-about-notice-aside">(Por el momento, no constituye un producto oficial o licenciado por Thomson Reuters.)</p>
               <div class="st2-about-signature" aria-label="× Tolei">

@@ -2271,10 +2271,26 @@ function userCanSeeDesktopToolDownloads() {
   }
 }
 
+function syncAboutNoticeCopy() {
+  const lead = document.getElementById("st2-about-notice-lead");
+  const text = document.getElementById("st2-about-notice-text");
+  if (!lead || !text) return;
+
+  const abbr = `<strong class="st2-about-abbr"><span class="st2-about-abbr-s">S</span>oluciones <span class="st2-about-abbr-t">T</span>ecnológicas <span class="st2-about-abbr-2">2</span></strong>`;
+  if (userCanSeeDesktopToolDownloads()) {
+    lead.textContent = "Suite de herramientas de uso interno";
+    text.innerHTML = `${abbr} reúne el portal web de planillas y accesos rápidos, y también herramientas de escritorio para backups, restauración de bases y diagnóstico de instalaciones.`;
+  } else {
+    lead.textContent = "Suite Web de uso interno";
+    text.innerHTML = `${abbr} es el portal web interno para planillas, referrals y flujos de la mesa: pensado para agilizar el trabajo diario desde el navegador.`;
+  }
+}
+
 function syncAboutToolsVisibility() {
   const show = userCanSeeDesktopToolDownloads();
   aboutToolsSection?.classList.toggle("hidden", !show);
   aboutToolsSection?.toggleAttribute("hidden", !show);
+  syncAboutNoticeCopy();
   if (!show) {
     aboutToolsBadge?.classList.add("hidden");
     aboutToolsBadge?.setAttribute("aria-hidden", "true");

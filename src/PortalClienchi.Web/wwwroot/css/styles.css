@@ -4333,22 +4333,24 @@ body.portal-tab-active .tab-icon {
 }
 
 /* ── Acceso corporativo (gate de entrada) ── */
-body.st2-access-pending .st2-app-root {
-  filter: blur(7px) grayscale(0.45);
-  pointer-events: none;
-  user-select: none;
+/* Hasta que hay sesión OK, la app no se ve (ni borrosa). */
+body.st2-access-pending #st2-app-root {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+body.st2-access-ok #st2-app-root {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  user-select: auto;
 }
 
 /* Recarga con sesión conocida: splash neutro, sin mostrar Planillas genéricas. */
 body.st2-access-restoring #st2-access-gate {
   display: none !important;
-}
-
-body.st2-access-restoring #st2-app-root {
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  user-select: none !important;
 }
 
 .st2-boot-splash {
@@ -4359,7 +4361,7 @@ body.st2-access-restoring #st2-app-root {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   background:
     radial-gradient(80% 60% at 20% 0%, rgba(214, 64, 0, 0.18) 0%, transparent 50%),
     #0b1220;
@@ -4370,27 +4372,66 @@ body.st2-access-restoring .st2-boot-splash {
   display: flex;
 }
 
-.st2-boot-splash-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+.st2-boot-splash-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.st2-boot-splash-mark {
-  margin: 0;
+.st2-boot-splash-st2-mark {
+  display: inline-flex;
+  align-items: flex-start;
   font-family: "Sora", system-ui, sans-serif;
-  font-weight: 700;
-  font-size: 1.35rem;
-  letter-spacing: 0.02em;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #e8eef7;
   line-height: 1;
+  transform-origin: 50% 60%;
+  animation: st2-boot-st2-float 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.28));
+  user-select: none;
 }
 
 .st2-boot-splash-st {
+  font-weight: 750;
+}
+
+.st2-boot-splash-sup {
+  color: #f97316;
+  font-size: 0.56em;
+  font-weight: 800;
+  line-height: 1;
+  margin-left: 1px;
+  transform: translateY(-0.2em);
+  animation: st2-boot-st2-sup-float 3.4s ease-in-out infinite 0.12s;
+}
+
+.st2-boot-splash-suite {
+  font-family: "Sora", system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
   color: #e8eef7;
 }
 
-.st2-boot-splash-two {
-  color: #f97316;
+.st2-boot-splash-status {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+@keyframes st2-boot-st2-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes st2-boot-st2-sup-float {
+  0%, 100% { transform: translateY(-0.2em); }
+  50% { transform: translateY(calc(-0.2em - 3px)); }
 }
 
 .st2-access-gate {
@@ -4402,10 +4443,9 @@ body.st2-access-restoring .st2-boot-splash {
   justify-content: center;
   padding: 20px;
   background:
-    radial-gradient(90% 70% at 12% 0%, rgba(214, 64, 0, 0.28) 0%, transparent 46%),
-    radial-gradient(80% 60% at 100% 100%, rgba(13, 148, 136, 0.22) 0%, transparent 48%),
-    rgba(8, 13, 24, 0.58);
-  backdrop-filter: blur(8px);
+    radial-gradient(90% 70% at 12% 0%, rgba(214, 64, 0, 0.22) 0%, transparent 46%),
+    radial-gradient(80% 60% at 100% 100%, rgba(13, 148, 136, 0.16) 0%, transparent 48%),
+    #0b1220;
 }
 
 .st2-access-gate.hidden {
