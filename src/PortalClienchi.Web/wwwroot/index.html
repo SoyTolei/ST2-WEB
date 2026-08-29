@@ -1754,7 +1754,10 @@
                 <p class="st2-access-admin-kicker">Administración</p>
                 <h3 class="st2-access-admin-title">Control de accesos</h3>
               </div>
-              <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
+              <div class="st2-access-admin-panel-actions">
+                <button type="button" id="st2-access-admin-preset" class="st2-access-admin-preset hidden" title="Crear un perfil aprobado con módulos antes del primer ingreso">Crear perfil</button>
+                <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
+              </div>
             </div>
             <div class="st2-access-admin-kpis" id="st2-access-admin-kpis">
               <div class="st2-access-admin-kpi">
@@ -1794,7 +1797,6 @@
               <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="cl" title="Chile">CL</button>
             </div>
             <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
-            <button type="button" id="st2-access-admin-preset" class="st2-access-admin-preset hidden" title="Precargar perfil aprobado con módulos">Cargar perfil</button>
           </div>
           <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
             <table class="st2-access-admin-table">
@@ -2190,6 +2192,7 @@
         <h3 id="st2-access-modules-title" class="st2-access-name-edit-title">Módulos habilitados</h3>
         <button type="button" id="st2-access-modules-close" class="st2-access-name-edit-x" aria-label="Cerrar">×</button>
       </div>
+      <div class="st2-access-modules-scroll">
       <div id="st2-access-modules-profile" class="st2-access-modules-profile">
         <div class="st2-access-modules-profile-top">
           <span class="st2-access-modules-profile-label">Perfil</span>
@@ -2270,6 +2273,7 @@
         </span>
       </label>
       <p id="st2-access-modules-error" class="st2-access-admin-error" role="alert"></p>
+      </div>
       <div class="st2-access-modules-actions">
         <button type="button" id="st2-access-modules-cancel" class="st2-access-admin-cancel">Cancelar</button>
         <button type="button" id="st2-access-modules-save" class="st2-access-admin-submit">Guardar</button>

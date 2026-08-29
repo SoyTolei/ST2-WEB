@@ -2876,6 +2876,13 @@ body.portal-tab-active .tab-icon {
   margin-bottom: 8px;
 }
 
+.st2-access-admin-panel-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .st2-access-admin-panel-titles .st2-access-admin-title {
   margin: 0;
 }
@@ -3327,19 +3334,21 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-admin-preset {
   flex: 0 0 auto;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #0f766e;
   border-radius: 8px;
-  background: #fff;
-  color: #0f172a;
+  background: #0f766e;
+  color: #fff;
   font-size: 0.78rem;
   font-weight: 600;
   padding: 7px 12px;
   cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .st2-access-admin-preset:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
+  background: #0d9488;
+  border-color: #0d9488;
 }
 
 .st2-access-modules-email-input {
@@ -3661,6 +3670,24 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-modules-dialog {
   width: min(420px, 96vw);
+  max-height: min(92vh, 860px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 12px;
+}
+
+.st2-access-modules-dialog .st2-access-name-edit-head {
+  flex-shrink: 0;
+}
+
+.st2-access-modules-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  margin-right: -2px;
 }
 
 .st2-access-modules-section-title {
@@ -3882,10 +3909,13 @@ body.portal-tab-active .tab-icon {
 }
 
 .st2-access-modules-actions {
-  margin-top: 14px;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .st2-access-admin-edit-icon {
@@ -4045,9 +4075,10 @@ body.portal-tab-active .tab-icon {
   inset: 0;
   z-index: 2700;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: max(12px, env(safe-area-inset-top, 0px)) 16px max(12px, env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(3px);
   animation: st2AccessNameEditIn 0.18s ease-out;
@@ -4064,6 +4095,7 @@ body.portal-tab-active .tab-icon {
 
 .st2-access-name-edit-dialog {
   width: min(420px, 94vw);
+  margin: auto;
   background: #fff;
   border-radius: 14px;
   padding: 18px 20px 16px;
