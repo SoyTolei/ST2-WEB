@@ -1586,11 +1586,6 @@ function itemMatchesModFilters(item) {
     if (key === "sql") ok = !!mods.planillasSqlOnvio;
     else if (key === "leg") ok = !!mods.planillasLegal;
     else if (key === "cl") ok = !!mods.planillasChile;
-    else if (key === "op") ok = !!mods.oportunidad;
-    else if (key === "pdf") ok = !!mods.pdfPortal;
-    else if (key === "bl") ok = !!(mods.blanqueo || mods.blanqueoConfirm || mods.blanqueoLoad);
-    else if (key === "bs") ok = !!(mods.borradoBases || mods.borradoBasesConfirm || mods.borradoBasesLoad);
-    else if (key === "adm") ok = !!item.isSt2Admin;
     if (!ok) return false;
   }
   return true;

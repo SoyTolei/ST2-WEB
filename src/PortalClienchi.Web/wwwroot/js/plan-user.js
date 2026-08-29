@@ -203,6 +203,14 @@ export async function ensureAppAccess() {
   if (accessPromise) return accessPromise;
 
   accessPromise = (async () => {
+    // Si ya hubo login en este navegador, no mostrar el formulario mientras se revalida.
+    const hasHint = !!localStorage.getItem("st2_plan_user_hint");
+    if (hasHint) {
+      document.body.classList.add("st2-access-restoring", "st2-access-pending");
+      document.body.classList.remove("st2-access-ok");
+      document.getElementById("st2-access-gate")?.classList.add("hidden");
+    }
+
     const synced = await syncPlanUserSession();
     if (synced) {
       unlockAppShell();
@@ -218,7 +226,7 @@ export async function ensureAppAccess() {
 
 function unlockAppShell() {
   appUnlocked = true;
-  document.body.classList.remove("st2-access-pending");
+  document.body.classList.remove("st2-access-pending", "st2-access-restoring");
   document.body.classList.add("st2-access-ok");
   document.getElementById("st2-access-gate")?.classList.add("hidden");
   document.dispatchEvent(new CustomEvent("st2:session-changed"));
@@ -227,7 +235,7 @@ function unlockAppShell() {
 function lockAppShell() {
   appUnlocked = false;
   document.body.classList.add("st2-access-pending");
-  document.body.classList.remove("st2-access-ok");
+  document.body.classList.remove("st2-access-ok", "st2-access-restoring");
   document.getElementById("st2-access-gate")?.classList.remove("hidden");
 }
 

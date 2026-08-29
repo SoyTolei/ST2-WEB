@@ -4294,6 +4294,18 @@ body.st2-access-pending .st2-app-root {
   user-select: none;
 }
 
+/* Recarga con sesión conocida: no mostrar el login; revalidar en silencio. */
+body.st2-access-restoring #st2-access-gate {
+  display: none !important;
+}
+
+body.st2-access-restoring.st2-access-pending .st2-app-root {
+  filter: none;
+  opacity: 0.92;
+  pointer-events: none;
+  user-select: none;
+}
+
 .st2-access-gate {
   position: fixed;
   inset: 0;

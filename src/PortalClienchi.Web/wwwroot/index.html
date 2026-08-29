@@ -24,6 +24,13 @@
   <link rel="stylesheet" href="/css/theme-dark.css"/>
 </head>
 <body class="st2-access-pending">
+<script>
+  try {
+    if (localStorage.getItem("st2_plan_user_hint")) {
+      document.body.classList.add("st2-access-restoring");
+    }
+  } catch (e) { /* ignore */ }
+</script>
   <div id="st2-app-root" class="st2-app-root">
   <header class="app-header">
     <div class="app-header-left">
@@ -1781,15 +1788,10 @@
               <button type="button" class="st2-access-admin-filter" data-filter="active">Activos</button>
               <button type="button" class="st2-access-admin-filter" data-filter="today">Hoy</button>
             </div>
-            <div class="st2-access-admin-mod-filters" role="group" aria-label="Filtrar por permisos">
+            <div class="st2-access-admin-mod-filters" role="group" aria-label="Filtrar por sistema">
               <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="sql" title="Bejerman SQL / ONVIO">SQL</button>
               <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="leg" title="LEGAL">LEG</button>
               <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="cl" title="Chile">CL</button>
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="op" title="Oportunidad">op</button>
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="pdf" title="PDF Portal">pdf</button>
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="bl" title="Blanqueo">bl</button>
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="bs" title="Borrado bases">bs</button>
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="adm" title="ADMIN WEB">adm</button>
             </div>
             <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
             <button type="button" id="st2-access-admin-preset" class="st2-access-admin-preset hidden" title="Precargar perfil aprobado con módulos">Cargar perfil</button>
