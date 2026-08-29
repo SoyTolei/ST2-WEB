@@ -180,33 +180,50 @@ body.portal-tab-active .st2-update-banner {
 
 @keyframes st2-update-text-glow {
   0%, 100% {
-    opacity: 0.92;
+    opacity: 0.88;
+    letter-spacing: 0.01em;
     text-shadow: 0 0 0 rgba(255, 247, 237, 0);
-    filter: brightness(1);
+    filter: brightness(1) saturate(1);
+    transform: scale(1);
   }
   50% {
     opacity: 1;
+    letter-spacing: 0.03em;
     text-shadow:
-      0 0 10px rgba(255, 247, 237, 0.95),
-      0 0 22px rgba(255, 237, 213, 0.65),
-      0 0 34px rgba(254, 215, 170, 0.35);
-    filter: brightness(1.08);
+      0 0 12px rgba(255, 247, 237, 1),
+      0 0 28px rgba(255, 237, 213, 0.85),
+      0 0 48px rgba(254, 215, 170, 0.55),
+      0 0 2px rgba(255, 255, 255, 0.9);
+    filter: brightness(1.18) saturate(1.15);
+    transform: scale(1.015);
+  }
+}
+
+@keyframes st2-update-btn-pulse {
+  0%, 100% {
+    box-shadow: 0 2px 0 rgba(154, 52, 18, 0.25), 0 0 0 0 rgba(255, 255, 255, 0.45);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 2px 0 rgba(154, 52, 18, 0.25), 0 0 0 6px rgba(255, 255, 255, 0);
+    transform: scale(1.04);
   }
 }
 
 .st2-update-banner-text {
   margin: 0;
-  font-size: 0.98rem;
-  font-weight: 650;
+  font-size: 1.02rem;
+  font-weight: 700;
   line-height: 1.35;
-  animation: st2-update-text-glow 2.2s ease-in-out infinite;
+  animation: st2-update-text-glow 1.7s ease-in-out infinite;
 }
 
 .st2-update-banner-text strong {
-  font-weight: 800;
+  font-weight: 900;
   text-decoration: underline;
-  text-underline-offset: 2px;
-  animation: st2-update-text-glow 2.2s ease-in-out infinite;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  animation: st2-update-text-glow 1.7s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -216,6 +233,12 @@ body.portal-tab-active .st2-update-banner {
     opacity: 1;
     filter: none;
     text-shadow: none;
+    transform: none;
+    letter-spacing: normal;
+  }
+
+  .st2-update-banner-reload {
+    animation: none;
   }
 }
 
@@ -230,10 +253,12 @@ body.portal-tab-active .st2-update-banner {
   cursor: pointer;
   flex-shrink: 0;
   box-shadow: 0 2px 0 rgba(154, 52, 18, 0.25);
+  animation: st2-update-btn-pulse 1.7s ease-in-out infinite;
 }
 
 .st2-update-banner-reload:hover {
   background: #ffedd5;
+  animation: none;
 }
 
 .st2-modules-banner {

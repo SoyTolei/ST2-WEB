@@ -3,7 +3,7 @@ import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDevi
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop, notifyAdminClientChangeDesktop } from "./st2-desktop-notif.js";
-import { setToastText, TOAST_FOOD_MARK, greetLine, toastFirstName } from "./st2-toast-greet.js";
+import { syncStackedToastGreetings } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -2230,17 +2230,20 @@ function toolPackageLabel(id) {
 function toolsUpdateMessage(newer) {
   const list = newer || [];
   if (!list.length) return "";
-  const names = list.map((t) => toolPackageLabel(t.id));
-  let body;
-  if (names.length === 1) {
-    body = `hay una versión nueva de ${names[0]} para descargar.`;
-  } else {
-    const last = names.pop();
-    body = `hay versiones nuevas de ${names.join(", ")} y de ${last} para descargar.`;
+  const hasSql = list.some((t) => t.id === "sql");
+  const hasBat = list.some((t) => t.id === "bat");
+  if (hasSql && !hasBat) {
+    return "hay una nueva versión del aplicativo «Herramientas SQL» para realizar backups, disponible para descargar.";
   }
-  const name = toastFirstName();
-  const greet = greetLine(name);
-  return greet ? `${greet} ${body}` : body.charAt(0).toUpperCase() + body.slice(1);
+  if (hasBat && !hasSql) {
+    return "hay una nueva versión de ST2.BAT disponible para descargar.";
+  }
+  const names = list.map((t) => toolPackageLabel(t.id));
+  if (names.length === 1) {
+    return `hay una nueva versión de ${names[0]} disponible para descargar.`;
+  }
+  const last = names.pop();
+  return `hay nuevas versiones de ${names.join(", ")} y de ${last} disponibles para descargar.`;
 }
 
 function hideToolsTopBanner() {
@@ -2252,7 +2255,6 @@ function hideToolsTopBanner() {
 
 function renderToolsToast(newer, message) {
   const toast = document.getElementById("tools-ready-toast");
-  const toastText = document.getElementById("tools-ready-toast-text");
   const toastCount = document.getElementById("tools-ready-toast-count");
   if (!toast) return;
   const n = (newer || []).length;
@@ -2260,6 +2262,8 @@ function renderToolsToast(newer, message) {
   if (!show) {
     toast.classList.add("hidden");
     toast.setAttribute("aria-hidden", "true");
+    delete toast.dataset.toastBody;
+    syncStackedToastGreetings();
     return;
   }
   if (toastCount) {
@@ -2267,9 +2271,10 @@ function renderToolsToast(newer, message) {
     toastCount.setAttribute("aria-hidden", n > 1 ? "false" : "true");
     toastCount.classList.toggle("hidden", n < 2);
   }
-  if (toastText) setToastText(toastText, `${TOAST_FOOD_MARK} ${message || ""}`.trim());
+  toast.dataset.toastBody = String(message || "").trim();
   toast.classList.remove("hidden");
   toast.setAttribute("aria-hidden", "false");
+  syncStackedToastGreetings();
 }
 
 function userCanSeeDesktopToolDownloads() {
@@ -2322,7 +2327,7 @@ function syncAboutToolsBadge() {
   if (aboutToolsBadge) {
     aboutToolsBadge.classList.toggle("hidden", !hasNew);
     aboutToolsBadge.setAttribute("aria-hidden", hasNew ? "false" : "true");
-    aboutToolsBadge.title = hasNew ? "Hay una versión nueva de herramientas" : "";
+    aboutToolsBadge.title = hasNew ? "Nueva versión de Herramientas SQL para descargar" : "";
   }
 
   const msg = toolsUpdateMessage(newer);
@@ -4455,6 +4460,8 @@ void bootstrapApp();
 const UPDATE_CHECK_MS = 45000;
 let lastLiveBuild = "";
 let updateCheckerStarted = false;
+/** Banner forzado por permisos nuevos (no lo apaga el check de build). */
+let reloadBannerForced = false;
 
 function loadedAppBuild() {
   const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
@@ -4482,16 +4489,27 @@ function setUpdateBannerVisible(show) {
   document.body.classList.toggle("st2-has-update", !!show);
 }
 
+/** Cartel único de “recargá” (versión web o permisos nuevos). */
+function requestUnifiedReloadBanner() {
+  reloadBannerForced = true;
+  setUpdateBannerVisible(true);
+}
+
+document.addEventListener("st2:request-reload-banner", () => {
+  requestUnifiedReloadBanner();
+});
+
 function applyLiveBuild(liveBuild) {
   const live = String(liveBuild || "").trim();
   if (!live) return;
   lastLiveBuild = live;
   if (!buildsDiffer(loadedAppBuild(), live)) {
-    setUpdateBannerVisible(false);
+    if (!reloadBannerForced) setUpdateBannerVisible(false);
     return;
   }
   setUpdateBannerVisible(true);
-  notifyWebUpdateDesktop(live);
+  // Notificación de escritorio solo al super-admin primario; el resto ve el cartel naranja.
+  if (isPrimarySuperAdmin()) notifyWebUpdateDesktop(live);
 }
 
 async function checkAppVersion() {

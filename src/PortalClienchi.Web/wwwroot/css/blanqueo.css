@@ -484,13 +484,13 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 10px;
-  padding: 7px 10px;
-  border-radius: 9px;
+  gap: 6px;
+  margin: 0 0 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
   border: 1px solid #a7f3d0;
   background: linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 100%);
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.1);
 }
 
 @keyframes st2-toast-dot-blink {
@@ -613,13 +613,13 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .blanqueo-ready-toast-main {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
 .blanqueo-ready-toast-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: #059669;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
@@ -638,25 +638,25 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 }
 
 .blanqueo-ready-toast-count {
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
   border-radius: 999px;
   background: #059669;
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  line-height: 20px;
+  line-height: 18px;
   text-align: center;
   flex-shrink: 0;
 }
 
 .blanqueo-ready-toast-text {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 650;
   color: #065f46;
-  line-height: 1.32;
+  line-height: 1.25;
 }
 
 .blanqueo-ready-toast-text .toast-emoji {
@@ -673,20 +673,21 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .blanqueo-ready-toast-actions {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex-shrink: 0;
 }
 
 .blanqueo-ready-toast-btn {
   border: 0;
-  border-radius: 6px;
-  padding: 5px 9px;
+  border-radius: 5px;
+  padding: 3px 8px;
   background: #047857;
   color: #fff;
   font: inherit;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
+  line-height: 1.2;
 }
 
 .blanqueo-ready-toast-btn:hover {

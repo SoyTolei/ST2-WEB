@@ -70,34 +70,24 @@ function newlyEnabledKeys(prev, next) {
   return keys;
 }
 
-function describeNewModules(keys) {
-  if (!keys.length) return "Se actualizaron tus permisos de módulos. Recargá para ver los cambios.";
-  const labels = keys.map((k) => MODULE_LABELS[k] || k);
-  if (labels.length === 1) {
-    return `Se habilitó: ${labels[0]}. Recargá para verlo en Planillas.`;
+function setModulesBannerVisible(show) {
+  // Unificado: mismo cartel naranja de “actu nueva” (el teal de permisos confunde y se omite).
+  if (show) {
+    document.dispatchEvent(new CustomEvent("st2:request-reload-banner"));
   }
-  if (labels.length === 2) {
-    return `Se habilitaron: ${labels[0]} y ${labels[1]}. Recargá para verlos.`;
-  }
-  return `Se habilitaron ${labels.length} permisos nuevos. Recargá para verlos en Planillas.`;
-}
-
-function setModulesBannerVisible(show, message) {
+  // Ocultar el banner legacy por si quedó en el DOM.
   const banner = document.getElementById("st2-modules-banner");
-  const text = document.getElementById("st2-modules-banner-text");
-  if (!banner) return;
-  if (message && text) text.textContent = message;
-  banner.classList.toggle("hidden", !show);
-  banner.toggleAttribute("hidden", !show);
-  document.body.classList.toggle("st2-has-modules-update", !!show);
+  if (banner) {
+    banner.classList.add("hidden");
+    banner.setAttribute("hidden", "");
+  }
+  document.body.classList.remove("st2-has-modules-update");
 }
 
 function bindModulesBanner() {
   if (modulesBannerBound) return;
   modulesBannerBound = true;
-  document.getElementById("st2-modules-reload")?.addEventListener("click", () => {
-    window.location.reload();
-  });
+  // El reload vive en el cartel unificado (#st2-update-reload).
 }
 
 function readViewAs() {
@@ -242,7 +232,7 @@ export async function refreshModuleFlags({ force = false, baseline = false, dete
       } else if (detectNew && prevKnown) {
         const gained = newlyEnabledKeys(prevKnown, next);
         if (gained.length) {
-          setModulesBannerVisible(true, describeNewModules(gained));
+          setModulesBannerVisible(true);
           document.dispatchEvent(new CustomEvent("st2:modules-access-changed", {
             detail: { gained, flags: cloneFlags(next) },
           }));

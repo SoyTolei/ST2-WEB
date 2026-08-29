@@ -11,6 +11,7 @@ const TOAST_FOOD_EMOJIS = [
 ];
 
 const STACKED_TOAST_IDS = [
+  "tools-ready-toast",
   "blanqueo-ready-toast",
   "borrado-ready-toast",
   "access-ready-toast",
@@ -91,7 +92,7 @@ export function greetLine(name) {
   return `Hola ${name}!`;
 }
 
-export function formatToastMessage(body, { greet = false } = {}) {
+export function formatToastMessage(body, { greet = false, stackIndex = 0 } = {}) {
   const msg = String(body || "").trim();
   if (!msg) return msg;
   const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
@@ -101,11 +102,12 @@ export function formatToastMessage(body, { greet = false } = {}) {
     if (isBirthdayGreetingForEmail(toastUserEmail())) return `${line} ${lowered}`;
     return `${TOAST_FOOD_MARK} ${line} ${lowered}`;
   }
-  const rest = lowered.replace(/^tenés\s+/i, "");
-  return `${TOAST_FOOD_MARK} También tenés ${rest}`;
+  // 2.ª: «También…» · 3.ª+: «Y además…» (sin repetir saludo ni «también»)
+  const connector = stackIndex >= 2 ? "Y además," : "También";
+  return `${TOAST_FOOD_MARK} ${connector} ${lowered}`;
 }
 
-/** El saludo “Hola …” solo en el primer toast visible. */
+/** El saludo “Hola …” solo en el primer toast visible del stack. */
 export function syncStackedToastGreetings() {
   const visible = STACKED_TOAST_IDS
     .map((id) => document.getElementById(id))
@@ -114,6 +116,6 @@ export function syncStackedToastGreetings() {
   visible.forEach((toast, index) => {
     const body = toast.dataset.toastBody || "";
     const textEl = toast.querySelector(".blanqueo-ready-toast-text");
-    setToastText(textEl, formatToastMessage(body, { greet: index === 0 }));
+    setToastText(textEl, formatToastMessage(body, { greet: index === 0, stackIndex: index }));
   });
 }
