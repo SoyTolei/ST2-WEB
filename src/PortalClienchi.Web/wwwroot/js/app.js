@@ -200,7 +200,7 @@ function getPortalEmbedPath() {
   const path = String(cfg?.embedPath || "").trim();
   if (path) return path;
   const site = activePortalId === "legal" ? "portal-legal" : "portal-bejerman";
-  return `/embed/${site}/home`;
+  return `/embed/${site}/auth/login`;
 }
 
 function getPortalExternalUrl() {
@@ -209,31 +209,36 @@ function getPortalExternalUrl() {
   return url || null;
 }
 
-function clearPortalEmbedStorage() {
+function applyPortalEmbedAuth(data) {
+  if (!data) return false;
+  const token = data.authToken || data.token;
+  if (!token) return false;
   try {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
+    localStorage.setItem("authToken", token);
+    if (data.user) {
+      localStorage.setItem("user", typeof data.user === "string" ? data.user : JSON.stringify(data.user));
+    }
+    const authState = { authToken: token, user: data.user || null, isAuthorized: true };
+    localStorage.setItem("persist:root", JSON.stringify({
+      auth: JSON.stringify(authState),
+      _persist: JSON.stringify({ version: -1, rehydrated: true }),
+    }));
   } catch {
-    /* ignore */
+    return false;
   }
+  return true;
 }
 
 async function seedPortalEmbedSession() {
   const cfg = getActivePortalConfig();
-  if (!cfg?.hasEmbedCredentials) return false;
+  if (cfg?.hasEmbedCredentials === false) return false;
 
-  clearPortalEmbedStorage();
   try {
-    const portalId = encodeURIComponent(cfg.id || activePortalId || "bejerman");
+    const portalId = encodeURIComponent(cfg?.id || activePortalId || "bejerman");
     const res = await fetch(`/api/portal-embed/session?portal=${portalId}`, { credentials: "include" });
     if (!res.ok) return false;
     const data = await res.json();
-    if (!data?.authToken) return false;
-    localStorage.setItem("authToken", data.authToken);
-    if (data.user) {
-      localStorage.setItem("user", typeof data.user === "string" ? data.user : JSON.stringify(data.user));
-    }
-    return true;
+    return applyPortalEmbedAuth(data);
   } catch {
     return false;
   }
@@ -3723,7 +3728,7 @@ async function loadEmbedFrameAsync(kind, { force = false } = {}) {
     if (!isThomWindowMode()) scheduleThomBlankCheck();
   }
   if (kind === "portal") {
-    await seedPortalEmbedSession();
+    void seedPortalEmbedSession();
   }
   frame.src = url;
 }

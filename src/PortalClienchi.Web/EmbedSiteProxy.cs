@@ -420,11 +420,17 @@ internal sealed class EmbedSiteProxy
     private static string RewritePortalWebpackPublicPath(string content, string site)
     {
         var embed = $"/embed/{site}/";
-        return Regex.Replace(
+        content = Regex.Replace(
             content,
             @"(\.p\s*=\s*"")/""",
             $"$1{embed}\"",
             RegexOptions.IgnoreCase);
+        content = Regex.Replace(
+            content,
+            @"(\bp\s*:\s*"")/""",
+            $"$1{embed}\"",
+            RegexOptions.IgnoreCase);
+        return content;
     }
 
     private static string InjectPortalEmbedAuthScript(string content, string site)
@@ -433,31 +439,20 @@ internal sealed class EmbedSiteProxy
         if (portalId is null)
             return content;
 
-        const string marker = "</head>";
-        if (!content.Contains(marker, StringComparison.OrdinalIgnoreCase))
-            return content;
+        var earlyScript = PortalEmbedBridge.BuildEarlyScript(portalId, site);
+        var lateScript = PortalEmbedBridge.BuildLateScript(portalId, site);
 
-        var script = $$"""
-<script>
-(function () {
-  try {
-    if (localStorage.getItem("authToken")) return;
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", "/api/portal-embed/session?portal={{portalId}}", false);
-    xhr.withCredentials = true;
-    xhr.send();
-    if (xhr.status !== 200) return;
-    var data = JSON.parse(xhr.responseText || "{}");
-    if (data.authToken) localStorage.setItem("authToken", data.authToken);
-    if (data.user) {
-      localStorage.setItem("user", typeof data.user === "string" ? data.user : JSON.stringify(data.user));
-    }
-  } catch (e) {}
-})();
-</script>
-""";
+        content = Regex.Replace(
+            content,
+            @"<head(\s[^>]*)?>",
+            match => match.Value + earlyScript,
+            RegexOptions.IgnoreCase);
 
-        return content.Replace(marker, script + marker, StringComparison.OrdinalIgnoreCase);
+        const string bodyMarker = "</body>";
+        if (content.Contains(bodyMarker, StringComparison.OrdinalIgnoreCase))
+            return content.Replace(bodyMarker, lateScript + bodyMarker, StringComparison.OrdinalIgnoreCase);
+
+        return content + lateScript;
     }
 
     private static string? PortalIdFromEmbedSite(string site) =>

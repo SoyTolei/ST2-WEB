@@ -267,7 +267,7 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
             id = p.Id,
             label = p.Label,
             portalBaseUrl = $"{runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? ""}/home",
-            embedPath = $"/embed/{embedSite}/home",
+            embedPath = $"/embed/{embedSite}/auth/login",
             hasEmbedCredentials = registry.HasCredentials(p.Id),
         };
     }),
@@ -303,6 +303,7 @@ app.MapGet("/api/portal-embed/session", async (
         return Results.Ok(new
         {
             authToken = session.AuthToken,
+            token = session.AuthToken,
             user = session.User,
         });
     }
@@ -313,6 +314,19 @@ app.MapGet("/api/portal-embed/session", async (
             title: "Login del portal falló",
             statusCode: StatusCodes.Status502BadGateway);
     }
+});
+
+app.MapGet("/api/portal-embed/credentials", (string? portal, PortalRegistry registry) =>
+{
+    if (!registry.HasCredentials(portal))
+        return CredentialsMissing(portal);
+
+    var runtime = registry.Resolve(portal);
+    return Results.Ok(new
+    {
+        email = runtime.Settings.Email.Trim().ToLowerInvariant(),
+        password = runtime.Settings.Password,
+    });
 });
 
 app.MapGet("/api/types", () =>
