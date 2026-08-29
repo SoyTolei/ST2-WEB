@@ -1454,6 +1454,45 @@ html.st2-theme-dark .st2-access-admin-filter.is-active {
   color: #fff !important;
 }
 
+html.st2-theme-dark .st2-access-admin-mod-filters {
+  border-left-color: #334155 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-mod-filter {
+  background: #1a2230 !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-mod-filter:hover {
+  background: #243044 !important;
+  color: #e2e8f0 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-mod-filter.is-active {
+  border-color: #0d9488 !important;
+  background: #134e4a !important;
+  color: #5eead4 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="sql"].is-active {
+  border-color: #3b82f6 !important;
+  background: #172554 !important;
+  color: #93c5fd !important;
+}
+
+html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="leg"].is-active {
+  border-color: #8b5cf6 !important;
+  background: #2e1065 !important;
+  color: #c4b5fd !important;
+}
+
+html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="cl"].is-active {
+  border-color: #ef4444 !important;
+  background: #450a0a !important;
+  color: #fca5a5 !important;
+}
+
 html.st2-theme-dark .st2-access-admin-panel-top,
 html.st2-theme-dark .st2-access-admin-panel-foot {
   border-color: #334155 !important;

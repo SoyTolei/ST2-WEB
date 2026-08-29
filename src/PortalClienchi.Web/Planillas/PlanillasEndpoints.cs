@@ -680,7 +680,9 @@ public static class PlanillasEndpoints
                         lastClientIp = showClientMeta ? item.LastClientIp : null,
                         lastClientHost = showClientMeta ? item.LastClientHost : null,
                         lastClientHint = showClientMeta ? item.LastClientHint : null,
-                        lastClientDevice = showClientMeta ? item.LastClientDevice : null,
+                        lastClientDevice = showClientMeta
+                            ? (AppAccessClientInfo.ResolveDeviceId(item.LastClientDevice, item.LastClientHint))
+                            : null,
                         lastClientBrowser = showClientMeta
                             ? AppAccessClientInfo.SummarizeBrowser(item.LastUserAgent)
                             : null,
@@ -689,7 +691,7 @@ public static class PlanillasEndpoints
                                 item.LastClientHost,
                                 item.LastClientHint,
                                 item.LastClientIp,
-                                item.LastClientDevice,
+                                AppAccessClientInfo.ResolveDeviceId(item.LastClientDevice, item.LastClientHint),
                                 AppAccessClientInfo.SummarizeBrowser(item.LastUserAgent))
                             : null,
                         modules = new

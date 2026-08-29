@@ -41,7 +41,7 @@
     </div>
     <div class="app-header-right">
       <span id="st2-session-email" class="st2-session-email hidden" aria-label="Usuario conectado"></span>
-      <button type="button" id="aboutBtn" class="btn-ghost about-btn" title="Acerca de, y descargas de la suite" aria-label="Acerca de ST2, y descargas de la suite">
+      <button type="button" id="aboutBtn" class="btn-ghost about-btn" title="Acerca de ST2" aria-label="Acerca de ST2">
         Acerca de ST2
         <span id="about-tools-badge" class="about-tools-badge hidden" aria-hidden="true">Nuevo</span>
       </button>
@@ -1781,6 +1781,16 @@
               <button type="button" class="st2-access-admin-filter" data-filter="active">Activos</button>
               <button type="button" class="st2-access-admin-filter" data-filter="today">Hoy</button>
             </div>
+            <div class="st2-access-admin-mod-filters" role="group" aria-label="Filtrar por permisos">
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="sql" title="Bejerman SQL / ONVIO">SQL</button>
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="leg" title="LEGAL">LEG</button>
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="cl" title="Chile">CL</button>
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="op" title="Oportunidad">op</button>
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="pdf" title="PDF Portal">pdf</button>
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="bl" title="Blanqueo">bl</button>
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="bs" title="Borrado bases">bs</button>
+              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="adm" title="ADMIN WEB">adm</button>
+            </div>
             <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
             <button type="button" id="st2-access-admin-preset" class="st2-access-admin-preset hidden" title="Precargar perfil aprobado con módulos">Cargar perfil</button>
           </div>
@@ -1850,7 +1860,7 @@
           </div>
         </section>
 
-        <section class="st2-about-tools" aria-label="Herramientas de la suite">
+        <section id="st2-about-tools" class="st2-about-tools" aria-label="Herramientas de la suite">
           <div class="st2-about-tools-head">
             <h3 class="st2-about-tools-title">Herramientas</h3>
           </div>

@@ -1,6 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
-import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop, notifyAdminClientChangeDesktop } from "./st2-desktop-notif.js";
 import { setToastText, TOAST_FOOD_MARK, greetLine, toastFirstName } from "./st2-toast-greet.js";
@@ -144,6 +144,8 @@ let accessModulesAfterApprove = false;
 let accessModulesPresetMode = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
 const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
+const accessAdminModFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-mod-filter"));
+const aboutToolsSection = document.getElementById("st2-about-tools");
 const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
 const accessAdminKpiActive = document.getElementById("st2-access-admin-kpi-active");
 const accessAdminKpiPending = document.getElementById("st2-access-admin-kpi-pending");
@@ -1093,6 +1095,7 @@ let accessAdminLastKnownEmails = [];
 let accessAdminItemsCache = [];
 let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
 let accessAdminFilter = "all";
+let accessAdminModFilters = new Set();
 let accessAdminQuery = "";
 let accessAdminLastClientByEmail = new Map();
 let accessAdminClientWatchReady = false;
@@ -1100,7 +1103,32 @@ let accessAdminClientWatchTimer = null;
 let accessAdminClientChangedEmails = new Set();
 let accessAdminClientWatchBusy = false;
 
+function resolveAccessDeviceShort(item) {
+  const raw = String(item?.lastClientDevice || "").trim().toLowerCase();
+  if (/^[a-z0-9-]{6,32}$/.test(raw)) return raw.slice(0, 8);
+  const hint = String(item?.lastClientHint || "");
+  const m = hint.match(/\bid:([a-z0-9-]{6,32})\b/i);
+  return m ? m[1].slice(0, 8).toLowerCase() : "";
+}
+
+function resolveAccessBrowserLabel(item) {
+  const fromApi = String(item?.lastClientBrowser || "").trim();
+  if (fromApi) return fromApi.replace(/\s+\d+(\.\d+)*$/, "").trim() || fromApi;
+  const hint = String(item?.lastClientHint || "");
+  if (/\bEdge\b/i.test(hint)) return "Edge";
+  if (/\bChrome\b/i.test(hint)) return "Chrome";
+  if (/\bFirefox\b/i.test(hint)) return "Firefox";
+  if (/\bSafari\b/i.test(hint)) return "Safari";
+  if (/\bOpera\b/i.test(hint)) return "Opera";
+  return "";
+}
+
 function formatAccessClientLabel(item) {
+  const browser = resolveAccessBrowserLabel(item);
+  const device = resolveAccessDeviceShort(item);
+  if (browser && device) return `${browser} · ${device}`;
+  if (device) return `id ${device}`;
+  if (browser) return browser;
   return item?.lastClientLabel
     || item?.lastClientHost
     || item?.lastClientHint
@@ -1110,13 +1138,13 @@ function formatAccessClientLabel(item) {
 
 function buildAccessClientKey(item) {
   // Prioridad: device id (estable por navegador). La IP de Zscaler no entra en la clave.
-  const device = String(item?.lastClientDevice || "").trim().toLowerCase();
+  const device = resolveAccessDeviceShort(item);
   if (device) return `d:${device}`;
 
   const hint = String(item?.lastClientHint || "").trim().toLowerCase();
   if (hint) return `h:${hint}`;
 
-  const browser = String(item?.lastClientBrowser || "").trim().toLowerCase();
+  const browser = resolveAccessBrowserLabel(item).toLowerCase();
   if (browser) return `b:${browser}`;
 
   return "";
@@ -1457,10 +1485,14 @@ function resetAccessAdminSnapshot() {
   accessAdminItemsCache = [];
   accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
   accessAdminFilter = "all";
+  accessAdminModFilters = new Set();
   accessAdminQuery = "";
   if (accessAdminSearch) accessAdminSearch.value = "";
   accessAdminFilterButtons.forEach((btn) => {
     btn.classList.toggle("is-active", btn.dataset.filter === "all");
+  });
+  accessAdminModFilterButtons.forEach((btn) => {
+    btn.classList.remove("is-active");
   });
 }
 
@@ -1546,16 +1578,35 @@ function syncAccessAdminHostColumn() {
   accessAdminTable?.classList.toggle("st2-access-admin-table--with-host", show);
 }
 
+function itemMatchesModFilters(item) {
+  if (!accessAdminModFilters.size) return true;
+  const mods = item.modules || {};
+  for (const key of accessAdminModFilters) {
+    let ok = false;
+    if (key === "sql") ok = !!mods.planillasSqlOnvio;
+    else if (key === "leg") ok = !!mods.planillasLegal;
+    else if (key === "cl") ok = !!mods.planillasChile;
+    else if (key === "op") ok = !!mods.oportunidad;
+    else if (key === "pdf") ok = !!mods.pdfPortal;
+    else if (key === "bl") ok = !!(mods.blanqueo || mods.blanqueoConfirm || mods.blanqueoLoad);
+    else if (key === "bs") ok = !!(mods.borradoBases || mods.borradoBasesConfirm || mods.borradoBasesLoad);
+    else if (key === "adm") ok = !!item.isSt2Admin;
+    if (!ok) return false;
+  }
+  return true;
+}
+
 function getFilteredAccessAdminItems() {
   const q = accessAdminQuery.trim().toLowerCase();
   return accessAdminItemsCache.filter((item) => {
     if (accessAdminFilter === "active" && !item.isActive) return false;
     if (accessAdminFilter === "pending" && !item.isPending) return false;
     if (accessAdminFilter === "today" && !item.loggedInToday) return false;
+    if (!itemMatchesModFilters(item)) return false;
     if (q) {
       const email = item.email.toLowerCase();
       const name = formatAccessDisplayName(item.email, item.displayNameOverride).toLowerCase();
-      const host = String(item.lastClientLabel || item.lastClientHost || item.lastClientHint || item.lastClientIp || "").toLowerCase();
+      const host = String(formatAccessClientLabel(item) || item.lastClientIp || "").toLowerCase();
       if (!email.includes(q) && !name.includes(q) && !host.includes(q)) return false;
     }
     return true;
@@ -1608,12 +1659,20 @@ function renderAccessAdminTable() {
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
     const permsHtml = buildAccessAdminPermsCell(item);
-    const hostLabel = item.lastClientLabel || item.lastClientHost || item.lastClientHint || item.lastClientIp || "—";
-    const deviceShort = item.lastClientDevice ? String(item.lastClientDevice).slice(0, 8) : "";
+    const hostLabel = formatAccessClientLabel(item) || "—";
+    const deviceShort = resolveAccessDeviceShort(item);
+    const browserLabel = resolveAccessBrowserLabel(item);
+    const entornoHint = String(item.lastClientHint || "")
+      .replace(/\s*·\s*id:[a-z0-9-]{6,32}\b/gi, "")
+      .replace(/\bid:[a-z0-9-]{6,32}\b/gi, "")
+      .replace(/\s*·\s*(Edge|Chrome|Firefox|Safari|Opera)\b/gi, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/^[·\s]+|[·\s]+$/g, "")
+      .trim();
     const hostTitle = [
-      item.lastClientBrowser ? `Navegador: ${item.lastClientBrowser}` : "",
+      browserLabel ? `Navegador: ${browserLabel}` : "",
       deviceShort ? `Dispositivo: ${deviceShort}` : "",
-      item.lastClientHint ? `Entorno: ${item.lastClientHint}` : "",
+      entornoHint ? `Entorno: ${entornoHint}` : "",
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
@@ -2181,7 +2240,7 @@ function renderToolsToast(newer, message) {
   const toastCount = document.getElementById("tools-ready-toast-count");
   if (!toast) return;
   const n = (newer || []).length;
-  const show = n > 0 && !aboutRouteOpen;
+  const show = n > 0 && !aboutRouteOpen && userCanSeeDesktopToolDownloads();
   if (!show) {
     toast.classList.add("hidden");
     toast.setAttribute("aria-hidden", "true");
@@ -2197,7 +2256,35 @@ function renderToolsToast(newer, message) {
   toast.setAttribute("aria-hidden", "false");
 }
 
+function userCanSeeDesktopToolDownloads() {
+  // Descargas SQL/BAT: solo perfiles con Bejerman SQL / ONVIO (no Legal/Chile solos).
+  try {
+    return canSeePlanillasSqlOnvio();
+  } catch {
+    return false;
+  }
+}
+
+function syncAboutToolsVisibility() {
+  const show = userCanSeeDesktopToolDownloads();
+  aboutToolsSection?.classList.toggle("hidden", !show);
+  aboutToolsSection?.toggleAttribute("hidden", !show);
+  if (!show) {
+    aboutToolsBadge?.classList.add("hidden");
+    aboutToolsBadge?.setAttribute("aria-hidden", "true");
+    hideToolsTopBanner();
+    const toast = document.getElementById("tools-ready-toast");
+    if (toast) {
+      toast.classList.add("hidden");
+      toast.setAttribute("aria-hidden", "true");
+    }
+  }
+}
+
 function syncAboutToolsBadge() {
+  syncAboutToolsVisibility();
+  if (!userCanSeeDesktopToolDownloads()) return;
+
   const newer = listNewTools();
   const hasNew = newer.length > 0;
   if (aboutToolsBadge) {
@@ -2744,10 +2831,13 @@ function showAbout({ history = "push" } = {}) {
   const webMeta = document.getElementById("st2-about-web-meta");
   if (webMeta) webMeta.textContent = getAboutVersionLabel();
   applyAboutUpdated();
+  syncAboutToolsVisibility();
   bindAboutToolsUi();
-  void refreshAboutTools().then(() => {
-    if (isSt2SuperAdmin()) void refreshToolsDiagHint();
-  });
+  if (userCanSeeDesktopToolDownloads()) {
+    void refreshAboutTools().then(() => {
+      if (isSt2SuperAdmin()) void refreshToolsDiagHint();
+    });
+  }
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
   document.title = "ST² · Acerca de";
@@ -2855,6 +2945,16 @@ accessAdminFilterButtons.forEach((btn) => {
     accessAdminFilterButtons.forEach((b) => {
       b.classList.toggle("is-active", b === btn);
     });
+    renderAccessAdminTable();
+  });
+});
+accessAdminModFilterButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const key = String(btn.dataset.modFilter || "").trim();
+    if (!key) return;
+    if (accessAdminModFilters.has(key)) accessAdminModFilters.delete(key);
+    else accessAdminModFilters.add(key);
+    btn.classList.toggle("is-active", accessAdminModFilters.has(key));
     renderAccessAdminTable();
   });
 });
@@ -4284,9 +4384,10 @@ async function bootstrapApp() {
   syncAdminTabVisibility();
   syncViewAsBanner();
   bindAboutToolsUi();
-  void refreshAboutTools({ silent: true });
   await initPlanillas();
   syncAdminTabVisibility();
+  syncAboutToolsBadge();
+  if (userCanSeeDesktopToolDownloads()) void refreshAboutTools({ silent: true });
   applyTopTabEntry();
   window.addEventListener("popstate", () => {
     if (applyAboutFromPath()) return;

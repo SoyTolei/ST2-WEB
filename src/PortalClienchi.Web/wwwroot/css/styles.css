@@ -3111,6 +3111,65 @@ body.portal-tab-active .tab-icon {
   gap: 4px;
 }
 
+.st2-access-admin-mod-filters {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: 2px;
+  padding-left: 8px;
+  border-left: 1px solid #e2e8f0;
+}
+
+.st2-access-admin-mod-filter {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1.2;
+  text-transform: lowercase;
+}
+
+.st2-access-admin-mod-filter[data-mod-filter="sql"],
+.st2-access-admin-mod-filter[data-mod-filter="leg"],
+.st2-access-admin-mod-filter[data-mod-filter="cl"],
+.st2-access-admin-mod-filter[data-mod-filter="adm"] {
+  text-transform: uppercase;
+}
+
+.st2-access-admin-mod-filter:hover {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.st2-access-admin-mod-filter.is-active {
+  border-color: #0f766e;
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.st2-access-admin-mod-filter[data-mod-filter="sql"].is-active {
+  border-color: #2563eb;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.st2-access-admin-mod-filter[data-mod-filter="leg"].is-active {
+  border-color: #7c3aed;
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.st2-access-admin-mod-filter[data-mod-filter="cl"].is-active {
+  border-color: #dc2626;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
 .st2-access-admin-filter {
   border: 1px solid #cbd5e1;
   background: #fff;

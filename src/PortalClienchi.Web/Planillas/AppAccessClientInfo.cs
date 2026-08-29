@@ -64,6 +64,19 @@ public static class AppAccessClientInfo
         return value.Length <= MaxDeviceIdLength ? value : value[..MaxDeviceIdLength];
     }
 
+    /// <summary>Extrae id:xxxxxxxx del hint del cliente si vino embebido.</summary>
+    public static string? ExtractDeviceFromHint(string? hint)
+    {
+        if (string.IsNullOrWhiteSpace(hint))
+            return null;
+
+        var m = Regex.Match(hint, @"\bid:([a-z0-9-]{6,32})\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        return m.Success ? NormalizeDeviceId(m.Groups[1].Value) : null;
+    }
+
+    public static string? ResolveDeviceId(string? deviceId, string? hint) =>
+        NormalizeDeviceId(deviceId) ?? ExtractDeviceFromHint(hint);
+
     /// <summary>Nombre del navegador para la columna Equipo (sin versión).</summary>
     public static string? SummarizeBrowser(string? userAgent)
     {

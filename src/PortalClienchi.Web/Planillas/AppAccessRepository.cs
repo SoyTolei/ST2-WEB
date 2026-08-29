@@ -256,7 +256,7 @@ public sealed class AppAccessRepository
         var ip = ctx is null ? null : AppAccessClientInfo.GetClientIp(ctx);
         var userAgent = ctx is null ? null : AppAccessClientInfo.GetUserAgent(ctx);
         var hint = AppAccessClientInfo.NormalizeClientHint(clientHint);
-        var device = AppAccessClientInfo.NormalizeDeviceId(deviceId);
+        var device = AppAccessClientInfo.ResolveDeviceId(deviceId, hint);
         // Solo DNS reverso real; no rellenar con el hint (antes Host y Cliente salían iguales).
         var host = AppAccessClientInfo.TryResolveHost(ip);
 

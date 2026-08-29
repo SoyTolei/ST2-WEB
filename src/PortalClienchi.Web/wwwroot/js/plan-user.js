@@ -90,7 +90,7 @@ export function buildPlanClientHint() {
   const browser = detectBrowserLabel();
   if (browser) parts.push(browser);
   const deviceId = getOrCreateDeviceId();
-  if (deviceId) parts.push(`id:${deviceId.slice(0, 8)}`);
+  if (deviceId) parts.push(`id:${deviceId}`);
   const hint = parts.filter(Boolean).join(" · ");
   return hint.slice(0, 160);
 }
