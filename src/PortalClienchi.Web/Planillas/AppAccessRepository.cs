@@ -176,7 +176,7 @@ public sealed class AppAccessRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
-                   last_client_ip, last_client_host, last_client_hint, last_user_agent
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device
             FROM app_access
             WHERE lower(email) = lower($email)
             LIMIT 1
@@ -248,7 +248,7 @@ public sealed class AppAccessRepository
             SetStatus(email, StatusApproved);
     }
 
-    public void UpdateClientPresence(string email, HttpContext? ctx, string? clientHint = null)
+    public void UpdateClientPresence(string email, HttpContext? ctx, string? clientHint = null, string? deviceId = null)
     {
         if (!StorageReady || AppAccessExclusions.IsExcluded(email))
             return;
@@ -256,7 +256,9 @@ public sealed class AppAccessRepository
         var ip = ctx is null ? null : AppAccessClientInfo.GetClientIp(ctx);
         var userAgent = ctx is null ? null : AppAccessClientInfo.GetUserAgent(ctx);
         var hint = AppAccessClientInfo.NormalizeClientHint(clientHint);
-        var host = AppAccessClientInfo.TryResolveHost(ip) ?? hint;
+        var device = AppAccessClientInfo.NormalizeDeviceId(deviceId);
+        // Solo DNS reverso real; no rellenar con el hint (antes Host y Cliente salían iguales).
+        var host = AppAccessClientInfo.TryResolveHost(ip);
 
         using var conn = Open();
         using var cmd = conn.CreateCommand();
@@ -264,14 +266,16 @@ public sealed class AppAccessRepository
             UPDATE app_access
             SET last_client_ip = $ip,
                 last_client_host = $host,
-                last_client_hint = $hint,
-                last_user_agent = $ua
+                last_client_hint = COALESCE($hint, last_client_hint),
+                last_client_device = COALESCE($device, last_client_device),
+                last_user_agent = COALESCE($ua, last_user_agent)
             WHERE lower(email) = lower($email)
             """;
         cmd.Parameters.AddWithValue("$email", email.Trim());
         cmd.Parameters.AddWithValue("$ip", (object?)ip ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$host", (object?)host ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$hint", (object?)hint ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$device", (object?)device ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$ua", (object?)userAgent ?? DBNull.Value);
         cmd.ExecuteNonQuery();
     }
@@ -541,7 +545,7 @@ public sealed class AppAccessRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
-                   last_client_ip, last_client_host, last_client_hint, last_user_agent
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device
             FROM app_access
             ORDER BY last_seen_at DESC
             """;
@@ -572,7 +576,7 @@ public sealed class AppAccessRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
-                   last_client_ip, last_client_host, last_client_hint, last_user_agent
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device
             FROM app_access
             ORDER BY email COLLATE NOCASE
             """;
@@ -609,6 +613,7 @@ public sealed class AppAccessRepository
         EnsureColumn(conn, "app_access", "last_client_host", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_client_hint", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_user_agent", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "last_client_device", "TEXT NULL");
         using (var backfill = conn.CreateCommand())
         {
             backfill.CommandText = """
@@ -680,6 +685,7 @@ public sealed class AppAccessRepository
             LastClientHost = reader.FieldCount > 9 && !reader.IsDBNull(9) ? reader.GetString(9) : null,
             LastClientHint = reader.FieldCount > 10 && !reader.IsDBNull(10) ? reader.GetString(10) : null,
             LastUserAgent = reader.FieldCount > 11 && !reader.IsDBNull(11) ? reader.GetString(11) : null,
+            LastClientDevice = reader.FieldCount > 12 && !reader.IsDBNull(12) ? reader.GetString(12) : null,
         };
     }
 
@@ -754,6 +760,7 @@ public sealed class AppAccessRecordDto
     public string? LastClientHost { get; init; }
     public string? LastClientHint { get; init; }
     public string? LastUserAgent { get; init; }
+    public string? LastClientDevice { get; init; }
 }
 
 public sealed class AccessSummaryDto

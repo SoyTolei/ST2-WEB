@@ -486,10 +486,12 @@ public static class PlanillasEndpoints
                 return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
 
             string? clientHint = null;
+            string? deviceId = null;
             try
             {
                 var body = await ctx.Request.ReadFromJsonAsync<PlanUserHeartbeatRequest>(cancellationToken: ct).ConfigureAwait(false);
                 clientHint = body?.ClientHint;
+                deviceId = body?.DeviceId;
             }
             catch
             {
@@ -497,7 +499,7 @@ public static class PlanillasEndpoints
             }
 
             accessRepo.TouchActivity(email);
-            accessRepo.UpdateClientPresence(email, ctx, clientHint);
+            accessRepo.UpdateClientPresence(email, ctx, clientHint, deviceId);
             blanqueoRepo.AssociatePendingRequester(email);
             return Results.Ok(new { ok = true, webBuild = St2WebBuild.GetBuild() });
         });
@@ -545,7 +547,7 @@ public static class PlanillasEndpoints
                 }
             }
 
-            return OpenUserSession(ctx, email, accessRepo, blanqueoRepo, body.ClientHint);
+            return OpenUserSession(ctx, email, accessRepo, blanqueoRepo, body.ClientHint, body.DeviceId);
         });
 
         app.MapDelete("/api/planillas/session", (HttpContext ctx) =>
@@ -678,8 +680,17 @@ public static class PlanillasEndpoints
                         lastClientIp = showClientMeta ? item.LastClientIp : null,
                         lastClientHost = showClientMeta ? item.LastClientHost : null,
                         lastClientHint = showClientMeta ? item.LastClientHint : null,
+                        lastClientDevice = showClientMeta ? item.LastClientDevice : null,
+                        lastClientBrowser = showClientMeta
+                            ? AppAccessClientInfo.SummarizeBrowser(item.LastUserAgent)
+                            : null,
                         lastClientLabel = showClientMeta
-                            ? AppAccessClientInfo.BuildDisplayLabel(item.LastClientHost, item.LastClientHint, item.LastClientIp)
+                            ? AppAccessClientInfo.BuildDisplayLabel(
+                                item.LastClientHost,
+                                item.LastClientHint,
+                                item.LastClientIp,
+                                item.LastClientDevice,
+                                AppAccessClientInfo.SummarizeBrowser(item.LastUserAgent))
                             : null,
                         modules = new
                         {
@@ -1051,7 +1062,8 @@ public static class PlanillasEndpoints
         string email,
         AppAccessRepository accessRepo,
         BlanqueoRepository blanqueoRepo,
-        string? clientHint = null)
+        string? clientHint = null,
+        string? deviceId = null)
     {
         if (St2SuperAdmin.Is(email))
         {
@@ -1059,7 +1071,7 @@ public static class PlanillasEndpoints
             PlanUserIdentity.SetCookie(ctx, email);
             accessRepo.RecordAccess(email);
             blanqueoRepo.AssociatePendingRequester(email);
-            accessRepo.UpdateClientPresence(email, ctx, clientHint);
+            accessRepo.UpdateClientPresence(email, ctx, clientHint, deviceId);
             var adminRec = accessRepo.Find(email);
             return Results.Ok(new
             {
@@ -1089,7 +1101,7 @@ public static class PlanillasEndpoints
         PlanUserIdentity.SetCookie(ctx, email);
         accessRepo.RecordAccess(email);
         blanqueoRepo.AssociatePendingRequester(email);
-        accessRepo.UpdateClientPresence(email, ctx, clientHint);
+        accessRepo.UpdateClientPresence(email, ctx, clientHint, deviceId);
         return Results.Ok(new
         {
             email,

@@ -11,6 +11,72 @@ const ALLOWED_DOMAIN = "thomsonreuters.com";
 const SUPER_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 const LOCAL_NAME_PATTERN = /^[a-z]{2,}\.[a-z]{2,}$/;
 
+const DEVICE_ID_KEY = "st2_device_id";
+
+/** Id estable por navegador/perfil; nueva PC o perfil limpio = id nuevo. */
+export function getOrCreateDeviceId() {
+  try {
+    const existing = String(localStorage.getItem(DEVICE_ID_KEY) || "").trim().toLowerCase();
+    if (/^[a-z0-9-]{6,32}$/.test(existing)) return existing;
+  } catch {
+    /* ignore */
+  }
+
+  const id = createDeviceId();
+  try {
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  } catch {
+    /* ignore */
+  }
+  return id;
+}
+
+function createDeviceId() {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+    }
+  } catch {
+    /* ignore */
+  }
+  const rand = Math.random().toString(36).slice(2, 10);
+  const time = Date.now().toString(36).slice(-4);
+  return `${rand}${time}`.slice(0, 12);
+}
+
+function detectBrowserLabel() {
+  try {
+    const brands = navigator.userAgentData?.brands;
+    if (Array.isArray(brands) && brands.length) {
+      const pick = brands.find((b) => {
+        const n = String(b?.brand || "");
+        return /edg|chrome|opera|chromium|firefox|safari/i.test(n) && !/not.?a.?brand/i.test(n);
+      }) || brands[0];
+      const brand = String(pick?.brand || "").replace(/Chromium/i, "Chrome").trim();
+      const ver = String(pick?.version || "").split(".")[0];
+      if (brand && ver) return `${brand} ${ver}`;
+      if (brand) return brand;
+    }
+  } catch {
+    /* ignore */
+  }
+
+  const ua = String(navigator.userAgent || "");
+  const rules = [
+    [/Edg(?:e|A|iOS)?\/(\d+)/i, "Edge"],
+    [/OPR\/(\d+)/i, "Opera"],
+    [/Firefox\/(\d+)/i, "Firefox"],
+    [/CriOS\/(\d+)/i, "Chrome"],
+    [/Chrome\/(\d+)/i, "Chrome"],
+    [/Version\/(\d+).*Safari/i, "Safari"],
+  ];
+  for (const [re, name] of rules) {
+    const m = ua.match(re);
+    if (m) return `${name} ${m[1]}`;
+  }
+  return "";
+}
+
 export function buildPlanClientHint() {
   const parts = [];
   try {
@@ -25,12 +91,20 @@ export function buildPlanClientHint() {
   } catch {
     /* ignore */
   }
+  const browser = detectBrowserLabel();
+  if (browser) parts.push(browser);
+  const deviceId = getOrCreateDeviceId();
+  if (deviceId) parts.push(`id:${deviceId.slice(0, 8)}`);
   const hint = parts.filter(Boolean).join(" · ");
   return hint.slice(0, 160);
 }
 
 function buildSessionPayload(email, password = "") {
-  const payload = { email, clientHint: buildPlanClientHint() };
+  const payload = {
+    email,
+    clientHint: buildPlanClientHint(),
+    deviceId: getOrCreateDeviceId(),
+  };
   if (isSuperAdminEmail(email)) payload.password = password || "";
   return payload;
 }

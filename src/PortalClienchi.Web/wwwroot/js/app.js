@@ -1,5 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
-import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint } from "./plan-user.js";
+import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop, notifyAdminClientChangeDesktop } from "./st2-desktop-notif.js";
@@ -1109,11 +1109,26 @@ function formatAccessClientLabel(item) {
 }
 
 function buildAccessClientKey(item) {
-  const host = String(item?.lastClientHost || "").trim().toLowerCase();
-  const ip = String(item?.lastClientIp || "").trim().toLowerCase();
+  // Prioridad: device id (estable por navegador). La IP de Zscaler no entra en la clave.
+  const device = String(item?.lastClientDevice || "").trim().toLowerCase();
+  if (device) return `d:${device}`;
+
   const hint = String(item?.lastClientHint || "").trim().toLowerCase();
-  if (!host && !ip && !hint) return "";
-  return `${host}|${ip}|${hint}`;
+  if (hint) return `h:${hint}`;
+
+  const browser = String(item?.lastClientBrowser || "").trim().toLowerCase();
+  if (browser) return `b:${browser}`;
+
+  return "";
+}
+
+function isBenignClientKeyMigration(prevKey, nextKey) {
+  if (!prevKey || !nextKey || prevKey === nextKey) return false;
+  // Primera vez que aparece device id tras el deploy: no alertar.
+  if (nextKey.startsWith("d:") && !prevKey.startsWith("d:")) return true;
+  // Formato viejo host|ip|hint → nuevo sin IP.
+  if (prevKey.includes("|") && !nextKey.includes("|")) return true;
+  return false;
 }
 
 function buildAccessAdminPermsCell(item) {
@@ -1184,6 +1199,7 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
   for (const [email, next] of nextMap.entries()) {
     const prev = accessAdminLastClientByEmail.get(email);
     if (!prev || prev.key === next.key) continue;
+    if (isBenignClientKeyMigration(prev.key, next.key)) continue;
     changes.push({
       email,
       displayName: next.displayName,
@@ -1373,6 +1389,8 @@ function normalizeAccessAdminItems(items) {
       lastClientIp: (item.lastClientIp ?? item.LastClientIp ?? "").trim() || null,
       lastClientHost: (item.lastClientHost ?? item.LastClientHost ?? "").trim() || null,
       lastClientHint: (item.lastClientHint ?? item.LastClientHint ?? "").trim() || null,
+      lastClientDevice: (item.lastClientDevice ?? item.LastClientDevice ?? "").trim() || null,
+      lastClientBrowser: (item.lastClientBrowser ?? item.LastClientBrowser ?? "").trim() || null,
       modules: {
         oportunidad: !!(modules.oportunidad ?? modules.Oportunidad),
         pdfPortal: !!(modules.pdfPortal ?? modules.PdfPortal),
@@ -1591,9 +1609,12 @@ function renderAccessAdminTable() {
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
     const permsHtml = buildAccessAdminPermsCell(item);
     const hostLabel = item.lastClientLabel || item.lastClientHost || item.lastClientHint || item.lastClientIp || "—";
+    const deviceShort = item.lastClientDevice ? String(item.lastClientDevice).slice(0, 8) : "";
     const hostTitle = [
+      item.lastClientBrowser ? `Navegador: ${item.lastClientBrowser}` : "",
+      deviceShort ? `Dispositivo: ${deviceShort}` : "",
+      item.lastClientHint ? `Entorno: ${item.lastClientHint}` : "",
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
-      item.lastClientHint ? `Cliente: ${item.lastClientHint}` : "",
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
     const hostCell = showHost
@@ -4375,7 +4396,10 @@ function startSessionHeartbeat() {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientHint: buildPlanClientHint() }),
+      body: JSON.stringify({
+        clientHint: buildPlanClientHint(),
+        deviceId: getOrCreateDeviceId(),
+      }),
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {

@@ -218,10 +218,17 @@ public sealed class PlanUserSessionRequest
     /// <summary>Pista de equipo/navegador enviada por el cliente (el hostname real no está disponible en web).</summary>
     [JsonPropertyName("clientHint")]
     public string? ClientHint { get; set; }
+
+    /// <summary>Id estable del navegador (localStorage); útil para alertar cambio de máquina detrás de Zscaler.</summary>
+    [JsonPropertyName("deviceId")]
+    public string? DeviceId { get; set; }
 }
 
 public sealed class PlanUserHeartbeatRequest
 {
     [JsonPropertyName("clientHint")]
     public string? ClientHint { get; set; }
+
+    [JsonPropertyName("deviceId")]
+    public string? DeviceId { get; set; }
 }

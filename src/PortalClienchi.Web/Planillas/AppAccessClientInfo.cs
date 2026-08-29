@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 
 namespace PortalClienchi.Web.Planillas;
 
@@ -8,6 +9,7 @@ public static class AppAccessClientInfo
     public const int MaxHintLength = 160;
     public const int MaxUserAgentLength = 512;
     public const int MaxHostLength = 200;
+    public const int MaxDeviceIdLength = 32;
 
     public static string? GetClientIp(HttpContext ctx)
     {
@@ -49,6 +51,49 @@ public static class AppAccessClientInfo
         return value.Length <= MaxHintLength ? value : value[..MaxHintLength];
     }
 
+    public static string? NormalizeDeviceId(string? deviceId)
+    {
+        var value = (deviceId ?? "").Trim().ToLowerInvariant();
+        if (value.Length == 0)
+            return null;
+
+        // Solo id alfanumérico corto (evita basura del cliente).
+        if (!Regex.IsMatch(value, "^[a-z0-9-]{6,32}$"))
+            return null;
+
+        return value.Length <= MaxDeviceIdLength ? value : value[..MaxDeviceIdLength];
+    }
+
+    /// <summary>Resumen corto del UA para la columna Equipo (Edge 128, Chrome 131, etc.).</summary>
+    public static string? SummarizeBrowser(string? userAgent)
+    {
+        if (string.IsNullOrWhiteSpace(userAgent))
+            return null;
+
+        var ua = userAgent.Trim();
+
+        // Orden importa: Edge/Opera/Chrome comparten "Chrome/" en el UA.
+        if (TryMatchBrowser(ua, "Edg(?:e|A|iOS)?/(\\d+)", "Edge", out var edge))
+            return edge;
+        if (TryMatchBrowser(ua, "OPR/(\\d+)", "Opera", out var opera))
+            return opera;
+        if (TryMatchBrowser(ua, "Firefox/(\\d+)", "Firefox", out var firefox))
+            return firefox;
+        if (TryMatchBrowser(ua, "CriOS/(\\d+)", "Chrome", out var crios))
+            return crios;
+        if (ua.Contains("Chrome/", StringComparison.Ordinal) && !ua.Contains("Chromium", StringComparison.Ordinal))
+        {
+            if (TryMatchBrowser(ua, "Chrome/(\\d+)", "Chrome", out var chrome))
+                return chrome;
+        }
+        if (TryMatchBrowser(ua, "Version/(\\d+).*Safari/", "Safari", out var safari))
+            return safari;
+        if (ua.Contains("Safari/", StringComparison.Ordinal) && TryMatchBrowser(ua, "Version/(\\d+)", "Safari", out var safari2))
+            return safari2;
+
+        return null;
+    }
+
     public static string? TryResolveHost(string? ip)
     {
         if (!IsUsableIp(ip) || IsPrivateLoopback(ip!))
@@ -69,18 +114,57 @@ public static class AppAccessClientInfo
         }
     }
 
-    public static string BuildDisplayLabel(string? host, string? hint, string? ip)
+    public static string BuildDisplayLabel(
+        string? host,
+        string? hint,
+        string? ip,
+        string? deviceId = null,
+        string? browser = null)
     {
-        if (!string.IsNullOrWhiteSpace(host))
-            return host.Trim();
+        var deviceShort = ShortDevice(deviceId);
+        var browserLabel = (browser ?? "").Trim();
 
+        if (!string.IsNullOrWhiteSpace(browserLabel) && !string.IsNullOrWhiteSpace(deviceShort))
+            return $"{browserLabel} · {deviceShort}";
+
+        if (!string.IsNullOrWhiteSpace(browserLabel))
+            return browserLabel;
+
+        if (!string.IsNullOrWhiteSpace(deviceShort))
+            return $"id {deviceShort}";
+
+        // Hint del cliente (SO · TZ · …) suele ser más útil que la IP de Zscaler.
         if (!string.IsNullOrWhiteSpace(hint))
             return hint.Trim();
+
+        if (!string.IsNullOrWhiteSpace(host))
+            return host.Trim();
 
         if (!string.IsNullOrWhiteSpace(ip))
             return ip.Trim();
 
         return "—";
+    }
+
+    public static string? ShortDevice(string? deviceId)
+    {
+        var id = NormalizeDeviceId(deviceId);
+        if (id is null)
+            return null;
+        return id.Length <= 8 ? id : id[..8];
+    }
+
+    private static bool TryMatchBrowser(string ua, string pattern, string name, out string label)
+    {
+        var m = Regex.Match(ua, pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        if (!m.Success)
+        {
+            label = "";
+            return false;
+        }
+
+        label = $"{name} {m.Groups[1].Value}";
+        return true;
     }
 
     private static bool IsUsableIp(string? ip)
