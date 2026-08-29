@@ -34,6 +34,7 @@ var thomEmbedConfig = await ThomEmbedResolver.ResolveAsync(appSettings, builder.
 builder.Services.AddSingleton(appSettings);
 builder.Services.AddSingleton(thomEmbedConfig);
 builder.Services.AddSingleton<PortalRegistry>();
+builder.Services.AddSingleton<PortalEmbedSessionService>();
 builder.Services.AddSingleton<EmbedSiteProxy>();
 builder.Services.AddSingleton<LocalCapturaStore>();
 builder.Services.AddSingleton<TransferenciaService>();
@@ -267,6 +268,7 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
             label = p.Label,
             portalBaseUrl = $"{runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? ""}/home",
             embedPath = $"/embed/{embedSite}/home",
+            hasEmbedCredentials = registry.HasCredentials(p.Id),
         };
     }),
     thomZoomFactor = settings.ThomZoomFactor,
@@ -279,6 +281,39 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
     webVersionLabel = St2WebBuild.GetVersionLabel(),
     webUpdatedLabel = St2WebBuild.GetUpdatedLabel(),
 }));
+
+app.MapGet("/api/portal-embed/session", async (
+    string? portal,
+    PortalEmbedSessionService sessions,
+    CancellationToken ct) =>
+{
+    if (!sessions.HasCredentials(portal))
+        return CredentialsMissing(portal);
+
+    try
+    {
+        var session = await sessions.GetSessionAsync(portal, ct);
+        if (session is null)
+        {
+            return Results.Problem(
+                title: "No se pudo iniciar sesión en el portal",
+                statusCode: StatusCodes.Status502BadGateway);
+        }
+
+        return Results.Ok(new
+        {
+            authToken = session.AuthToken,
+            user = session.User,
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: ex.Message,
+            title: "Login del portal falló",
+            statusCode: StatusCodes.Status502BadGateway);
+    }
+});
 
 app.MapGet("/api/types", () =>
     Enum.GetValues<KnowledgeType>()

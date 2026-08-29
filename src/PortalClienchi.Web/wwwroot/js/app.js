@@ -209,6 +209,36 @@ function getPortalExternalUrl() {
   return url || null;
 }
 
+function clearPortalEmbedStorage() {
+  try {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+  } catch {
+    /* ignore */
+  }
+}
+
+async function seedPortalEmbedSession() {
+  const cfg = getActivePortalConfig();
+  if (!cfg?.hasEmbedCredentials) return false;
+
+  clearPortalEmbedStorage();
+  try {
+    const portalId = encodeURIComponent(cfg.id || activePortalId || "bejerman");
+    const res = await fetch(`/api/portal-embed/session?portal=${portalId}`, { credentials: "include" });
+    if (!res.ok) return false;
+    const data = await res.json();
+    if (!data?.authToken) return false;
+    localStorage.setItem("authToken", data.authToken);
+    if (data.user) {
+      localStorage.setItem("user", typeof data.user === "string" ? data.user : JSON.stringify(data.user));
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function initPortalPicker() {
   const portals = appConfig?.portals ?? [];
   if (!portals.length || !portalSistemaPills) return;
@@ -3675,6 +3705,10 @@ function onThomEmbedMessage(event) {
 }
 
 function loadEmbedFrame(kind, { force = false } = {}) {
+  void loadEmbedFrameAsync(kind, { force });
+}
+
+async function loadEmbedFrameAsync(kind, { force = false } = {}) {
   const frame = kind === "thom" ? thomFrame : kind === "portal" ? portalFrame : aiFrame;
   if (kind === "thom" && isThomWindowMode()) return;
   const url = getEmbedFrameUrl(kind);
@@ -3687,6 +3721,9 @@ function loadEmbedFrame(kind, { force = false } = {}) {
     hideThomDirectGate();
     showThomLoading();
     if (!isThomWindowMode()) scheduleThomBlankCheck();
+  }
+  if (kind === "portal") {
+    await seedPortalEmbedSession();
   }
   frame.src = url;
 }
