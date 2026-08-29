@@ -109,8 +109,8 @@
           Portal Cliente
         </button>
         <div id="portalSistemaBar" class="portal-sistema-bar hidden">
-          <span class="portal-sistema-label">Buscar en:</span>
-          <div id="portalSistemaPills" class="portal-sistema-pills" role="tablist" aria-label="Catálogo del Portal Cliente"></div>
+          <span class="portal-sistema-label">Portal:</span>
+          <div id="portalSistemaPills" class="portal-sistema-pills" role="tablist" aria-label="Portal Cliente"></div>
         </div>
       </div>
       <button type="button" class="tab-btn tab-btn-admin hidden" data-tab="admin" role="tab" id="tabAdminBtn" aria-hidden="true" title="Panel de administración de accesos">
@@ -1621,78 +1621,14 @@
     </section>
 
     <section id="panel-portal" class="tab-panel hidden" role="tabpanel">
-      <div class="portal-layout">
-        <aside class="search-column">
-          <header class="portal-search-head">
-            <p class="portal-kicker">Portal Cliente</p>
-            <h2 class="panel-title">Buscar instructivos</h2>
-            <p class="portal-search-lead">Encontrá guías, videos y procedimientos del catálogo.</p>
-          </header>
-          <div class="portal-search-field">
-            <svg class="portal-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-            <input id="searchInput" type="search" class="search-box" placeholder="Ej: factura electrónica, OnePass, Estados Contables…" autocomplete="off" spellcheck="false"/>
-          </div>
-          <label class="field-label" for="typeFilter">Tipo de contenido</label>
-          <select id="typeFilter" class="combo-box"></select>
-          <div id="yearFilterPanel" class="year-filter hidden">
-            <span class="field-label">Año</span>
-            <div id="yearFilterButtons" class="year-buttons" role="radiogroup"></div>
-          </div>
-          <div class="results-panel">
-            <div id="resultsSummary" class="results-summary hidden" aria-live="polite"></div>
-            <div id="searchLoading" class="search-loading hidden" aria-live="polite">
-              <div class="preview-loading-spinner" aria-hidden="true"></div>
-              <p>Buscando instructivos…</p>
-            </div>
-            <div id="resultsEmpty" class="results-empty" data-mode="idle">
-              <div class="results-empty-visual" aria-hidden="true">
-                <span class="results-empty-orb"></span>
-                <svg class="results-empty-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
-              </div>
-              <p id="resultsEmptyTitle" class="hidden"></p>
-              <small id="resultsEmptyHint">Probá una sugerencia o escribí en el buscador.</small>
-              <div class="portal-suggest" aria-label="Sugerencias rápidas">
-                <button type="button" class="portal-suggest-chip" data-portal-suggest="factura electronica">Factura electrónica</button>
-                <button type="button" class="portal-suggest-chip" data-portal-suggest="OnePass">OnePass</button>
-                <button type="button" class="portal-suggest-chip" data-portal-suggest="HighQ">HighQ</button>
-                <button type="button" class="portal-suggest-chip" data-portal-suggest="estados contables">Estados Contables</button>
-                <button type="button" class="portal-suggest-chip" data-portal-suggest="recibo de sueldo">Recibo de sueldo</button>
-                <button type="button" class="portal-suggest-chip" data-portal-suggest="sueldos y jornales">Sueldos y Jornales</button>
-              </div>
-            </div>
-            <ul id="resultsList" class="results-list hidden" aria-live="polite"></ul>
-          </div>
-        </aside>
-
-        <section class="preview-column">
-          <div class="preview-column-head">
-            <h2 id="previewTitle" class="preview-title">Seleccioná un resultado</h2>
-            <div class="preview-badges">
-              <span id="previewTypeBadge" class="type-badge hidden"></span>
-              <span id="previewProduct" class="preview-product"></span>
-            </div>
-          </div>
-          <div class="preview-frame-wrap" id="previewFrameWrap" data-idle="true">
-            <div id="previewIdle" class="preview-idle" aria-hidden="true">
-              <div class="preview-idle-glow" aria-hidden="true"></div>
-              <p class="preview-idle-title">Vista previa</p>
-              <p class="preview-idle-text">Elegí un instructivo de la izquierda para verlo acá.</p>
-            </div>
-            <div id="previewLoading" class="preview-loading hidden" aria-live="polite">
-              <div class="preview-loading-spinner" aria-hidden="true"></div>
-              <p>Cargando instructivo…</p>
-            </div>
-            <iframe id="previewFrame" class="preview-frame" title="Vista previa del instructivo"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"></iframe>
-          </div>
-          <div id="previewActions" class="preview-actions hidden">
-            <button id="openPortalBtn" type="button" class="btn btn-primary" disabled>Abrir en portal</button>
-            <button id="exportPdfBtn" type="button" class="btn btn-secondary" disabled title="Guarda este instructivo en PDF">Exportar PDF</button>
-            <button id="downloadContentBtn" type="button" class="btn btn-secondary hidden" disabled title="Descarga el PDF o video del instructivo">Descargar archivo</button>
-            <button id="openMediaBtn" type="button" class="btn btn-secondary hidden" disabled>Abrir archivo</button>
-            <button id="copyLinkBtn" type="button" class="btn btn-secondary" disabled>Copiar link</button>
-          </div>
-        </section>
+      <div class="embed-toolbar">
+        <button type="button" id="portalReloadBtn" class="btn btn-secondary">Recargar</button>
+        <button type="button" id="portalOpenBtn" class="btn btn-secondary">Abrir en navegador</button>
+      </div>
+      <p class="embed-hint hidden" id="portalEmbedHint" aria-hidden="true"></p>
+      <div class="embed-frame-wrap">
+        <iframe id="portalFrame" class="embed-frame" title="Portal Cliente"
+          allow="clipboard-read; clipboard-write; fullscreen; autoplay"></iframe>
       </div>
     </section>
 

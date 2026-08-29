@@ -255,7 +255,20 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
     settings.AiPlatformUrl,
     settings.PortalBaseUrl,
     defaultPortalId = registry.DefaultId,
-    portals = registry.List().Select(p => new { id = p.Id, label = p.Label }),
+    portals = registry.List().Select(p =>
+    {
+        var runtime = registry.Resolve(p.Id);
+        var embedSite = string.Equals(p.Id, PortalIds.Legal, StringComparison.OrdinalIgnoreCase)
+            ? "portal-legal"
+            : "portal-bejerman";
+        return new
+        {
+            id = p.Id,
+            label = p.Label,
+            portalBaseUrl = runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? "",
+            embedPath = $"/embed/{embedSite}/",
+        };
+    }),
     thomZoomFactor = settings.ThomZoomFactor,
     aiPlatformZoomFactor = settings.AiPlatformZoomFactor,
     thomAutoCloseHelpPanel = settings.ThomAutoCloseHelpPanel,

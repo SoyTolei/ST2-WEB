@@ -22,32 +22,22 @@ import {
 
 const PRIMARY_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
 
-const searchInput = document.getElementById("searchInput");
-const typeFilter = document.getElementById("typeFilter");
-const resultsList = document.getElementById("resultsList");
-const resultsSummary = document.getElementById("resultsSummary");
-const resultsEmpty = document.getElementById("resultsEmpty");
-const resultsEmptyTitle = document.getElementById("resultsEmptyTitle");
-const resultsEmptyHint = document.getElementById("resultsEmptyHint");
 const statusText = document.getElementById("statusText");
 const statusBar = document.getElementById("statusBar");
-const yearFilterPanel = document.getElementById("yearFilterPanel");
-const yearFilterButtons = document.getElementById("yearFilterButtons");
-const previewFrame = document.getElementById("previewFrame");
-const previewLoading = document.getElementById("previewLoading");
-const previewActions = document.getElementById("previewActions");
-const searchLoading = document.getElementById("searchLoading");
-const previewTitle = document.getElementById("previewTitle");
-const previewProduct = document.getElementById("previewProduct");
-const previewTypeBadge = document.getElementById("previewTypeBadge");
-const copyLinkBtn = document.getElementById("copyLinkBtn");
-const openPortalBtn = document.getElementById("openPortalBtn");
-const openMediaBtn = document.getElementById("openMediaBtn");
-const downloadContentBtn = document.getElementById("downloadContentBtn");
-const exportPdfBtn = document.getElementById("exportPdfBtn");
 const aboutBtn = document.getElementById("aboutBtn");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 const THEME_STORAGE_KEY = "st2-theme";
+const portalFrame = document.getElementById("portalFrame");
+const thomFrame = document.getElementById("thomFrame");
+const thomEmbedLoading = document.getElementById("thomEmbedLoading");
+const thomDirectGate = document.getElementById("thomDirectGate");
+const aiFrame = document.getElementById("aiFrame");
+const portalSistemaBar = document.getElementById("portalSistemaBar");
+const thomPortalBar = document.getElementById("thomPortalBar");
+const portalSistemaPills = document.getElementById("portalSistemaPills");
+
+let appConfig = null;
+let activePortalId = "bejerman";
 
 function isDarkTheme() {
   return document.documentElement.classList.contains("st2-theme-dark");
@@ -165,189 +155,6 @@ const accessAdminInbox = document.getElementById("st2-access-admin-inbox");
 const accessAdminTable = document.querySelector("#st2-access-admin-table-wrap .st2-access-admin-table");
 const accessAdminThHost = document.getElementById("st2-access-admin-th-host");
 const accessAdminPresetBtn = document.getElementById("st2-access-admin-preset");
-const thomFrame = document.getElementById("thomFrame");
-const thomEmbedLoading = document.getElementById("thomEmbedLoading");
-const thomDirectGate = document.getElementById("thomDirectGate");
-const aiFrame = document.getElementById("aiFrame");
-
-let searchTimer = null;
-let searchAbort = null;
-let detailAbort = null;
-let organizeAbort = null;
-
-let lastResults = [];
-let yearFilterMode = "all";
-let yearFilterValue = new Date().getFullYear();
-let selectedResult = null;
-let selectedDetail = null;
-let selectedMedia = null;
-let previewReady = false;
-let appConfig = null;
-let activePortalId = "bejerman";
-
-const portalSistemaBar = document.getElementById("portalSistemaBar");
-const thomPortalBar = document.getElementById("thomPortalBar");
-const portalSistemaPills = document.getElementById("portalSistemaPills");
-
-const placeholderHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
-html,body{margin:0;height:100%;background:transparent}
-</style></head><body></body></html>`;
-
-const previewLoadingHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"/><style>
-body{font-family:Segoe UI,sans-serif;display:flex;align-items:center;justify-content:center;min-height:200px;margin:0;color:#6b7280;background:#fff}
-</style></head><body><p>Cargando instructivo…</p></body></html>`;
-
-previewFrame.srcdoc = placeholderHtml;
-previewFrame.addEventListener("load", () => {
-  if (previewFrame.src && previewFrame.src !== "about:blank") {
-    previewReady = true;
-    hidePreviewLoading();
-  }
-});
-
-function showPreviewLoading(message = "Cargando instructivo…") {
-  previewLoading?.classList.remove("hidden");
-  const msg = previewLoading?.querySelector("p");
-  if (msg) msg.textContent = message;
-  setStatus(message);
-}
-
-function hidePreviewLoading() {
-  previewLoading?.classList.add("hidden");
-}
-
-function showSearchLoading(message = "Buscando instructivos…") {
-  searchLoading?.classList.remove("hidden");
-  const msg = searchLoading?.querySelector("p");
-  if (msg) msg.textContent = message;
-  resultsList?.classList.add("is-searching");
-  resultsEmpty?.classList.add("hidden");
-  setResultsSummary("");
-  setStatus(message);
-}
-
-function hideSearchLoading() {
-  searchLoading?.classList.add("hidden");
-  resultsList?.classList.remove("is-searching");
-}
-
-function setResultsSummary(text) {
-  if (!resultsSummary) return;
-  if (!text) {
-    resultsSummary.textContent = "";
-    resultsSummary.classList.add("hidden");
-    return;
-  }
-  resultsSummary.textContent = text;
-  resultsSummary.classList.remove("hidden");
-}
-
-function setResultsEmpty(title, hint = "", mode = "message") {
-  if (resultsEmptyTitle) {
-    resultsEmptyTitle.textContent = title || "";
-    resultsEmptyTitle.classList.toggle("hidden", !title);
-  }
-  if (resultsEmptyHint) {
-    resultsEmptyHint.textContent = hint;
-    resultsEmptyHint.classList.toggle("hidden", !hint);
-  }
-  resultsEmpty?.setAttribute("data-mode", mode);
-  resultsEmpty?.classList.remove("hidden");
-  resultsList?.classList.add("hidden");
-}
-
-function hideResultsEmpty() {
-  resultsEmpty?.classList.add("hidden");
-  resultsList?.classList.remove("hidden");
-}
-
-function showIdleResultsState() {
-  setResultsSummary("");
-  setResultsEmpty(
-    "",
-    "Probá una sugerencia o escribí en el buscador.",
-    "idle",
-  );
-}
-
-function buildResultsSummary(visible) {
-  const total = lastResults.length;
-  const yearHint =
-    yearFilterMode === "all" ? "" : yearFilterMode === "undated" ? " · sin fecha" : ` · año ${yearFilterValue}`;
-  const multiTopics = groupCount(visible);
-
-  if (total === 0) {
-    return { status: "Sin resultados. Probá con otras palabras.", summary: "0 resultados" };
-  }
-  if (visible.length === 0) {
-    return {
-      status: `Ningún resultado para este filtro${yearHint}. Probá «Todos» u otro año.`,
-      summary: `0 de ${total}${yearHint}`,
-    };
-  }
-  if (multiTopics > 0) {
-    return {
-      status: `${visible.length} de ${total}${yearHint} · ${multiTopics} tema(s) con varias versiones`,
-      summary: `${visible.length} de ${total}${yearHint} · ${multiTopics} tema(s) con varias versiones`,
-    };
-  }
-  return {
-    status: `${visible.length} de ${total}${yearHint} encontrados.`,
-    summary: `${visible.length} de ${total}${yearHint} encontrados`,
-  };
-}
-
-function updateResultsPresentation(visible, displayItems) {
-  const query = searchInput.value.trim();
-  const { status, summary } = buildResultsSummary(visible);
-  setStatus(status);
-  setResultsSummary(summary);
-
-  const hasItems = (displayItems ?? []).some((item) => item.result);
-
-  if (query.length < 2) {
-    showIdleResultsState();
-    return;
-  }
-
-  if (lastResults.length === 0) {
-    setResultsEmpty("Sin resultados. Probá con otras palabras.", "Revisá la ortografía o cambiá el filtro de tipo.");
-    return;
-  }
-
-  if (visible.length === 0 || !hasItems) {
-    const yearHint =
-      yearFilterMode === "all" ? "" : yearFilterMode === "undated" ? " sin fecha" : ` del año ${yearFilterValue}`;
-    setResultsEmpty(
-      `Ningún resultado${yearHint} con este filtro.`,
-      "Probá «Todos» u otro año en los botones de arriba.",
-    );
-    return;
-  }
-
-  hideResultsEmpty();
-}
-
-function setPreviewActionsVisible(visible) {
-  previewActions?.classList.toggle("hidden", !visible);
-}
-
-function setPreviewIdle(idle) {
-  document.getElementById("previewFrameWrap")?.setAttribute("data-idle", idle ? "true" : "false");
-}
-
-function resetPreviewToPlaceholder() {
-  detailAbort?.abort();
-  hidePreviewLoading();
-  previewTitle.textContent = "Seleccioná un resultado";
-  previewProduct.textContent = "";
-  previewTypeBadge.classList.add("hidden");
-  previewFrame.removeAttribute("src");
-  previewFrame.srcdoc = placeholderHtml;
-  setPreviewActionsVisible(false);
-  setPreviewIdle(true);
-}
-
 async function apiGet(url, signal) {
   const response = await fetch(url, { signal, credentials: "include", cache: "no-store" });
   if (!response.ok) {
@@ -380,16 +187,26 @@ function escapeHtml(value) {
 }
 
 function setStatus(message) {
-  statusText.textContent = message;
+  if (statusText) statusText.textContent = message;
 }
 
-function buildPortalParams(extra = {}) {
-  const params = new URLSearchParams({ portal: activePortalId });
-  for (const [key, value] of Object.entries(extra)) {
-    if (value !== undefined && value !== null && value !== "")
-      params.set(key, value);
-  }
-  return params;
+function getActivePortalConfig() {
+  const portals = appConfig?.portals ?? [];
+  return portals.find((p) => p.id === activePortalId) || portals[0] || null;
+}
+
+function getPortalEmbedPath() {
+  const cfg = getActivePortalConfig();
+  const path = String(cfg?.embedPath || "").trim();
+  if (path) return path.endsWith("/") ? path : `${path}/`;
+  const site = activePortalId === "legal" ? "portal-legal" : "portal-bejerman";
+  return `/embed/${site}/`;
+}
+
+function getPortalExternalUrl() {
+  const cfg = getActivePortalConfig();
+  const url = String(cfg?.portalBaseUrl || appConfig?.portalBaseUrl || "").trim();
+  return url || null;
 }
 
 function initPortalPicker() {
@@ -410,32 +227,18 @@ function initPortalPicker() {
   for (const btn of portalSistemaPills.querySelectorAll(".portal-sistema-pill")) {
     btn.addEventListener("click", () => switchPortal(btn.dataset.portalId));
   }
+  syncPortalFrameTitle();
 }
 
-function resetPortalSearchUi() {
-  lastResults = [];
-  selectedResult = null;
-  selectedDetail = null;
-  selectedMedia = null;
-  yearFilterMode = "all";
-  searchAbort?.abort();
-  detailAbort?.abort();
-  organizeAbort?.abort();
-  yearFilterPanel.classList.add("hidden");
-  yearFilterButtons.innerHTML = "";
-  resultsList.innerHTML = "";
-  hideSearchLoading();
-  resetPreviewToPlaceholder();
-  showIdleResultsState();
+function syncPortalFrameTitle() {
+  const cfg = getActivePortalConfig();
+  const label = cfg?.label || activePortalId || "Portal Cliente";
+  if (portalFrame) portalFrame.title = `Portal Cliente · ${label}`;
 }
 
-async function switchPortal(portalId, { history = "push" } = {}) {
-  if (!portalId || portalId === activePortalId) {
-    if (history !== "none" && document.querySelector('.tab-btn.active[data-tab="portal"]')) {
-      syncTabHistory("portal", history);
-    }
-    return;
-  }
+function switchPortal(portalId, { history = "push" } = {}) {
+  if (!portalId) return;
+  const same = portalId === activePortalId;
   activePortalId = portalId;
 
   for (const btn of portalSistemaPills?.querySelectorAll(".portal-sistema-pill") ?? []) {
@@ -443,21 +246,15 @@ async function switchPortal(portalId, { history = "push" } = {}) {
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-selected", active ? "true" : "false");
   }
+  syncPortalFrameTitle();
 
-  searchInput.value = "";
-  if (typeFilter.options.length) typeFilter.selectedIndex = 0;
-  resetPortalSearchUi();
   if (history !== "none" && document.querySelector('.tab-btn.active[data-tab="portal"]')) {
     syncTabHistory("portal", history);
   }
-  await checkHealth();
-}
 
-async function loadTypes() {
-  const types = await apiGet("/api/types");
-  typeFilter.innerHTML = types
-    .map((t) => `<option value="${escapeHtml(t.key)}">${escapeHtml(t.label)}</option>`)
-    .join("");
+  if (document.querySelector('.tab-btn.active[data-tab="portal"]')) {
+    loadEmbedFrame("portal", { force: !same });
+  }
 }
 
 async function loadAppConfig() {
@@ -465,330 +262,14 @@ async function loadAppConfig() {
   initPortalPicker();
   applyEmbedZoom("thom");
   applyEmbedZoom("ai");
+  applyEmbedZoom("portal");
   updateThomDirectUi();
   applyAboutUpdated();
   const activeThom = document.querySelector('.tab-btn.active[data-tab="thom"]');
   if (activeThom) activateThomTab();
-}
-
-async function checkHealth() {
-  try {
-    const health = await apiGet(`/api/health?portal=${encodeURIComponent(activePortalId)}`);
-    const portalLabel = health.label ?? activePortalId;
-    if (!health.credentialsConfigured) {
-      setStatus(`Faltan credenciales para ${portalLabel}. Configurá appsettings.local.json y reiniciá el servidor.`);
-      return;
-    }
-    if (!health.connected) {
-      setStatus(health.message || `No se pudo conectar a ${portalLabel}. Verificá usuario/contraseña.`);
-      return;
-    }
-    setStatus(`Portal ${portalLabel}: escribí al menos 2 letras para buscar (ignora tildes).`);
-  } catch (err) {
-    setStatus(`Error de API: ${err.message}`);
+  if (document.querySelector('.tab-btn.active[data-tab="portal"]')) {
+    loadEmbedFrame("portal", { force: true });
   }
-}
-
-function scheduleSearch() {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(runSearch, 400);
-}
-
-async function runSearch() {
-  const query = searchInput.value.trim();
-  if (query.length < 2) {
-    lastResults = [];
-    selectedResult = null;
-    selectedDetail = null;
-    yearFilterPanel.classList.add("hidden");
-    yearFilterButtons.innerHTML = "";
-    resultsList.innerHTML = "";
-    hideSearchLoading();
-    resetPreviewToPlaceholder();
-    showIdleResultsState();
-    setStatus("Escribí al menos 2 letras para buscar.");
-    return;
-  }
-
-  searchAbort?.abort();
-  searchAbort = new AbortController();
-
-  showSearchLoading("Buscando instructivos…");
-  resultsList.innerHTML = "";
-
-  try {
-    const params = buildPortalParams({ q: query });
-    if (typeFilter.value) params.set("type", typeFilter.value);
-
-    const data = await apiGet(`/api/search?${params}`, searchAbort.signal);
-    lastResults = data.results ?? [];
-    yearFilterMode = "all";
-    rebuildYearTabs(data.years ?? [], data.hasUndated);
-    await applyYearFilterAndDisplay();
-
-    if (selectedResult && !lastResults.some((r) => r.id === selectedResult.id)) {
-      selectedResult = null;
-      selectedDetail = null;
-      resetPreviewToPlaceholder();
-    }
-  } catch (err) {
-    if (err.name === "AbortError") return;
-    setStatus(err.message || "Error al buscar.");
-    setResultsSummary("");
-    setResultsEmpty("No se pudo completar la búsqueda.", err.message || "Intentá de nuevo en unos segundos.");
-    console.error(err);
-  } finally {
-    hideSearchLoading();
-  }
-}
-
-function rebuildYearTabs(years, hasUndated) {
-  yearFilterButtons.innerHTML = "";
-  if (lastResults.length === 0) {
-    yearFilterPanel.classList.add("hidden");
-    return;
-  }
-
-  yearFilterPanel.classList.remove("hidden");
-  addYearButton("Todos", "all", yearFilterMode === "all");
-  for (const year of years) {
-    const count = lastResults.filter((r) => r.sortYear === year).length;
-    addYearButton(`${year} (${count})`, String(year), yearFilterMode === "specific" && yearFilterValue === year);
-  }
-  if (hasUndated) {
-    const count = lastResults.filter((r) => r.sortYear === 0).length;
-    addYearButton(`Sin fecha (${count})`, "undated", yearFilterMode === "undated");
-  }
-}
-
-function addYearButton(label, tag, active) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = `year-btn${active ? " active" : ""}`;
-  btn.textContent = label;
-  btn.dataset.tag = tag;
-  btn.addEventListener("click", async () => {
-    yearFilterMode = tag === "all" ? "all" : tag === "undated" ? "undated" : "specific";
-    if (yearFilterMode === "specific") yearFilterValue = Number.parseInt(tag, 10);
-    const years = [...new Set(lastResults.map((r) => r.sortYear).filter((y) => y > 1900 && y < 2100))].sort((a, b) => b - a);
-    rebuildYearTabs(years, lastResults.some((r) => r.sortYear === 0));
-    await applyYearFilterAndDisplay({ showLoading: true });
-  });
-  yearFilterButtons.appendChild(btn);
-}
-
-function filterByYear(results) {
-  if (yearFilterMode === "all") return results;
-  if (yearFilterMode === "undated") return results.filter((r) => r.sortYear === 0);
-  return results.filter((r) => r.sortYear === yearFilterValue);
-}
-
-async function applyYearFilterAndDisplay({ showLoading = false } = {}) {
-  const filtered = filterByYear(lastResults);
-
-  organizeAbort?.abort();
-  organizeAbort = new AbortController();
-
-  if (showLoading) showSearchLoading("Actualizando resultados…");
-
-  try {
-    const data = await apiPost("/api/organize", filtered, organizeAbort.signal);
-    const displayItems = data.displayItems ?? [];
-    renderResults(displayItems);
-    updateResultsPresentation(filtered, displayItems);
-  } catch (err) {
-    if (err.name === "AbortError") return;
-    setStatus(err.message || "Error al organizar resultados.");
-  } finally {
-    if (showLoading) hideSearchLoading();
-  }
-}
-
-function renderResults(items) {
-  resultsList.innerHTML = items
-    .map((item) => {
-      if (item.isGroupHeader) {
-        return `<li class="result-group-header">
-          <strong>${escapeHtml(item.headerText)}</strong>
-          <span>${escapeHtml(item.yearsHint ?? "")}</span>
-          <small>Elegí la versión (la más nueva está primero):</small>
-        </li>`;
-      }
-
-      const r = item.result;
-      if (!r) return "";
-
-      const selected = selectedResult?.id === r.id ? " selected" : "";
-      const indented = r.isVersionOfGroup ? " indented" : "";
-      const currentYear = r.isCurrentYear ? " current" : "";
-
-      return `<li class="result-item${selected}${indented}" data-id="${r.id}" data-type="${escapeHtml(r.type)}">
-        <div class="result-tags">
-          <span class="tag-date${currentYear}">${escapeHtml(r.dateLabel)}</span>
-          <span class="tag-type">${escapeHtml(r.typeLabel)}</span>
-          ${r.productName ? `<span class="tag-product">${escapeHtml(r.productName)}</span>` : ""}
-        </div>
-        <div class="result-title">${escapeHtml(r.title)}</div>
-        <div class="result-snippet">${escapeHtml(r.snippet)}</div>
-      </li>`;
-    })
-    .join("");
-
-  for (const el of resultsList.querySelectorAll(".result-item")) {
-    el.addEventListener("click", () => selectResult(Number(el.dataset.id), el.dataset.type));
-  }
-}
-
-function groupCount(results) {
-  const groups = new Map();
-  for (const r of results) {
-    const key = r.groupKey || r.title;
-    groups.set(key, (groups.get(key) ?? 0) + 1);
-  }
-  return [...groups.values()].filter((c) => c > 1).length;
-}
-
-async function selectResult(id, type) {
-  selectedResult = lastResults.find((r) => r.id === id) ?? { id, type };
-  selectedDetail = null;
-  selectedMedia = null;
-  previewReady = false;
-
-  for (const el of resultsList.querySelectorAll(".result-item")) {
-    el.classList.toggle("selected", Number(el.dataset.id) === id);
-  }
-
-  const result = lastResults.find((r) => r.id === id);
-  previewTitle.textContent = result?.title ?? "Cargando…";
-  previewProduct.textContent = result?.productName ? `Producto: ${result.productName}` : "";
-  previewTypeBadge.textContent = result?.typeLabel ?? "";
-  previewTypeBadge.classList.toggle("hidden", !result?.typeLabel);
-
-  setPreviewIdle(false);
-  setPreviewActionsVisible(true);
-
-  copyLinkBtn.disabled = !result?.portalUrl;
-  openPortalBtn.disabled = !result?.portalUrl;
-  exportPdfBtn.disabled = true;
-  openMediaBtn.classList.add("hidden");
-  downloadContentBtn.classList.add("hidden");
-  openMediaBtn.disabled = true;
-  downloadContentBtn.disabled = true;
-
-  previewFrame.removeAttribute("src");
-  previewFrame.srcdoc = previewLoadingHtml;
-  showPreviewLoading("Cargando detalle…");
-
-  detailAbort?.abort();
-  detailAbort = new AbortController();
-
-  try {
-    const params = buildPortalParams({ type: type ?? result?.type ?? "faq" });
-    const data = await apiGet(`/api/knowledge/${id}?${params}`, detailAbort.signal);
-    selectedDetail = data.item;
-    selectedMedia = data.media;
-    previewReady = false;
-    previewFrame.removeAttribute("srcdoc");
-    showPreviewLoading("Cargando vista previa…");
-    previewFrame.src = data.previewUrl ?? `/api/knowledge/${id}/preview?${params}`;
-    previewTitle.textContent = data.item.title;
-    previewProduct.textContent = data.item.productName ? `Producto: ${data.item.productName}` : "";
-    previewTypeBadge.textContent = data.typeLabel;
-    previewTypeBadge.classList.remove("hidden");
-
-    copyLinkBtn.disabled = !data.item.portalUrl;
-    openPortalBtn.disabled = !data.item.portalUrl;
-    exportPdfBtn.disabled = !data.canExportPdf;
-
-    if (data.media?.url) {
-      const isVideo = data.media.kind === "Video";
-      openMediaBtn.classList.remove("hidden");
-      openMediaBtn.disabled = false;
-      openMediaBtn.textContent = isVideo ? "Abrir video" : "Abrir PDF";
-      if (isVideo) {
-        downloadContentBtn.classList.add("hidden");
-        downloadContentBtn.disabled = true;
-      } else {
-        downloadContentBtn.classList.remove("hidden");
-        downloadContentBtn.disabled = false;
-        downloadContentBtn.textContent = "Descargar archivo";
-      }
-    }
-  } catch (err) {
-    if (err.name === "AbortError") return;
-    hidePreviewLoading();
-    previewFrame.removeAttribute("src");
-    previewFrame.srcdoc = `<!DOCTYPE html><html><body><p>No se pudo cargar el detalle.<br>${escapeHtml(err.message)}</p></body></html>`;
-    setStatus(err.message || "Error al cargar el instructivo.");
-  }
-}
-
-copyLinkBtn.addEventListener("click", async () => {
-  const url = selectedDetail?.portalUrl ?? selectedResult?.portalUrl;
-  if (!url) return;
-  await navigator.clipboard.writeText(url);
-  setStatus("Link copiado al portapapeles.");
-});
-
-openPortalBtn.addEventListener("click", () => {
-  const url = selectedDetail?.portalUrl ?? selectedResult?.portalUrl;
-  if (url) window.open(url, "_blank", "noopener");
-});
-
-openMediaBtn.addEventListener("click", () => {
-  const url = selectedMedia?.url ?? selectedDetail?.externalUrl;
-  if (url) window.open(url, "_blank", "noopener");
-});
-
-downloadContentBtn.addEventListener("click", () => {
-  const url = selectedMedia?.url;
-  if (!url) return;
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = selectedMedia.suggestedFileName || "";
-  a.target = "_blank";
-  a.rel = "noopener";
-  a.click();
-  setStatus("Descarga iniciada.");
-});
-
-exportPdfBtn.addEventListener("click", async () => {
-  const frameWindow = previewFrame.contentWindow;
-  const frameDoc = previewFrame.contentDocument;
-  if (!frameWindow || !frameDoc || !previewFrame.src) {
-    setStatus("Esperá a que cargue la vista previa e intentá de nuevo.");
-    return;
-  }
-
-  setStatus("Preparando PDF…");
-  await waitForPreviewImages(frameDoc);
-
-  try {
-    frameWindow.focus();
-    frameWindow.print();
-    setStatus("Usá «Guardar como PDF» en el diálogo de impresión.");
-  } catch {
-    setStatus("No se pudo abrir el diálogo de impresión.");
-  }
-});
-
-function waitForPreviewImages(doc) {
-  const images = [...doc.images];
-  if (images.length === 0) return Promise.resolve();
-
-  return Promise.all(
-    images.map(
-      (img) =>
-        new Promise((resolve) => {
-          if (img.complete) {
-            resolve();
-            return;
-          }
-          img.addEventListener("load", () => resolve(), { once: true });
-          img.addEventListener("error", () => resolve(), { once: true });
-        }),
-    ),
-  );
 }
 
 function getAboutVersionLabel() {
@@ -3491,6 +2972,7 @@ function getEmbedFrameUrl(kind) {
     }
   }
   if (kind === "ai") return appConfig?.aiPlatformUrl;
+  if (kind === "portal") return getPortalEmbedPath();
   return null;
 }
 
@@ -4067,13 +3549,14 @@ function needsEmbedReload(frame, url) {
 }
 
 function getEmbedZoom(kind) {
+  if (kind === "portal") return 1;
   const zoom = kind === "thom" ? appConfig?.thomZoomFactor : appConfig?.aiPlatformZoomFactor;
   if (typeof zoom === "number" && zoom > 0.25 && zoom < 2) return zoom;
   return 0.9;
 }
 
 function applyEmbedZoom(kind) {
-  const frame = kind === "thom" ? thomFrame : aiFrame;
+  const frame = kind === "thom" ? thomFrame : kind === "portal" ? portalFrame : aiFrame;
   if (!frame) return;
   frame.style.zoom = String(getEmbedZoom(kind));
 }
@@ -4192,7 +3675,7 @@ function onThomEmbedMessage(event) {
 }
 
 function loadEmbedFrame(kind, { force = false } = {}) {
-  const frame = kind === "thom" ? thomFrame : aiFrame;
+  const frame = kind === "thom" ? thomFrame : kind === "portal" ? portalFrame : aiFrame;
   if (kind === "thom" && isThomWindowMode()) return;
   const url = getEmbedFrameUrl(kind);
   if (!frame || !url) return;
@@ -4209,7 +3692,8 @@ function loadEmbedFrame(kind, { force = false } = {}) {
 }
 
 function clearEmbedHint(kind) {
-  const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
+  const id = kind === "thom" ? "thomEmbedHint" : kind === "portal" ? "portalEmbedHint" : "aiEmbedHint";
+  const el = document.getElementById(id);
   if (!el) return;
   el.classList.add("hidden");
   el.setAttribute("aria-hidden", "true");
@@ -4217,9 +3701,10 @@ function clearEmbedHint(kind) {
 }
 
 function setEmbedHint(kind, message) {
-  const el = document.getElementById(kind === "thom" ? "thomEmbedHint" : "aiEmbedHint");
+  const id = kind === "thom" ? "thomEmbedHint" : kind === "portal" ? "portalEmbedHint" : "aiEmbedHint";
+  const el = document.getElementById(id);
   if (!el) return;
-  // Hints de THOM / AI ocultos: el toolbar ya tiene «Abrir en navegador».
+  // Hints de embed ocultos: el toolbar ya tiene «Abrir en navegador».
   el.classList.add("hidden");
   el.setAttribute("aria-hidden", "true");
   el.textContent = "";
@@ -4363,13 +3848,13 @@ function switchTab(tabId) {
     panel.classList.toggle("hidden", panel.id !== `panel-${tabId}`);
   });
 
-  statusBar.classList.toggle("hidden", tabId !== "portal");
+  statusBar?.classList.add("hidden");
   portalSistemaBar?.classList.toggle("hidden", tabId !== "portal");
   thomPortalBar?.classList.toggle("hidden", tabId !== "thom");
   document.body.classList.toggle("portal-tab-active", tabId === "portal");
   document.body.classList.toggle("thom-tab-active", tabId === "thom");
   document.body.classList.toggle("admin-tab-active", tabId === ADMIN_TAB_ID);
-  document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai");
+  document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai" || tabId === "portal");
 
   if (tabId !== "thom") {
     closeThomPopup();
@@ -4382,6 +3867,9 @@ function switchTab(tabId) {
   } else if (tabId === "ai") {
     loadEmbedFrame("ai");
     startEngagementTimer("ai");
+  } else if (tabId === "portal") {
+    loadEmbedFrame("portal");
+    startEngagementTimer("portal");
   } else if (tabId === ADMIN_TAB_ID) {
     void activateAdminTab();
     // Tras ver el panel, limpia el ⚠ (ya quedó el hint en pantalla).
@@ -4394,6 +3882,7 @@ function switchTab(tabId) {
 function initEmbedReminders() {
   bindEmbedEngagement(thomFrame, "thom");
   bindEmbedEngagement(aiFrame, "ai");
+  bindEmbedEngagement(portalFrame, "portal");
   window.addEventListener("message", onThomEmbedMessage);
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
@@ -4419,30 +3908,28 @@ document.getElementById("thomGateOpenBtn")?.addEventListener("click", () => focu
 document.getElementById("thomGateCloseBtn")?.addEventListener("click", () => closeThomPopup());
 document.getElementById("thomOpenBtn")?.addEventListener("click", openThomBrowserTab);
 document.getElementById("thomProxyOpenBtn")?.addEventListener("click", openThomBrowserTab);
-document.getElementById("aiReloadBtn").addEventListener("click", () => {
+document.getElementById("aiReloadBtn")?.addEventListener("click", () => {
   if (isEmbedFrameEmpty(aiFrame)) loadEmbedFrame("ai", { force: true });
   else aiFrame.contentWindow?.location.reload();
 });
-document.getElementById("aiOpenBtn").addEventListener("click", () => {
+document.getElementById("aiOpenBtn")?.addEventListener("click", () => {
   if (appConfig?.aiPlatformUrl) window.open(appConfig.aiPlatformUrl, "_blank", "noopener");
 });
 
-searchInput.addEventListener("input", scheduleSearch);
-typeFilter.addEventListener("change", runSearch);
-
-document.querySelectorAll("[data-portal-suggest]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const q = btn.getAttribute("data-portal-suggest") || "";
-    if (!searchInput || !q) return;
-    searchInput.value = q;
-    searchInput.focus();
-    scheduleSearch();
-  });
+document.getElementById("portalReloadBtn")?.addEventListener("click", () => {
+  if (isEmbedFrameEmpty(portalFrame)) loadEmbedFrame("portal", { force: true });
+  else {
+    try {
+      portalFrame.contentWindow?.location.reload();
+    } catch {
+      loadEmbedFrame("portal", { force: true });
+    }
+  }
 });
-
-// Estado vacío inicial con sugerencias visibles.
-resultsEmpty?.setAttribute("data-mode", "idle");
-setPreviewIdle(true);
+document.getElementById("portalOpenBtn")?.addEventListener("click", () => {
+  const url = getPortalExternalUrl();
+  if (url) window.open(url, "_blank", "noopener");
+});
 
 async function bootstrapApp() {
   applyAboutUpdated();
@@ -4594,6 +4081,5 @@ function startSessionHeartbeat() {
 }
 
 async function bootstrapPortal() {
-  showIdleResultsState();
-  await Promise.allSettled([loadAppConfig(), loadTypes(), checkHealth()]);
+  await loadAppConfig();
 }
