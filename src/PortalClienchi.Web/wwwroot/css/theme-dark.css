@@ -192,7 +192,9 @@ html.st2-theme-dark .st2-access-pending-note {
   color: #94a3b8;
 }
 
-html.st2-theme-dark .st2-access-pending-email {
+html.st2-theme-dark .st2-access-birthday-note {
+  color: #7d8ba0 !important;
+}
   background: #3a1d12;
   border-color: #c2410c;
   color: #fdba74;

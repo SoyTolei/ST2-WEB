@@ -72,8 +72,19 @@ function applyTheme(dark) {
   syncThemeToggle();
 }
 
+/** Oscuro por defecto; solo "light" explícito deja el tema claro. */
+function initThemeFromStorage() {
+  let dark = true;
+  try {
+    dark = localStorage.getItem(THEME_STORAGE_KEY) !== "light";
+  } catch {
+    dark = true;
+  }
+  applyTheme(dark);
+}
+
 themeToggleBtn?.addEventListener("click", () => applyTheme(!isDarkTheme()));
-syncThemeToggle();
+initThemeFromStorage();
 const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
 const aboutCloseBtn = document.getElementById("st2-about-close");
