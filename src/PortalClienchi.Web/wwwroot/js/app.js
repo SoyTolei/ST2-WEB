@@ -195,18 +195,19 @@ function getActivePortalConfig() {
   return portals.find((p) => p.id === activePortalId) || portals[0] || null;
 }
 
-function getPortalEmbedPath() {
+function getPortalLoginUrl() {
   const cfg = getActivePortalConfig();
-  const path = String(cfg?.embedPath || "").trim();
-  if (path) return path;
-  const site = activePortalId === "legal" ? "portal-legal" : "portal-bejerman";
-  return `/embed/${site}/auth/login`;
+  const fromConfig = String(cfg?.loginUrl || "").trim();
+  if (fromConfig) return fromConfig;
+  const base = String(cfg?.portalBaseUrl || appConfig?.portalBaseUrl || "").trim().replace(/\/+$/, "");
+  if (base) return `${base}/auth/login`;
+  return activePortalId === "legal"
+    ? "https://portaldelcliente.thomsonreuters.com.ar/auth/login"
+    : "https://clientes.thomsonreuters.com.ar/auth/login";
 }
 
 function getPortalExternalUrl() {
-  const cfg = getActivePortalConfig();
-  const url = String(cfg?.portalBaseUrl || appConfig?.portalBaseUrl || "").trim();
-  return url || null;
+  return getPortalLoginUrl();
 }
 
 function initPortalPicker() {
@@ -2972,7 +2973,7 @@ function getEmbedFrameUrl(kind) {
     }
   }
   if (kind === "ai") return appConfig?.aiPlatformUrl;
-  if (kind === "portal") return getPortalEmbedPath();
+  if (kind === "portal") return getPortalLoginUrl();
   return null;
 }
 

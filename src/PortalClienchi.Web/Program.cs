@@ -258,15 +258,13 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
     portals = registry.List().Select(p =>
     {
         var runtime = registry.Resolve(p.Id);
-        var embedSite = string.Equals(p.Id, PortalIds.Legal, StringComparison.OrdinalIgnoreCase)
-            ? "portal-legal"
-            : "portal-bejerman";
+        var portalBase = runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? "";
         return new
         {
             id = p.Id,
             label = p.Label,
-            portalBaseUrl = runtime.Settings.PortalBaseUrl?.TrimEnd('/') ?? "",
-            embedPath = $"/embed/{embedSite}/auth/login",
+            portalBaseUrl = portalBase,
+            loginUrl = string.IsNullOrEmpty(portalBase) ? "" : $"{portalBase}/auth/login",
         };
     }),
     thomZoomFactor = settings.ThomZoomFactor,
