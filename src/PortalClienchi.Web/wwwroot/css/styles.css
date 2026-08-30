@@ -4548,8 +4548,7 @@ body.st2-access-restoring .st2-boot-splash {
   display: flex;
 }
 
-.st2-boot-splash-brand,
-.st2-access-brand-head {
+.st2-boot-splash-brand {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4558,8 +4557,16 @@ body.st2-access-restoring .st2-boot-splash {
   min-height: 2.25rem;
 }
 
-.st2-boot-splash-st2-mark,
-.st2-access-title.st2-access-title-mark {
+.st2-access-brand-head {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  min-height: 2.5rem;
+}
+
+.st2-boot-splash-st2-mark {
   display: inline-flex;
   align-items: flex-start;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
@@ -4569,28 +4576,36 @@ body.st2-access-restoring .st2-boot-splash {
   line-height: 1;
   transform-origin: 50% 60%;
   user-select: none;
-}
-
-.st2-boot-splash-st2-mark {
   color: #e8eef7;
   animation: st2-boot-st2-float 3.4s ease-in-out infinite;
   filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.28));
 }
 
 .st2-access-title.st2-access-title-mark {
+  display: inline-flex;
+  align-items: flex-start;
   margin: 0;
+  flex: 0 0 auto;
+  min-width: 3.6rem;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  transform-origin: 50% 60%;
+  user-select: none;
   color: var(--dark);
-  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.18));
+  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.22));
+  animation: st2-boot-st2-float 3.4s ease-in-out infinite;
 }
 
 .st2-boot-splash-st,
 .st2-access-title-st {
-  font-weight: 750;
+  font-weight: 800;
 }
 
 .st2-boot-splash-sup,
 .st2-access-title-sup {
-  color: #f97316;
   font-size: 0.56em;
   font-weight: 800;
   line-height: 1;
@@ -4599,15 +4614,16 @@ body.st2-access-restoring .st2-boot-splash {
 }
 
 .st2-boot-splash-sup {
+  color: #f97316;
   animation: st2-boot-st2-sup-float 3.4s ease-in-out infinite 0.12s;
 }
 
 .st2-access-title-sup {
   color: #d64000;
+  animation: st2-boot-st2-sup-float 3.4s ease-in-out infinite 0.12s;
 }
 
-.st2-boot-splash-suite,
-.st2-access-suite {
+.st2-boot-splash-suite {
   margin: 0;
   font-family: "Segoe UI", system-ui, sans-serif;
   font-size: 1.15rem;
@@ -4615,13 +4631,18 @@ body.st2-access-restoring .st2-boot-splash {
   letter-spacing: 0.01em;
   line-height: 1.1;
   white-space: nowrap;
-}
-
-.st2-boot-splash-suite {
   color: #e8eef7;
 }
 
 .st2-access-suite {
+  margin: 0;
+  flex: 0 0 auto;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 1.28rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  white-space: nowrap;
   color: var(--dark);
 }
 

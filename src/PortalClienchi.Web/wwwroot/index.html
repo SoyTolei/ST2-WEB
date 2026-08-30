@@ -18,20 +18,37 @@
   <link rel="icon" href="/st2.ico" type="image/x-icon"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/sora/v17/xMQOuFFYT72X5wkB_18qmnndmSfSmU-NKQI.woff2"/>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet"/>
   <style>
-    /* Evita salto de “Suite Web” antes de que cargue el CSS principal. */
-    .st2-access-brand-head,
-    .st2-boot-splash-brand {
+    /* Métricas finales del login antes de que cargue styles.css (evita salto del branding). */
+    #st2-access-gate .st2-access-brand-head {
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      min-height: 2.25rem;
+      flex-wrap: nowrap;
+      min-height: 2.5rem;
     }
-    .st2-access-suite,
-    .st2-boot-splash-suite {
+    #st2-access-gate .st2-access-title.st2-access-title-mark {
+      display: inline-flex;
+      align-items: flex-start;
       margin: 0;
-      font: 600 1.15rem/1.1 "Segoe UI", system-ui, sans-serif;
+      min-width: 3.6rem;
+      flex: 0 0 auto;
+      font: 800 1.85rem/1 "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0.04em;
+    }
+    #st2-access-gate .st2-access-title-sup {
+      font-size: 0.56em;
+      font-weight: 800;
+      line-height: 1;
+      margin-left: 1px;
+      transform: translateY(-0.2em);
+    }
+    #st2-access-gate .st2-access-suite {
+      margin: 0;
+      flex: 0 0 auto;
+      font: 600 1.28rem/1.1 "Segoe UI", system-ui, sans-serif;
       white-space: nowrap;
     }
   </style>
