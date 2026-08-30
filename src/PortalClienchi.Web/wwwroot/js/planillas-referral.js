@@ -163,7 +163,7 @@ function sistemaLabel() {
     Legal: "LEGAL",
     Chile: "Chile",
   }[id] || "Bejerman SQL";
-  return id === "Legal" && ctx?.getConfig()?.legal?.beta ? `${label} · beta` : label;
+  return label;
 }
 
 function isChile() {
@@ -183,11 +183,6 @@ function updateReferralPanels() {
   const legal = isLegal();
   const chile = isChile();
   const standard = document.getElementById("ref-standard-flow");
-
-  document.getElementById("plan-legal-beta-banner")?.classList.toggle(
-    "hidden",
-    !(legal && ctx?.getConfig()?.legal?.beta),
-  );
 
   document.getElementById("ref-bejerman-panel")?.classList.toggle("hidden", !bej || legal || chile);
   document.getElementById("ref-chile-panel")?.classList.toggle("hidden", !chile);
@@ -1154,7 +1149,7 @@ async function generarReferral(copiar) {
         status.textContent = "";
         return;
       }
-      throw new Error(data.error || data.detail || data.title || "Error al generar Referral I+D");
+      throw new Error(data.error || data.detail || data.title || "Error al generar escalamiento");
     }
 
     const capturasMsg = data.capturasSubidas > 0

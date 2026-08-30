@@ -1996,110 +1996,68 @@
                 "Copiar"
               ],
               "id": "bug-geral",
-              "label": "Bug general"
-            },
+              "label": "Bug"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "westlaw",
+      "label": "Westlaw",
+      "categories": [
+        {
+          "id": "general",
+          "label": "Westlaw",
+          "templates": [
             {
-              "title": "Plantilla - Bug workflow",
+              "title": "Plantilla - Bug Westlaw",
               "fields": [
-                {
-                  "id": "",
-                  "label": "",
-                  "type": "checkbox",
-                  "placeholder": ""
-                },
-                {
-                  "id": "",
-                  "label": "Descripción del problema *",
-                  "type": "text",
-                  "placeholder": "Ej: El workflow no se dispara aun cumpliendo las condiciones de gatilho"
-                },
-                {
-                  "id": "",
-                  "label": "1. URL do cliente *",
-                  "type": "text",
-                  "placeholder": "https://latamdemo.highq.com/"
-                },
-                {
-                  "id": "",
-                  "label": "Describí los pasos para reproducir el problema *",
-                  "type": "textarea",
-                  "placeholder": "Acceder al sitio: Ejemplo\nAcceder al módulo: Admin\nAcceder al menú de regras do Workflow\nAcceder al flujo de ID: 123\nAcceder a la regla de ID: 456"
-                },
-                {
-                  "id": "",
-                  "label": "Found result (O que aconteceu) *",
-                  "type": "textarea",
-                  "placeholder": "Ejemplo: Observá que las condiciones de disparo de la regla son la creación de un registro en la iSheet XPTO, pero aun después de que el usuario crea ese registro, el flujo no se dispara. Por ejemplo el registro con ID: 789"
-                },
-                {
-                  "id": "",
-                  "label": "Expected results (O que deveria acontecer) *",
-                  "type": "textarea",
-                  "placeholder": "Ejemplo: Que el workflow se dispare cuando se cumplan correctamente las condiciones de la regla."
-                }
+                { "id": "", "label": "", "type": "checkbox", "placeholder": "" },
+                { "id": "", "label": "Descripción del bug *", "type": "text", "placeholder": "Ej: Error al buscar jurisprudencia" },
+                { "id": "", "label": "URL del cliente *", "type": "text", "placeholder": "https://..." },
+                { "id": "", "label": "Usuario *", "type": "text", "placeholder": "Ej: usuario@cliente.com" },
+                { "id": "", "label": "Pasos para reproducir *", "type": "textarea", "placeholder": "Describí los pasos para reproducir el problema..." },
+                { "id": "", "label": "Resultado encontrado *", "type": "textarea", "placeholder": "Describí el comportamiento encontrado..." },
+                { "id": "", "label": "Resultado esperado *", "type": "textarea", "placeholder": "Describí el comportamiento esperado..." }
               ],
               "blocks": [
-                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+                "Completá el formulario y hacé clic en \"Vista previa\" para ver la planilla"
               ],
-              "actions": [
-                "Generar plantilla",
-                "Limpiar",
-                "Copiar"
-              ],
-              "id": "bug-workflow",
-              "label": "Bug workflow"
-            },
+              "actions": ["Generar plantilla", "Limpiar", "Copiar"],
+              "id": "bug",
+              "label": "Bug"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cocounsel",
+      "label": "CoCounsel",
+      "categories": [
+        {
+          "id": "general",
+          "label": "CoCounsel",
+          "templates": [
             {
-              "title": "Plantilla - Performance",
+              "title": "Plantilla - Bug CoCounsel",
               "fields": [
-                {
-                  "id": "",
-                  "label": "",
-                  "type": "checkbox",
-                  "placeholder": ""
-                },
-                {
-                  "id": "",
-                  "label": "Descripción del problema *",
-                  "type": "text",
-                  "placeholder": "Ej: Lentitud al abrir a Home de um site"
-                },
-                {
-                  "id": "",
-                  "label": "1. URL do cliente *",
-                  "type": "text",
-                  "placeholder": "https://latamdemo.highq.com/"
-                },
-                {
-                  "id": "",
-                  "label": "Describí los pasos para reproducir el problema *",
-                  "type": "textarea",
-                  "placeholder": "Ejemplo:Acceder al sitio: Ejemplo: Acceder al módulo: Dashboard XPTO"
-                },
-                {
-                  "id": "",
-                  "label": "Found result (O que aconteceu) *",
-                  "type": "textarea",
-                  "placeholder": "Ejemplo: Observá que al abrir la pantalla anterior, hay lentitud superior a 7 segundos"
-                },
-                {
-                  "id": "",
-                  "label": "Expected results (O que deveria acontecer) *",
-                  "type": "textarea",
-                  "placeholder": "Ejemplo: Que no haya lentitud"
-                }
+                { "id": "", "label": "", "type": "checkbox", "placeholder": "" },
+                { "id": "", "label": "Descripción del bug *", "type": "text", "placeholder": "Ej: Error al generar respuesta con IA" },
+                { "id": "", "label": "URL del cliente *", "type": "text", "placeholder": "https://..." },
+                { "id": "", "label": "Usuario *", "type": "text", "placeholder": "Ej: usuario@cliente.com" },
+                { "id": "", "label": "Consulta o prompt utilizado (Opcional)", "type": "textarea", "placeholder": "Pegá la consulta o prompt si aplica..." },
+                { "id": "", "label": "Pasos para reproducir *", "type": "textarea", "placeholder": "Describí los pasos para reproducir el problema..." },
+                { "id": "", "label": "Resultado encontrado *", "type": "textarea", "placeholder": "Describí el comportamiento encontrado..." },
+                { "id": "", "label": "Resultado esperado *", "type": "textarea", "placeholder": "Describí el comportamiento esperado..." }
               ],
               "blocks": [
-                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa",
-                "Nota: recordá revisar los límites de referencia de HighQ. Si el cliente supera el límite, la respuesta estándar es que debe ajustarse a los límites del sistema para mejorar el rendimiento."
+                "Completá el formulario y hacé clic en \"Vista previa\" para ver la planilla"
               ],
-              "actions": [
-                "Generar plantilla",
-                "Limpiar",
-                "Copiar"
-              ],
-              "id": "performance",
-              "label": "Performance"
+              "actions": ["Generar plantilla", "Limpiar", "Copiar"],
+              "id": "bug",
+              "label": "Bug"
             }
           ]
         }

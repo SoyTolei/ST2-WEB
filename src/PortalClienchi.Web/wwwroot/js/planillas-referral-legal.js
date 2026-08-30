@@ -1,42 +1,34 @@
 import { planTextPreviewHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 
-const LEGAL_ICONS = {  briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
-  graph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 20V4M4 20h16"/><path d="m7 16 3-4 3 2 4-6"/></svg>',
+const LEGAL_ICONS = {
+  briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
   diagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M12 8v4M8.5 14.5 10 12M15.5 14.5 14 12"/></svg>',
+  scale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3v18M5 7h14M7 7l-2 6h4L7 7zM17 7l-2 6h4L17 7z"/></svg>',
+  sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3l1.2 4.2L17 8.5l-3.8 1.3L12 14l-1.2-4.2L7 8.5l3.8-1.3L12 3z"/><path d="M5 16l.8 2.8L8.5 20l-2.7.9L5 23.5l-.8-2.6L1.5 20l2.7-.9L5 16z"/><path d="M19 14l.8 2.8L22.5 18l-2.7.9L19 21.5l-.8-2.6L15.5 18l2.7-.9L19 14z"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2"/></svg>',
-  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3z"/></svg>',
-  file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg>',
-  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="7" y="3" width="10" height="18" rx="2"/></svg>',
-  cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M7 18h11a3 3 0 0 0 .4-6 4.5 4.5 0 0 0-8.7-1.5A3.5 3.5 0 0 0 7 18z"/></svg>',
-  gauge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/></svg>',
-  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9"/></svg>',
   bug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M8 8a4 4 0 0 1 8 0M5 12h3M16 12h3M6 16h12"/></svg>',
-  chevronDown: '<svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>',
-  chevronUp: '<svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/></svg>',
+};
+
+const LEGAL_PRODUCT_BTN_CLASS = {
+  firm: "legal-one",
+  highq: "highq",
+  westlaw: "westlaw",
+  cocounsel: "cocounsel",
 };
 
 let hubCtx = null;
 let templatesCatalog = null;
-let expandedProductId = null;
 let navStack = { product: null, item: null, category: null, template: null };
 
-/** Fallback si el servidor aún no expone catalogProductId / catalogCategoryId */
 const LEGAL_CATALOG_PRODUCT_MAP = {
   firm: "legal-one",
-  analytics: "legal-one-analytics",
   highq: "highq",
+  westlaw: "westlaw",
+  cocounsel: "cocounsel",
 };
-const LEGAL_CATALOG_CATEGORY_MAP = {
-  rto: "rto-proview",
-};
-const LEGAL_DIRECT_CARD_PRODUCTS = new Set(["analytics", "highq"]);
 
 function icon(name) {
-  return `<span class="plan-legal-pick-icon">${LEGAL_ICONS[name] || LEGAL_ICONS.gear}</span>`;
-}
-
-function chevron(expanded) {
-  return `<span class="plan-legal-chevron">${expanded ? LEGAL_ICONS.chevronUp : LEGAL_ICONS.chevronDown}</span>`;
+  return LEGAL_ICONS[name] || LEGAL_ICONS.gear;
 }
 
 function hideAllLegalViews() {
@@ -63,10 +55,9 @@ function resolveCatalogProductId(hubProduct) {
   return hubProduct?.catalogProductId || LEGAL_CATALOG_PRODUCT_MAP[hubProduct?.id] || hubProduct?.id;
 }
 
-function resolveCatalogCategoryId(hubProduct, hubItem, itemId) {
+function resolveCatalogCategoryId(hubProduct, hubItem) {
   if (hubItem?.catalogCategoryId) return hubItem.catalogCategoryId;
-  if (LEGAL_DIRECT_CARD_PRODUCTS.has(hubProduct?.id)) return "general";
-  return LEGAL_CATALOG_CATEGORY_MAP[itemId] || itemId;
+  return "general";
 }
 
 function showHubStatus(msg, isError = false) {
@@ -85,47 +76,25 @@ function findCatalogCategory(catalogProductId, categoryId) {
   return product?.categories?.find((c) => c.id === categoryId);
 }
 
-function renderAccordionItems(product) {
-  return `<div class="plan-legal-list">${product.items.map((item) => `
-    <button type="button" class="plan-adj-card plan-legal-pick" data-legal-product="${product.id}" data-legal-item="${item.id}">
-      <span class="plan-legal-pick-label">${icon(item.icon)}<span>${item.label}</span></span>
-      <span class="card-mark">›</span>
-    </button>
-  `).join("")}</div>`;
-}
-
-function renderCardItems(product) {
-  return `<div class="plan-legal-cards">${product.items.map((item) => `
-    <button type="button" class="plan-op-card plan-legal-pick-card" data-legal-product="${product.id}" data-legal-item="${item.id}">
-      <span class="op-accent orange"></span>
-      ${icon(item.icon)}
-      <strong>${item.label}</strong>
-    </button>
-  `).join("")}</div>`;
-}
-
-function renderProduct(product) {
-  const expanded = expandedProductId === product.id;
-  const body = product.layout === "cards" ? renderCardItems(product) : renderAccordionItems(product);
-  return `
-    <section class="plan-legal-product${expanded ? " is-expanded" : ""}">
-      <button type="button" class="plan-legal-product-head" data-legal-product-toggle="${product.id}" aria-expanded="${expanded}">
-        <span class="plan-legal-product-title">
-          <span class="plan-module-icon-badge referral plan-legal-product-badge">${icon(product.icon)}</span>
-          <strong>${product.label}</strong>
-        </span>
-        ${chevron(expanded)}
-      </button>
-      <div class="plan-legal-product-body${expanded ? "" : " hidden"}">${body}</div>
-    </section>
-  `;
-}
-
 function renderHub() {
   const root = document.getElementById("ref-legal-hub-root");
   const catalog = hubCtx?.getConfig()?.legal?.referralHub;
   if (!root || !catalog?.length) return;
-  root.innerHTML = catalog.map(renderProduct).join("");
+  root.innerHTML = `
+    <div class="plan-modulos-well plan-legal-products-well">
+      <div class="plan-modulos-grid plan-legal-products-grid">
+        ${catalog.map((product) => `
+          <button type="button" class="plan-modulo-btn plan-legal-product-btn ${LEGAL_PRODUCT_BTN_CLASS[product.id] || "referral"}" data-legal-product="${product.id}">
+            <span class="plan-modulo-icon" aria-hidden="true">${icon(product.icon)}</span>
+            <span class="plan-modulo-copy">
+              <span class="plan-modulo-label">${product.label}</span>
+              <span class="plan-modulo-sub">Bug</span>
+            </span>
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
 }
 
 function showHub() {
@@ -176,7 +145,7 @@ function showTemplateForm(product, item, template) {
   navStack = { ...navStack, product, item, template };
   showView("ref-legal-form");
   const crumb = document.getElementById("ref-legal-form-breadcrumb");
-  if (crumb) crumb.textContent = `${product.label} › ${item.label} › ${template.label}`;
+  if (crumb) crumb.textContent = `${product.label} › ${template.label}`;
   const root = document.getElementById("ref-legal-form-root");
   if (!root) return;
 
@@ -251,38 +220,36 @@ function setStatus(msg, isError = false) {
   el.classList.toggle("error", isError);
 }
 
+function resolveTemplate(category, hubItem) {
+  return category.templates.find((t) => t.id === hubItem.id)
+    || category.templates.find((t) => t.label?.toLowerCase() === hubItem.label?.toLowerCase())
+    || category.templates[0];
+}
+
 async function onHubItemPick(productId, itemId) {
   try {
-    showHubStatus("Cargando plantillas…");
+    showHubStatus("Cargando plantilla…");
     await ensureCatalog();
     const hubProduct = findHubProduct(productId);
     const hubItem = hubProduct?.items?.find((i) => i.id === itemId);
     if (!hubProduct || !hubItem) {
-      showHubStatus("No se encontró la categoría seleccionada.", true);
+      showHubStatus("No se encontró el producto seleccionado.", true);
       return;
     }
 
     const catalogProductId = resolveCatalogProductId(hubProduct);
-    const categoryId = resolveCatalogCategoryId(hubProduct, hubItem, itemId);
+    const categoryId = resolveCatalogCategoryId(hubProduct, hubItem);
     const category = findCatalogCategory(catalogProductId, categoryId);
     if (!category?.templates?.length) {
-      showHubStatus(`Sin plantillas para ${hubItem.label} (${catalogProductId}/${categoryId}).`, true);
+      showHubStatus(`Sin plantillas para ${hubProduct.label}.`, true);
       return;
     }
 
     const product = { id: productId, label: hubProduct.label };
     const item = { id: itemId, label: hubItem.label, icon: hubItem.icon };
-
-    if (hubProduct.layout === "accordion") {
-      showTemplateCards(product, item, category, category.templates);
-      return;
-    }
-
-    const tpl = category.templates.find((t) => t.id === itemId)
-      || category.templates.find((t) => t.label?.toLowerCase() === hubItem.label?.toLowerCase())
-      || category.templates[0];
+    const tpl = resolveTemplate(category, hubItem);
     if (!tpl) {
-      showHubStatus("No se encontró la plantilla.", true);
+      showHubStatus("No se encontró la plantilla Bug.", true);
       return;
     }
     showTemplateForm(product, item, tpl);
@@ -298,15 +265,12 @@ function bindHubEvents() {
   root.dataset.bound = "1";
 
   root.addEventListener("click", (e) => {
-    const toggle = e.target.closest("[data-legal-product-toggle]");
-    if (toggle) {
-      const id = toggle.dataset.legalProductToggle;
-      expandedProductId = expandedProductId === id ? null : id;
-      renderHub();
-      return;
+    const productBtn = e.target.closest("[data-legal-product]");
+    if (productBtn) {
+      const hubProduct = findHubProduct(productBtn.dataset.legalProduct);
+      const bugItem = hubProduct?.items?.[0];
+      if (bugItem) void onHubItemPick(productBtn.dataset.legalProduct, bugItem.id);
     }
-    const pick = e.target.closest("[data-legal-item]");
-    if (pick) void onHubItemPick(pick.dataset.legalProduct, pick.dataset.legalItem);
   });
 
   document.getElementById("ref-legal-templates-back")?.addEventListener("click", () => {
@@ -322,27 +286,14 @@ function bindHubEvents() {
     const hubItem = hubProduct?.items?.find((i) => i.id === navStack.item?.id);
     const category = findCatalogCategory(
       resolveCatalogProductId(hubProduct),
-      resolveCatalogCategoryId(hubProduct, hubItem, navStack.item?.id),
+      resolveCatalogCategoryId(hubProduct, hubItem),
     );
     const tpl = category?.templates?.find((t) => t.id === card.dataset.legalTemplateId);
     if (tpl) showTemplateForm(navStack.product, navStack.item, tpl);
   });
 
   document.getElementById("ref-legal-form-back")?.addEventListener("click", () => {
-    const hubProduct = findHubProduct(navStack.product?.id);
-    if (hubProduct?.layout === "accordion" && navStack.item && navStack.product) {
-      void (async () => {
-        await ensureCatalog();
-        const hubItem = hubProduct.items.find((i) => i.id === navStack.item.id);
-        const category = findCatalogCategory(
-          resolveCatalogProductId(hubProduct),
-          resolveCatalogCategoryId(hubProduct, hubItem, navStack.item.id),
-        );
-        showTemplateCards(navStack.product, navStack.item, category, category?.templates || []);
-      })();
-    } else {
-      showHub();
-    }
+    showHub();
   });
 }
 
@@ -352,7 +303,6 @@ export function initLegalReferralHub(context) {
 }
 
 export function openLegalReferralHub() {
-  expandedProductId = "firm";
   navStack = { product: null, item: null, category: null, template: null };
   templatesCatalog = null;
   showHub();
@@ -360,7 +310,6 @@ export function openLegalReferralHub() {
 }
 
 export function resetLegalReferralHub() {
-  expandedProductId = null;
   navStack = { product: null, item: null, category: null, template: null };
   hideAllLegalViews();
 }

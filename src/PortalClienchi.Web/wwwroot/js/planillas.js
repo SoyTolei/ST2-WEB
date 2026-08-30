@@ -130,7 +130,6 @@ function syncSistemaDataset() {
 }
 
 function updateSistemaBetaUi() {
-  document.getElementById("plan-legal-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Legal"));
   document.getElementById("plan-chile-beta-pill")?.classList.toggle("hidden", !isSistemaBeta("Chile"));
 }
 
@@ -330,7 +329,7 @@ function canOpenRoute(route) {
 function titleForView(name) {
   switch (name) {
     case "transferencia": return "ST² · Transferencia";
-    case "referral": return "ST² · Referral I+D";
+    case "referral": return "ST² · Escalamiento N2/N3";
     case "oportunidadMenu":
     case "oportunidadCargar":
     case "oportunidadGestor": return "ST² · Oportunidad";
@@ -425,12 +424,15 @@ function updateSistemaUi() {
   const hideCommercial = hidesCommercialModules();
 
   if (transferBtn) {
-    transferBtn.classList.remove("hidden");
-    transferBtn.disabled = placeholderBlocked;
+    transferBtn.classList.toggle("hidden", hideCommercial);
+    transferBtn.toggleAttribute("hidden", hideCommercial);
+    transferBtn.disabled = placeholderBlocked || hideCommercial;
   }
   if (transferNa) {
-    transferNa.classList.add("hidden");
-    transferNa.setAttribute("aria-hidden", "true");
+    const showTransferNa = hideCommercial;
+    transferNa.classList.toggle("hidden", !showTransferNa);
+    transferNa.toggleAttribute("hidden", !showTransferNa);
+    transferNa.setAttribute("aria-hidden", showTransferNa ? "false" : "true");
   }
   if (referralBtn) referralBtn.disabled = placeholderBlocked;
 

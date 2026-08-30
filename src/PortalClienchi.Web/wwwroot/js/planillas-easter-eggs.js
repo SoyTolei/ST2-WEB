@@ -4,7 +4,7 @@
  * Receta de CUMPLEAÑOS (banner gif + globos, fechas Argentina):
  * copiar PLANILLAS_BIRTHDAY_RECIPE y poner email, src, mes y días.
  * También podés cargar el cumpleaños en ADMIN → ficha del usuario (DD/MM):
- * eso activa el saludo sin tocar este archivo. El gif/banner sigue acá.
+ * eso activa saludo, gif de torta y globos sin tocar este archivo.
  */
 export const PLANILLAS_BIRTHDAY_RECIPE = {
   motion: "still",
@@ -60,14 +60,29 @@ export const PLANILLAS_EASTER_EGGS = [
   },
 ];
 
+function sessionBirthdayEgg(email) {
+  const mmDd = getSessionBirthdayMmDd();
+  const m = /^(\d{2})-(\d{2})$/.exec(String(mmDd || "").trim());
+  if (!m || !isMmDdToday(mmDd)) return null;
+  return {
+    ...PLANILLAS_BIRTHDAY_RECIPE,
+    email: String(email || "").trim().toLowerCase(),
+    src: "/img/cumpleaños-easteregg.gif?v=1",
+    birthdayMonth: Number(m[1]),
+    birthdayDay: Number(m[2]),
+  };
+}
+
 /** Prioriza banner de cumpleaños en su ventana; si no, el huevo “siempre” (paseo, etc.). */
 export function resolvePlanillasEgg(email) {
   const key = String(email || "").trim().toLowerCase();
   if (!key) return null;
   const matches = PLANILLAS_EASTER_EGGS.filter((item) => item.email === key);
+  const birthdayHardcoded = matches.find((e) => e.birthdayMonth && e.birthdayDay && isEggBirthdayWindow(e));
+  if (birthdayHardcoded) return birthdayHardcoded;
+  const sessionBirthday = sessionBirthdayEgg(key);
+  if (sessionBirthday) return sessionBirthday;
   if (!matches.length) return null;
-  const birthday = matches.find((e) => e.birthdayMonth && e.birthdayDay && isEggBirthdayWindow(e));
-  if (birthday) return birthday;
   const always = matches.find((e) => !e.birthdayMonth || !e.birthdayDay);
   return always || null;
 }

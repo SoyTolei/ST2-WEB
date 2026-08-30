@@ -3870,11 +3870,35 @@ a.plan-modulo-btn.plan-modulo-link:visited {
 .plan-sql-copy:disabled { opacity: 0.6; cursor: default; }
 
 /* LEGAL Referral hub ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ estÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ©tica portal ST2 */
-.plan-legal-hub-root {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* LEGAL Escalamiento N2/N3 */
+.plan-modulo-btn.legal-one { background: #1e40af; }
+.plan-modulo-btn.highq { background: #0f766e; }
+.plan-modulo-btn.westlaw { background: #9a3412; }
+.plan-modulo-btn.cocounsel { background: #6d28d9; }
+
+.plan-legal-products-well {
   margin-top: 4px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.plan-legal-products-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.plan-legal-product-btn .plan-modulo-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.plan-legal-hub-root {
+  margin-top: 0;
+}
+
+.plan-legal-form-panel {
+  margin-top: 0;
 }
 
 .plan-legal-product {
