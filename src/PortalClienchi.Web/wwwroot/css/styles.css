@@ -4670,9 +4670,26 @@ body.st2-access-restoring .st2-boot-splash {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   margin: 0 auto 18px;
   text-align: center;
+}
+
+.st2-access-brand-head {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.st2-access-suite {
+  margin: 0;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-size: 1.28rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: var(--dark);
+  line-height: 1.1;
 }
 
 .st2-access-icon {
