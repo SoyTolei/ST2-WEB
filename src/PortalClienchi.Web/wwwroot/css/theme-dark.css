@@ -369,6 +369,11 @@ html.st2-theme-dark .blanqueo-list-panel {
   box-shadow: none;
 }
 
+html.st2-theme-dark .plan-user-dialog .planillas-hero-st2-mark,
+html.st2-theme-dark .plan-user-dialog .planillas-hero-title-main {
+  color: #e8eef7;
+}
+
 html.st2-theme-dark .planillas-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
 html.st2-theme-dark .planillas-app textarea,
 html.st2-theme-dark .planillas-app select,

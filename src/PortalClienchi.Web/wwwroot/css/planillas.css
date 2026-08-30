@@ -3521,10 +3521,28 @@ body.st2-chile-embed-active #panel-planillas.active {
   box-shadow: 0 12px 40px rgba(26, 31, 46, 0.2);
 }
 
+.plan-user-brand {
+  margin: 0 0 14px;
+}
+
+.plan-user-brand-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.plan-user-suite-title {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
 .plan-user-dialog h3 {
   margin: 0 0 8px;
   font-size: 1.1rem;
   color: var(--dark);
+  text-align: center;
 }
 
 .plan-user-hint {
@@ -3532,6 +3550,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-size: 0.82rem;
   color: #6b7280;
   line-height: 1.45;
+  text-align: center;
 }
 
 .plan-user-label {
