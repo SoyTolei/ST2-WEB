@@ -125,7 +125,7 @@ internal static class PortalSettingsNormalizer
         {
             root.Portals["Bejerman"] = new PortalProfileSettings
             {
-                Label = "Bejerman SQL/WEB - ONVIO",
+                Label = "SQL/ONVIO",
                 ApiBaseUrl = root.ApiBaseUrl,
                 PortalBaseUrl = root.PortalBaseUrl,
                 Email = root.Email,
@@ -136,7 +136,7 @@ internal static class PortalSettingsNormalizer
 
         EnsureProfile(root, "Bejerman", new PortalProfileSettings
         {
-            Label = "Bejerman SQL/WEB - ONVIO",
+            Label = "SQL/ONVIO",
             ApiBaseUrl = string.IsNullOrWhiteSpace(root.ApiBaseUrl)
                 ? "https://clientes.thomsonreuters.com.ar:3333"
                 : root.ApiBaseUrl,

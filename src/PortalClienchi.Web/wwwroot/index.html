@@ -90,11 +90,11 @@
           THOM
           <span class="tab-reminder-badge tab-reminder-badge--hint hidden" data-reminder="thom" aria-hidden="true">!</span>
         </button>
-        <div id="thomPortalBar" class="thom-portal-bar hidden" role="group" aria-label="Sub-opción THOM">
-          <div class="thom-portal-seg">
-            <button type="button" class="thom-portal-btn active" data-thom-portal="bejerman">SQL/ONVIO-SAAS</button>
-            <button type="button" class="thom-portal-btn" data-thom-portal="legal">LEGAL</button>
-            <button type="button" class="thom-portal-btn" data-thom-portal="chile">CHILE</button>
+        <div id="thomPortalBar" class="st2-context-bar hidden" role="group" aria-label="Sub-opción THOM">
+          <div class="st2-context-seg">
+            <button type="button" class="st2-context-btn active" data-thom-portal="bejerman">SQL/ONVIO</button>
+            <button type="button" class="st2-context-btn" data-thom-portal="legal">LEGAL</button>
+            <button type="button" class="st2-context-btn" data-thom-portal="chile">CHILE</button>
           </div>
         </div>
       </div>
@@ -108,9 +108,8 @@
           <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
           Portal Cliente
         </button>
-        <div id="portalSistemaBar" class="portal-sistema-bar hidden">
-          <span class="portal-sistema-label">Portal:</span>
-          <div id="portalSistemaPills" class="portal-sistema-pills" role="tablist" aria-label="Portal Cliente"></div>
+        <div id="portalSistemaBar" class="st2-context-bar hidden">
+          <div id="portalSistemaPills" class="st2-context-seg" role="tablist" aria-label="Portal Cliente"></div>
         </div>
       </div>
       <button type="button" class="tab-btn tab-btn-admin hidden" data-tab="admin" role="tab" id="tabAdminBtn" aria-hidden="true" title="Panel de administración de accesos">
@@ -1684,7 +1683,7 @@
       <div class="embed-frame-wrap">
         <div id="thomDirectGate" class="embed-direct-gate hidden" aria-live="polite">
           <div class="embed-panel-placeholder" aria-hidden="true"></div>
-          <p><strong id="thomGateTitle">THOM · SQL/ONVIO-SAAS</strong></p>
+          <p><strong id="thomGateTitle">THOM · SQL/ONVIO</strong></p>
           <p id="thomGateStatus" class="embed-direct-gate-status hidden"><span class="embed-direct-gate-dot" aria-hidden="true"></span>Abierto sobre este panel</p>
           <p id="thomGateZscaler">Necesitas tener <strong>ZScaler activado</strong>.</p>
           <p id="thomGateNote" class="embed-direct-gate-note">(Si no aparece, permití «ventanas emergentes» en la configuración del navegador.)</p>

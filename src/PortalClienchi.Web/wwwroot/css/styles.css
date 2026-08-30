@@ -632,7 +632,7 @@ body.portal-tab-active.st2-has-update.st2-has-modules-update.st2-has-tools-updat
 }
 
 body.portal-tab-active .tab-bar {
-  margin-bottom: 34px;
+  margin-bottom: 48px;
   padding: 4px 4px 4px;
 }
 
@@ -969,16 +969,16 @@ body.admin-tab-active {
   width: 100%;
 }
 
-.portal-sistema-bar {
+/* Barra de contexto compartida (Portal + THOM): misma lógica visual que Planillas. */
+.st2-context-bar {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 12;
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
-  gap: 6px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -987,67 +987,75 @@ body.admin-tab-active {
   white-space: nowrap;
 }
 
-.portal-sistema-bar.hidden {
+.st2-context-bar.hidden {
   display: none;
 }
 
-.portal-sistema-label {
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #9a4a28;
-}
-
-.portal-sistema-pills {
+.st2-context-seg {
   display: inline-flex;
   flex-wrap: nowrap;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 9px;
-  border: 1px solid rgba(214, 64, 0, 0.18);
-  background: linear-gradient(180deg, #fff7f2 0%, #fff 100%);
+  align-items: stretch;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 14px;
+  border: 2px solid var(--border);
+  background: #fafafa;
   box-shadow:
-    0 1px 2px rgba(214, 64, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 1px 2px rgba(26, 31, 46, 0.04),
+    0 6px 16px rgba(214, 64, 0, 0.06);
 }
 
-.portal-sistema-pill {
+.st2-context-btn {
   appearance: none;
-  border: 0;
+  position: relative;
+  border: 1px solid transparent;
   background: transparent;
-  color: #9a4a28;
+  color: var(--dark);
   font: inherit;
-  font-size: 0.66rem;
+  font-size: 0.8rem;
   font-weight: 650;
-  letter-spacing: 0.02em;
-  min-height: 22px;
-  padding: 3px 10px;
-  border-radius: 7px;
+  letter-spacing: 0.01em;
+  min-height: 34px;
+  padding: 6px 14px;
+  border-radius: 10px;
   white-space: nowrap;
   cursor: pointer;
   transition:
     background 0.16s ease,
     color 0.16s ease,
-    box-shadow 0.16s ease;
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.12s ease;
 }
 
-.portal-sistema-pill:hover {
+.st2-context-btn:hover:not(.active) {
   background: rgba(214, 64, 0, 0.08);
+  border-color: rgba(214, 64, 0, 0.28);
   color: #b83d00;
+  box-shadow: 0 2px 10px rgba(214, 64, 0, 0.1);
 }
 
-.portal-sistema-pill.active {
+.st2-context-btn.active {
+  border-color: transparent;
   background: linear-gradient(180deg, #e24808 0%, var(--primary) 100%);
   color: #fff;
   font-weight: 750;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 2px 8px rgba(214, 64, 0, 0.28);
+    0 2px 10px rgba(214, 64, 0, 0.3);
 }
 
-.portal-sistema-pill.active:hover {
+.st2-context-btn.active:hover {
   filter: brightness(1.04);
+}
+
+.st2-context-btn:active:not(.active) {
+  transform: translateY(0.5px);
+}
+
+.st2-context-btn:focus-visible {
+  outline: 2px solid rgba(214, 64, 0, 0.4);
+  outline-offset: 2px;
 }
 
 .search-column,
@@ -1793,92 +1801,10 @@ body.portal-tab-active .combo-box {
   box-shadow: 0 2px 8px rgba(26, 31, 46, 0.08);
 }
 
-.thom-portal-bar {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 12;
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.thom-portal-bar.hidden {
-  display: none;
-}
-
-/* El selector flota debajo de la pestaña: hay que dejarle el hueco. */
+/* El selector flota debajo de la pestaña: hueco para st2-context-bar. */
 body.thom-tab-active .tab-bar,
 body.embed-active.thom-tab-active .tab-bar {
-  margin-bottom: 34px;
-}
-
-.thom-portal-seg {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 9px;
-  border: 1px solid rgba(214, 64, 0, 0.18);
-  background:
-    linear-gradient(180deg, #fff7f2 0%, #fff 100%);
-  box-shadow:
-    0 1px 2px rgba(214, 64, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-.thom-portal-btn {
-  appearance: none;
-  position: relative;
-  border: 0;
-  border-radius: 7px;
-  min-height: 22px;
-  padding: 3px 10px;
-  white-space: nowrap;
-  font: inherit;
-  font-size: 0.66rem;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-  color: #9a4a28;
-  background: transparent;
-  cursor: pointer;
-  transition:
-    background 0.16s ease,
-    color 0.16s ease,
-    box-shadow 0.16s ease,
-    transform 0.12s ease;
-}
-
-.thom-portal-btn:hover:not(.active) {
-  color: #b83d00;
-  background: rgba(214, 64, 0, 0.08);
-}
-
-.thom-portal-btn.active {
-  color: #fff;
-  background: linear-gradient(180deg, #e24808 0%, var(--primary) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 2px 8px rgba(214, 64, 0, 0.28);
-  font-weight: 750;
-}
-
-.thom-portal-btn.active:hover {
-  filter: brightness(1.04);
-}
-
-.thom-portal-btn:active:not(.active) {
-  transform: translateY(0.5px);
-}
-
-.thom-portal-btn:focus-visible {
-  outline: 2px solid rgba(214, 64, 0, 0.4);
-  outline-offset: 2px;
+  margin-bottom: 48px;
 }
 
 .thom-proxy-open {

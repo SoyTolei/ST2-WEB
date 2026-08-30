@@ -216,6 +216,14 @@ function getPortalExternalUrl() {
   return getPortalLoginUrl();
 }
 
+function portalPickerLabel(id, label) {
+  const key = String(id || "").toLowerCase();
+  if (key === "bejerman") return "SQL/ONVIO";
+  if (key === "legal") return "LEGAL";
+  if (key === "chile") return "CHILE";
+  return String(label || id || "").trim() || key;
+}
+
 function initPortalPicker() {
   const portals = appConfig?.portals ?? [];
   if (!portals.length || !portalSistemaPills) return;
@@ -227,11 +235,11 @@ function initPortalPicker() {
   portalSistemaPills.innerHTML = portals
     .map(
       (p) =>
-        `<button type="button" class="portal-sistema-pill${p.id === activePortalId ? " active" : ""}" data-portal-id="${escapeHtml(p.id)}" role="tab" aria-selected="${p.id === activePortalId ? "true" : "false"}">${escapeHtml(p.label)}</button>`,
+        `<button type="button" class="st2-context-btn${p.id === activePortalId ? " active" : ""}" data-portal-id="${escapeHtml(p.id)}" role="tab" aria-selected="${p.id === activePortalId ? "true" : "false"}">${escapeHtml(portalPickerLabel(p.id, p.label))}</button>`,
     )
     .join("");
 
-  for (const btn of portalSistemaPills.querySelectorAll(".portal-sistema-pill")) {
+  for (const btn of portalSistemaPills.querySelectorAll(".st2-context-btn")) {
     btn.addEventListener("click", () => switchPortal(btn.dataset.portalId));
   }
   syncPortalFrameTitle();
@@ -239,7 +247,7 @@ function initPortalPicker() {
 
 function syncPortalFrameTitle() {
   const cfg = getActivePortalConfig();
-  const label = cfg?.label || activePortalId || "Portal Cliente";
+  const label = portalPickerLabel(activePortalId, cfg?.label) || activePortalId || "Portal Cliente";
   if (portalFrame) portalFrame.title = `Portal Cliente · ${label}`;
 }
 
@@ -248,7 +256,7 @@ function switchPortal(portalId, { history = "push" } = {}) {
   const same = portalId === activePortalId;
   activePortalId = portalId;
 
-  for (const btn of portalSistemaPills?.querySelectorAll(".portal-sistema-pill") ?? []) {
+  for (const btn of portalSistemaPills?.querySelectorAll(".st2-context-btn") ?? []) {
     const active = btn.dataset.portalId === portalId;
     btn.classList.toggle("active", active);
     btn.setAttribute("aria-selected", active ? "true" : "false");
@@ -3196,7 +3204,7 @@ function isThomDirectEmbed() {
 const THOM_PORTAL_KEY = "st2-thom-portal";
 const THOM_PORTALS = {
   bejerman: {
-    label: "SQL/ONVIO-SAAS",
+    label: "SQL/ONVIO",
     fallback: "https://css-latam.int.thomsonreuters.com/css-tap",
     configKey: "thomTapUrl",
   },
