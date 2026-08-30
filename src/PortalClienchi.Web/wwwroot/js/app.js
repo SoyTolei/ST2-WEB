@@ -218,7 +218,7 @@ function getPortalExternalUrl() {
 
 function portalPickerLabel(id, label) {
   const key = String(id || "").toLowerCase();
-  if (key === "bejerman") return "SQL/ONVIO";
+  if (key === "bejerman") return "SQL/ONVIO/WEB";
   if (key === "legal") return "LEGAL";
   if (key === "chile") return "CHILE";
   return String(label || id || "").trim() || key;
@@ -3204,7 +3204,7 @@ function isThomDirectEmbed() {
 const THOM_PORTAL_KEY = "st2-thom-portal";
 const THOM_PORTALS = {
   bejerman: {
-    label: "SQL/ONVIO",
+    label: "SQL/ONVIO/WEB",
     fallback: "https://css-latam.int.thomsonreuters.com/css-tap",
     configKey: "thomTapUrl",
   },

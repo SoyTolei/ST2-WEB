@@ -632,7 +632,7 @@ body.portal-tab-active.st2-has-update.st2-has-modules-update.st2-has-tools-updat
 }
 
 body.portal-tab-active .tab-bar {
-  margin-bottom: 48px;
+  margin-bottom: 56px;
   padding: 4px 4px 4px;
 }
 
@@ -972,7 +972,7 @@ body.admin-tab-active {
 /* Barra de contexto compartida (Portal + THOM): misma lógica visual que Planillas. */
 .st2-context-bar {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 1px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 12;
@@ -1804,7 +1804,7 @@ body.portal-tab-active .combo-box {
 /* El selector flota debajo de la pestaña: hueco para st2-context-bar. */
 body.thom-tab-active .tab-bar,
 body.embed-active.thom-tab-active .tab-bar {
-  margin-bottom: 48px;
+  margin-bottom: 44px;
 }
 
 .thom-proxy-open {

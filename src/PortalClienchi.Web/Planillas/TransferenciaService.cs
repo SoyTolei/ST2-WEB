@@ -188,7 +188,7 @@ public sealed class TransferenciaService
     {
         var sistema = PlanillasSistemaExtensions.Parse(req.Sistema);
         if (sistema is PlanillasSistema.None)
-            return "Elegí un sistema válido (Bejerman SQL, ONVIO/Bejerman WEB, LEGAL o Chile).";
+            return "Elegí un sistema válido (Bejerman SQL, ONVIO/WEB, LEGAL o Chile).";
         if (sistema is PlanillasSistema.Legal && !PlanillasFeatureFlags.LegalEnabled)
             return "El módulo LEGAL estará disponible en una próxima versión.";
 

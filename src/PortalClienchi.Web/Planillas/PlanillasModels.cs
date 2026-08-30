@@ -12,7 +12,7 @@ public enum PlanillasSistema
 public static class PlanillasSistemaExtensions
 {
     public const string BejermanSqlLabel = "Bejerman SQL";
-    public const string OnvioWebLabel = "ONVIO/Bejerman WEB";
+    public const string OnvioWebLabel = "ONVIO/WEB";
     public const string LegalLabel = "LEGAL";
     public const string ChileLabel = "Chile";
 
@@ -28,7 +28,7 @@ public static class PlanillasSistemaExtensions
     public static PlanillasSistema Parse(string? value) => value?.Trim() switch
     {
         "BejermanSql" or "bejermanSql" or BejermanSqlLabel => PlanillasSistema.BejermanSql,
-        "OnvioWeb" or "onvioWeb" or OnvioWebLabel => PlanillasSistema.OnvioWeb,
+        "OnvioWeb" or "onvioWeb" or OnvioWebLabel or "ONVIO/Bejerman WEB" => PlanillasSistema.OnvioWeb,
         "Legal" or "legal" or LegalLabel => PlanillasSistema.Legal,
         "Chile" or "chile" or ChileLabel => PlanillasSistema.Chile,
         _ => PlanillasSistema.None,

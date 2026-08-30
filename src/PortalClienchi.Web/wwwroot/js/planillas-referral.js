@@ -167,7 +167,7 @@ function sistemaLabel() {
   const id = ctx.getSistema();
   const label = {
     BejermanSql: "Bejerman SQL",
-    OnvioWeb: "ONVIO/Bejerman WEB",
+    OnvioWeb: "ONVIO/WEB",
     Legal: "LEGAL",
     Chile: "Chile",
   }[id] || "Bejerman SQL";
