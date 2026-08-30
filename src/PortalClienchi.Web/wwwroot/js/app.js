@@ -2577,13 +2577,44 @@ function closeAccessModulesModal() {
   accessModulesEmailValue = "";
   accessModulesAfterApprove = false;
   accessModulesPresetMode = false;
+  accessModulesSaving = false;
   accessModulesEmail?.classList.remove("hidden");
   accessModulesEmailInput?.classList.add("hidden");
   if (accessModulesEmailInput) accessModulesEmailInput.value = "";
   if (accessModulesError) accessModulesError.textContent = "";
   if (accessModulesTitle) accessModulesTitle.textContent = "Módulos habilitados";
-  if (accessModulesSave) accessModulesSave.textContent = "Guardar";
-  if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
+  if (accessModulesSave) {
+    accessModulesSave.disabled = false;
+    accessModulesSave.textContent = "Guardar";
+  }
+  if (accessModulesCancel) {
+    accessModulesCancel.disabled = false;
+    accessModulesCancel.textContent = "Cancelar";
+  }
+}
+
+function isValidAccessProfileEmail(email) {
+  const normalized = String(email || "").trim().toLowerCase();
+  const at = normalized.lastIndexOf("@");
+  if (at <= 0 || at >= normalized.length - 1) return false;
+  const local = normalized.slice(0, at);
+  const domain = normalized.slice(at + 1);
+  if (!local || local.includes(" ") || local.includes("@")) return false;
+  if (domain !== "thomsonreuters.com") return false;
+  return /^[a-z]{2,}\.[a-z]{2,}$/.test(local);
+}
+
+function showAccessModulesError(message) {
+  if (accessModulesError) {
+    accessModulesError.textContent = message;
+    accessModulesError.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+}
+
+function accessModulesSaveLabel() {
+  if (accessModulesPresetMode) return "Crear perfil";
+  if (accessModulesAfterApprove) return "Listo";
+  return "Guardar";
 }
 
 function syncAccessSqlModulesGroup() {
@@ -2640,6 +2671,7 @@ function syncViewAsBanner() {
 
 function openAccessModulesModal(email, { afterApprove = false } = {}) {
   if (!accessModulesOverlay || !email) return;
+  accessModulesSaving = false;
   accessModulesPresetMode = false;
   accessModulesEmail?.classList.remove("hidden");
   accessModulesEmailInput?.classList.add("hidden");
@@ -2696,11 +2728,17 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   }
   syncAccessSqlModulesGroup();
   if (accessModulesError) accessModulesError.textContent = "";
+  if (accessModulesSave) {
+    accessModulesSave.disabled = false;
+    accessModulesSave.textContent = accessModulesSaveLabel();
+  }
+  if (accessModulesCancel) accessModulesCancel.disabled = false;
   accessModulesOverlay.classList.remove("hidden");
 }
 
 function openAccessPresetModal() {
   if (!accessModulesOverlay || !isPrimarySuperAdmin()) return;
+  accessModulesSaving = false;
   accessModulesPresetMode = true;
   accessModulesAfterApprove = false;
   accessModulesEmailValue = "";
@@ -2735,6 +2773,11 @@ function openAccessPresetModal() {
   if (accessModSt2AdminWrap) accessModSt2AdminWrap.classList.remove("hidden");
   syncAccessSqlModulesGroup();
   if (accessModulesError) accessModulesError.textContent = "";
+  if (accessModulesSave) {
+    accessModulesSave.disabled = false;
+    accessModulesSave.textContent = "Crear perfil";
+  }
+  if (accessModulesCancel) accessModulesCancel.disabled = false;
   accessModulesOverlay.classList.remove("hidden");
   accessModulesEmailInput?.focus();
 }
@@ -2792,7 +2835,11 @@ async function saveAccessModules() {
   if (!accessModulesPresetMode && !accessModulesEmailValue) return;
 
   accessModulesSaving = true;
-  if (accessModulesSave) accessModulesSave.disabled = true;
+  if (accessModulesSave) {
+    accessModulesSave.disabled = true;
+    accessModulesSave.textContent = accessModulesPresetMode ? "Creando…" : "Guardando…";
+  }
+  if (accessModulesCancel) accessModulesCancel.disabled = true;
   if (accessModulesError) accessModulesError.textContent = "";
 
   const modulesBody = {
@@ -2817,6 +2864,9 @@ async function saveAccessModules() {
     if (accessModulesPresetMode) {
       const email = String(accessModulesEmailInput?.value || "").trim().toLowerCase();
       if (!email) throw new Error("Ingresá el correo del perfil.");
+      if (!isValidAccessProfileEmail(email)) {
+        throw new Error("Usá un correo @thomsonreuters.com con formato nombre.apellido.");
+      }
       const autoName = parseAccessNameFromEmail(email).display;
       const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;
 
@@ -2899,16 +2949,27 @@ async function saveAccessModules() {
     renderAccessAdminTable();
     if (fromApprove) setAccessAdminUpdatedHint("Aprobado. Módulos guardados.");
   } catch (err) {
-    if (accessModulesError) accessModulesError.textContent = err?.message || "No se pudo guardar.";
+    showAccessModulesError(err?.message || "No se pudo guardar.");
   } finally {
     accessModulesSaving = false;
-    if (accessModulesSave) accessModulesSave.disabled = false;
+    if (accessModulesSave) {
+      accessModulesSave.disabled = false;
+      accessModulesSave.textContent = accessModulesSaveLabel();
+    }
+    if (accessModulesCancel) accessModulesCancel.disabled = false;
   }
 }
 
 accessModulesClose?.addEventListener("click", closeAccessModulesModal);
 accessModulesCancel?.addEventListener("click", closeAccessModulesModal);
 accessModulesSave?.addEventListener("click", () => { void saveAccessModules(); });
+accessModulesOverlay?.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || e.isComposing) return;
+  const tag = e.target?.tagName?.toLowerCase();
+  if (tag !== "input" && tag !== "button") return;
+  e.preventDefault();
+  void saveAccessModules();
+});
 accessModulesOverlay?.addEventListener("click", (e) => {
   if (e.target === accessModulesOverlay) closeAccessModulesModal();
 });
