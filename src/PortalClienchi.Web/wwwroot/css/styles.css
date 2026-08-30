@@ -16,6 +16,10 @@
   --portal-sub-hover: #4e5d72;
   --portal-sub-glow: rgba(38, 47, 62, 0.22);
   --portal-sub-soft: #eef1f5;
+  --st2-suite-surface: linear-gradient(155deg, #ffffff 0%, #fff9f5 45%, #ffefe4 100%);
+  --st2-suite-surface-soft: linear-gradient(180deg, #fdfcfb 0%, #faf6f3 100%);
+  --st2-suite-border: rgba(251, 146, 60, 0.24);
+  --st2-suite-glow: 0 8px 28px rgba(214, 64, 0, 0.08);
 }
 
 * { box-sizing: border-box; }
@@ -4653,15 +4657,14 @@ body.st2-access-restoring .st2-boot-splash {
 
 .st2-access-card {
   width: min(420px, 96vw);
-  background:
-    linear-gradient(180deg, #ffffff 0%, #fffaf7 72%, #fff 100%);
+  background: var(--st2-suite-surface);
   border-radius: 20px;
   padding: 30px 28px 24px;
-  border: 1px solid rgba(251, 146, 60, 0.28);
+  border: 1px solid var(--st2-suite-border);
   box-shadow:
-    0 0 0 1px rgba(214, 64, 0, 0.12),
-    0 0 48px rgba(214, 64, 0, 0.28),
-    0 28px 64px rgba(15, 23, 42, 0.45),
+    var(--st2-suite-glow),
+    0 0 0 1px rgba(214, 64, 0, 0.1),
+    0 28px 64px rgba(15, 23, 42, 0.18),
     inset 0 3px 0 #d64000;
 }
 
