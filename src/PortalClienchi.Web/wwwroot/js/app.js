@@ -118,6 +118,8 @@ const accessModulesEmail = document.getElementById("st2-access-modules-email");
 const accessModulesEmailInput = document.getElementById("st2-access-modules-email-input");
 const accessModulesName = document.getElementById("st2-access-modules-name");
 const accessModulesBirthday = document.getElementById("st2-access-modules-birthday");
+const accessModulesBirthdayOpen = document.getElementById("st2-access-modules-birthday-open");
+const accessModulesBirthdayPicker = document.getElementById("st2-access-modules-birthday-picker");
 const accessModulesError = document.getElementById("st2-access-modules-error");
 const accessModulesClose = document.getElementById("st2-access-modules-close");
 const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
@@ -1957,6 +1959,9 @@ async function downloadTool(toolId) {
   document.body.appendChild(a);
   a.click();
   a.remove();
+  if (toolId === "sql") {
+    setAboutToolsStatus("Antes de descomprimir, borrá las versiones anteriores de Herramientas SQL para no mezclar archivos viejos con los nuevos.");
+  }
   markToolSeen(toolId);
 }
 
@@ -2371,7 +2376,10 @@ function bindAboutToolsUi() {
 function showAbout({ history = "push" } = {}) {
   aboutRouteOpen = true;
   const webMeta = document.getElementById("st2-about-web-meta");
-  if (webMeta) webMeta.textContent = getAboutVersionLabel();
+  if (webMeta) {
+    webMeta.textContent = "Esta web";
+    webMeta.title = "Estás usando esta aplicación web";
+  }
   applyAboutUpdated();
   syncAboutToolsVisibility();
   bindAboutToolsUi();
@@ -2564,12 +2572,124 @@ accessAdminBody?.addEventListener("click", (e) => {
   }
 });
 
+const ACCESS_BDAY_MONTHS = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
+let accessBirthdayPickerMonth = 0;
+let accessBirthdayPickerOpen = false;
+
+function accessBirthdayDaysInMonth(monthIndex) {
+  return new Date(2000, monthIndex + 1, 0).getDate();
+}
+
+function parseAccessBirthdayDisplay(val) {
+  const m = String(val || "").trim().match(/^(\d{1,2})\/(\d{1,2})$/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10);
+  if (month < 1 || month > 12 || day < 1 || day > accessBirthdayDaysInMonth(month - 1)) return null;
+  return { day, month };
+}
+
+function formatAccessBirthdayDisplay(day, month) {
+  return `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}`;
+}
+
+function closeAccessBirthdayPicker() {
+  accessBirthdayPickerOpen = false;
+  accessModulesBirthdayPicker?.classList.add("hidden");
+  accessModulesBirthdayOpen?.setAttribute("aria-expanded", "false");
+}
+
+function renderAccessBirthdayPicker() {
+  const grid = accessModulesBirthdayPicker?.querySelector("[data-bday-days]");
+  const label = accessModulesBirthdayPicker?.querySelector("[data-bday-month-label]");
+  if (!grid || !label) return;
+  label.textContent = ACCESS_BDAY_MONTHS[accessBirthdayPickerMonth];
+  const total = accessBirthdayDaysInMonth(accessBirthdayPickerMonth);
+  const selected = parseAccessBirthdayDisplay(accessModulesBirthday?.value);
+  grid.innerHTML = "";
+  for (let d = 1; d <= total; d++) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "st2-birthday-picker-day";
+    btn.textContent = String(d);
+    const month = accessBirthdayPickerMonth + 1;
+    if (selected && selected.day === d && selected.month === month) {
+      btn.classList.add("is-selected");
+    }
+    btn.addEventListener("click", () => {
+      if (accessModulesBirthday) {
+        accessModulesBirthday.value = formatAccessBirthdayDisplay(d, month);
+      }
+      closeAccessBirthdayPicker();
+    });
+    grid.appendChild(btn);
+  }
+}
+
+function openAccessBirthdayPicker() {
+  if (!accessModulesBirthdayPicker) return;
+  const parsed = parseAccessBirthdayDisplay(accessModulesBirthday?.value);
+  accessBirthdayPickerMonth = parsed ? parsed.month - 1 : new Date().getMonth();
+  renderAccessBirthdayPicker();
+  accessBirthdayPickerOpen = true;
+  accessModulesBirthdayPicker.classList.remove("hidden");
+  accessModulesBirthdayOpen?.setAttribute("aria-expanded", "true");
+}
+
+function initAccessBirthdayPicker() {
+  if (!accessModulesBirthdayPicker || accessModulesBirthdayPicker.dataset.bound) return;
+  accessModulesBirthdayPicker.dataset.bound = "1";
+
+  accessModulesBirthdayOpen?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (accessBirthdayPickerOpen) closeAccessBirthdayPicker();
+    else openAccessBirthdayPicker();
+  });
+
+  accessModulesBirthday?.addEventListener("click", () => {
+    if (accessBirthdayPickerOpen) closeAccessBirthdayPicker();
+    else openAccessBirthdayPicker();
+  });
+
+  accessModulesBirthdayPicker.querySelector('[data-bday-nav="prev"]')?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    accessBirthdayPickerMonth = (accessBirthdayPickerMonth + 11) % 12;
+    renderAccessBirthdayPicker();
+  });
+
+  accessModulesBirthdayPicker.querySelector('[data-bday-nav="next"]')?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    accessBirthdayPickerMonth = (accessBirthdayPickerMonth + 1) % 12;
+    renderAccessBirthdayPicker();
+  });
+
+  accessModulesBirthdayPicker.querySelector(".st2-birthday-picker-clear")?.addEventListener("click", () => {
+    if (accessModulesBirthday) accessModulesBirthday.value = "";
+    closeAccessBirthdayPicker();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!accessBirthdayPickerOpen) return;
+    if (e.target.closest(".st2-birthday-field")) return;
+    closeAccessBirthdayPicker();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && accessBirthdayPickerOpen) closeAccessBirthdayPicker();
+  });
+}
+
 function closeAccessModulesModal() {
   accessModulesOverlay?.classList.add("hidden");
   accessModulesEmailValue = "";
   accessModulesAfterApprove = false;
   accessModulesPresetMode = false;
   accessModulesSaving = false;
+  closeAccessBirthdayPicker();
   accessModulesEmail?.classList.remove("hidden");
   accessModulesEmailInput?.classList.add("hidden");
   if (accessModulesEmailInput) accessModulesEmailInput.value = "";
@@ -4040,6 +4160,7 @@ async function bootstrapApp() {
   applyAboutUpdated();
   paintToolDatesFromMeta();
   syncAboutToolsBadge();
+  initAccessBirthdayPicker();
   await ensureAppAccess();
   if (isPrimarySuperAdmin()) startAccessAdminClientWatch();
   syncAdminTabVisibility();

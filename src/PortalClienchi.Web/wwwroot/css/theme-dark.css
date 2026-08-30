@@ -249,6 +249,33 @@ html.st2-theme-dark .st2-access-birthday-note {
   color: #7d8ba0 !important;
 }
 
+html.st2-theme-dark .st2-birthday-open-btn,
+html.st2-theme-dark .st2-birthday-picker,
+html.st2-theme-dark .st2-birthday-picker-nav {
+  background: #1a2130;
+  border-color: #2d3748;
+  color: var(--text);
+}
+
+html.st2-theme-dark .st2-birthday-open-btn:hover,
+html.st2-theme-dark .st2-birthday-picker-nav:hover,
+html.st2-theme-dark .st2-birthday-picker-day:hover {
+  background: #243044;
+}
+
+html.st2-theme-dark .st2-birthday-picker-month,
+html.st2-theme-dark .st2-birthday-picker-day {
+  color: var(--text);
+}
+
+html.st2-theme-dark .st2-birthday-picker-clear {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-birthday-picker-clear:hover {
+  color: #e8eef7;
+}
+
 html.st2-theme-dark .st2-about-signature-by,
 html.st2-theme-dark .st2-about-signature-at {
   color: #64748b !important;
