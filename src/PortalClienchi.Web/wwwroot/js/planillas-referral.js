@@ -151,6 +151,7 @@ export function openReferral() {
   resetReferralForm();
   updateReferralPanels();
   if (isLegal()) openLegalReferralHub();
+  ctx.syncReferralModuleLabels?.();
   document.getElementById("ref-sistema-badge").textContent = sistemaLabel();
   ctx.showView("referral");
 }
@@ -1149,7 +1150,7 @@ async function generarReferral(copiar) {
         status.textContent = "";
         return;
       }
-      throw new Error(data.error || data.detail || data.title || "Error al generar escalamiento");
+      throw new Error(data.error || data.detail || data.title || "Error al generar Referral I+D");
     }
 
     const capturasMsg = data.capturasSubidas > 0

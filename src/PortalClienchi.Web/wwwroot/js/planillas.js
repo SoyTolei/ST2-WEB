@@ -326,10 +326,31 @@ function canOpenRoute(route) {
   return true;
 }
 
+function referralModuleLabel(sistema = sistemaActual) {
+  return sistema === "Legal" ? "Escalamiento a N2/N3" : "Referral I+D";
+}
+
+function referralModuleSubtitle(sistema = sistemaActual) {
+  return sistema === "Legal" ? "Reporte de bugs LEGAL" : "Escalamiento a desarrollo";
+}
+
+function syncReferralModuleLabels(sistema = sistemaActual) {
+  const label = referralModuleLabel(sistema);
+  const sub = referralModuleSubtitle(sistema);
+  const menuLabel = document.getElementById("plan-modulo-referral-label");
+  const menuSub = document.getElementById("plan-modulo-referral-sub");
+  const moduleTitle = document.getElementById("plan-referral-module-title");
+  const loadingText = document.getElementById("plan-referral-loading-text");
+  if (menuLabel) menuLabel.textContent = label;
+  if (menuSub) menuSub.textContent = sub;
+  if (moduleTitle) moduleTitle.textContent = label;
+  if (loadingText) loadingText.textContent = `Cargando ${label}…`;
+}
+
 function titleForView(name) {
   switch (name) {
     case "transferencia": return "ST² · Transferencia";
-    case "referral": return "ST² · Escalamiento N2/N3";
+    case "referral": return isLegal() ? "ST² · Escalamiento N2/N3" : "ST² · Referral I+D";
     case "oportunidadMenu":
     case "oportunidadCargar":
     case "oportunidadGestor": return "ST² · Oportunidad";
@@ -459,6 +480,7 @@ function updateSistemaUi() {
   });
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
+  syncReferralModuleLabels();
 }
 
 function selectSistema(id) {
@@ -1425,6 +1447,7 @@ const planillasContext = {
   getConfig: () => planillasConfig,
   goPlanillasMenu: goBackToPlanillasMenu,
   goOportunidadMenu: goBackToOportunidadMenu,
+  syncReferralModuleLabels,
 };
 
 let referralModulePromise = null;
