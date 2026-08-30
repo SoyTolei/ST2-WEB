@@ -115,6 +115,19 @@ function getVisibleSistemas() {
   return SISTEMA_ORDER.filter(canSeeSistema);
 }
 
+function shouldHideSistemaPicker() {
+  const visible = getVisibleSistemas();
+  return visible.length === 1 && (visible[0] === "Legal" || visible[0] === "Chile");
+}
+
+function syncSistemaPickerVisibility() {
+  const hide = shouldHideSistemaPicker();
+  const section = document.getElementById("plan-sistema-section");
+  section?.classList.toggle("hidden", hide);
+  section?.toggleAttribute("hidden", hide);
+  document.body.classList.toggle("st2-single-legal-chile-sistema", hide);
+}
+
 function ensureAllowedSistema() {
   if (canSeeSistema(sistemaActual)) return;
   const visible = getVisibleSistemas();
@@ -449,6 +462,7 @@ function updateSistemaUi() {
     btn.classList.toggle("active", active);
   });
   syncSistemaGridColumns();
+  syncSistemaPickerVisibility();
   refreshSistemaIndicator();
   syncSistemaDataset();
 
