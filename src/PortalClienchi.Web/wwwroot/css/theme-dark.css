@@ -946,6 +946,29 @@ html.st2-theme-dark .plan-adj-card.plan-legal-pick:hover {
   background: #243044 !important;
 }
 
+html.st2-theme-dark .plan-chile-embed-menu-btn {
+  background: #1a2130;
+  border-color: #2d3748;
+  color: var(--text);
+}
+
+html.st2-theme-dark .plan-chile-embed-menu-btn:hover {
+  background: #243044;
+}
+
+html.st2-theme-dark .plan-chile-embed-menu {
+  background: #1a2130;
+  border-color: #2d3748;
+}
+
+html.st2-theme-dark .plan-chile-embed-menu-item {
+  color: var(--text);
+}
+
+html.st2-theme-dark .plan-chile-embed-menu-item:hover {
+  background: #243044;
+}
+
 html.st2-theme-dark .plan-chile-embed-fallback {
   background: rgba(42, 33, 24, 0.96);
   border-color: #b45309;

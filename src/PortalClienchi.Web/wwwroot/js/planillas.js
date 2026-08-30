@@ -172,7 +172,10 @@ const views = {
 };
 
 let chileEmbedUrl = "";
+let chileEmbedTitle = "";
 let chileEmbedLoadTimer = null;
+let chileEmbedMenuOpen = false;
+const CHILE_EMBED_STORAGE_KEY = "st2-chile-embed";
 
 const els = {
   sistemaBtns: () => document.querySelectorAll(".plan-sistema-grid > [data-plan-sistema]"),
@@ -261,6 +264,7 @@ function pathForView(name) {
     case "pdfPortal": return "/pdfportal";
     case "blanqueo": return "/blanqueo";
     case "borradoBases": return "/borrado-bases";
+    case "chileEmbed": return "/chile/soporte";
     default: return "/";
   }
 }
@@ -310,6 +314,7 @@ function routeFromPath(pathname) {
     case "/oportunidad/gestor": return { view: "oportunidadGestor", requires: "oportunidad" };
     case "/blanqueo": return { view: "blanqueo", requires: "blanqueo" };
     case "/borrado-bases": return { view: "borradoBases", requires: "borrado-bases" };
+    case "/chile/soporte": return { view: "chileEmbed", requires: "chile-soporte" };
     default: return { view: "menu", unknown: true };
   }
 }
@@ -326,6 +331,9 @@ function canOpenRoute(route) {
   }
   if (route.requires === "referral") {
     return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys);
+  }
+  if (route.requires === "chile-soporte") {
+    return canSeeSistema("Chile") && !!chileEmbedUrl;
   }
   return true;
 }
@@ -390,6 +398,7 @@ function showView(name, { history = "push" } = {}) {
     el.classList.toggle("hidden", key !== name);
   });
   document.body.classList.toggle("st2-balloons-sides", name !== "menu");
+  document.body.classList.toggle("st2-chile-embed-active", name === "chileEmbed");
   injectModuleHeaders();
   document.title = titleForView(name);
   syncHistory(name, history);
@@ -513,6 +522,10 @@ function updateSistemaUi() {
 function selectSistema(id) {
   const normalized = normalizeSistemaId(id);
   if (!normalized || !canSeeSistema(normalized)) return;
+  if (normalized !== "Chile" && !views.chileEmbed?.classList.contains("hidden")) {
+    closeChileEmbed();
+    showView("menu", { history: "replace" });
+  }
   sistemaActual = normalized;
   rememberSistema(normalized);
   normalizeMesaForSistema();
@@ -1159,6 +1172,66 @@ function setModuleLoading(overlayId, active) {
   overlay.setAttribute("aria-busy", active ? "true" : "false");
 }
 
+function readChileEmbedSession() {
+  try {
+    const raw = sessionStorage.getItem(CHILE_EMBED_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data?.url) return null;
+    return { url: String(data.url), title: String(data.title || "Soporte técnico Chile") };
+  } catch {
+    return null;
+  }
+}
+
+function writeChileEmbedSession(url, title) {
+  try {
+    sessionStorage.setItem(CHILE_EMBED_STORAGE_KEY, JSON.stringify({ url, title }));
+  } catch { /* ignore */ }
+}
+
+function clearChileEmbedSession() {
+  try {
+    sessionStorage.removeItem(CHILE_EMBED_STORAGE_KEY);
+  } catch { /* ignore */ }
+}
+
+function closeChileEmbedMenu() {
+  chileEmbedMenuOpen = false;
+  document.getElementById("plan-chile-embed-menu")?.classList.add("hidden");
+  document.getElementById("plan-chile-embed-menu-btn")?.setAttribute("aria-expanded", "false");
+}
+
+function toggleChileEmbedMenu() {
+  const menu = document.getElementById("plan-chile-embed-menu");
+  const btn = document.getElementById("plan-chile-embed-menu-btn");
+  if (!menu || !btn) return;
+  chileEmbedMenuOpen = !chileEmbedMenuOpen;
+  menu.classList.toggle("hidden", !chileEmbedMenuOpen);
+  btn.setAttribute("aria-expanded", chileEmbedMenuOpen ? "true" : "false");
+}
+
+function closeChileEmbed({ clearFrame = true } = {}) {
+  clearChileEmbedLoadTimer();
+  hideChileEmbedFallback();
+  closeChileEmbedMenu();
+  if (clearFrame) {
+    const frame = document.getElementById("planChileEmbedFrame");
+    if (frame) frame.removeAttribute("src");
+    chileEmbedUrl = "";
+    chileEmbedTitle = "";
+    clearChileEmbedSession();
+  }
+}
+
+function goBackToChileHome() {
+  closeChileEmbed();
+  selectSistema("Chile");
+  document.dispatchEvent(new CustomEvent("st2:planillas-home"));
+  showView("menu", { history: "replace" });
+  void refreshModuleFlags().then(() => updateSistemaUi());
+}
+
 function clearChileEmbedLoadTimer() {
   if (chileEmbedLoadTimer) {
     window.clearTimeout(chileEmbedLoadTimer);
@@ -1199,11 +1272,15 @@ function reloadChileEmbed() {
 function openChileEmbed(url, title) {
   chileEmbedUrl = String(url || "").trim();
   if (!chileEmbedUrl) return;
+  chileEmbedTitle = title || "Soporte técnico Chile";
+  writeChileEmbedSession(chileEmbedUrl, chileEmbedTitle);
+  selectSistema("Chile");
   const titleEl = document.getElementById("plan-chile-embed-title");
   const frame = document.getElementById("planChileEmbedFrame");
-  if (titleEl) titleEl.textContent = title || "Soporte técnico Chile";
-  if (frame) frame.title = title || "Soporte técnico Chile";
-  showView("chileEmbed");
+  if (titleEl) titleEl.textContent = chileEmbedTitle;
+  if (frame) frame.title = chileEmbedTitle;
+  const onMenu = !document.getElementById("planillas-menu")?.classList.contains("hidden");
+  showView("chileEmbed", { history: onMenu ? "push" : "replace" });
   reloadChileEmbed();
 }
 
@@ -1216,10 +1293,34 @@ function bindChileEmbedUi() {
     });
   });
 
-  document.getElementById("plan-chile-embed-reload")?.addEventListener("click", () => reloadChileEmbed());
-  document.getElementById("plan-chile-embed-open")?.addEventListener("click", () => openChileEmbedInBrowser());
+  const backBtn = document.getElementById("plan-chile-embed-back");
+  backBtn?.addEventListener("click", () => goBackToChileHome());
+
+  document.getElementById("plan-chile-embed-menu-btn")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleChileEmbedMenu();
+  });
+
+  document.querySelectorAll("[data-chile-embed-action]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const action = btn.getAttribute("data-chile-embed-action");
+      closeChileEmbedMenu();
+      if (action === "reload") reloadChileEmbed();
+      else if (action === "open") openChileEmbedInBrowser();
+    });
+  });
+
   document.getElementById("plan-chile-embed-fallback-open")?.addEventListener("click", () => openChileEmbedInBrowser());
-  document.querySelector("[data-plan-chile-embed-back]")?.addEventListener("click", () => goBackToPlanillasMenu());
+
+  document.addEventListener("click", (e) => {
+    if (!chileEmbedMenuOpen) return;
+    if (e.target.closest(".plan-chile-embed-nav")) return;
+    closeChileEmbedMenu();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && chileEmbedMenuOpen) closeChileEmbedMenu();
+  });
 
   const frame = document.getElementById("planChileEmbedFrame");
   frame?.addEventListener("load", () => {
@@ -1236,11 +1337,10 @@ function openReferralShell(historyMode = "push") {
 }
 
 function goBackToPlanillasMenu() {
-  clearChileEmbedLoadTimer();
-  hideChileEmbedFallback();
+  closeChileEmbed();
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
   const st = window.history.state?.st2;
-  if (st && st !== "menu") {
+  if (st && st !== "menu" && st !== "chileEmbed") {
     window.history.back();
     return;
   }
@@ -1347,6 +1447,28 @@ async function revealView(name, historyMode = "push") {
     }
     showView("borradoBases", { history: historyMode });
     await openBorradoBasesModule();
+    return;
+  }
+
+  if (name === "chileEmbed") {
+    if (!chileEmbedUrl) {
+      const saved = readChileEmbedSession();
+      if (saved) {
+        chileEmbedUrl = saved.url;
+        chileEmbedTitle = saved.title;
+      }
+    }
+    if (!canSeeSistema("Chile") || !chileEmbedUrl) {
+      goBackToChileHome();
+      return;
+    }
+    selectSistema("Chile");
+    const titleEl = document.getElementById("plan-chile-embed-title");
+    const frame = document.getElementById("planChileEmbedFrame");
+    if (titleEl) titleEl.textContent = chileEmbedTitle || "Soporte técnico Chile";
+    if (frame) frame.title = chileEmbedTitle || "Soporte técnico Chile";
+    showView("chileEmbed", { history: historyMode });
+    if (!frame?.getAttribute("src")) reloadChileEmbed();
   }
 }
 
@@ -1384,8 +1506,15 @@ function bindPlanillasRouting() {
       routeSyncing = true;
       try {
         if (!canOpenRoute(route) || route.unknown) {
+          if (route.view === "chileEmbed") {
+            goBackToChileHome();
+            return;
+          }
           showView("menu", { history: "replace" });
           return;
+        }
+        if (route.view === "menu") {
+          closeChileEmbed();
         }
         await revealView(route.view, "none");
       } finally {

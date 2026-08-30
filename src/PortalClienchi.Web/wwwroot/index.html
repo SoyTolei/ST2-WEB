@@ -352,18 +352,21 @@
 
         <div id="planillas-chile-embed" class="planillas-view hidden">
           <div class="planillas-card plan-chile-embed-card">
-            <div class="plan-module-sticky-head">
+            <div class="plan-module-sticky-head plan-chile-embed-head">
               <div class="plan-module-header-bar">
-                <button type="button" class="planillas-back" data-plan-chile-embed-back>← Volver</button>
+                <div class="plan-chile-embed-nav">
+                  <button type="button" class="planillas-back" id="plan-chile-embed-back">← Volver a Chile</button>
+                  <button type="button" class="plan-chile-embed-menu-btn" id="plan-chile-embed-menu-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="plan-chile-embed-menu" aria-label="Más opciones">▾</button>
+                  <div id="plan-chile-embed-menu" class="plan-chile-embed-menu hidden" role="menu" aria-label="Opciones del sitio embebido">
+                    <button type="button" class="plan-chile-embed-menu-item" role="menuitem" data-chile-embed-action="reload">Recargar</button>
+                    <button type="button" class="plan-chile-embed-menu-item" role="menuitem" data-chile-embed-action="open">Abrir en navegador</button>
+                  </div>
+                </div>
                 <div class="plan-module-title-row">
                   <h2 class="plan-module-title" id="plan-chile-embed-title">Soporte técnico Chile</h2>
                 </div>
               </div>
               <div class="plan-accent-bar"></div>
-            </div>
-            <div class="plan-chile-embed-toolbar embed-toolbar">
-              <button type="button" id="plan-chile-embed-reload" class="btn btn-secondary">Recargar</button>
-              <button type="button" id="plan-chile-embed-open" class="btn btn-secondary">Abrir en navegador</button>
             </div>
             <div class="plan-chile-embed-wrap embed-frame-wrap">
               <div id="plan-chile-embed-loading" class="embed-loading" aria-live="polite">

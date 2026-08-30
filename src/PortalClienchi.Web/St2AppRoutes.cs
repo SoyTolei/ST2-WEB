@@ -21,6 +21,7 @@ public static class St2AppRoutes
             or "/pdfportal"
             or "/blanqueo"
             or "/borrado-bases"
+            or "/chile"
             or "/thom"
             or "/ai"
             or "/admin"
@@ -32,7 +33,8 @@ public static class St2AppRoutes
             || p.StartsWith("/transferencia/", StringComparison.OrdinalIgnoreCase)
             || p.StartsWith("/referral/", StringComparison.OrdinalIgnoreCase)
             || p.StartsWith("/thom/", StringComparison.OrdinalIgnoreCase)
-            || p.StartsWith("/portal/", StringComparison.OrdinalIgnoreCase);
+            || p.StartsWith("/portal/", StringComparison.OrdinalIgnoreCase)
+            || p.StartsWith("/chile/", StringComparison.OrdinalIgnoreCase);
     }
 
     public static string Normalize(string? path)
