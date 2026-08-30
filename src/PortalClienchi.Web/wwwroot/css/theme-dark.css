@@ -956,6 +956,10 @@ html.st2-theme-dark .plan-chile-embed-menu-btn:hover {
   background: #243044;
 }
 
+html.st2-theme-dark .plan-chile-embed-menu-btn--solo {
+  border-color: #2d3748;
+}
+
 html.st2-theme-dark .plan-chile-embed-menu {
   background: #1a2130;
   border-color: #2d3748;

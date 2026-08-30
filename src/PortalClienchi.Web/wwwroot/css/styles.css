@@ -1676,6 +1676,10 @@ body.portal-tab-active .combo-box {
   font-size: 12px;
 }
 
+.embed-toolbar.embed-toolbar-compact {
+  margin-bottom: 4px;
+}
+
 .embed-hint {
   margin: 0 0 4px;
   font-size: 11px;

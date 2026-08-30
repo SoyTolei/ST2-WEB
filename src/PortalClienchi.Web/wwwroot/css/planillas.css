@@ -1165,6 +1165,11 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: var(--nav-hover);
 }
 
+.plan-chile-embed-menu-btn--solo {
+  border-left: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 .plan-chile-embed-menu {
   position: absolute;
   top: calc(100% + 6px);
