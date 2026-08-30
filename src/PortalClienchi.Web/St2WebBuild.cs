@@ -48,7 +48,7 @@ public static class St2WebBuild
         return null;
     }
 
-    public static string GetVersionLabel() => "Versión WEB";
+    public static string GetVersionLabel() => "Esta web";
 
     public static string GetUpdatedLabel()
     {
@@ -56,16 +56,16 @@ public static class St2WebBuild
         {
             var updated = GetBuildUpdatedUtc();
             if (updated is null)
-                return "Última actualización de la web: versión WEB";
+                return "Último update de la web: —";
 
             var utc = DateTime.SpecifyKind(updated.Value, DateTimeKind.Utc);
             var local = TimeZoneInfo.ConvertTimeFromUtc(utc, GetArgentinaTimeZone());
             var date = local.ToString("d 'de' MMMM yyyy", new CultureInfo("es-AR"));
-            return $"Última actualización de la web: {date}";
+            return $"Último update de la web: {date}";
         }
         catch
         {
-            return "Última actualización de la web: versión WEB";
+            return "Último update de la web: —";
         }
     }
 

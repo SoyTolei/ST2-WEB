@@ -1,5 +1,5 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
-import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts } from "./planillas-referral-legal.js";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, handleLegalReferralBack } from "./planillas-referral-legal.js";
 import {
   initChileReferral,
   buildChileReferralPanel,
@@ -467,6 +467,7 @@ function bindOnvioCard(cardId, checkId, onChange) {
 
 function bindReferralEvents() {
   document.querySelector("[data-plan-back-referral]")?.addEventListener("click", () => {
+    if (isLegal() && handleLegalReferralBack()) return;
     if (ctx.goPlanillasMenu) ctx.goPlanillasMenu();
     else ctx.showView("menu");
   });

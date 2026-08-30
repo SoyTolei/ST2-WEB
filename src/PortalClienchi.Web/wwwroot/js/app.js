@@ -286,7 +286,7 @@ function getAboutUpdatedLabel() {
   const meta = document.querySelector('meta[name="st2-updated-label"]');
   if (meta?.content?.trim()) return meta.content.trim();
   const current = aboutUpdatedEl?.textContent?.trim();
-  return current || "Última actualización de la web";
+  return current || "Último update de la web";
 }
 
 function applyAboutUpdated() {
@@ -1950,8 +1950,7 @@ async function downloadTool(toolId) {
   const label = toolId === "bat" ? "ST2.BAT" : "Herramientas SQL";
   const ok = await confirmSt2({
     title: `Descargar ${label}`,
-    body: "Antes de usar la versión nueva, borrá de la PC la versión anterior para no mezclar archivos viejos con los nuevos.",
-    detail: "Misma carpeta / accesos directos viejos suelen generar errores raros.",
+    body: `¿Descargar ${label}?`,
     confirmLabel: "Descargar",
   });
   if (!ok) return;
@@ -1964,7 +1963,7 @@ async function downloadTool(toolId) {
   a.click();
   a.remove();
   markToolSeen(toolId);
-  setAboutToolsStatus("Descarga iniciada. Recordá borrar la versión anterior de la PC.");
+  setAboutToolsStatus("Descarga iniciada.");
 }
 
 async function uploadTool(toolId, file) {

@@ -2353,6 +2353,17 @@ body.portal-tab-active .tab-icon {
   line-height: 1.35;
 }
 
+.st2-about-tool-tag {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #7c3aed;
+}
+
 .st2-about-tool-meta {
   flex-shrink: 0;
   font-size: 0.72rem;
@@ -2360,6 +2371,13 @@ body.portal-tab-active .tab-icon {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #c2410c;
+}
+
+.st2-about-tool-meta-web {
+  color: #0f766e;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-weight: 600;
 }
 
 .st2-about-tool-actions {
