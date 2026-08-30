@@ -1,5 +1,5 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
-import { initLegalReferralHub, openLegalReferralHub, resetLegalReferralHub } from "./planillas-referral-legal.js";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts } from "./planillas-referral-legal.js";
 import {
   initChileReferral,
   buildChileReferralPanel,
@@ -146,15 +146,22 @@ export function initReferralModule(context) {
   void loadReferralDialogs();
 }
 
-export function openReferral() {
+export async function openReferral({ legalProductId = null } = {}) {
   if (!ctx) return;
   resetReferralForm();
   updateReferralPanels();
-  if (isLegal()) openLegalReferralHub();
-  ctx.syncReferralModuleLabels?.();
+  if (isLegal()) {
+    const productId = legalProductId || ctx.getPendingLegalProductId?.();
+    if (productId) await openLegalProduct(productId);
+    else openLegalReferralHub();
+  } else {
+    ctx.syncReferralModuleLabels?.();
+  }
   document.getElementById("ref-sistema-badge").textContent = sistemaLabel();
   ctx.showView("referral");
 }
+
+export { syncLegalMenuProducts };
 
 function sistemaLabel() {
   const id = ctx.getSistema();

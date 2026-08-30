@@ -326,6 +326,8 @@ function canOpenRoute(route) {
   return true;
 }
 
+let pendingLegalProductId = null;
+
 function referralModuleLabel(sistema = sistemaActual) {
   return sistema === "Legal" ? "Escalamiento a N2/N3" : "Referral I+D";
 }
@@ -441,8 +443,12 @@ function updateSistemaUi() {
   const referralBtn = document.querySelector('[data-plan-modulo="referral"]');
   const oportunidadBtn = document.querySelector('[data-plan-modulo="oportunidad"]');
   const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
+  const opcionesTitle = document.getElementById("plan-opciones-section-title");
+  const opcionesWell = document.getElementById("plan-opciones-modulos-well");
+  const legalProductsWrap = document.getElementById("plan-legal-products-wrap");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
   const hideCommercial = hidesCommercialModules();
+  const showLegalProducts = isLegal();
 
   if (transferBtn) {
     transferBtn.classList.toggle("hidden", hideCommercial);
@@ -450,12 +456,27 @@ function updateSistemaUi() {
     transferBtn.disabled = placeholderBlocked || hideCommercial;
   }
   if (transferNa) {
-    const showTransferNa = hideCommercial;
-    transferNa.classList.toggle("hidden", !showTransferNa);
-    transferNa.toggleAttribute("hidden", !showTransferNa);
-    transferNa.setAttribute("aria-hidden", showTransferNa ? "false" : "true");
+    transferNa.classList.add("hidden");
+    transferNa.toggleAttribute("hidden", true);
+    transferNa.setAttribute("aria-hidden", "true");
   }
-  if (referralBtn) referralBtn.disabled = placeholderBlocked;
+  if (referralBtn) {
+    referralBtn.classList.toggle("hidden", showLegalProducts);
+    referralBtn.toggleAttribute("hidden", showLegalProducts);
+    referralBtn.disabled = placeholderBlocked;
+  }
+  opcionesTitle?.classList.toggle("hidden", showLegalProducts);
+  opcionesTitle?.toggleAttribute("hidden", showLegalProducts);
+  opcionesWell?.classList.toggle("hidden", showLegalProducts);
+  opcionesWell?.toggleAttribute("hidden", showLegalProducts);
+  if (legalProductsWrap) {
+    legalProductsWrap.classList.toggle("hidden", !showLegalProducts);
+    legalProductsWrap.toggleAttribute("hidden", !showLegalProducts);
+    legalProductsWrap.setAttribute("aria-hidden", showLegalProducts ? "false" : "true");
+  }
+  if (showLegalProducts) {
+    void loadReferralModule().then((mod) => mod.syncLegalMenuProducts?.());
+  }
 
   if (oportunidadBtn) {
     const allowedOp = canSeeOportunidadModule();
@@ -1189,7 +1210,9 @@ async function revealView(name, historyMode = "push") {
     openReferralShell(historyMode);
     try {
       const mod = await loadReferralModule();
-      mod.openReferral();
+      const legalProductId = pendingLegalProductId;
+      pendingLegalProductId = null;
+      await mod.openReferral({ legalProductId });
       showView("referral", { history: historyMode });
     } finally {
       setModuleLoading("plan-referral-loading", false);
@@ -1448,6 +1471,11 @@ const planillasContext = {
   goPlanillasMenu: goBackToPlanillasMenu,
   goOportunidadMenu: goBackToOportunidadMenu,
   syncReferralModuleLabels,
+  openLegalProduct: (productId) => {
+    pendingLegalProductId = productId;
+    void revealView("referral");
+  },
+  getPendingLegalProductId: () => pendingLegalProductId,
 };
 
 let referralModulePromise = null;

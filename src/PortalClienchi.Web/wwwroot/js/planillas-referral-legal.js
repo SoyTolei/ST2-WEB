@@ -9,6 +9,8 @@ const LEGAL_ICONS = {
   bug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M8 8a4 4 0 0 1 8 0M5 12h3M16 12h3M6 16h12"/></svg>',
 };
 
+const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
+
 const LEGAL_PRODUCT_BTN_CLASS = {
   firm: "legal-one",
   highq: "highq",
@@ -18,6 +20,8 @@ const LEGAL_PRODUCT_BTN_CLASS = {
 
 let hubCtx = null;
 let templatesCatalog = null;
+let openedFromMenu = false;
+let legalHubEventsBound = false;
 let navStack = { product: null, item: null, category: null, template: null };
 
 const LEGAL_CATALOG_PRODUCT_MAP = {
@@ -76,6 +80,18 @@ function findCatalogCategory(catalogProductId, categoryId) {
   return product?.categories?.find((c) => c.id === categoryId);
 }
 
+function renderProductButtons(catalog, attrName) {
+  return catalog.map((product) => `
+    <button type="button" class="plan-modulo-btn plan-legal-product-btn ${LEGAL_PRODUCT_BTN_CLASS[product.id] || "referral"}" ${attrName}="${product.id}">
+      <span class="plan-modulo-icon" aria-hidden="true">${icon(product.icon)}</span>
+      <span class="plan-modulo-copy">
+        <span class="plan-modulo-label">${product.label}</span>
+        <span class="plan-modulo-sub">${LEGAL_ESCALAMIENTO_LABEL}</span>
+      </span>
+    </button>
+  `).join("");
+}
+
 function renderHub() {
   const root = document.getElementById("ref-legal-hub-root");
   const catalog = hubCtx?.getConfig()?.legal?.referralHub;
@@ -83,18 +99,17 @@ function renderHub() {
   root.innerHTML = `
     <div class="plan-modulos-well plan-legal-products-well">
       <div class="plan-modulos-grid plan-legal-products-grid">
-        ${catalog.map((product) => `
-          <button type="button" class="plan-modulo-btn plan-legal-product-btn ${LEGAL_PRODUCT_BTN_CLASS[product.id] || "referral"}" data-legal-product="${product.id}">
-            <span class="plan-modulo-icon" aria-hidden="true">${icon(product.icon)}</span>
-            <span class="plan-modulo-copy">
-              <span class="plan-modulo-label">${product.label}</span>
-              <span class="plan-modulo-sub">Bug</span>
-            </span>
-          </button>
-        `).join("")}
+        ${renderProductButtons(catalog, "data-legal-product")}
       </div>
     </div>
   `;
+}
+
+export function syncLegalMenuProducts() {
+  const root = document.getElementById("plan-legal-menu-products");
+  const catalog = hubCtx?.getConfig()?.legal?.referralHub;
+  if (!root || !catalog?.length) return;
+  root.innerHTML = renderProductButtons(catalog, "data-legal-menu-product");
 }
 
 function showHub() {
@@ -145,7 +160,10 @@ function showTemplateForm(product, item, template) {
   navStack = { ...navStack, product, item, template };
   showView("ref-legal-form");
   const crumb = document.getElementById("ref-legal-form-breadcrumb");
-  if (crumb) crumb.textContent = `${product.label} › ${template.label}`;
+  if (crumb) crumb.textContent = `${product.label} › ${LEGAL_ESCALAMIENTO_LABEL}`;
+  const titleEl = document.getElementById("plan-referral-module-title");
+  if (titleEl) titleEl.textContent = product.label;
+  document.title = `ST² · ${product.label}`;
   const root = document.getElementById("ref-legal-form-root");
   if (!root) return;
 
@@ -226,8 +244,9 @@ function resolveTemplate(category, hubItem) {
     || category.templates[0];
 }
 
-async function onHubItemPick(productId, itemId) {
+async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
   try {
+    openedFromMenu = !!fromMenu;
     showHubStatus("Cargando plantilla…");
     await ensureCatalog();
     const hubProduct = findHubProduct(productId);
@@ -249,7 +268,7 @@ async function onHubItemPick(productId, itemId) {
     const item = { id: itemId, label: hubItem.label, icon: hubItem.icon };
     const tpl = resolveTemplate(category, hubItem);
     if (!tpl) {
-      showHubStatus("No se encontró la plantilla Bug.", true);
+      showHubStatus("No se encontró la plantilla de escalamiento.", true);
       return;
     }
     showTemplateForm(product, item, tpl);
@@ -260,17 +279,20 @@ async function onHubItemPick(productId, itemId) {
 }
 
 function bindHubEvents() {
-  const root = document.getElementById("ref-legal-hub-root");
-  if (!root || root.dataset.bound === "1") return;
-  root.dataset.bound = "1";
+  if (legalHubEventsBound) return;
+  legalHubEventsBound = true;
 
-  root.addEventListener("click", (e) => {
-    const productBtn = e.target.closest("[data-legal-product]");
-    if (productBtn) {
-      const hubProduct = findHubProduct(productBtn.dataset.legalProduct);
-      const bugItem = hubProduct?.items?.[0];
-      if (bugItem) void onHubItemPick(productBtn.dataset.legalProduct, bugItem.id);
+  document.addEventListener("click", (e) => {
+    const menuBtn = e.target.closest("[data-legal-menu-product]");
+    if (menuBtn) {
+      hubCtx?.openLegalProduct?.(menuBtn.dataset.legalMenuProduct);
+      return;
     }
+    const hubBtn = e.target.closest("[data-legal-product]");
+    if (!hubBtn) return;
+    const hubProduct = findHubProduct(hubBtn.dataset.legalProduct);
+    const bugItem = hubProduct?.items?.[0];
+    if (bugItem) void onHubItemPick(hubBtn.dataset.legalProduct, bugItem.id);
   });
 
   document.getElementById("ref-legal-templates-back")?.addEventListener("click", () => {
@@ -293,6 +315,11 @@ function bindHubEvents() {
   });
 
   document.getElementById("ref-legal-form-back")?.addEventListener("click", () => {
+    if (openedFromMenu) {
+      openedFromMenu = false;
+      hubCtx?.goPlanillasMenu?.();
+      return;
+    }
     showHub();
   });
 }
@@ -300,6 +327,15 @@ function bindHubEvents() {
 export function initLegalReferralHub(context) {
   hubCtx = context;
   bindHubEvents();
+}
+
+export function openLegalProduct(productId) {
+  openedFromMenu = true;
+  navStack = { product: null, item: null, category: null, template: null };
+  const hubProduct = findHubProduct(productId);
+  const bugItem = hubProduct?.items?.[0];
+  if (!hubProduct || !bugItem) return Promise.resolve();
+  return onHubItemPick(productId, bugItem.id, { fromMenu: true });
 }
 
 export function openLegalReferralHub() {
@@ -310,6 +346,7 @@ export function openLegalReferralHub() {
 }
 
 export function resetLegalReferralHub() {
+  openedFromMenu = false;
   navStack = { product: null, item: null, category: null, template: null };
   hideAllLegalViews();
 }

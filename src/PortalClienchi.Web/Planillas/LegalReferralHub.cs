@@ -21,7 +21,7 @@ public static class LegalReferralHubCatalog
             "cards",
             "legal-one",
             [
-                new("bug", "Bug", "bug", "sistema"),
+                new("bug", "Escalamiento a N2/N3", "bug", "sistema"),
             ]),
         new(
             "highq",
@@ -30,7 +30,7 @@ public static class LegalReferralHubCatalog
             "cards",
             "highq",
             [
-                new("bug-geral", "Bug", "bug", "general"),
+                new("bug-geral", "Escalamiento a N2/N3", "bug", "general"),
             ]),
         new(
             "westlaw",
@@ -39,7 +39,7 @@ public static class LegalReferralHubCatalog
             "cards",
             "westlaw",
             [
-                new("bug", "Bug", "bug", "general"),
+                new("bug", "Escalamiento a N2/N3", "bug", "general"),
             ]),
         new(
             "cocounsel",
@@ -48,7 +48,7 @@ public static class LegalReferralHubCatalog
             "cards",
             "cocounsel",
             [
-                new("bug", "Bug", "bug", "general"),
+                new("bug", "Escalamiento a N2/N3", "bug", "general"),
             ]),
     ];
 
