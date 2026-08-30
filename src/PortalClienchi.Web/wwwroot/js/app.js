@@ -1924,7 +1924,11 @@ function renderAboutTools() {
     if (btn) {
       btn.disabled = false;
       btn.textContent = "Descargar";
-      btn.title = `Descargar ${label}`;
+      if (id === "sql") {
+        btn.title = "Recordá borrar versiones anteriores de tu PC para no mezclar archivos viejos con los nuevos.";
+      } else {
+        btn.title = `Descargar ${label}`;
+      }
     }
   }
   syncAboutToolsBadge();
@@ -1947,15 +1951,6 @@ async function refreshAboutTools({ silent = false } = {}) {
 async function downloadTool(toolId) {
   const btn = document.querySelector(`[data-tool-download="${toolId}"]`);
   if (!btn || btn.disabled) return;
-  const label = toolId === "bat" ? "ST2.BAT" : "Herramientas SQL";
-  const ok = await confirmSt2({
-    title: `Descargar ${label}`,
-    body: `¿Descargar ${label}?`,
-    confirmLabel: "Descargar",
-  });
-  if (!ok) return;
-  // Link directo: el .exe ~70MB no cabe bien en fetch+blob (memoria / timeouts).
-  setAboutToolsStatus("Iniciando descarga…");
   const a = document.createElement("a");
   a.href = `/api/tools/${encodeURIComponent(toolId)}/download?t=${Date.now()}`;
   a.rel = "noopener";
@@ -1963,7 +1958,6 @@ async function downloadTool(toolId) {
   a.click();
   a.remove();
   markToolSeen(toolId);
-  setAboutToolsStatus("Descarga iniciada.");
 }
 
 async function uploadTool(toolId, file) {
