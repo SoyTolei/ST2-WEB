@@ -18,7 +18,23 @@
   <link rel="icon" href="/st2.ico" type="image/x-icon"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    /* Evita salto de “Suite Web” antes de que cargue el CSS principal. */
+    .st2-access-brand-head,
+    .st2-boot-splash-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 2.25rem;
+    }
+    .st2-access-suite,
+    .st2-boot-splash-suite {
+      margin: 0;
+      font: 600 1.15rem/1.1 "Segoe UI", system-ui, sans-serif;
+      white-space: nowrap;
+    }
+  </style>
   <link rel="stylesheet" href="/css/styles.css"/>
   <link rel="stylesheet" href="/css/planillas.css"/>
   <link rel="stylesheet" href="/css/pdf-portal.css"/>

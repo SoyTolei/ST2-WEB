@@ -4548,47 +4548,81 @@ body.st2-access-restoring .st2-boot-splash {
   display: flex;
 }
 
-.st2-boot-splash-brand {
+.st2-boot-splash-brand,
+.st2-access-brand-head {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
+  flex-wrap: nowrap;
+  min-height: 2.25rem;
 }
 
-.st2-boot-splash-st2-mark {
+.st2-boot-splash-st2-mark,
+.st2-access-title.st2-access-title-mark {
   display: inline-flex;
   align-items: flex-start;
-  font-family: "Sora", system-ui, sans-serif;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
   font-size: 1.7rem;
   font-weight: 800;
   letter-spacing: 0.04em;
-  color: #e8eef7;
   line-height: 1;
   transform-origin: 50% 60%;
-  animation: st2-boot-st2-float 3.4s ease-in-out infinite;
-  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.28));
   user-select: none;
 }
 
-.st2-boot-splash-st {
+.st2-boot-splash-st2-mark {
+  color: #e8eef7;
+  animation: st2-boot-st2-float 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.28));
+}
+
+.st2-access-title.st2-access-title-mark {
+  margin: 0;
+  color: var(--dark);
+  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.18));
+}
+
+.st2-boot-splash-st,
+.st2-access-title-st {
   font-weight: 750;
 }
 
-.st2-boot-splash-sup {
+.st2-boot-splash-sup,
+.st2-access-title-sup {
   color: #f97316;
   font-size: 0.56em;
   font-weight: 800;
   line-height: 1;
   margin-left: 1px;
   transform: translateY(-0.2em);
+}
+
+.st2-boot-splash-sup {
   animation: st2-boot-st2-sup-float 3.4s ease-in-out infinite 0.12s;
 }
 
-.st2-boot-splash-suite {
-  font-family: "Sora", system-ui, sans-serif;
+.st2-access-title-sup {
+  color: #d64000;
+}
+
+.st2-boot-splash-suite,
+.st2-access-suite {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
   font-size: 1.15rem;
-  font-weight: 650;
+  font-weight: 600;
   letter-spacing: 0.01em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.st2-boot-splash-suite {
   color: #e8eef7;
+}
+
+.st2-access-suite {
+  color: var(--dark);
 }
 
 .st2-boot-splash-status {
@@ -4677,24 +4711,6 @@ body.st2-access-restoring .st2-boot-splash {
   text-align: center;
 }
 
-.st2-access-brand-head {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.st2-access-suite {
-  margin: 0;
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 1.28rem;
-  font-weight: 650;
-  letter-spacing: 0.01em;
-  color: var(--dark);
-  line-height: 1.1;
-}
-
 .st2-access-icon {
   border-radius: 10px;
   box-shadow: 0 10px 22px rgba(13, 148, 136, 0.22);
@@ -4709,30 +4725,6 @@ body.st2-access-restoring .st2-boot-splash {
   color: var(--dark);
   letter-spacing: 0.02em;
   line-height: 1;
-}
-
-.st2-access-title-mark {
-  font-size: 1.85rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  transform-origin: 50% 60%;
-  animation: st2-boot-st2-float 3.4s ease-in-out infinite;
-  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.22));
-  user-select: none;
-}
-
-.st2-access-title-st {
-  font-weight: 750;
-}
-
-.st2-access-title-sup {
-  color: #d64000;
-  font-size: 0.56em;
-  font-weight: 800;
-  line-height: 1;
-  margin-left: 1px;
-  transform: translateY(-0.2em);
-  animation: st2-boot-st2-sup-float 3.4s ease-in-out infinite 0.12s;
 }
 
 .st2-access-title-two {
