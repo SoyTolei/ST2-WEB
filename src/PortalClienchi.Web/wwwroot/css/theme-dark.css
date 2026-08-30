@@ -946,7 +946,11 @@ html.st2-theme-dark .plan-adj-card.plan-legal-pick:hover {
   background: #243044 !important;
 }
 
-html.st2-theme-dark .plan-legal-pick-icon {
+html.st2-theme-dark .plan-chile-embed-fallback {
+  background: rgba(42, 33, 24, 0.96);
+  border-color: #b45309;
+  color: #fcd34d;
+}
   color: #e8eef7 !important;
 }
 

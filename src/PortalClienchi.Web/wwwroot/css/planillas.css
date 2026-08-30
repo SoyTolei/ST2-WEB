@@ -1074,6 +1074,12 @@ a.plan-modulo-btn.plan-modulo-link {
   color: #fff;
 }
 
+button.plan-modulo-btn.plan-modulo-link {
+  text-decoration: none;
+  color: #fff;
+  font: inherit;
+}
+
 a.plan-modulo-btn.plan-modulo-link:visited {
   color: #fff;
 }
@@ -1090,6 +1096,59 @@ a.plan-modulo-btn.plan-modulo-link:visited {
 .plan-chile-soporte-grid {
   grid-template-columns: repeat(2, minmax(180px, 1fr));
   justify-content: center;
+}
+
+#planillas-chile-embed.planillas-view {
+  overflow: hidden;
+}
+
+.plan-chile-embed-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: min(1400px, 99vw);
+}
+
+.plan-chile-embed-toolbar {
+  margin: 0 0 10px;
+}
+
+.plan-chile-embed-wrap {
+  flex: 1;
+  min-height: min(72vh, 880px);
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-chile-embed-frame {
+  flex: 1;
+  min-height: 480px;
+}
+
+.plan-chile-embed-fallback {
+  position: absolute;
+  inset: auto 16px 16px 16px;
+  z-index: 4;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #f59e0b;
+  background: rgba(255, 251, 235, 0.96);
+  color: #78350f;
+  font-size: 0.84rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.plan-chile-embed-fallback.hidden {
+  display: none !important;
+}
+
+.plan-chile-embed-fallback p {
+  margin: 0;
+  flex: 1 1 220px;
 }
 
 .plan-modulo-alert-badge {

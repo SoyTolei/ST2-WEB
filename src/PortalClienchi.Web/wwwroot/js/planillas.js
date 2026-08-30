@@ -168,7 +168,11 @@ const views = {
   pdfPortal: document.getElementById("planillas-pdf-portal"),
   blanqueo: document.getElementById("planillas-blanqueo"),
   borradoBases: document.getElementById("planillas-borrado-bases"),
+  chileEmbed: document.getElementById("planillas-chile-embed"),
 };
+
+let chileEmbedUrl = "";
+let chileEmbedLoadTimer = null;
 
 const els = {
   sistemaBtns: () => document.querySelectorAll(".plan-sistema-grid > [data-plan-sistema]"),
@@ -359,6 +363,7 @@ function titleForView(name) {
     case "pdfPortal": return "ST² · Generador PDF";
     case "blanqueo": return "ST² · Blanqueo";
     case "borradoBases": return "ST² · Borrado de Bases Web";
+    case "chileEmbed": return "ST² · Chile";
     default: return "ST² · Suite Web";
   }
 }
@@ -1154,6 +1159,75 @@ function setModuleLoading(overlayId, active) {
   overlay.setAttribute("aria-busy", active ? "true" : "false");
 }
 
+function clearChileEmbedLoadTimer() {
+  if (chileEmbedLoadTimer) {
+    window.clearTimeout(chileEmbedLoadTimer);
+    chileEmbedLoadTimer = null;
+  }
+}
+
+function hideChileEmbedFallback() {
+  document.getElementById("plan-chile-embed-fallback")?.classList.add("hidden");
+}
+
+function showChileEmbedFallback() {
+  document.getElementById("plan-chile-embed-fallback")?.classList.remove("hidden");
+}
+
+function openChileEmbedInBrowser() {
+  if (!chileEmbedUrl) return;
+  window.open(chileEmbedUrl, "_blank", "noopener,noreferrer");
+}
+
+function reloadChileEmbed() {
+  const frame = document.getElementById("planChileEmbedFrame");
+  if (!frame || !chileEmbedUrl) return;
+  hideChileEmbedFallback();
+  document.getElementById("plan-chile-embed-loading")?.classList.remove("hidden");
+  clearChileEmbedLoadTimer();
+  chileEmbedLoadTimer = window.setTimeout(() => {
+    showChileEmbedFallback();
+    document.getElementById("plan-chile-embed-loading")?.classList.add("hidden");
+  }, 12000);
+  try {
+    frame.src = chileEmbedUrl;
+  } catch {
+    frame.setAttribute("src", chileEmbedUrl);
+  }
+}
+
+function openChileEmbed(url, title) {
+  chileEmbedUrl = String(url || "").trim();
+  if (!chileEmbedUrl) return;
+  const titleEl = document.getElementById("plan-chile-embed-title");
+  const frame = document.getElementById("planChileEmbedFrame");
+  if (titleEl) titleEl.textContent = title || "Soporte técnico Chile";
+  if (frame) frame.title = title || "Soporte técnico Chile";
+  showView("chileEmbed");
+  reloadChileEmbed();
+}
+
+function bindChileEmbedUi() {
+  document.querySelectorAll("[data-chile-embed-url]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const url = btn.getAttribute("data-chile-embed-url");
+      const title = btn.querySelector(".plan-modulo-label")?.textContent?.trim() || "Soporte técnico Chile";
+      openChileEmbed(url, title);
+    });
+  });
+
+  document.getElementById("plan-chile-embed-reload")?.addEventListener("click", () => reloadChileEmbed());
+  document.getElementById("plan-chile-embed-open")?.addEventListener("click", () => openChileEmbedInBrowser());
+  document.getElementById("plan-chile-embed-fallback-open")?.addEventListener("click", () => openChileEmbedInBrowser());
+  document.querySelector("[data-plan-chile-embed-back]")?.addEventListener("click", () => goBackToPlanillasMenu());
+
+  const frame = document.getElementById("planChileEmbedFrame");
+  frame?.addEventListener("load", () => {
+    clearChileEmbedLoadTimer();
+    document.getElementById("plan-chile-embed-loading")?.classList.add("hidden");
+  });
+}
+
 function openReferralShell(historyMode = "push") {
   const badge = document.getElementById("ref-sistema-badge");
   if (badge) badge.textContent = sistemaBadgeLabel(sistemaActual);
@@ -1162,6 +1236,8 @@ function openReferralShell(historyMode = "push") {
 }
 
 function goBackToPlanillasMenu() {
+  clearChileEmbedLoadTimer();
+  hideChileEmbedFallback();
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
   const st = window.history.state?.st2;
   if (st && st !== "menu") {
@@ -1686,6 +1762,7 @@ export function initPlanillas() {
   syncBlanqueoModuleVisibility();
   initBorradoBasesModule();
   syncBorradoBasesModuleVisibility();
+  bindChileEmbedUi();
   syncPlanillasHeroEaster();
   syncAguaEgg();
   document.addEventListener("st2:session-changed", syncPlanillasHeroEaster);
