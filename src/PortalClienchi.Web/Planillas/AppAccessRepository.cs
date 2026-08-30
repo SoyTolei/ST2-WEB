@@ -613,6 +613,29 @@ public sealed class AppAccessRepository
         EnsureColumn(conn, "app_access", "last_client_hint", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_user_agent", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_client_device", "TEXT NULL");
+        using (var notices = conn.CreateCommand())
+        {
+            notices.CommandText = """
+                CREATE TABLE IF NOT EXISTS app_access_owner_notices (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    kind TEXT NOT NULL,
+                    target_email TEXT NOT NULL,
+                    actor_email TEXT NOT NULL,
+                    message TEXT NULL,
+                    created_at TEXT NOT NULL,
+                    seen INTEGER NOT NULL DEFAULT 0
+                )
+                """;
+            notices.ExecuteNonQuery();
+        }
+        using (var idx = conn.CreateCommand())
+        {
+            idx.CommandText = """
+                CREATE INDEX IF NOT EXISTS idx_app_access_owner_notices_seen
+                ON app_access_owner_notices (seen, created_at)
+                """;
+            idx.ExecuteNonQuery();
+        }
         using (var backfill = conn.CreateCommand())
         {
             backfill.CommandText = """
@@ -622,6 +645,79 @@ public sealed class AppAccessRepository
                 """;
             backfill.ExecuteNonQuery();
         }
+    }
+
+    public void AddOwnerNotice(string kind, string targetEmail, string actorEmail, string? message = null)
+    {
+        if (!StorageReady) return;
+        var target = PlanUserIdentity.ValidateAndNormalize(targetEmail);
+        var actor = PlanUserIdentity.ValidateAndNormalize(actorEmail);
+        if (target is null || actor is null) return;
+        var kindNorm = string.IsNullOrWhiteSpace(kind) ? "preset_created" : kind.Trim().ToLowerInvariant();
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO app_access_owner_notices (kind, target_email, actor_email, message, created_at, seen)
+            VALUES ($kind, $target, $actor, $msg, $created, 0)
+            """;
+        cmd.Parameters.AddWithValue("$kind", kindNorm);
+        cmd.Parameters.AddWithValue("$target", target);
+        cmd.Parameters.AddWithValue("$actor", actor);
+        cmd.Parameters.AddWithValue("$msg", (object?)message ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$created", DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture));
+        cmd.ExecuteNonQuery();
+    }
+
+    public IReadOnlyList<AppAccessOwnerNoticeDto> ListUnseenOwnerNotices(int limit = 40)
+    {
+        if (!StorageReady) return Array.Empty<AppAccessOwnerNoticeDto>();
+        var take = Math.Clamp(limit, 1, 100);
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, kind, target_email, actor_email, message, created_at
+            FROM app_access_owner_notices
+            WHERE seen = 0
+            ORDER BY created_at DESC, id DESC
+            LIMIT $limit
+            """;
+        cmd.Parameters.AddWithValue("$limit", take);
+        var list = new List<AppAccessOwnerNoticeDto>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new AppAccessOwnerNoticeDto
+            {
+                Id = reader.GetInt32(0),
+                Kind = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                TargetEmail = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                ActorEmail = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                Message = reader.IsDBNull(4) ? null : reader.GetString(4),
+                CreatedAt = reader.IsDBNull(5) ? "" : reader.GetString(5),
+            });
+        }
+        return list;
+    }
+
+    public int MarkOwnerNoticesSeen(IEnumerable<int>? ids = null)
+    {
+        if (!StorageReady) return 0;
+        using var conn = Open();
+        var idList = ids?.Where(id => id > 0).Distinct().ToList();
+        using var cmd = conn.CreateCommand();
+        if (idList is { Count: > 0 })
+        {
+            var placeholders = string.Join(",", idList.Select((_, i) => $"$id{i}"));
+            cmd.CommandText = $"UPDATE app_access_owner_notices SET seen = 1 WHERE seen = 0 AND id IN ({placeholders})";
+            for (var i = 0; i < idList.Count; i++)
+                cmd.Parameters.AddWithValue($"$id{i}", idList[i]);
+        }
+        else
+        {
+            cmd.CommandText = "UPDATE app_access_owner_notices SET seen = 1 WHERE seen = 0";
+        }
+        return cmd.ExecuteNonQuery();
     }
 
     public bool IsSt2Admin(string? email)
@@ -808,4 +904,19 @@ public sealed class AccessDisplayNameRequest
     /// <summary>DD/MM o MM-DD. Enviar vacío + ClearBirthday para borrar.</summary>
     public string? BirthdayMmDd { get; set; }
     public bool ClearBirthday { get; set; }
+}
+
+public sealed class OwnerNoticesSeenRequest
+{
+    public List<int>? Ids { get; set; }
+}
+
+public sealed class AppAccessOwnerNoticeDto
+{
+    public int Id { get; set; }
+    public string Kind { get; set; } = "";
+    public string TargetEmail { get; set; } = "";
+    public string ActorEmail { get; set; } = "";
+    public string? Message { get; set; }
+    public string CreatedAt { get; set; } = "";
 }

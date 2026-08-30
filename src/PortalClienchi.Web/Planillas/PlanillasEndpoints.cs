@@ -753,10 +753,15 @@ public static class PlanillasEndpoints
 
         app.MapGet("/api/access/alerts", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo) =>
         {
-            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out var role, out var denied))
                 return denied!;
 
             var pending = accessRepo.ListPending();
+            var isPrimary = St2SuperAdmin.Is(PlanUserIdentity.GetFromRequest(ctx));
+            var ownerNotices = isPrimary
+                ? accessRepo.ListUnseenOwnerNotices()
+                : Array.Empty<AppAccessOwnerNoticeDto>();
+
             return Results.Ok(new
             {
                 mode = "confirm",
@@ -767,7 +772,31 @@ public static class PlanillasEndpoints
                     displayName = item.DisplayName,
                     createdAt = item.FirstSeenAt,
                 }),
+                ownerNotices = ownerNotices.Select(n => new
+                {
+                    id = n.Id,
+                    kind = n.Kind,
+                    targetEmail = n.TargetEmail,
+                    actorEmail = n.ActorEmail,
+                    message = n.Message,
+                    createdAt = n.CreatedAt,
+                }),
+                role = role.ToString().ToLowerInvariant(),
             });
+        });
+
+        app.MapPost("/api/access/owner-notices/seen", async (
+            HttpContext ctx,
+            IConfiguration config,
+            AppAccessRepository accessRepo,
+            CancellationToken ct) =>
+        {
+            if (!St2SuperAdmin.Is(PlanUserIdentity.GetFromRequest(ctx)))
+                return Results.Json(new { error = "Solo el super-admin puede marcar estos avisos." }, statusCode: StatusCodes.Status403Forbidden);
+
+            var body = await ctx.Request.ReadFromJsonAsync<OwnerNoticesSeenRequest>(cancellationToken: ct).ConfigureAwait(false);
+            var marked = accessRepo.MarkOwnerNoticesSeen(body?.Ids);
+            return Results.Ok(new { ok = true, marked });
         });
 
         app.MapPost("/api/access/registrations/decision", (
@@ -863,8 +892,8 @@ public static class PlanillasEndpoints
             ModuleAccessRepository modules,
             AccessPresetRequest body) =>
         {
-            if (!CanUsePrimaryAdminFeatures(ctx, config, accessRepo))
-                return Results.Json(new { error = "Solo el super-admin puede precargar perfiles." }, statusCode: StatusCodes.Status403Forbidden);
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out var role, out var denied))
+                return denied!;
 
             try
             {
@@ -894,7 +923,9 @@ public static class PlanillasEndpoints
                 });
 
                 var isSt2Admin = St2SuperAdmin.Is(email);
-                if (body.St2Admin is not null && !St2SuperAdmin.Is(email))
+                if (body.St2Admin is not null
+                    && !St2SuperAdmin.Is(email)
+                    && role == AccessPanelGate.Role.Owner)
                 {
                     accessRepo.SetSt2Admin(email, body.St2Admin.Value);
                     isSt2Admin = body.St2Admin.Value;
@@ -902,6 +933,22 @@ public static class PlanillasEndpoints
                 else
                 {
                     isSt2Admin = St2SuperAdmin.Is(email) || accessRepo.IsSt2Admin(email);
+                }
+
+                var actorEmail = PlanUserIdentity.GetFromRequest(ctx);
+                if (role == AccessPanelGate.Role.Manager
+                    && actorEmail is not null
+                    && !St2SuperAdmin.Is(actorEmail))
+                {
+                    var actorName = accessRepo.Find(actorEmail)?.DisplayName;
+                    var who = string.IsNullOrWhiteSpace(actorName)
+                        ? actorEmail
+                        : $"{actorName.Trim()} ({actorEmail})";
+                    accessRepo.AddOwnerNotice(
+                        "preset_created",
+                        email,
+                        actorEmail,
+                        $"ADMIN WEB {who} creó el perfil {email}.");
                 }
 
                 return Results.Ok(new

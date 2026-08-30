@@ -1097,7 +1097,7 @@ function setAccessAdminUpdatedHint(text) {
 
 function syncAccessAdminHostColumn() {
   const show = isSt2SuperAdmin();
-  accessAdminPresetBtn?.classList.toggle("hidden", !isPrimarySuperAdmin());
+  accessAdminPresetBtn?.classList.toggle("hidden", !isSt2SuperAdmin());
   accessAdminThHost?.classList.toggle("hidden", !show);
   accessAdminTable?.classList.toggle("st2-access-admin-table--with-host", show);
 }
@@ -2752,7 +2752,7 @@ function showAccessModulesError(message) {
 }
 
 function accessModulesSaveLabel() {
-  if (accessModulesPresetMode) return "Crear perfil";
+  if (accessModulesPresetMode) return "Crear un perfil nuevo";
   if (accessModulesAfterApprove) return "Listo";
   return "Guardar";
 }
@@ -2886,13 +2886,13 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
 }
 
 function openAccessPresetModal() {
-  if (!accessModulesOverlay || !isPrimarySuperAdmin()) return;
+  if (!accessModulesOverlay || !isSt2SuperAdmin()) return;
   accessModulesSaving = false;
   accessModulesPresetMode = true;
   accessModulesAfterApprove = false;
   accessModulesEmailValue = "";
-  if (accessModulesTitle) accessModulesTitle.textContent = "Crear perfil";
-  if (accessModulesSave) accessModulesSave.textContent = "Crear perfil";
+  if (accessModulesTitle) accessModulesTitle.textContent = "Crear un perfil nuevo";
+  if (accessModulesSave) accessModulesSave.textContent = "Crear un perfil nuevo";
   if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
   if (accessModulesName) accessModulesName.value = "";
   if (accessModulesBirthday) accessModulesBirthday.value = "";
@@ -2918,13 +2918,16 @@ function openAccessPresetModal() {
   if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = false;
   if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.checked = false;
   if (accessModSt2Admin) accessModSt2Admin.checked = false;
-  if (accessModSt2Admin) accessModSt2Admin.disabled = false;
-  if (accessModSt2AdminWrap) accessModSt2AdminWrap.classList.remove("hidden");
+  if (accessModSt2Admin) accessModSt2Admin.disabled = !isPrimarySuperAdmin();
+  if (accessModSt2AdminWrap) {
+    accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
+    accessModSt2AdminWrap.classList.remove("is-primary-locked");
+  }
   syncAccessSqlModulesGroup();
   if (accessModulesError) accessModulesError.textContent = "";
   if (accessModulesSave) {
     accessModulesSave.disabled = false;
-    accessModulesSave.textContent = "Crear perfil";
+    accessModulesSave.textContent = "Crear un perfil nuevo";
   }
   if (accessModulesCancel) accessModulesCancel.disabled = false;
   accessModulesOverlay.classList.remove("hidden");

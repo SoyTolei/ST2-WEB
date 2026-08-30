@@ -101,6 +101,34 @@ export function notifyWebUpdateDesktop(build) {
 
 const lastClientChangeTags = new Set();
 
+/** Aviso cuando un ADMIN WEB crea un perfil (solo super-admin). */
+export function notifyOwnerPresetDesktop(count, actorEmail, targetEmail, signature) {
+  const sig = String(signature || "");
+  if (!count || !sig) return;
+  const actor = String(actorEmail || "").split("@")[0] || "ADMIN WEB";
+  const target = String(targetEmail || "").split("@")[0] || "perfil";
+  const body = count === 1
+    ? `${actor} creó el perfil ${target}`
+    : `ADMIN WEB creó ${count} perfiles nuevos`;
+  void ensureDesktopNotifPermission().then((ok) => {
+    if (!ok) return;
+    showDesktopNotif(
+      "ST2 · Perfil nuevo",
+      body,
+      `owner-preset-${sig}`,
+      {
+        allowWhileVisible: true,
+        onClick: () => {
+          try {
+            window.location.hash = "#/admin";
+            window.dispatchEvent(new HashChangeEvent("hashchange"));
+          } catch { /* ignore */ }
+        },
+      },
+    );
+  });
+}
+
 /** Aviso cuando un usuario conecta desde otro equipo/terminal (solo super-admin). */
 export function notifyAdminClientChangeDesktop(displayName, email, previousLabel, nextLabel) {
   const mail = String(email || "").trim().toLowerCase();
