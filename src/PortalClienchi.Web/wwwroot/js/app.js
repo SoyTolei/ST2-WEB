@@ -203,9 +203,13 @@ function getPortalLoginUrl() {
   if (fromConfig) return fromConfig;
   const base = String(cfg?.portalBaseUrl || appConfig?.portalBaseUrl || "").trim().replace(/\/+$/, "");
   if (base) return `${base}/auth/login`;
-  return activePortalId === "legal"
-    ? "https://portaldelcliente.thomsonreuters.com.ar/auth/login"
-    : "https://clientes.thomsonreuters.com.ar/auth/login";
+  if (activePortalId === "legal") {
+    return "https://portaldelcliente.thomsonreuters.com.ar/auth/login";
+  }
+  if (activePortalId === "chile") {
+    return "https://centrodesoluciones.thomsonreuters.cl/auth/login";
+  }
+  return "https://clientes.thomsonreuters.com.ar/auth/login";
 }
 
 function getPortalExternalUrl() {

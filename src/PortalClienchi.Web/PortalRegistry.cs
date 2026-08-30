@@ -7,6 +7,7 @@ internal static class PortalIds
 {
     public const string Bejerman = "bejerman";
     public const string Legal = "legal";
+    public const string Chile = "chile";
 }
 
 internal sealed class PortalRegistry : IDisposable
@@ -51,8 +52,18 @@ internal sealed class PortalRegistry : IDisposable
 
     public string DefaultId => _defaultId;
 
+    private static readonly string[] PortalDisplayOrder = [PortalIds.Bejerman, PortalIds.Legal, PortalIds.Chile];
+
     public IReadOnlyList<PortalInfo> List() =>
-        _portals.Values.Select(p => p.Info).OrderBy(p => p.Id, StringComparer.OrdinalIgnoreCase).ToList();
+        _portals.Values
+            .Select(p => p.Info)
+            .OrderBy(p =>
+            {
+                var idx = Array.FindIndex(PortalDisplayOrder, id => id.Equals(p.Id, StringComparison.OrdinalIgnoreCase));
+                return idx < 0 ? 100 : idx;
+            })
+            .ThenBy(p => p.Id, StringComparer.OrdinalIgnoreCase)
+            .ToList();
 
     public PortalRuntime Resolve(string? portalId)
     {
@@ -141,6 +152,13 @@ internal static class PortalSettingsNormalizer
             PortalBaseUrl = "https://portaldelcliente.thomsonreuters.com.ar",
         });
 
+        EnsureProfile(root, "Chile", new PortalProfileSettings
+        {
+            Label = "CHILE",
+            ApiBaseUrl = "https://centrodesoluciones.thomsonreuters.cl",
+            PortalBaseUrl = "https://centrodesoluciones.thomsonreuters.cl",
+        });
+
         var bejerman = root.Portals["Bejerman"];
         if (string.IsNullOrWhiteSpace(bejerman.Email) && !string.IsNullOrWhiteSpace(root.Email))
             bejerman.Email = root.Email;
@@ -158,6 +176,16 @@ internal static class PortalSettingsNormalizer
             legal.Password = bejerman.Password;
 
         legal.ApiBaseUrl = NormalizeLegalApiBaseUrl(legal.ApiBaseUrl, bejerman.ApiBaseUrl);
+
+        var chile = root.Portals["Chile"];
+        if (string.IsNullOrWhiteSpace(chile.Email) && !string.IsNullOrWhiteSpace(root.Email))
+            chile.Email = root.Email;
+        if (string.IsNullOrWhiteSpace(chile.Password) && !string.IsNullOrWhiteSpace(root.Password))
+            chile.Password = root.Password;
+        if (string.IsNullOrWhiteSpace(chile.Email) && !string.IsNullOrWhiteSpace(bejerman.Email))
+            chile.Email = bejerman.Email;
+        if (string.IsNullOrWhiteSpace(chile.Password) && !string.IsNullOrWhiteSpace(bejerman.Password))
+            chile.Password = bejerman.Password;
 
         root.ApiBaseUrl = bejerman.ApiBaseUrl;
         root.PortalBaseUrl = bejerman.PortalBaseUrl;
@@ -186,6 +214,7 @@ internal static class PortalSettingsNormalizer
         {
             "bejerman" => PortalIds.Bejerman,
             "legal" => PortalIds.Legal,
+            "chile" => PortalIds.Chile,
             _ => configKey.Trim().ToLowerInvariant(),
         };
 
