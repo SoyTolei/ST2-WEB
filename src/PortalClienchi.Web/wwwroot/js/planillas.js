@@ -25,23 +25,23 @@ import { syncAguaEgg } from "./planillas-agua-egg.js";
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
 const MESA_LABELS = {
-  TECNICO: "Técnico",
-  FLEX: "Flex",
-  FUNCIONAL: "Funcional",
+  TECNICO: "TÉCNICO",
+  FLEX: "FLEX",
+  FUNCIONAL: "FUNCIONAL",
   SAAS: "SaaS",
-  SUELDOS: "Sueldos",
+  SUELDOS: "SUELDOS",
 };
 
 const DEFAULT_STANDARD_MESAS = [
-  { id: "TECNICO", label: "Técnico" },
-  { id: "FLEX", label: "Flex" },
+  { id: "TECNICO", label: "TÉCNICO" },
+  { id: "FLEX", label: "FLEX" },
   { id: "SAAS", label: "SaaS" },
-  { id: "SUELDOS", label: "Sueldos" },
+  { id: "SUELDOS", label: "SUELDOS" },
 ];
 
 const FALLBACK_CHILE_MESAS = [
-  { id: "TECNICO", label: "Técnico" },
-  { id: "FUNCIONAL", label: "Funcional" },
+  { id: "TECNICO", label: "TÉCNICO" },
+  { id: "FUNCIONAL", label: "FUNCIONAL" },
 ];
 
 const SISTEMA_LABELS = {
@@ -201,7 +201,6 @@ const els = {
   asunto: () => document.getElementById("plan-asunto"),
   descripcion: () => document.getElementById("plan-descripcion"),
   mesaBtns: () => document.querySelectorAll("#plan-standard-mesas [data-mesa]"),
-  mesaHint: () => document.getElementById("plan-mesa-hint"),
   capturasCard: () => document.getElementById("plan-capturas-card"),
   capturasCheck: () => document.getElementById("plan-capturas-check"),
   capturasPanel: () => document.getElementById("plan-capturas-panel"),
@@ -592,7 +591,7 @@ function buildStandardMesas() {
   const row = document.getElementById("plan-standard-mesas");
   if (!row) return;
   row.innerHTML = getStandardMesas().map((m) =>
-    `<button type="button" class="plan-mesa-btn${mesaActual === m.id ? " active" : ""}" data-mesa="${m.id}">${m.label}</button>`
+    `<button type="button" class="plan-mesa-btn${m.id === "SAAS" ? " plan-mesa-btn--saas" : ""}${mesaActual === m.id ? " active" : ""}" data-mesa="${m.id}">${m.label}</button>`
   ).join("");
 }
 
@@ -627,15 +626,6 @@ function refreshLegalMesaUi() {
   document.querySelectorAll("#plan-legal-mesas .plan-mesa-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.legalMesa === mesaActual);
   });
-  const hint = document.getElementById("plan-legal-mesa-hint");
-  if (hint) {
-    const label = planillasConfig?.legal?.mesas?.find((m) => m.id === mesaActual)?.label
-      || LEGAL_MESA_LABELS[mesaActual]
-      || mesaActual;
-    hint.textContent = mesaActual
-      ? `Mesa seleccionada: ${label}`
-      : "Elegí la mesa de destino para continuar.";
-  }
 }
 
 function toggleLegalMesa(mesa) {
@@ -688,12 +678,6 @@ function refreshMesaUi() {
   els.mesaBtns().forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.mesa === mesaActual);
   });
-  const hint = els.mesaHint();
-  if (hint) {
-    hint.textContent = mesaActual
-      ? `Mesa seleccionada: ${MESA_LABELS[mesaActual] || mesaActual}`
-      : "Elegí la mesa de destino para continuar.";
-  }
   showTicketSection();
 }
 

@@ -125,7 +125,7 @@ public sealed class TransferenciaService
         if (string.IsNullOrWhiteSpace(caso.Mesa))
             throw new InvalidOperationException("Elegí la mesa de destino antes de usar IA.");
 
-        return await ia.GenerarBorradorTransferenciaAsync(
+        return await ia.MejorarRedaccionTransferenciaAsync(
             caso.Sistema.ToDisplayName(),
             caso.Mesa,
             caso.NumeroCliente,

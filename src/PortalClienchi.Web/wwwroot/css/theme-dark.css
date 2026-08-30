@@ -448,24 +448,27 @@ html.st2-theme-dark .plan-pill-btn.active {
 }
 
 html.st2-theme-dark .plan-mesas {
-  background: #0f1622 !important;
-  border-color: #334155 !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 html.st2-theme-dark .plan-mesa-btn {
-  background: transparent !important;
+  background: #151c28 !important;
+  border-color: #4b5a73 !important;
   color: #94a3b8 !important;
 }
 
 html.st2-theme-dark .plan-mesa-btn:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: #1e293b !important;
+  border-color: #64748b !important;
   color: #e2e8f0 !important;
 }
 
 html.st2-theme-dark .plan-mesa-btn.active {
   background: #c2410c !important;
+  border-color: #ea580c !important;
   color: #fff !important;
-  box-shadow: none !important;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.28) !important;
 }
 
 html.st2-theme-dark .plan-segment-track {
@@ -481,6 +484,10 @@ html.st2-theme-dark .plan-segment-btn {
 html.st2-theme-dark .plan-segment-btn.active {
   background: #c2410c !important;
   color: #fff !important;
+}
+
+html.st2-theme-dark .plan-bej-label {
+  color: #94a3b8 !important;
 }
 
 html.st2-theme-dark .planillas-back,
@@ -1818,8 +1825,8 @@ html.st2-theme-dark .blanqueo-correo-remove:hover {
 }
 
 html.st2-theme-dark #planillas-transferencia .plan-mesas {
-  background: #151c28 !important;
-  border-color: #4b5a73 !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 html.st2-theme-dark #planillas-transferencia .plan-capturas-card,

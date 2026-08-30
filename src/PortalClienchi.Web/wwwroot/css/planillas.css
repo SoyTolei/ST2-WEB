@@ -1553,57 +1553,61 @@ body.st2-chile-embed-active #panel-planillas.active {
   color: var(--text-muted);
 }
 
+.plan-mesa-field {
+  margin-bottom: 14px;
+}
+
 .plan-mesas {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
-  padding: 4px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 .plan-mesa-btn {
   appearance: none;
-  flex: 1 1 0;
-  min-width: 7.5rem;
-  border: 0;
-  border-radius: 7px;
-  padding: 11px 10px;
+  flex: 0 0 auto;
+  min-width: 0;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 7px 14px;
   font: inherit;
-  font-size: 0.84rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   line-height: 1.2;
   color: #64748b;
-  background: transparent;
+  background: #fff;
   cursor: pointer;
-  transition: color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease;
+  transition: color 0.14s ease, background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.plan-mesa-btn--saas {
+  text-transform: none;
+  letter-spacing: 0.02em;
 }
 
 .plan-mesa-btn:hover {
   color: #334155;
-  background: rgba(255, 255, 255, 0.7);
+  border-color: #94a3b8;
+  background: #f8fafc;
 }
 
 .plan-mesa-btn:focus-visible {
   outline: 2px solid rgba(214, 64, 0, 0.35);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .plan-mesa-btn.active {
-  color: #0f172a;
+  color: #fff;
   font-weight: 700;
-  background: #fff;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.06),
-    inset 0 -2px 0 #d64000;
-}
-
-.plan-mesa-hint {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-top: 8px;
+  background: #d64000;
+  border-color: #d64000;
+  box-shadow: 0 2px 8px rgba(214, 64, 0, 0.28);
 }
 
 .plan-capturas-card {
@@ -2156,12 +2160,31 @@ body.st2-chile-embed-active #panel-planillas.active {
   box-shadow: 0 1px 3px rgba(26, 31, 46, 0.08);
 }
 
+.plan-bej-toolbar {
+  position: relative;
+  z-index: 2;
+  margin: 2px 0 16px;
+  scroll-margin-top: 88px;
+}
+
 .plan-bej-config {
   background: #fff;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 10px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  margin-bottom: 0;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+}
+
+.plan-bej-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.plan-bej-field:last-child {
+  margin-bottom: 0;
 }
 
 .plan-bej-row {
@@ -2177,9 +2200,24 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-bej-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.plan-bej-config .plan-segment-track {
+  width: 100%;
+}
+
+.plan-bej-config .plan-segment-btn {
+  min-height: 36px;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .plan-bej-sql {
@@ -4369,14 +4407,12 @@ body.st2-chile-embed-active #panel-planillas.active {
   .plan-chile-soporte-grid { grid-template-columns: 1fr; }
   .plan-sistema-indicator { display: none; }
   .plan-mesas {
-    flex-direction: column;
-    gap: 4px;
+    gap: 6px;
   }
 
   .plan-mesa-btn {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 100%;
+    padding: 8px 12px;
+    font-size: 0.74rem;
   }
   .plan-check-cards, .plan-onvio-grid, .plan-adj-grid, .plan-op-submenu, .plan-legal-cards, .plan-form-2col { grid-template-columns: 1fr; }
   .plan-check-wrap.mam, .plan-check-wrap.sdk { margin: 0; }

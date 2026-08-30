@@ -41,7 +41,41 @@ public sealed class RedaccionIaService : IDisposable
             "Mejorá la redacción del siguiente documento de planilla. " +
             "Devolvé el documento completo, sin explicaciones ni markdown:\n\n" +
             documento.Trim(),
-            ct).ConfigureAwait(false);
+            ct,
+            temperature: 0.2).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Mejora asunto y descripción existentes (ortografía, claridad) sin reescribir desde cero.
+    /// </summary>
+    public async Task<TransferenciaIaBorrador> MejorarRedaccionTransferenciaAsync(
+        string sistema,
+        string mesa,
+        string numeroCliente,
+        string? asuntoOperador,
+        string? notasOperador,
+        CancellationToken ct = default)
+    {
+        if (!IsConfigured)
+            throw new InvalidOperationException("La redacción con IA no está configurada.");
+
+        if (string.IsNullOrWhiteSpace(mesa))
+            throw new InvalidOperationException("Elegí una mesa de destino.");
+
+        var user = new StringBuilder()
+            .AppendLine($"Sistema/producto: {sistema.Trim()}")
+            .AppendLine($"Mesa destino (código interno): {mesa.Trim().ToUpperInvariant()}")
+            .AppendLine($"N° de cliente: {numeroCliente.Trim()}")
+            .AppendLine(string.IsNullOrWhiteSpace(asuntoOperador)
+                ? "ASUNTO actual del operador: (vacío)"
+                : $"ASUNTO actual del operador:\n{asuntoOperador.Trim()}")
+            .AppendLine(string.IsNullOrWhiteSpace(notasOperador)
+                ? "DESCRIPCIÓN actual del operador: (vacía)"
+                : $"DESCRIPCIÓN actual del operador:\n{notasOperador.Trim()}")
+            .ToString();
+
+        var raw = await EnviarChatAsync(TransferenciaMejorarSystemPrompt, user, ct, temperature: 0.2).ConfigureAwait(false);
+        return ParseTransferenciaBorrador(raw);
     }
 
     /// <summary>
@@ -73,13 +107,13 @@ public sealed class RedaccionIaService : IDisposable
                 : $"Detalle actual del operador: {notasOperador.Trim()}")
             .ToString();
 
-        var raw = await EnviarChatAsync(TransferenciaBorradorSystemPrompt, user, ct).ConfigureAwait(false);
+        var raw = await EnviarChatAsync(TransferenciaBorradorSystemPrompt, user, ct, temperature: 0.35).ConfigureAwait(false);
         return ParseTransferenciaBorrador(raw);
     }
 
     public void Dispose() => _http.Dispose();
 
-    private async Task<string> EnviarChatAsync(string systemPrompt, string userContent, CancellationToken ct)
+    private async Task<string> EnviarChatAsync(string systemPrompt, string userContent, CancellationToken ct, double temperature = 0.35)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, _settings.Endpoint.Trim());
         if (!string.IsNullOrWhiteSpace(_settings.ApiKey))
@@ -88,7 +122,7 @@ public sealed class RedaccionIaService : IDisposable
         var payload = new
         {
             model = _settings.Model.Trim(),
-            temperature = 0.35,
+            temperature,
             messages = new[]
             {
                 new { role = "system", content = systemPrompt },
@@ -110,6 +144,27 @@ public sealed class RedaccionIaService : IDisposable
 
         return text.Trim();
     }
+
+    private const string TransferenciaMejorarSystemPrompt =
+        """
+        Sos un agente de mesa de ayuda técnica en español (Argentina).
+        Tu trabajo es pulir la redacción de una transferencia de caso entre mesas.
+
+        REGLAS ESTRICTAS:
+        - Corregí SOLO ortografía, tildes/acentos, puntuación y orden de frases para mayor claridad.
+        - Mantené un tono profesional, directo y claro, propio de soporte de mesa de ayuda.
+        - NO inventes datos, pasos técnicos, versiones, tickets ni causas que el operador no mencionó.
+        - NO cambies el sentido, el nivel de detalle ni agregues información nueva.
+        - NO reescribas desde cero: partí del texto del operador si existe.
+        - NO agregues saludos, despedidas, recomendaciones ni explicaciones sobre tu trabajo.
+        - Si el ASUNTO ya tiene formato de derivación ("Se deriva a..."), conservalo y solo pulí la redacción.
+        - Si un campo viene vacío, devolvé una frase mínima neutra y editable; no inventes el caso.
+
+        Respondé ÚNICAMENTE con este formato (sin markdown ni texto extra):
+        ASUNTO: [texto mejorado]
+        DESCRIPCION:
+        [texto mejorado]
+        """;
 
     private const string TransferenciaBorradorSystemPrompt =
         """
@@ -175,14 +230,18 @@ public sealed class RedaccionIaService : IDisposable
 
     private const string DocumentoSystemPrompt =
         """
-        Sos un asistente de soporte técnico en español (Argentina).
+        Sos un agente de mesa de ayuda técnica en español (Argentina).
         Recibirás un documento de planilla (.txt) con formato fijo corporativo (Bejerman / planillas internas).
 
         REGLAS ESTRICTAS:
+        - Tu ÚNICA tarea es pulir la redacción: ortografía, tildes, puntuación y orden de frases para mayor claridad.
+        - Mantené un tono profesional, directo y claro, propio de soporte de mesa de ayuda.
+        - NO agregues información, pasos, causas, versiones, tickets ni datos que no figuren en el original.
+        - NO reescribas por completo ni cambies el sentido ni el nivel de detalle.
+        - NO agregues saludos, despedidas, recomendaciones ni explicaciones sobre tu trabajo.
         - Conservá EXACTAMENTE la estructura: líneas ==========, títulos de sección, emojis, etiquetas (ej. ASUNTO Y/O ERROR:, DESCRIPCIÓN DEL CASO:, SISTEMA:, VERSIÓN:).
         - Conservá valores estructurados: SÍ/NO, listas de comprobaciones, adjuntos, datos de sistema, tickets, MAM, SDK, planilla técnica.
         - Mejorá SOLO la redacción de textos narrativos (asunto, descripciones, paso a paso, párrafos explicativos en DETALLES DEL CASO).
-        - No inventes datos, pasos, números de cliente ni causas que no estén en el original.
         - No elimines secciones ni líneas de encabezado.
         - Mantené saltos de línea y separadores (────────────────────────) donde existan.
         """;
