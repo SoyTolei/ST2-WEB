@@ -48,7 +48,7 @@ const SISTEMA_LABELS = {
   BejermanSql: "Bejerman SQL",
   OnvioWeb: "ONVIO/Bejerman WEB",
   Legal: "LEGAL",
-  Chile: "Chile",
+  Chile: "CHILE",
 };
 
 const SISTEMA_INDEX = {
