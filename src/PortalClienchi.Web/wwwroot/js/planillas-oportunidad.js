@@ -50,11 +50,11 @@ export async function openOportunidadGestor() {
 function sistemaLabel() {
   const id = ctx.getSistema();
   return {
-    BejermanSql: "Bejerman SQL",
+    BejermanSql: "BEJERMAN SQL",
     OnvioWeb: "ONVIO/WEB",
     Legal: "LEGAL",
     Chile: "Chile",
-  }[id] || "Bejerman SQL";
+  }[id] || "BEJERMAN SQL";
 }
 
 function bindOportunidadEvents() {

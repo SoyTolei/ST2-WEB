@@ -45,7 +45,7 @@ const FALLBACK_CHILE_MESAS = [
 ];
 
 const SISTEMA_LABELS = {
-  BejermanSql: "Bejerman SQL",
+  BejermanSql: "BEJERMAN SQL",
   OnvioWeb: "ONVIO/WEB",
   Legal: "LEGAL",
   Chile: "CHILE",

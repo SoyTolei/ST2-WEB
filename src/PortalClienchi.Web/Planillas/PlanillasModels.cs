@@ -11,7 +11,7 @@ public enum PlanillasSistema
 
 public static class PlanillasSistemaExtensions
 {
-    public const string BejermanSqlLabel = "Bejerman SQL";
+    public const string BejermanSqlLabel = "BEJERMAN SQL";
     public const string OnvioWebLabel = "ONVIO/WEB";
     public const string LegalLabel = "LEGAL";
     public const string ChileLabel = "Chile";

@@ -1976,6 +1976,11 @@ body.st2-chile-embed-active #panel-planillas.active {
   text-align: center;
 }
 
+.plan-status-bar.is-error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
 .plan-module-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--dark); }
 .plan-section-hint { font-size: 0.75rem; color: var(--text-muted); margin: -8px 0 14px; }
 .plan-section-hint { font-size: 0.75rem; color: var(--text-muted); margin: -8px 0 14px; }
@@ -2344,30 +2349,15 @@ body.st2-chile-embed-active #panel-planillas.active {
   line-height: 1.45;
 }
 .plan-ref-perfil {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 10px;
-  margin: 0 0 10px;
-  padding: 7px 10px;
-  border: 1px solid #fdba74;
-  border-radius: 8px;
-  background: #fff7ed;
+  margin: 0 0 14px;
 }
-.plan-ref-perfil-label {
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #c2410c;
+
+.plan-ref-perfil .plan-bej-field {
+  margin-bottom: 0;
 }
+
 .plan-ref-perfil-seg {
-  display: inline-flex;
-  gap: 0;
-  padding: 2px;
-  background: #fff;
-  border: 1px solid #fed7aa;
-  border-radius: 7px;
+  width: 100%;
 }
 .plan-chile-modulos-row {
   align-items: flex-start;
@@ -2392,24 +2382,6 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-chile-meta-row {
   margin-top: 0.75rem;
-}
-.plan-ref-perfil-seg .plan-segment-btn {
-  min-height: 28px;
-  min-width: 0;
-  padding: 5px 12px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #9a3412;
-}
-.plan-ref-perfil-seg .plan-segment-btn:hover {
-  color: #7c2d12;
-  background: #fff7ed;
-}
-.plan-ref-perfil-seg .plan-segment-btn.active {
-  background: #d64000;
-  color: #fff;
-  font-weight: 700;
-  box-shadow: none;
 }
 .plan-ref-perfil-hint {
   margin: 0 0 14px;

@@ -291,6 +291,13 @@ public sealed class RedaccionIaService : IDisposable
             var code = err.TryGetProperty("code", out var codeEl) ? codeEl.GetString() : null;
             var msg = err.TryGetProperty("message", out var msgEl) ? msgEl.GetString() : null;
 
+            if (msg?.Contains("does not exist", StringComparison.OrdinalIgnoreCase) == true
+                || msg?.Contains("model_not_found", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return "El modelo de IA configurado ya no está disponible en Groq.\n\n" +
+                       "Actualizá RedaccionIa:Model a openai/gpt-oss-120b en appsettings o variables de entorno y redeployá.";
+            }
+
             return code switch
             {
                 "insufficient_quota" =>

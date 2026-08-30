@@ -1309,27 +1309,8 @@ html.st2-theme-dark .plan-ref-modal-subtitle {
 }
 
 html.st2-theme-dark .plan-ref-perfil {
-  background: #1e293b !important;
-  border-color: #475569 !important;
-}
-
-html.st2-theme-dark .plan-ref-perfil-label {
-  color: #94a3b8 !important;
-}
-
-html.st2-theme-dark .plan-ref-perfil-seg {
-  background: #0f172a !important;
-  border-color: #334155 !important;
-}
-
-html.st2-theme-dark .plan-ref-perfil-seg .plan-segment-btn {
-  color: #cbd5e1 !important;
   background: transparent !important;
-}
-
-html.st2-theme-dark .plan-ref-perfil-seg .plan-segment-btn.active {
-  background: #0f766e !important;
-  color: #fff !important;
+  border: none !important;
 }
 
 html.st2-theme-dark .plan-ref-perfil-hint.is-otra {

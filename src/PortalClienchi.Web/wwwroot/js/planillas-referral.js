@@ -166,11 +166,11 @@ export { syncLegalMenuProducts };
 function sistemaLabel() {
   const id = ctx.getSistema();
   const label = {
-    BejermanSql: "Bejerman SQL",
+    BejermanSql: "BEJERMAN SQL",
     OnvioWeb: "ONVIO/WEB",
     Legal: "LEGAL",
     Chile: "Chile",
-  }[id] || "Bejerman SQL";
+  }[id] || "BEJERMAN SQL";
   return label;
 }
 
@@ -1190,7 +1190,11 @@ async function mejorarReferralIa() {
   const btn = document.getElementById("ref-btn-ia");
   referralIaUndo?.saveSnapshot();
   if (btn) btn.disabled = true;
-  status.textContent = "Mejorando con IA…";
+  if (status) {
+    status.textContent = "Mejorando con IA…";
+    status.classList.remove("is-error");
+    status.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
 
   try {
     const response = await fetch("/api/planillas/referral/mejorar", {
@@ -1201,13 +1205,52 @@ async function mejorarReferralIa() {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       referralIaUndo?.clearSnapshot();
-      status.textContent = data.detail || "Error IA";
+      const msg = data.detail || data.title || data.error || `Error ${response.status}`;
+      if (status) {
+        status.textContent = msg;
+        status.classList.add("is-error");
+      }
+      alert(msg);
       return;
     }
-    if (data.asunto) document.getElementById("ref-asunto").value = data.asunto;
-    if (data.descripcion) setField("ref-descripcion", data.descripcion, REF_DESC_PH);
-    if (data.pasoAPaso) setField("ref-paso", data.pasoAPaso, REF_PASO_PH);
-    status.textContent = "Redacción mejorada. Usá ↩ al lado si no te convence.";
+
+    let updated = 0;
+    if (data.asunto) {
+      document.getElementById("ref-asunto").value = data.asunto;
+      updated += 1;
+    }
+    if (data.descripcion) {
+      setField("ref-descripcion", data.descripcion, REF_DESC_PH);
+      updated += 1;
+    }
+    if (data.pasoAPaso) {
+      setField("ref-paso", data.pasoAPaso, REF_PASO_PH);
+      updated += 1;
+    }
+
+    if (updated === 0) {
+      referralIaUndo?.clearSnapshot();
+      const msg = "La IA respondió pero no se pudieron aplicar cambios en los campos.";
+      if (status) {
+        status.textContent = msg;
+        status.classList.add("is-error");
+      }
+      alert(msg);
+      return;
+    }
+
+    if (status) {
+      status.textContent = "Redacción mejorada. Usá ↩ al lado si no te convence.";
+      status.classList.remove("is-error");
+    }
+  } catch (ex) {
+    referralIaUndo?.clearSnapshot();
+    const msg = ex?.message || "Error al mejorar con IA";
+    if (status) {
+      status.textContent = msg;
+      status.classList.add("is-error");
+    }
+    alert(msg);
   } finally {
     if (btn) btn.disabled = false;
   }
