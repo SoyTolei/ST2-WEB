@@ -1919,7 +1919,7 @@ function renderAboutTools() {
     }
     if (btn) {
       btn.disabled = false;
-      btn.textContent = label;
+      btn.textContent = "Descargar";
       btn.removeAttribute("title");
     }
   }
@@ -2131,13 +2131,22 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
 let toolUrlDialogToolId = "";
 let toolUrlDialogBound = false;
 
-function showSt2Message(title, body, { okLabel = "Entendido" } = {}) {
+function showSt2Message(title, body, { okLabel = "Entendido", downloadNotice = false } = {}) {
+  bindToolUrlDialog();
   const overlay = document.getElementById("st2-msg-overlay");
+  const dialog = overlay?.querySelector(".st2-msg-dialog");
   const titleEl = document.getElementById("st2-msg-title");
   const bodyEl = document.getElementById("st2-msg-body");
   const okBtn = document.getElementById("st2-msg-ok");
   if (!overlay) return;
-  if (titleEl) titleEl.textContent = title || "Aviso";
+  dialog?.classList.toggle("st2-msg-dialog-centered", !!downloadNotice);
+  if (titleEl) {
+    if (downloadNotice) {
+      titleEl.innerHTML = 'Descargando<span class="st2-dl-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
+    } else {
+      titleEl.textContent = title || "Aviso";
+    }
+  }
   if (bodyEl) bodyEl.textContent = body || "";
   if (okBtn) okBtn.textContent = okLabel;
   overlay.classList.remove("hidden");
@@ -2147,17 +2156,21 @@ function showSt2Message(title, body, { okLabel = "Entendido" } = {}) {
 
 function hideSt2Message() {
   const overlay = document.getElementById("st2-msg-overlay");
+  const dialog = overlay?.querySelector(".st2-msg-dialog");
+  const titleEl = document.getElementById("st2-msg-title");
   const okBtn = document.getElementById("st2-msg-ok");
   overlay?.classList.add("hidden");
   overlay?.setAttribute("aria-hidden", "true");
+  dialog?.classList.remove("st2-msg-dialog-centered");
+  if (titleEl) titleEl.textContent = "Aviso";
   if (okBtn) okBtn.textContent = "Entendido";
 }
 
 function showSqlDownloadNotice() {
   showSt2Message(
-    "Descarga iniciada",
+    "",
     "Antes de descomprimir, borrá las versiones anteriores de Herramientas SQL para no mezclar archivos viejos con los nuevos.",
-    { okLabel: "Cerrar" },
+    { okLabel: "Cerrar", downloadNotice: true },
   );
 }
 
@@ -2357,6 +2370,7 @@ function xhrJson(method, url, bodyObj) {
 }
 
 function bindAboutToolsUi() {
+  bindToolUrlDialog();
   if (toolsBound) return;
   toolsBound = true;
   document.querySelectorAll("[data-tool-download]").forEach((btn) => {
