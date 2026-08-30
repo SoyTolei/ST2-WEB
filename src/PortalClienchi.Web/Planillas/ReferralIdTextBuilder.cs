@@ -4,6 +4,9 @@ public static class ReferralIdTextBuilder
 {
     public static string Build(ReferralIdCase c)
     {
+        if (c.Sistema == PlanillasSistema.Chile)
+            return BuildChile(c);
+
         var partes = new List<string>();
 
         partes.Add("==========================================");
@@ -27,10 +30,6 @@ public static class ReferralIdTextBuilder
             if (!string.IsNullOrWhiteSpace(c.Legal.ChaveRegistro))
                 partes.Add($"CLAVE DE REGISTRO: {c.Legal.ChaveRegistro.Trim()}");
         }
-        else if (c.Sistema == PlanillasSistema.Chile)
-        {
-            AppendChileDatosSistema(partes, c.Chile);
-        }
 
         partes.Add("");
         partes.Add("==========================================");
@@ -43,7 +42,6 @@ public static class ReferralIdTextBuilder
         if (IsRealText(c.PasoAPaso, ReferralIdConstants.PlaceholderPasoAPaso))
         {
             partes.Add("");
-            partes.Add("────────────────────────");
             partes.Add($"PASO A PASO REALIZADO: {c.PasoAPaso.Trim()}");
         }
 
@@ -53,8 +51,6 @@ public static class ReferralIdTextBuilder
             AppendBejermanComprobaciones(partes, c);
         else if (c.Sistema == PlanillasSistema.Legal)
             AppendLegalComprobaciones(partes, c);
-        else if (c.Sistema == PlanillasSistema.Chile)
-            AppendChileDetalles(partes, c);
 
         partes.Add("");
         partes.Add("==========================================");
@@ -62,6 +58,46 @@ public static class ReferralIdTextBuilder
         AppendAdjuntos(partes, c);
         partes.Add("==========================================");
 
+        return string.Join(Environment.NewLine, partes);
+    }
+
+    private static string BuildChile(ReferralIdCase c)
+    {
+        var partes = new List<string>();
+        var ch = c.Chile;
+
+        partes.Add("==========================================");
+        partes.Add("DATOS DEL CLIENTE 🪪");
+        AppendChileDatosSistema(partes, ch);
+
+        partes.Add("==========================================");
+        partes.Add("DETALLES DEL CASO 📝");
+        partes.Add("");
+        partes.Add($"ASUNTO Y/O ERROR: {c.Asunto.Trim()}");
+
+        if (IsRealText(c.Descripcion, ReferralIdConstants.PlaceholderDescripcion))
+            partes.Add($"DESCRIPCIÓN DEL CASO: {c.Descripcion.Trim()}");
+
+        if (IsRealText(c.PasoAPaso, ReferralIdConstants.PlaceholderPasoAPaso))
+        {
+            partes.Add("");
+            partes.Add($"PASO A PASO REALIZADO: {c.PasoAPaso.Trim()}");
+        }
+
+        partes.Add("");
+        partes.Add("==========================================");
+        partes.Add("INFORMACIÓN ADICIONAL");
+        partes.Add("");
+        partes.Add($"- Usuario: {ch.Usuario.Trim()}");
+        partes.Add($"- Clave: {ch.Clave.Trim()}");
+        partes.Add($"- Sistema operativo: {ch.SistemaOperativo.Trim()}");
+        if (!string.IsNullOrWhiteSpace(ch.VersionMotorSql))
+            partes.Add($"- Versión motor SQL: {ch.VersionMotorSql.Trim()}");
+
+        var hayCapturas = ch.AdjuntaPantallas || c.CapturasEnlaces.Count > 0;
+        CapturasTextoHelper.AppendBloqueCapturas(partes, hayCapturas, c.CapturasEnlaces);
+
+        partes.Add("==========================================");
         return string.Join(Environment.NewLine, partes);
     }
 

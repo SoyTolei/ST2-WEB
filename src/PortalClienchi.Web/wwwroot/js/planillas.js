@@ -448,12 +448,13 @@ function updateSistemaUi() {
   const legalProductsWrap = document.getElementById("plan-legal-products-wrap");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
   const hideCommercial = hidesCommercialModules();
+  const hideTransfer = isLegal();
   const showLegalProducts = isLegal();
 
   if (transferBtn) {
-    transferBtn.classList.toggle("hidden", hideCommercial);
-    transferBtn.toggleAttribute("hidden", hideCommercial);
-    transferBtn.disabled = placeholderBlocked || hideCommercial;
+    transferBtn.classList.toggle("hidden", hideTransfer);
+    transferBtn.toggleAttribute("hidden", hideTransfer);
+    transferBtn.disabled = placeholderBlocked || hideTransfer;
   }
   if (transferNa) {
     transferNa.classList.add("hidden");

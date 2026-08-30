@@ -1,4 +1,5 @@
-import { planTextPreviewHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { injectModuleHeaders } from "./planillas-icons.js";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -175,13 +176,11 @@ function showTemplateForm(product, item, template) {
       <p class="plan-ref-title">${template.title || template.label}</p>
       ${blocks}
       <form id="ref-legal-template-form" class="plan-form-grid" autocomplete="off">${fields}</form>
-      <div class="plan-ref-actions plan-ref-actions-dual plan-legal-form-actions">
-        <button type="button" id="ref-legal-btn-generar" class="plan-action-btn green">
-          <span class="plan-action-btn-main">Vista previa</span>
-          <span class="plan-action-btn-sub">Genera y muestra la planilla acá en pantalla</span>
-        </button>
-        <button type="button" id="ref-legal-btn-limpar" class="plan-action-btn ghost">Limpiar</button>
-      </div>
+      ${planFormActionsHtml({
+        copyId: "ref-legal-btn-copiar",
+        previewId: "ref-legal-btn-ver-planilla",
+        clearId: "ref-legal-btn-limpar",
+      })}
       ${planTextPreviewHtml("ref-legal-text-preview", "ref-legal-form-status")}
       <p id="ref-legal-form-status" class="plan-status-bar"></p>
     </div>
@@ -194,7 +193,24 @@ function showTemplateForm(product, item, template) {
   });
 
   mountPlanTextPreview("ref-legal-text-preview");
-  document.getElementById("ref-legal-btn-generar")?.addEventListener("click", () => generatePreview(template));
+  injectModuleHeaders();
+  const templateText = () => buildTemplateText(template, product.label);
+  document.getElementById("ref-legal-btn-ver-planilla")?.addEventListener("click", () => {
+    const text = templateText();
+    if (!text) return;
+    showPlanTextPreview("ref-legal-text-preview", text);
+    setStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
+  });
+  document.getElementById("ref-legal-btn-copiar")?.addEventListener("click", async () => {
+    const text = templateText();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setStatus("Texto copiado al portapapeles.");
+    } catch {
+      setStatus("No se pudo copiar.", true);
+    }
+  });
 }
 
 function collectValues(template) {
@@ -213,22 +229,30 @@ function collectValues(template) {
   return values;
 }
 
-function buildTemplateText(template) {
-  const lines = [template.title || template.label, "=".repeat(40)];
-  for (const { label, value } of collectValues(template)) {
-    if (!label) {
+function buildTemplateText(template, productLabel = "") {
+  const values = collectValues(template);
+  const lines = [];
+  lines.push("==========================================");
+  lines.push("DATOS DEL CLIENTE 🪪");
+  if (productLabel) lines.push(`PRODUCTO: ${productLabel.trim().toUpperCase()}`);
+  lines.push(`TIPO DE ESCALAMIENTO: ${LEGAL_ESCALAMIENTO_LABEL.toUpperCase()}`);
+  lines.push("==========================================");
+  lines.push("DETALLES DEL CASO 📝");
+  lines.push("");
+  for (const { label, value } of values) {
+    if (!value) continue;
+    if (label) {
+      lines.push(`${label.trim().toUpperCase()}: ${value}`);
+    } else {
       lines.push(value);
-      continue;
     }
-    lines.push(`${label}: ${value}`);
   }
+  lines.push("");
+  lines.push("==========================================");
+  lines.push("INFORMACIÓN ADICIONAL");
+  lines.push("");
+  lines.push("==========================================");
   return lines.join("\n");
-}
-
-function generatePreview(template) {
-  const text = buildTemplateText(template);
-  showPlanTextPreview("ref-legal-text-preview", text);
-  setStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
 }
 
 function setStatus(msg, isError = false) {

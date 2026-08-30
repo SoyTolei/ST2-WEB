@@ -2,6 +2,35 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 
 const bound = new Set();
 
+export function planFormActionsHtml({
+  copyId,
+  previewId,
+  clearId,
+  clearLabel = "🗑 Limpiar",
+}) {
+  return `
+    <div class="plan-ref-actions">
+      <button type="button" id="${copyId}" class="plan-action-btn green">
+        <span class="plan-action-btn-main">
+          <span class="plan-action-btn-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
+          Copiar al portapapeles
+        </span>
+        <span class="plan-action-btn-sub">Solo copiar y pegar</span>
+      </button>
+      <button type="button" id="${previewId}" class="plan-action-btn blue">
+        <span class="plan-action-btn-main">
+          <span class="plan-action-btn-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
+          Vista previa
+        </span>
+        <span class="plan-action-btn-sub">Genera y muestra la planilla acá en pantalla</span>
+      </button>
+      <button type="button" id="${clearId}" class="plan-action-btn ghost">
+        <span class="plan-action-btn-main">${clearLabel}</span>
+      </button>
+    </div>
+  `;
+}
+
 export function planTextPreviewHtml(panelId, statusTargetId = "") {
   const statusAttr = statusTargetId ? ` data-status-target="${statusTargetId}"` : "";
   return `
