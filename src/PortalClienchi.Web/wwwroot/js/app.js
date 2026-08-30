@@ -1,6 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
-import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, refreshModuleFlags } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
@@ -1737,7 +1737,7 @@ function toolsUpdateMessage(newer) {
   const hasSql = list.some((t) => t.id === "sql");
   const hasBat = list.some((t) => t.id === "bat");
   if (hasSql && !hasBat) {
-    return 'hay una nueva versión del aplicativo para realizar backups "Herramientas SQL" para descargar.';
+    return 'hay una nueva versión para descargar del aplicativo para realizar backups "Herramientas SQL"';
   }
   if (hasBat && !hasSql) {
     return "hay una nueva versión de ST2.BAT disponible para descargar.";
@@ -2474,8 +2474,7 @@ document.addEventListener("st2:session-changed", () => {
   syncViewAsBanner();
 });
 viewAsExitBtn?.addEventListener("click", () => {
-  clearViewAsProfile();
-  window.location.assign("/admin");
+  void exitViewAsProfile();
 });
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
@@ -2654,6 +2653,15 @@ function modulesFromAccessForm() {
 function previewAccessModulesProfile() {
   if (!accessModulesEmailValue) return;
   startAccessProfilePreview(accessModulesEmailValue, modulesFromAccessForm());
+}
+
+async function exitViewAsProfile() {
+  clearViewAsProfile();
+  syncViewAsBanner();
+  syncAdminTabVisibility();
+  document.dispatchEvent(new CustomEvent("st2:session-changed"));
+  await refreshModuleFlags({ force: true });
+  navigateTab(ADMIN_TAB_ID, { history: "replace" });
 }
 
 function syncViewAsBanner() {
@@ -3889,8 +3897,7 @@ function applyTopTabEntry() {
   const portal = portalIdFromPath(window.location.pathname);
   if (tab === "portal" && portal) activePortalId = portal;
 
-  window.history.replaceState({ tab: "planillas" }, "", "/");
-  navigateTab(tab, { history: "push" });
+  navigateTab(tab, { history: "replace" });
 }
 
 function switchTab(tabId) {
