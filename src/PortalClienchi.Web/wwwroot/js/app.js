@@ -1796,13 +1796,12 @@ function syncAboutNoticeCopy() {
   const text = document.getElementById("st2-about-notice-text");
   if (!lead || !text) return;
 
-  const abbr = `<strong class="st2-about-abbr"><span class="st2-about-abbr-s">S</span>oluciones <span class="st2-about-abbr-t">T</span>ecnológicas <span class="st2-about-abbr-2">2</span></strong>`;
   if (userCanSeeDesktopToolDownloads()) {
-    lead.textContent = "Suite de herramientas de uso interno";
-    text.innerHTML = `${abbr} reúne el portal web de planillas y accesos rápidos, y también herramientas de escritorio para backups, restauración de bases y diagnóstico de instalaciones.`;
+    lead.textContent = "Suite interna para soporte técnico";
+    text.innerHTML = "<strong>ST2</strong> integra esta plataforma web —planillas, referrals y accesos del portal— con herramientas de escritorio para backups y restauración de bases SQL, y automatización de procesos de la mesa.";
   } else {
-    lead.textContent = "Suite Web de uso interno";
-    text.innerHTML = `${abbr} es el portal web interno para planillas, referrals y flujos de la mesa: pensado para agilizar el trabajo diario desde el navegador.`;
+    lead.textContent = "Portal web de uso interno";
+    text.innerHTML = "<strong>ST2</strong> concentra en el navegador las planillas automáticas, referrals y flujos operativos del equipo de soporte técnico.";
   }
 }
 
