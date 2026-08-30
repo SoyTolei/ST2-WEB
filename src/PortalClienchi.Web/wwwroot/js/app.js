@@ -1919,12 +1919,8 @@ function renderAboutTools() {
     }
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "Descargar";
-      if (id === "sql") {
-        btn.title = "Recordá borrar versiones anteriores de tu PC para no mezclar archivos viejos con los nuevos.";
-      } else {
-        btn.title = `Descargar ${label}`;
-      }
+      btn.textContent = label;
+      btn.removeAttribute("title");
     }
   }
   syncAboutToolsBadge();
@@ -1954,7 +1950,7 @@ async function downloadTool(toolId) {
   a.click();
   a.remove();
   if (toolId === "sql") {
-    setAboutToolsStatus("Antes de descomprimir, borrá las versiones anteriores de Herramientas SQL para no mezclar archivos viejos con los nuevos.");
+    showSqlDownloadNotice();
   }
   markToolSeen(toolId);
 }
@@ -2135,22 +2131,34 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
 let toolUrlDialogToolId = "";
 let toolUrlDialogBound = false;
 
-function showSt2Message(title, body) {
+function showSt2Message(title, body, { okLabel = "Entendido" } = {}) {
   const overlay = document.getElementById("st2-msg-overlay");
   const titleEl = document.getElementById("st2-msg-title");
   const bodyEl = document.getElementById("st2-msg-body");
+  const okBtn = document.getElementById("st2-msg-ok");
   if (!overlay) return;
   if (titleEl) titleEl.textContent = title || "Aviso";
   if (bodyEl) bodyEl.textContent = body || "";
+  if (okBtn) okBtn.textContent = okLabel;
   overlay.classList.remove("hidden");
   overlay.setAttribute("aria-hidden", "false");
-  document.getElementById("st2-msg-ok")?.focus();
+  okBtn?.focus();
 }
 
 function hideSt2Message() {
   const overlay = document.getElementById("st2-msg-overlay");
+  const okBtn = document.getElementById("st2-msg-ok");
   overlay?.classList.add("hidden");
   overlay?.setAttribute("aria-hidden", "true");
+  if (okBtn) okBtn.textContent = "Entendido";
+}
+
+function showSqlDownloadNotice() {
+  showSt2Message(
+    "Descarga iniciada",
+    "Antes de descomprimir, borrá las versiones anteriores de Herramientas SQL para no mezclar archivos viejos con los nuevos.",
+    { okLabel: "Cerrar" },
+  );
 }
 
 let st2ConfirmBound = false;
@@ -2247,6 +2255,7 @@ function bindToolUrlDialog() {
   toolUrlDialogBound = true;
   document.getElementById("st2-tool-url-cancel")?.addEventListener("click", hideToolUrlDialog);
   document.getElementById("st2-msg-ok")?.addEventListener("click", hideSt2Message);
+  document.getElementById("st2-msg-close")?.addEventListener("click", hideSt2Message);
   document.getElementById("st2-tool-url-overlay")?.addEventListener("click", (e) => {
     if (e.target?.id === "st2-tool-url-overlay") hideToolUrlDialog();
   });

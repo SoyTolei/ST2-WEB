@@ -2439,6 +2439,10 @@ body.portal-tab-active .tab-icon {
   background: #fff7ed;
   color: #c2410c;
   cursor: pointer;
+  max-width: min(220px, 42vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .st2-about-tool-dl:not(:disabled):hover {
@@ -2562,6 +2566,38 @@ body.portal-tab-active .tab-icon {
   word-break: break-word;
   max-height: 40vh;
   overflow: auto;
+}
+
+.st2-msg-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.st2-msg-dialog-head h3 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.st2-msg-close {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.st2-msg-close:hover {
+  background: var(--nav-hover);
+  color: var(--dark);
 }
 
 .st2-tool-url-label {

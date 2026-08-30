@@ -96,6 +96,17 @@ html.st2-theme-dark .st2-tool-url-dialog h3 {
   color: var(--dark);
 }
 
+html.st2-theme-dark .st2-msg-close {
+  background: #121820;
+  border-color: #2b3445;
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-msg-close:hover {
+  background: #243044;
+  color: var(--text);
+}
+
 html.st2-theme-dark .st2-tool-url-input {
   background: #121820;
   border-color: #2b3445;
