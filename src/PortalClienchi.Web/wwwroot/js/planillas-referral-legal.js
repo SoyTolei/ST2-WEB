@@ -23,7 +23,7 @@ let hubCtx = null;
 let templatesCatalog = null;
 let openedFromMenu = false;
 let legalHubEventsBound = false;
-let navStack = { product: null, item: null, category: null, template: null, templateCount: 0 };
+let navStack = { product: null, item: null, category: null, template: null };
 
 const LEGAL_CATALOG_PRODUCT_MAP = {
   firm: "legal-one",
@@ -121,7 +121,7 @@ function showHub() {
 
 function showTemplateCards(product, item, category, templates) {
   showHubStatus("");
-  navStack = { product, item, category, template: null, templateCount: templates.length };
+  navStack = { product, item, category, template: null };
   showView("ref-legal-templates");
   const crumb = document.getElementById("ref-legal-templates-breadcrumb");
   if (crumb) crumb.textContent = `${product.label} › ${item.label}`;
@@ -158,7 +158,7 @@ function renderField(field, index) {
 }
 
 function showTemplateForm(product, item, template) {
-  navStack = { ...navStack, product, item, template, templateCount: navStack.templateCount || 1 };
+  navStack = { ...navStack, product, item, template };
   showView("ref-legal-form");
   const crumb = document.getElementById("ref-legal-form-breadcrumb");
   if (crumb) crumb.textContent = `${product.label} › ${LEGAL_ESCALAMIENTO_LABEL}`;
@@ -290,18 +290,11 @@ async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
 
     const product = { id: productId, label: hubProduct.label };
     const item = { id: itemId, label: hubItem.label, icon: hubItem.icon };
-
-    if (category.templates.length > 1) {
-      showTemplateCards(product, item, category, category.templates);
-      return;
-    }
-
     const tpl = resolveTemplate(category, hubItem);
     if (!tpl) {
       showHubStatus("No se encontró la plantilla de escalamiento.", true);
       return;
     }
-    navStack = { product, item, category, template: null, templateCount: 1 };
     showTemplateForm(product, item, tpl);
   } catch (err) {
     console.error(err);
@@ -343,24 +336,9 @@ function bindHubEvents() {
 
 export function handleLegalReferralBack() {
   const formVisible = !document.getElementById("ref-legal-form")?.classList.contains("hidden");
-  const templatesVisible = !document.getElementById("ref-legal-templates")?.classList.contains("hidden");
   const hubVisible = !document.getElementById("ref-legal-hub")?.classList.contains("hidden");
 
   if (formVisible) {
-    if (navStack.templateCount > 1 && navStack.product && navStack.item && navStack.category) {
-      showTemplateCards(navStack.product, navStack.item, navStack.category, navStack.category.templates || []);
-      return true;
-    }
-    if (openedFromMenu) {
-      openedFromMenu = false;
-      hubCtx?.goPlanillasMenu?.();
-      return true;
-    }
-    showHub();
-    return true;
-  }
-
-  if (templatesVisible) {
     if (openedFromMenu) {
       openedFromMenu = false;
       hubCtx?.goPlanillasMenu?.();
@@ -385,7 +363,7 @@ export function initLegalReferralHub(context) {
 
 export function openLegalProduct(productId) {
   openedFromMenu = true;
-  navStack = { product: null, item: null, category: null, template: null, templateCount: 0 };
+  navStack = { product: null, item: null, category: null, template: null };
   const hubProduct = findHubProduct(productId);
   const bugItem = hubProduct?.items?.[0];
   if (!hubProduct || !bugItem) return Promise.resolve();
@@ -393,7 +371,7 @@ export function openLegalProduct(productId) {
 }
 
 export function openLegalReferralHub() {
-  navStack = { product: null, item: null, category: null, template: null, templateCount: 0 };
+  navStack = { product: null, item: null, category: null, template: null };
   templatesCatalog = null;
   showHub();
   void ensureCatalog().catch((err) => showHubStatus(err?.message || "Error al cargar catálogo.", true));
@@ -401,7 +379,7 @@ export function openLegalReferralHub() {
 
 export function resetLegalReferralHub() {
   openedFromMenu = false;
-  navStack = { product: null, item: null, category: null, template: null, templateCount: 0 };
+  navStack = { product: null, item: null, category: null, template: null };
   hideAllLegalViews();
 }
 

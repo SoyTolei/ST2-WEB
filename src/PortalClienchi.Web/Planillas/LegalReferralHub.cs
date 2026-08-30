@@ -37,18 +37,18 @@ public static class LegalReferralHubCatalog
             "Westlaw",
             "scale",
             "cards",
-            "legal-one",
+            "westlaw",
             [
-                new("bug", "Escalamiento a N2/N3", "bug", "sistema"),
+                new("bug", "Escalamiento a N2/N3", "bug", "general"),
             ]),
         new(
             "cocounsel",
             "CoCounsel",
             "sparkles",
             "cards",
-            "legal-one",
+            "cocounsel",
             [
-                new("bug", "Escalamiento a N2/N3", "bug", "sistema"),
+                new("bug", "Escalamiento a N2/N3", "bug", "general"),
             ]),
     ];
 
