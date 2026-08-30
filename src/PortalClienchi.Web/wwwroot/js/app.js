@@ -279,7 +279,7 @@ function getAboutVersionLabel() {
   if (appConfig?.webVersionLabel) return appConfig.webVersionLabel;
   const meta = document.querySelector('meta[name="st2-version-label"]');
   if (meta?.content?.trim()) return meta.content.trim();
-  return "Versión WEB";
+  return "Esta web";
 }
 
 function getAboutUpdatedLabel() {
@@ -287,8 +287,7 @@ function getAboutUpdatedLabel() {
   if (fromConfig) return fromConfig;
   const meta = document.querySelector('meta[name="st2-updated-label"]');
   if (meta?.content?.trim()) return meta.content.trim();
-  const current = aboutUpdatedEl?.textContent?.trim();
-  return current || "Último update de la web";
+  return "Último update de la web: —";
 }
 
 function applyAboutUpdated() {
@@ -1863,11 +1862,9 @@ function markToolSeen(toolId) {
 function renderAboutTools() {
   const copy = {
     sql: {
-      desc: "Backups y restauración automática de bases, queries y scripts.",
       file: "ST2 - Herramientas SQL.zip",
     },
     bat: {
-      desc: "Automatización de procesos, habilitación, verificación de permisos y registro de componentes. Más usado por la mesa técnica.",
       file: "ST2-PS.zip",
     },
   };
@@ -1875,14 +1872,11 @@ function renderAboutTools() {
   for (const id of ["sql", "bat"]) {
     const tool = (cachedTools || []).find((t) => t.id === id);
     const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
-    const desc = card?.querySelector("[data-tool-desc]");
     const sizeEl = card?.querySelector(`[data-tool-size="${id}"]`);
     const newEl = card?.querySelector(`[data-tool-new="${id}"]`);
     const dateEl = card?.querySelector(`[data-tool-date="${id}"]`);
     const btn = card?.querySelector(`[data-tool-download="${id}"]`);
     const meta = copy[id];
-
-    if (desc) desc.textContent = meta.desc;
 
     if (!tool?.available) {
       if (newEl) newEl.hidden = true;
@@ -2377,7 +2371,7 @@ function showAbout({ history = "push" } = {}) {
   aboutRouteOpen = true;
   const webMeta = document.getElementById("st2-about-web-meta");
   if (webMeta) {
-    webMeta.textContent = "Esta web";
+    webMeta.textContent = getAboutVersionLabel();
     webMeta.title = "Estás usando esta aplicación web";
   }
   applyAboutUpdated();
@@ -4170,6 +4164,7 @@ async function bootstrapApp() {
   syncAdminTabVisibility();
   syncAboutToolsBadge();
   if (userCanSeeDesktopToolDownloads()) void refreshAboutTools({ silent: true });
+  applyAboutUpdated();
   applyTopTabEntry();
   window.addEventListener("popstate", () => {
     if (applyAboutFromPath()) return;
