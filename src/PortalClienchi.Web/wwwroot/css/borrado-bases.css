@@ -947,6 +947,24 @@ button.borrado-aclaracion-pill:focus-visible {
   margin: 0.75rem 0 1rem;
 }
 
+.borrado-edit-empresa-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 6.5rem minmax(10rem, 1fr);
+  gap: 0.45rem 0.75rem;
+}
+
+.borrado-edit-empresa-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.borrado-edit-empresa-pair .plan-user-input {
+  margin-bottom: 0;
+}
+
 .borrado-edit-bases {
   display: flex;
   flex-wrap: wrap;

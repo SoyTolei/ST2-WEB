@@ -948,20 +948,24 @@ function buildRow(item) {
   const cuit = String(item.cuit || "").trim();
   const cuitFmt = formatCuit(cuit);
   const cliente = String(item.nroCliente || "").trim();
+  const caso = String(item.nroCaso || "").trim();
   const aclaracion = String(item.aclaracion || "").trim();
   const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
-  const clienteCell = !cliente
-    ? "—"
-    : canConfirm
-      ? `<button type="button" class="borrado-cliente-copy" data-borrado-copy-cliente="${escapeHtml(cliente)}" title="Clic para copiar N° de cliente">
+  const copyBtn = (value, kind) => {
+    if (!value || !canConfirm) return escapeHtml(value || "—");
+    const label = kind === "caso" ? "caso" : "cliente";
+    return `<button type="button" class="borrado-cliente-copy" data-borrado-copy-value="${escapeHtml(value)}" data-borrado-copy-kind="${label}" title="Clic para copiar N° de ${label}">
             <span class="borrado-cliente-copy-icon" aria-hidden="true">📋</span>
-            <span class="borrado-cliente-copy-text">${escapeHtml(cliente)}</span>
+            <span class="borrado-cliente-copy-text">${escapeHtml(value)}</span>
             <span class="borrado-cliente-copy-hint" aria-hidden="true">copiar</span>
-          </button>`
-      : escapeHtml(cliente);
+          </button>`;
+  };
+  const allowCopy = isDetalleSalesforce(item) || canConfirm;
+  const casoCell = !caso ? "—" : allowCopy ? copyBtn(caso, "caso") : escapeHtml(caso);
+  const clienteCell = !cliente ? "—" : allowCopy ? copyBtn(cliente, "cliente") : escapeHtml(cliente);
   row.innerHTML = `
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
-    <td class="borrado-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
+    <td class="borrado-col-caso" title="${escapeHtml(caso)}">${casoCell}</td>
     <td class="borrado-col-cliente" title="${escapeHtml(cliente)}">${clienteCell}</td>
     <td class="borrado-col-empresa" title="${escapeHtml(empresaLabel)}">
       <span class="borrado-empresa-inline">${escapeHtml(empresaLabel)}</span>
@@ -974,17 +978,18 @@ function buildRow(item) {
     <td class="borrado-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${formatGestionadoPorCell(item)}</td>
   `;
 
-  row.querySelector("[data-borrado-copy-cliente]")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const btn = e.currentTarget;
-    const value = btn.getAttribute("data-borrado-copy-cliente") || cliente;
-    void copyClienteText(value, btn);
+  row.querySelectorAll("[data-borrado-copy-value]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const value = btn.getAttribute("data-borrado-copy-value") || "";
+      void copyClienteText(value, btn);
+    });
   });
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-borrado-copy-cliente]")) return;
+    if (e.target.closest("[data-borrado-copy-value]")) return;
     const pill = e.target.closest("button.borrado-base-pill");
     if (pill) {
       e.preventDefault();
@@ -1003,7 +1008,7 @@ function buildRow(item) {
   });
 
   row.addEventListener("dblclick", (e) => {
-    if (e.target.closest("button.borrado-base-pill, button.borrado-cliente-copy")) return;
+    if (e.target.closest("button.borrado-base-pill, [data-borrado-copy-value]")) return;
     e.preventDefault();
     selectedId = item.id;
     applyFilters();
@@ -1069,13 +1074,15 @@ function openListoModal(item) {
   const chkCg = document.getElementById("borrado-listo-contabilidad");
   const sf = isDetalleSalesforce(item);
 
-  wrapIva?.classList.toggle("hidden", sf || !item.iva);
-  wrapSj?.classList.toggle("hidden", sf || !item.sueldos);
-  wrapCg?.classList.toggle("hidden", sf || !item.contabilidad);
-  if (chkIva) chkIva.checked = !!item.iva;
-  if (chkSj) chkSj.checked = !!item.sueldos;
-  if (chkCg) chkCg.checked = !!item.contabilidad;
+  wrapIva?.classList.toggle("hidden", !sf && !item.iva);
+  wrapSj?.classList.toggle("hidden", !sf && !item.sueldos);
+  wrapCg?.classList.toggle("hidden", !sf && !item.contabilidad);
+  if (chkIva) chkIva.checked = sf ? false : !!item.iva;
+  if (chkSj) chkSj.checked = sf ? false : !!item.sueldos;
+  if (chkCg) chkCg.checked = sf ? false : !!item.contabilidad;
 
+  document.getElementById("borrado-listo-hint")?.classList.toggle("hidden", sf);
+  document.getElementById("borrado-listo-salesforce-hint")?.classList.toggle("hidden", !sf);
   overlay?.classList.toggle("is-salesforce", sf);
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
@@ -1088,6 +1095,8 @@ function hideListoModal() {
   overlay?.classList.add("hidden");
   overlay?.classList.remove("is-salesforce");
   overlay?.setAttribute("aria-hidden", "true");
+  document.getElementById("borrado-listo-hint")?.classList.remove("hidden");
+  document.getElementById("borrado-listo-salesforce-hint")?.classList.add("hidden");
 }
 
 async function confirmListoModal() {
@@ -1098,14 +1107,22 @@ async function confirmListoModal() {
     return;
   }
 
-  const done = {
-    iva: !!item.iva && !!document.getElementById("borrado-listo-iva")?.checked,
-    sueldos: !!item.sueldos && !!document.getElementById("borrado-listo-sueldos")?.checked,
-    contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
-  };
-  const summary = isDetalleSalesforce(item) ? DETALLE_SALESFORCE_NOMBRE : buildListoSummary(item, done);
+  const sf = isDetalleSalesforce(item);
+  const done = sf
+    ? {
+      iva: !!document.getElementById("borrado-listo-iva")?.checked,
+      sueldos: !!document.getElementById("borrado-listo-sueldos")?.checked,
+      contabilidad: !!document.getElementById("borrado-listo-contabilidad")?.checked,
+    }
+    : {
+      iva: !!item.iva && !!document.getElementById("borrado-listo-iva")?.checked,
+      sueldos: !!item.sueldos && !!document.getElementById("borrado-listo-sueldos")?.checked,
+      contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
+    };
+  const summary = sf ? buildListoSummarySalesforce(done) : buildListoSummary(item, done);
   const { nota } = parseAclaracion(item.aclaracion);
-  const aclaracion = composeAclaracion(summary, nota);
+  const notaFinal = sf ? DETALLE_SALESFORCE_NOMBRE : nota;
+  const aclaracion = composeAclaracion(summary, notaFinal);
 
   try {
     await patchItem(pendingListoId, { listo: true, aclaracion });
@@ -1116,6 +1133,18 @@ async function confirmListoModal() {
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
   }
+}
+
+/** Resumen al confirmar solicitudes Salesforce: siempre IVA, SJ y CG. */
+function buildListoSummarySalesforce(done) {
+  const parts = [
+    { label: "IVA", ok: !!done.iva },
+    { label: "SJ", ok: !!done.sueldos },
+    { label: "CG", ok: !!done.contabilidad },
+  ];
+  const allOk = parts.every((p) => p.ok);
+  if (allOk) return `Listo ${parts.map((p) => p.label).join(", ")}`;
+  return parts.map((p) => `${p.ok ? "✓" : "✗"} ${p.label}`).join(" · ");
 }
 
 /** Resumen al confirmar: "Listo IVA, SJ, CG" o "✓ IVA · ✗ SJ · ✓ CG". */
