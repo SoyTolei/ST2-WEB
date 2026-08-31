@@ -94,6 +94,7 @@ public sealed class OnvioReferralState
     public bool AdjuntaPantallas { get; set; }
     public string UsuarioContador { get; set; } = "";
     public string Empresa { get; set; } = "";
+    public string EjercicioNumero { get; set; } = "";
     public bool TicketAvisoOmitido { get; set; }
 }
 
@@ -198,6 +199,7 @@ public sealed class OnvioReferralDto
     public bool AdjuntaPantallas { get; set; }
     public string? UsuarioContador { get; set; }
     public string? Empresa { get; set; }
+    public string? EjercicioNumero { get; set; }
 }
 
 public sealed class ChileReferralDto

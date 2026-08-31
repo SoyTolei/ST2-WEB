@@ -80,6 +80,7 @@ public sealed class ReferralIdService
             caso.Onvio.AdjuntaPantallas = req.Onvio.AdjuntaPantallas;
             caso.Onvio.UsuarioContador = req.Onvio.UsuarioContador?.Trim() ?? "";
             caso.Onvio.Empresa = req.Onvio.Empresa?.Trim() ?? "";
+            caso.Onvio.EjercicioNumero = req.Onvio.EjercicioNumero?.Trim() ?? "";
         }
         if (req.Legal is not null)
         {

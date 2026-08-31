@@ -2672,6 +2672,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin-bottom: 8px;
 }
 .plan-form-2col-tight { margin-bottom: 0; gap: 12px; }
+.plan-onvio-ejercicio-field { grid-column: 1 / -1; }
 
 .plan-check-cards {
   display: grid;

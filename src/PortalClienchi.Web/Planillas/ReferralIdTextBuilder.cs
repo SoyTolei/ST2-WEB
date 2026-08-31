@@ -164,7 +164,7 @@ public static class ReferralIdTextBuilder
 
         partes.Add($"- Se adjuntan {CapturasTextoHelper.BuildSiNoLabel(c.CapturasEnlaces, o.AdjuntaPantallas)}: {(o.AdjuntaPantallas ? "SÍ" : "NO")}");
 
-        if (!string.IsNullOrWhiteSpace(o.UsuarioContador) || !string.IsNullOrWhiteSpace(o.Empresa))
+        if (!string.IsNullOrWhiteSpace(o.UsuarioContador) || !string.IsNullOrWhiteSpace(o.Empresa) || !string.IsNullOrWhiteSpace(o.EjercicioNumero))
         {
             partes.Add("");
             partes.Add("INFORMACIÓN DEL USUARIO:");
@@ -172,6 +172,8 @@ public static class ReferralIdTextBuilder
                 partes.Add($"- Usuario/Contador: {o.UsuarioContador.Trim()}");
             if (!string.IsNullOrWhiteSpace(o.Empresa))
                 partes.Add($"- Empresa: {o.Empresa.Trim()}");
+            if (!string.IsNullOrWhiteSpace(o.EjercicioNumero))
+                partes.Add($"- Ejercicio N°: {o.EjercicioNumero.Trim()}");
         }
     }
 

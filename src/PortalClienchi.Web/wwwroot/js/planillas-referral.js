@@ -1044,6 +1044,7 @@ function buildPayload() {
       reproduceEmpresaPrueba: document.getElementById("ref-onvio-rep-prueba")?.checked,
       usuarioContador: document.getElementById("ref-onvio-usuario")?.value.trim(),
       empresa: document.getElementById("ref-onvio-empresa")?.value.trim(),
+      ejercicioNumero: document.getElementById("ref-onvio-ejercicio")?.value.trim(),
     };
   }
   return payload;
@@ -1307,7 +1308,7 @@ function resetReferralForm() {
   clearBackupBases();
   clearOnvioTicketFields();
   clearLegalTicketFields();
-  ["ref-legal-chave", "ref-legal-usuario", "ref-legal-escritorio", "ref-onvio-usuario", "ref-onvio-empresa"].forEach((id) => {
+  ["ref-legal-chave", "ref-legal-usuario", "ref-legal-escritorio", "ref-onvio-usuario", "ref-onvio-empresa", "ref-onvio-ejercicio"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
