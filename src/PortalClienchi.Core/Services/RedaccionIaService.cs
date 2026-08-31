@@ -121,7 +121,7 @@ public sealed class RedaccionIaService : IDisposable
 
         var payload = new
         {
-            model = _settings.Model.Trim(),
+            model = _settings.ResolvedModel,
             temperature,
             messages = new[]
             {

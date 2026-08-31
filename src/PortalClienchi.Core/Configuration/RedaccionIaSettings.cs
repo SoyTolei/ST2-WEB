@@ -16,6 +16,24 @@ public sealed class RedaccionIaSettings
 
     public int TimeoutSeconds { get; set; } = 60;
 
+    /// <summary>Modelo efectivo: reemplaza IDs deprecados de Groq sin tocar variables de entorno.</summary>
+    public string ResolvedModel => ResolveModel(Model);
+
+    public static string ResolveModel(string? model)
+    {
+        var id = (model ?? "").Trim();
+        if (id.Length == 0)
+            return "openai/gpt-oss-120b";
+
+        return id.ToLowerInvariant() switch
+        {
+            "llama-3.3-70b-versatile" or "llama-3.3-70b-specdec" => "openai/gpt-oss-120b",
+            "llama-3.1-8b-instant" => "openai/gpt-oss-20b",
+            "llama-3.1-70b-versatile" or "llama-3.1-70b-specdec" => "openai/gpt-oss-120b",
+            _ => id,
+        };
+    }
+
     /// <summary>Activo si está habilitado explícitamente o hay API key cargada.</summary>
     public bool IsActive => Enabled || TieneApiKeyValida;
 
