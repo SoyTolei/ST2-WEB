@@ -194,8 +194,11 @@ let planEmbedReturnMode = "chile";
 const CHILE_EMBED_STORAGE_KEY = "st2-chile-embed";
 const BEJERMANWEB_EMBED_STORAGE_KEY = "st2-bejermanweb-embed";
 const BEJERMAN_WEB_EMBED_URL = "https://www.bejermanweb.com.ar/BW/LoginUser/BW";
+const BEJERMAN_WEB_OPEN_URL = "https://www.bejermanweb.com.ar/bw";
 /** Sin allow-top-navigation: evita que RutinasIndex.js redirija top → index.aspx (404). */
 const BEJERMAN_EMBED_SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads";
+let bejermanEmbedLoadCount = 0;
+let bejermanPostLoginDetected = false;
 
 const els = {
   sistemaBtns: () => document.querySelectorAll(".plan-sistema-grid > [data-plan-sistema]"),
@@ -1264,6 +1267,31 @@ function readBejermanWebEmbedSession() {
   return { ...saved, url: normalizeBejermanWebEmbedUrl(saved.url) };
 }
 
+function resetBejermanEmbedNavigationState() {
+  bejermanEmbedLoadCount = 0;
+  bejermanPostLoginDetected = false;
+  hideBejermanPostLoginHandoff();
+}
+
+function hideBejermanPostLoginHandoff() {
+  document.getElementById("plan-bejerman-postlogin-handoff")?.classList.add("hidden");
+}
+
+function showBejermanPostLoginHandoff() {
+  document.getElementById("plan-bejerman-postlogin-handoff")?.classList.remove("hidden");
+}
+
+function getBejermanBrowserUrl() {
+  return bejermanPostLoginDetected ? BEJERMAN_WEB_OPEN_URL : (chileEmbedUrl || BEJERMAN_WEB_EMBED_URL);
+}
+
+function handleBejermanEmbedFrameLoad() {
+  bejermanEmbedLoadCount += 1;
+  if (bejermanEmbedLoadCount < 2 || bejermanPostLoginDetected) return;
+  bejermanPostLoginDetected = true;
+  showBejermanPostLoginHandoff();
+}
+
 function syncBejermanEmbedFrameSandbox() {
   const frame = document.getElementById("planChileEmbedFrame");
   if (!frame) return;
@@ -1278,7 +1306,7 @@ function syncBejermanEmbedFallbackCopy() {
   const p = document.querySelector("#plan-chile-embed-fallback p");
   if (!p) return;
   p.textContent = planEmbedReturnMode === "menu"
-    ? "Si el login no aparece o ves un error, abrí BejermanWEB en el navegador."
+    ? "Usá el login embebido y, al ingresar, continuá en el navegador con el botón que aparece."
     : "Si la página no carga embebida (login o restricción del sitio), abrila en el navegador.";
 }
 
@@ -1340,6 +1368,8 @@ function toggleChileEmbedMenu() {
 function closeChileEmbed({ clearFrame = true } = {}) {
   clearChileEmbedLoadTimer();
   hideChileEmbedFallback();
+  hideBejermanPostLoginHandoff();
+  resetBejermanEmbedNavigationState();
   closeChileEmbedMenu();
   if (clearFrame) {
     const frame = document.getElementById("planChileEmbedFrame");
@@ -1389,14 +1419,16 @@ function showChileEmbedFallback() {
 }
 
 function openChileEmbedInBrowser() {
-  if (!chileEmbedUrl) return;
-  window.open(chileEmbedUrl, "_blank", "noopener,noreferrer");
+  const url = planEmbedReturnMode === "menu" ? getBejermanBrowserUrl() : chileEmbedUrl;
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function reloadChileEmbed() {
   const frame = document.getElementById("planChileEmbedFrame");
   if (!frame || !chileEmbedUrl) return;
   hideChileEmbedFallback();
+  if (planEmbedReturnMode === "menu") resetBejermanEmbedNavigationState();
   syncBejermanEmbedFrameSandbox();
   document.getElementById("plan-chile-embed-loading")?.classList.remove("hidden");
   clearChileEmbedLoadTimer();
@@ -1414,7 +1446,10 @@ function reloadChileEmbed() {
 function openPlanEmbed(url, title, returnMode = "menu") {
   planEmbedReturnMode = returnMode === "chile" ? "chile" : "menu";
   chileEmbedUrl = String(url || "").trim();
-  if (planEmbedReturnMode === "menu") chileEmbedUrl = normalizeBejermanWebEmbedUrl(chileEmbedUrl);
+  if (planEmbedReturnMode === "menu") {
+    chileEmbedUrl = normalizeBejermanWebEmbedUrl(chileEmbedUrl);
+    resetBejermanEmbedNavigationState();
+  }
   if (!chileEmbedUrl) return;
   chileEmbedTitle = title || (planEmbedReturnMode === "chile" ? "Soporte técnico Chile" : "BejermanWEB");
   if (planEmbedReturnMode === "chile") writeChileEmbedSession(chileEmbedUrl, chileEmbedTitle);
@@ -1466,6 +1501,7 @@ function bindChileEmbedUi() {
   });
 
   document.getElementById("plan-chile-embed-fallback-open")?.addEventListener("click", () => openChileEmbedInBrowser());
+  document.getElementById("plan-bejerman-postlogin-open")?.addEventListener("click", () => openChileEmbedInBrowser());
 
   document.addEventListener("click", (e) => {
     if (!chileEmbedMenuOpen) return;
@@ -1481,6 +1517,7 @@ function bindChileEmbedUi() {
   frame?.addEventListener("load", () => {
     clearChileEmbedLoadTimer();
     document.getElementById("plan-chile-embed-loading")?.classList.add("hidden");
+    if (planEmbedReturnMode === "menu") handleBejermanEmbedFrameLoad();
   });
 }
 
