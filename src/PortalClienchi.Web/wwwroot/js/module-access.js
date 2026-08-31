@@ -40,8 +40,10 @@ function fullFlags() {
     planillasTransferencia: true,
     planillasReferral: true,
     planillasLegal: true,
-    legalTransferencia: true,
-    legalEscalamiento: true,
+    legalFirm: true,
+    legalHighq: true,
+    legalWestlaw: true,
+    legalCocounsel: true,
     planillasChile: true,
     chileTransferencia: true,
     chileReferral: true,
@@ -67,8 +69,10 @@ function emptyFlags() {
     planillasTransferencia: false,
     planillasReferral: false,
     planillasLegal: false,
-    legalTransferencia: false,
-    legalEscalamiento: false,
+    legalFirm: false,
+    legalHighq: false,
+    legalWestlaw: false,
+    legalCocounsel: false,
     planillasChile: false,
     chileTransferencia: false,
     chileReferral: false,
@@ -200,8 +204,10 @@ function parseFlagsFromApi(m) {
     planillasTransferencia: m.planillasTransferencia == null ? true : !!m.planillasTransferencia,
     planillasReferral: m.planillasReferral == null ? true : !!m.planillasReferral,
     planillasLegal: m.planillasLegal == null ? true : !!m.planillasLegal,
-    legalTransferencia: m.legalTransferencia == null ? true : !!m.legalTransferencia,
-    legalEscalamiento: m.legalEscalamiento == null ? true : !!m.legalEscalamiento,
+    legalFirm: m.legalFirm == null ? true : !!m.legalFirm,
+    legalHighq: m.legalHighq == null ? true : !!m.legalHighq,
+    legalWestlaw: m.legalWestlaw == null ? true : !!m.legalWestlaw,
+    legalCocounsel: m.legalCocounsel == null ? true : !!m.legalCocounsel,
     planillasChile: m.planillasChile == null ? true : !!m.planillasChile,
     chileTransferencia: m.chileTransferencia == null ? true : !!m.chileTransferencia,
     chileReferral: m.chileReferral == null ? true : !!m.chileReferral,
@@ -358,12 +364,33 @@ export function canSeePlanillasReferral() {
   return !!getCachedModuleFlags().planillasReferral;
 }
 
-export function canSeeLegalTransferencia() {
-  return !!getCachedModuleFlags().legalTransferencia;
+export function canSeeLegalFirm() {
+  return !!getCachedModuleFlags().legalFirm;
 }
 
-export function canSeeLegalEscalamiento() {
-  return !!getCachedModuleFlags().legalEscalamiento;
+export function canSeeLegalHighq() {
+  return !!getCachedModuleFlags().legalHighq;
+}
+
+export function canSeeLegalWestlaw() {
+  return !!getCachedModuleFlags().legalWestlaw;
+}
+
+export function canSeeLegalCocounsel() {
+  return !!getCachedModuleFlags().legalCocounsel;
+}
+
+export function canSeeLegalProduct(productId) {
+  const id = String(productId || "").trim().toLowerCase();
+  if (id === "firm") return canSeeLegalFirm();
+  if (id === "highq") return canSeeLegalHighq();
+  if (id === "westlaw") return canSeeLegalWestlaw();
+  if (id === "cocounsel") return canSeeLegalCocounsel();
+  return false;
+}
+
+export function canSeeAnyLegalProduct() {
+  return canSeeLegalFirm() || canSeeLegalHighq() || canSeeLegalWestlaw() || canSeeLegalCocounsel();
 }
 
 export function canSeeChileTransferencia() {

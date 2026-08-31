@@ -116,8 +116,10 @@ public sealed class ModuleAccessRepository
         var planillasTransferencia = req.PlanillasTransferencia ?? current.PlanillasTransferencia;
         var planillasReferral = req.PlanillasReferral ?? current.PlanillasReferral;
         var planillasLegal = req.PlanillasLegal ?? current.PlanillasLegal;
-        var legalTransferencia = req.LegalTransferencia ?? current.LegalTransferencia;
-        var legalEscalamiento = req.LegalEscalamiento ?? current.LegalEscalamiento;
+        var legalFirm = req.LegalFirm ?? current.LegalFirm;
+        var legalHighq = req.LegalHighq ?? current.LegalHighq;
+        var legalWestlaw = req.LegalWestlaw ?? current.LegalWestlaw;
+        var legalCocounsel = req.LegalCocounsel ?? current.LegalCocounsel;
         var planillasChile = req.PlanillasChile ?? current.PlanillasChile;
         var chileTransferencia = req.ChileTransferencia ?? current.ChileTransferencia;
         var chileReferral = req.ChileReferral ?? current.ChileReferral;
@@ -137,8 +139,10 @@ public sealed class ModuleAccessRepository
         WriteModule(conn, email, PlanModuleIds.PlanillasTransferencia, planillasTransferencia, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasReferral, planillasReferral, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasLegal, planillasLegal, false);
-        WriteModule(conn, email, PlanModuleIds.LegalTransferencia, legalTransferencia, false);
-        WriteModule(conn, email, PlanModuleIds.LegalEscalamiento, legalEscalamiento, false);
+        WriteModule(conn, email, PlanModuleIds.LegalFirm, legalFirm, false);
+        WriteModule(conn, email, PlanModuleIds.LegalHighq, legalHighq, false);
+        WriteModule(conn, email, PlanModuleIds.LegalWestlaw, legalWestlaw, false);
+        WriteModule(conn, email, PlanModuleIds.LegalCocounsel, legalCocounsel, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasChile, planillasChile, false);
         WriteModule(conn, email, PlanModuleIds.ChileTransferencia, chileTransferencia, false);
         WriteModule(conn, email, PlanModuleIds.ChileReferral, chileReferral, false);
@@ -169,6 +173,7 @@ public sealed class ModuleAccessRepository
         var flags = new ModuleAccessFlagsDto();
         var loadExplicit = false;
         var borradoLoadExplicit = false;
+        bool? legacyLegalEscalamiento = null;
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT module, can_view, can_confirm
@@ -214,10 +219,16 @@ public sealed class ModuleAccessRepository
                 flags.PlanillasReferral = view;
             else if (module.Equals(PlanModuleIds.PlanillasLegal, StringComparison.OrdinalIgnoreCase))
                 flags.PlanillasLegal = view;
-            else if (module.Equals(PlanModuleIds.LegalTransferencia, StringComparison.OrdinalIgnoreCase))
-                flags.LegalTransferencia = view;
-            else if (module.Equals(PlanModuleIds.LegalEscalamiento, StringComparison.OrdinalIgnoreCase))
-                flags.LegalEscalamiento = view;
+            else if (module.Equals("legal_escalamiento", StringComparison.OrdinalIgnoreCase))
+                legacyLegalEscalamiento = view;
+            else if (module.Equals(PlanModuleIds.LegalFirm, StringComparison.OrdinalIgnoreCase))
+                flags.LegalFirm = view;
+            else if (module.Equals(PlanModuleIds.LegalHighq, StringComparison.OrdinalIgnoreCase))
+                flags.LegalHighq = view;
+            else if (module.Equals(PlanModuleIds.LegalWestlaw, StringComparison.OrdinalIgnoreCase))
+                flags.LegalWestlaw = view;
+            else if (module.Equals(PlanModuleIds.LegalCocounsel, StringComparison.OrdinalIgnoreCase))
+                flags.LegalCocounsel = view;
             else if (module.Equals(PlanModuleIds.PlanillasChile, StringComparison.OrdinalIgnoreCase))
                 flags.PlanillasChile = view;
             else if (module.Equals(PlanModuleIds.ChileTransferencia, StringComparison.OrdinalIgnoreCase))
@@ -258,10 +269,28 @@ public sealed class ModuleAccessRepository
             flags.PlanillasReferral = true;
         if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasLegal))
             flags.PlanillasLegal = true;
-        if (!HasModuleRow(conn, email, PlanModuleIds.LegalTransferencia))
-            flags.LegalTransferencia = true;
-        if (!HasModuleRow(conn, email, PlanModuleIds.LegalEscalamiento))
-            flags.LegalEscalamiento = true;
+
+        var hasLegalProductRow = HasAnyLegalProductRow(conn, email);
+        if (!hasLegalProductRow)
+        {
+            var legacy = legacyLegalEscalamiento ?? true;
+            flags.LegalFirm = legacy;
+            flags.LegalHighq = legacy;
+            flags.LegalWestlaw = legacy;
+            flags.LegalCocounsel = legacy;
+        }
+        else
+        {
+            if (!HasModuleRow(conn, email, PlanModuleIds.LegalFirm))
+                flags.LegalFirm = true;
+            if (!HasModuleRow(conn, email, PlanModuleIds.LegalHighq))
+                flags.LegalHighq = true;
+            if (!HasModuleRow(conn, email, PlanModuleIds.LegalWestlaw))
+                flags.LegalWestlaw = true;
+            if (!HasModuleRow(conn, email, PlanModuleIds.LegalCocounsel))
+                flags.LegalCocounsel = true;
+        }
+
         if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasChile))
             flags.PlanillasChile = true;
         if (!HasModuleRow(conn, email, PlanModuleIds.ChileTransferencia))
@@ -281,6 +310,12 @@ public sealed class ModuleAccessRepository
 
         return flags;
     }
+
+    private static bool HasAnyLegalProductRow(SqliteConnection conn, string email) =>
+        HasModuleRow(conn, email, PlanModuleIds.LegalFirm)
+        || HasModuleRow(conn, email, PlanModuleIds.LegalHighq)
+        || HasModuleRow(conn, email, PlanModuleIds.LegalWestlaw)
+        || HasModuleRow(conn, email, PlanModuleIds.LegalCocounsel);
 
     private static bool HasModuleRow(SqliteConnection conn, string email, string module)
     {
@@ -370,6 +405,7 @@ public sealed class ModuleAccessRepository
         EnsureBlanqueoLoadDefaults();
         EnsureBorradoBasesDefaults();
         EnsurePlanillasSistemaDefaults();
+        EnsureLegalProductDefaults();
     }
 
     /// <summary>
@@ -503,6 +539,52 @@ public sealed class ModuleAccessRepository
                 """;
             mark.ExecuteNonQuery();
             _logger.LogInformation("Defaults de sistemas Planillas aplicados (SQL/ONVIO, LEGAL, Chile)");
+        }
+    }
+
+    /// <summary>Migra legal_escalamiento legacy a productos individuales.</summary>
+    private void EnsureLegalProductDefaults()
+    {
+        lock (_gate)
+        {
+            using var conn = Open();
+            using (var check = conn.CreateCommand())
+            {
+                check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'seeded_legal_products_v1'";
+                var existing = check.ExecuteScalar() as string;
+                if (string.Equals(existing, "1", StringComparison.Ordinal))
+                    return;
+            }
+
+            using var list = conn.CreateCommand();
+            list.CommandText = """
+                SELECT email, can_view FROM module_access
+                WHERE lower(module) = lower($mod)
+                """;
+            list.Parameters.AddWithValue("$mod", "legal_escalamiento");
+            var rows = new List<(string Email, bool View)>();
+            using (var r = list.ExecuteReader())
+            {
+                while (r.Read())
+                    rows.Add((r.GetString(0), r.GetInt32(1) != 0));
+            }
+
+            foreach (var (email, view) in rows)
+            {
+                if (HasAnyLegalProductRow(conn, email)) continue;
+                WriteModule(conn, email, PlanModuleIds.LegalFirm, view, false);
+                WriteModule(conn, email, PlanModuleIds.LegalHighq, view, false);
+                WriteModule(conn, email, PlanModuleIds.LegalWestlaw, view, false);
+                WriteModule(conn, email, PlanModuleIds.LegalCocounsel, view, false);
+            }
+
+            using var mark = conn.CreateCommand();
+            mark.CommandText = """
+                INSERT INTO module_access_meta (key, value) VALUES ('seeded_legal_products_v1', '1')
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                """;
+            mark.ExecuteNonQuery();
+            _logger.LogInformation("Migración de productos LEGAL aplicada (legal_escalamiento → por producto)");
         }
     }
 

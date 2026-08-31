@@ -895,8 +895,10 @@ public sealed class AccessPresetRequest
     public bool? PlanillasTransferencia { get; set; }
     public bool? PlanillasReferral { get; set; }
     public bool? PlanillasLegal { get; set; }
-    public bool? LegalTransferencia { get; set; }
-    public bool? LegalEscalamiento { get; set; }
+    public bool? LegalFirm { get; set; }
+    public bool? LegalHighq { get; set; }
+    public bool? LegalWestlaw { get; set; }
+    public bool? LegalCocounsel { get; set; }
     public bool? PlanillasChile { get; set; }
     public bool? ChileTransferencia { get; set; }
     public bool? ChileReferral { get; set; }

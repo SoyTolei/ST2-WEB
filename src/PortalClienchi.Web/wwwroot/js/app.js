@@ -137,8 +137,10 @@ const accessModPlanillasLegal = document.getElementById("st2-mod-planillas-legal
 const accessModPlanillasChile = document.getElementById("st2-mod-planillas-chile");
 const accessModPlanillasTransferencia = document.getElementById("st2-mod-planillas-transferencia");
 const accessModPlanillasReferral = document.getElementById("st2-mod-planillas-referral");
-const accessModLegalTransferencia = document.getElementById("st2-mod-legal-transferencia");
-const accessModLegalEscalamiento = document.getElementById("st2-mod-legal-escalamiento");
+const accessModLegalFirm = document.getElementById("st2-mod-legal-firm");
+const accessModLegalHighq = document.getElementById("st2-mod-legal-highq");
+const accessModLegalWestlaw = document.getElementById("st2-mod-legal-westlaw");
+const accessModLegalCocounsel = document.getElementById("st2-mod-legal-cocounsel");
 const accessModChileTransferencia = document.getElementById("st2-mod-chile-transferencia");
 const accessModChileReferral = document.getElementById("st2-mod-chile-referral");
 const accessModChileSaad = document.getElementById("st2-mod-chile-saad");
@@ -948,12 +950,18 @@ function normalizeAccessModules(modules) {
     planillasLegal: m.planillasLegal == null && m.PlanillasLegal == null
       ? true
       : !!(m.planillasLegal ?? m.PlanillasLegal),
-    legalTransferencia: m.legalTransferencia == null && m.LegalTransferencia == null
+    legalFirm: m.legalFirm == null && m.LegalFirm == null
       ? true
-      : !!(m.legalTransferencia ?? m.LegalTransferencia),
-    legalEscalamiento: m.legalEscalamiento == null && m.LegalEscalamiento == null
+      : !!(m.legalFirm ?? m.LegalFirm),
+    legalHighq: m.legalHighq == null && m.LegalHighq == null
       ? true
-      : !!(m.legalEscalamiento ?? m.LegalEscalamiento),
+      : !!(m.legalHighq ?? m.LegalHighq),
+    legalWestlaw: m.legalWestlaw == null && m.LegalWestlaw == null
+      ? true
+      : !!(m.legalWestlaw ?? m.LegalWestlaw),
+    legalCocounsel: m.legalCocounsel == null && m.LegalCocounsel == null
+      ? true
+      : !!(m.legalCocounsel ?? m.LegalCocounsel),
     planillasChile: m.planillasChile == null && m.PlanillasChile == null
       ? true
       : !!(m.planillasChile ?? m.PlanillasChile),
@@ -2826,8 +2834,10 @@ function readAccessModuleChecksFromForm() {
     planillasTransferencia: !!accessModPlanillasTransferencia?.checked,
     planillasReferral: !!accessModPlanillasReferral?.checked,
     planillasLegal: !!accessModPlanillasLegal?.checked,
-    legalTransferencia: !!accessModLegalTransferencia?.checked,
-    legalEscalamiento: !!accessModLegalEscalamiento?.checked,
+    legalFirm: !!accessModLegalFirm?.checked,
+    legalHighq: !!accessModLegalHighq?.checked,
+    legalWestlaw: !!accessModLegalWestlaw?.checked,
+    legalCocounsel: !!accessModLegalCocounsel?.checked,
     planillasChile: !!accessModPlanillasChile?.checked,
     chileTransferencia: !!accessModChileTransferencia?.checked,
     chileReferral: !!accessModChileReferral?.checked,
@@ -2847,8 +2857,10 @@ function setAccessModuleChecks(mods, { presetDefaults = false } = {}) {
   if (accessModPlanillasTransferencia) accessModPlanillasTransferencia.checked = def("planillasTransferencia");
   if (accessModPlanillasReferral) accessModPlanillasReferral.checked = def("planillasReferral");
   if (accessModPlanillasLegal) accessModPlanillasLegal.checked = def("planillasLegal");
-  if (accessModLegalTransferencia) accessModLegalTransferencia.checked = def("legalTransferencia");
-  if (accessModLegalEscalamiento) accessModLegalEscalamiento.checked = def("legalEscalamiento");
+  if (accessModLegalFirm) accessModLegalFirm.checked = def("legalFirm");
+  if (accessModLegalHighq) accessModLegalHighq.checked = def("legalHighq");
+  if (accessModLegalWestlaw) accessModLegalWestlaw.checked = def("legalWestlaw");
+  if (accessModLegalCocounsel) accessModLegalCocounsel.checked = def("legalCocounsel");
   if (accessModPlanillasChile) accessModPlanillasChile.checked = def("planillasChile");
   if (accessModChileTransferencia) accessModChileTransferencia.checked = def("chileTransferencia");
   if (accessModChileReferral) accessModChileReferral.checked = def("chileReferral");

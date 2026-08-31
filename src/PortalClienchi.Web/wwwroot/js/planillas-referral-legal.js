@@ -1,5 +1,7 @@
 import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
+import { canSeeLegalProduct } from "./module-access.js";
+import { syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -81,8 +83,12 @@ function findCatalogCategory(catalogProductId, categoryId) {
   return product?.categories?.find((c) => c.id === categoryId);
 }
 
+function visibleLegalCatalog(catalog) {
+  return (catalog || []).filter((product) => canSeeLegalProduct(product.id));
+}
+
 function renderProductButtons(catalog, attrName) {
-  return catalog.map((product) => `
+  return visibleLegalCatalog(catalog).map((product) => `
     <button type="button" class="plan-modulo-btn plan-legal-product-btn ${LEGAL_PRODUCT_BTN_CLASS[product.id] || "referral"}" ${attrName}="${product.id}">
       <span class="plan-modulo-icon" aria-hidden="true">${icon(product.icon)}</span>
       <span class="plan-modulo-copy">
@@ -97,6 +103,11 @@ function renderHub() {
   const root = document.getElementById("ref-legal-hub-root");
   const catalog = hubCtx?.getConfig()?.legal?.referralHub;
   if (!root || !catalog?.length) return;
+  const visible = visibleLegalCatalog(catalog);
+  if (!visible.length) {
+    root.innerHTML = "";
+    return;
+  }
   root.innerHTML = `
     <div class="plan-modulos-well plan-legal-products-well">
       <div class="plan-modulos-grid plan-legal-products-grid">
@@ -104,13 +115,21 @@ function renderHub() {
       </div>
     </div>
   `;
+  syncPlanModulosGridLayout(root.querySelector(".plan-legal-products-grid"));
 }
 
 export function syncLegalMenuProducts() {
   const root = document.getElementById("plan-legal-menu-products");
+  const wrap = document.getElementById("plan-legal-products-wrap");
   const catalog = hubCtx?.getConfig()?.legal?.referralHub;
   if (!root || !catalog?.length) return;
+  const visible = visibleLegalCatalog(catalog);
   root.innerHTML = renderProductButtons(catalog, "data-legal-menu-product");
+  const show = visible.length > 0;
+  wrap?.classList.toggle("hidden", !show);
+  wrap?.toggleAttribute("hidden", !show);
+  wrap?.setAttribute("aria-hidden", show ? "false" : "true");
+  syncPlanModulosGridLayout(root);
 }
 
 function showHub() {
@@ -309,11 +328,13 @@ function bindHubEvents() {
   document.addEventListener("click", (e) => {
     const menuBtn = e.target.closest("[data-legal-menu-product]");
     if (menuBtn) {
+      if (!canSeeLegalProduct(menuBtn.dataset.legalMenuProduct)) return;
       hubCtx?.openLegalProduct?.(menuBtn.dataset.legalMenuProduct);
       return;
     }
     const hubBtn = e.target.closest("[data-legal-product]");
     if (!hubBtn) return;
+    if (!canSeeLegalProduct(hubBtn.dataset.legalProduct)) return;
     const hubProduct = findHubProduct(hubBtn.dataset.legalProduct);
     const bugItem = hubProduct?.items?.[0];
     if (bugItem) void onHubItemPick(hubBtn.dataset.legalProduct, bugItem.id);
@@ -362,6 +383,7 @@ export function initLegalReferralHub(context) {
 }
 
 export function openLegalProduct(productId) {
+  if (!canSeeLegalProduct(productId)) return Promise.resolve();
   openedFromMenu = true;
   navStack = { product: null, item: null, category: null, template: null };
   const hubProduct = findHubProduct(productId);

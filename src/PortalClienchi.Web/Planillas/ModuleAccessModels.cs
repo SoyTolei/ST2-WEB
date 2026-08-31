@@ -14,8 +14,10 @@ public static class PlanModuleIds
     public const string PlanillasTransferencia = "planillas_transferencia";
     public const string PlanillasReferral = "planillas_referral";
     public const string PlanillasLegal = "planillas_legal";
-    public const string LegalTransferencia = "legal_transferencia";
-    public const string LegalEscalamiento = "legal_escalamiento";
+    public const string LegalFirm = "legal_firm";
+    public const string LegalHighq = "legal_highq";
+    public const string LegalWestlaw = "legal_westlaw";
+    public const string LegalCocounsel = "legal_cocounsel";
     public const string PlanillasChile = "planillas_chile";
     public const string ChileTransferencia = "chile_transferencia";
     public const string ChileReferral = "chile_referral";
@@ -37,8 +39,10 @@ public static class PlanModuleIds
         PlanillasTransferencia,
         PlanillasReferral,
         PlanillasLegal,
-        LegalTransferencia,
-        LegalEscalamiento,
+        LegalFirm,
+        LegalHighq,
+        LegalWestlaw,
+        LegalCocounsel,
         PlanillasChile,
         ChileTransferencia,
         ChileReferral,
@@ -66,8 +70,10 @@ public sealed class ModuleAccessFlagsDto
     public bool PlanillasTransferencia { get; set; } = true;
     public bool PlanillasReferral { get; set; } = true;
     public bool PlanillasLegal { get; set; } = true;
-    public bool LegalTransferencia { get; set; } = true;
-    public bool LegalEscalamiento { get; set; } = true;
+    public bool LegalFirm { get; set; } = true;
+    public bool LegalHighq { get; set; } = true;
+    public bool LegalWestlaw { get; set; } = true;
+    public bool LegalCocounsel { get; set; } = true;
     public bool PlanillasChile { get; set; } = true;
     public bool ChileTransferencia { get; set; } = true;
     public bool ChileReferral { get; set; } = true;
@@ -93,8 +99,10 @@ public sealed class ModuleAccessUpdateRequest
     public bool? PlanillasTransferencia { get; set; }
     public bool? PlanillasReferral { get; set; }
     public bool? PlanillasLegal { get; set; }
-    public bool? LegalTransferencia { get; set; }
-    public bool? LegalEscalamiento { get; set; }
+    public bool? LegalFirm { get; set; }
+    public bool? LegalHighq { get; set; }
+    public bool? LegalWestlaw { get; set; }
+    public bool? LegalCocounsel { get; set; }
     public bool? PlanillasChile { get; set; }
     public bool? ChileTransferencia { get; set; }
     public bool? ChileReferral { get; set; }
