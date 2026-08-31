@@ -148,6 +148,9 @@ export function initReferralModule(context) {
 
 export async function openReferral({ legalProductId = null } = {}) {
   if (!ctx) return;
+  if (ctx.getSistema() === "BejermanSql") {
+    saveEsTecnico(false);
+  }
   resetReferralForm();
   updateReferralPanels();
   if (isLegal()) {

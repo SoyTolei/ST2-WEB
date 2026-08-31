@@ -407,7 +407,19 @@ html.st2-theme-dark .blanqueo-note-textarea {
 html.st2-theme-dark .planillas-app input::placeholder,
 html.st2-theme-dark .planillas-app textarea::placeholder,
 html.st2-theme-dark .pdf-portal-rich:empty::before {
-  color: #7d8ba0 !important;
+  color: #64748b !important;
+  font-style: italic;
+  opacity: 1;
+}
+
+html.st2-theme-dark .planillas-app textarea.placeholder-active,
+html.st2-theme-dark .planillas-app input.placeholder-active,
+html.st2-theme-dark #planillas-transferencia textarea.placeholder-active,
+html.st2-theme-dark #planillas-transferencia input.placeholder-active,
+html.st2-theme-dark #planillas-referral textarea.placeholder-active,
+html.st2-theme-dark #planillas-referral input.placeholder-active {
+  color: #64748b !important;
+  font-style: italic !important;
 }
 
 html.st2-theme-dark .plan-onvio-option,
@@ -421,6 +433,10 @@ html.st2-theme-dark .plan-gestor-ctx button {
 
 html.st2-theme-dark .plan-gestor-ctx button:hover {
   background: #243044 !important;
+}
+
+html.st2-theme-dark #planillas-menu .planillas-section-title {
+  color: #94a3b8 !important;
 }
 
 html.st2-theme-dark .plan-pill-btn:not(.active) {

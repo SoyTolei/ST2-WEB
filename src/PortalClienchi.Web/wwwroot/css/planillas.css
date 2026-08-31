@@ -851,10 +851,12 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .planillas-section-title {
   text-align: center;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   margin: 0 0 12px;
-  color: var(--dark);
+  color: #64748b;
 }
 
 #planillas-menu .planillas-section-title:last-of-type {
@@ -888,6 +890,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   background: transparent;
   padding: 12px 8px;
   border-radius: 10px;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
   color: var(--dark);
@@ -1022,19 +1025,22 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-modulo-label {
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
   font-size: 0.86rem;
   font-weight: 700;
+  letter-spacing: -0.015em;
   line-height: 1.2;
   text-align: center;
 }
 
 .plan-modulo-sub {
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
   font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   line-height: 1.25;
   text-align: center;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .plan-modulo-btn:hover:not(:disabled) {
@@ -1676,8 +1682,17 @@ body.st2-chile-embed-active #panel-planillas.active {
   resize: vertical;
 }
 
-.plan-field textarea.placeholder-active {
-  color: var(--text-muted);
+.plan-field textarea.placeholder-active,
+.plan-field input.placeholder-active {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.planillas-app input::placeholder,
+.planillas-app textarea::placeholder {
+  color: #94a3b8;
+  font-style: italic;
+  opacity: 1;
 }
 
 .plan-mesa-field {
