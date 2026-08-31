@@ -1,9 +1,19 @@
 const NOTIF_PREF_KEY = "st2-desktop-notif-v1";
 const NOTIF_SOUND_PREF_KEY = "st2-desktop-notif-sound-v1";
+const NOTIF_SOUND_DEFAULT = "/sounds/notif-pending.mp3";
+const NOTIF_SOUND_FALLBACKS = [
+  "/sounds/notif-pending.mp3",
+  "/sounds/notif-pending.ogg",
+  "/sounds/notif-pending.wav",
+];
 let lastBlanqueoSig = "";
 let lastBorradoSig = "";
 let lastWebUpdateBuild = "";
 let audioCtx = null;
+let notifAudio = null;
+let notifAudioUrl = "";
+let notifAudioFailed = false;
+let notifSoundUnlockBound = false;
 
 export function desktopNotifSupported() {
   return typeof window !== "undefined" && "Notification" in window;
@@ -37,6 +47,67 @@ function notifSoundEnabled() {
   }
 }
 
+function notifSoundCandidates() {
+  const custom = document.querySelector('meta[name="st2-notif-sound"]')?.content?.trim();
+  if (custom) return [custom];
+  return NOTIF_SOUND_FALLBACKS;
+}
+
+function getNotifAudio(url) {
+  if (!url || notifAudioFailed) return null;
+  if (!notifAudio || notifAudioUrl !== url) {
+    notifAudio = new Audio(url);
+    notifAudio.preload = "auto";
+    notifAudioUrl = url;
+    notifAudio.addEventListener("error", () => {
+      const list = notifSoundCandidates();
+      const idx = list.indexOf(url);
+      const next = idx >= 0 ? list[idx + 1] : null;
+      if (next) {
+        notifAudioUrl = "";
+        getNotifAudio(next);
+        return;
+      }
+      notifAudioFailed = true;
+    }, { once: true });
+  }
+  return notifAudio;
+}
+
+/** Desbloquea audio tras el primer clic/tecla (política de autoplay del navegador). */
+export function unlockNotifSound() {
+  const ctx = getAudioCtx();
+  if (ctx?.state === "suspended") void ctx.resume();
+  const audio = getNotifAudio(notifSoundCandidates()[0]);
+  if (!audio) return;
+  const prevVolume = audio.volume;
+  audio.volume = 0.001;
+  const playPromise = audio.play();
+  if (!playPromise) {
+    audio.volume = prevVolume;
+    return;
+  }
+  playPromise
+    .then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = prevVolume;
+    })
+    .catch(() => {
+      audio.volume = prevVolume;
+    });
+}
+
+export function bindNotifSoundUnlock() {
+  if (notifSoundUnlockBound) return;
+  notifSoundUnlockBound = true;
+  const unlock = () => unlockNotifSound();
+  document.addEventListener("pointerdown", unlock, { once: true, passive: true });
+  document.addEventListener("keydown", unlock, { once: true, passive: true });
+}
+
+bindNotifSoundUnlock();
+
 function getAudioCtx() {
   if (audioCtx) return audioCtx;
   try {
@@ -49,9 +120,31 @@ function getAudioCtx() {
   }
 }
 
-/** Dos tonos cortos tipo “pendiente” (Web Audio, sin archivo externo). */
+/** Sonido de aviso: archivo en /sounds/ si existe; si no, pitido Web Audio. */
 export function playPendingNotifSound() {
   if (!notifSoundEnabled()) return;
+
+  const url = notifSoundCandidates()[0];
+  const audio = getNotifAudio(url);
+  if (audio && !notifAudioFailed) {
+    try {
+      audio.currentTime = 0;
+      audio.volume = 1;
+      const playPromise = audio.play();
+      if (playPromise) {
+        playPromise.catch(() => playWebAudioNotifSound());
+        return;
+      }
+      return;
+    } catch {
+      notifAudioFailed = true;
+    }
+  }
+
+  playWebAudioNotifSound();
+}
+
+function playWebAudioNotifSound() {
   try {
     const ctx = getAudioCtx();
     if (!ctx) return;
@@ -78,6 +171,10 @@ export function playPendingNotifSound() {
       osc.stop(at + dur + 0.02);
     });
   } catch { /* ignore */ }
+}
+
+export function getNotifSoundPath() {
+  return notifSoundCandidates()[0] || NOTIF_SOUND_DEFAULT;
 }
 
 export function setDesktopNotifSoundEnabled(on) {
