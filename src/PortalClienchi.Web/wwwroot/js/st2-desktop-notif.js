@@ -1,7 +1,8 @@
 const NOTIF_PREF_KEY = "st2-desktop-notif-v1";
 const NOTIF_SOUND_PREF_KEY = "st2-desktop-notif-sound-v1";
-const NOTIF_SOUND_DEFAULT = "/sounds/notif-pending.mp3";
+const NOTIF_SOUND_DEFAULT = "/sounds/notificacion.mp3";
 const NOTIF_SOUND_FALLBACKS = [
+  "/sounds/notificacion.mp3",
   "/sounds/notif-pending.mp3",
   "/sounds/notif-pending.ogg",
   "/sounds/notif-pending.wav",
