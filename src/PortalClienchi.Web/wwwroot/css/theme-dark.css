@@ -1955,10 +1955,20 @@ html.st2-theme-dark #planillas-transferencia .btn-secondary {
   color: #e8eef7 !important;
 }
 
+html.st2-theme-dark .plan-capturas-card label {
+  color: #e2e8f0 !important;
+}
+
+html.st2-theme-dark .plan-capturas-card:hover {
+  background: rgba(58, 29, 18, 0.55) !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12) !important;
+}
+
 html.st2-theme-dark #planillas-transferencia .plan-ia-undo-btn {
-  background: #151c28 !important;
-  border-color: #4b5a73 !important;
-  color: #cbd5e1 !important;
+  background: linear-gradient(180deg, #2a1810 0%, #1a2130 100%) !important;
+  border-color: rgba(234, 88, 12, 0.45) !important;
+  color: #fdba74 !important;
 }
 
 html.st2-theme-dark .borrado-list-footer,
