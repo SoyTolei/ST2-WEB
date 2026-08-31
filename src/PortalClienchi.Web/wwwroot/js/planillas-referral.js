@@ -1,4 +1,4 @@
-import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, handleLegalReferralBack } from "./planillas-referral-legal.js";
 import {
   initChileReferral,
@@ -1191,9 +1191,8 @@ async function mejorarReferralIa() {
   referralIaUndo?.saveSnapshot();
   if (btn) btn.disabled = true;
   if (status) {
-    status.textContent = "Mejorando con IA…";
+    status.textContent = "";
     status.classList.remove("is-error");
-    status.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   try {
@@ -1240,9 +1239,10 @@ async function mejorarReferralIa() {
     }
 
     if (status) {
-      status.textContent = "Redacción mejorada. Usá ↩ al lado si no te convence.";
+      status.textContent = "";
       status.classList.remove("is-error");
     }
+    notifyIaUndoHint("ref-btn-ia-undo");
   } catch (ex) {
     referralIaUndo?.clearSnapshot();
     const msg = ex?.message || "Error al mejorar con IA";

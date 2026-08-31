@@ -1,5 +1,5 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
@@ -901,7 +901,7 @@ async function mejorarTransferenciaIa() {
   transferIaUndo?.saveSnapshot();
   const btn = document.getElementById("plan-btn-ia");
   if (btn) btn.disabled = true;
-  setPlanStatus("Mejorando redacción con IA…");
+  setPlanStatus("");
 
   try {
     const response = await fetch("/api/planillas/transferencia/mejorar", {
@@ -922,7 +922,8 @@ async function mejorarTransferenciaIa() {
       desc.classList.remove("placeholder-active");
       descripcionEsPlaceholder = false;
     }
-    setPlanStatus("Redacción mejorada. Usá ↩ al lado si no te convence.");
+    setPlanStatus("");
+    notifyIaUndoHint("plan-btn-ia-undo");
   } catch (ex) {
     setPlanStatus(ex.message, true);
     alert(ex.message);

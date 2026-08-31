@@ -2322,6 +2322,13 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-color: #fdba74;
 }
 
+.plan-ia-undo-btn:not(:disabled).is-hint {
+  color: #d64000;
+  border-color: #f97316;
+  background: #fff7ed;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.22);
+}
+
 .plan-ia-undo-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;

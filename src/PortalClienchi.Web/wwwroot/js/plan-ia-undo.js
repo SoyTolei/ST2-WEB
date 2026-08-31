@@ -1,5 +1,42 @@
 /** Snapshot / restore de campos antes de aplicar IA manual. */
 
+const IA_UNDO_HINT = "Volvé atrás si no te convence";
+const IA_UNDO_DEFAULT = "Deshacer cambios de la IA";
+const iaUndoHintTimers = new Map();
+
+export function notifyIaUndoHint(undoBtnId) {
+  const undoBtn = document.getElementById(undoBtnId);
+  if (!undoBtn) return;
+
+  const prev = iaUndoHintTimers.get(undoBtnId);
+  if (prev) clearTimeout(prev);
+
+  undoBtn.title = IA_UNDO_HINT;
+  undoBtn.setAttribute("aria-label", IA_UNDO_HINT);
+  undoBtn.classList.add("is-hint");
+
+  const timer = setTimeout(() => {
+    if (!undoBtn.disabled) {
+      undoBtn.title = IA_UNDO_DEFAULT;
+      undoBtn.setAttribute("aria-label", IA_UNDO_DEFAULT);
+    }
+    undoBtn.classList.remove("is-hint");
+    iaUndoHintTimers.delete(undoBtnId);
+  }, 8000);
+
+  iaUndoHintTimers.set(undoBtnId, timer);
+}
+
+function clearIaUndoHint(undoBtn) {
+  if (!undoBtn) return;
+  const timer = iaUndoHintTimers.get(undoBtn.id);
+  if (timer) {
+    clearTimeout(timer);
+    iaUndoHintTimers.delete(undoBtn.id);
+  }
+  undoBtn.classList.remove("is-hint");
+}
+
 export function syncIaUndoBar(iaBtnId, undoBtnId, visible) {
   const show = !!visible;
   document.getElementById(iaBtnId)?.classList.toggle("hidden", !show);
@@ -60,9 +97,13 @@ export function bindIaUndoButtons({ undoBtnId, getSnapshot, onUndo }) {
     if (!undoBtn) return;
     undoBtn.disabled = !snapshot;
     undoBtn.title = snapshot
-      ? "Deshacer cambios de la IA"
+      ? IA_UNDO_DEFAULT
       : "Disponible después de usar «Mejorar redacción con IA»";
     undoBtn.setAttribute("aria-disabled", snapshot ? "false" : "true");
+    undoBtn.setAttribute(
+      "aria-label",
+      snapshot ? IA_UNDO_DEFAULT : "Deshacer cambios de la IA (disponible después de mejorar con IA)",
+    );
   };
 
   updateUndoUi();
@@ -76,10 +117,12 @@ export function bindIaUndoButtons({ undoBtnId, getSnapshot, onUndo }) {
       if (!snapshot) return;
       onUndo(snapshot);
       snapshot = null;
+      clearIaUndoHint(undoBtn);
       updateUndoUi();
     },
     clearSnapshot() {
       snapshot = null;
+      clearIaUndoHint(undoBtn);
       updateUndoUi();
     },
     hasSnapshot: () => !!snapshot,

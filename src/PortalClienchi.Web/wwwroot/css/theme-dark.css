@@ -1057,6 +1057,13 @@ html.st2-theme-dark #planillas-transferencia .plan-ia-btn:hover {
   color: #ffedd5 !important;
 }
 
+html.st2-theme-dark .plan-ia-undo-btn:not(:disabled).is-hint {
+  background: #3a1d12 !important;
+  border-color: #ea580c !important;
+  color: #fdba74 !important;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.28) !important;
+}
+
 html.st2-theme-dark .plan-chile-embed-fallback {
   background: rgba(42, 33, 24, 0.96);
   border-color: #b45309;

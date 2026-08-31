@@ -5,7 +5,7 @@ import {
   refreshPlanUserSession,
   syncPlanUserSession,
 } from "./plan-user.js";
-import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar } from "./plan-ia-undo.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 
 let ctx = null;
 let metodoContacto = null;
@@ -222,7 +222,8 @@ async function mejorarOportunidadIa() {
       return;
     }
     applyCargarPayload(data);
-    status.textContent = "Formulario actualizado con IA. Usá ↩ al lado si no te convence.";
+    status.textContent = "";
+    notifyIaUndoHint("op-btn-ia-undo");
   } finally {
     if (btn) btn.disabled = false;
   }
