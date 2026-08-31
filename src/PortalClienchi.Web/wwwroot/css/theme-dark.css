@@ -627,7 +627,7 @@ html.st2-theme-dark .plan-module-sticky-head {
 
 html.st2-theme-dark .plan-module-title {
   color: #e8eef7 !important;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
@@ -1441,8 +1441,10 @@ html.st2-theme-dark .pdf-fmt-field,
 html.st2-theme-dark .pdf-portal-status,
 html.st2-theme-dark .planillas-app label,
 html.st2-theme-dark .plan-field label,
-html.st2-theme-dark .plan-gestor-field-label {
-  color: #d6dee9 !important;
+html.st2-theme-dark .plan-gestor-field-label,
+html.st2-theme-dark .plan-gestor-panel-title,
+html.st2-theme-dark .plan-ref-title {
+  color: #94a3b8 !important;
 }
 
 html.st2-theme-dark .blanqueo-clave-hint {

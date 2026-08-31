@@ -1449,7 +1449,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background-image: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  margin: calc(-1 * var(--plan-card-pad-top)) calc(-1 * var(--plan-card-pad-x)) 10px;
+  margin: calc(-1 * var(--plan-card-pad-top)) calc(-1 * var(--plan-card-pad-x)) 20px;
   padding: calc(14px + var(--plan-view-pad-y, 12px)) var(--plan-card-pad-x) 8px;
   border-bottom: 1px solid var(--border);
   box-shadow:
@@ -1651,7 +1651,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-size: 0.82rem;
   font-weight: 600;
   margin-bottom: 6px;
-  color: var(--dark);
+  color: #94a3b8;
 }
 
 .plan-field input,
@@ -2112,7 +2112,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin: 0;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
   font-size: clamp(0.94rem, 1.05rem + 0.35vw, 1.14rem);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.028em;
   line-height: 1.28;
   text-wrap: balance;
@@ -2121,7 +2121,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-module-sticky-head .plan-module-title {
   font-size: clamp(0.9rem, 0.95rem + 0.3vw, 1.06rem);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 @media (max-width: 720px) {
@@ -2332,8 +2332,13 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-bej-toolbar {
   position: relative;
   z-index: 2;
-  margin: 2px 0 16px;
-  scroll-margin-top: 88px;
+  margin: 12px 0 16px;
+  scroll-margin-top: 96px;
+}
+
+#ref-chile-panel:not(.hidden) {
+  margin: 12px 0 16px;
+  scroll-margin-top: 96px;
 }
 
 .plan-bej-config {
@@ -2373,7 +2378,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #475569;
+  color: #94a3b8;
 }
 
 .plan-bej-config .plan-segment-track {
@@ -2399,7 +2404,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: block;
   font-size: 0.68rem;
   font-weight: 600;
-  color: #6b7280;
+  color: #94a3b8;
   margin-bottom: 4px;
 }
 
@@ -2510,7 +2515,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 6px;
-  color: var(--dark);
+  color: #94a3b8;
 }
 .plan-ref-hint {
   text-align: left;
@@ -3286,8 +3291,8 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-gestor-panel-title {
   margin: 0 0 16px;
   font-size: 1rem;
-  font-weight: 700;
-  color: var(--dark);
+  font-weight: 600;
+  color: #94a3b8;
   text-align: left;
 }
 
@@ -3307,7 +3312,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-gestor-field-label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--dark);
+  color: #94a3b8;
   padding-top: 8px;
 }
 
