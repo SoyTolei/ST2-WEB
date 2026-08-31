@@ -719,7 +719,24 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-field-portal {
   grid-column: 1 / -1;
-  max-width: 280px;
+  max-width: 240px;
+}
+
+.blanqueo-form-grid .blanqueo-field:has(#blanqueo-caso) {
+  max-width: 11.5rem;
+}
+
+.blanqueo-form-grid .blanqueo-field:has(#blanqueo-cliente) {
+  max-width: 8rem;
+}
+
+.blanqueo-form-grid .blanqueo-field:has(#blanqueo-tipo) {
+  max-width: 13rem;
+}
+
+.blanqueo-field-correos {
+  grid-column: 1 / -1;
+  max-width: min(100%, 24rem);
 }
 
 .blanqueo-field-modulos {
@@ -849,10 +866,14 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   .blanqueo-form-grid {
     grid-template-columns: 1fr;
   }
-}
 
-.blanqueo-field-correos {
-  grid-column: 1 / -1;
+  .blanqueo-form-grid .blanqueo-field:has(#blanqueo-caso),
+  .blanqueo-form-grid .blanqueo-field:has(#blanqueo-cliente),
+  .blanqueo-form-grid .blanqueo-field:has(#blanqueo-tipo),
+  .blanqueo-field-portal,
+  .blanqueo-field-correos {
+    max-width: 100%;
+  }
 }
 
 .blanqueo-correos {

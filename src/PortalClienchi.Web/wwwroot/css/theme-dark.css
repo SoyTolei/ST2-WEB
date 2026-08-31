@@ -1970,7 +1970,7 @@ html.st2-theme-dark #planillas-transferencia textarea {
   color: #f8fafc !important;
 }
 
-html.st2-theme-dark #planillas-transferencia .btn-secondary {
+html.st2-theme-dark #planillas-transferencia .btn-secondary:not(.plan-ia-btn) {
   background: #151c28 !important;
   border-color: #4b5a73 !important;
   color: #e8eef7 !important;

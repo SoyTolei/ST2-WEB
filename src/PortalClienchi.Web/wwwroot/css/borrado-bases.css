@@ -53,6 +53,22 @@
   align-items: end;
 }
 
+.borrado-form-grid .borrado-field:has(#borrado-caso) {
+  max-width: 11.5rem;
+}
+
+.borrado-form-grid .borrado-field:has(#borrado-cliente) {
+  max-width: 8rem;
+}
+
+.borrado-form-grid .borrado-field:has(#borrado-empresa) {
+  max-width: 7rem;
+}
+
+.borrado-form-grid .borrado-field:has(#borrado-cuit) {
+  max-width: 16rem;
+}
+
 .borrado-field label {
   display: block;
   font-size: 0.75rem;
@@ -84,22 +100,26 @@
 .borrado-field-bases {
   grid-column: 1;
   min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.borrado-bases-checks {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
 }
 
 .borrado-optional {
   font-weight: 500;
   font-size: 0.78em;
   color: var(--text-muted, #94a3b8);
-}
-
-.borrado-bases-checks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 8px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
 }
 
 .borrado-check {
@@ -897,6 +917,13 @@ button.borrado-aclaracion-pill:focus-visible {
 @media (max-width: 720px) {
   .borrado-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .borrado-form-grid .borrado-field:has(#borrado-caso),
+  .borrado-form-grid .borrado-field:has(#borrado-cliente),
+  .borrado-form-grid .borrado-field:has(#borrado-empresa),
+  .borrado-form-grid .borrado-field:has(#borrado-cuit) {
+    max-width: 100%;
   }
 
   .borrado-field-bases,
