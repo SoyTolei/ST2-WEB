@@ -148,6 +148,7 @@ const accessModChileHr = document.getElementById("st2-mod-chile-hr");
 const accessModChileWiki = document.getElementById("st2-mod-chile-wiki");
 const accessModChileLp = document.getElementById("st2-mod-chile-lp");
 const accessModChilePowerapps = document.getElementById("st2-mod-chile-powerapps");
+const accessModBejermanWeb = document.getElementById("st2-mod-bejerman-web");
 const accessModSt2Admin = document.getElementById("st2-mod-st2-admin");
 const accessModSt2AdminWrap = document.getElementById("st2-mod-st2-admin-wrap");
 const accessModulesSqlGroup = document.getElementById("st2-access-modules-sql-group");
@@ -990,6 +991,7 @@ function normalizeAccessModules(modules) {
     chilePowerapps: m.chilePowerapps == null && m.ChilePowerapps == null
       ? true
       : !!(m.chilePowerapps ?? m.ChilePowerapps),
+    bejermanWeb: !!(m.bejermanWeb ?? m.BejermanWeb),
   };
 }
 
@@ -2850,6 +2852,7 @@ function readAccessModuleChecksFromForm() {
     chileWiki: !!accessModChileWiki?.checked,
     chileLp: !!accessModChileLp?.checked,
     chilePowerapps: !!accessModChilePowerapps?.checked,
+    bejermanWeb: !!accessModBejermanWeb?.checked,
   };
 }
 
@@ -2873,6 +2876,7 @@ function setAccessModuleChecks(mods, { presetDefaults = false } = {}) {
   if (accessModChileWiki) accessModChileWiki.checked = def("chileWiki");
   if (accessModChileLp) accessModChileLp.checked = def("chileLp");
   if (accessModChilePowerapps) accessModChilePowerapps.checked = def("chilePowerapps");
+  if (accessModBejermanWeb) accessModBejermanWeb.checked = presetDefaults ? false : !!mods.bejermanWeb;
   if (accessModBlanqueo) accessModBlanqueo.checked = presetDefaults ? false : !!mods.blanqueo;
   if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = presetDefaults ? false : !!mods.blanqueoConfirm;
   if (accessModBlanqueoLoad) {

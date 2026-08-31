@@ -907,6 +907,7 @@ public sealed class AccessPresetRequest
     public bool? ChileWiki { get; set; }
     public bool? ChileLp { get; set; }
     public bool? ChilePowerapps { get; set; }
+    public bool? BejermanWeb { get; set; }
     public bool? St2Admin { get; set; }
 }
 

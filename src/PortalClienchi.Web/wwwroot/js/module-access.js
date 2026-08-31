@@ -52,6 +52,7 @@ function fullFlags() {
     chileWiki: true,
     chileLp: true,
     chilePowerapps: true,
+    bejermanWeb: true,
   };
 }
 
@@ -81,6 +82,7 @@ function emptyFlags() {
     chileWiki: false,
     chileLp: false,
     chilePowerapps: false,
+    bejermanWeb: false,
   };
 }
 
@@ -216,6 +218,7 @@ function parseFlagsFromApi(m) {
     chileWiki: m.chileWiki == null ? true : !!m.chileWiki,
     chileLp: m.chileLp == null ? true : !!m.chileLp,
     chilePowerapps: m.chilePowerapps == null ? true : !!m.chilePowerapps,
+    bejermanWeb: !!m.bejermanWeb,
   };
 }
 
@@ -419,4 +422,8 @@ export function canSeeChileLp() {
 
 export function canSeeChilePowerapps() {
   return !!getCachedModuleFlags().chilePowerapps;
+}
+
+export function canSeeBejermanWeb() {
+  return !!getCachedModuleFlags().bejermanWeb;
 }

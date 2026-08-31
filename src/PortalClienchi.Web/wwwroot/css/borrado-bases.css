@@ -161,6 +161,23 @@
   max-width: 100%;
 }
 
+.borrado-row-empresa {
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.borrado-row-empresa .borrado-field-empresa {
+  flex: 0 0 6.5rem;
+  width: 6.5rem;
+}
+
+.borrado-row-empresa .borrado-field-nombre {
+  flex: 1 1 20rem;
+  width: auto;
+  max-width: 20rem;
+}
+
 .borrado-field-nombre {
   width: min(20rem, 100%);
 }
@@ -1033,6 +1050,10 @@ button.borrado-aclaracion-pill:focus-visible {
 }
 
 @media (max-width: 720px) {
+  .borrado-row-empresa {
+    flex-wrap: wrap;
+  }
+
   .borrado-field-caso,
   .borrado-field-cliente,
   .borrado-field-empresa,
