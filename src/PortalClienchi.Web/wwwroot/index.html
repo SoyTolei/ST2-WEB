@@ -45,6 +45,13 @@
       margin-left: 1px;
       transform: translateY(-0.2em);
     }
+    #st2-access-gate .st2-access-suite-sep {
+      margin: 0;
+      flex: 0 0 auto;
+      font: 500 1.1rem/1 "Segoe UI", system-ui, sans-serif;
+      color: #94a3b8;
+      user-select: none;
+    }
     #st2-access-gate .st2-access-suite {
       margin: 0;
       flex: 0 0 auto;
@@ -2411,16 +2418,16 @@
     <div class="st2-access-card">
       <div class="st2-access-brand">
         <div class="st2-access-brand-head">
-          <h2 id="st2-access-title" class="st2-access-title st2-access-title-mark" aria-label="ST² Suite Web">
+          <h2 id="st2-access-title" class="st2-access-title st2-access-title-mark" aria-label="ST² - Suite Web">
             <span class="st2-access-title-st">ST</span><sup class="st2-access-title-sup">2</sup>
           </h2>
+          <span class="st2-access-suite-sep" aria-hidden="true">–</span>
           <p class="st2-access-suite">Suite Web</p>
         </div>
       </div>
       <div id="st2-access-form">
         <p class="st2-access-hint">Ingresá tu correo para continuar.</p>
-        <label class="st2-access-label" for="st2-access-email">Correo</label>
-        <input id="st2-access-email" type="email" class="st2-access-input" placeholder="Correo" autocomplete="email" spellcheck="false"/>
+        <input id="st2-access-email" type="email" class="st2-access-input" autocomplete="email" spellcheck="false" inputmode="email" autocapitalize="none" aria-label="Correo electrónico"/>
         <div id="st2-access-pass-wrap" class="st2-access-pass-wrap hidden">
           <label class="st2-access-label" for="st2-access-pass">Contraseña</label>
           <input id="st2-access-pass" type="password" class="st2-access-input" autocomplete="current-password" spellcheck="false"/>

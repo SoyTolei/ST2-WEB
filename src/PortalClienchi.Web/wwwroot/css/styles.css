@@ -4677,6 +4677,17 @@ body.st2-access-restoring .st2-boot-splash {
   color: #e8eef7;
 }
 
+.st2-access-suite-sep {
+  margin: 0;
+  flex: 0 0 auto;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1;
+  color: #94a3b8;
+  user-select: none;
+}
+
 .st2-access-suite {
   margin: 0;
   flex: 0 0 auto;
@@ -4801,7 +4812,7 @@ body.st2-access-restoring .st2-boot-splash {
 }
 
 .st2-access-hint {
-  margin: 0 0 16px;
+  margin: 0 0 10px;
   font-size: 0.88rem;
   line-height: 1.45;
   color: #64748b;

@@ -227,6 +227,10 @@ html.st2-theme-dark .st2-access-suite {
   color: #f1f5f9;
 }
 
+html.st2-theme-dark .st2-access-suite-sep {
+  color: #64748b;
+}
+
 html.st2-theme-dark .st2-access-title-sup,
 html.st2-theme-dark .st2-access-title-two {
   color: #fb923c;
