@@ -23,7 +23,18 @@ public static class St2SuperAdmin
         BorradoBasesConfirm = true,
         BorradoBasesLoad = true,
         PlanillasSqlOnvio = true,
+        PlanillasTransferencia = true,
+        PlanillasReferral = true,
         PlanillasLegal = true,
+        LegalTransferencia = true,
+        LegalEscalamiento = true,
         PlanillasChile = true,
+        ChileTransferencia = true,
+        ChileReferral = true,
+        ChileSaad = true,
+        ChileHr = true,
+        ChileWiki = true,
+        ChileLp = true,
+        ChilePowerapps = true,
     };
 }

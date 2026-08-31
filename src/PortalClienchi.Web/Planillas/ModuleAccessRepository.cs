@@ -113,8 +113,19 @@ public sealed class ModuleAccessRepository
             borradoBases = true;
 
         var planillasSqlOnvio = req.PlanillasSqlOnvio ?? current.PlanillasSqlOnvio;
+        var planillasTransferencia = req.PlanillasTransferencia ?? current.PlanillasTransferencia;
+        var planillasReferral = req.PlanillasReferral ?? current.PlanillasReferral;
         var planillasLegal = req.PlanillasLegal ?? current.PlanillasLegal;
+        var legalTransferencia = req.LegalTransferencia ?? current.LegalTransferencia;
+        var legalEscalamiento = req.LegalEscalamiento ?? current.LegalEscalamiento;
         var planillasChile = req.PlanillasChile ?? current.PlanillasChile;
+        var chileTransferencia = req.ChileTransferencia ?? current.ChileTransferencia;
+        var chileReferral = req.ChileReferral ?? current.ChileReferral;
+        var chileSaad = req.ChileSaad ?? current.ChileSaad;
+        var chileHr = req.ChileHr ?? current.ChileHr;
+        var chileWiki = req.ChileWiki ?? current.ChileWiki;
+        var chileLp = req.ChileLp ?? current.ChileLp;
+        var chilePowerapps = req.ChilePowerapps ?? current.ChilePowerapps;
 
         WriteModule(conn, email, PlanModuleIds.Oportunidad, oportunidad, false);
         WriteModule(conn, email, PlanModuleIds.PdfPortal, pdfPortal, false);
@@ -123,8 +134,19 @@ public sealed class ModuleAccessRepository
         WriteModule(conn, email, PlanModuleIds.BorradoBases, borradoBases, borradoBasesConfirm);
         WriteModule(conn, email, PlanModuleIds.BorradoBasesLoad, borradoBasesLoad, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasSqlOnvio, planillasSqlOnvio, false);
+        WriteModule(conn, email, PlanModuleIds.PlanillasTransferencia, planillasTransferencia, false);
+        WriteModule(conn, email, PlanModuleIds.PlanillasReferral, planillasReferral, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasLegal, planillasLegal, false);
+        WriteModule(conn, email, PlanModuleIds.LegalTransferencia, legalTransferencia, false);
+        WriteModule(conn, email, PlanModuleIds.LegalEscalamiento, legalEscalamiento, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasChile, planillasChile, false);
+        WriteModule(conn, email, PlanModuleIds.ChileTransferencia, chileTransferencia, false);
+        WriteModule(conn, email, PlanModuleIds.ChileReferral, chileReferral, false);
+        WriteModule(conn, email, PlanModuleIds.ChileSaad, chileSaad, false);
+        WriteModule(conn, email, PlanModuleIds.ChileHr, chileHr, false);
+        WriteModule(conn, email, PlanModuleIds.ChileWiki, chileWiki, false);
+        WriteModule(conn, email, PlanModuleIds.ChileLp, chileLp, false);
+        WriteModule(conn, email, PlanModuleIds.ChilePowerapps, chilePowerapps, false);
 
         return ReadFlags(conn, email);
     }
@@ -186,10 +208,32 @@ public sealed class ModuleAccessRepository
             }
             else if (module.Equals(PlanModuleIds.PlanillasSqlOnvio, StringComparison.OrdinalIgnoreCase))
                 flags.PlanillasSqlOnvio = view;
+            else if (module.Equals(PlanModuleIds.PlanillasTransferencia, StringComparison.OrdinalIgnoreCase))
+                flags.PlanillasTransferencia = view;
+            else if (module.Equals(PlanModuleIds.PlanillasReferral, StringComparison.OrdinalIgnoreCase))
+                flags.PlanillasReferral = view;
             else if (module.Equals(PlanModuleIds.PlanillasLegal, StringComparison.OrdinalIgnoreCase))
                 flags.PlanillasLegal = view;
+            else if (module.Equals(PlanModuleIds.LegalTransferencia, StringComparison.OrdinalIgnoreCase))
+                flags.LegalTransferencia = view;
+            else if (module.Equals(PlanModuleIds.LegalEscalamiento, StringComparison.OrdinalIgnoreCase))
+                flags.LegalEscalamiento = view;
             else if (module.Equals(PlanModuleIds.PlanillasChile, StringComparison.OrdinalIgnoreCase))
                 flags.PlanillasChile = view;
+            else if (module.Equals(PlanModuleIds.ChileTransferencia, StringComparison.OrdinalIgnoreCase))
+                flags.ChileTransferencia = view;
+            else if (module.Equals(PlanModuleIds.ChileReferral, StringComparison.OrdinalIgnoreCase))
+                flags.ChileReferral = view;
+            else if (module.Equals(PlanModuleIds.ChileSaad, StringComparison.OrdinalIgnoreCase))
+                flags.ChileSaad = view;
+            else if (module.Equals(PlanModuleIds.ChileHr, StringComparison.OrdinalIgnoreCase))
+                flags.ChileHr = view;
+            else if (module.Equals(PlanModuleIds.ChileWiki, StringComparison.OrdinalIgnoreCase))
+                flags.ChileWiki = view;
+            else if (module.Equals(PlanModuleIds.ChileLp, StringComparison.OrdinalIgnoreCase))
+                flags.ChileLp = view;
+            else if (module.Equals(PlanModuleIds.ChilePowerapps, StringComparison.OrdinalIgnoreCase))
+                flags.ChilePowerapps = view;
         }
 
         // Legacy: sin fila blanqueo_load → confirmador = solo listado; el resto puede cargar.
@@ -208,10 +252,32 @@ public sealed class ModuleAccessRepository
         // Legacy: sin filas de sistemas Planillas → todos visibles.
         if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasSqlOnvio))
             flags.PlanillasSqlOnvio = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasTransferencia))
+            flags.PlanillasTransferencia = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasReferral))
+            flags.PlanillasReferral = true;
         if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasLegal))
             flags.PlanillasLegal = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.LegalTransferencia))
+            flags.LegalTransferencia = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.LegalEscalamiento))
+            flags.LegalEscalamiento = true;
         if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasChile))
             flags.PlanillasChile = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.ChileTransferencia))
+            flags.ChileTransferencia = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.ChileReferral))
+            flags.ChileReferral = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.ChileSaad))
+            flags.ChileSaad = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.ChileHr))
+            flags.ChileHr = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.ChileWiki))
+            flags.ChileWiki = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.ChileLp))
+            flags.ChileLp = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.ChilePowerapps))
+            flags.ChilePowerapps = true;
 
         return flags;
     }

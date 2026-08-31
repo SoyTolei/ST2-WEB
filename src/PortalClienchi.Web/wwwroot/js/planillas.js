@@ -5,7 +5,7 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
-import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
+import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeLegalTransferencia, canSeeLegalEscalamiento, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
@@ -331,6 +331,45 @@ function routeFromPath(pathname) {
   }
 }
 
+function canSeeTransferenciaModule(sistema = sistemaActual) {
+  if (sistema === "Legal") return canSeeLegalTransferencia();
+  if (sistema === "Chile") return canSeeChileTransferencia();
+  if (sistema === "BejermanSql" || sistema === "OnvioWeb") return canSeePlanillasTransferencia();
+  return false;
+}
+
+function canSeeReferralModule(sistema = sistemaActual) {
+  if (sistema === "Legal") return false;
+  if (sistema === "Chile") return canSeeChileReferral();
+  if (sistema === "BejermanSql" || sistema === "OnvioWeb") return canSeePlanillasReferral();
+  return false;
+}
+
+function canSeeChileEmbedButton(btn) {
+  if (!btn) return false;
+  if (btn.classList.contains("chile-saad")) return canSeeChileSaad();
+  if (btn.classList.contains("chile-hr")) return canSeeChileHr();
+  if (btn.classList.contains("chile-wiki")) return canSeeChileWiki();
+  if (btn.classList.contains("chile-lp")) return canSeeChileLp();
+  if (btn.classList.contains("chile-powerapps")) return canSeeChilePowerapps();
+  return true;
+}
+
+function syncChileSoporteVisibility() {
+  const showChile = isChile();
+  let anyVisible = false;
+  document.querySelectorAll("[data-chile-embed-url]").forEach((btn) => {
+    const show = showChile && canSeeChileEmbedButton(btn);
+    btn.classList.toggle("hidden", !show);
+    btn.toggleAttribute("hidden", !show);
+    btn.setAttribute("aria-hidden", show ? "false" : "true");
+    if (show) anyVisible = true;
+  });
+  const chileWrap = document.getElementById("plan-chile-soporte-wrap");
+  chileWrap?.classList.toggle("hidden", !anyVisible);
+  chileWrap?.setAttribute("aria-hidden", anyVisible ? "false" : "true");
+}
+
 function canOpenRoute(route) {
   if (!route?.requires) return true;
   if (route.requires === "oportunidad") return canSeeOportunidadModule() && !hidesCommercialModules();
@@ -339,10 +378,10 @@ function canOpenRoute(route) {
   if (route.requires === "borrado-bases") return canSeeBorradoBasesModule() && !hidesCommercialModules();
   const sys = route.sistema || sistemaActual;
   if (route.requires === "transferencia") {
-    return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys);
+    return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys) && canSeeTransferenciaModule(sys);
   }
   if (route.requires === "referral") {
-    return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys);
+    return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys) && canSeeReferralModule(sys);
   }
   if (route.requires === "chile-soporte") {
     return canSeeSistema("Chile") && !!chileEmbedUrl;
@@ -475,23 +514,25 @@ function updateSistemaUi() {
   const legalProductsWrap = document.getElementById("plan-legal-products-wrap");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
   const hideCommercial = hidesCommercialModules();
-  const hideTransfer = isLegal();
-  const showLegalProducts = isLegal();
+  const showTransfer = canSeeTransferenciaModule();
+  const showReferral = canSeeReferralModule() && !isLegal();
+  const showLegalProducts = isLegal() && canSeeLegalEscalamiento();
 
   if (transferBtn) {
-    transferBtn.classList.toggle("hidden", hideTransfer);
-    transferBtn.toggleAttribute("hidden", hideTransfer);
-    transferBtn.disabled = placeholderBlocked || hideTransfer;
+    transferBtn.classList.toggle("hidden", !showTransfer);
+    transferBtn.toggleAttribute("hidden", !showTransfer);
+    transferBtn.disabled = placeholderBlocked || !showTransfer;
   }
   if (transferNa) {
-    transferNa.classList.add("hidden");
-    transferNa.toggleAttribute("hidden", true);
-    transferNa.setAttribute("aria-hidden", "true");
+    const showNa = isLegal() && !showTransfer;
+    transferNa.classList.toggle("hidden", !showNa);
+    transferNa.toggleAttribute("hidden", !showNa);
+    transferNa.setAttribute("aria-hidden", showNa ? "false" : "true");
   }
   if (referralBtn) {
-    referralBtn.classList.toggle("hidden", showLegalProducts);
-    referralBtn.toggleAttribute("hidden", showLegalProducts);
-    referralBtn.disabled = placeholderBlocked;
+    referralBtn.classList.toggle("hidden", !showReferral || showLegalProducts);
+    referralBtn.toggleAttribute("hidden", !showReferral || showLegalProducts);
+    referralBtn.disabled = placeholderBlocked || !showReferral;
   }
   opcionesTitle?.classList.toggle("hidden", showLegalProducts);
   opcionesTitle?.toggleAttribute("hidden", showLegalProducts);
@@ -519,14 +560,7 @@ function updateSistemaUi() {
   syncBlanqueoModuleVisibility();
   syncBorradoBasesModuleVisibility();
   document.querySelector(".plan-modulos-grid")?.classList.toggle("is-compact", hideCommercial);
-  const chileWrap = document.getElementById("plan-chile-soporte-wrap");
-  const showChileLinks = isChile();
-  chileWrap?.classList.toggle("hidden", !showChileLinks);
-  chileWrap?.setAttribute("aria-hidden", showChileLinks ? "false" : "true");
-  document.querySelectorAll(".plan-chile-only").forEach((el) => {
-    el.classList.toggle("hidden", !showChileLinks);
-    el.setAttribute("aria-hidden", showChileLinks ? "false" : "true");
-  });
+  syncChileSoporteVisibility();
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
   syncReferralModuleLabels();
@@ -1286,6 +1320,7 @@ function openChileEmbed(url, title) {
 function bindChileEmbedUi() {
   document.querySelectorAll("[data-chile-embed-url]").forEach((btn) => {
     btn.addEventListener("click", () => {
+      if (!canSeeChileEmbedButton(btn)) return;
       const url = btn.getAttribute("data-chile-embed-url");
       const title = btn.querySelector(".plan-modulo-label")?.textContent?.trim() || "Soporte técnico Chile";
       openChileEmbed(url, title);

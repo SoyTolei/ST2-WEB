@@ -135,9 +135,22 @@ const accessModBorradoBasesLoad = document.getElementById("st2-mod-borrado-bases
 const accessModPlanillasSqlOnvio = document.getElementById("st2-mod-planillas-sql-onvio");
 const accessModPlanillasLegal = document.getElementById("st2-mod-planillas-legal");
 const accessModPlanillasChile = document.getElementById("st2-mod-planillas-chile");
+const accessModPlanillasTransferencia = document.getElementById("st2-mod-planillas-transferencia");
+const accessModPlanillasReferral = document.getElementById("st2-mod-planillas-referral");
+const accessModLegalTransferencia = document.getElementById("st2-mod-legal-transferencia");
+const accessModLegalEscalamiento = document.getElementById("st2-mod-legal-escalamiento");
+const accessModChileTransferencia = document.getElementById("st2-mod-chile-transferencia");
+const accessModChileReferral = document.getElementById("st2-mod-chile-referral");
+const accessModChileSaad = document.getElementById("st2-mod-chile-saad");
+const accessModChileHr = document.getElementById("st2-mod-chile-hr");
+const accessModChileWiki = document.getElementById("st2-mod-chile-wiki");
+const accessModChileLp = document.getElementById("st2-mod-chile-lp");
+const accessModChilePowerapps = document.getElementById("st2-mod-chile-powerapps");
 const accessModSt2Admin = document.getElementById("st2-mod-st2-admin");
 const accessModSt2AdminWrap = document.getElementById("st2-mod-st2-admin-wrap");
 const accessModulesSqlGroup = document.getElementById("st2-access-modules-sql-group");
+const accessModulesLegalGroup = document.getElementById("st2-access-modules-legal-group");
+const accessModulesChileGroup = document.getElementById("st2-access-modules-chile-group");
 const viewAsBanner = document.getElementById("st2-view-as-banner");
 const viewAsBannerText = document.getElementById("st2-view-as-banner-text");
 const viewAsExitBtn = document.getElementById("st2-view-as-exit");
@@ -908,6 +921,66 @@ function markAccessAdminEmailsAsSeen(items) {
   if (changed) saveAccessAdminSeenMap(map);
 }
 
+function normalizeAccessModules(modules) {
+  const m = modules || {};
+  return {
+    oportunidad: !!(m.oportunidad ?? m.Oportunidad),
+    pdfPortal: !!(m.pdfPortal ?? m.PdfPortal),
+    blanqueo: !!(m.blanqueo ?? m.Blanqueo),
+    blanqueoConfirm: !!(m.blanqueoConfirm ?? m.BlanqueoConfirm),
+    blanqueoLoad: m.blanqueoLoad == null && m.BlanqueoLoad == null
+      ? !!(m.blanqueo ?? m.Blanqueo) && !(m.blanqueoConfirm ?? m.BlanqueoConfirm)
+      : !!(m.blanqueoLoad ?? m.BlanqueoLoad),
+    borradoBases: !!(m.borradoBases ?? m.BorradoBases),
+    borradoBasesConfirm: !!(m.borradoBasesConfirm ?? m.BorradoBasesConfirm),
+    borradoBasesLoad: m.borradoBasesLoad == null && m.BorradoBasesLoad == null
+      ? !!(m.borradoBases ?? m.BorradoBases) && !(m.borradoBasesConfirm ?? m.BorradoBasesConfirm)
+      : !!(m.borradoBasesLoad ?? m.BorradoBasesLoad),
+    planillasSqlOnvio: m.planillasSqlOnvio == null && m.PlanillasSqlOnvio == null
+      ? true
+      : !!(m.planillasSqlOnvio ?? m.PlanillasSqlOnvio),
+    planillasTransferencia: m.planillasTransferencia == null && m.PlanillasTransferencia == null
+      ? true
+      : !!(m.planillasTransferencia ?? m.PlanillasTransferencia),
+    planillasReferral: m.planillasReferral == null && m.PlanillasReferral == null
+      ? true
+      : !!(m.planillasReferral ?? m.PlanillasReferral),
+    planillasLegal: m.planillasLegal == null && m.PlanillasLegal == null
+      ? true
+      : !!(m.planillasLegal ?? m.PlanillasLegal),
+    legalTransferencia: m.legalTransferencia == null && m.LegalTransferencia == null
+      ? true
+      : !!(m.legalTransferencia ?? m.LegalTransferencia),
+    legalEscalamiento: m.legalEscalamiento == null && m.LegalEscalamiento == null
+      ? true
+      : !!(m.legalEscalamiento ?? m.LegalEscalamiento),
+    planillasChile: m.planillasChile == null && m.PlanillasChile == null
+      ? true
+      : !!(m.planillasChile ?? m.PlanillasChile),
+    chileTransferencia: m.chileTransferencia == null && m.ChileTransferencia == null
+      ? true
+      : !!(m.chileTransferencia ?? m.ChileTransferencia),
+    chileReferral: m.chileReferral == null && m.ChileReferral == null
+      ? true
+      : !!(m.chileReferral ?? m.ChileReferral),
+    chileSaad: m.chileSaad == null && m.ChileSaad == null
+      ? true
+      : !!(m.chileSaad ?? m.ChileSaad),
+    chileHr: m.chileHr == null && m.ChileHr == null
+      ? true
+      : !!(m.chileHr ?? m.ChileHr),
+    chileWiki: m.chileWiki == null && m.ChileWiki == null
+      ? true
+      : !!(m.chileWiki ?? m.ChileWiki),
+    chileLp: m.chileLp == null && m.ChileLp == null
+      ? true
+      : !!(m.chileLp ?? m.ChileLp),
+    chilePowerapps: m.chilePowerapps == null && m.ChilePowerapps == null
+      ? true
+      : !!(m.chilePowerapps ?? m.ChilePowerapps),
+  };
+}
+
 function normalizeAccessAdminItems(items) {
   return items.map((item) => {
     const email = item.email || item.Email || "";
@@ -943,29 +1016,7 @@ function normalizeAccessAdminItems(items) {
       lastClientHint: (item.lastClientHint ?? item.LastClientHint ?? "").trim() || null,
       lastClientDevice: (item.lastClientDevice ?? item.LastClientDevice ?? "").trim() || null,
       lastClientBrowser: (item.lastClientBrowser ?? item.LastClientBrowser ?? "").trim() || null,
-      modules: {
-        oportunidad: !!(modules.oportunidad ?? modules.Oportunidad),
-        pdfPortal: !!(modules.pdfPortal ?? modules.PdfPortal),
-        blanqueo: !!(modules.blanqueo ?? modules.Blanqueo),
-        blanqueoConfirm: !!(modules.blanqueoConfirm ?? modules.BlanqueoConfirm),
-        blanqueoLoad: modules.blanqueoLoad == null && modules.BlanqueoLoad == null
-          ? !!(modules.blanqueo ?? modules.Blanqueo) && !(modules.blanqueoConfirm ?? modules.BlanqueoConfirm)
-          : !!(modules.blanqueoLoad ?? modules.BlanqueoLoad),
-        borradoBases: !!(modules.borradoBases ?? modules.BorradoBases),
-        borradoBasesConfirm: !!(modules.borradoBasesConfirm ?? modules.BorradoBasesConfirm),
-        borradoBasesLoad: modules.borradoBasesLoad == null && modules.BorradoBasesLoad == null
-          ? !!(modules.borradoBases ?? modules.BorradoBases) && !(modules.borradoBasesConfirm ?? modules.BorradoBasesConfirm)
-          : !!(modules.borradoBasesLoad ?? modules.BorradoBasesLoad),
-        planillasSqlOnvio: modules.planillasSqlOnvio == null && modules.PlanillasSqlOnvio == null
-          ? true
-          : !!(modules.planillasSqlOnvio ?? modules.PlanillasSqlOnvio),
-        planillasLegal: modules.planillasLegal == null && modules.PlanillasLegal == null
-          ? true
-          : !!(modules.planillasLegal ?? modules.PlanillasLegal),
-        planillasChile: modules.planillasChile == null && modules.PlanillasChile == null
-          ? true
-          : !!(modules.planillasChile ?? modules.PlanillasChile),
-      },
+      modules: normalizeAccessModules(modules),
     };
   });
 }
@@ -2757,9 +2808,94 @@ function accessModulesSaveLabel() {
   return "Guardar";
 }
 
+function accessModDefault(mods, key) {
+  return mods[key] == null ? true : !!mods[key];
+}
+
+function readAccessModuleChecksFromForm() {
+  return {
+    oportunidad: !!accessModOportunidad?.checked,
+    pdfPortal: !!accessModPdf?.checked,
+    blanqueo: !!accessModBlanqueo?.checked,
+    blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
+    blanqueoLoad: !!accessModBlanqueoLoad?.checked,
+    borradoBases: !!accessModBorradoBases?.checked,
+    borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
+    borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
+    planillasSqlOnvio: !!accessModPlanillasSqlOnvio?.checked,
+    planillasTransferencia: !!accessModPlanillasTransferencia?.checked,
+    planillasReferral: !!accessModPlanillasReferral?.checked,
+    planillasLegal: !!accessModPlanillasLegal?.checked,
+    legalTransferencia: !!accessModLegalTransferencia?.checked,
+    legalEscalamiento: !!accessModLegalEscalamiento?.checked,
+    planillasChile: !!accessModPlanillasChile?.checked,
+    chileTransferencia: !!accessModChileTransferencia?.checked,
+    chileReferral: !!accessModChileReferral?.checked,
+    chileSaad: !!accessModChileSaad?.checked,
+    chileHr: !!accessModChileHr?.checked,
+    chileWiki: !!accessModChileWiki?.checked,
+    chileLp: !!accessModChileLp?.checked,
+    chilePowerapps: !!accessModChilePowerapps?.checked,
+  };
+}
+
+function setAccessModuleChecks(mods, { presetDefaults = false } = {}) {
+  const def = (key) => (presetDefaults ? true : accessModDefault(mods, key));
+  if (accessModOportunidad) accessModOportunidad.checked = presetDefaults ? false : !!mods.oportunidad;
+  if (accessModPdf) accessModPdf.checked = presetDefaults ? false : !!mods.pdfPortal;
+  if (accessModPlanillasSqlOnvio) accessModPlanillasSqlOnvio.checked = def("planillasSqlOnvio");
+  if (accessModPlanillasTransferencia) accessModPlanillasTransferencia.checked = def("planillasTransferencia");
+  if (accessModPlanillasReferral) accessModPlanillasReferral.checked = def("planillasReferral");
+  if (accessModPlanillasLegal) accessModPlanillasLegal.checked = def("planillasLegal");
+  if (accessModLegalTransferencia) accessModLegalTransferencia.checked = def("legalTransferencia");
+  if (accessModLegalEscalamiento) accessModLegalEscalamiento.checked = def("legalEscalamiento");
+  if (accessModPlanillasChile) accessModPlanillasChile.checked = def("planillasChile");
+  if (accessModChileTransferencia) accessModChileTransferencia.checked = def("chileTransferencia");
+  if (accessModChileReferral) accessModChileReferral.checked = def("chileReferral");
+  if (accessModChileSaad) accessModChileSaad.checked = def("chileSaad");
+  if (accessModChileHr) accessModChileHr.checked = def("chileHr");
+  if (accessModChileWiki) accessModChileWiki.checked = def("chileWiki");
+  if (accessModChileLp) accessModChileLp.checked = def("chileLp");
+  if (accessModChilePowerapps) accessModChilePowerapps.checked = def("chilePowerapps");
+  if (accessModBlanqueo) accessModBlanqueo.checked = presetDefaults ? false : !!mods.blanqueo;
+  if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = presetDefaults ? false : !!mods.blanqueoConfirm;
+  if (accessModBlanqueoLoad) {
+    accessModBlanqueoLoad.checked = presetDefaults
+      ? false
+      : mods.blanqueoLoad == null
+        ? !!mods.blanqueo && !mods.blanqueoConfirm
+        : !!mods.blanqueoLoad;
+  }
+  if (accessModBorradoBases) accessModBorradoBases.checked = presetDefaults ? false : !!mods.borradoBases;
+  if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = presetDefaults ? false : !!mods.borradoBasesConfirm;
+  if (accessModBorradoBasesLoad) {
+    accessModBorradoBasesLoad.checked = presetDefaults
+      ? false
+      : mods.borradoBasesLoad == null
+        ? !!mods.borradoBases && !mods.borradoBasesConfirm
+        : !!mods.borradoBasesLoad;
+  }
+}
+
 function syncAccessSqlModulesGroup() {
   const on = !!accessModPlanillasSqlOnvio?.checked;
   accessModulesSqlGroup?.classList.toggle("is-disabled", !on);
+}
+
+function syncAccessLegalModulesGroup() {
+  const on = !!accessModPlanillasLegal?.checked;
+  accessModulesLegalGroup?.classList.toggle("is-disabled", !on);
+}
+
+function syncAccessChileModulesGroup() {
+  const on = !!accessModPlanillasChile?.checked;
+  accessModulesChileGroup?.classList.toggle("is-disabled", !on);
+}
+
+function syncAccessSystemModuleGroups() {
+  syncAccessSqlModulesGroup();
+  syncAccessLegalModulesGroup();
+  syncAccessChileModulesGroup();
 }
 
 function startAccessProfilePreview(email, modulesOverride = null) {
@@ -2779,16 +2915,7 @@ function startAccessProfilePreview(email, modulesOverride = null) {
 }
 
 function modulesFromAccessForm() {
-  return {
-    oportunidad: !!accessModOportunidad?.checked,
-    pdfPortal: !!accessModPdf?.checked,
-    blanqueo: !!accessModBlanqueo?.checked,
-    blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
-    blanqueoLoad: !!accessModBlanqueoLoad?.checked,
-    borradoBases: !!accessModBorradoBases?.checked,
-    borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
-    borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
-  };
+  return readAccessModuleChecksFromForm();
 }
 
 function previewAccessModulesProfile() {
@@ -2842,31 +2969,7 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
   if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
-  if (accessModOportunidad) accessModOportunidad.checked = !!mods.oportunidad;
-  if (accessModPdf) accessModPdf.checked = !!mods.pdfPortal;
-  if (accessModPlanillasSqlOnvio) {
-    accessModPlanillasSqlOnvio.checked = mods.planillasSqlOnvio == null ? true : !!mods.planillasSqlOnvio;
-  }
-  if (accessModPlanillasLegal) {
-    accessModPlanillasLegal.checked = mods.planillasLegal == null ? true : !!mods.planillasLegal;
-  }
-  if (accessModPlanillasChile) {
-    accessModPlanillasChile.checked = mods.planillasChile == null ? true : !!mods.planillasChile;
-  }
-  if (accessModBlanqueo) accessModBlanqueo.checked = !!mods.blanqueo;
-  if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = !!mods.blanqueoConfirm;
-  if (accessModBlanqueoLoad) {
-    accessModBlanqueoLoad.checked = mods.blanqueoLoad == null
-      ? !!mods.blanqueo && !mods.blanqueoConfirm
-      : !!mods.blanqueoLoad;
-  }
-  if (accessModBorradoBases) accessModBorradoBases.checked = !!mods.borradoBases;
-  if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = !!mods.borradoBasesConfirm;
-  if (accessModBorradoBasesLoad) {
-    accessModBorradoBasesLoad.checked = mods.borradoBasesLoad == null
-      ? !!mods.borradoBases && !mods.borradoBasesConfirm
-      : !!mods.borradoBasesLoad;
-  }
+  setAccessModuleChecks(mods);
   if (accessModSt2Admin) {
     accessModSt2Admin.checked = isPrimary || !!current?.isSt2Admin;
     accessModSt2Admin.disabled = isPrimary || !isPrimarySuperAdmin();
@@ -2875,7 +2978,7 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
     accessModSt2AdminWrap.classList.toggle("is-primary-locked", isPrimary);
     accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
   }
-  syncAccessSqlModulesGroup();
+  syncAccessSystemModuleGroups();
   if (accessModulesError) accessModulesError.textContent = "";
   if (accessModulesSave) {
     accessModulesSave.disabled = false;
@@ -2906,24 +3009,14 @@ function openAccessPresetModal() {
   }
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
   if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
-  if (accessModOportunidad) accessModOportunidad.checked = false;
-  if (accessModPdf) accessModPdf.checked = false;
-  if (accessModPlanillasSqlOnvio) accessModPlanillasSqlOnvio.checked = true;
-  if (accessModPlanillasLegal) accessModPlanillasLegal.checked = true;
-  if (accessModPlanillasChile) accessModPlanillasChile.checked = true;
-  if (accessModBlanqueo) accessModBlanqueo.checked = false;
-  if (accessModBlanqueoConfirm) accessModBlanqueoConfirm.checked = false;
-  if (accessModBlanqueoLoad) accessModBlanqueoLoad.checked = false;
-  if (accessModBorradoBases) accessModBorradoBases.checked = false;
-  if (accessModBorradoBasesConfirm) accessModBorradoBasesConfirm.checked = false;
-  if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.checked = false;
+  setAccessModuleChecks({}, { presetDefaults: true });
   if (accessModSt2Admin) accessModSt2Admin.checked = false;
   if (accessModSt2Admin) accessModSt2Admin.disabled = !isPrimarySuperAdmin();
   if (accessModSt2AdminWrap) {
     accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
     accessModSt2AdminWrap.classList.remove("is-primary-locked");
   }
-  syncAccessSqlModulesGroup();
+  syncAccessSystemModuleGroups();
   if (accessModulesError) accessModulesError.textContent = "";
   if (accessModulesSave) {
     accessModulesSave.disabled = false;
@@ -2935,6 +3028,8 @@ function openAccessPresetModal() {
 }
 
 accessModPlanillasSqlOnvio?.addEventListener("change", syncAccessSqlModulesGroup);
+accessModPlanillasLegal?.addEventListener("change", syncAccessLegalModulesGroup);
+accessModPlanillasChile?.addEventListener("change", syncAccessChileModulesGroup);
 accessModBlanqueoConfirm?.addEventListener("change", () => {
   if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
     accessModBlanqueo.checked = true;
@@ -2995,17 +3090,7 @@ async function saveAccessModules() {
   if (accessModulesError) accessModulesError.textContent = "";
 
   const modulesBody = {
-    oportunidad: !!accessModOportunidad?.checked,
-    pdfPortal: !!accessModPdf?.checked,
-    planillasSqlOnvio: !!accessModPlanillasSqlOnvio?.checked,
-    planillasLegal: !!accessModPlanillasLegal?.checked,
-    planillasChile: !!accessModPlanillasChile?.checked,
-    blanqueo: !!accessModBlanqueo?.checked,
-    blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
-    blanqueoLoad: !!accessModBlanqueoLoad?.checked,
-    borradoBases: !!accessModBorradoBases?.checked,
-    borradoBasesConfirm: !!accessModBorradoBasesConfirm?.checked,
-    borradoBasesLoad: !!accessModBorradoBasesLoad?.checked,
+    ...readAccessModuleChecksFromForm(),
     st2Admin: isPrimarySuperAdmin() ? !!accessModSt2Admin?.checked : undefined,
   };
 
@@ -3080,19 +3165,7 @@ async function saveAccessModules() {
             birthdayDisplay: nameData.birthdayDisplay || null,
             birthdayMmDd: nameData.birthdayMmDd || null,
             isSt2Admin: !!(data.isSt2Admin ?? accessModSt2Admin?.checked),
-            modules: {
-              oportunidad: !!mods.oportunidad,
-              pdfPortal: !!mods.pdfPortal,
-              planillasSqlOnvio: !!mods.planillasSqlOnvio,
-              planillasLegal: !!mods.planillasLegal,
-              planillasChile: !!mods.planillasChile,
-              blanqueo: !!mods.blanqueo,
-              blanqueoConfirm: !!mods.blanqueoConfirm,
-              blanqueoLoad: !!mods.blanqueoLoad,
-              borradoBases: !!mods.borradoBases,
-              borradoBasesConfirm: !!mods.borradoBasesConfirm,
-              borradoBasesLoad: !!mods.borradoBasesLoad,
-            },
+            modules: normalizeAccessModules(mods),
           }
         : item
     );

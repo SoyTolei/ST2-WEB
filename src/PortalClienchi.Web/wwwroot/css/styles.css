@@ -4041,7 +4041,8 @@ body.portal-tab-active .brand-icon {
   box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12);
 }
 
-.st2-access-modules-sql-group {
+.st2-access-modules-sql-group,
+.st2-access-modules-sub-group {
   margin: 4px 0 14px;
   padding: 10px 12px 4px;
   border-radius: 10px;
@@ -4050,11 +4051,53 @@ body.portal-tab-active .brand-icon {
   background: linear-gradient(180deg, #f8fbff 0%, #f1f5f9 100%);
 }
 
-.st2-access-modules-sql-group.is-disabled {
+.st2-access-modules-sql-group.is-disabled,
+.st2-access-modules-sub-group.is-disabled {
   opacity: 0.48;
   border-color: #e2e8f0;
   border-left-color: #cbd5e1;
   background: #f8fafc;
+}
+
+.st2-access-modules-legal-group {
+  border-color: #e9d5ff;
+  border-left-color: #9333ea;
+  background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+}
+
+.st2-access-modules-legal-group.is-disabled {
+  border-color: #e2e8f0;
+  border-left-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.st2-access-modules-legal-group .st2-access-modules-group-kicker {
+  color: #7e22ce;
+}
+
+.st2-access-modules-chile-group {
+  border-color: #fecaca;
+  border-left-color: #dc2626;
+  background: linear-gradient(180deg, #fff7f7 0%, #fef2f2 100%);
+}
+
+.st2-access-modules-chile-group.is-disabled {
+  border-color: #e2e8f0;
+  border-left-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.st2-access-modules-chile-group .st2-access-modules-group-kicker {
+  color: #b91c1c;
+}
+
+.st2-access-modules-group-subtitle {
+  margin: 8px 0 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
 .st2-access-modules-group-kicker {

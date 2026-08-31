@@ -1542,15 +1542,37 @@ html.st2-theme-dark .st2-access-modules-name-input::placeholder {
   color: #7d8ba0 !important;
 }
 
-html.st2-theme-dark .st2-access-modules-sql-group {
+html.st2-theme-dark .st2-access-modules-sql-group,
+html.st2-theme-dark .st2-access-modules-sub-group {
   background: linear-gradient(180deg, #172033 0%, #151b26 100%) !important;
   border-color: #334155 !important;
   border-left-color: #3b82f6 !important;
 }
 
-html.st2-theme-dark .st2-access-modules-sql-group.is-disabled {
+html.st2-theme-dark .st2-access-modules-sql-group.is-disabled,
+html.st2-theme-dark .st2-access-modules-sub-group.is-disabled {
   background: #151b26 !important;
   border-left-color: #475569 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-legal-group {
+  border-color: #4c1d95 !important;
+  border-left-color: #a855f7 !important;
+  background: linear-gradient(180deg, #1a1428 0%, #151b26 100%) !important;
+}
+
+html.st2-theme-dark .st2-access-modules-chile-group {
+  border-color: #7f1d1d !important;
+  border-left-color: #ef4444 !important;
+  background: linear-gradient(180deg, #1f1414 0%, #151b26 100%) !important;
+}
+
+html.st2-theme-dark .st2-access-modules-legal-group .st2-access-modules-group-kicker {
+  color: #d8b4fe !important;
+}
+
+html.st2-theme-dark .st2-access-modules-chile-group .st2-access-modules-group-kicker {
+  color: #fca5a5 !important;
 }
 
 html.st2-theme-dark .st2-access-modules-group-kicker {

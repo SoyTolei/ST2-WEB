@@ -37,8 +37,19 @@ function fullFlags() {
     borradoBasesConfirm: true,
     borradoBasesLoad: true,
     planillasSqlOnvio: true,
+    planillasTransferencia: true,
+    planillasReferral: true,
     planillasLegal: true,
+    legalTransferencia: true,
+    legalEscalamiento: true,
     planillasChile: true,
+    chileTransferencia: true,
+    chileReferral: true,
+    chileSaad: true,
+    chileHr: true,
+    chileWiki: true,
+    chileLp: true,
+    chilePowerapps: true,
   };
 }
 
@@ -53,8 +64,19 @@ function emptyFlags() {
     borradoBasesConfirm: false,
     borradoBasesLoad: false,
     planillasSqlOnvio: false,
+    planillasTransferencia: false,
+    planillasReferral: false,
     planillasLegal: false,
+    legalTransferencia: false,
+    legalEscalamiento: false,
     planillasChile: false,
+    chileTransferencia: false,
+    chileReferral: false,
+    chileSaad: false,
+    chileHr: false,
+    chileWiki: false,
+    chileLp: false,
+    chilePowerapps: false,
   };
 }
 
@@ -175,8 +197,19 @@ function parseFlagsFromApi(m) {
     borradoBasesConfirm: !!m.borradoBasesConfirm,
     borradoBasesLoad: m.borradoBasesLoad == null ? !m.borradoBasesConfirm : !!m.borradoBasesLoad,
     planillasSqlOnvio: m.planillasSqlOnvio == null ? true : !!m.planillasSqlOnvio,
+    planillasTransferencia: m.planillasTransferencia == null ? true : !!m.planillasTransferencia,
+    planillasReferral: m.planillasReferral == null ? true : !!m.planillasReferral,
     planillasLegal: m.planillasLegal == null ? true : !!m.planillasLegal,
+    legalTransferencia: m.legalTransferencia == null ? true : !!m.legalTransferencia,
+    legalEscalamiento: m.legalEscalamiento == null ? true : !!m.legalEscalamiento,
     planillasChile: m.planillasChile == null ? true : !!m.planillasChile,
+    chileTransferencia: m.chileTransferencia == null ? true : !!m.chileTransferencia,
+    chileReferral: m.chileReferral == null ? true : !!m.chileReferral,
+    chileSaad: m.chileSaad == null ? true : !!m.chileSaad,
+    chileHr: m.chileHr == null ? true : !!m.chileHr,
+    chileWiki: m.chileWiki == null ? true : !!m.chileWiki,
+    chileLp: m.chileLp == null ? true : !!m.chileLp,
+    chilePowerapps: m.chilePowerapps == null ? true : !!m.chilePowerapps,
   };
 }
 
@@ -315,4 +348,48 @@ export function canSeePlanillasLegal() {
 
 export function canSeePlanillasChile() {
   return !!getCachedModuleFlags().planillasChile;
+}
+
+export function canSeePlanillasTransferencia() {
+  return !!getCachedModuleFlags().planillasTransferencia;
+}
+
+export function canSeePlanillasReferral() {
+  return !!getCachedModuleFlags().planillasReferral;
+}
+
+export function canSeeLegalTransferencia() {
+  return !!getCachedModuleFlags().legalTransferencia;
+}
+
+export function canSeeLegalEscalamiento() {
+  return !!getCachedModuleFlags().legalEscalamiento;
+}
+
+export function canSeeChileTransferencia() {
+  return !!getCachedModuleFlags().chileTransferencia;
+}
+
+export function canSeeChileReferral() {
+  return !!getCachedModuleFlags().chileReferral;
+}
+
+export function canSeeChileSaad() {
+  return !!getCachedModuleFlags().chileSaad;
+}
+
+export function canSeeChileHr() {
+  return !!getCachedModuleFlags().chileHr;
+}
+
+export function canSeeChileWiki() {
+  return !!getCachedModuleFlags().chileWiki;
+}
+
+export function canSeeChileLp() {
+  return !!getCachedModuleFlags().chileLp;
+}
+
+export function canSeeChilePowerapps() {
+  return !!getCachedModuleFlags().chilePowerapps;
 }

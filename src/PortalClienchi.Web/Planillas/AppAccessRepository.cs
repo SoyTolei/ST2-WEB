@@ -892,8 +892,19 @@ public sealed class AccessPresetRequest
     public bool? BorradoBasesConfirm { get; set; }
     public bool? BorradoBasesLoad { get; set; }
     public bool? PlanillasSqlOnvio { get; set; }
+    public bool? PlanillasTransferencia { get; set; }
+    public bool? PlanillasReferral { get; set; }
     public bool? PlanillasLegal { get; set; }
+    public bool? LegalTransferencia { get; set; }
+    public bool? LegalEscalamiento { get; set; }
     public bool? PlanillasChile { get; set; }
+    public bool? ChileTransferencia { get; set; }
+    public bool? ChileReferral { get; set; }
+    public bool? ChileSaad { get; set; }
+    public bool? ChileHr { get; set; }
+    public bool? ChileWiki { get; set; }
+    public bool? ChileLp { get; set; }
+    public bool? ChilePowerapps { get; set; }
     public bool? St2Admin { get; set; }
 }
 

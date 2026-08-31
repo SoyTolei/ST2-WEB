@@ -568,20 +568,7 @@ public static class PlanillasEndpoints
             {
                 email,
                 st2Admin,
-                modules = new
-                {
-                    oportunidad = flags.Oportunidad,
-                    pdfPortal = flags.PdfPortal,
-                    blanqueo = flags.Blanqueo,
-                    blanqueoConfirm = flags.BlanqueoConfirm,
-                    blanqueoLoad = flags.BlanqueoLoad,
-                    borradoBases = flags.BorradoBases,
-                    borradoBasesConfirm = flags.BorradoBasesConfirm,
-                    borradoBasesLoad = flags.BorradoBasesLoad,
-                    planillasSqlOnvio = flags.PlanillasSqlOnvio,
-                    planillasLegal = flags.PlanillasLegal,
-                    planillasChile = flags.PlanillasChile,
-                },
+                modules = ModuleAccessApi.Snapshot(flags),
             });
         });
 
@@ -694,20 +681,7 @@ public static class PlanillasEndpoints
                                 AppAccessClientInfo.ResolveDeviceId(item.LastClientDevice, item.LastClientHint),
                                 AppAccessClientInfo.SummarizeBrowser(item.LastUserAgent))
                             : null,
-                        modules = new
-                        {
-                            oportunidad = flags.Oportunidad,
-                            pdfPortal = flags.PdfPortal,
-                            blanqueo = flags.Blanqueo,
-                            blanqueoConfirm = flags.BlanqueoConfirm,
-                            blanqueoLoad = flags.BlanqueoLoad,
-                            borradoBases = flags.BorradoBases,
-                            borradoBasesConfirm = flags.BorradoBasesConfirm,
-                            borradoBasesLoad = flags.BorradoBasesLoad,
-                            planillasSqlOnvio = flags.PlanillasSqlOnvio,
-                            planillasLegal = flags.PlanillasLegal,
-                            planillasChile = flags.PlanillasChile,
-                        },
+                        modules = ModuleAccessApi.Snapshot(flags),
                     };
                 }).ToList();
 
@@ -863,20 +837,7 @@ public static class PlanillasEndpoints
                     ok = true,
                     email,
                     isSt2Admin,
-                    modules = new
-                    {
-                        oportunidad = flags.Oportunidad,
-                        pdfPortal = flags.PdfPortal,
-                        blanqueo = flags.Blanqueo,
-                        blanqueoConfirm = flags.BlanqueoConfirm,
-                        blanqueoLoad = flags.BlanqueoLoad,
-                        borradoBases = flags.BorradoBases,
-                        borradoBasesConfirm = flags.BorradoBasesConfirm,
-                        borradoBasesLoad = flags.BorradoBasesLoad,
-                        planillasSqlOnvio = flags.PlanillasSqlOnvio,
-                        planillasLegal = flags.PlanillasLegal,
-                        planillasChile = flags.PlanillasChile,
-                    },
+                    modules = ModuleAccessApi.Snapshot(flags),
                 });
             }
             catch (ArgumentException ex)
@@ -918,8 +879,19 @@ public static class PlanillasEndpoints
                     BorradoBasesConfirm = body.BorradoBasesConfirm,
                     BorradoBasesLoad = body.BorradoBasesLoad,
                     PlanillasSqlOnvio = body.PlanillasSqlOnvio,
+                    PlanillasTransferencia = body.PlanillasTransferencia,
+                    PlanillasReferral = body.PlanillasReferral,
                     PlanillasLegal = body.PlanillasLegal,
+                    LegalTransferencia = body.LegalTransferencia,
+                    LegalEscalamiento = body.LegalEscalamiento,
                     PlanillasChile = body.PlanillasChile,
+                    ChileTransferencia = body.ChileTransferencia,
+                    ChileReferral = body.ChileReferral,
+                    ChileSaad = body.ChileSaad,
+                    ChileHr = body.ChileHr,
+                    ChileWiki = body.ChileWiki,
+                    ChileLp = body.ChileLp,
+                    ChilePowerapps = body.ChilePowerapps,
                 });
 
                 var isSt2Admin = St2SuperAdmin.Is(email);
@@ -960,20 +932,7 @@ public static class PlanillasEndpoints
                     birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec.BirthdayMmDd),
                     status = rec.Status,
                     isSt2Admin,
-                    modules = new
-                    {
-                        oportunidad = flags.Oportunidad,
-                        pdfPortal = flags.PdfPortal,
-                        blanqueo = flags.Blanqueo,
-                        blanqueoConfirm = flags.BlanqueoConfirm,
-                        blanqueoLoad = flags.BlanqueoLoad,
-                        borradoBases = flags.BorradoBases,
-                        borradoBasesConfirm = flags.BorradoBasesConfirm,
-                        borradoBasesLoad = flags.BorradoBasesLoad,
-                        planillasSqlOnvio = flags.PlanillasSqlOnvio,
-                        planillasLegal = flags.PlanillasLegal,
-                        planillasChile = flags.PlanillasChile,
-                    },
+                    modules = ModuleAccessApi.Snapshot(flags),
                 });
             }
             catch (ArgumentException ex)
