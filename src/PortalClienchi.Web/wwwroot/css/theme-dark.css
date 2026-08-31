@@ -494,7 +494,6 @@ html.st2-theme-dark .plan-bej-label {
   color: #94a3b8 !important;
 }
 
-html.st2-theme-dark .planillas-back,
 html.st2-theme-dark .plan-action-btn.ghost,
 html.st2-theme-dark .plan-op-btn-limpiar,
 html.st2-theme-dark .btn-secondary {
@@ -503,7 +502,47 @@ html.st2-theme-dark .btn-secondary {
   border: 1px solid #3d4b61 !important;
 }
 
-html.st2-theme-dark .planillas-back:hover,
+html.st2-theme-dark .planillas-back {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .planillas-back-icon {
+  background: linear-gradient(180deg, #2a2118 0%, #1c1510 100%) !important;
+  border-color: #9a3412 !important;
+  color: #fb923c !important;
+  box-shadow: none !important;
+}
+
+html.st2-theme-dark .planillas-back:hover {
+  background: rgba(234, 88, 12, 0.1) !important;
+  color: #fdba74 !important;
+}
+
+html.st2-theme-dark .planillas-back:hover .planillas-back-icon {
+  background: linear-gradient(180deg, #3d2814 0%, #2a1a0d 100%) !important;
+  border-color: #ea580c !important;
+  color: #fdba74 !important;
+}
+
+html.st2-theme-dark .plan-chile-embed-nav {
+  background: linear-gradient(180deg, #221a12 0%, #1a1410 100%) !important;
+  border-color: #7c2d12 !important;
+  box-shadow: none !important;
+}
+
+html.st2-theme-dark .plan-chile-embed-nav .planillas-back:hover,
+html.st2-theme-dark .plan-chile-embed-menu-btn:hover {
+  background: rgba(234, 88, 12, 0.12) !important;
+}
+
+html.st2-theme-dark .plan-chile-embed-menu-btn {
+  background: transparent !important;
+  border-left-color: #7c2d12 !important;
+  color: #fb923c !important;
+}
+
 html.st2-theme-dark .plan-action-btn.ghost:hover,
 html.st2-theme-dark .plan-op-btn-limpiar:hover {
   background: #243044 !important;

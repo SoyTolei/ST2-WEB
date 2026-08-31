@@ -1143,28 +1143,40 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: inline-flex;
   align-items: stretch;
   gap: 0;
+  padding: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffaf5 0%, #fff7ed 100%);
+  border: 1px solid #fed7aa;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset;
 }
 
 .plan-chile-embed-nav .planillas-back {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  border-radius: 999px 0 0 999px;
+  padding-right: 6px;
+}
+
+.plan-chile-embed-nav .planillas-back:hover {
+  background: rgba(255, 237, 213, 0.55);
 }
 
 .plan-chile-embed-menu-btn {
-  border: 1px solid var(--border);
-  border-left: none;
-  background: #fff;
-  border-radius: 0 6px 6px 0;
-  padding: 5px 9px;
-  font-size: 0.78rem;
+  border: none;
+  border-left: 1px solid #fdba74;
+  background: transparent;
+  border-radius: 0 999px 999px 0;
+  padding: 0 11px;
+  min-width: 34px;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  color: var(--dark);
+  color: #c2410c;
   line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .plan-chile-embed-menu-btn:hover {
-  background: var(--nav-hover);
+  background: rgba(255, 237, 213, 0.55);
+  color: #9a3412;
 }
 
 .plan-chile-embed-menu-btn--solo {
@@ -1344,18 +1356,75 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .planillas-back {
-  border: 1px solid var(--border);
-  background: #fff;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 5px 12px 5px 5px;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-size: 0.8rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
   cursor: pointer;
-  color: var(--dark);
+  color: #64748b;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.planillas-back-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
+  border: 1px solid #fdba74;
+  color: #ea580c;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.planillas-back-icon svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.planillas-back-label {
+  white-space: nowrap;
 }
 
 .planillas-back:hover {
-  background: var(--nav-hover);
+  color: #c2410c;
+  background: rgba(255, 247, 237, 0.72);
+}
+
+.planillas-back:hover .planillas-back-icon {
+  background: linear-gradient(180deg, #ffedd5 0%, #fdba74 100%);
+  border-color: #fb923c;
+  color: #9a3412;
+  transform: translateX(-1px);
+}
+
+.planillas-back:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.22);
+}
+
+.planillas-back:active {
+  transform: translateY(1px);
 }
 
 .plan-sistema-badge {
@@ -1416,9 +1485,18 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-module-sticky-head .planillas-back {
-  padding: 5px 10px;
-  font-size: 0.78rem;
-  border-radius: 6px;
+  padding: 4px 10px 4px 4px;
+  font-size: 0.76rem;
+}
+
+.plan-module-sticky-head .planillas-back-icon {
+  width: 26px;
+  height: 26px;
+}
+
+.plan-module-sticky-head .planillas-back-icon svg {
+  width: 14px;
+  height: 14px;
 }
 
 .plan-module-sticky-head .plan-sistema-badge {

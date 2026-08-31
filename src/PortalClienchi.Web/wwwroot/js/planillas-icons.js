@@ -22,9 +22,28 @@ export const PLAN_ICONS = {
   pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M8 9h8M8 13h6M8 17h4"/></svg>`,
   blanqueo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5 12 13.5 20 8.5"/><rect x="4" y="6" width="16" height="12" rx="2"/><path d="M16.5 17.5a3.5 3.5 0 1 0-3.2-4.9"/><path d="M13.2 14.2h3.1v3.1"/></svg>`,
   "borrado-bases": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v4c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 10v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4"/><path d="M9 16.5 12 19.5 15 16.5"/><path d="M12 13.5v6"/></svg>`,
+  backChevron: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 7 9 12l5.5 5"/></svg>`,
 };
 
+export function upgradePlanillasBackButtons() {
+  document.querySelectorAll(".planillas-back:not([data-back-ready])").forEach((btn) => {
+    const raw = btn.textContent.replace(/^\s*←\s*/, "").trim() || "Volver";
+    btn.textContent = "";
+    btn.dataset.backReady = "1";
+    const icon = document.createElement("span");
+    icon.className = "planillas-back-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = PLAN_ICONS.backChevron;
+    const label = document.createElement("span");
+    label.className = "planillas-back-label";
+    label.textContent = raw;
+    btn.appendChild(icon);
+    btn.appendChild(label);
+  });
+}
+
 export function injectModuleHeaders() {
+  upgradePlanillasBackButtons();
   document.querySelectorAll("[data-plan-icon]").forEach((el) => {
     const key = el.dataset.planIcon;
     if (PLAN_ICONS[key]) el.innerHTML = PLAN_ICONS[key];
