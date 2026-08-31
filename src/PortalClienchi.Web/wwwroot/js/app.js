@@ -153,6 +153,10 @@ const accessModSt2AdminWrap = document.getElementById("st2-mod-st2-admin-wrap");
 const accessModulesSqlGroup = document.getElementById("st2-access-modules-sql-group");
 const accessModulesLegalGroup = document.getElementById("st2-access-modules-legal-group");
 const accessModulesChileGroup = document.getElementById("st2-access-modules-chile-group");
+const accessModulesSqlCard = document.getElementById("st2-access-modules-sql-card");
+const accessModulesLegalCard = document.getElementById("st2-access-modules-legal-card");
+const accessModulesChileCard = document.getElementById("st2-access-modules-chile-card");
+const accessModulesSysExpandButtons = Array.from(document.querySelectorAll(".st2-access-modules-sys-expand"));
 const viewAsBanner = document.getElementById("st2-view-as-banner");
 const viewAsBannerText = document.getElementById("st2-view-as-banner-text");
 const viewAsExitBtn = document.getElementById("st2-view-as-exit");
@@ -2889,19 +2893,123 @@ function setAccessModuleChecks(mods, { presetDefaults = false } = {}) {
   }
 }
 
+function resetSqlSystemModules(enabled) {
+  const on = !!enabled;
+  const inputs = [
+    accessModPlanillasTransferencia,
+    accessModPlanillasReferral,
+    accessModOportunidad,
+    accessModPdf,
+    accessModBlanqueo,
+    accessModBlanqueoConfirm,
+    accessModBlanqueoLoad,
+    accessModBorradoBases,
+    accessModBorradoBasesConfirm,
+    accessModBorradoBasesLoad,
+  ];
+  inputs.forEach((el) => { if (el) el.checked = false; });
+  if (!on) return;
+  [
+    accessModPlanillasTransferencia,
+    accessModPlanillasReferral,
+    accessModOportunidad,
+    accessModPdf,
+    accessModBlanqueo,
+    accessModBorradoBases,
+  ].forEach((el) => { if (el) el.checked = true; });
+  if (accessModBlanqueoLoad) accessModBlanqueoLoad.checked = true;
+  if (accessModBorradoBasesLoad) accessModBorradoBasesLoad.checked = true;
+  if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
+  if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
+}
+
+function resetLegalSystemModules(enabled) {
+  const on = !!enabled;
+  [
+    accessModLegalFirm,
+    accessModLegalHighq,
+    accessModLegalWestlaw,
+    accessModLegalCocounsel,
+  ].forEach((el) => { if (el) el.checked = on; });
+}
+
+function resetChileSystemModules(enabled) {
+  const on = !!enabled;
+  [
+    accessModChileTransferencia,
+    accessModChileReferral,
+    accessModChileSaad,
+    accessModChileHr,
+    accessModChileWiki,
+    accessModChileLp,
+    accessModChilePowerapps,
+  ].forEach((el) => { if (el) el.checked = on; });
+}
+
+function getAccessSysExpandButton(sys) {
+  return accessModulesSysExpandButtons.find((btn) => btn.dataset.sysExpand === sys) || null;
+}
+
+function setAccessSysBodyOpen(sys, open) {
+  const body = sys === "sql" ? accessModulesSqlGroup
+    : sys === "legal" ? accessModulesLegalGroup
+      : accessModulesChileGroup;
+  const btn = getAccessSysExpandButton(sys);
+  if (!body) return;
+  body.classList.toggle("hidden", !open);
+  body.classList.toggle("is-open", open);
+  if (btn) {
+    btn.classList.toggle("is-open", open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+    const icon = btn.querySelector(".st2-access-modules-sys-expand-icon");
+    if (icon) icon.textContent = open ? "−" : "+";
+  }
+}
+
+function collapseAllAccessSysBodies() {
+  ["sql", "legal", "chile"].forEach((sys) => setAccessSysBodyOpen(sys, false));
+}
+
+function toggleAccessSysBody(sys) {
+  const body = sys === "sql" ? accessModulesSqlGroup
+    : sys === "legal" ? accessModulesLegalGroup
+      : accessModulesChileGroup;
+  if (!body || body.classList.contains("is-disabled")) return;
+  const open = body.classList.contains("hidden");
+  setAccessSysBodyOpen(sys, open);
+}
+
+function syncAccessSystemCard(sys, { group, card, enabled }) {
+  const on = !!enabled;
+  group?.classList.toggle("is-disabled", !on);
+  card?.classList.toggle("is-disabled", !on);
+  const btn = getAccessSysExpandButton(sys);
+  if (btn) btn.disabled = !on;
+  if (!on) setAccessSysBodyOpen(sys, false);
+}
+
 function syncAccessSqlModulesGroup() {
-  const on = !!accessModPlanillasSqlOnvio?.checked;
-  accessModulesSqlGroup?.classList.toggle("is-disabled", !on);
+  syncAccessSystemCard("sql", {
+    group: accessModulesSqlGroup,
+    card: accessModulesSqlCard,
+    enabled: accessModPlanillasSqlOnvio?.checked,
+  });
 }
 
 function syncAccessLegalModulesGroup() {
-  const on = !!accessModPlanillasLegal?.checked;
-  accessModulesLegalGroup?.classList.toggle("is-disabled", !on);
+  syncAccessSystemCard("legal", {
+    group: accessModulesLegalGroup,
+    card: accessModulesLegalCard,
+    enabled: accessModPlanillasLegal?.checked,
+  });
 }
 
 function syncAccessChileModulesGroup() {
-  const on = !!accessModPlanillasChile?.checked;
-  accessModulesChileGroup?.classList.toggle("is-disabled", !on);
+  syncAccessSystemCard("chile", {
+    group: accessModulesChileGroup,
+    card: accessModulesChileCard,
+    enabled: accessModPlanillasChile?.checked,
+  });
 }
 
 function syncAccessSystemModuleGroups() {
@@ -2991,6 +3099,7 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
     accessModSt2AdminWrap.classList.toggle("hidden", !isPrimarySuperAdmin());
   }
   syncAccessSystemModuleGroups();
+  collapseAllAccessSysBodies();
   if (accessModulesError) accessModulesError.textContent = "";
   if (accessModulesSave) {
     accessModulesSave.disabled = false;
@@ -3029,6 +3138,7 @@ function openAccessPresetModal() {
     accessModSt2AdminWrap.classList.remove("is-primary-locked");
   }
   syncAccessSystemModuleGroups();
+  collapseAllAccessSysBodies();
   if (accessModulesError) accessModulesError.textContent = "";
   if (accessModulesSave) {
     accessModulesSave.disabled = false;
@@ -3039,9 +3149,25 @@ function openAccessPresetModal() {
   accessModulesEmailInput?.focus();
 }
 
-accessModPlanillasSqlOnvio?.addEventListener("change", syncAccessSqlModulesGroup);
-accessModPlanillasLegal?.addEventListener("change", syncAccessLegalModulesGroup);
-accessModPlanillasChile?.addEventListener("change", syncAccessChileModulesGroup);
+accessModPlanillasSqlOnvio?.addEventListener("change", () => {
+  resetSqlSystemModules(accessModPlanillasSqlOnvio.checked);
+  syncAccessSqlModulesGroup();
+});
+accessModPlanillasLegal?.addEventListener("change", () => {
+  resetLegalSystemModules(accessModPlanillasLegal.checked);
+  syncAccessLegalModulesGroup();
+});
+accessModPlanillasChile?.addEventListener("change", () => {
+  resetChileSystemModules(accessModPlanillasChile.checked);
+  syncAccessChileModulesGroup();
+});
+accessModulesSysExpandButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const sys = btn.dataset.sysExpand;
+    if (!sys || btn.disabled) return;
+    toggleAccessSysBody(sys);
+  });
+});
 accessModBlanqueoConfirm?.addEventListener("change", () => {
   if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
     accessModBlanqueo.checked = true;

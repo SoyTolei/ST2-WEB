@@ -1546,29 +1546,52 @@ html.st2-theme-dark .st2-access-modules-name-input::placeholder {
   color: #7d8ba0 !important;
 }
 
+html.st2-theme-dark .st2-access-modules-sys-card {
+  background: #151b26 !important;
+  border-color: #334155 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sys-head {
+  background: #1a2233 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sys-expand {
+  background: #0f172a !important;
+  border-color: #475569 !important;
+  color: #cbd5e1 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sys-expand:hover:not(:disabled) {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sys-body {
+  background: #151b26 !important;
+  border-top-color: #334155 !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sys-card--sql .st2-access-modules-sys-body {
+  background: linear-gradient(180deg, #172033 0%, #151b26 100%) !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sys-card--legal .st2-access-modules-sys-body {
+  background: linear-gradient(180deg, #1a1428 0%, #151b26 100%) !important;
+}
+
+html.st2-theme-dark .st2-access-modules-sys-card--chile .st2-access-modules-sys-body {
+  background: linear-gradient(180deg, #1f1414 0%, #151b26 100%) !important;
+}
+
 html.st2-theme-dark .st2-access-modules-sql-group,
 html.st2-theme-dark .st2-access-modules-sub-group {
-  background: linear-gradient(180deg, #172033 0%, #151b26 100%) !important;
-  border-color: #334155 !important;
-  border-left-color: #3b82f6 !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 html.st2-theme-dark .st2-access-modules-sql-group.is-disabled,
 html.st2-theme-dark .st2-access-modules-sub-group.is-disabled {
-  background: #151b26 !important;
-  border-left-color: #475569 !important;
-}
-
-html.st2-theme-dark .st2-access-modules-legal-group {
-  border-color: #4c1d95 !important;
-  border-left-color: #a855f7 !important;
-  background: linear-gradient(180deg, #1a1428 0%, #151b26 100%) !important;
-}
-
-html.st2-theme-dark .st2-access-modules-chile-group {
-  border-color: #7f1d1d !important;
-  border-left-color: #ef4444 !important;
-  background: linear-gradient(180deg, #1f1414 0%, #151b26 100%) !important;
+  background: transparent !important;
 }
 
 html.st2-theme-dark .st2-access-modules-legal-group .st2-access-modules-group-kicker {
