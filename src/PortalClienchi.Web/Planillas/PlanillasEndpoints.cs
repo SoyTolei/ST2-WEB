@@ -894,7 +894,6 @@ public static class PlanillasEndpoints
                     ChileWiki = body.ChileWiki,
                     ChileLp = body.ChileLp,
                     ChilePowerapps = body.ChilePowerapps,
-                    BejermanWeb = body.BejermanWeb,
                 });
 
                 var isSt2Admin = St2SuperAdmin.Is(email);

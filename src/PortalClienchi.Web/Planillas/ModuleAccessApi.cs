@@ -28,6 +28,5 @@ public static class ModuleAccessApi
         chileWiki = flags.ChileWiki,
         chileLp = flags.ChileLp,
         chilePowerapps = flags.ChilePowerapps,
-        bejermanWeb = flags.BejermanWeb,
     };
 }

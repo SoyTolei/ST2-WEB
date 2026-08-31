@@ -26,7 +26,6 @@ public static class PlanModuleIds
     public const string ChileWiki = "chile_wiki";
     public const string ChileLp = "chile_lp";
     public const string ChilePowerapps = "chile_powerapps";
-    public const string BejermanWeb = "bejerman_web";
 
     public static readonly string[] All =
     [
@@ -52,7 +51,6 @@ public static class PlanModuleIds
         ChileWiki,
         ChileLp,
         ChilePowerapps,
-        BejermanWeb,
     ];
 }
 
@@ -84,7 +82,6 @@ public sealed class ModuleAccessFlagsDto
     public bool ChileWiki { get; set; } = true;
     public bool ChileLp { get; set; } = true;
     public bool ChilePowerapps { get; set; } = true;
-    public bool BejermanWeb { get; set; }
 }
 
 public sealed class ModuleAccessUpdateRequest
@@ -114,7 +111,6 @@ public sealed class ModuleAccessUpdateRequest
     public bool? ChileWiki { get; set; }
     public bool? ChileLp { get; set; }
     public bool? ChilePowerapps { get; set; }
-    public bool? BejermanWeb { get; set; }
     /// <summary>Puede ver la pestaña Admin ST2 (además del super-admin primario).</summary>
     public bool? St2Admin { get; set; }
 }

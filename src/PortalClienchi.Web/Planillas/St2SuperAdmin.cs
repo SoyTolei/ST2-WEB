@@ -38,6 +38,5 @@ public static class St2SuperAdmin
         ChileWiki = true,
         ChileLp = true,
         ChilePowerapps = true,
-        BejermanWeb = true,
     };
 }

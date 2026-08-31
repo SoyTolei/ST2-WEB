@@ -128,7 +128,6 @@ public sealed class ModuleAccessRepository
         var chileWiki = req.ChileWiki ?? current.ChileWiki;
         var chileLp = req.ChileLp ?? current.ChileLp;
         var chilePowerapps = req.ChilePowerapps ?? current.ChilePowerapps;
-        var bejermanWeb = req.BejermanWeb ?? current.BejermanWeb;
 
         WriteModule(conn, email, PlanModuleIds.Oportunidad, oportunidad, false);
         WriteModule(conn, email, PlanModuleIds.PdfPortal, pdfPortal, false);
@@ -152,7 +151,6 @@ public sealed class ModuleAccessRepository
         WriteModule(conn, email, PlanModuleIds.ChileWiki, chileWiki, false);
         WriteModule(conn, email, PlanModuleIds.ChileLp, chileLp, false);
         WriteModule(conn, email, PlanModuleIds.ChilePowerapps, chilePowerapps, false);
-        WriteModule(conn, email, PlanModuleIds.BejermanWeb, bejermanWeb, false);
 
         return ReadFlags(conn, email);
     }
@@ -247,8 +245,6 @@ public sealed class ModuleAccessRepository
                 flags.ChileLp = view;
             else if (module.Equals(PlanModuleIds.ChilePowerapps, StringComparison.OrdinalIgnoreCase))
                 flags.ChilePowerapps = view;
-            else if (module.Equals(PlanModuleIds.BejermanWeb, StringComparison.OrdinalIgnoreCase))
-                flags.BejermanWeb = view;
         }
 
         // Legacy: sin fila blanqueo_load → confirmador = solo listado; el resto puede cargar.

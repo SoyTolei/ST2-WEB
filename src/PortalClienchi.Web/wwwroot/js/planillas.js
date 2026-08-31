@@ -5,7 +5,7 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
-import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeBejermanWeb, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
+import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { getPlanUserEmail } from "./plan-user.js";
 import {
@@ -189,16 +189,7 @@ let chileEmbedUrl = "";
 let chileEmbedTitle = "";
 let chileEmbedLoadTimer = null;
 let chileEmbedMenuOpen = false;
-/** @type {"chile" | "menu"} */
-let planEmbedReturnMode = "chile";
 const CHILE_EMBED_STORAGE_KEY = "st2-chile-embed";
-const BEJERMANWEB_EMBED_STORAGE_KEY = "st2-bejermanweb-embed";
-const BEJERMAN_WEB_EMBED_URL = "https://www.bejermanweb.com.ar/BW/LoginUser/BW";
-const BEJERMAN_WEB_OPEN_URL = "https://www.bejermanweb.com.ar/bw";
-/** Sin allow-top-navigation: evita que RutinasIndex.js redirija top → index.aspx (404). */
-const BEJERMAN_EMBED_SANDBOX = "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-downloads";
-let bejermanEmbedLoadCount = 0;
-let bejermanPostLoginDetected = false;
 
 const els = {
   sistemaBtns: () => document.querySelectorAll(".plan-sistema-grid > [data-plan-sistema]"),
@@ -287,7 +278,6 @@ function pathForView(name) {
     case "blanqueo": return "/blanqueo";
     case "borradoBases": return "/borrado-bases";
     case "chileEmbed": return "/chile/soporte";
-    case "bejermanWebEmbed": return "/bejermanweb";
     default: return "/";
   }
 }
@@ -338,7 +328,6 @@ function routeFromPath(pathname) {
     case "/blanqueo": return { view: "blanqueo", requires: "blanqueo" };
     case "/borrado-bases": return { view: "borradoBases", requires: "borrado-bases" };
     case "/chile/soporte": return { view: "chileEmbed", requires: "chile-soporte" };
-    case "/bejermanweb": return { view: "bejermanWebEmbed", requires: "bejermanweb-embed" };
     default: return { view: "menu", unknown: true };
   }
 }
@@ -383,21 +372,6 @@ function syncChileSoporteVisibility() {
   syncPlanModulosGridLayout(document.querySelector(".plan-chile-soporte-grid"));
 }
 
-function syncBejermanWebVisibility() {
-  const sistemaOk = sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb";
-  const allowed = sistemaOk && canSeeBejermanWeb();
-  const wrap = document.getElementById("plan-bejermanweb-wrap");
-  const btn = document.querySelector("#plan-bejermanweb-wrap [data-plan-embed-url]");
-  wrap?.classList.toggle("hidden", !allowed);
-  wrap?.setAttribute("aria-hidden", allowed ? "false" : "true");
-  if (btn) {
-    btn.classList.toggle("hidden", !allowed);
-    btn.toggleAttribute("hidden", !allowed);
-    btn.setAttribute("aria-hidden", allowed ? "false" : "true");
-  }
-  if (allowed) syncPlanModulosGridLayout(wrap?.querySelector(".plan-modulos-grid"));
-}
-
 function canOpenRoute(route) {
   if (!route?.requires) return true;
   if (route.requires === "oportunidad") return canSeeOportunidadModule() && !hidesCommercialModules();
@@ -413,9 +387,6 @@ function canOpenRoute(route) {
   }
   if (route.requires === "chile-soporte") {
     return canSeeSistema("Chile") && !!chileEmbedUrl;
-  }
-  if (route.requires === "bejermanweb-embed") {
-    return (sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb") && canSeeBejermanWeb() && !!chileEmbedUrl;
   }
   return true;
 }
@@ -453,8 +424,7 @@ function titleForView(name) {
     case "pdfPortal": return "ST² · Generador PDF";
     case "blanqueo": return "ST² · Blanqueo";
     case "borradoBases": return "ST² · Borrado de Bases Web";
-    case "chileEmbed":
-    case "bejermanWebEmbed": return chileEmbedTitle ? `ST² · ${chileEmbedTitle}` : "ST² · Sitio embebido";
+    case "chileEmbed": return chileEmbedTitle ? `ST² · ${chileEmbedTitle}` : "ST² · Sitio embebido";
     default: return "ST² · Suite Web";
   }
 }
@@ -473,18 +443,13 @@ function syncHistory(name, mode = "push") {
   }
 }
 
-function normalizeViewName(name) {
-  if (name === "bejermanWebEmbed") return "chileEmbed";
-  return name;
-}
-
 function showView(name, { history = "push" } = {}) {
-  const viewKey = normalizeViewName(name);
+  const viewKey = name;
   if (viewKey !== "blanqueo") stopBlanqueoLiveRefresh();
   if (viewKey !== "borradoBases") stopBorradoLiveRefresh();
   Object.entries(views).forEach(([key, el]) => {
     if (!el) return;
-    el.classList.toggle("hidden", normalizeViewName(key) !== viewKey);
+    el.classList.toggle("hidden", key !== viewKey);
   });
   document.body.classList.toggle("st2-balloons-sides", name !== "menu");
   document.body.classList.toggle("st2-chile-embed-active", viewKey === "chileEmbed");
@@ -598,7 +563,6 @@ function updateSistemaUi() {
   syncBorradoBasesModuleVisibility();
   document.querySelector(".plan-modulos-grid")?.classList.toggle("is-compact", hideCommercial);
   syncChileSoporteVisibility();
-  syncBejermanWebVisibility();
   syncAllPlanModulosGrids();
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
@@ -1248,68 +1212,6 @@ function readChileEmbedSession() {
   return readEmbedSession(CHILE_EMBED_STORAGE_KEY, "Soporte técnico Chile");
 }
 
-function normalizeBejermanWebEmbedUrl(url) {
-  const u = String(url || "").trim();
-  if (!u) return BEJERMAN_WEB_EMBED_URL;
-  const lower = u.toLowerCase().replace(/\/+$/, "");
-  if (lower === "https://www.bejermanweb.com.ar" || lower === "http://www.bejermanweb.com.ar") {
-    return BEJERMAN_WEB_EMBED_URL;
-  }
-  if (/\/bw$/i.test(lower) && !lower.includes("/loginuser")) {
-    return BEJERMAN_WEB_EMBED_URL;
-  }
-  return u;
-}
-
-function readBejermanWebEmbedSession() {
-  const saved = readEmbedSession(BEJERMANWEB_EMBED_STORAGE_KEY, "BejermanWEB");
-  if (!saved) return null;
-  return { ...saved, url: normalizeBejermanWebEmbedUrl(saved.url) };
-}
-
-function resetBejermanEmbedNavigationState() {
-  bejermanEmbedLoadCount = 0;
-  bejermanPostLoginDetected = false;
-  hideBejermanPostLoginHandoff();
-}
-
-function hideBejermanPostLoginHandoff() {
-  document.getElementById("plan-bejerman-postlogin-handoff")?.classList.add("hidden");
-}
-
-function showBejermanPostLoginHandoff() {
-  document.getElementById("plan-bejerman-postlogin-handoff")?.classList.remove("hidden");
-}
-
-function getBejermanBrowserUrl() {
-  return bejermanPostLoginDetected ? BEJERMAN_WEB_OPEN_URL : (chileEmbedUrl || BEJERMAN_WEB_EMBED_URL);
-}
-
-function handleBejermanEmbedFrameLoad() {
-  bejermanEmbedLoadCount += 1;
-  if (bejermanEmbedLoadCount < 2 || bejermanPostLoginDetected) return;
-  bejermanPostLoginDetected = true;
-  showBejermanPostLoginHandoff();
-}
-
-function syncBejermanEmbedFrameSandbox() {
-  const frame = document.getElementById("planChileEmbedFrame");
-  if (!frame) return;
-  if (planEmbedReturnMode === "menu") {
-    frame.setAttribute("sandbox", BEJERMAN_EMBED_SANDBOX);
-  } else {
-    frame.removeAttribute("sandbox");
-  }
-}
-
-function syncBejermanEmbedFallbackCopy() {
-  const p = document.querySelector("#plan-chile-embed-fallback p");
-  if (!p) return;
-  p.textContent = planEmbedReturnMode === "menu"
-    ? "Usá el login embebido y, al ingresar, continuá en el navegador con el botón que aparece."
-    : "Si la página no carga embebida (login o restricción del sitio), abrila en el navegador.";
-}
-
 function readEmbedSession(key, defaultTitle) {
   try {
     const raw = sessionStorage.getItem(key);
@@ -1326,10 +1228,6 @@ function writeChileEmbedSession(url, title) {
   writeEmbedSession(CHILE_EMBED_STORAGE_KEY, url, title);
 }
 
-function writeBejermanWebEmbedSession(url, title) {
-  writeEmbedSession(BEJERMANWEB_EMBED_STORAGE_KEY, url, title);
-}
-
 function writeEmbedSession(key, url, title) {
   try {
     sessionStorage.setItem(key, JSON.stringify({ url, title }));
@@ -1338,10 +1236,6 @@ function writeEmbedSession(key, url, title) {
 
 function clearChileEmbedSession() {
   clearEmbedSession(CHILE_EMBED_STORAGE_KEY);
-}
-
-function clearBejermanWebEmbedSession() {
-  clearEmbedSession(BEJERMANWEB_EMBED_STORAGE_KEY);
 }
 
 function clearEmbedSession(key) {
@@ -1368,31 +1262,14 @@ function toggleChileEmbedMenu() {
 function closeChileEmbed({ clearFrame = true } = {}) {
   clearChileEmbedLoadTimer();
   hideChileEmbedFallback();
-  hideBejermanPostLoginHandoff();
-  resetBejermanEmbedNavigationState();
   closeChileEmbedMenu();
   if (clearFrame) {
     const frame = document.getElementById("planChileEmbedFrame");
-    if (frame) {
-      frame.removeAttribute("src");
-      frame.removeAttribute("sandbox");
-    }
+    if (frame) frame.removeAttribute("src");
     chileEmbedUrl = "";
     chileEmbedTitle = "";
-    if (planEmbedReturnMode === "chile") clearChileEmbedSession();
-    else clearBejermanWebEmbedSession();
+    clearChileEmbedSession();
   }
-}
-
-function goBackFromEmbed() {
-  if (planEmbedReturnMode === "chile") {
-    goBackToChileHome();
-    return;
-  }
-  closeChileEmbed();
-  document.dispatchEvent(new CustomEvent("st2:planillas-home"));
-  showView("menu", { history: "replace" });
-  void refreshModuleFlags().then(() => updateSistemaUi());
 }
 
 function goBackToChileHome() {
@@ -1419,23 +1296,20 @@ function showChileEmbedFallback() {
 }
 
 function openChileEmbedInBrowser() {
-  const url = planEmbedReturnMode === "menu" ? getBejermanBrowserUrl() : chileEmbedUrl;
-  if (!url) return;
-  window.open(url, "_blank", "noopener,noreferrer");
+  if (!chileEmbedUrl) return;
+  window.open(chileEmbedUrl, "_blank", "noopener,noreferrer");
 }
 
 function reloadChileEmbed() {
   const frame = document.getElementById("planChileEmbedFrame");
   if (!frame || !chileEmbedUrl) return;
   hideChileEmbedFallback();
-  if (planEmbedReturnMode === "menu") resetBejermanEmbedNavigationState();
-  syncBejermanEmbedFrameSandbox();
   document.getElementById("plan-chile-embed-loading")?.classList.remove("hidden");
   clearChileEmbedLoadTimer();
   chileEmbedLoadTimer = window.setTimeout(() => {
     showChileEmbedFallback();
     document.getElementById("plan-chile-embed-loading")?.classList.add("hidden");
-  }, planEmbedReturnMode === "menu" ? 8000 : 12000);
+  }, 12000);
   try {
     frame.src = chileEmbedUrl;
   } catch {
@@ -1443,48 +1317,33 @@ function reloadChileEmbed() {
   }
 }
 
-function openPlanEmbed(url, title, returnMode = "menu") {
-  planEmbedReturnMode = returnMode === "chile" ? "chile" : "menu";
+function openChileEmbed(url, title) {
   chileEmbedUrl = String(url || "").trim();
-  if (planEmbedReturnMode === "menu") {
-    chileEmbedUrl = normalizeBejermanWebEmbedUrl(chileEmbedUrl);
-    resetBejermanEmbedNavigationState();
-  }
   if (!chileEmbedUrl) return;
-  chileEmbedTitle = title || (planEmbedReturnMode === "chile" ? "Soporte técnico Chile" : "BejermanWEB");
-  if (planEmbedReturnMode === "chile") writeChileEmbedSession(chileEmbedUrl, chileEmbedTitle);
-  else writeBejermanWebEmbedSession(chileEmbedUrl, chileEmbedTitle);
-  if (planEmbedReturnMode === "chile") selectSistema("Chile");
+  chileEmbedTitle = title || "Soporte técnico Chile";
+  writeChileEmbedSession(chileEmbedUrl, chileEmbedTitle);
+  selectSistema("Chile");
   const titleEl = document.getElementById("plan-chile-embed-title");
   const frame = document.getElementById("planChileEmbedFrame");
   if (titleEl) titleEl.textContent = chileEmbedTitle;
   if (frame) frame.title = chileEmbedTitle;
-  syncBejermanEmbedFallbackCopy();
-  const viewName = planEmbedReturnMode === "chile" ? "chileEmbed" : "bejermanWebEmbed";
   const onMenu = !document.getElementById("planillas-menu")?.classList.contains("hidden");
-  showView(viewName, { history: onMenu ? "push" : "replace" });
+  showView("chileEmbed", { history: onMenu ? "push" : "replace" });
   reloadChileEmbed();
-}
-
-function openChileEmbed(url, title) {
-  openPlanEmbed(url, title, "chile");
 }
 
 function bindChileEmbedUi() {
   document.querySelectorAll("[data-plan-embed-url]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const returnMode = btn.getAttribute("data-plan-embed-return") === "chile" ? "chile" : "menu";
-      if (returnMode === "chile" && !canSeeChileEmbedButton(btn)) return;
-      if (returnMode === "menu" && !canSeeBejermanWeb()) return;
+      if (!canSeeChileEmbedButton(btn)) return;
       const url = btn.getAttribute("data-plan-embed-url");
-      const title = btn.querySelector(".plan-modulo-label")?.textContent?.trim()
-        || (returnMode === "chile" ? "Soporte técnico Chile" : "BejermanWEB");
-      openPlanEmbed(url, title, returnMode);
+      const title = btn.querySelector(".plan-modulo-label")?.textContent?.trim() || "Soporte técnico Chile";
+      openChileEmbed(url, title);
     });
   });
 
   const backBtn = document.getElementById("plan-chile-embed-back");
-  backBtn?.addEventListener("click", () => goBackFromEmbed());
+  backBtn?.addEventListener("click", () => goBackToChileHome());
 
   document.getElementById("plan-chile-embed-menu-btn")?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -1501,7 +1360,6 @@ function bindChileEmbedUi() {
   });
 
   document.getElementById("plan-chile-embed-fallback-open")?.addEventListener("click", () => openChileEmbedInBrowser());
-  document.getElementById("plan-bejerman-postlogin-open")?.addEventListener("click", () => openChileEmbedInBrowser());
 
   document.addEventListener("click", (e) => {
     if (!chileEmbedMenuOpen) return;
@@ -1517,7 +1375,6 @@ function bindChileEmbedUi() {
   frame?.addEventListener("load", () => {
     clearChileEmbedLoadTimer();
     document.getElementById("plan-chile-embed-loading")?.classList.add("hidden");
-    if (planEmbedReturnMode === "menu") handleBejermanEmbedFrameLoad();
   });
 }
 
@@ -1642,31 +1499,24 @@ async function revealView(name, historyMode = "push") {
     return;
   }
 
-  if (name === "chileEmbed" || name === "bejermanWebEmbed") {
+  if (name === "chileEmbed") {
     if (!chileEmbedUrl) {
-      const saved = name === "chileEmbed" ? readChileEmbedSession() : readBejermanWebEmbedSession();
+      const saved = readChileEmbedSession();
       if (saved) {
         chileEmbedUrl = saved.url;
         chileEmbedTitle = saved.title;
-        planEmbedReturnMode = name === "chileEmbed" ? "chile" : "menu";
       }
     }
-    if (name === "chileEmbed" && (!canSeeSistema("Chile") || !chileEmbedUrl)) {
+    if (!canSeeSistema("Chile") || !chileEmbedUrl) {
       goBackToChileHome();
       return;
     }
-    if (name === "bejermanWebEmbed" && (!(sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb") || !canSeeBejermanWeb() || !chileEmbedUrl)) {
-      goBackFromEmbed();
-      return;
-    }
-    if (name === "chileEmbed") selectSistema("Chile");
-    if (name === "bejermanWebEmbed") chileEmbedUrl = normalizeBejermanWebEmbedUrl(chileEmbedUrl);
+    selectSistema("Chile");
     const titleEl = document.getElementById("plan-chile-embed-title");
     const frame = document.getElementById("planChileEmbedFrame");
-    if (titleEl) titleEl.textContent = chileEmbedTitle || (name === "chileEmbed" ? "Soporte técnico Chile" : "BejermanWEB");
-    if (frame) frame.title = chileEmbedTitle || (name === "chileEmbed" ? "Soporte técnico Chile" : "BejermanWEB");
-    syncBejermanEmbedFallbackCopy();
-    showView(name, { history: historyMode });
+    if (titleEl) titleEl.textContent = chileEmbedTitle || "Soporte técnico Chile";
+    if (frame) frame.title = chileEmbedTitle || "Soporte técnico Chile";
+    showView("chileEmbed", { history: historyMode });
     if (!frame?.getAttribute("src")) reloadChileEmbed();
   }
 }
@@ -1678,9 +1528,6 @@ async function applyEntryRoute() {
     selectSistema(route.sistema);
   } else if (route.view === "transferencia" || route.view === "referral") {
     selectSistema(readRememberedSistema());
-  } else if (route.view === "bejermanWebEmbed") {
-    const sys = readRememberedSistema();
-    if (sys === "BejermanSql" || sys === "OnvioWeb") selectSistema(sys);
   }
 
   if (route.unknown || route.view === "menu" || !canOpenRoute(route)) {
@@ -1710,10 +1557,6 @@ function bindPlanillasRouting() {
         if (!canOpenRoute(route) || route.unknown) {
           if (route.view === "chileEmbed") {
             goBackToChileHome();
-            return;
-          }
-          if (route.view === "bejermanWebEmbed") {
-            goBackFromEmbed();
             return;
           }
           showView("menu", { history: "replace" });

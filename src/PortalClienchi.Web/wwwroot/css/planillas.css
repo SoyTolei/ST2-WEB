@@ -1266,22 +1266,6 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex: 1 1 220px;
 }
 
-.plan-bejerman-postlogin-handoff {
-  inset: 0;
-  border-radius: 0;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  background: rgba(255, 251, 235, 0.98);
-}
-
-.plan-bejerman-postlogin-handoff p {
-  flex: none;
-  max-width: 460px;
-  line-height: 1.45;
-}
-
 .plan-modulo-alert-badge {
   position: absolute;
   top: 8px;
