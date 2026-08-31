@@ -722,7 +722,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 }
 
 .blanqueo-inline-fields-head,
-.blanqueo-inline-fields-correo {
+.blanqueo-inline-fields-submit {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -730,16 +730,15 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   max-width: 100%;
 }
 
-.blanqueo-inline-fields-correo .blanqueo-field-correos {
-  flex: 1 1 16rem;
-  min-width: 14rem;
+.blanqueo-field-correos {
+  width: min(28rem, 100%);
 }
 
-.blanqueo-inline-fields-correo .blanqueo-field-solicitud {
+.blanqueo-inline-fields-submit .blanqueo-field-solicitud {
   flex: 0 0 12rem;
 }
 
-.blanqueo-inline-fields-correo .blanqueo-field-actions {
+.blanqueo-inline-fields-submit .blanqueo-field-actions {
   flex: 0 0 auto;
 }
 
@@ -756,10 +755,6 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .blanqueo-field-cliente {
   width: 7.5rem;
   max-width: 100%;
-}
-
-.blanqueo-field-correos {
-  width: min(22rem, 100%);
 }
 
 .blanqueo-field-modulos {
