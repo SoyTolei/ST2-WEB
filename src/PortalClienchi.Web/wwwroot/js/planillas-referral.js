@@ -252,7 +252,16 @@ function buildReferralPills() {
   if (col && col.options.length === 0) {
     col.innerHTML = `<option value="">Seleccionar…</option>${cfg.collations.map((c) => `<option>${c}</option>`).join("")}`;
     sql.innerHTML = `<option value="">Seleccionar…</option>${cfg.sqlServers.map((s) => `<option>${s}</option>`).join("")}`;
+    syncPlanSelectFilled(col);
+    syncPlanSelectFilled(sql);
+    col.addEventListener("change", () => syncPlanSelectFilled(col));
+    sql.addEventListener("change", () => syncPlanSelectFilled(sql));
   }
+}
+
+function syncPlanSelectFilled(select) {
+  if (!select) return;
+  select.classList.toggle("has-value", Boolean(select.value));
 }
 
 function updateSqlPanel() {

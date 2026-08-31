@@ -1024,10 +1024,31 @@ html.st2-theme-dark .plan-select {
   border: 1px solid #3d4b61 !important;
   outline: none !important;
   box-shadow: none !important;
+  color-scheme: dark;
+  accent-color: #ea580c;
+}
+
+html.st2-theme-dark .plan-select option {
+  background: #151c28;
+  color: #e8eef7;
+}
+
+html.st2-theme-dark .plan-select option:checked,
+html.st2-theme-dark .plan-select option:hover,
+html.st2-theme-dark .plan-select option:focus {
+  background: #c2410c !important;
+  color: #fff !important;
+}
+
+html.st2-theme-dark .plan-select.has-value {
+  background: #3a1d12 !important;
+  border-color: #ea580c !important;
+  color: #ffedd5 !important;
 }
 
 html.st2-theme-dark .plan-select:focus {
   border-color: #ea580c !important;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2) !important;
 }
 
 html.st2-theme-dark .plan-backup-base-card {
