@@ -625,6 +625,12 @@ html.st2-theme-dark .plan-module-sticky-head {
     0 14px 18px -8px rgba(0, 0, 0, 0.45);
 }
 
+html.st2-theme-dark .plan-module-title {
+  color: #e8eef7 !important;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
 html.st2-theme-dark .plan-inline-icon {
   background: #243044 !important;
   color: #cbd5e1 !important;
