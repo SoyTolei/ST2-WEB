@@ -377,6 +377,7 @@ html.st2-theme-dark .pdf-portal-editor-shell,
 html.st2-theme-dark .pdf-portal-preview,
 html.st2-theme-dark .blanqueo-toolbar,
 html.st2-theme-dark .blanqueo-form-panel,
+html.st2-theme-dark .borrado-form-panel,
 html.st2-theme-dark .blanqueo-list-panel {
   background: var(--st2-suite-surface) !important;
   color: var(--dark);
@@ -1884,6 +1885,26 @@ html.st2-theme-dark .st2-access-admin-delete {
 html.st2-theme-dark .borrado-bases-checks {
   background: #151b26;
   border-color: #334155;
+}
+
+html.st2-theme-dark .borrado-salesforce-toggle {
+  background: rgba(190, 18, 60, 0.12);
+  border-color: #9f1239;
+  color: #fda4af;
+}
+
+html.st2-theme-dark .borrado-salesforce-toggle:hover {
+  background: rgba(190, 18, 60, 0.2);
+  border-color: #fb7185;
+}
+
+html.st2-theme-dark .borrado-salesforce-hint {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .borrado-base-pill.salesforce {
+  background: rgba(99, 102, 241, 0.22);
+  color: #c7d2fe;
 }
 
 html.st2-theme-dark .borrado-check {

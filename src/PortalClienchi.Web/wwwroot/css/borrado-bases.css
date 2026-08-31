@@ -22,6 +22,8 @@
 
 .borrado-form-panel {
   margin-bottom: 16px;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .borrado-form-panel.hidden {
@@ -51,7 +53,89 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
+  width: fit-content;
   max-width: 100%;
+}
+
+.borrado-salesforce-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px dashed #fda4af;
+  border-radius: 8px;
+  background: #fff1f2;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #9f1239;
+  cursor: pointer;
+  user-select: none;
+}
+
+.borrado-salesforce-toggle:hover {
+  background: #ffe4e6;
+  border-color: #fb7185;
+}
+
+.borrado-salesforce-toggle input {
+  margin: 0;
+  accent-color: #be123c;
+}
+
+.borrado-salesforce-hint {
+  margin: 0;
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.borrado-salesforce-hint.hidden {
+  display: none !important;
+}
+
+.borrado-detalle-fields {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+.borrado-form-grid.is-salesforce .borrado-detalle-fields {
+  display: none;
+}
+
+.borrado-actions-salesforce {
+  display: none;
+}
+
+.borrado-form-grid.is-salesforce .borrado-actions-salesforce {
+  display: flex;
+}
+
+.borrado-form-grid.is-salesforce .borrado-actions-detalle {
+  display: none;
+}
+
+.borrado-edit-detalle-fields {
+  display: contents;
+}
+
+.borrado-edit-grid.is-salesforce .borrado-edit-detalle-fields {
+  display: none;
+}
+
+.borrado-edit-salesforce-toggle {
+  grid-column: 1 / -1;
+}
+
+.borrado-base-pill.salesforce {
+  background: #e0e7ff;
+  color: #3730a3;
+  font-weight: 700;
 }
 
 .borrado-inline-fields {

@@ -41,6 +41,8 @@ public sealed class BorradoBasesCreateRequest
     public string? IvaDetalle { get; set; }
     public string? SueldosDetalle { get; set; }
     public string? EjerciciosDetalle { get; set; }
+    /// <summary>Solo caso y cliente; el detalle de bases está en Salesforce.</summary>
+    public bool DetalleEnSalesforce { get; set; }
 }
 
 public sealed class BorradoBasesUpdateRequest
@@ -56,6 +58,7 @@ public sealed class BorradoBasesUpdateRequest
     public string? IvaDetalle { get; set; }
     public string? SueldosDetalle { get; set; }
     public string? EjerciciosDetalle { get; set; }
+    public bool DetalleEnSalesforce { get; set; }
 }
 
 public sealed class BorradoBasesPatchRequest

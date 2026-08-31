@@ -5,6 +5,8 @@ namespace PortalClienchi.Web.Planillas;
 
 public static class BorradoBasesEndpoints
 {
+    private const string DetalleSalesforceNombre = "Detalle en Salesforce";
+    private const string DetalleSalesforceEmpresa = "—";
     public static void MapBorradoBasesEndpoints(this WebApplication app)
     {
         app.MapGet("/api/planillas/borrado-bases", (HttpContext ctx, BorradoBasesRepository repo, ModuleAccessRepository modules) =>
@@ -253,35 +255,77 @@ public static class BorradoBasesEndpoints
         return true;
     }
 
-    private static BorradoBasesCreateRequest NormalizeCreate(BorradoBasesCreateRequest body) => new()
+    private static BorradoBasesCreateRequest NormalizeCreate(BorradoBasesCreateRequest body)
     {
-        NroCaso = body.NroCaso.Trim(),
-        NroCliente = body.NroCliente.Trim(),
-        NroEmpresa = body.NroEmpresa.Trim(),
-        NombreEmpresa = body.NombreEmpresa.Trim(),
-        Cuit = NormalizeCuit(body.Cuit),
-        Iva = body.Iva,
-        Sueldos = body.Sueldos,
-        Contabilidad = body.Contabilidad,
-        IvaDetalle = null,
-        SueldosDetalle = null,
-        EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
-    };
+        if (body.DetalleEnSalesforce || IsDetalleSalesforceNombre(body.NombreEmpresa))
+        {
+            return new BorradoBasesCreateRequest
+            {
+                NroCaso = body.NroCaso.Trim(),
+                NroCliente = body.NroCliente.Trim(),
+                NroEmpresa = DetalleSalesforceEmpresa,
+                NombreEmpresa = DetalleSalesforceNombre,
+                Cuit = "",
+                Iva = false,
+                Sueldos = false,
+                Contabilidad = false,
+                IvaDetalle = null,
+                SueldosDetalle = null,
+                EjerciciosDetalle = null,
+            };
+        }
 
-    private static BorradoBasesUpdateRequest NormalizeUpdate(BorradoBasesUpdateRequest body) => new()
+        return new BorradoBasesCreateRequest
+        {
+            NroCaso = body.NroCaso.Trim(),
+            NroCliente = body.NroCliente.Trim(),
+            NroEmpresa = body.NroEmpresa.Trim(),
+            NombreEmpresa = body.NombreEmpresa.Trim(),
+            Cuit = NormalizeCuit(body.Cuit),
+            Iva = body.Iva,
+            Sueldos = body.Sueldos,
+            Contabilidad = body.Contabilidad,
+            IvaDetalle = null,
+            SueldosDetalle = null,
+            EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
+        };
+    }
+
+    private static BorradoBasesUpdateRequest NormalizeUpdate(BorradoBasesUpdateRequest body)
     {
-        NroCaso = body.NroCaso.Trim(),
-        NroCliente = body.NroCliente.Trim(),
-        NroEmpresa = body.NroEmpresa.Trim(),
-        NombreEmpresa = body.NombreEmpresa.Trim(),
-        Cuit = NormalizeCuit(body.Cuit),
-        Iva = body.Iva,
-        Sueldos = body.Sueldos,
-        Contabilidad = body.Contabilidad,
-        IvaDetalle = null,
-        SueldosDetalle = null,
-        EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
-    };
+        if (body.DetalleEnSalesforce || IsDetalleSalesforceNombre(body.NombreEmpresa))
+        {
+            return new BorradoBasesUpdateRequest
+            {
+                NroCaso = body.NroCaso.Trim(),
+                NroCliente = body.NroCliente.Trim(),
+                NroEmpresa = DetalleSalesforceEmpresa,
+                NombreEmpresa = DetalleSalesforceNombre,
+                Cuit = "",
+                Iva = false,
+                Sueldos = false,
+                Contabilidad = false,
+                IvaDetalle = null,
+                SueldosDetalle = null,
+                EjerciciosDetalle = null,
+            };
+        }
+
+        return new BorradoBasesUpdateRequest
+        {
+            NroCaso = body.NroCaso.Trim(),
+            NroCliente = body.NroCliente.Trim(),
+            NroEmpresa = body.NroEmpresa.Trim(),
+            NombreEmpresa = body.NombreEmpresa.Trim(),
+            Cuit = NormalizeCuit(body.Cuit),
+            Iva = body.Iva,
+            Sueldos = body.Sueldos,
+            Contabilidad = body.Contabilidad,
+            IvaDetalle = null,
+            SueldosDetalle = null,
+            EjerciciosDetalle = body.Contabilidad ? NullIfBlank(body.EjerciciosDetalle) : null,
+        };
+    }
 
     private static string? ValidateCreate(BorradoBasesCreateRequest body) => ValidateFields(body);
 
@@ -296,6 +340,7 @@ public static class BorradoBasesEndpoints
         Sueldos = body.Sueldos,
         Contabilidad = body.Contabilidad,
         EjerciciosDetalle = body.EjerciciosDetalle,
+        DetalleEnSalesforce = body.DetalleEnSalesforce,
     });
 
     private static string? ValidateFields(BorradoBasesCreateRequest body)
@@ -304,6 +349,10 @@ public static class BorradoBasesEndpoints
             return "Completá el N° de caso.";
         if (string.IsNullOrWhiteSpace(body.NroCliente))
             return "Completá el N° de cliente.";
+
+        if (body.DetalleEnSalesforce || IsDetalleSalesforceNombre(body.NombreEmpresa))
+            return null;
+
         if (string.IsNullOrWhiteSpace(body.NroEmpresa))
             return "Completá el código de empresa.";
         if (string.IsNullOrWhiteSpace(body.NombreEmpresa))
@@ -321,6 +370,9 @@ public static class BorradoBasesEndpoints
 
     private static string NormalizeCuit(string? value) =>
         Regex.Replace((value ?? "").Trim(), @"\s+", " ");
+
+    private static bool IsDetalleSalesforceNombre(string? nombre) =>
+        string.Equals((nombre ?? "").Trim(), DetalleSalesforceNombre, StringComparison.OrdinalIgnoreCase);
 
     private static string? NullIfBlank(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

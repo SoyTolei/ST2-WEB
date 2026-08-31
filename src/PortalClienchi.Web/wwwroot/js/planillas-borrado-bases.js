@@ -18,6 +18,7 @@ import { createPlanillasLiveList } from "./planillas-live-list.js";
 const FORCE_KEY = "st2-borrado-bases-force";
 const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 const PREVIEW_LIST_KEY = "st2-borrado-preview-list-only";
+const DETALLE_SALESFORCE_NOMBRE = "Detalle en Salesforce";
 
 let moduleInited = false;
 let items = [];
@@ -108,6 +109,12 @@ export function initBorradoBasesModule() {
   document.getElementById("borrado-add")?.addEventListener("click", () => {
     void createSolicitud();
   });
+  document.getElementById("borrado-add-detalle")?.addEventListener("click", () => {
+    void createSolicitud();
+  });
+
+  document.getElementById("borrado-salesforce")?.addEventListener("change", () => syncSalesforceMode());
+  document.getElementById("borrado-edit-salesforce")?.addEventListener("change", () => syncEditSalesforceMode());
 
   ["borrado-caso", "borrado-cliente", "borrado-empresa", "borrado-nombre-empresa", "borrado-cuit"].forEach((id) => {
     document.getElementById(id)?.addEventListener("keydown", (e) => {
@@ -232,6 +239,7 @@ export function initBorradoBasesModule() {
   });
 
   syncSolicitanteBadge();
+  syncSalesforceMode();
   syncDetalleFieldsVisibility();
 }
 
@@ -332,7 +340,41 @@ function syncConfirmToolsVisibility() {
 }
 
 function syncDetalleFieldsVisibility() {
+  if (isSalesforceFormMode()) return;
   toggleDetailField("borrado-ejercicios-field", "borrado-ejercicios", !!document.getElementById("borrado-base-contabilidad")?.checked);
+}
+
+function isSalesforceFormMode() {
+  return !!document.getElementById("borrado-salesforce")?.checked;
+}
+
+function isDetalleSalesforce(item) {
+  return String(item?.nombreEmpresa || "").trim() === DETALLE_SALESFORCE_NOMBRE;
+}
+
+function syncSalesforceMode() {
+  const sf = isSalesforceFormMode();
+  const grid = document.getElementById("borrado-form-grid");
+  grid?.classList.toggle("is-salesforce", sf);
+  document.getElementById("borrado-salesforce-hint")?.classList.toggle("hidden", !sf);
+  if (sf) {
+    document.getElementById("borrado-ejercicios-field")?.classList.add("hidden");
+    document.getElementById("borrado-ejercicios")?.setAttribute("aria-hidden", "true");
+  } else {
+    syncDetalleFieldsVisibility();
+  }
+}
+
+function syncEditSalesforceMode() {
+  const sf = !!document.getElementById("borrado-edit-salesforce")?.checked;
+  const grid = document.querySelector("#borrado-edit-overlay .borrado-edit-grid");
+  grid?.classList.toggle("is-salesforce", sf);
+  document.getElementById("borrado-edit-salesforce-hint")?.classList.toggle("hidden", !sf);
+  if (sf) {
+    document.getElementById("borrado-edit-ejercicios-field")?.classList.add("hidden");
+  } else {
+    syncEditDetalleFieldsVisibility();
+  }
 }
 
 function syncEditDetalleFieldsVisibility() {
@@ -366,15 +408,18 @@ function clearForm() {
   const nombre = document.getElementById("borrado-nombre-empresa");
   const cuit = document.getElementById("borrado-cuit");
   const ejercicios = document.getElementById("borrado-ejercicios");
+  const salesforce = document.getElementById("borrado-salesforce");
   if (caso) caso.value = "";
   if (cliente) cliente.value = "";
   if (empresa) empresa.value = "";
   if (nombre) nombre.value = "";
   if (cuit) cuit.value = "";
   if (ejercicios) ejercicios.value = "";
+  if (salesforce) salesforce.checked = false;
   document.querySelectorAll('input[name="borrado-base"]').forEach((el) => {
     el.checked = false;
   });
+  syncSalesforceMode();
   syncDetalleFieldsVisibility();
 }
 
@@ -419,25 +464,48 @@ async function createSolicitud() {
     setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
     return;
   }
+  const detalleEnSalesforce = isSalesforceFormMode();
   const nroCaso = document.getElementById("borrado-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("borrado-cliente")?.value.trim() || "";
-  const nroEmpresa = document.getElementById("borrado-empresa")?.value.trim() || "";
-  const nombreEmpresa = document.getElementById("borrado-nombre-empresa")?.value.trim() || "";
-  const cuit = document.getElementById("borrado-cuit")?.value.trim() || "";
-  const bases = readBasesFromForm("borrado-base");
-  const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
-    setStatus("Completá caso, cliente, código y nombre de empresa.", true);
+  if (!nroCaso || !nroCliente) {
+    setStatus("Completá caso y cliente.", true);
     return;
   }
-  if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
-    setStatus("Marcá al menos una base a borrar.", true);
-    return;
-  }
-  if (bases.contabilidad && !ejerciciosDetalle) {
-    setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
-    return;
+
+  let payload;
+  if (detalleEnSalesforce) {
+    payload = { nroCaso, nroCliente, detalleEnSalesforce: true };
+  } else {
+    const nroEmpresa = document.getElementById("borrado-empresa")?.value.trim() || "";
+    const nombreEmpresa = document.getElementById("borrado-nombre-empresa")?.value.trim() || "";
+    const cuit = document.getElementById("borrado-cuit")?.value.trim() || "";
+    const bases = readBasesFromForm("borrado-base");
+    const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
+
+    if (!nroEmpresa || !nombreEmpresa) {
+      setStatus("Completá código y nombre de empresa.", true);
+      return;
+    }
+    if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
+      setStatus("Marcá al menos una base a borrar.", true);
+      return;
+    }
+    if (bases.contabilidad && !ejerciciosDetalle) {
+      setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
+      return;
+    }
+
+    payload = {
+      nroCaso,
+      nroCliente,
+      nroEmpresa,
+      nombreEmpresa,
+      cuit,
+      ...bases,
+      ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
+      detalleEnSalesforce: false,
+    };
   }
 
   setStatus("Guardando…");
@@ -445,15 +513,7 @@ async function createSolicitud() {
     const res = await planUserFetch("/api/planillas/borrado-bases", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nroCaso,
-        nroCliente,
-        nroEmpresa,
-        nombreEmpresa,
-        cuit,
-        ...bases,
-        ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
-      }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
@@ -667,6 +727,7 @@ async function exportExcel() {
 }
 
 function basesLabel(item) {
+  if (isDetalleSalesforce(item)) return "Salesforce";
   const parts = [];
   if (item.iva) parts.push("IVA");
   if (item.sueldos) parts.push("SJ");
@@ -675,6 +736,9 @@ function basesLabel(item) {
 }
 
 function formatBasesPills(item) {
+  if (isDetalleSalesforce(item)) {
+    return '<span class="borrado-base-pill salesforce" title="Detalle en Salesforce">Salesforce</span>';
+  }
   const pills = [];
   if (item.iva) {
     pills.push('<span class="borrado-base-pill" title="IVA">IVA</span>');
@@ -1003,14 +1067,16 @@ function openListoModal(item) {
   const chkIva = document.getElementById("borrado-listo-iva");
   const chkSj = document.getElementById("borrado-listo-sueldos");
   const chkCg = document.getElementById("borrado-listo-contabilidad");
+  const sf = isDetalleSalesforce(item);
 
-  wrapIva?.classList.toggle("hidden", !item.iva);
-  wrapSj?.classList.toggle("hidden", !item.sueldos);
-  wrapCg?.classList.toggle("hidden", !item.contabilidad);
+  wrapIva?.classList.toggle("hidden", sf || !item.iva);
+  wrapSj?.classList.toggle("hidden", sf || !item.sueldos);
+  wrapCg?.classList.toggle("hidden", sf || !item.contabilidad);
   if (chkIva) chkIva.checked = !!item.iva;
   if (chkSj) chkSj.checked = !!item.sueldos;
   if (chkCg) chkCg.checked = !!item.contabilidad;
 
+  overlay?.classList.toggle("is-salesforce", sf);
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   document.getElementById("borrado-listo-confirm")?.focus();
@@ -1020,6 +1086,7 @@ function hideListoModal() {
   pendingListoId = null;
   const overlay = document.getElementById("borrado-listo-overlay");
   overlay?.classList.add("hidden");
+  overlay?.classList.remove("is-salesforce");
   overlay?.setAttribute("aria-hidden", "true");
 }
 
@@ -1036,7 +1103,7 @@ async function confirmListoModal() {
     sueldos: !!item.sueldos && !!document.getElementById("borrado-listo-sueldos")?.checked,
     contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
   };
-  const summary = buildListoSummary(item, done);
+  const summary = isDetalleSalesforce(item) ? DETALLE_SALESFORCE_NOMBRE : buildListoSummary(item, done);
   const { nota } = parseAclaracion(item.aclaracion);
   const aclaracion = composeAclaracion(summary, nota);
 
@@ -1292,16 +1359,19 @@ function openEditModal(item) {
   const sueldos = document.getElementById("borrado-edit-base-sueldos");
   const contabilidad = document.getElementById("borrado-edit-base-contabilidad");
   const ejercicios = document.getElementById("borrado-edit-ejercicios");
+  const salesforce = document.getElementById("borrado-edit-salesforce");
+  const sf = isDetalleSalesforce(item);
   if (caso) caso.value = item.nroCaso || "";
   if (cliente) cliente.value = item.nroCliente || "";
-  if (empresa) empresa.value = item.nroEmpresa || "";
-  if (nombre) nombre.value = item.nombreEmpresa || "";
-  if (cuitInput) cuitInput.value = item.cuit || "";
-  if (iva) iva.checked = !!item.iva;
-  if (sueldos) sueldos.checked = !!item.sueldos;
-  if (contabilidad) contabilidad.checked = !!item.contabilidad;
-  syncEditDetalleFieldsVisibility();
-  if (ejercicios) ejercicios.value = item.contabilidad ? (item.ejerciciosDetalle || "") : "";
+  if (empresa) empresa.value = sf ? "" : (item.nroEmpresa || "");
+  if (nombre) nombre.value = sf ? "" : (item.nombreEmpresa || "");
+  if (cuitInput) cuitInput.value = sf ? "" : (item.cuit || "");
+  if (iva) iva.checked = sf ? false : !!item.iva;
+  if (sueldos) sueldos.checked = sf ? false : !!item.sueldos;
+  if (contabilidad) contabilidad.checked = sf ? false : !!item.contabilidad;
+  if (salesforce) salesforce.checked = sf;
+  syncEditSalesforceMode();
+  if (ejercicios) ejercicios.value = !sf && item.contabilidad ? (item.ejerciciosDetalle || "") : "";
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   caso?.focus();
@@ -1316,40 +1386,55 @@ function hideEditModal() {
 
 async function saveEdit() {
   if (!editingId) return;
+  const detalleEnSalesforce = !!document.getElementById("borrado-edit-salesforce")?.checked;
   const nroCaso = document.getElementById("borrado-edit-caso")?.value.trim() || "";
   const nroCliente = document.getElementById("borrado-edit-cliente")?.value.trim() || "";
-  const nroEmpresa = document.getElementById("borrado-edit-empresa")?.value.trim() || "";
-  const nombreEmpresa = document.getElementById("borrado-edit-nombre-empresa")?.value.trim() || "";
-  const cuit = document.getElementById("borrado-edit-cuit")?.value.trim() || "";
-  const bases = readBasesFromForm("borrado-edit-base");
-  const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente || !nroEmpresa || !nombreEmpresa) {
-    setStatus("Completá caso, cliente, código y nombre de empresa.", true);
+  if (!nroCaso || !nroCliente) {
+    setStatus("Completá caso y cliente.", true);
     return;
   }
-  if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
-    setStatus("Marcá al menos una base a borrar.", true);
-    return;
-  }
-  if (bases.contabilidad && !ejerciciosDetalle) {
-    setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
-    return;
+
+  let payload;
+  if (detalleEnSalesforce) {
+    payload = { nroCaso, nroCliente, detalleEnSalesforce: true };
+  } else {
+    const nroEmpresa = document.getElementById("borrado-edit-empresa")?.value.trim() || "";
+    const nombreEmpresa = document.getElementById("borrado-edit-nombre-empresa")?.value.trim() || "";
+    const cuit = document.getElementById("borrado-edit-cuit")?.value.trim() || "";
+    const bases = readBasesFromForm("borrado-edit-base");
+    const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
+
+    if (!nroEmpresa || !nombreEmpresa) {
+      setStatus("Completá código y nombre de empresa.", true);
+      return;
+    }
+    if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
+      setStatus("Marcá al menos una base a borrar.", true);
+      return;
+    }
+    if (bases.contabilidad && !ejerciciosDetalle) {
+      setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
+      return;
+    }
+
+    payload = {
+      nroCaso,
+      nroCliente,
+      nroEmpresa,
+      nombreEmpresa,
+      cuit,
+      ...bases,
+      ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
+      detalleEnSalesforce: false,
+    };
   }
 
   try {
     const res = await planUserFetch(`/api/planillas/borrado-bases/${editingId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nroCaso,
-        nroCliente,
-        nroEmpresa,
-        nombreEmpresa,
-        cuit,
-        ...bases,
-        ejerciciosDetalle: bases.contabilidad ? ejerciciosDetalle : null,
-      }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);

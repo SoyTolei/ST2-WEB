@@ -618,15 +618,15 @@
                 <div class="plan-gestor-panel-accent blanqueo-accent-form"></div>
                 <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
                 <div class="blanqueo-form-grid">
-                  <div class="blanqueo-field blanqueo-field-portal">
-                    <label for="blanqueo-portal">Plataforma</label>
-                    <select id="blanqueo-portal">
-                      <option value="OnBalance" selected>On Balance</option>
-                      <option value="Onvio">ONVIO</option>
-                      <option value="PortalCliente">Portal Cliente</option>
-                    </select>
-                  </div>
-                  <div class="blanqueo-inline-fields">
+                  <div class="blanqueo-inline-fields blanqueo-inline-fields-head">
+                    <div class="blanqueo-field blanqueo-field-portal">
+                      <label for="blanqueo-portal">Plataforma</label>
+                      <select id="blanqueo-portal">
+                        <option value="OnBalance" selected>On Balance</option>
+                        <option value="Onvio">ONVIO</option>
+                        <option value="PortalCliente">Portal Cliente</option>
+                      </select>
+                    </div>
                     <div class="blanqueo-field blanqueo-field-caso">
                       <label for="blanqueo-caso">N° de caso</label>
                       <input id="blanqueo-caso" type="text" autocomplete="off" spellcheck="false"/>
@@ -636,26 +636,26 @@
                       <input id="blanqueo-cliente" type="text" autocomplete="off" spellcheck="false"/>
                     </div>
                   </div>
-                  <div class="blanqueo-field blanqueo-field-correos">
-                    <label for="blanqueo-correo">Correo</label>
-                    <div id="blanqueo-correos" class="blanqueo-correos">
-                      <div class="blanqueo-correo-row">
-                        <input id="blanqueo-correo" class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false"/>
+                  <div class="blanqueo-inline-fields blanqueo-inline-fields-correo">
+                    <div class="blanqueo-field blanqueo-field-correos">
+                      <label for="blanqueo-correo">Correo</label>
+                      <div id="blanqueo-correos" class="blanqueo-correos">
+                        <div class="blanqueo-correo-row">
+                          <input id="blanqueo-correo" class="blanqueo-correo-input" type="email" autocomplete="off" spellcheck="false"/>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="blanqueo-submit-row">
-                  <div class="blanqueo-field blanqueo-field-solicitud">
-                    <label for="blanqueo-tipo">Solicitud</label>
-                    <select id="blanqueo-tipo">
-                      <option value="Blanqueo" selected>Blanqueo</option>
-                      <option value="MFA">MFA</option>
-                      <option value="Blanqueo + MFA">Blanqueo + MFA</option>
-                    </select>
-                  </div>
-                  <div class="blanqueo-field blanqueo-field-actions">
-                    <button type="button" id="blanqueo-add" class="btn btn-primary">Agregar</button>
-                  </div>
+                    <div class="blanqueo-field blanqueo-field-solicitud">
+                      <label for="blanqueo-tipo">Solicitud</label>
+                      <select id="blanqueo-tipo">
+                        <option value="Blanqueo" selected>Blanqueo</option>
+                        <option value="MFA">MFA</option>
+                        <option value="Blanqueo + MFA">Blanqueo + MFA</option>
+                      </select>
+                    </div>
+                    <div class="blanqueo-field blanqueo-field-actions">
+                      <button type="button" id="blanqueo-add" class="btn btn-primary">Agregar</button>
+                    </div>
                   </div>
                   <div id="blanqueo-modulos-field" class="blanqueo-field blanqueo-field-modulos hidden" aria-hidden="true">
                     <span class="blanqueo-modulos-label">Módulos a habilitar en el Portal:</span>
@@ -798,8 +798,15 @@
               <div class="plan-gestor-panel borrado-form-panel">
                 <div class="plan-gestor-panel-accent borrado-accent-form"></div>
                 <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
-                <div class="borrado-form-grid">
-                  <div class="borrado-inline-fields">
+                <div id="borrado-form-grid" class="borrado-form-grid">
+                  <label class="borrado-salesforce-toggle" for="borrado-salesforce">
+                    <input id="borrado-salesforce" type="checkbox"/>
+                    <span>Varias bases — detalle en Salesforce</span>
+                  </label>
+                  <p id="borrado-salesforce-hint" class="borrado-salesforce-hint hidden" aria-live="polite">
+                    Solo se registra N° de caso y cliente. El detalle completo está en Salesforce.
+                  </p>
+                  <div class="borrado-inline-fields borrado-row-primary">
                     <div class="borrado-field borrado-field-caso">
                       <label for="borrado-caso">N° de caso</label>
                       <input id="borrado-caso" type="text" autocomplete="off" spellcheck="false"/>
@@ -808,35 +815,42 @@
                       <label for="borrado-cliente">N° de cliente</label>
                       <input id="borrado-cliente" type="text" autocomplete="off" spellcheck="false"/>
                     </div>
-                    <div class="borrado-field borrado-field-empresa">
-                      <label for="borrado-empresa">Código de empresa</label>
-                      <input id="borrado-empresa" type="text" autocomplete="off" spellcheck="false"/>
-                    </div>
-                  </div>
-                  <div class="borrado-field borrado-field-nombre">
-                    <label for="borrado-nombre-empresa">Nombre de empresa</label>
-                    <input id="borrado-nombre-empresa" type="text" autocomplete="off" spellcheck="false"/>
-                  </div>
-                  <div class="borrado-inline-fields borrado-inline-fields-tail">
-                    <div class="borrado-field borrado-field-cuit">
-                      <label for="borrado-cuit">CUIT <span class="borrado-optional">(opcional)</span></label>
-                      <input id="borrado-cuit" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"/>
-                    </div>
-                    <div class="borrado-field borrado-field-bases">
-                      <label>Bases a borrar</label>
-                      <div class="borrado-bases-checks">
-                        <label class="borrado-check"><input id="borrado-base-iva" name="borrado-base" type="checkbox"/> IVA</label>
-                        <label class="borrado-check"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> Sueldos y Jornales</label>
-                        <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
-                      </div>
-                    </div>
-                    <div class="borrado-field borrado-field-actions">
+                    <div class="borrado-field borrado-field-actions borrado-actions-salesforce">
                       <button type="button" id="borrado-add" class="btn btn-primary">Agregar</button>
                     </div>
                   </div>
-                  <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
-                    <label for="borrado-ejercicios">Ejercicios a borrar</label>
-                    <textarea id="borrado-ejercicios" rows="4" placeholder="Pegá el detalle del mail con los ejercicios a borrar…" spellcheck="false"></textarea>
+                  <div id="borrado-detalle-fields" class="borrado-detalle-fields">
+                    <div class="borrado-inline-fields">
+                      <div class="borrado-field borrado-field-empresa">
+                        <label for="borrado-empresa">Código de empresa</label>
+                        <input id="borrado-empresa" type="text" autocomplete="off" spellcheck="false"/>
+                      </div>
+                    </div>
+                    <div class="borrado-field borrado-field-nombre">
+                      <label for="borrado-nombre-empresa">Nombre de empresa</label>
+                      <input id="borrado-nombre-empresa" type="text" autocomplete="off" spellcheck="false"/>
+                    </div>
+                    <div class="borrado-inline-fields borrado-inline-fields-tail">
+                      <div class="borrado-field borrado-field-cuit">
+                        <label for="borrado-cuit">CUIT <span class="borrado-optional">(opcional)</span></label>
+                        <input id="borrado-cuit" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"/>
+                      </div>
+                      <div class="borrado-field borrado-field-bases">
+                        <label>Bases a borrar</label>
+                        <div class="borrado-bases-checks">
+                          <label class="borrado-check"><input id="borrado-base-iva" name="borrado-base" type="checkbox"/> IVA</label>
+                          <label class="borrado-check"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> Sueldos y Jornales</label>
+                          <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
+                        </div>
+                      </div>
+                      <div class="borrado-field borrado-field-actions borrado-actions-detalle">
+                        <button type="button" id="borrado-add-detalle" class="btn btn-primary">Agregar</button>
+                      </div>
+                    </div>
+                    <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
+                      <label for="borrado-ejercicios">Ejercicios a borrar</label>
+                      <textarea id="borrado-ejercicios" rows="4" placeholder="Pegá el detalle del mail con los ejercicios a borrar…" spellcheck="false"></textarea>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2119,10 +2133,16 @@
       <h3 id="borrado-edit-title">Editar solicitud</h3>
       <p class="plan-user-hint">Modificá los datos y guardá los cambios.</p>
       <div class="borrado-edit-grid">
+        <label class="borrado-salesforce-toggle borrado-edit-salesforce-toggle" for="borrado-edit-salesforce">
+          <input id="borrado-edit-salesforce" type="checkbox"/>
+          <span>Varias bases — detalle en Salesforce</span>
+        </label>
+        <p id="borrado-edit-salesforce-hint" class="borrado-salesforce-hint hidden">Solo caso y cliente; el detalle está en Salesforce.</p>
         <label class="plan-user-label" for="borrado-edit-caso">N° de caso</label>
         <input id="borrado-edit-caso" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
         <label class="plan-user-label" for="borrado-edit-cliente">N° de cliente</label>
         <input id="borrado-edit-cliente" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
+        <div id="borrado-edit-detalle-fields" class="borrado-edit-detalle-fields">
         <label class="plan-user-label" for="borrado-edit-empresa">Código de empresa</label>
         <input id="borrado-edit-empresa" type="text" class="plan-user-input" autocomplete="off" spellcheck="false"/>
         <label class="plan-user-label" for="borrado-edit-nombre-empresa">Nombre de empresa</label>
@@ -2138,6 +2158,7 @@
         <div id="borrado-edit-ejercicios-field" class="borrado-edit-ejercicios hidden" aria-hidden="true">
           <label class="plan-user-label" for="borrado-edit-ejercicios">Ejercicios a borrar</label>
           <textarea id="borrado-edit-ejercicios" class="borrado-note-textarea" rows="4" spellcheck="false"></textarea>
+        </div>
         </div>
       </div>
       <div class="plan-user-actions">
