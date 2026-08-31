@@ -1,7 +1,9 @@
 const NOTIF_PREF_KEY = "st2-desktop-notif-v1";
+const NOTIF_SOUND_PREF_KEY = "st2-desktop-notif-sound-v1";
 let lastBlanqueoSig = "";
 let lastBorradoSig = "";
 let lastWebUpdateBuild = "";
+let audioCtx = null;
 
 export function desktopNotifSupported() {
   return typeof window !== "undefined" && "Notification" in window;
@@ -27,6 +29,63 @@ function notifEnabled() {
   }
 }
 
+function notifSoundEnabled() {
+  try {
+    return localStorage.getItem(NOTIF_SOUND_PREF_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+
+function getAudioCtx() {
+  if (audioCtx) return audioCtx;
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+    return audioCtx;
+  } catch {
+    return null;
+  }
+}
+
+/** Dos tonos cortos tipo “pendiente” (Web Audio, sin archivo externo). */
+export function playPendingNotifSound() {
+  if (!notifSoundEnabled()) return;
+  try {
+    const ctx = getAudioCtx();
+    if (!ctx) return;
+    if (ctx.state === "suspended") void ctx.resume();
+
+    const start = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, start);
+    master.gain.exponentialRampToValueAtTime(0.22, start + 0.015);
+    master.gain.exponentialRampToValueAtTime(0.0001, start + 0.42);
+    master.connect(ctx.destination);
+
+    [[880, start, 0.16], [1174.66, start + 0.18, 0.2]].forEach(([freq, at, dur]) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, at);
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(0.9, at + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start(at);
+      osc.stop(at + dur + 0.02);
+    });
+  } catch { /* ignore */ }
+}
+
+export function setDesktopNotifSoundEnabled(on) {
+  try {
+    localStorage.setItem(NOTIF_SOUND_PREF_KEY, on ? "1" : "0");
+  } catch { /* ignore */ }
+}
+
 export function setDesktopNotifEnabled(on) {
   try {
     localStorage.setItem(NOTIF_PREF_KEY, on ? "1" : "0");
@@ -41,6 +100,7 @@ function showDesktopNotif(title, body, tag, { allowWhileVisible = false, onClick
   if (!desktopNotifSupported() || Notification.permission !== "granted" || !notifEnabled()) return;
   // Blanqueo/borrado: solo con pestaña oculta (evita spam encima del toast).
   if (!allowWhileVisible && !document.hidden) return;
+  playPendingNotifSound();
   try {
     const n = new Notification(title, {
       body,
