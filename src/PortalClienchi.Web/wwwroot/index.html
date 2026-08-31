@@ -626,13 +626,15 @@
                       <option value="PortalCliente">Portal Cliente</option>
                     </select>
                   </div>
-                  <div class="blanqueo-field">
-                    <label for="blanqueo-caso">N° de caso</label>
-                    <input id="blanqueo-caso" type="text" autocomplete="off" spellcheck="false"/>
-                  </div>
-                  <div class="blanqueo-field">
-                    <label for="blanqueo-cliente">N° de cliente</label>
-                    <input id="blanqueo-cliente" type="text" autocomplete="off" spellcheck="false"/>
+                  <div class="blanqueo-inline-fields">
+                    <div class="blanqueo-field blanqueo-field-caso">
+                      <label for="blanqueo-caso">N° de caso</label>
+                      <input id="blanqueo-caso" type="text" autocomplete="off" spellcheck="false"/>
+                    </div>
+                    <div class="blanqueo-field blanqueo-field-cliente">
+                      <label for="blanqueo-cliente">N° de cliente</label>
+                      <input id="blanqueo-cliente" type="text" autocomplete="off" spellcheck="false"/>
+                    </div>
                   </div>
                   <div class="blanqueo-field blanqueo-field-correos">
                     <label for="blanqueo-correo">Correo</label>
@@ -642,13 +644,18 @@
                       </div>
                     </div>
                   </div>
-                  <div class="blanqueo-field">
+                  <div class="blanqueo-submit-row">
+                  <div class="blanqueo-field blanqueo-field-solicitud">
                     <label for="blanqueo-tipo">Solicitud</label>
                     <select id="blanqueo-tipo">
                       <option value="Blanqueo" selected>Blanqueo</option>
                       <option value="MFA">MFA</option>
                       <option value="Blanqueo + MFA">Blanqueo + MFA</option>
                     </select>
+                  </div>
+                  <div class="blanqueo-field blanqueo-field-actions">
+                    <button type="button" id="blanqueo-add" class="btn btn-primary">Agregar</button>
+                  </div>
                   </div>
                   <div id="blanqueo-modulos-field" class="blanqueo-field blanqueo-field-modulos hidden" aria-hidden="true">
                     <span class="blanqueo-modulos-label">Módulos a habilitar en el Portal:</span>
@@ -659,9 +666,6 @@
                       <label class="borrado-check"><input type="checkbox" name="blanqueo-modulo" value="Bejerman SQL"/> Bejerman SQL</label>
                       <label class="borrado-check"><input type="checkbox" name="blanqueo-modulo" value="Contabilidad WEB"/> Contabilidad WEB</label>
                     </div>
-                  </div>
-                  <div class="blanqueo-field blanqueo-field-actions">
-                    <button type="button" id="blanqueo-add" class="btn btn-primary">Agregar</button>
                   </div>
                 </div>
               </div>
@@ -795,36 +799,40 @@
                 <div class="plan-gestor-panel-accent borrado-accent-form"></div>
                 <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
                 <div class="borrado-form-grid">
-                  <div class="borrado-field">
-                    <label for="borrado-caso">N° de caso</label>
-                    <input id="borrado-caso" type="text" autocomplete="off" spellcheck="false"/>
+                  <div class="borrado-inline-fields">
+                    <div class="borrado-field borrado-field-caso">
+                      <label for="borrado-caso">N° de caso</label>
+                      <input id="borrado-caso" type="text" autocomplete="off" spellcheck="false"/>
+                    </div>
+                    <div class="borrado-field borrado-field-cliente">
+                      <label for="borrado-cliente">N° de cliente</label>
+                      <input id="borrado-cliente" type="text" autocomplete="off" spellcheck="false"/>
+                    </div>
+                    <div class="borrado-field borrado-field-empresa">
+                      <label for="borrado-empresa">Código de empresa</label>
+                      <input id="borrado-empresa" type="text" autocomplete="off" spellcheck="false"/>
+                    </div>
                   </div>
-                  <div class="borrado-field">
-                    <label for="borrado-cliente">N° de cliente</label>
-                    <input id="borrado-cliente" type="text" autocomplete="off" spellcheck="false"/>
-                  </div>
-                  <div class="borrado-field">
-                    <label for="borrado-empresa">Código de empresa</label>
-                    <input id="borrado-empresa" type="text" autocomplete="off" spellcheck="false"/>
-                  </div>
-                  <div class="borrado-field">
+                  <div class="borrado-field borrado-field-nombre">
                     <label for="borrado-nombre-empresa">Nombre de empresa</label>
                     <input id="borrado-nombre-empresa" type="text" autocomplete="off" spellcheck="false"/>
                   </div>
-                  <div class="borrado-field">
-                    <label for="borrado-cuit">CUIT <span class="borrado-optional">(opcional)</span></label>
-                    <input id="borrado-cuit" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"/>
-                  </div>
-                  <div class="borrado-field borrado-field-bases">
-                    <label>Bases a borrar</label>
-                    <div class="borrado-bases-checks">
-                      <label class="borrado-check"><input id="borrado-base-iva" name="borrado-base" type="checkbox"/> IVA</label>
-                      <label class="borrado-check"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> Sueldos y Jornales</label>
-                      <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
+                  <div class="borrado-inline-fields borrado-inline-fields-tail">
+                    <div class="borrado-field borrado-field-cuit">
+                      <label for="borrado-cuit">CUIT <span class="borrado-optional">(opcional)</span></label>
+                      <input id="borrado-cuit" type="text" inputmode="numeric" autocomplete="off" spellcheck="false"/>
                     </div>
-                  </div>
-                  <div class="borrado-field borrado-field-actions">
-                    <button type="button" id="borrado-add" class="btn btn-primary">Agregar</button>
+                    <div class="borrado-field borrado-field-bases">
+                      <label>Bases a borrar</label>
+                      <div class="borrado-bases-checks">
+                        <label class="borrado-check"><input id="borrado-base-iva" name="borrado-base" type="checkbox"/> IVA</label>
+                        <label class="borrado-check"><input id="borrado-base-sueldos" name="borrado-base" type="checkbox"/> Sueldos y Jornales</label>
+                        <label class="borrado-check"><input id="borrado-base-contabilidad" name="borrado-base" type="checkbox"/> Contabilidad General</label>
+                      </div>
+                    </div>
+                    <div class="borrado-field borrado-field-actions">
+                      <button type="button" id="borrado-add" class="btn btn-primary">Agregar</button>
+                    </div>
                   </div>
                   <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
                     <label for="borrado-ejercicios">Ejercicios a borrar</label>

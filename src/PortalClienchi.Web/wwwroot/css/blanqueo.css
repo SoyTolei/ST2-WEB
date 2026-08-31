@@ -711,36 +711,60 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 }
 
 .blanqueo-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 14px;
-  align-items: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.blanqueo-inline-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+  max-width: 100%;
 }
 
 .blanqueo-field-portal {
-  grid-column: 1 / -1;
-  max-width: 240px;
+  width: 12rem;
+  max-width: 100%;
 }
 
-.blanqueo-form-grid .blanqueo-field:has(#blanqueo-caso) {
-  max-width: 11.5rem;
+.blanqueo-field-caso {
+  width: 11rem;
+  max-width: 100%;
 }
 
-.blanqueo-form-grid .blanqueo-field:has(#blanqueo-cliente) {
-  max-width: 8rem;
-}
-
-.blanqueo-form-grid .blanqueo-field:has(#blanqueo-tipo) {
-  max-width: 13rem;
+.blanqueo-field-cliente {
+  width: 7.5rem;
+  max-width: 100%;
 }
 
 .blanqueo-field-correos {
-  grid-column: 1 / -1;
-  max-width: min(100%, 24rem);
+  width: min(22rem, 100%);
 }
 
 .blanqueo-field-modulos {
-  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 100%;
+}
+
+.blanqueo-submit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+  max-width: 100%;
+}
+
+.blanqueo-field-solicitud {
+  width: 12rem;
+  max-width: 100%;
+}
+
+.blanqueo-submit-row .blanqueo-field-actions {
+  flex: 0 0 auto;
 }
 
 .blanqueo-field-modulos.hidden,
@@ -858,21 +882,17 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 }
 
 .blanqueo-edit-modulos {
-  grid-column: 1 / -1;
+  width: 100%;
   margin-bottom: 10px;
 }
 
 @media (max-width: 720px) {
-  .blanqueo-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .blanqueo-form-grid .blanqueo-field:has(#blanqueo-caso),
-  .blanqueo-form-grid .blanqueo-field:has(#blanqueo-cliente),
-  .blanqueo-form-grid .blanqueo-field:has(#blanqueo-tipo),
   .blanqueo-field-portal,
-  .blanqueo-field-correos {
-    max-width: 100%;
+  .blanqueo-field-caso,
+  .blanqueo-field-cliente,
+  .blanqueo-field-correos,
+  .blanqueo-field-solicitud {
+    width: 100%;
   }
 }
 

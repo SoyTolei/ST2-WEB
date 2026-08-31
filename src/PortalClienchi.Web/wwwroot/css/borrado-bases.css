@@ -47,26 +47,43 @@
 }
 
 .borrado-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 14px;
-  align-items: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 100%;
 }
 
-.borrado-form-grid .borrado-field:has(#borrado-caso) {
-  max-width: 11.5rem;
+.borrado-inline-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+  max-width: 100%;
 }
 
-.borrado-form-grid .borrado-field:has(#borrado-cliente) {
-  max-width: 8rem;
+.borrado-field-caso {
+  width: 11rem;
+  max-width: 100%;
 }
 
-.borrado-form-grid .borrado-field:has(#borrado-empresa) {
-  max-width: 7rem;
+.borrado-field-cliente {
+  width: 7.5rem;
+  max-width: 100%;
 }
 
-.borrado-form-grid .borrado-field:has(#borrado-cuit) {
-  max-width: 16rem;
+.borrado-field-empresa {
+  width: 6.5rem;
+  max-width: 100%;
+}
+
+.borrado-field-nombre {
+  width: min(28rem, 100%);
+}
+
+.borrado-field-cuit {
+  width: 15rem;
+  max-width: 100%;
 }
 
 .borrado-field label {
@@ -98,8 +115,6 @@
 }
 
 .borrado-field-bases {
-  grid-column: 1;
-  min-width: 0;
   width: fit-content;
   max-width: 100%;
 }
@@ -161,7 +176,8 @@
 
 .borrado-field-ejercicios,
 .borrado-detail-field {
-  grid-column: 1 / -1;
+  width: 100%;
+  max-width: min(36rem, 100%);
 }
 
 .borrado-field-ejercicios textarea {
@@ -173,7 +189,7 @@
 }
 
 .borrado-field-actions {
-  grid-column: 2;
+  flex: 0 0 auto;
   display: flex;
   align-items: end;
 }
@@ -915,19 +931,16 @@ button.borrado-aclaracion-pill:focus-visible {
 }
 
 @media (max-width: 720px) {
-  .borrado-form-grid {
-    grid-template-columns: 1fr;
+  .borrado-field-caso,
+  .borrado-field-cliente,
+  .borrado-field-empresa,
+  .borrado-field-nombre,
+  .borrado-field-cuit,
+  .borrado-field-bases {
+    width: 100%;
   }
 
-  .borrado-form-grid .borrado-field:has(#borrado-caso),
-  .borrado-form-grid .borrado-field:has(#borrado-cliente),
-  .borrado-form-grid .borrado-field:has(#borrado-empresa),
-  .borrado-form-grid .borrado-field:has(#borrado-cuit) {
-    max-width: 100%;
-  }
-
-  .borrado-field-bases,
-  .borrado-field-actions {
-    grid-column: 1;
+  .borrado-bases-checks {
+    width: 100%;
   }
 }
