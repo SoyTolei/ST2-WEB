@@ -5006,7 +5006,7 @@ body.st2-access-restoring #st2-access-gate {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 18px;
+  gap: 32px;
   background:
     radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.2) 0%, transparent 58%),
     radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
@@ -5022,25 +5022,25 @@ body.st2-access-restoring .st2-boot-splash {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 22px;
   flex-wrap: nowrap;
-  min-height: 2.6rem;
+  min-height: 4.8rem;
 }
 
 .st2-access-brand-head {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: nowrap;
-  min-height: 2.5rem;
+  min-height: 3.2rem;
 }
 
 .st2-boot-splash-st2-mark {
   display: inline-flex;
   align-items: flex-start;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 2rem;
+  font-size: 4rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -5048,7 +5048,7 @@ body.st2-access-restoring .st2-boot-splash {
   user-select: none;
   color: #f3f4f6;
   animation: st2-boot-st2-float 3.4s ease-in-out infinite;
-  filter: drop-shadow(0 3px 10px rgba(214, 64, 0, 0.32));
+  filter: drop-shadow(0 4px 14px rgba(214, 64, 0, 0.36));
 }
 
 .st2-access-title.st2-access-title-mark {
@@ -5056,9 +5056,9 @@ body.st2-access-restoring .st2-boot-splash {
   align-items: flex-start;
   margin: 0;
   flex: 0 0 auto;
-  min-width: 3.6rem;
+  min-width: 4.4rem;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 1.85rem;
+  font-size: 2.5rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -5096,7 +5096,7 @@ body.st2-access-restoring .st2-boot-splash {
 .st2-boot-splash-suite {
   margin: 0;
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 1.38rem;
+  font-size: 2.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.1;
@@ -5108,7 +5108,7 @@ body.st2-access-restoring .st2-boot-splash {
   margin: 0;
   flex: 0 0 auto;
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   font-weight: 500;
   line-height: 1;
   color: #94a3b8;
@@ -5119,7 +5119,7 @@ body.st2-access-restoring .st2-boot-splash {
   margin: 0;
   flex: 0 0 auto;
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 1.28rem;
+  font-size: 1.62rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.1;
@@ -5129,7 +5129,7 @@ body.st2-access-restoring .st2-boot-splash {
 
 .st2-boot-splash-status {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1.9rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -5138,10 +5138,10 @@ body.st2-access-restoring .st2-boot-splash {
 
 .st2-boot-splash-dots {
   display: inline-flex;
-  gap: 2px;
-  margin-left: 2px;
-  min-width: 1.25em;
-  font-size: 1.08em;
+  gap: 3px;
+  margin-left: 3px;
+  min-width: 1.45em;
+  font-size: 1.15em;
 }
 
 .st2-boot-splash-dots span {
@@ -5164,12 +5164,47 @@ body.st2-access-restoring .st2-boot-splash {
 
 @keyframes st2-boot-st2-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+  50% { transform: translateY(-12px); }
 }
 
 @keyframes st2-boot-st2-sup-float {
   0%, 100% { transform: translateY(-0.2em); }
-  50% { transform: translateY(calc(-0.2em - 4px)); }
+  50% { transform: translateY(calc(-0.2em - 7px)); }
+}
+
+@media (max-width: 560px) {
+  .st2-boot-splash-brand {
+    gap: 14px;
+    min-height: 3.4rem;
+  }
+
+  .st2-boot-splash-st2-mark {
+    font-size: 2.85rem;
+  }
+
+  .st2-boot-splash-suite {
+    font-size: 1.95rem;
+  }
+
+  .st2-boot-splash-status {
+    font-size: 1.2rem;
+  }
+
+  .st2-access-title.st2-access-title-mark {
+    font-size: 2.05rem;
+  }
+
+  .st2-access-suite {
+    font-size: 1.35rem;
+  }
+
+  .st2-access-suite-sep {
+    font-size: 1.15rem;
+  }
+
+  .st2-access-card {
+    padding: 30px 24px 24px;
+  }
 }
 
 .st2-access-gate {
@@ -5179,13 +5214,12 @@ body.st2-access-restoring .st2-boot-splash {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
   background:
-    radial-gradient(ellipse 95% 55% at 50% -8%, rgba(214, 64, 0, 0.42) 0%, transparent 58%),
-    radial-gradient(ellipse 55% 45% at 100% 15%, rgba(214, 64, 0, 0.22) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 45% at 0% 85%, rgba(214, 64, 0, 0.2) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 50% at 100% 100%, rgba(13, 148, 136, 0.14) 0%, transparent 50%),
-    #0b1220;
+    radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.2) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 70% at 50% 100%, rgba(234, 88, 12, 0.08) 0%, transparent 55%),
+    linear-gradient(180deg, #222222 0%, #161616 100%);
 }
 
 .st2-access-gate.hidden {
@@ -5193,10 +5227,11 @@ body.st2-access-restoring .st2-boot-splash {
 }
 
 .st2-access-card {
-  width: min(420px, 96vw);
+  position: relative;
+  width: min(500px, 96vw);
   background: var(--st2-suite-surface);
-  border-radius: 20px;
-  padding: 30px 28px 24px;
+  border-radius: 22px;
+  padding: 38px 36px 30px;
   border: 1px solid var(--st2-suite-border);
   box-shadow:
     var(--st2-suite-glow),
@@ -5205,12 +5240,21 @@ body.st2-access-restoring .st2-boot-splash {
     inset 0 3px 0 #d64000;
 }
 
+.st2-access-card::before {
+  content: "";
+  position: absolute;
+  inset: -48px -72px;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 55% at 50% 45%, rgba(234, 88, 12, 0.14) 0%, transparent 72%);
+}
+
 .st2-access-brand {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 18px;
+  margin: 0 auto 26px;
   text-align: center;
 }
 
@@ -5240,8 +5284,8 @@ body.st2-access-restoring .st2-boot-splash {
 }
 
 .st2-access-hint {
-  margin: 0 0 10px;
-  font-size: 0.88rem;
+  margin: 0 0 14px;
+  font-size: 1.02rem;
   line-height: 1.45;
   color: #64748b;
   text-align: center;
@@ -5259,9 +5303,9 @@ body.st2-access-restoring .st2-boot-splash {
   width: 100%;
   box-sizing: border-box;
   border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 11px 12px;
-  font-size: 0.95rem;
+  border-radius: 12px;
+  padding: 14px 15px;
+  font-size: 1.06rem;
   color: #0f172a;
   background: #fff;
   caret-color: #d64000;
@@ -5289,11 +5333,11 @@ body.st2-access-restoring .st2-boot-splash {
 
 .st2-access-submit {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 18px;
   border: none;
-  border-radius: 10px;
-  padding: 12px 16px;
-  font-size: 0.98rem;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 1.08rem;
   font-weight: 700;
   color: #fff;
   background: linear-gradient(180deg, #e85a12 0%, #d64000 100%);
