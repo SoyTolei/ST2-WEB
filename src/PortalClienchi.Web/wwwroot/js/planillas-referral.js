@@ -701,6 +701,8 @@ function setReferralPantallasUi(checked) {
   document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !checked);
 }
 
+const REFERRAL_CAPTURAS_ACCEPT = "image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel";
+
 function isReferralVideoFile(file) {
   if (/\.(mp4|webm)$/i.test(file.name || "")) return true;
   const t = file.type || "";
@@ -716,10 +718,18 @@ function isReferralTxtFile(file) {
   return /\.txt$/i.test(file.name || "");
 }
 
+function isReferralExcelFile(file) {
+  if (/\.(xlsx|xls)$/i.test(file.name || "")) return true;
+  const t = file.type || "";
+  return t === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    || t === "application/vnd.ms-excel";
+}
+
 function isReferralCapturaFile(file) {
   if (isReferralVideoFile(file)) return true;
   if (isReferralPdfFile(file)) return true;
   if (isReferralTxtFile(file)) return true;
+  if (isReferralExcelFile(file)) return true;
   if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
   return (file.type || "").startsWith("image/");
 }
@@ -728,12 +738,14 @@ const MAX_REFERRAL_VIDEOS = 1;
 const MAX_REFERRAL_VIDEO_BYTES = 100 * 1024 * 1024;
 const MAX_REFERRAL_PDF_BYTES = 12 * 1024 * 1024;
 const MAX_REFERRAL_TXT_BYTES = 12 * 1024 * 1024;
+const MAX_REFERRAL_EXCEL_BYTES = 12 * 1024 * 1024;
 
 function addReferralCapturaFiles(fileList, targetList) {
   let added = 0;
   let rejectedHeavy = false;
   let rejectedPdfHeavy = false;
   let rejectedTxtHeavy = false;
+  let rejectedExcelHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
 
@@ -762,6 +774,11 @@ function addReferralCapturaFiles(fileList, targetList) {
         rejectedTxtHeavy = true;
         continue;
       }
+    } else if (isReferralExcelFile(file)) {
+      if (file.size > MAX_REFERRAL_EXCEL_BYTES) {
+        rejectedExcelHeavy = true;
+        continue;
+      }
     }
 
     if (!targetList.some((f) => f.name === file.name && f.size === file.size)) {
@@ -776,10 +793,12 @@ function addReferralCapturaFiles(fileList, targetList) {
     alert("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedTxtHeavy) {
     alert("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedExcelHeavy) {
+    alert("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
     alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT o video MP4/WEBM.");
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls) o video MP4/WEBM.");
   }
   if (added > 0) setReferralPantallasUi(true);
   return added;
@@ -802,12 +821,14 @@ function refreshCapturasEstadoReferral(prefix, fileList) {
   const videos = fileList.filter(isReferralVideoFile).length;
   const pdfs = fileList.filter(isReferralPdfFile).length;
   const txts = fileList.filter(isReferralTxtFile).length;
-  const imgs = fileList.length - videos - pdfs - txts;
+  const excels = fileList.filter(isReferralExcelFile).length;
+  const imgs = fileList.length - videos - pdfs - txts - excels;
   const parts = [];
   if (imgs > 0) parts.push(`${imgs} imagen(es)`);
   if (videos > 0) parts.push(`${videos} video(s)`);
   if (pdfs > 0) parts.push(`${pdfs} PDF`);
   if (txts > 0) parts.push(`${txts} TXT`);
+  if (excels > 0) parts.push(`${excels} Excel`);
   estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
 }
 
@@ -820,10 +841,12 @@ function revokeCapturaThumbUrls(container) {
 }
 
 function setupCapturas(prefix, fileList) {
+  const input = document.getElementById(`${prefix}-input`);
+  if (input) input.setAttribute("accept", REFERRAL_CAPTURAS_ACCEPT);
   document.getElementById(`${prefix}-agregar`)?.addEventListener("click", () => {
-    document.getElementById(`${prefix}-input`)?.click();
+    input?.click();
   });
-  document.getElementById(`${prefix}-input`)?.addEventListener("change", (e) => {
+  input?.addEventListener("change", (e) => {
     const added = addReferralCapturaFiles(e.target.files, fileList);
     if (added === 0 && e.target.files?.length > 0) {
       // alert ya se mostró en addReferralCapturaFiles si corresponde
@@ -936,10 +959,11 @@ function refreshChips(id, files, prefix, fileList) {
     const isVideo = isReferralVideoFile(f);
     const isPdf = isReferralPdfFile(f);
     const isTxt = isReferralTxtFile(f);
-    const isChip = isVideo || isPdf || isTxt;
+    const isExcel = isReferralExcelFile(f);
+    const isChip = isVideo || isPdf || isTxt || isExcel;
     const card = document.createElement("div");
     card.className = isChip
-      ? `plan-traza-chip ${isVideo ? "plan-video-chip" : isTxt ? "plan-txt-chip" : "plan-pdf-chip"}`
+      ? `plan-traza-chip ${isVideo ? "plan-video-chip" : isTxt ? "plan-txt-chip" : isExcel ? "plan-excel-chip" : "plan-pdf-chip"}`
       : "plan-captura-thumb";
 
     let preview;
@@ -947,7 +971,7 @@ function refreshChips(id, files, prefix, fileList) {
       preview = document.createElement("span");
       preview.className = "plan-traza-chip-ext";
       const match = /\.([^.]+)$/.exec(f.name || "");
-      preview.textContent = (match?.[1] || (isPdf ? "pdf" : isTxt ? "txt" : "mp4")).toUpperCase();
+      preview.textContent = (match?.[1] || (isPdf ? "pdf" : isTxt ? "txt" : isExcel ? "xlsx" : "mp4")).toUpperCase();
     } else {
       preview = document.createElement("img");
       const url = URL.createObjectURL(f);

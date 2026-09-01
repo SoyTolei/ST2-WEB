@@ -25,6 +25,11 @@ public static class PlanillasEndpoints
         ".txt",
     };
 
+    private static readonly HashSet<string> ExcelExtensiones = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".xlsx", ".xls",
+    };
+
     private static readonly HashSet<string> TrazaExtensiones = new(StringComparer.OrdinalIgnoreCase)
     {
         ".trc", ".csv", ".txt",
@@ -140,9 +145,12 @@ public static class PlanillasEndpoints
                 var esTxt = TxtExtensiones.Contains(ext)
                     || (string.IsNullOrEmpty(ext)
                         && contentType.Equals("text/plain", StringComparison.OrdinalIgnoreCase));
+                var esExcel = ExcelExtensiones.Contains(ext)
+                    || contentType.Equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", StringComparison.OrdinalIgnoreCase)
+                    || contentType.Equals("application/vnd.ms-excel", StringComparison.OrdinalIgnoreCase);
 
-                if (!esImagen && !esVideo && !esPdf && !esTxt)
-                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen, PDF, TXT o video mp4/webm." });
+                if (!esImagen && !esVideo && !esPdf && !esTxt && !esExcel)
+                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen, PDF, TXT, Excel o video mp4/webm." });
 
                 if (esVideo)
                     videos++;
