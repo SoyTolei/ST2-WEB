@@ -1718,6 +1718,7 @@ const toolsBanner = document.getElementById("st2-tools-banner");
 const toolsBannerText = document.getElementById("st2-tools-banner-text");
 let cachedTools = [];
 let toolsBound = false;
+let aboutClaveCopyBound = false;
 let toolsBannerBound = false;
 
 function readSeenToolVersions() {
@@ -2014,7 +2015,7 @@ function renderAboutTools() {
       file: "ST2 - Herramientas SQL.zip",
     },
     bat: {
-      file: "ST2-PS.zip",
+      file: "ST2-PS.7z",
     },
   };
 
@@ -2098,8 +2099,8 @@ async function downloadTool(toolId) {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  if (toolId === "sql") {
-    showSqlDownloadNotice();
+  if (toolId === "sql" || toolId === "bat") {
+    showToolDownloadNotice(toolId);
   }
   markToolSeen(toolId);
 }
@@ -2315,10 +2316,14 @@ function hideSt2Message() {
   if (okBtn) okBtn.textContent = "Entendido";
 }
 
-function showSqlDownloadNotice() {
+const ST2_DESKTOP_TOOL_PASSWORD = "bejerman**";
+
+function showToolDownloadNotice(toolId) {
+  const label = toolId === "bat" ? "ST2.BAT" : "Herramientas SQL";
+  const fileKind = toolId === "bat" ? "el .bat" : "el .exe";
   showSt2Message(
     "",
-    "Antes de descomprimir, borrá las versiones anteriores de Herramientas SQL para no mezclar archivos viejos con los nuevos.",
+    `Antes de descomprimir, borrá las versiones anteriores de ${label} para no mezclar archivos viejos con los nuevos. La clave para abrir ${fileKind} es ${ST2_DESKTOP_TOOL_PASSWORD}.`,
     { okLabel: "Cerrar", downloadNotice: true },
   );
 }
@@ -2518,8 +2523,30 @@ function xhrJson(method, url, bodyObj) {
   });
 }
 
+async function copySt2DesktopToolPassword(btn) {
+  const value = ST2_DESKTOP_TOOL_PASSWORD;
+  try {
+    await navigator.clipboard.writeText(value);
+    btn?.classList.add("is-copied");
+    const prevTitle = btn?.title || "";
+    if (btn) btn.title = "Copiado";
+    window.setTimeout(() => {
+      btn?.classList.remove("is-copied");
+      if (btn) btn.title = prevTitle || "Clic para copiar la clave";
+    }, 1600);
+  } catch {
+    window.prompt("Copiá la clave:", value);
+  }
+}
+
 function bindAboutToolsUi() {
   bindToolUrlDialog();
+  if (!aboutClaveCopyBound) {
+    aboutClaveCopyBound = true;
+    document.getElementById("st2-about-tools-clave-copy")?.addEventListener("click", (e) => {
+      void copySt2DesktopToolPassword(e.currentTarget);
+    });
+  }
   if (toolsBound) return;
   toolsBound = true;
   document.querySelectorAll("[data-tool-download]").forEach((btn) => {

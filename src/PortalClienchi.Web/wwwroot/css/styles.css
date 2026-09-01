@@ -2355,6 +2355,11 @@ body.portal-tab-active .brand-icon {
   font-size: 0.72rem;
 }
 
+.st2-about-tools-clave-copy {
+  margin: 0 2px;
+  vertical-align: baseline;
+}
+
 .st2-about-tools-list {
   display: flex;
   flex-direction: column;
