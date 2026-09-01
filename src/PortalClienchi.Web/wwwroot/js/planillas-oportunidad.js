@@ -10,6 +10,8 @@ import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notify
 let ctx = null;
 let metodoContacto = null;
 
+const OP_METODOS_VALIDOS = new Set(["Telefónicamente", "WhatsApp", "Email"]);
+
 const GESTOR_POR_PAGINA = 5;
 const LINK_PLACEHOLDER = "Pegar link de la oportunidad";
 const GESTOR_MESES = [
@@ -119,6 +121,7 @@ function oportunidadIaFieldDefs() {
       id: "op-metodo",
       kind: "radio-group",
       name: "op-metodo",
+      scope: "op-metodo-radios",
       onRestore: (value) => setMetodoContacto(value),
     },
     { id: "op-numero" },
@@ -229,15 +232,27 @@ async function mejorarOportunidadIa() {
   }
 }
 
+function normalizeMetodoContacto(value) {
+  const raw = String(value || "").trim();
+  if (!raw || raw === "NINGUNO") return null;
+  if (OP_METODOS_VALIDOS.has(raw)) return raw;
+  const lower = raw.toLowerCase();
+  if (lower.includes("telef")) return "Telefónicamente";
+  if (lower.includes("whats")) return "WhatsApp";
+  if (lower.includes("mail") || lower === "email") return "Email";
+  return null;
+}
+
 function setMetodoContacto(value) {
-  metodoContacto = value || null;
+  metodoContacto = normalizeMetodoContacto(value);
   document.querySelectorAll('#op-metodo-radios input[name="op-metodo"]').forEach((input) => {
     input.checked = input.value === metodoContacto;
   });
 }
 
 function applyCargarPayload(data) {
-  if (data.metodoContacto) setMetodoContacto(data.metodoContacto);
+  const metodo = normalizeMetodoContacto(data.metodoContacto);
+  if (metodo) setMetodoContacto(metodo);
   if (data.numeroCliente) document.getElementById("op-numero").value = data.numeroCliente;
   if (data.razonSocial) document.getElementById("op-razon").value = data.razonSocial;
   if (data.nombreContacto) document.getElementById("op-contacto").value = data.nombreContacto;

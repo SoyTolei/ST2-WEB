@@ -336,6 +336,7 @@ function bindToastOnce() {
   if (toastBound) return;
   toastBound = true;
   document.getElementById("blanqueo-ready-toast-open")?.addEventListener("click", () => {
+    void markBlanqueoAlertsSeen();
     document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
     document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
   });

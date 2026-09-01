@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBorradoChanged } from "./borrado-alerts.js";
+import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -245,6 +245,7 @@ export function initBorradoBasesModule() {
 
 export async function openBorradoBasesModule() {
   if (!canSeeBorradoBasesModule()) return;
+  void markBorradoAlertsSeen();
   initBorradoBasesModule();
   await refreshModuleFlags();
   canConfirm = canConfirmBorrado();

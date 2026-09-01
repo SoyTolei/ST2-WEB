@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBlanqueoChanged } from "./blanqueo-alerts.js";
+import { notifyBlanqueoChanged, markBlanqueoAlertsSeen } from "./blanqueo-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -231,8 +231,13 @@ export function initBlanqueoModule() {
   document.addEventListener("click", () => hideCtx());
   document.addEventListener("scroll", () => hideCtx(), true);
 
+  document.getElementById("blanqueo-clave-copy")?.addEventListener("click", () => {
+    void copyClaveBlanqueo();
+  });
+
   document.getElementById("blanqueo-portal")?.addEventListener("change", () => {
     syncTipoOptions("blanqueo-tipo", getFormPortal());
+    syncClaveVisibility();
     syncModulosField();
   });
   document.getElementById("blanqueo-tipo")?.addEventListener("change", () => syncModulosField());
@@ -267,12 +272,14 @@ export function initBlanqueoModule() {
 
   syncSolicitanteBadge();
   syncTipoOptions("blanqueo-tipo", getFormPortal());
+  syncClaveVisibility();
   syncModulosField();
   syncCorreoRows();
 }
 
 export async function openBlanqueoModule() {
   if (!canSeeBlanqueoModule()) return;
+  void markBlanqueoAlertsSeen();
   initBlanqueoModule();
   // Usa cache de permisos (evita otro /modules al abrir).
   await refreshModuleFlags();
@@ -284,6 +291,7 @@ export async function openBlanqueoModule() {
   clearForm();
   monthFilterTouched = false;
   syncTipoOptions("blanqueo-tipo", getFormPortal());
+  syncClaveVisibility();
   setStatus("Cargando solicitudes…");
   await reloadList();
   liveList.start();
@@ -677,6 +685,36 @@ async function copyAclaracionPopText() {
 function syncDefaultClave(clave) {
   const value = String(clave || defaultClaveBlanqueo).trim();
   if (value) defaultClaveBlanqueo = value;
+  syncClaveUi(value);
+}
+
+function syncClaveVisibility() {
+  const hint = document.getElementById("blanqueo-clave-hint");
+  if (!hint) return;
+  const sistema = document.body.dataset.planSistema;
+  const hide = sistema === "Legal" || sistema === "Chile";
+  hint.classList.toggle("hidden", hide);
+  hint.setAttribute("aria-hidden", hide ? "true" : "false");
+}
+
+function syncClaveUi(clave) {
+  const btn = document.getElementById("blanqueo-clave-copy");
+  if (!btn) return;
+  const value = String(clave || defaultClaveBlanqueo || "Sueldo.2026").trim() || "Sueldo.2026";
+  btn.textContent = value;
+  btn.dataset.clave = value;
+  syncClaveVisibility();
+}
+
+async function copyClaveBlanqueo() {
+  const btn = document.getElementById("blanqueo-clave-copy");
+  const value = btn?.dataset.clave || btn?.textContent?.trim() || claveDefault();
+  await copyText(value, {
+    el: btn,
+    attr: "data-copy-hint",
+    copiedText: "Copiado",
+    restoreText: "Clic para copiar",
+  });
 }
 
 async function createSolicitud() {

@@ -1571,6 +1571,31 @@ html.st2-theme-dark .borrado-estado-pending {
   color: #94a3b8;
 }
 
+html.st2-theme-dark .blanqueo-clave-hint {
+  background: linear-gradient(180deg, #1e293b 0%, #162033 100%) !important;
+  border-color: #737373 !important;
+  color: #e2e8f0 !important;
+}
+
+html.st2-theme-dark .blanqueo-clave-hint-label {
+  color: #f1f5f9;
+}
+
+html.st2-theme-dark .blanqueo-clave-hint-note {
+  color: #cbd5e1;
+}
+
+html.st2-theme-dark .blanqueo-clave-code {
+  background: #121212;
+  border-color: #94a3b8;
+  color: #f8fafc;
+}
+
+html.st2-theme-dark .blanqueo-clave-code:hover {
+  background: #1e293b;
+  border-color: #cbd5e1;
+}
+
 html.st2-theme-dark .blanqueo-clave-pill--custom {
   background: #3b2a14;
   border-color: #f59e0b;
