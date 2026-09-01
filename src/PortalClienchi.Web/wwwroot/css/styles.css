@@ -2,9 +2,9 @@
   --primary: #d64000;
   --primary-glow: rgba(214, 64, 0, 0.45);
   --dark: #1a1f2e;
-  --header-top: #131820;
-  --header-bottom: #1c2433;
-  --header-line: rgba(255, 255, 255, 0.07);
+  --header-top: #1a2230;
+  --header-bottom: #232c3d;
+  --header-line: rgba(255, 255, 255, 0.08);
   --header-accent: rgba(214, 64, 0, 0.55);
   --panel: #f4f6fa;
   --border: #e2e6ef;
@@ -41,7 +41,10 @@ html, body {
   justify-content: space-between;
   height: 64px;
   padding: 0 22px;
-  background: linear-gradient(180deg, var(--header-top) 0%, var(--header-bottom) 100%);
+  background:
+    radial-gradient(ellipse 90% 120% at 0% 0%, rgba(59, 130, 246, 0.1) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 110% at 100% 0%, rgba(249, 115, 22, 0.12) 0%, transparent 52%),
+    linear-gradient(180deg, var(--header-top) 0%, var(--header-bottom) 100%);
   border-bottom: 1px solid var(--header-line);
   box-shadow: 0 8px 24px rgba(15, 18, 28, 0.18);
 }
@@ -85,6 +88,7 @@ html, body {
 }
 
 .brand-home-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -92,28 +96,47 @@ html, body {
   height: 54px;
   padding: 0;
   margin: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
+  overflow: visible;
   transition:
-    background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.16s ease;
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.brand-home-btn::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 122, 51, 0.28) 0%, transparent 72%);
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .brand-home-btn:hover {
-  background: rgba(255, 122, 51, 0.1);
-  border-color: #ff7a33;
+  background: rgba(255, 122, 51, 0.12);
+  border-color: rgba(255, 138, 76, 0.75);
   box-shadow:
-    0 0 0 3px rgba(255, 122, 51, 0.18),
-    0 6px 16px rgba(255, 122, 51, 0.14);
-  transform: translateY(-1px) scale(1.03);
+    0 0 0 3px rgba(255, 122, 51, 0.16),
+    0 10px 22px rgba(255, 122, 51, 0.2);
+  transform: translateY(-3px);
+}
+
+.brand-home-btn:hover::after {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .brand-home-btn:active {
-  transform: translateY(0) scale(1);
+  transform: translateY(-1px);
   box-shadow: 0 0 0 2px rgba(255, 122, 51, 0.14);
 }
 
@@ -123,10 +146,20 @@ html, body {
 }
 
 .brand-icon {
+  position: relative;
+  z-index: 1;
   width: 46px;
   height: 46px;
   image-rendering: -webkit-optimize-contrast;
   pointer-events: none;
+  transition: transform 0.22s ease, filter 0.22s ease;
+}
+
+.brand-home-btn:hover .brand-icon {
+  transform: translateY(-1px) scale(1.07);
+  filter:
+    drop-shadow(0 0 10px rgba(255, 138, 76, 0.55))
+    drop-shadow(0 4px 8px rgba(15, 23, 42, 0.35));
 }
 
 .app-header-right {

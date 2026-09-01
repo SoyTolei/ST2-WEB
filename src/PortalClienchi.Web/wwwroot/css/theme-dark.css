@@ -7,6 +7,10 @@ html.st2-theme-dark {
   --text-muted: #9ca3af;
   --nav-well: #161616;
   --nav-hover: #2a2a2a;
+  --header-top: #222222;
+  --header-bottom: #161616;
+  --header-line: rgba(255, 255, 255, 0.06);
+  --header-accent: rgba(249, 115, 22, 0.62);
   --portal-sub: #c5c5c5;
   --portal-sub-hover: #e0e0e0;
   --portal-sub-glow: rgba(0, 0, 0, 0.35);
@@ -20,6 +24,38 @@ html.st2-theme-dark {
 html.st2-theme-dark body {
   background: var(--panel);
   color: var(--dark);
+}
+
+html.st2-theme-dark .app-header {
+  background:
+    radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.22) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
+    linear-gradient(180deg, var(--header-top) 0%, var(--header-bottom) 100%);
+  border-bottom-color: var(--header-line);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+html.st2-theme-dark .app-header-left .theme-switch {
+  border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+html.st2-theme-dark .brand-home-btn {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+html.st2-theme-dark .brand-home-btn:hover {
+  border-color: rgba(251, 146, 60, 0.72);
+  background: rgba(249, 115, 22, 0.14);
+  box-shadow:
+    0 0 0 3px rgba(249, 115, 22, 0.14),
+    0 10px 22px rgba(234, 88, 12, 0.22);
+}
+
+html.st2-theme-dark .st2-session-email {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: rgba(255, 255, 255, 0.84);
 }
 
 html.st2-theme-dark .tab-bar {
