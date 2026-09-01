@@ -1872,11 +1872,11 @@ function syncAboutNoticeCopy() {
   if (!lead || !text) return;
 
   if (userCanSeeDesktopToolDownloads()) {
-    lead.textContent = "Suite web + escritorio";
-    text.innerHTML = "<strong>ST2</strong> integra esta web con la app de <strong>backups SQL</strong> y el <strong>BAT</strong> de mesa técnica. Lo que ves depende de tu perfil.";
+    lead.textContent = "Suite interna para soporte técnico";
+    text.innerHTML = "Todos ven las mismas pestañas superiores. Las planillas dependen de tu perfil; además podés descargar las herramientas de escritorio <strong>SQL</strong> y <strong>BAT</strong> de la suite.";
   } else {
     lead.textContent = "Suite web de uso interno";
-    text.innerHTML = "<strong>ST2.WEB</strong> reúne planillas, referrals y portales según tu perfil.";
+    text.innerHTML = "Todos ven las mismas pestañas superiores. Las planillas y herramientas dentro de cada una dependen de tu perfil.";
   }
 }
 

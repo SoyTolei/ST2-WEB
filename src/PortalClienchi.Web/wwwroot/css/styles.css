@@ -2113,6 +2113,27 @@ body.portal-tab-active .brand-icon {
   color: #4b5563;
 }
 
+.st2-about-tabs-list {
+  margin: 0 0 12px;
+  padding: 0 0 0 1.1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.st2-about-tabs-list li {
+  margin: 0 0 6px;
+}
+
+.st2-about-tabs-list li:last-child {
+  margin-bottom: 0;
+}
+
+.st2-about-tabs-list strong {
+  color: var(--dark);
+  font-weight: 700;
+}
+
 .st2-about-notice-aside {
   display: block;
   margin: 0 0 10px;

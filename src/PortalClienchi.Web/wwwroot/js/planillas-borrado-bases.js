@@ -1135,16 +1135,14 @@ async function confirmListoModal() {
   }
 }
 
-/** Resumen al confirmar solicitudes Salesforce: siempre IVA, SJ y CG. */
+/** Resumen al confirmar solicitudes Salesforce: solo las bases marcadas (el detalle está en Salesforce). */
 function buildListoSummarySalesforce(done) {
-  const parts = [
-    { label: "IVA", ok: !!done.iva },
-    { label: "SJ", ok: !!done.sueldos },
-    { label: "CG", ok: !!done.contabilidad },
-  ];
-  const allOk = parts.every((p) => p.ok);
-  if (allOk) return `Listo ${parts.map((p) => p.label).join(", ")}`;
-  return parts.map((p) => `${p.ok ? "✓" : "✗"} ${p.label}`).join(" · ");
+  const parts = [];
+  if (done.iva) parts.push("IVA");
+  if (done.sueldos) parts.push("SJ");
+  if (done.contabilidad) parts.push("CG");
+  if (!parts.length) return "Listo";
+  return `Listo ${parts.join(", ")}`;
 }
 
 /** Resumen al confirmar: "Listo IVA, SJ, CG" o "✓ IVA · ✗ SJ · ✓ CG". */
@@ -1222,6 +1220,7 @@ function formatCuit(raw) {
 
 function isPartialListo(item) {
   if (!item?.listo) return false;
+  if (isDetalleSalesforce(item)) return false;
   const { resultado } = parseAclaracion(item.aclaracion);
   return /✗/.test(String(resultado || ""));
 }

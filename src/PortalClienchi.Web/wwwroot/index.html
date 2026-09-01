@@ -675,12 +675,6 @@
                 <h3 class="plan-gestor-panel-title">
                   Listado <span id="blanqueo-count" class="plan-gestor-count"></span>
                 </h3>
-                <p id="blanqueo-clave-hint" class="blanqueo-clave-hint">
-                  <span class="blanqueo-clave-hint-emoji" aria-hidden="true">⚠️</span>
-                  <span class="blanqueo-clave-hint-label">Por defecto la clave generada es</span>
-                  <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code" title="Clic para copiar la clave" data-copy-hint="Clic para copiar">Sueldo.2026</button>
-                  <span class="blanqueo-clave-hint-note">salvo que en aclaración se indique otra.</span>
-                </p>
                 <div class="blanqueo-filter-bar">
                   <label class="blanqueo-filter-month">
                     Mes
@@ -1905,8 +1899,15 @@
             <div class="st2-about-notice-copy">
               <p id="st2-about-notice-lead" class="st2-about-notice-lead">Suite web de uso interno</p>
               <p id="st2-about-notice-text" class="st2-about-notice-text">
-                <strong>ST2.WEB</strong> reúne planillas, referrals y portales según tu perfil.
+                Todos ven las mismas pestañas superiores. Las planillas y herramientas dentro de cada una dependen de tu perfil.
               </p>
+              <ul class="st2-about-tabs-list" aria-label="Pestañas de ST2">
+                <li><strong>Sistema de Planillas</strong> — Blanqueo de claves, borrado de bases, referrals, transferencias, oportunidades y otras planillas según tu acceso.</li>
+                <li><strong>THOM</strong> — Acceso a portales Thomson: SQL/ONVIO/WEB, LEGAL y Chile.</li>
+                <li><strong>AI Platform</strong> — Plataforma de inteligencia artificial integrada en el navegador.</li>
+                <li><strong>Portal Cliente</strong> — Búsqueda y acceso al portal del cliente.</li>
+                <li><strong>ADMIN</strong> — Administración de accesos y configuración (según perfil).</li>
+              </ul>
               <p class="st2-about-notice-aside">Herramienta de uso interno. No constituye un producto oficial ni licenciado por Thomson Reuters.</p>
               <div class="st2-about-signature" aria-label="× Leonel Gallo">
                 <a
@@ -1936,7 +1937,7 @@
             <article class="st2-about-tool" id="st2-about-tool-sql" data-tool="sql">
               <div class="st2-about-tool-main">
                 <span class="st2-about-tool-name">ST2 - Herramientas SQL</span>
-                <span class="st2-about-tool-desc" data-tool-desc>Backups y restauración de bases Bejerman SQL.</span>
+                <span class="st2-about-tool-desc" data-tool-desc>Aplicativo para realizar backups, restaurar bases, correr scripts y queries dentro de Bejerman.</span>
                 <span class="st2-about-tool-date" data-tool-date="sql" hidden></span>
               </div>
               <div class="st2-about-tool-actions">
@@ -1947,8 +1948,8 @@
             </article>
             <article class="st2-about-tool" id="st2-about-tool-bat" data-tool="bat">
               <div class="st2-about-tool-main">
-                <span class="st2-about-tool-name">ST2.BAT <span class="st2-about-tool-tag">mesa técnica</span></span>
-                <span class="st2-about-tool-desc" data-tool-desc>Automatización y procesos de la mesa de ayuda técnica.</span>
+                <span class="st2-about-tool-name">ST2.BAT <span class="st2-about-tool-tag">herramienta usada por la mesa de ayuda técnica</span></span>
+                <span class="st2-about-tool-desc" data-tool-desc>Consola de automatización de procesos, habilitación, solución de incidencias, verificación de permisos y registro de archivos.</span>
                 <span class="st2-about-tool-date" data-tool-date="bat" hidden></span>
               </div>
               <div class="st2-about-tool-actions">
@@ -1960,7 +1961,7 @@
             <article class="st2-about-tool is-current">
               <div class="st2-about-tool-main">
                 <span class="st2-about-tool-name">ST2.WEB</span>
-                <span class="st2-about-tool-desc">Esta suite web: planillas, referrals y herramientas del portal.</span>
+                <span class="st2-about-tool-desc">La suite web de planillas automáticas y otras herramientas para mesa de ayuda.</span>
               </div>
               <span class="st2-about-tool-meta st2-about-tool-meta-web" id="st2-about-web-meta" title="Estás usando esta aplicación web">Esta web</span>
             </article>

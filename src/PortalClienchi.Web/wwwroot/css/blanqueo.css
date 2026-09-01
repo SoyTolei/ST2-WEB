@@ -44,42 +44,6 @@
   margin-top: 0;
 }
 
-.blanqueo-clave-hint {
-  margin: 0 0 12px;
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px dashed #93c5fd;
-  background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
-  font-size: 0.86rem;
-  font-weight: 650;
-  color: #1e3a5f;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 6px 8px;
-}
-
-.blanqueo-clave-hint-emoji {
-  flex-shrink: 0;
-  font-size: 1rem;
-  line-height: 1;
-}
-
-.blanqueo-clave-hint-label {
-  font-weight: 650;
-}
-
-.blanqueo-clave-hint-note {
-  font-weight: 600;
-  color: #334155;
-}
-
-.blanqueo-clave-hint.hidden {
-  display: none !important;
-}
-
 .blanqueo-list-footer {
   display: flex;
   align-items: center;
@@ -219,48 +183,6 @@
   color: #ecfdf5;
 }
 
-.blanqueo-clave-code::after {
-  content: attr(data-copy-hint);
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 8px);
-  transform: translateX(-50%) translateY(4px);
-  padding: 5px 9px;
-  border-radius: 6px;
-  background: #0f172a;
-  color: #f8fafc;
-  font-family: inherit;
-  font-size: 0.7rem;
-  font-weight: 650;
-  letter-spacing: 0.01em;
-  line-height: 1.2;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease, background 0.15s ease;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
-  z-index: 5;
-}
-
-.blanqueo-clave-code:hover::after,
-.blanqueo-clave-code:focus-visible::after,
-.blanqueo-clave-code.is-copied::after {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(0);
-}
-
-.blanqueo-clave-code.is-copied {
-  border-color: #059669;
-  background: #ecfdf5;
-}
-
-.blanqueo-clave-code.is-copied::after {
-  background: #047857;
-  color: #ecfdf5;
-}
-
 .blanqueo-mail-copy-icon {
   flex-shrink: 0;
   font-size: 0.78rem;
@@ -272,24 +194,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
-}
-
-.blanqueo-clave-code {
-  position: relative;
-  border: 1px dashed #94a3b8;
-  background: #f8fafc;
-  color: #0f172a;
-  font-family: Consolas, "Courier New", monospace;
-  font-size: 0.86rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.blanqueo-clave-code:hover {
-  background: #e2e8f0;
-  border-color: #64748b;
 }
 
 /* Pastilla clave: una línea; “Copiar” afuera al hover (no estrecha la clave). */

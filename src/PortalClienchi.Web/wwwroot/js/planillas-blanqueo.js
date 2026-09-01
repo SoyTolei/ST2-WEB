@@ -38,6 +38,7 @@ let fechaSortDir = "desc";
 let monthFilterTouched = false;
 let listLoadGen = 0;
 let scrollListToEndOnce = false;
+let defaultClaveBlanqueo = "Sueldo.2026";
 
 const liveList = createPlanillasLiveList({
   viewId: "planillas-blanqueo",
@@ -230,13 +231,8 @@ export function initBlanqueoModule() {
   document.addEventListener("click", () => hideCtx());
   document.addEventListener("scroll", () => hideCtx(), true);
 
-  document.getElementById("blanqueo-clave-copy")?.addEventListener("click", () => {
-    void copyClaveBlanqueo();
-  });
-
   document.getElementById("blanqueo-portal")?.addEventListener("change", () => {
     syncTipoOptions("blanqueo-tipo", getFormPortal());
-    syncClaveVisibility();
     syncModulosField();
   });
   document.getElementById("blanqueo-tipo")?.addEventListener("change", () => syncModulosField());
@@ -271,7 +267,6 @@ export function initBlanqueoModule() {
 
   syncSolicitanteBadge();
   syncTipoOptions("blanqueo-tipo", getFormPortal());
-  syncClaveVisibility();
   syncModulosField();
   syncCorreoRows();
 }
@@ -289,7 +284,6 @@ export async function openBlanqueoModule() {
   clearForm();
   monthFilterTouched = false;
   syncTipoOptions("blanqueo-tipo", getFormPortal());
-  syncClaveVisibility();
   setStatus("Cargando solicitudes…");
   await reloadList();
   liveList.start();
@@ -430,7 +424,6 @@ function clearForm({ keepCaso = false } = {}) {
   }
   resetCorreoRows();
   clearModulosChecks("blanqueo-modulo");
-  syncClaveVisibility();
   syncModulosField();
 }
 
@@ -681,14 +674,9 @@ async function copyAclaracionPopText() {
   }
 }
 
-function syncClaveVisibility() {
-  const hint = document.getElementById("blanqueo-clave-hint");
-  if (!hint) return;
-  // Aviso fijo del listado (todos), oculto solo en Legal/Chile.
-  const sistema = document.body.dataset.planSistema;
-  const hide = sistema === "Legal" || sistema === "Chile";
-  hint.classList.toggle("hidden", hide);
-  hint.setAttribute("aria-hidden", hide ? "true" : "false");
+function syncDefaultClave(clave) {
+  const value = String(clave || defaultClaveBlanqueo).trim();
+  if (value) defaultClaveBlanqueo = value;
 }
 
 async function createSolicitud() {
@@ -765,7 +753,7 @@ async function reloadList({ silent = false } = {}) {
     applyEffectiveAccess(data);
     syncMineFilterVisibility();
     syncLoadFormVisibility();
-    syncClaveUi(data.claveBlanqueo);
+    syncDefaultClave(data.claveBlanqueo);
     rebuildMonthOptions();
     if (!silent || changed) applyFilters();
   } catch (err) {
@@ -794,26 +782,6 @@ function isBlanqueoUiBusy() {
     if (el && !el.classList.contains("hidden")) return true;
   }
   return false;
-}
-
-function syncClaveUi(clave) {
-  const btn = document.getElementById("blanqueo-clave-copy");
-  if (!btn) return;
-  const value = String(clave || btn.textContent || "Sueldo.2026").trim() || "Sueldo.2026";
-  btn.textContent = value;
-  btn.dataset.clave = value;
-  syncClaveVisibility();
-}
-
-async function copyClaveBlanqueo() {
-  const btn = document.getElementById("blanqueo-clave-copy");
-  const value = btn?.dataset.clave || btn?.textContent?.trim() || "Sueldo.2026";
-  await copyText(value, {
-    el: btn,
-    attr: "data-copy-hint",
-    copiedText: "Copiado",
-    restoreText: "Clic para copiar",
-  });
 }
 
 function flashCopied(el, { hintSelector, copiedText = "Copiado", restoreText = "Copiar", attr } = {}) {
@@ -1240,8 +1208,7 @@ function formatFecha(iso) {
 }
 
 function claveDefault() {
-  const btn = document.getElementById("blanqueo-clave-copy");
-  return String(btn?.dataset.clave || btn?.textContent || "Sueldo.2026").trim() || "Sueldo.2026";
+  return String(defaultClaveBlanqueo || "Sueldo.2026").trim() || "Sueldo.2026";
 }
 
 function isBlanqueoConClave(item) {
