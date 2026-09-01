@@ -1872,11 +1872,11 @@ function syncAboutNoticeCopy() {
   if (!lead || !text) return;
 
   if (userCanSeeDesktopToolDownloads()) {
-    lead.textContent = "Suite interna para soporte técnico";
-    text.innerHTML = "<strong>ST2</strong> integra esta plataforma web —planillas, referrals y accesos del portal— con herramientas de escritorio para backups y restauración de bases SQL, y automatización de procesos de la mesa.";
+    lead.textContent = "Suite web + escritorio";
+    text.innerHTML = "<strong>ST2</strong> integra esta web con la app de <strong>backups SQL</strong> y el <strong>BAT</strong> de mesa técnica. Lo que ves depende de tu perfil.";
   } else {
-    lead.textContent = "Portal web de uso interno";
-    text.innerHTML = "<strong>ST2</strong> concentra en el navegador las planillas automáticas, referrals y flujos operativos del equipo de soporte técnico.";
+    lead.textContent = "Suite web de uso interno";
+    text.innerHTML = "<strong>ST2.WEB</strong> reúne planillas, referrals y portales según tu perfil.";
   }
 }
 

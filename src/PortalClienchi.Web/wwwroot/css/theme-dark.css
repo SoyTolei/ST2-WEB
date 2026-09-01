@@ -493,13 +493,13 @@ html.st2-theme-dark .plan-mesa-btn.active {
 }
 
 html.st2-theme-dark .plan-segment-track {
-  background: #0f1622 !important;
-  border-color: #334155 !important;
+  background: #121212 !important;
+  border-color: #404040 !important;
 }
 
 html.st2-theme-dark .plan-segment-btn {
   background: transparent !important;
-  color: #94a3b8 !important;
+  color: #a3a3a3 !important;
 }
 
 html.st2-theme-dark .plan-segment-btn.active {
@@ -507,8 +507,14 @@ html.st2-theme-dark .plan-segment-btn.active {
   color: #fff !important;
 }
 
+html.st2-theme-dark .plan-bej-config {
+  background: #1c1c1c !important;
+  border-color: #404040 !important;
+  box-shadow: none !important;
+}
+
 html.st2-theme-dark .plan-bej-label {
-  color: #94a3b8 !important;
+  color: #a3a3a3 !important;
 }
 
 html.st2-theme-dark .plan-action-btn.ghost,
