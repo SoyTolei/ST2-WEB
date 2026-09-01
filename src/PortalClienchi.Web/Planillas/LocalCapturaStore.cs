@@ -28,6 +28,7 @@ public sealed class LocalCapturaStore
         ".mp4", ".webm",
         ".pdf",
         ".xlsx", ".xls",
+        ".xml",
         ".trc", ".csv", ".txt",
     ];
 
@@ -49,6 +50,11 @@ public sealed class LocalCapturaStore
     private static readonly HashSet<string> AllowedExcelExt = new(StringComparer.OrdinalIgnoreCase)
     {
         ".xlsx", ".xls",
+    };
+
+    private static readonly HashSet<string> AllowedXmlExt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".xml",
     };
 
     private static readonly HashSet<string> AllowedDownloadExt = new(StringComparer.OrdinalIgnoreCase)
@@ -136,6 +142,7 @@ public sealed class LocalCapturaStore
                 var isPdf = AllowedPdfExt.Contains(ext) || LooksLikePdf(raw);
                 var isTxt = ext.Equals(".txt", StringComparison.OrdinalIgnoreCase);
                 var isExcel = AllowedExcelExt.Contains(ext);
+                var isXml = AllowedXmlExt.Contains(ext);
 
                 if (isVideo)
                 {
@@ -249,6 +256,39 @@ public sealed class LocalCapturaStore
                     continue;
                 }
 
+                if (isXml)
+                {
+                    if (raw.Length > maxImageBytes)
+                    {
+                        results.Add(new CapturaSubidaResult(
+                            safeName,
+                            null,
+                            $"El XML supera el máximo de {maxImageBytes / (1024 * 1024.0):0.#} MB."));
+                        continue;
+                    }
+
+                    if (!LooksLikeXml(raw))
+                    {
+                        results.Add(new CapturaSubidaResult(safeName, null, "El archivo no parece un XML válido (.xml)."));
+                        continue;
+                    }
+
+                    EnsureRoot();
+                    var xmlId = NewShortId();
+                    await File.WriteAllBytesAsync(Path.Combine(_root, xmlId + ".xml"), raw, ct)
+                        .ConfigureAwait(false);
+                    var downloadName = SanitizeDownloadName(safeName, ".xml");
+                    await File.WriteAllTextAsync(
+                        Path.Combine(_root, xmlId + ".meta"),
+                        downloadName,
+                        ct).ConfigureAwait(false);
+
+                    var xmlUrl = $"{baseUrl}/c/{xmlId}";
+                    _logger.LogInformation("XML guardado {Id} ({Bytes} bytes) → {Url}", xmlId, raw.Length, xmlUrl);
+                    results.Add(new CapturaSubidaResult(safeName, xmlUrl, null));
+                    continue;
+                }
+
                 if (raw.Length > maxImageBytes)
                 {
                     results.Add(new CapturaSubidaResult(
@@ -260,7 +300,7 @@ public sealed class LocalCapturaStore
 
                 if (!AllowedExt.Contains(ext) && !LooksLikeImage(raw))
                 {
-                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes, PDF, TXT, Excel o video mp4/webm."));
+                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes, PDF, TXT, Excel, XML o video mp4/webm."));
                     continue;
                 }
 
@@ -392,7 +432,7 @@ public sealed class LocalCapturaStore
             if (!File.Exists(path))
                 continue;
 
-            var forceDownload = AllowedDownloadExt.Contains(ext) || AllowedExcelExt.Contains(ext);
+            var forceDownload = AllowedDownloadExt.Contains(ext) || AllowedExcelExt.Contains(ext) || AllowedXmlExt.Contains(ext);
             string? downloadName = null;
             if (forceDownload)
             {
@@ -638,6 +678,18 @@ public sealed class LocalCapturaStore
     private static bool LooksLikeZip(byte[] raw) =>
         raw.Length >= 4 && raw[0] == 0x50 && raw[1] == 0x4B && raw[2] == 0x03 && raw[3] == 0x04;
 
+    private static bool LooksLikeXml(byte[] raw)
+    {
+        var i = 0;
+        if (raw.Length >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF)
+            i = 3;
+
+        while (i < raw.Length && raw[i] is 0x20 or 0x09 or 0x0A or 0x0D)
+            i++;
+
+        return i < raw.Length && raw[i] == (byte)'<';
+    }
+
     private static string GuessExt(byte[] raw)
     {
         if (raw.Length >= 3 && raw[0] == 0xFF && raw[1] == 0xD8)
@@ -665,6 +717,7 @@ public sealed class LocalCapturaStore
         ".pdf" => "application/pdf",
         ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ".xls" => "application/vnd.ms-excel",
+        ".xml" => "application/xml",
         ".csv" => "text/csv",
         ".txt" => "text/plain",
         ".trc" => "application/octet-stream",

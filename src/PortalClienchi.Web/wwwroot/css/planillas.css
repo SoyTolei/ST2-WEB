@@ -1826,6 +1826,15 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: #15803d;
 }
 
+.plan-xml-chip {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.plan-xml-chip .plan-traza-chip-ext {
+  background: #1d4ed8;
+}
+
 .plan-capturas-actions {
   display: flex;
   flex-wrap: wrap;

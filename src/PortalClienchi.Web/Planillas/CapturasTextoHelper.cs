@@ -22,9 +22,14 @@ public static class CapturasTextoHelper
         ".xlsx", ".xls",
     };
 
-    private const string DefaultAdjuntosLabel = "capturas / video / PDF / TXT / Excel";
-    private const string DefaultAdjuntosLabelMayus = "CAPTURAS / VIDEO / PDF / TXT / EXCEL";
-    private const string DefaultAdjuntosTitulo = "Capturas / video / PDF / TXT / Excel";
+    private static readonly HashSet<string> XmlExt = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".xml",
+    };
+
+    private const string DefaultAdjuntosLabel = "capturas / video / PDF / TXT / Excel / XML";
+    private const string DefaultAdjuntosLabelMayus = "CAPTURAS / VIDEO / PDF / TXT / EXCEL / XML";
+    private const string DefaultAdjuntosTitulo = "Capturas / video / PDF / TXT / Excel / XML";
 
     public static void AppendBloqueCapturas(
         List<string> partes,
@@ -112,7 +117,7 @@ public static class CapturasTextoHelper
         var uno = enlaces.Count == 1;
         var phrase = BuildPhrase(flags, Style.Minuscula, uno);
         if (string.IsNullOrEmpty(phrase))
-            phrase = uno ? "captura / video / PDF / TXT / Excel" : DefaultAdjuntosLabel;
+            phrase = uno ? "captura / video / PDF / TXT / Excel / XML" : DefaultAdjuntosLabel;
 
         if (uno)
             return $"Se adjunta {ArticleFor(flags)} {phrase} en el siguiente link:";
@@ -122,12 +127,12 @@ public static class CapturasTextoHelper
 
     private static string ArticleFor(MediaFlags flags)
     {
-        // "el video", "el PDF", "el TXT", "la captura"
-        if (flags.Video && !flags.Images && !flags.Pdf && !flags.Txt && !flags.Excel) return "el";
-        if (flags.Pdf && !flags.Images && !flags.Video && !flags.Txt && !flags.Excel) return "el";
-        if (flags.Txt && !flags.Images && !flags.Video && !flags.Pdf && !flags.Excel) return "el";
-        if (flags.Excel && !flags.Images && !flags.Video && !flags.Pdf && !flags.Txt) return "el";
-        if (flags.Images && !flags.Video && !flags.Pdf && !flags.Txt && !flags.Excel) return "la";
+        if (Only(flags, f => f.Video)) return "el";
+        if (Only(flags, f => f.Pdf)) return "el";
+        if (Only(flags, f => f.Txt)) return "el";
+        if (Only(flags, f => f.Excel)) return "el";
+        if (Only(flags, f => f.Xml)) return "el";
+        if (Only(flags, f => f.Images)) return "la";
         return "el";
     }
 
@@ -139,11 +144,12 @@ public static class CapturasTextoHelper
 
         var sujeto = flags switch
         {
-            { Images: false, Video: true, Pdf: false, Txt: false, Excel: false } => "El video se adjunta",
-            { Images: false, Video: false, Pdf: true, Txt: false, Excel: false } => "El PDF se adjunta",
-            { Images: false, Video: false, Pdf: false, Txt: true, Excel: false } => "El TXT se adjunta",
-            { Images: false, Video: false, Pdf: false, Txt: false, Excel: true } => "El Excel se adjunta",
-            { Images: true, Video: false, Pdf: false, Txt: false, Excel: false } => "Las capturas se adjuntan",
+            _ when Only(flags, f => f.Video) => "El video se adjunta",
+            _ when Only(flags, f => f.Pdf) => "El PDF se adjunta",
+            _ when Only(flags, f => f.Txt) => "El TXT se adjunta",
+            _ when Only(flags, f => f.Excel) => "El Excel se adjunta",
+            _ when Only(flags, f => f.Xml) => "El XML se adjunta",
+            _ when Only(flags, f => f.Images) => "Las capturas se adjuntan",
             _ => $"{char.ToUpperInvariant(phrase[0])}{phrase[1..]} se adjuntan",
         };
 
@@ -158,6 +164,22 @@ public static class CapturasTextoHelper
         return string.IsNullOrEmpty(phrase) ? DefaultAdjuntosLabelMayus : phrase;
     }
 
+    private static bool Only(MediaFlags flags, Func<MediaFlags, bool> pick) =>
+        pick(flags)
+        && CountTrue(flags) == 1;
+
+    private static int CountTrue(MediaFlags flags)
+    {
+        var n = 0;
+        if (flags.Images) n++;
+        if (flags.Video) n++;
+        if (flags.Pdf) n++;
+        if (flags.Txt) n++;
+        if (flags.Excel) n++;
+        if (flags.Xml) n++;
+        return n;
+    }
+
     private enum Style
     {
         Minuscula,
@@ -167,7 +189,7 @@ public static class CapturasTextoHelper
 
     private static string BuildPhrase(MediaFlags flags, Style style, bool singular)
     {
-        var parts = new List<string>(4);
+        var parts = new List<string>(6);
         if (flags.Images)
         {
             parts.Add(style switch
@@ -218,6 +240,16 @@ public static class CapturasTextoHelper
             });
         }
 
+        if (flags.Xml)
+        {
+            parts.Add(style switch
+            {
+                Style.Mayuscula => "XML",
+                Style.Titulo => "XML",
+                _ => "XML",
+            });
+        }
+
         if (parts.Count == 0)
             return "";
 
@@ -243,6 +275,7 @@ public static class CapturasTextoHelper
         var pdf = false;
         var txt = false;
         var excel = false;
+        var xml = false;
         foreach (var e in enlaces)
         {
             if (IsVideoFileName(e.FileName))
@@ -253,11 +286,13 @@ public static class CapturasTextoHelper
                 txt = true;
             else if (IsExcelFileName(e.FileName))
                 excel = true;
+            else if (IsXmlFileName(e.FileName))
+                xml = true;
             else
                 images = true;
         }
 
-        return new MediaFlags(images, video, pdf, txt, excel);
+        return new MediaFlags(images, video, pdf, txt, excel, xml);
     }
 
     private static bool IsVideoFileName(string? fileName)
@@ -288,5 +323,12 @@ public static class CapturasTextoHelper
         return ExcelExt.Contains(Path.GetExtension(fileName));
     }
 
-    private readonly record struct MediaFlags(bool Images, bool Video, bool Pdf, bool Txt, bool Excel);
+    private static bool IsXmlFileName(string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return false;
+        return XmlExt.Contains(Path.GetExtension(fileName));
+    }
+
+    private readonly record struct MediaFlags(bool Images, bool Video, bool Pdf, bool Txt, bool Excel, bool Xml);
 }

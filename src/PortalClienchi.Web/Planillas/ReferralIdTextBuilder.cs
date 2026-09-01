@@ -403,7 +403,7 @@ public static class ReferralIdTextBuilder
         }
 
         if (!hay)
-            partes.Add("- No se adjuntan capturas / video / PDF / TXT / Excel");
+            partes.Add("- No se adjuntan capturas / video / PDF / TXT / Excel / XML");
     }
 
     /// <summary>

@@ -30,6 +30,11 @@ public static class PlanillasEndpoints
         ".xlsx", ".xls",
     };
 
+    private static readonly HashSet<string> XmlExtensiones = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".xml",
+    };
+
     private static readonly HashSet<string> TrazaExtensiones = new(StringComparer.OrdinalIgnoreCase)
     {
         ".trc", ".csv", ".txt",
@@ -148,9 +153,12 @@ public static class PlanillasEndpoints
                 var esExcel = ExcelExtensiones.Contains(ext)
                     || contentType.Equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", StringComparison.OrdinalIgnoreCase)
                     || contentType.Equals("application/vnd.ms-excel", StringComparison.OrdinalIgnoreCase);
+                var esXml = XmlExtensiones.Contains(ext)
+                    || contentType.Equals("application/xml", StringComparison.OrdinalIgnoreCase)
+                    || contentType.Equals("text/xml", StringComparison.OrdinalIgnoreCase);
 
-                if (!esImagen && !esVideo && !esPdf && !esTxt && !esExcel)
-                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen, PDF, TXT, Excel o video mp4/webm." });
+                if (!esImagen && !esVideo && !esPdf && !esTxt && !esExcel && !esXml)
+                    return Results.BadRequest(new { error = $"Formato no permitido: {file.FileName}. Usá imagen, PDF, TXT, Excel, XML o video mp4/webm." });
 
                 if (esVideo)
                     videos++;
