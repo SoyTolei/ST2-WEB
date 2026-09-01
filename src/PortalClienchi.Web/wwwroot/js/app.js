@@ -165,7 +165,6 @@ let accessModulesSaving = false;
 let accessModulesAfterApprove = false;
 let accessModulesPresetMode = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
-const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
 const aboutToolsSection = document.getElementById("st2-about-tools");
 const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
 const accessAdminKpiActive = document.getElementById("st2-access-admin-kpi-active");
@@ -618,7 +617,6 @@ let accessAdminLastActiveEmails = [];
 let accessAdminLastKnownEmails = [];
 let accessAdminItemsCache = [];
 let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
-let accessAdminFilter = "all";
 let accessAdminQuery = "";
 let accessAdminLastClientByEmail = new Map();
 let accessAdminClientWatchReady = false;
@@ -1109,12 +1107,8 @@ function resetAccessAdminSnapshot() {
   accessAdminLastKnownEmails = [];
   accessAdminItemsCache = [];
   accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
-  accessAdminFilter = "all";
   accessAdminQuery = "";
   if (accessAdminSearch) accessAdminSearch.value = "";
-  accessAdminFilterButtons.forEach((btn) => {
-    btn.classList.toggle("is-active", btn.dataset.filter === "all");
-  });
 }
 
 function setAccessAdminSummary(text) {
@@ -1202,9 +1196,6 @@ function getFilteredAccessAdminItems() {
   return accessAdminItemsCache.filter((item) => {
     // Pendientes van solo al inbox; rechazados no se listan.
     if (item.isRejected || item.isPending) return false;
-    if (accessAdminFilter === "active" && !item.isActive) return false;
-    if (accessAdminFilter === "pending") return false;
-    if (accessAdminFilter === "today" && !item.loggedInToday) return false;
     if (q) {
       const email = item.email.toLowerCase();
       const name = formatAccessDisplayName(item.email, item.displayNameOverride).toLowerCase();
@@ -1231,9 +1222,9 @@ function renderAccessAdminTable() {
   accessAdminToolbar?.classList.remove("hidden");
 
   if (!items.length) {
-    accessAdminStatus.textContent = accessAdminFilter === "pending"
-      ? "Las solicitudes pendientes están arriba, en la bandeja."
-      : "Sin resultados para este filtro.";
+    accessAdminStatus.textContent = accessAdminQuery.trim()
+      ? "Sin resultados para esa búsqueda."
+      : "Sin usuarios en la lista.";
     accessAdminBody.innerHTML = "";
     accessAdminTableWrap?.classList.remove("hidden");
     return;
@@ -2594,20 +2585,7 @@ accessAdminSubmit?.addEventListener("click", () => { void submitAccessAdminLogin
 accessAdminPass?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") void submitAccessAdminLogin();
 });
-accessAdminFilterButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    accessAdminFilter = btn.dataset.filter || "all";
-    accessAdminFilterButtons.forEach((b) => {
-      b.classList.toggle("is-active", b === btn);
-    });
-    renderAccessAdminTable();
-  });
-});
 document.addEventListener("st2:open-admin-from-alert", () => {
-  accessAdminFilter = "pending";
-  accessAdminFilterButtons.forEach((b) => {
-    b.classList.toggle("is-active", b.dataset.filter === "pending");
-  });
   document.querySelector('.tab-btn[data-tab="admin"]')?.click();
   void loadAccessAdminRegistrations({ silent: true, force: true });
 });

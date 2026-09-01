@@ -1741,7 +1741,6 @@ html.st2-theme-dark .st2-access-admin-input,
 html.st2-theme-dark .st2-access-admin-search,
 html.st2-theme-dark .st2-access-admin-cancel,
 html.st2-theme-dark .st2-access-admin-refresh,
-html.st2-theme-dark .st2-access-admin-filter,
 html.st2-theme-dark .st2-access-admin-summary,
 html.st2-theme-dark .st2-access-admin-toolbar,
 html.st2-theme-dark .st2-access-admin-table-wrap,
@@ -1754,14 +1753,20 @@ html.st2-theme-dark .st2-access-admin-table td {
 }
 
 html.st2-theme-dark .st2-access-admin-preset {
-  background: linear-gradient(180deg, #3b5f8f 0%, #2a4a72 100%) !important;
-  border-color: #3b5f8f !important;
-  color: #f8fafc !important;
+  background: linear-gradient(180deg, #e24808 0%, var(--primary) 100%) !important;
+  border-color: #b83800 !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 2px 10px rgba(214, 64, 0, 0.28) !important;
 }
 
 html.st2-theme-dark .st2-access-admin-preset:hover {
-  background: linear-gradient(180deg, #4a72a6 0%, #355987 100%) !important;
-  border-color: #4a72a6 !important;
+  background: linear-gradient(180deg, #ea510f 0%, #de4500 100%) !important;
+  border-color: #c43c00 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 4px 14px rgba(214, 64, 0, 0.34) !important;
 }
 
 html.st2-theme-dark .st2-access-modules-actions {
@@ -1781,18 +1786,11 @@ html.st2-theme-dark .st2-access-admin-table tr.is-new {
   background: #3a1d12 !important;
 }
 
-html.st2-theme-dark .st2-access-admin-filter:hover,
 html.st2-theme-dark .st2-access-admin-cancel:hover,
 html.st2-theme-dark .st2-access-admin-refresh:hover,
 html.st2-theme-dark .st2-access-name-edit-x:hover {
   background: #2a2a2a !important;
   color: #e5e5e5 !important;
-}
-
-html.st2-theme-dark .st2-access-admin-filter.is-active {
-  background: #c2410c !important;
-  border-color: #c2410c !important;
-  color: #fff !important;
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filters {
