@@ -3510,7 +3510,13 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-table th:nth-child(2),
 .st2-access-admin-table td:nth-child(2) {
-  width: 12%;
+  width: 14%;
+  min-width: 5.5rem;
+}
+
+.st2-access-admin-table tr:has(.st2-access-admin-perm-detail[open]) {
+  position: relative;
+  z-index: 3;
 }
 
 .st2-access-admin-table th:nth-child(3),
@@ -3673,27 +3679,35 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-mods-cell {
   vertical-align: middle;
-  overflow: hidden;
-  max-width: 11rem;
+  overflow: visible;
+  position: relative;
   line-height: 1.35;
 }
 
 .st2-access-admin-perms-col {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   min-width: 0;
+  max-width: 100%;
 }
 
 .st2-access-admin-perm-detail {
-  position: relative;
+  position: static;
   display: inline-flex;
+  flex-shrink: 0;
 }
 
 .st2-access-admin-perm-detail summary {
   list-style: none;
   cursor: pointer;
+  outline: none;
+}
+
+.st2-access-admin-perm-detail summary:focus-visible .st2-access-admin-perm-more-btn {
+  outline: 2px solid rgba(214, 64, 0, 0.45);
+  outline-offset: 2px;
 }
 
 .st2-access-admin-perm-detail summary::-webkit-details-marker {
@@ -3740,6 +3754,13 @@ body.portal-tab-active .brand-icon {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.st2-access-admin-perm-pop.is-floating {
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
 }
 
 .st2-access-admin-perm-pop-item {

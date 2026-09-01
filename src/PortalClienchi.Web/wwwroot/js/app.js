@@ -721,6 +721,47 @@ function buildAccessAdminPermsCell(item) {
   return `<div class="st2-access-admin-perms-col">${sysHtml}${extrasHtml}</div>`;
 }
 
+function resetAccessAdminPermPop(pop) {
+  if (!pop) return;
+  pop.classList.remove("is-floating");
+  pop.style.removeProperty("position");
+  pop.style.removeProperty("top");
+  pop.style.removeProperty("left");
+  pop.style.removeProperty("z-index");
+}
+
+function positionAccessAdminPermPop(detail) {
+  const summary = detail.querySelector(".st2-access-admin-perm-more-btn");
+  const pop = detail.querySelector(".st2-access-admin-perm-pop");
+  if (!summary || !pop) return;
+  resetAccessAdminPermPop(pop);
+  const rect = summary.getBoundingClientRect();
+  pop.classList.add("is-floating");
+  pop.style.position = "fixed";
+  pop.style.zIndex = "1200";
+  const margin = 8;
+  requestAnimationFrame(() => {
+    const popRect = pop.getBoundingClientRect();
+    let left = rect.left;
+    let top = rect.bottom + 6;
+    if (left + popRect.width > window.innerWidth - margin) {
+      left = Math.max(margin, window.innerWidth - popRect.width - margin);
+    }
+    if (top + popRect.height > window.innerHeight - margin) {
+      top = Math.max(margin, rect.top - popRect.height - 6);
+    }
+    pop.style.left = `${left}px`;
+    pop.style.top = `${top}px`;
+  });
+}
+
+function closeAllAccessAdminPermPops() {
+  accessAdminBody?.querySelectorAll(".st2-access-admin-perm-detail[open]").forEach((detail) => {
+    detail.open = false;
+    resetAccessAdminPermPop(detail.querySelector(".st2-access-admin-perm-pop"));
+  });
+}
+
 function applyAccessAdminClientWatch(items, { notify = true, showHint = true } = {}) {
   if (!isPrimarySuperAdmin() || accessAdminClientWatchBusy) return [];
 
@@ -2576,11 +2617,26 @@ accessAdminSearch?.addEventListener("input", () => {
 });
 accessAdminBody?.addEventListener("toggle", (e) => {
   const detail = e.target?.closest?.(".st2-access-admin-perm-detail");
-  if (!detail || !detail.open || !accessAdminBody) return;
+  if (!detail || !accessAdminBody) return;
+  if (!detail.open) {
+    resetAccessAdminPermPop(detail.querySelector(".st2-access-admin-perm-pop"));
+    return;
+  }
   accessAdminBody.querySelectorAll(".st2-access-admin-perm-detail[open]").forEach((openDetail) => {
-    if (openDetail !== detail) openDetail.open = false;
+    if (openDetail !== detail) {
+      openDetail.open = false;
+      resetAccessAdminPermPop(openDetail.querySelector(".st2-access-admin-perm-pop"));
+    }
   });
+  positionAccessAdminPermPop(detail);
 }, true);
+document.addEventListener("click", (e) => {
+  if (!(e.target instanceof Element)) return;
+  if (e.target.closest(".st2-access-admin-perm-detail")) return;
+  closeAllAccessAdminPermPops();
+});
+window.addEventListener("resize", closeAllAccessAdminPermPops);
+accessAdminTableWrap?.addEventListener("scroll", closeAllAccessAdminPermPops, { passive: true });
 document.querySelectorAll(".st2-access-admin-th-sort").forEach((th) => {
   th.addEventListener("click", () => {
     setAccessAdminSort(th.dataset.sort || "");
