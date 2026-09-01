@@ -754,10 +754,25 @@ function isPlanTxtFile(file) {
   return /\.txt$/i.test(file.name || "");
 }
 
+function isPlanExcelFile(file) {
+  if (/\.(xlsx|xls)$/i.test(file.name || "")) return true;
+  const t = file.type || "";
+  return t === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    || t === "application/vnd.ms-excel";
+}
+
+function isPlanXmlFile(file) {
+  if (/\.xml$/i.test(file.name || "")) return true;
+  const t = file.type || "";
+  return t === "application/xml" || t === "text/xml";
+}
+
 function isPlanCapturaFile(file) {
   if (isPlanVideoFile(file)) return true;
   if (isPlanPdfFile(file)) return true;
   if (isPlanTxtFile(file)) return true;
+  if (isPlanExcelFile(file)) return true;
+  if (isPlanXmlFile(file)) return true;
   if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
   return (file.type || "").startsWith("image/");
 }
@@ -766,6 +781,8 @@ const MAX_PLAN_VIDEOS = 1;
 const MAX_PLAN_VIDEO_BYTES = 100 * 1024 * 1024;
 const MAX_PLAN_PDF_BYTES = 12 * 1024 * 1024;
 const MAX_PLAN_TXT_BYTES = 12 * 1024 * 1024;
+const MAX_PLAN_EXCEL_BYTES = 12 * 1024 * 1024;
+const MAX_PLAN_XML_BYTES = 12 * 1024 * 1024;
 
 function refreshCapturasUi() {
   const chips = els.capturasChips();
@@ -778,10 +795,12 @@ function refreshCapturasUi() {
     const isVideo = isPlanVideoFile(f);
     const isPdf = isPlanPdfFile(f);
     const isTxt = isPlanTxtFile(f);
-    const isChip = isVideo || isPdf || isTxt;
+    const isExcel = isPlanExcelFile(f);
+    const isXml = isPlanXmlFile(f);
+    const isChip = isVideo || isPdf || isTxt || isExcel || isXml;
     const card = document.createElement("div");
     card.className = isChip
-      ? `plan-traza-chip ${isVideo ? "plan-video-chip" : isTxt ? "plan-txt-chip" : "plan-pdf-chip"}`
+      ? `plan-traza-chip ${isVideo ? "plan-video-chip" : isTxt ? "plan-txt-chip" : isExcel ? "plan-excel-chip" : isXml ? "plan-xml-chip" : "plan-pdf-chip"}`
       : "plan-captura-thumb";
 
     let preview;
@@ -789,7 +808,7 @@ function refreshCapturasUi() {
       preview = document.createElement("span");
       preview.className = "plan-traza-chip-ext";
       const match = /\.([^.]+)$/.exec(f.name || "");
-      preview.textContent = (match?.[1] || (isPdf ? "pdf" : isTxt ? "txt" : "mp4")).toUpperCase();
+      preview.textContent = (match?.[1] || (isPdf ? "pdf" : isTxt ? "txt" : isExcel ? "xlsx" : isXml ? "xml" : "mp4")).toUpperCase();
     } else {
       preview = document.createElement("img");
       const url = URL.createObjectURL(f);
@@ -826,12 +845,16 @@ function refreshCapturasUi() {
       const videos = capturaFiles.filter(isPlanVideoFile).length;
       const pdfs = capturaFiles.filter(isPlanPdfFile).length;
       const txts = capturaFiles.filter(isPlanTxtFile).length;
-      const imgs = capturaFiles.length - videos - pdfs - txts;
+      const excels = capturaFiles.filter(isPlanExcelFile).length;
+      const xmls = capturaFiles.filter(isPlanXmlFile).length;
+      const imgs = capturaFiles.length - videos - pdfs - txts - excels - xmls;
       const parts = [];
       if (imgs > 0) parts.push(`${imgs} imagen(es)`);
       if (videos > 0) parts.push(`${videos} video(s)`);
       if (pdfs > 0) parts.push(`${pdfs} PDF`);
       if (txts > 0) parts.push(`${txts} TXT`);
+      if (excels > 0) parts.push(`${excels} Excel`);
+      if (xmls > 0) parts.push(`${xmls} XML`);
       estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
     }
   }
@@ -854,6 +877,8 @@ function addCapturaFiles(fileList) {
   let rejectedHeavy = false;
   let rejectedPdfHeavy = false;
   let rejectedTxtHeavy = false;
+  let rejectedExcelHeavy = false;
+  let rejectedXmlHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
   for (const file of fileList) {
@@ -880,6 +905,16 @@ function addCapturaFiles(fileList) {
         rejectedTxtHeavy = true;
         continue;
       }
+    } else if (isPlanExcelFile(file)) {
+      if (file.size > MAX_PLAN_EXCEL_BYTES) {
+        rejectedExcelHeavy = true;
+        continue;
+      }
+    } else if (isPlanXmlFile(file)) {
+      if (file.size > MAX_PLAN_XML_BYTES) {
+        rejectedXmlHeavy = true;
+        continue;
+      }
     }
     if (!capturaFiles.some((f) => f.name === file.name && f.size === file.size)) {
       capturaFiles.push(file);
@@ -892,10 +927,14 @@ function addCapturaFiles(fileList) {
     alert("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedTxtHeavy) {
     alert("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedExcelHeavy) {
+    alert("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedXmlHeavy) {
+    alert("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
     alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT o video MP4/WEBM.");
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
   }
   if (added > 0) {
     const check = els.capturasCheck();
