@@ -1793,7 +1793,32 @@ html.st2-theme-dark .st2-access-name-edit-x:hover {
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filters {
-  border-left-color: #334155 !important;
+  border-left-color: transparent !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perms-filter-pop {
+  background: #1c1c1c !important;
+  border-color: #3d4b61 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perms-filter-title,
+html.st2-theme-dark .st2-access-admin-perms-filter-hint {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-th-perms-btn:hover,
+html.st2-theme-dark .st2-access-admin-th-perms-btn:focus-visible,
+html.st2-theme-dark .st2-access-admin-th-perms-btn.is-filtering {
+  color: #7dd3fc !important;
+}
+
+html.st2-theme-dark .st2-access-admin-th-perms-mark {
+  color: #cbd5e1 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perms-filter-clear {
+  color: #5eead4 !important;
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter {

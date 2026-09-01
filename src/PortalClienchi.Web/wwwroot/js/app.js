@@ -164,6 +164,11 @@ let accessModulesSaving = false;
 let accessModulesAfterApprove = false;
 let accessModulesPresetMode = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
+const accessAdminModFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-mod-filter"));
+const accessAdminPermsFilterBtn = document.getElementById("st2-access-admin-perms-filter-btn");
+const accessAdminPermsFilterPop = document.getElementById("st2-access-admin-perms-filter-pop");
+const accessAdminPermsFilterClear = document.getElementById("st2-access-admin-perms-filter-clear");
+const accessAdminPermsFilterMark = document.getElementById("st2-access-admin-perms-filter-mark");
 const aboutToolsSection = document.getElementById("st2-about-tools");
 const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
 const accessAdminKpiActive = document.getElementById("st2-access-admin-kpi-active");
@@ -617,6 +622,8 @@ let accessAdminLastKnownEmails = [];
 let accessAdminItemsCache = [];
 let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
 let accessAdminQuery = "";
+let accessAdminModFilters = new Set();
+let accessAdminPermsFilterOpen = false;
 let accessAdminLastClientByEmail = new Map();
 let accessAdminClientWatchReady = false;
 let accessAdminClientWatchTimer = null;
@@ -1107,7 +1114,90 @@ function resetAccessAdminSnapshot() {
   accessAdminItemsCache = [];
   accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
   accessAdminQuery = "";
+  accessAdminModFilters = new Set();
   if (accessAdminSearch) accessAdminSearch.value = "";
+  closeAccessAdminPermsFilterPop();
+  syncAccessAdminModFilterUi();
+}
+
+function itemMatchesModFilters(item) {
+  if (!accessAdminModFilters.size) return true;
+  const mods = item.modules || {};
+  for (const key of accessAdminModFilters) {
+    if (key === "sql" && mods.planillasSqlOnvio) return true;
+    if (key === "leg" && mods.planillasLegal) return true;
+    if (key === "cl" && mods.planillasChile) return true;
+  }
+  return false;
+}
+
+function syncAccessAdminModFilterUi() {
+  accessAdminModFilterButtons.forEach((btn) => {
+    const key = String(btn.dataset.modFilter || "").trim();
+    btn.classList.toggle("is-active", accessAdminModFilters.has(key));
+  });
+  const has = accessAdminModFilters.size > 0;
+  accessAdminPermsFilterBtn?.classList.toggle("is-filtering", has);
+  accessAdminPermsFilterBtn?.setAttribute("aria-expanded", accessAdminPermsFilterOpen ? "true" : "false");
+  accessAdminPermsFilterClear?.classList.toggle("hidden", !has);
+  if (accessAdminPermsFilterMark) {
+    if (!has) {
+      accessAdminPermsFilterMark.textContent = "";
+      accessAdminPermsFilterMark.classList.add("hidden");
+    } else {
+      const labels = { sql: "SQL", leg: "LEG", cl: "CL" };
+      accessAdminPermsFilterMark.textContent = [...accessAdminModFilters].map((key) => labels[key] || key).join(" · ");
+      accessAdminPermsFilterMark.classList.remove("hidden");
+    }
+  }
+}
+
+function positionAccessAdminPermsFilterPop() {
+  if (!accessAdminPermsFilterBtn || !accessAdminPermsFilterPop) return;
+  const rect = accessAdminPermsFilterBtn.getBoundingClientRect();
+  const margin = 8;
+  accessAdminPermsFilterPop.style.position = "fixed";
+  accessAdminPermsFilterPop.style.zIndex = "1200";
+  requestAnimationFrame(() => {
+    const popRect = accessAdminPermsFilterPop.getBoundingClientRect();
+    let left = rect.left;
+    let top = rect.bottom + 6;
+    if (left + popRect.width > window.innerWidth - margin) {
+      left = Math.max(margin, window.innerWidth - popRect.width - margin);
+    }
+    if (top + popRect.height > window.innerHeight - margin) {
+      top = Math.max(margin, rect.top - popRect.height - 6);
+    }
+    accessAdminPermsFilterPop.style.left = `${left}px`;
+    accessAdminPermsFilterPop.style.top = `${top}px`;
+  });
+}
+
+function openAccessAdminPermsFilterPop() {
+  if (!accessAdminPermsFilterPop || !accessAdminPermsFilterBtn) return;
+  closeAllAccessAdminPermPops();
+  accessAdminPermsFilterOpen = true;
+  accessAdminPermsFilterPop.hidden = false;
+  accessAdminPermsFilterPop.classList.remove("hidden");
+  syncAccessAdminModFilterUi();
+  positionAccessAdminPermsFilterPop();
+}
+
+function closeAccessAdminPermsFilterPop() {
+  if (!accessAdminPermsFilterPop) return;
+  accessAdminPermsFilterOpen = false;
+  accessAdminPermsFilterPop.hidden = true;
+  accessAdminPermsFilterPop.classList.add("hidden");
+  accessAdminPermsFilterPop.style.removeProperty("position");
+  accessAdminPermsFilterPop.style.removeProperty("top");
+  accessAdminPermsFilterPop.style.removeProperty("left");
+  accessAdminPermsFilterPop.style.removeProperty("z-index");
+  syncAccessAdminModFilterUi();
+}
+
+function toggleAccessAdminPermsFilterPop() {
+  if (accessAdminPermsFilterOpen) closeAccessAdminPermsFilterPop();
+  else openAccessAdminPermsFilterPop();
 }
 
 function updateAccessAdminSummaryLine() {
@@ -1173,6 +1263,7 @@ function getFilteredAccessAdminItems() {
   return accessAdminItemsCache.filter((item) => {
     // Pendientes van solo al inbox; rechazados no se listan.
     if (item.isRejected || item.isPending) return false;
+    if (!itemMatchesModFilters(item)) return false;
     if (q) {
       const email = item.email.toLowerCase();
       const name = formatAccessDisplayName(item.email, item.displayNameOverride).toLowerCase();
@@ -1201,7 +1292,9 @@ function renderAccessAdminTable() {
   if (!items.length) {
     accessAdminStatus.textContent = accessAdminQuery.trim()
       ? "Sin resultados para esa búsqueda."
-      : "Sin usuarios en la lista.";
+      : accessAdminModFilters.size
+        ? "Nadie coincide con ese filtro de permisos."
+        : "Sin usuarios en la lista.";
     accessAdminBody.innerHTML = "";
     accessAdminTableWrap?.classList.remove("hidden");
     return;
@@ -2570,6 +2663,27 @@ accessAdminSearch?.addEventListener("input", () => {
   accessAdminQuery = accessAdminSearch.value || "";
   renderAccessAdminTable();
 });
+accessAdminPermsFilterBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleAccessAdminPermsFilterPop();
+});
+accessAdminPermsFilterClear?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  accessAdminModFilters.clear();
+  syncAccessAdminModFilterUi();
+  renderAccessAdminTable();
+});
+accessAdminModFilterButtons.forEach((btn) => {
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const key = String(btn.dataset.modFilter || "").trim();
+    if (!key) return;
+    if (accessAdminModFilters.has(key)) accessAdminModFilters.delete(key);
+    else accessAdminModFilters.add(key);
+    syncAccessAdminModFilterUi();
+    renderAccessAdminTable();
+  });
+});
 accessAdminBody?.addEventListener("toggle", (e) => {
   const detail = e.target?.closest?.(".st2-access-admin-perm-detail");
   if (!detail || !accessAdminBody) return;
@@ -2577,6 +2691,7 @@ accessAdminBody?.addEventListener("toggle", (e) => {
     resetAccessAdminPermPop(detail.querySelector(".st2-access-admin-perm-pop"));
     return;
   }
+  closeAccessAdminPermsFilterPop();
   accessAdminBody.querySelectorAll(".st2-access-admin-perm-detail[open]").forEach((openDetail) => {
     if (openDetail !== detail) {
       openDetail.open = false;
@@ -2588,10 +2703,18 @@ accessAdminBody?.addEventListener("toggle", (e) => {
 document.addEventListener("click", (e) => {
   if (!(e.target instanceof Element)) return;
   if (e.target.closest(".st2-access-admin-perm-detail")) return;
+  if (e.target.closest("#st2-access-admin-perms-filter-pop") || e.target.closest("#st2-access-admin-perms-filter-btn")) return;
   closeAllAccessAdminPermPops();
+  closeAccessAdminPermsFilterPop();
 });
-window.addEventListener("resize", closeAllAccessAdminPermPops);
-accessAdminTableWrap?.addEventListener("scroll", closeAllAccessAdminPermPops, { passive: true });
+window.addEventListener("resize", () => {
+  closeAllAccessAdminPermPops();
+  if (accessAdminPermsFilterOpen) positionAccessAdminPermsFilterPop();
+});
+accessAdminTableWrap?.addEventListener("scroll", () => {
+  closeAllAccessAdminPermPops();
+  closeAccessAdminPermsFilterPop();
+}, { passive: true });
 document.querySelectorAll(".st2-access-admin-th-sort").forEach((th) => {
   th.addEventListener("click", () => {
     setAccessAdminSort(th.dataset.sort || "");

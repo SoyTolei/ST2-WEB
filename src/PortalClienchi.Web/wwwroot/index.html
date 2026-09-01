@@ -1841,7 +1841,25 @@
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th>Permisos</th>
+                  <th class="st2-access-admin-th-perms" id="st2-access-admin-th-perms">
+                    <div class="st2-access-admin-th-perms-wrap">
+                      <button type="button" id="st2-access-admin-perms-filter-btn" class="st2-access-admin-th-perms-btn" aria-expanded="false" aria-haspopup="dialog" aria-controls="st2-access-admin-perms-filter-pop" title="Filtrar por sistema">
+                        <span>Permisos</span>
+                        <span id="st2-access-admin-perms-filter-mark" class="st2-access-admin-th-perms-mark hidden" aria-hidden="true"></span>
+                        <span class="st2-access-admin-th-perms-caret" aria-hidden="true">▾</span>
+                      </button>
+                      <div id="st2-access-admin-perms-filter-pop" class="st2-access-admin-perms-filter-pop hidden" role="dialog" aria-label="Filtrar por sistema" hidden>
+                        <p class="st2-access-admin-perms-filter-title">Sistemas</p>
+                        <div class="st2-access-admin-mod-filters st2-access-admin-perms-filter-track" role="group" aria-label="Filtrar por acceso a planillas">
+                          <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="sql" title="Bejerman SQL / ONVIO / WEB">SQL</button>
+                          <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="leg" title="LEGAL">LEG</button>
+                          <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="cl" title="Chile">CL</button>
+                        </div>
+                        <p class="st2-access-admin-perms-filter-hint">Elegí uno o más para ver quién tiene ese acceso.</p>
+                        <button type="button" id="st2-access-admin-perms-filter-clear" class="st2-access-admin-perms-filter-clear hidden">Ver todos</button>
+                      </div>
+                    </div>
+                  </th>
                   <th id="st2-access-admin-th-host" title="Equipo o terminal (hostname vía DNS reverso cuando es posible)">Equipo <span id="st2-access-admin-host-attention" class="st2-access-admin-host-attn-th hidden" aria-hidden="true"></span></th>
                   <th id="st2-access-admin-th-last" class="st2-access-admin-th-sort st2-access-admin-th-tight" data-sort="lastSeen" title="Clic para ordenar por último acceso" aria-sort="descending" tabindex="0" role="columnheader">
                     Último acceso <span class="st2-access-admin-sort-mark" aria-hidden="true">↓</span>
@@ -1854,9 +1872,6 @@
               </thead>
               <tbody id="st2-access-admin-body"></tbody>
             </table>
-          </div>
-          <div class="st2-access-admin-panel-foot">
-            <p class="st2-access-admin-legend">Permisos: <span class="st2-access-admin-legend-sql">SQL</span> · <span class="st2-access-admin-legend-leg">LEG</span> · <span class="st2-access-admin-legend-cl">CL</span> · tocá <span class="st2-access-admin-legend-plus">+</span> para ver módulos extra</p>
           </div>
         </div>
       </div>

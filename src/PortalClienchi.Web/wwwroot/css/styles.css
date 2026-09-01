@@ -927,8 +927,7 @@ body.portal-tab-active .tab-bar {
 
 #panel-admin .st2-access-admin-toolbar,
 #panel-admin #st2-access-admin-inbox,
-#panel-admin #st2-access-admin-status,
-#panel-admin .st2-access-admin-panel-foot {
+#panel-admin #st2-access-admin-status {
   flex-shrink: 0;
 }
 
@@ -3358,21 +3357,22 @@ body.portal-tab-active .brand-icon {
 .st2-access-admin-mod-filters {
   display: inline-flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-left: 2px;
-  padding-left: 8px;
-  border-left: 1px solid #e2e8f0;
+  gap: 6px;
+}
+
+.st2-access-admin-perms-filter-track {
+  width: 100%;
 }
 
 .st2-access-admin-mod-filter {
   border: 1px solid #cbd5e1;
   background: #fff;
   color: #64748b;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
   cursor: pointer;
   line-height: 1.2;
   text-transform: lowercase;
@@ -3632,6 +3632,109 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-th-sort.is-sorted {
   color: #0c4a6e;
+}
+
+.st2-access-admin-th-perms {
+  position: relative;
+  z-index: 4;
+}
+
+.st2-access-admin-th-perms-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+}
+
+.st2-access-admin-th-perms-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.st2-access-admin-th-perms-btn:hover,
+.st2-access-admin-th-perms-btn:focus-visible {
+  color: #0c4a6e;
+  outline: none;
+}
+
+.st2-access-admin-th-perms-btn.is-filtering {
+  color: #0c4a6e;
+}
+
+.st2-access-admin-th-perms-mark {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #64748b;
+}
+
+.st2-access-admin-th-perms-caret {
+  font-size: 0.72em;
+  opacity: 0.72;
+  line-height: 1;
+}
+
+.st2-access-admin-perms-filter-pop {
+  min-width: 220px;
+  max-width: min(280px, calc(100vw - 24px));
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+}
+
+.st2-access-admin-perms-filter-pop.hidden {
+  display: none !important;
+}
+
+.st2-access-admin-perms-filter-title {
+  margin: 0 0 8px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.st2-access-admin-perms-filter-hint {
+  margin: 8px 0 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: #94a3b8;
+}
+
+.st2-access-admin-perms-filter-clear {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0f766e;
+  font-size: 0.72rem;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.st2-access-admin-perms-filter-clear:hover {
+  color: #0d9488;
+}
+
+.st2-access-admin-perms-filter-clear.hidden {
+  display: none !important;
 }
 
 .st2-access-admin-sort-mark {
