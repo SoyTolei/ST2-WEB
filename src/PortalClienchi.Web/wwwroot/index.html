@@ -99,11 +99,31 @@
       </button>
     </div>
     <div class="app-header-right">
-      <span id="st2-session-email" class="st2-session-email hidden" aria-label="Usuario conectado"></span>
-      <button type="button" id="aboutBtn" class="btn-ghost about-btn" title="Acerca de ST2" aria-label="Acerca de ST2">
-        Acerca de ST2
-        <span id="about-tools-badge" class="about-tools-badge hidden" aria-hidden="true">Nuevo</span>
-      </button>
+      <div class="app-header-user-zone" id="appHeaderUserZone">
+        <div class="st2-suite-sig-stage app-header-fx-stage" aria-hidden="true">
+          <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest" width="16" height="16"/>
+          <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest2" width="14" height="14"/>
+          <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest3" width="13" height="13"/>
+          <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest4" width="15" height="15"/>
+          <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest5" width="12" height="12"/>
+          <img src="/img/st2-suite-portrait.png" alt="" class="st2-suite-float st2-suite-float--portrait" width="22" height="22"/>
+          <span class="st2-suite-float st2-suite-float--bike">🚲</span>
+          <span class="st2-suite-float st2-suite-float--bike2">🚲</span>
+          <span class="st2-suite-float st2-suite-float--bike3">🚲</span>
+          <span class="st2-suite-float st2-suite-float--bike4">🚲</span>
+          <span class="st2-suite-float st2-suite-float--web" title="WEB">🌐</span>
+          <span class="st2-suite-float st2-suite-float--sql" title="SQL">🗄️</span>
+          <span class="st2-suite-float st2-suite-float--bat" title="BAT">⚙️</span>
+          <span class="st2-suite-float st2-suite-float--tree">🌳</span>
+          <span class="st2-suite-float st2-suite-float--leaf">🌿</span>
+          <span class="st2-suite-float st2-suite-float--seed">🌱</span>
+        </div>
+        <span id="st2-session-email" class="st2-session-email hidden" aria-label="Usuario conectado"></span>
+        <button type="button" id="aboutBtn" class="btn-ghost about-btn" title="Acerca de ST2" aria-label="Acerca de ST2">
+          Acerca de ST2
+          <span id="about-tools-badge" class="about-tools-badge hidden" aria-hidden="true">Nuevo</span>
+        </button>
+      </div>
     </div>
   </header>
   <div id="st2-update-banner" class="st2-update-banner hidden" role="status" aria-live="polite" hidden>
@@ -182,9 +202,6 @@
               </div>
               <div class="planillas-hero-copy">
                 <div class="planillas-hero-head">
-                  <span class="planillas-hero-st2-mark" aria-hidden="true">
-                    <span class="planillas-hero-st2-st">ST</span><sup class="planillas-hero-st2-sup">2</sup>
-                  </span>
                   <div class="planillas-hero-title-lines">
                     <h2 class="planillas-hero-title-main">Suite Web</h2>
                   </div>
@@ -381,31 +398,6 @@
                 </div>
               </div>
             </div>
-            <footer class="planillas-footer" title="ST2" aria-hidden="true">
-            <div class="st2-suite-sig">
-              <div class="st2-suite-sig-stage">
-                <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest" width="16" height="16"/>
-                <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest2" width="14" height="14"/>
-                <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest3" width="13" height="13"/>
-                <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest4" width="15" height="15"/>
-                <img src="/img/banfield-escudo.png" alt="" class="st2-suite-float st2-suite-float--crest5" width="12" height="12"/>
-                <img src="/img/st2-suite-portrait.png" alt="" class="st2-suite-float st2-suite-float--portrait" width="22" height="22"/>
-                <span class="st2-suite-float st2-suite-float--bike">🚲</span>
-                <span class="st2-suite-float st2-suite-float--bike2">🚲</span>
-                <span class="st2-suite-float st2-suite-float--bike3">🚲</span>
-                <span class="st2-suite-float st2-suite-float--bike4">🚲</span>
-                <span class="st2-suite-float st2-suite-float--web" title="WEB">🌐</span>
-                <span class="st2-suite-float st2-suite-float--sql" title="SQL">🗄️</span>
-                <span class="st2-suite-float st2-suite-float--bat" title="BAT">⚙️</span>
-                <span class="st2-suite-float st2-suite-float--tree">🌳</span>
-                <span class="st2-suite-float st2-suite-float--leaf">🌿</span>
-                <span class="st2-suite-float st2-suite-float--seed">🌱</span>
-              </div>
-              <div class="st2-suite-sig-mark">
-                <span class="st2-suite-sig-brand">ST2</span>
-              </div>
-            </div>
-          </footer>
           </div>
         </div>
 
@@ -1851,26 +1843,18 @@
               </div>
               <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
             </div>
-            <div class="st2-access-admin-perm-filter" role="group" aria-label="Filtrar por acceso a Planillas">
-              <span class="st2-access-admin-perm-filter-label">Acceso a Planillas</span>
-              <div class="st2-access-admin-perm-filter-track plan-segment-track plan-segment-track-wide">
-                <button type="button" class="plan-segment-btn st2-access-admin-mod-filter" data-mod-filter="sql" title="Bejerman SQL / ONVIO / WEB">SQL</button>
-                <button type="button" class="plan-segment-btn st2-access-admin-mod-filter" data-mod-filter="leg" title="LEGAL">LEG</button>
-                <button type="button" class="plan-segment-btn st2-access-admin-mod-filter" data-mod-filter="cl" title="Chile">CL</button>
-              </div>
-              <span class="st2-access-admin-perm-filter-hint">Elegí uno o más sistemas para ver quién tiene ese acceso</span>
-            </div>
           </div>
           <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
             <table class="st2-access-admin-table">
               <thead>
                 <tr>
                   <th>Nombre</th>
+                  <th>Permisos</th>
                   <th id="st2-access-admin-th-host" title="Equipo o terminal (hostname vía DNS reverso cuando es posible)">Equipo <span id="st2-access-admin-host-attention" class="st2-access-admin-host-attn-th hidden" aria-hidden="true"></span></th>
-                  <th id="st2-access-admin-th-last" class="st2-access-admin-th-sort" data-sort="lastSeen" title="Clic para ordenar por último acceso" aria-sort="descending" tabindex="0" role="columnheader">
+                  <th id="st2-access-admin-th-last" class="st2-access-admin-th-sort st2-access-admin-th-tight" data-sort="lastSeen" title="Clic para ordenar por último acceso" aria-sort="descending" tabindex="0" role="columnheader">
                     Último acceso <span class="st2-access-admin-sort-mark" aria-hidden="true">↓</span>
                   </th>
-                  <th id="st2-access-admin-th-logins" class="st2-access-admin-th-sort" data-sort="loginCount" title="Días distintos en los que abrió ST2 (no cuenta F5 el mismo día). Clic para ordenar." aria-sort="none" tabindex="0" role="columnheader">
+                  <th id="st2-access-admin-th-logins" class="st2-access-admin-th-sort st2-access-admin-th-tight" data-sort="loginCount" title="Días distintos en los que abrió ST2 (no cuenta F5 el mismo día). Clic para ordenar." aria-sort="none" tabindex="0" role="columnheader">
                     Ingresos <span class="st2-access-admin-sort-mark" aria-hidden="true"></span>
                   </th>
                   <th class="st2-access-admin-th-actions">Gestión</th>
@@ -1880,7 +1864,7 @@
             </table>
           </div>
           <div class="st2-access-admin-panel-foot">
-            <p class="st2-access-admin-legend">Los accesos a Planillas se ven junto al nombre: <span class="st2-access-admin-legend-sql">SQL</span> · <span class="st2-access-admin-legend-leg">LEG</span> · <span class="st2-access-admin-legend-cl">CL</span> · <span class="st2-access-admin-legend-plus">+</span> módulos extra</p>
+            <p class="st2-access-admin-legend">Permisos: <span class="st2-access-admin-legend-sql">SQL</span> · <span class="st2-access-admin-legend-leg">LEG</span> · <span class="st2-access-admin-legend-cl">CL</span> · tocá <span class="st2-access-admin-legend-plus">+</span> para ver módulos extra</p>
           </div>
         </div>
       </div>
@@ -2228,9 +2212,6 @@
     <div class="plan-user-dialog">
       <div class="plan-user-brand" aria-hidden="true">
         <div class="plan-user-brand-head">
-          <span class="planillas-hero-st2-mark">
-            <span class="planillas-hero-st2-st">ST</span><sup class="planillas-hero-st2-sup">2</sup>
-          </span>
           <div class="planillas-hero-title-lines">
             <p class="planillas-hero-title-main plan-user-suite-title">Suite Web</p>
           </div>

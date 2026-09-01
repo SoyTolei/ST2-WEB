@@ -166,7 +166,6 @@ let accessModulesAfterApprove = false;
 let accessModulesPresetMode = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
 const accessAdminFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-filter"));
-const accessAdminModFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-mod-filter"));
 const aboutToolsSection = document.getElementById("st2-about-tools");
 const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
 const accessAdminKpiActive = document.getElementById("st2-access-admin-kpi-active");
@@ -620,7 +619,6 @@ let accessAdminLastKnownEmails = [];
 let accessAdminItemsCache = [];
 let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
 let accessAdminFilter = "all";
-let accessAdminModFilters = new Set();
 let accessAdminQuery = "";
 let accessAdminLastClientByEmail = new Map();
 let accessAdminClientWatchReady = false;
@@ -699,7 +697,7 @@ function buildAccessAdminExtraModules(item) {
   return extras;
 }
 
-function buildAccessAdminPermsInline(item) {
+function buildAccessAdminPermsCell(item) {
   const mods = item.modules || {};
   const systems = [];
   if (mods.planillasSqlOnvio) systems.push({ key: "sql", label: "SQL", title: "Bejerman SQL / ONVIO / WEB" });
@@ -707,15 +705,20 @@ function buildAccessAdminPermsInline(item) {
   if (mods.planillasChile) systems.push({ key: "cl", label: "CL", title: "Chile" });
   const extras = buildAccessAdminExtraModules(item);
   if (!systems.length && !extras.length) {
-    return '<span class="st2-access-admin-perm-empty" title="Sin acceso a sistemas Planillas">—</span>';
+    return '<span class="st2-access-admin-perm-empty">—</span>';
   }
   const sysHtml = systems.map((sys) => (
     `<span class="st2-access-admin-perm-sys st2-access-admin-perm-sys--${sys.key} is-on" title="${escapeHtml(sys.title)}">${escapeHtml(sys.label)}</span>`
   )).join("");
-  const plusHtml = extras.length
-    ? `<span class="st2-access-admin-perm-more" title="${escapeHtml(extras.join(" · "))}">+</span>`
+  const extrasHtml = extras.length
+    ? `<details class="st2-access-admin-perm-detail">
+        <summary class="st2-access-admin-perm-more-btn" aria-label="Ver ${extras.length} módulo${extras.length === 1 ? "" : "s"} extra">+</summary>
+        <div class="st2-access-admin-perm-pop" role="list">
+          ${extras.map((label) => `<span class="st2-access-admin-perm-pop-item" role="listitem">${escapeHtml(label)}</span>`).join("")}
+        </div>
+      </details>`
     : "";
-  return `<span class="st2-access-admin-perms-inline" aria-label="Accesos Planillas">${sysHtml}${plusHtml}</span>`;
+  return `<div class="st2-access-admin-perms-col">${sysHtml}${extrasHtml}</div>`;
 }
 
 function applyAccessAdminClientWatch(items, { notify = true, showHint = true } = {}) {
@@ -1066,14 +1069,10 @@ function resetAccessAdminSnapshot() {
   accessAdminItemsCache = [];
   accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
   accessAdminFilter = "all";
-  accessAdminModFilters = new Set();
   accessAdminQuery = "";
   if (accessAdminSearch) accessAdminSearch.value = "";
   accessAdminFilterButtons.forEach((btn) => {
     btn.classList.toggle("is-active", btn.dataset.filter === "all");
-  });
-  accessAdminModFilterButtons.forEach((btn) => {
-    btn.classList.remove("is-active", "active");
   });
 }
 
@@ -1155,18 +1154,6 @@ function setAccessAdminUpdatedHint(text) {
 function syncAccessAdminHostColumn() {
   accessAdminPresetBtn?.classList.toggle("hidden", !isSt2SuperAdmin());
   accessAdminThHost?.classList.remove("hidden");
-  accessAdminTable?.classList.remove("st2-access-admin-table--with-host");
-}
-
-function itemMatchesModFilters(item) {
-  if (!accessAdminModFilters.size) return true;
-  const mods = item.modules || {};
-  for (const key of accessAdminModFilters) {
-    if (key === "sql" && mods.planillasSqlOnvio) return true;
-    if (key === "leg" && mods.planillasLegal) return true;
-    if (key === "cl" && mods.planillasChile) return true;
-  }
-  return false;
 }
 
 function getFilteredAccessAdminItems() {
@@ -1177,7 +1164,6 @@ function getFilteredAccessAdminItems() {
     if (accessAdminFilter === "active" && !item.isActive) return false;
     if (accessAdminFilter === "pending") return false;
     if (accessAdminFilter === "today" && !item.loggedInToday) return false;
-    if (!itemMatchesModFilters(item)) return false;
     if (q) {
       const email = item.email.toLowerCase();
       const name = formatAccessDisplayName(item.email, item.displayNameOverride).toLowerCase();
@@ -1234,7 +1220,7 @@ function renderAccessAdminTable() {
       accessAdminClientChangedEmails.has(item.email) ? "is-client-changed" : "",
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
-    const permsHtml = buildAccessAdminPermsInline(item);
+    const permsHtml = buildAccessAdminPermsCell(item);
     const hostLabel = formatAccessClientLabel(item) || "—";
     const deviceShort = resolveAccessDeviceShort(item);
     const browserLabel = resolveAccessBrowserLabel(item);
@@ -1271,8 +1257,8 @@ function renderAccessAdminTable() {
           <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
         </div>
-        ${permsHtml}
       </td>
+      <td class="st2-access-admin-mods-cell">${permsHtml}</td>
       ${hostCell}
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
@@ -2576,18 +2562,6 @@ accessAdminFilterButtons.forEach((btn) => {
     renderAccessAdminTable();
   });
 });
-accessAdminModFilterButtons.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const key = String(btn.dataset.modFilter || "").trim();
-    if (!key) return;
-    if (accessAdminModFilters.has(key)) accessAdminModFilters.delete(key);
-    else accessAdminModFilters.add(key);
-    const on = accessAdminModFilters.has(key);
-    btn.classList.toggle("is-active", on);
-    btn.classList.toggle("active", on);
-    renderAccessAdminTable();
-  });
-});
 document.addEventListener("st2:open-admin-from-alert", () => {
   accessAdminFilter = "pending";
   accessAdminFilterButtons.forEach((b) => {
@@ -2600,6 +2574,13 @@ accessAdminSearch?.addEventListener("input", () => {
   accessAdminQuery = accessAdminSearch.value || "";
   renderAccessAdminTable();
 });
+accessAdminBody?.addEventListener("toggle", (e) => {
+  const detail = e.target?.closest?.(".st2-access-admin-perm-detail");
+  if (!detail || !detail.open || !accessAdminBody) return;
+  accessAdminBody.querySelectorAll(".st2-access-admin-perm-detail[open]").forEach((openDetail) => {
+    if (openDetail !== detail) openDetail.open = false;
+  });
+}, true);
 document.querySelectorAll(".st2-access-admin-th-sort").forEach((th) => {
   th.addEventListener("click", () => {
     setAccessAdminSort(th.dataset.sort || "");

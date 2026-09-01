@@ -134,6 +134,69 @@ html, body {
   align-items: center;
   gap: 12px;
   min-width: 0;
+  overflow: visible;
+}
+
+.app-header-user-zone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+  margin: -6px -10px;
+  border-radius: 12px;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.app-header-fx-stage {
+  position: absolute;
+  inset: -18px -48px;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.app-header-user-zone::after {
+  content: "";
+  position: absolute;
+  inset: -4px -12px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 12px;
+  transition: opacity 0.45s ease;
+  background: radial-gradient(
+    ellipse 90% 80% at 50% 50%,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.04) 55%,
+    transparent 78%
+  );
+}
+
+.app-header-user-zone:hover .app-header-fx-stage,
+.app-header-user-zone:focus-within .app-header-fx-stage {
+  opacity: 1;
+  visibility: visible;
+}
+
+.app-header-user-zone:hover::after,
+.app-header-user-zone:focus-within::after {
+  opacity: 1;
+}
+
+.app-header-user-zone:hover .st2-suite-float,
+.app-header-user-zone:focus-within .st2-suite-float {
+  animation-play-state: running;
+}
+
+.app-header-user-zone .st2-session-email,
+.app-header-user-zone .about-btn {
+  position: relative;
+  z-index: 2;
 }
 
 .st2-session-email {
@@ -3270,10 +3333,11 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
   margin: 0 0 10px;
-  padding: 12px;
+  padding: 10px 12px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -3284,57 +3348,7 @@ body.portal-tab-active .brand-icon {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 12px;
-}
-
-.st2-access-admin-perm-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-top: 10px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.st2-access-admin-perm-filter-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #94a3b8;
-}
-
-.st2-access-admin-perm-filter-hint {
-  font-size: 0.72rem;
-  color: #94a3b8;
-  line-height: 1.35;
-}
-
-.st2-access-admin-perm-filter-track .plan-segment-btn {
-  min-height: 34px;
-  min-width: 56px;
-  padding: 6px 14px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter.is-active,
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter.active {
-  color: #d64000;
-}
-
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="sql"].is-active,
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="sql"].active {
-  color: #1d4ed8;
-}
-
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="leg"].is-active,
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="leg"].active {
-  color: #6d28d9;
-}
-
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="cl"].is-active,
-.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="cl"].active {
-  color: #b91c1c;
+  width: 100%;
 }
 
 .st2-access-admin-toolbar.hidden {
@@ -3491,12 +3505,17 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-table th:nth-child(1),
 .st2-access-admin-table td:nth-child(1) {
-  width: 30%;
+  width: 22%;
 }
 
 .st2-access-admin-table th:nth-child(2),
 .st2-access-admin-table td:nth-child(2) {
-  width: 18%;
+  width: 12%;
+}
+
+.st2-access-admin-table th:nth-child(3),
+.st2-access-admin-table td:nth-child(3) {
+  width: 16%;
   min-width: 0;
   text-align: left;
   font-size: 0.72rem;
@@ -3504,24 +3523,34 @@ body.portal-tab-active .brand-icon {
   word-break: break-word;
 }
 
-.st2-access-admin-table th:nth-child(3),
-.st2-access-admin-table td:nth-child(3) {
-  width: 14%;
-  padding-right: 4px;
-}
-
 .st2-access-admin-table th:nth-child(4),
 .st2-access-admin-table td:nth-child(4) {
-  width: 8%;
-  padding-left: 2px;
-  text-align: center;
+  width: 11%;
+  padding-right: 2px;
 }
 
 .st2-access-admin-table th:nth-child(5),
 .st2-access-admin-table td:nth-child(5) {
-  width: 148px;
-  min-width: 148px;
+  width: 6%;
+  padding-left: 4px;
+  text-align: center;
+}
+
+.st2-access-admin-table th:nth-child(6),
+.st2-access-admin-table td:nth-child(6) {
+  width: 132px;
+  min-width: 132px;
   text-align: right;
+}
+
+.st2-access-admin-th-tight + .st2-access-admin-th-tight,
+.st2-access-admin-date {
+  padding-right: 2px;
+}
+
+.st2-access-admin-num {
+  padding-left: 4px;
+  white-space: nowrap;
 }
 
 .st2-access-admin-host {
@@ -3647,6 +3676,86 @@ body.portal-tab-active .brand-icon {
   overflow: hidden;
   max-width: 11rem;
   line-height: 1.35;
+}
+
+.st2-access-admin-perms-col {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.st2-access-admin-perm-detail {
+  position: relative;
+  display: inline-flex;
+}
+
+.st2-access-admin-perm-detail summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.st2-access-admin-perm-detail summary::-webkit-details-marker {
+  display: none;
+}
+
+.st2-access-admin-perm-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.st2-access-admin-perm-detail[open] .st2-access-admin-perm-more-btn,
+.st2-access-admin-perm-more-btn:hover {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #c2410c;
+}
+
+.st2-access-admin-perm-pop {
+  position: absolute;
+  z-index: 12;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 168px;
+  max-width: 220px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.st2-access-admin-perm-pop-item {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.35;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #334155;
+}
+
+.st2-access-admin-perm-empty {
+  color: #cbd5e1;
+  font-size: 0.78rem;
 }
 
 .st2-access-admin-perms-inline {

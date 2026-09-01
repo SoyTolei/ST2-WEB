@@ -322,16 +322,22 @@
   font-weight: 400;
 }
 
-.planillas-footer:hover .st2-suite-sig-stage {
+.planillas-footer:hover .st2-suite-sig-stage,
+.app-header-user-zone:hover .app-header-fx-stage,
+.app-header-user-zone:focus-within .app-header-fx-stage {
   opacity: 1;
   visibility: visible;
 }
 
-.planillas-footer:hover .st2-suite-sig::after {
+.planillas-footer:hover .st2-suite-sig::after,
+.app-header-user-zone:hover::after,
+.app-header-user-zone:focus-within::after {
   opacity: 1;
 }
 
-.planillas-footer:hover .st2-suite-float {
+.planillas-footer:hover .st2-suite-float,
+.app-header-user-zone:hover .st2-suite-float,
+.app-header-user-zone:focus-within .st2-suite-float {
   animation-play-state: running;
 }
 

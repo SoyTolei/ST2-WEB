@@ -468,17 +468,29 @@ html.st2-theme-dark .plan-pill-btn.active {
   color: #fff !important;
 }
 
-html.st2-theme-dark .st2-access-admin-perm-filter,
-html.st2-theme-dark .st2-access-admin-perm-filter-hint,
-html.st2-theme-dark .st2-access-admin-perm-filter-label {
-  color: #a3a3a3 !important;
+html.st2-theme-dark .st2-access-admin-perm-pop {
+  background: #1c1c1c !important;
+  border-color: #404040 !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45) !important;
 }
 
-html.st2-theme-dark .st2-access-admin-perm-more,
+html.st2-theme-dark .st2-access-admin-perm-pop-item {
+  background: #121212 !important;
+  color: #e5e5e5 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-more-btn,
 html.st2-theme-dark .st2-access-admin-legend-plus {
   background: #121212 !important;
   border-color: #404040 !important;
   color: #a3a3a3 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-detail[open] .st2-access-admin-perm-more-btn,
+html.st2-theme-dark .st2-access-admin-perm-more-btn:hover {
+  background: #3a1d12 !important;
+  border-color: #ea580c !important;
+  color: #fdba74 !important;
 }
 
 html.st2-theme-dark .plan-segment-track {
