@@ -3410,6 +3410,12 @@ body.portal-tab-active .brand-icon {
   color: #b91c1c;
 }
 
+.st2-access-admin-mod-filter[data-mod-filter="adm"].is-active {
+  border-color: #d97706;
+  background: #fef3c7;
+  color: #b45309;
+}
+
 .st2-access-admin-search {
   display: block;
   width: 100%;
@@ -3726,6 +3732,12 @@ body.portal-tab-active .brand-icon {
   box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.28);
 }
 
+.st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="adm"].active {
+  background: #fef3c7;
+  color: #b45309;
+  box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.32);
+}
+
 .st2-access-admin-sort-mark {
   display: inline-block;
   min-width: 0.7em;
@@ -3959,6 +3971,15 @@ body.portal-tab-active .brand-icon {
   color: #b91c1c;
   opacity: 1;
   box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
+}
+
+.st2-access-admin-perm-sys--adm.is-on {
+  border-color: #f59e0b;
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+  color: #b45309;
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
+  font-weight: 800;
 }
 
 .st2-access-admin-perm-extra.role-sadm {

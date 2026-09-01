@@ -688,7 +688,6 @@ function isBenignClientKeyMigration(prevKey, nextKey) {
 function buildAccessAdminExtraModules(item) {
   const mods = item.modules || {};
   const extras = [];
-  if (item.isSt2Admin) extras.push("Admin web");
   if (mods.oportunidad) extras.push("Oportunidad");
   if (mods.pdfPortal) extras.push("PDF Portal");
   if (mods.blanqueoConfirm && mods.blanqueoLoad) extras.push("Blanqueo (confirma y carga)");
@@ -706,6 +705,7 @@ function buildAccessAdminPermsCell(item) {
   if (mods.planillasSqlOnvio) systems.push({ key: "sql", label: "SQL", title: "Bejerman SQL / ONVIO / WEB" });
   if (mods.planillasLegal) systems.push({ key: "leg", label: "LEG", title: "LEGAL" });
   if (mods.planillasChile) systems.push({ key: "cl", label: "CL", title: "Chile" });
+  if (item.isSt2Admin) systems.push({ key: "adm", label: "ADM", title: "Administrador web (ADMIN)" });
   const extras = buildAccessAdminExtraModules(item);
   if (!systems.length && !extras.length) {
     return '<span class="st2-access-admin-perm-empty">—</span>';
@@ -1126,6 +1126,7 @@ function itemMatchesModFilters(item) {
     if (key === "sql" && mods.planillasSqlOnvio) return true;
     if (key === "leg" && mods.planillasLegal) return true;
     if (key === "cl" && mods.planillasChile) return true;
+    if (key === "adm" && item.isSt2Admin) return true;
   }
   return false;
 }
@@ -1143,7 +1144,7 @@ function syncAccessAdminModFilterUi() {
       accessAdminPermsFilterMark.textContent = "";
       accessAdminPermsFilterMark.classList.add("hidden");
     } else {
-      const labels = { sql: "SQL", leg: "LEG", cl: "CL" };
+      const labels = { sql: "SQL", leg: "LEG", cl: "CL", adm: "ADM" };
       accessAdminPermsFilterMark.textContent = [...accessAdminModFilters].map((key) => labels[key] || key).join(" · ");
       accessAdminPermsFilterMark.classList.remove("hidden");
     }

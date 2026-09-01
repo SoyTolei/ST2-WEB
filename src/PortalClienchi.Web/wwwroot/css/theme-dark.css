@@ -1829,6 +1829,12 @@ html.st2-theme-dark .st2-access-admin-perms-filter-track .plan-segment-btn[data-
   box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.35) !important;
 }
 
+html.st2-theme-dark .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="adm"].active {
+  background: #78350f !important;
+  color: #fcd34d !important;
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.38) !important;
+}
+
 html.st2-theme-dark .st2-access-admin-th-perms-btn:hover,
 html.st2-theme-dark .st2-access-admin-th-perms-btn:focus-visible,
 html.st2-theme-dark .st2-access-admin-th-perms-btn.is-filtering {
