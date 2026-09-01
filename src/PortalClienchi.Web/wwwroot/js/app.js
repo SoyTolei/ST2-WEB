@@ -95,7 +95,6 @@ const accessAdminSubmit = document.getElementById("st2-access-admin-submit");
 const accessAdminCancel = document.getElementById("st2-access-admin-cancel");
 const accessAdminStatus = document.getElementById("st2-access-admin-status");
 const accessAdminBody = document.getElementById("st2-access-admin-body");
-const accessAdminSummary = document.getElementById("st2-access-admin-summary");
 const accessAdminRefresh = document.getElementById("st2-access-admin-refresh");
 const accessAdminUpdated = document.getElementById("st2-access-admin-updated");
 const accessAdminTableWrap = document.getElementById("st2-access-admin-table-wrap");
@@ -1111,17 +1110,6 @@ function resetAccessAdminSnapshot() {
   if (accessAdminSearch) accessAdminSearch.value = "";
 }
 
-function setAccessAdminSummary(text) {
-  if (!accessAdminSummary) return;
-  if (!text) {
-    accessAdminSummary.textContent = "";
-    accessAdminSummary.classList.add("hidden");
-    return;
-  }
-  accessAdminSummary.textContent = text;
-  accessAdminSummary.classList.remove("hidden");
-}
-
 function updateAccessAdminSummaryLine() {
   const total = accessAdminItemsCache.filter((item) => !item.isRejected).length;
   const pending = accessAdminItemsCache.filter((item) => item.isPending).length;
@@ -1133,17 +1121,6 @@ function updateAccessAdminSummaryLine() {
   if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
   updateAdminTabBadge();
   renderAccessAdminInbox();
-  if (!total) {
-    setAccessAdminSummary("");
-    return;
-  }
-  const bits = [
-    `${total} registrado${total === 1 ? "" : "s"}`,
-    `${activeCount} activo${activeCount === 1 ? "" : "s"}`,
-    `${today} hoy`,
-  ];
-  if (pending) bits.push(`${pending} pendiente${pending === 1 ? "" : "s"}`);
-  setAccessAdminSummary(bits.join(" · "));
 }
 
 function renderAccessAdminInbox() {

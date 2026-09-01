@@ -925,11 +925,6 @@ body.portal-tab-active .tab-bar {
   font-size: 1.1rem;
 }
 
-#panel-admin .st2-access-admin-stats {
-  margin: 0;
-  gap: 4px 10px;
-}
-
 #panel-admin .st2-access-admin-toolbar,
 #panel-admin #st2-access-admin-inbox,
 #panel-admin #st2-access-admin-status,
@@ -3149,6 +3144,19 @@ body.portal-tab-active .brand-icon {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  max-width: min(100%, 420px);
+}
+
+.st2-access-admin-updated {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.25;
+  text-align: right;
+  max-width: min(280px, 48vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .st2-access-admin-panel-titles .st2-access-admin-title {
@@ -3323,19 +3331,6 @@ body.portal-tab-active .brand-icon {
   background: #fff7ed;
 }
 
-.st2-access-admin-stats {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 14px;
-}
-
-.st2-access-admin-updated {
-  margin: 0;
-  font-size: 0.72rem;
-  color: #64748b;
-}
-
 .st2-access-admin-updated.hidden {
   display: none !important;
 }
@@ -3345,23 +3340,6 @@ body.portal-tab-active .brand-icon {
   font-size: 0.76rem;
   color: var(--text-muted);
   min-height: 1.1em;
-}
-
-.st2-access-admin-summary {
-  margin: 0;
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.76rem;
-  font-weight: 650;
-  color: #0f172a;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  padding: 4px 10px;
-}
-
-.st2-access-admin-summary.hidden {
-  display: none !important;
 }
 
 .st2-access-admin-toolbar {
