@@ -5006,7 +5006,7 @@ body.st2-access-restoring #st2-access-gate {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 32px;
+  gap: 26px;
   background:
     radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.2) 0%, transparent 58%),
     radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
@@ -5129,19 +5129,19 @@ body.st2-access-restoring .st2-boot-splash {
 
 .st2-boot-splash-status {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: 1.12rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #a3a3a3;
+  color: #9ca3af;
 }
 
 .st2-boot-splash-dots {
   display: inline-flex;
-  gap: 3px;
-  margin-left: 3px;
-  min-width: 1.45em;
-  font-size: 1.15em;
+  gap: 2px;
+  margin-left: 2px;
+  min-width: 1.2em;
+  font-size: 1em;
 }
 
 .st2-boot-splash-dots span {
@@ -5187,7 +5187,7 @@ body.st2-access-restoring .st2-boot-splash {
   }
 
   .st2-boot-splash-status {
-    font-size: 1.2rem;
+    font-size: 1.02rem;
   }
 
   .st2-access-title.st2-access-title-mark {
