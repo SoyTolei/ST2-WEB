@@ -982,28 +982,11 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-modulos-grid {
-  --plan-modulos-cols: 3;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-content: flex-start;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0;
   padding: 0;
   min-height: 120px;
-}
-
-.plan-modulos-grid > * {
-  flex: 0 0 calc(100% / var(--plan-modulos-cols));
-  max-width: calc(100% / var(--plan-modulos-cols));
-  box-sizing: border-box;
-}
-
-.plan-modulos-grid.is-compact {
-  --plan-modulos-cols: 2;
-}
-
-.plan-chile-soporte-grid {
-  --plan-modulos-cols: 2;
 }
 
 .plan-modulo-btn {
@@ -4317,10 +4300,6 @@ body.st2-chile-embed-active #panel-planillas.active {
   box-shadow: none;
 }
 
-.plan-legal-products-grid {
-  --plan-modulos-cols: 3;
-}
-
 .plan-legal-product-btn .plan-modulo-icon svg {
   width: 1.35rem;
   height: 1.35rem;
@@ -4622,7 +4601,10 @@ body.st2-chile-embed-active #panel-planillas.active {
   .plan-modulos-grid.is-compact,
   .plan-chile-soporte-grid,
   .plan-legal-products-grid {
-    --plan-modulos-cols: 1;
+    grid-template-columns: 1fr !important;
+  }
+  .plan-modulos-grid > * {
+    grid-column: auto !important;
   }
   .plan-sistema-indicator { display: none; }
   .plan-mesa-field .plan-segment-btn {
