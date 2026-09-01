@@ -1077,9 +1077,29 @@ html.st2-theme-dark .plan-select option {
   color: #e5e5e5;
 }
 
-html.st2-theme-dark .plan-select option:checked,
-html.st2-theme-dark .plan-select option:hover,
-html.st2-theme-dark .plan-select option:focus {
+html.st2-theme-dark .plan-custom-select-menu {
+  background: #1c1c1c !important;
+  border-color: #3d4b61 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+html.st2-theme-dark .plan-custom-select-option {
+  color: #e5e5e5;
+}
+
+html.st2-theme-dark .plan-custom-select-option:hover,
+html.st2-theme-dark .plan-custom-select-option:focus-visible {
+  background: #c2410c !important;
+  color: #fff !important;
+}
+
+html.st2-theme-dark .plan-custom-select-option[aria-selected="true"] {
+  background: #3a1d12;
+  color: #ffedd5;
+}
+
+html.st2-theme-dark .plan-custom-select-option[aria-selected="true"]:hover,
+html.st2-theme-dark .plan-custom-select-option[aria-selected="true"]:focus-visible {
   background: #c2410c !important;
   color: #fff !important;
 }

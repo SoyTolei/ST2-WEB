@@ -1,4 +1,5 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
+import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
 import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, handleLegalReferralBack } from "./planillas-referral-legal.js";
 import {
   initChileReferral,
@@ -252,6 +253,8 @@ function buildReferralPills() {
   if (col && col.options.length === 0) {
     col.innerHTML = `<option value="">Seleccionar…</option>${cfg.collations.map((c) => `<option>${c}</option>`).join("")}`;
     sql.innerHTML = `<option value="">Seleccionar…</option>${cfg.sqlServers.map((s) => `<option>${s}</option>`).join("")}`;
+    enhancePlanSelect(col);
+    enhancePlanSelect(sql);
     syncPlanSelectFilled(col);
     syncPlanSelectFilled(sql);
     col.addEventListener("change", () => syncPlanSelectFilled(col));
@@ -498,8 +501,16 @@ function bindReferralEvents() {
       if (!moduloSel) {
         const col = document.getElementById("ref-collation");
         const sql = document.getElementById("ref-sql-server");
-        if (col) col.selectedIndex = 0;
-        if (sql) sql.selectedIndex = 0;
+        if (col) {
+          col.selectedIndex = 0;
+          syncPlanSelectFilled(col);
+          syncPlanCustomSelect(col);
+        }
+        if (sql) {
+          sql.selectedIndex = 0;
+          syncPlanSelectFilled(sql);
+          syncPlanCustomSelect(sql);
+        }
       }
       buildReferralPills();
     }
