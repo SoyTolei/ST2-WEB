@@ -164,10 +164,9 @@ let accessModulesSaving = false;
 let accessModulesAfterApprove = false;
 let accessModulesPresetMode = false;
 const accessAdminSearch = document.getElementById("st2-access-admin-search");
-const accessAdminModFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-mod-filter"));
+const accessAdminModFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-perms-filter-opt"));
 const accessAdminPermsFilterBtn = document.getElementById("st2-access-admin-perms-filter-btn");
 const accessAdminPermsFilterPop = document.getElementById("st2-access-admin-perms-filter-pop");
-const accessAdminPermsFilterClear = document.getElementById("st2-access-admin-perms-filter-clear");
 const accessAdminPermsFilterMark = document.getElementById("st2-access-admin-perms-filter-mark");
 const aboutToolsSection = document.getElementById("st2-about-tools");
 const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total");
@@ -1134,12 +1133,11 @@ function itemMatchesModFilters(item) {
 function syncAccessAdminModFilterUi() {
   accessAdminModFilterButtons.forEach((btn) => {
     const key = String(btn.dataset.modFilter || "").trim();
-    btn.classList.toggle("is-active", accessAdminModFilters.has(key));
+    btn.classList.toggle("active", accessAdminModFilters.has(key));
   });
   const has = accessAdminModFilters.size > 0;
   accessAdminPermsFilterBtn?.classList.toggle("is-filtering", has);
   accessAdminPermsFilterBtn?.setAttribute("aria-expanded", accessAdminPermsFilterOpen ? "true" : "false");
-  accessAdminPermsFilterClear?.classList.toggle("hidden", !has);
   if (accessAdminPermsFilterMark) {
     if (!has) {
       accessAdminPermsFilterMark.textContent = "";
@@ -2666,12 +2664,6 @@ accessAdminSearch?.addEventListener("input", () => {
 accessAdminPermsFilterBtn?.addEventListener("click", (e) => {
   e.stopPropagation();
   toggleAccessAdminPermsFilterPop();
-});
-accessAdminPermsFilterClear?.addEventListener("click", (e) => {
-  e.stopPropagation();
-  accessAdminModFilters.clear();
-  syncAccessAdminModFilterUi();
-  renderAccessAdminTable();
 });
 accessAdminModFilterButtons.forEach((btn) => {
   btn.addEventListener("click", (e) => {

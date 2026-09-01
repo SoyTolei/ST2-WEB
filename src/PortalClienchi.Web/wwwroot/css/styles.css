@@ -3360,10 +3360,6 @@ body.portal-tab-active .brand-icon {
   gap: 6px;
 }
 
-.st2-access-admin-perms-filter-track {
-  width: 100%;
-}
-
 .st2-access-admin-mod-filter {
   border: 1px solid #cbd5e1;
   background: #fff;
@@ -3687,54 +3683,47 @@ body.portal-tab-active .brand-icon {
 }
 
 .st2-access-admin-perms-filter-pop {
-  min-width: 220px;
-  max-width: min(280px, calc(100vw - 24px));
-  padding: 10px 12px;
+  min-width: 0;
+  max-width: min(320px, calc(100vw - 24px));
+  padding: 5px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+  background: #f8fafc;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
 }
 
 .st2-access-admin-perms-filter-pop.hidden {
   display: none !important;
 }
 
-.st2-access-admin-perms-filter-title {
-  margin: 0 0 8px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+.st2-access-admin-perms-filter-track {
+  width: 100%;
+}
+
+.st2-access-admin-perms-filter-track .plan-segment-btn {
+  flex: 1 1 0;
+  min-width: 58px;
+  min-height: 34px;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  color: #64748b;
 }
 
-.st2-access-admin-perms-filter-hint {
-  margin: 8px 0 0;
-  font-size: 0.68rem;
-  line-height: 1.35;
-  color: #94a3b8;
+.st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="sql"].active {
+  background: #dbeafe;
+  color: #1d4ed8;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.28);
 }
 
-.st2-access-admin-perms-filter-clear {
-  margin-top: 8px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #0f766e;
-  font-size: 0.72rem;
-  font-weight: 650;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="leg"].active {
+  background: #ede9fe;
+  color: #6d28d9;
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.28);
 }
 
-.st2-access-admin-perms-filter-clear:hover {
-  color: #0d9488;
-}
-
-.st2-access-admin-perms-filter-clear.hidden {
-  display: none !important;
+.st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="cl"].active {
+  background: #fee2e2;
+  color: #b91c1c;
+  box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.28);
 }
 
 .st2-access-admin-sort-mark {
@@ -5017,11 +5006,12 @@ body.st2-access-restoring #st2-access-gate {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 14px;
+  gap: 18px;
   background:
-    radial-gradient(80% 60% at 20% 0%, rgba(214, 64, 0, 0.18) 0%, transparent 50%),
-    #0b1220;
-  color: #e8eef7;
+    radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.2) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
+    linear-gradient(180deg, #222222 0%, #161616 100%);
+  color: #e5e5e5;
 }
 
 body.st2-access-restoring .st2-boot-splash {
@@ -5032,9 +5022,9 @@ body.st2-access-restoring .st2-boot-splash {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: nowrap;
-  min-height: 2.25rem;
+  min-height: 2.6rem;
 }
 
 .st2-access-brand-head {
@@ -5050,15 +5040,15 @@ body.st2-access-restoring .st2-boot-splash {
   display: inline-flex;
   align-items: flex-start;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 1.7rem;
+  font-size: 2rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
   transform-origin: 50% 60%;
   user-select: none;
-  color: #e8eef7;
+  color: #f3f4f6;
   animation: st2-boot-st2-float 3.4s ease-in-out infinite;
-  filter: drop-shadow(0 2px 8px rgba(214, 64, 0, 0.28));
+  filter: drop-shadow(0 3px 10px rgba(214, 64, 0, 0.32));
 }
 
 .st2-access-title.st2-access-title-mark {
@@ -5106,12 +5096,12 @@ body.st2-access-restoring .st2-boot-splash {
 .st2-boot-splash-suite {
   margin: 0;
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.38rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.1;
   white-space: nowrap;
-  color: #e8eef7;
+  color: #f3f4f6;
 }
 
 .st2-access-suite-sep {
@@ -5139,18 +5129,19 @@ body.st2-access-restoring .st2-boot-splash {
 
 .st2-boot-splash-status {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #a3a3a3;
 }
 
 .st2-boot-splash-dots {
   display: inline-flex;
-  gap: 1px;
-  margin-left: 1px;
-  min-width: 1.1em;
+  gap: 2px;
+  margin-left: 2px;
+  min-width: 1.25em;
+  font-size: 1.08em;
 }
 
 .st2-boot-splash-dots span {
@@ -5173,12 +5164,12 @@ body.st2-access-restoring .st2-boot-splash {
 
 @keyframes st2-boot-st2-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  50% { transform: translateY(-7px); }
 }
 
 @keyframes st2-boot-st2-sup-float {
   0%, 100% { transform: translateY(-0.2em); }
-  50% { transform: translateY(calc(-0.2em - 3px)); }
+  50% { transform: translateY(calc(-0.2em - 4px)); }
 }
 
 .st2-access-gate {

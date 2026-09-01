@@ -1797,14 +1797,36 @@ html.st2-theme-dark .st2-access-admin-mod-filters {
 }
 
 html.st2-theme-dark .st2-access-admin-perms-filter-pop {
-  background: #1c1c1c !important;
-  border-color: #3d4b61 !important;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+  background: #2a2a2a !important;
+  border-color: #525252 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42) !important;
 }
 
-html.st2-theme-dark .st2-access-admin-perms-filter-title,
-html.st2-theme-dark .st2-access-admin-perms-filter-hint {
-  color: #94a3b8 !important;
+html.st2-theme-dark .st2-access-admin-perms-filter-track.plan-segment-track {
+  background: #343434 !important;
+  border-color: #525252 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perms-filter-track .plan-segment-btn {
+  color: #d4d4d4 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="sql"].active {
+  background: #1e3a8a !important;
+  color: #bfdbfe !important;
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.35) !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="leg"].active {
+  background: #4c1d95 !important;
+  color: #ddd6fe !important;
+  box-shadow: inset 0 0 0 1px rgba(167, 139, 250, 0.35) !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="cl"].active {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+  box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.35) !important;
 }
 
 html.st2-theme-dark .st2-access-admin-th-perms-btn:hover,
@@ -1815,10 +1837,6 @@ html.st2-theme-dark .st2-access-admin-th-perms-btn.is-filtering {
 
 html.st2-theme-dark .st2-access-admin-th-perms-mark {
   color: #cbd5e1 !important;
-}
-
-html.st2-theme-dark .st2-access-admin-perms-filter-clear {
-  color: #5eead4 !important;
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter {
