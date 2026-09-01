@@ -628,7 +628,7 @@ function buildStandardMesas() {
   const row = document.getElementById("plan-standard-mesas");
   if (!row) return;
   row.innerHTML = getStandardMesas().map((m) =>
-    `<button type="button" class="plan-mesa-btn${m.id === "SAAS" ? " plan-mesa-btn--saas" : ""}${mesaActual === m.id ? " active" : ""}" data-mesa="${m.id}">${m.label}</button>`
+    `<button type="button" class="plan-segment-btn${mesaActual === m.id ? " active" : ""}" data-mesa="${m.id}">${m.label}</button>`
   ).join("");
 }
 
@@ -638,7 +638,7 @@ function buildLegalMesas() {
   if (!row || !cfg?.mesas) return;
 
   row.innerHTML = cfg.mesas.map((m) =>
-    `<button type="button" class="plan-mesa-btn${mesaActual === m.id ? " active" : ""}" data-legal-mesa="${m.id}">${m.label}</button>`
+    `<button type="button" class="plan-segment-btn${mesaActual === m.id ? " active" : ""}" data-legal-mesa="${m.id}">${m.label}</button>`
   ).join("");
 }
 
@@ -660,7 +660,7 @@ function updateTransferenciaPanels() {
 }
 
 function refreshLegalMesaUi() {
-  document.querySelectorAll("#plan-legal-mesas .plan-mesa-btn").forEach((btn) => {
+  document.querySelectorAll("#plan-legal-mesas .plan-segment-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.legalMesa === mesaActual);
   });
 }

@@ -3270,14 +3270,71 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
   margin: 0 0 10px;
-  padding: 8px 10px;
-  background: #fff;
+  padding: 12px;
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
+}
+
+.st2-access-admin-toolbar-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+}
+
+.st2-access-admin-perm-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.st2-access-admin-perm-filter-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.st2-access-admin-perm-filter-hint {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.st2-access-admin-perm-filter-track .plan-segment-btn {
+  min-height: 34px;
+  min-width: 56px;
+  padding: 6px 14px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter.is-active,
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter.active {
+  color: #d64000;
+}
+
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="sql"].is-active,
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="sql"].active {
+  color: #1d4ed8;
+}
+
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="leg"].is-active,
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="leg"].active {
+  color: #6d28d9;
+}
+
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="cl"].is-active,
+.st2-access-admin-perm-filter-track .st2-access-admin-mod-filter[data-mod-filter="cl"].active {
+  color: #b91c1c;
 }
 
 .st2-access-admin-toolbar.hidden {
@@ -3374,6 +3431,7 @@ body.portal-tab-active .brand-icon {
 .st2-access-admin-search {
   flex: 1 1 180px;
   min-width: 150px;
+  margin-left: auto;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 6px 11px;
@@ -3438,52 +3496,7 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-table th:nth-child(2),
 .st2-access-admin-table td:nth-child(2) {
-  width: 32%;
-}
-
-.st2-access-admin-table th:nth-child(3),
-.st2-access-admin-table td:nth-child(3) {
-  width: 12%;
-  padding-right: 4px;
-}
-
-.st2-access-admin-table th:nth-child(4),
-.st2-access-admin-table td:nth-child(4) {
-  width: 7%;
-  padding-left: 2px;
-  text-align: center;
-}
-
-.st2-access-admin-table th:nth-child(5),
-.st2-access-admin-table td:nth-child(5) {
-  width: 148px;
-  min-width: 148px;
-  text-align: right;
-}
-
-.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(1),
-.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(1) {
-  width: 22%;
-}
-
-.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(2),
-.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(2) {
-  width: 26%;
-}
-
-.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(3),
-.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(3) {
-  width: 11%;
-}
-
-.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(4),
-.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(4) {
-  width: 7%;
-}
-
-.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(5),
-.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(5) {
-  width: 14%;
+  width: 18%;
   min-width: 0;
   text-align: left;
   font-size: 0.72rem;
@@ -3491,8 +3504,21 @@ body.portal-tab-active .brand-icon {
   word-break: break-word;
 }
 
-.st2-access-admin-table.st2-access-admin-table--with-host th:nth-child(6),
-.st2-access-admin-table.st2-access-admin-table--with-host td:nth-child(6) {
+.st2-access-admin-table th:nth-child(3),
+.st2-access-admin-table td:nth-child(3) {
+  width: 14%;
+  padding-right: 4px;
+}
+
+.st2-access-admin-table th:nth-child(4),
+.st2-access-admin-table td:nth-child(4) {
+  width: 8%;
+  padding-left: 2px;
+  text-align: center;
+}
+
+.st2-access-admin-table th:nth-child(5),
+.st2-access-admin-table td:nth-child(5) {
   width: 148px;
   min-width: 148px;
   text-align: right;
@@ -3621,6 +3647,54 @@ body.portal-tab-active .brand-icon {
   overflow: hidden;
   max-width: 11rem;
   line-height: 1.35;
+}
+
+.st2-access-admin-perms-inline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.st2-access-admin-perm-empty {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+}
+
+.st2-access-admin-perm-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+
+.st2-access-admin-legend-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.62rem;
+  font-weight: 700;
+  vertical-align: middle;
 }
 
 .st2-access-admin-perms {

@@ -1699,57 +1699,22 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin-bottom: 14px;
 }
 
-.plan-mesas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: 0;
+.plan-mesa-field.plan-bej-field {
+  margin-bottom: 16px;
 }
 
-.plan-mesa-btn {
-  appearance: none;
-  flex: 0 0 auto;
-  min-width: 0;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 999px;
-  padding: 7px 14px;
-  font: inherit;
-  font-size: 0.76rem;
+.plan-mesa-field .plan-segment-track {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.plan-mesa-field .plan-segment-btn {
+  min-height: 36px;
+  padding: 8px 14px;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 1.2;
-  color: #64748b;
-  background: #fff;
-  cursor: pointer;
-  transition: color 0.14s ease, background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
-}
-
-.plan-mesa-btn--saas {
-  text-transform: none;
-  letter-spacing: 0.02em;
-}
-
-.plan-mesa-btn:hover {
-  color: #334155;
-  border-color: #94a3b8;
-  background: #f8fafc;
-}
-
-.plan-mesa-btn:focus-visible {
-  outline: 2px solid rgba(214, 64, 0, 0.35);
-  outline-offset: 2px;
-}
-
-.plan-mesa-btn.active {
-  color: #fff;
-  font-weight: 700;
-  background: #d64000;
-  border-color: #d64000;
-  box-shadow: 0 2px 8px rgba(214, 64, 0, 0.28);
 }
 
 .plan-capturas-card {
@@ -2246,19 +2211,21 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-op-cargar-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
   gap: 12px;
   margin-top: 4px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
 }
 
-.plan-op-cargar-actions:has(.plan-ia-group--op.hidden) {
-  grid-template-columns: 1fr;
+.plan-op-cargar-actions:has(.plan-ia-group--op.hidden) .plan-op-btn-pdf {
+  flex: 1 1 auto;
 }
 
 .plan-op-btn-pdf {
+  flex: 1 1 220px;
   min-height: 52px;
   border: none;
   border-radius: 6px;
@@ -2278,6 +2245,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-op-btn-pdf:hover { opacity: 0.92; }
 
 .plan-op-btn-ia {
+  flex: 1 1 220px;
   min-height: 52px;
   border: 1px solid rgba(214, 64, 0, 0.28);
   border-radius: 6px;
@@ -2299,27 +2267,37 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-color: rgba(214, 64, 0, 0.42);
 }
 
-.plan-op-cargar-clear {
+.plan-ia-group--op {
+  flex: 1 1 220px;
   display: flex;
-  justify-content: center;
-  margin-top: 12px;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
 }
 
 .plan-op-btn-limpiar {
-  min-height: 44px;
-  min-width: 120px;
-  padding: 8px 16px;
-  border: 1px solid var(--border);
+  flex: 0 0 auto;
+  align-self: center;
+  margin-left: auto;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: none;
   border-radius: 8px;
-  background: #fff;
-  color: var(--dark);
-  font-size: 0.88rem;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.plan-op-btn-limpiar:hover { background: var(--nav-hover); }
+.plan-op-btn-limpiar:hover {
+  color: var(--dark);
+  background: var(--nav-hover);
+  text-decoration: none;
+}
 
 .plan-select, .plan-input-inline {
   width: 100%;
@@ -4631,11 +4609,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   .plan-modulos-grid.is-compact,
   .plan-chile-soporte-grid { grid-template-columns: 1fr; }
   .plan-sistema-indicator { display: none; }
-  .plan-mesas {
-    gap: 6px;
-  }
-
-  .plan-mesa-btn {
+  .plan-mesa-field .plan-segment-btn {
     padding: 8px 12px;
     font-size: 0.74rem;
   }
@@ -4652,7 +4626,14 @@ body.st2-chile-embed-active #panel-planillas.active {
   .plan-gestor-btn-add { grid-column: 1 / -1; width: 100%; }
   .plan-gestor-footer { flex-direction: column; align-items: stretch; }
   .plan-gestor-pagination { justify-content: center; }
-  .plan-op-cargar-actions { grid-template-columns: 1fr; }
+  .plan-op-cargar-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .plan-op-btn-limpiar {
+    margin-left: 0;
+    align-self: flex-end;
+  }
   .plan-op-cargar-panel { padding: 18px 16px; }
   .plan-op-metodo-well { gap: 8px 16px; }
 }

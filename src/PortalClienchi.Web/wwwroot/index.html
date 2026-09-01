@@ -457,9 +457,9 @@
             </div>
 
             <div id="plan-trans-standard-fields">
-              <div class="plan-field plan-mesa-field">
-                <label>Deriva a mesa</label>
-                <div class="plan-mesas" id="plan-standard-mesas" role="group" aria-label="Mesa de destino"></div>
+              <div class="plan-bej-field plan-mesa-field">
+                <span class="plan-bej-label">Deriva a mesa</span>
+                <div class="plan-segment-track plan-segment-track-wide" id="plan-standard-mesas" role="group" aria-label="Mesa de destino"></div>
               </div>
 
               <div class="plan-field">
@@ -484,9 +484,9 @@
                 </div>
               </div>
               <div class="plan-form-grid">
-                <div class="plan-field plan-mesa-field">
-                  <label>Deriva a mesa</label>
-                  <div class="plan-mesas" id="plan-legal-mesas" role="group" aria-label="Mesa de destino"></div>
+                <div class="plan-bej-field plan-mesa-field">
+                  <span class="plan-bej-label">Deriva a mesa</span>
+                  <div class="plan-segment-track plan-segment-track-wide" id="plan-legal-mesas" role="group" aria-label="Mesa de destino"></div>
                 </div>
                 <div class="plan-field">
                   <label for="plan-legal-chave">Clave de registro</label>
@@ -1534,9 +1534,7 @@
                   </button>
                   <button type="button" id="op-btn-ia-undo" class="plan-ia-undo-btn hidden" aria-label="Deshacer cambios de la IA" disabled>↩</button>
                 </div>
-              </div>
-              <div class="plan-op-cargar-clear">
-                <button type="button" id="op-btn-limpiar" class="plan-op-btn-limpiar">🗑 Limpiar</button>
+                <button type="button" id="op-btn-limpiar" class="plan-op-btn-limpiar">Limpiar</button>
               </div>
             </div>
             <p id="op-cargar-status" class="plan-status-bar"></p>
@@ -1844,40 +1842,45 @@
           <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>
           <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
           <div id="st2-access-admin-toolbar" class="st2-access-admin-toolbar hidden">
-            <div class="st2-access-admin-filters" role="tablist" aria-label="Filtro de accesos">
-              <button type="button" class="st2-access-admin-filter is-active" data-filter="all">Todos</button>
-              <button type="button" class="st2-access-admin-filter" data-filter="pending">Pendientes</button>
-              <button type="button" class="st2-access-admin-filter" data-filter="active">Activos</button>
-              <button type="button" class="st2-access-admin-filter" data-filter="today">Hoy</button>
+            <div class="st2-access-admin-toolbar-main">
+              <div class="st2-access-admin-filters" role="tablist" aria-label="Filtro de accesos">
+                <button type="button" class="st2-access-admin-filter is-active" data-filter="all">Todos</button>
+                <button type="button" class="st2-access-admin-filter" data-filter="pending">Pendientes</button>
+                <button type="button" class="st2-access-admin-filter" data-filter="active">Activos</button>
+                <button type="button" class="st2-access-admin-filter" data-filter="today">Hoy</button>
+              </div>
+              <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
             </div>
-            <div class="st2-access-admin-mod-filters" role="group" aria-label="Filtrar por sistema">
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="sql" title="Bejerman SQL / ONVIO">SQL</button>
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="leg" title="LEGAL">LEG</button>
-              <button type="button" class="st2-access-admin-mod-filter" data-mod-filter="cl" title="Chile">CL</button>
+            <div class="st2-access-admin-perm-filter" role="group" aria-label="Filtrar por acceso a Planillas">
+              <span class="st2-access-admin-perm-filter-label">Acceso a Planillas</span>
+              <div class="st2-access-admin-perm-filter-track plan-segment-track plan-segment-track-wide">
+                <button type="button" class="plan-segment-btn st2-access-admin-mod-filter" data-mod-filter="sql" title="Bejerman SQL / ONVIO / WEB">SQL</button>
+                <button type="button" class="plan-segment-btn st2-access-admin-mod-filter" data-mod-filter="leg" title="LEGAL">LEG</button>
+                <button type="button" class="plan-segment-btn st2-access-admin-mod-filter" data-mod-filter="cl" title="Chile">CL</button>
+              </div>
+              <span class="st2-access-admin-perm-filter-hint">Elegí uno o más sistemas para ver quién tiene ese acceso</span>
             </div>
-            <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar nombre o correo…" autocomplete="off" spellcheck="false"/>
           </div>
           <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
             <table class="st2-access-admin-table">
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th title="Sistemas Planillas (SQL · LEG · CL) y módulos extra (op · pdf · bl · bs · adm)">Permisos</th>
+                  <th id="st2-access-admin-th-host" title="Equipo o terminal (hostname vía DNS reverso cuando es posible)">Equipo <span id="st2-access-admin-host-attention" class="st2-access-admin-host-attn-th hidden" aria-hidden="true"></span></th>
                   <th id="st2-access-admin-th-last" class="st2-access-admin-th-sort" data-sort="lastSeen" title="Clic para ordenar por último acceso" aria-sort="descending" tabindex="0" role="columnheader">
                     Último acceso <span class="st2-access-admin-sort-mark" aria-hidden="true">↓</span>
                   </th>
                   <th id="st2-access-admin-th-logins" class="st2-access-admin-th-sort" data-sort="loginCount" title="Días distintos en los que abrió ST2 (no cuenta F5 el mismo día). Clic para ordenar." aria-sort="none" tabindex="0" role="columnheader">
                     Ingresos <span class="st2-access-admin-sort-mark" aria-hidden="true"></span>
                   </th>
-                  <th id="st2-access-admin-th-host" class="st2-access-admin-th-host hidden" title="Equipo o terminal (hostname vía DNS reverso cuando es posible)">Equipo <span id="st2-access-admin-host-attention" class="st2-access-admin-host-attn-th hidden" aria-hidden="true"></span></th>
-                  <th class="st2-access-admin-th-actions">Acciones</th>
+                  <th class="st2-access-admin-th-actions">Gestión</th>
                 </tr>
               </thead>
               <tbody id="st2-access-admin-body"></tbody>
             </table>
           </div>
           <div class="st2-access-admin-panel-foot">
-            <p class="st2-access-admin-legend">Referral I+D y Transferencia: todos · Permisos: <span class="st2-access-admin-legend-sql">SQL</span>/<span class="st2-access-admin-legend-leg">LEG</span>/<span class="st2-access-admin-legend-cl">CL</span> + módulos</p>
+            <p class="st2-access-admin-legend">Los accesos a Planillas se ven junto al nombre: <span class="st2-access-admin-legend-sql">SQL</span> · <span class="st2-access-admin-legend-leg">LEG</span> · <span class="st2-access-admin-legend-cl">CL</span> · <span class="st2-access-admin-legend-plus">+</span> módulos extra</p>
           </div>
         </div>
       </div>

@@ -684,44 +684,38 @@ function isBenignClientKeyMigration(prevKey, nextKey) {
   return false;
 }
 
-function buildAccessAdminPermsCell(item) {
+function buildAccessAdminExtraModules(item) {
   const mods = item.modules || {};
-  const systems = [
-    { key: "sql", label: "SQL", on: !!mods.planillasSqlOnvio, title: "Bejerman SQL / ONVIO" },
-    { key: "leg", label: "LEG", on: !!mods.planillasLegal, title: "LEGAL" },
-    { key: "cl", label: "CL", on: !!mods.planillasChile, title: "Chile" },
-  ];
-  const sysHtml = systems.map((sys) => (
-    `<span class="st2-access-admin-perm-sys st2-access-admin-perm-sys--${sys.key}${sys.on ? " is-on" : " is-off"}" title="${escapeHtml(sys.title)}${sys.on ? "" : " (sin acceso)"}">${escapeHtml(sys.label)}</span>`
-  )).join("");
-
   const extras = [];
-  if (item.isSt2Admin) extras.push({ label: "adm", title: "ADMIN WEB", cls: "role-adm" });
-  if (mods.oportunidad) extras.push({ label: "op", title: "Oportunidad de Venta" });
-  if (mods.pdfPortal) extras.push({ label: "pdf", title: "Generador PDF-Portal" });
-  if (mods.blanqueoConfirm && mods.blanqueoLoad) {
-    extras.push({ label: "bl+", title: "Blanqueo Claves: confirma y carga" });
-  } else if (mods.blanqueoConfirm) {
-    extras.push({ label: "bl✓", title: "Blanqueo Claves: solo confirma" });
-  } else if (mods.blanqueoLoad || mods.blanqueo) {
-    extras.push({ label: "bl", title: "Blanqueo Claves" });
-  }
-  if (mods.borradoBasesConfirm && mods.borradoBasesLoad) {
-    extras.push({ label: "bs+", title: "Borrado de Bases: confirma y carga" });
-  } else if (mods.borradoBasesConfirm) {
-    extras.push({ label: "bs✓", title: "Borrado de Bases: solo confirma" });
-  } else   if (mods.borradoBasesLoad || mods.borradoBases) {
-    extras.push({ label: "bs", title: "Borrado de Bases Web" });
-  }
+  if (item.isSt2Admin) extras.push("Admin web");
+  if (mods.oportunidad) extras.push("Oportunidad");
+  if (mods.pdfPortal) extras.push("PDF Portal");
+  if (mods.blanqueoConfirm && mods.blanqueoLoad) extras.push("Blanqueo (confirma y carga)");
+  else if (mods.blanqueoConfirm) extras.push("Blanqueo (solo confirma)");
+  else if (mods.blanqueoLoad || mods.blanqueo) extras.push("Blanqueo");
+  if (mods.borradoBasesConfirm && mods.borradoBasesLoad) extras.push("Borrado de bases (confirma y carga)");
+  else if (mods.borradoBasesConfirm) extras.push("Borrado de bases (solo confirma)");
+  else if (mods.borradoBasesLoad || mods.borradoBases) extras.push("Borrado de bases");
+  return extras;
+}
 
-  const extrasHtml = extras.length
-    ? `<div class="st2-access-admin-perm-extras" aria-label="Roles y módulos extra">${extras.map((extra, idx) => `${idx ? '<span class="st2-access-admin-perm-sep" aria-hidden="true">·</span>' : ""}<span class="st2-access-admin-perm-extra${extra.cls ? ` ${escapeHtml(extra.cls)}` : ""}" title="${escapeHtml(extra.title)}">${escapeHtml(extra.label)}</span>`).join("")}</div>`
+function buildAccessAdminPermsInline(item) {
+  const mods = item.modules || {};
+  const systems = [];
+  if (mods.planillasSqlOnvio) systems.push({ key: "sql", label: "SQL", title: "Bejerman SQL / ONVIO / WEB" });
+  if (mods.planillasLegal) systems.push({ key: "leg", label: "LEG", title: "LEGAL" });
+  if (mods.planillasChile) systems.push({ key: "cl", label: "CL", title: "Chile" });
+  const extras = buildAccessAdminExtraModules(item);
+  if (!systems.length && !extras.length) {
+    return '<span class="st2-access-admin-perm-empty" title="Sin acceso a sistemas Planillas">—</span>';
+  }
+  const sysHtml = systems.map((sys) => (
+    `<span class="st2-access-admin-perm-sys st2-access-admin-perm-sys--${sys.key} is-on" title="${escapeHtml(sys.title)}">${escapeHtml(sys.label)}</span>`
+  )).join("");
+  const plusHtml = extras.length
+    ? `<span class="st2-access-admin-perm-more" title="${escapeHtml(extras.join(" · "))}">+</span>`
     : "";
-
-  return `<div class="st2-access-admin-perms">
-    <div class="st2-access-admin-perm-line" aria-label="Sistemas Planillas">${sysHtml}</div>
-    ${extrasHtml}
-  </div>`;
+  return `<span class="st2-access-admin-perms-inline" aria-label="Accesos Planillas">${sysHtml}${plusHtml}</span>`;
 }
 
 function applyAccessAdminClientWatch(items, { notify = true, showHint = true } = {}) {
@@ -1079,7 +1073,7 @@ function resetAccessAdminSnapshot() {
     btn.classList.toggle("is-active", btn.dataset.filter === "all");
   });
   accessAdminModFilterButtons.forEach((btn) => {
-    btn.classList.remove("is-active");
+    btn.classList.remove("is-active", "active");
   });
 }
 
@@ -1159,23 +1153,20 @@ function setAccessAdminUpdatedHint(text) {
 }
 
 function syncAccessAdminHostColumn() {
-  const show = isSt2SuperAdmin();
   accessAdminPresetBtn?.classList.toggle("hidden", !isSt2SuperAdmin());
-  accessAdminThHost?.classList.toggle("hidden", !show);
-  accessAdminTable?.classList.toggle("st2-access-admin-table--with-host", show);
+  accessAdminThHost?.classList.remove("hidden");
+  accessAdminTable?.classList.remove("st2-access-admin-table--with-host");
 }
 
 function itemMatchesModFilters(item) {
   if (!accessAdminModFilters.size) return true;
   const mods = item.modules || {};
   for (const key of accessAdminModFilters) {
-    let ok = false;
-    if (key === "sql") ok = !!mods.planillasSqlOnvio;
-    else if (key === "leg") ok = !!mods.planillasLegal;
-    else if (key === "cl") ok = !!mods.planillasChile;
-    if (!ok) return false;
+    if (key === "sql" && mods.planillasSqlOnvio) return true;
+    if (key === "leg" && mods.planillasLegal) return true;
+    if (key === "cl" && mods.planillasChile) return true;
   }
-  return true;
+  return false;
 }
 
 function getFilteredAccessAdminItems() {
@@ -1199,7 +1190,6 @@ function getFilteredAccessAdminItems() {
 
 function renderAccessAdminTable() {
   syncAccessAdminHostColumn();
-  const showHost = isSt2SuperAdmin();
   const items = getFilteredAccessAdminItems();
   if (!accessAdminBody) return;
 
@@ -1244,7 +1234,7 @@ function renderAccessAdminTable() {
       accessAdminClientChangedEmails.has(item.email) ? "is-client-changed" : "",
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
-    const permsHtml = buildAccessAdminPermsCell(item);
+    const permsHtml = buildAccessAdminPermsInline(item);
     const hostLabel = formatAccessClientLabel(item) || "—";
     const deviceShort = resolveAccessDeviceShort(item);
     const browserLabel = resolveAccessBrowserLabel(item);
@@ -1262,13 +1252,11 @@ function renderAccessAdminTable() {
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
-    const hostCell = showHost
-      ? `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
-          accessAdminClientChangedEmails.has(item.email)
-            ? `<span class="st2-access-admin-host-attn" title="Cambió de equipo">⚠</span> `
-            : ""
-        }${escapeHtml(hostLabel)}</td>`
-      : "";
+    const hostCell = `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
+      accessAdminClientChangedEmails.has(item.email)
+        ? `<span class="st2-access-admin-host-attn" title="Cambió de equipo">⚠</span> `
+        : ""
+    }${escapeHtml(hostLabel)}</td>`;
     const ownerActions = isPrimarySuperAdmin();
     const extraActions = item.isPending
       ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
@@ -1283,11 +1271,11 @@ function renderAccessAdminTable() {
           <span class="st2-access-admin-email" title="${escapeHtml(item.email)}">${escapeHtml(displayName)}</span>
           ${badgeHtml}
         </div>
+        ${permsHtml}
       </td>
-      <td class="st2-access-admin-mods-cell">${permsHtml}</td>
+      ${hostCell}
       <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
       <td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
-      ${hostCell}
       <td class="st2-access-admin-actions-cell">
         ${extraActions}
       </td>
@@ -2594,7 +2582,9 @@ accessAdminModFilterButtons.forEach((btn) => {
     if (!key) return;
     if (accessAdminModFilters.has(key)) accessAdminModFilters.delete(key);
     else accessAdminModFilters.add(key);
-    btn.classList.toggle("is-active", accessAdminModFilters.has(key));
+    const on = accessAdminModFilters.has(key);
+    btn.classList.toggle("is-active", on);
+    btn.classList.toggle("active", on);
     renderAccessAdminTable();
   });
 });
