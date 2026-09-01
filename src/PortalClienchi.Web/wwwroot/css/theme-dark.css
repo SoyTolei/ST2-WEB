@@ -1880,6 +1880,12 @@ html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="cl"].is-active
   color: #fca5a5 !important;
 }
 
+html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="adm"].is-active {
+  border-color: #f59e0b !important;
+  background: #78350f !important;
+  color: #fcd34d !important;
+}
+
 html.st2-theme-dark .st2-access-admin-panel-top,
 html.st2-theme-dark .st2-access-admin-panel-foot {
   border-color: #334155 !important;
@@ -1922,6 +1928,14 @@ html.st2-theme-dark .st2-access-admin-perm-sys--cl.is-on {
   color: #fca5a5 !important;
   opacity: 1 !important;
   box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.35) !important;
+}
+
+html.st2-theme-dark .st2-access-admin-perm-sys--adm.is-on {
+  border-color: #f59e0b !important;
+  background: linear-gradient(180deg, #92400e 0%, #78350f 100%) !important;
+  color: #fcd34d !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.38) !important;
 }
 
 html.st2-theme-dark .st2-access-admin-perm-extra.role-sadm {
