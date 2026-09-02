@@ -499,6 +499,15 @@
   display: none !important;
 }
 
+#planillas-hero-titan-img.planillas-hero-titan {
+  object-fit: contain;
+}
+
+.planillas-hero.has-titan-peek:hover #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
+  object-fit: contain;
+  object-position: center bottom;
+}
+
 .planillas-hero.is-easter-banner {
   padding: 10px 12px 12px;
 }

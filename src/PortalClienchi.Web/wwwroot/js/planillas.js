@@ -1874,6 +1874,10 @@ function syncEasterBalloons(egg) {
   }
 }
 
+function isTitanPeekImage(peekSrc) {
+  return /\.(gif|png|jpe?g|webp|avif)(\?|$)/i.test(String(peekSrc || ""));
+}
+
 function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = resolvePlanillasEgg(email);
@@ -1917,7 +1921,9 @@ function syncPlanillasHeroEaster() {
   syncEasterBalloons(showEgg ? egg : null);
   const hero = document.querySelector("#planillas-menu .planillas-hero");
   const titan = document.getElementById("planillas-hero-titan");
+  const titanImg = document.getElementById("planillas-hero-titan-img");
   const peek = !!(showEgg && egg?.peekSrc);
+  const peekImage = peek && isTitanPeekImage(egg.peekSrc);
   hero?.classList.toggle("has-titan-peek", peek);
   if (titan) {
     const srcEl = document.getElementById("planillas-hero-titan-src");
@@ -1925,7 +1931,7 @@ function syncPlanillasHeroEaster() {
     titan.defaultMuted = true;
     titan.playsInline = true;
     titan.loop = true;
-    if (peek) {
+    if (peek && !peekImage) {
       if (titan.dataset.peekSrc !== egg.peekSrc) {
         if (srcEl) srcEl.src = egg.peekSrc;
         else titan.src = egg.peekSrc;
@@ -1934,11 +1940,26 @@ function syncPlanillasHeroEaster() {
       }
     } else {
       titan.pause();
+      if (srcEl) srcEl.removeAttribute("src");
       titan.removeAttribute("src");
+      delete titan.dataset.peekSrc;
       titan.load();
     }
-    titan.classList.toggle("is-hidden", !peek);
-    titan.setAttribute("aria-hidden", peek ? "false" : "true");
+    titan.classList.toggle("is-hidden", !peek || peekImage);
+    titan.setAttribute("aria-hidden", peek && !peekImage ? "false" : "true");
+  }
+  if (titanImg) {
+    if (peek && peekImage) {
+      if (titanImg.dataset.peekSrc !== egg.peekSrc) {
+        titanImg.src = egg.peekSrc;
+        titanImg.dataset.peekSrc = egg.peekSrc;
+      }
+    } else {
+      titanImg.removeAttribute("src");
+      delete titanImg.dataset.peekSrc;
+    }
+    titanImg.classList.toggle("is-hidden", !peek || !peekImage);
+    titanImg.setAttribute("aria-hidden", peek && peekImage ? "false" : "true");
   }
   bindTitanPeekHover();
 }
@@ -1954,7 +1975,7 @@ function bindTitanPeekHover() {
   });
   hero.addEventListener("mouseleave", () => {
     const titan = document.getElementById("planillas-hero-titan");
-    if (!titan) return;
+    if (!titan || titan.classList.contains("is-hidden")) return;
     titan.pause();
     try {
       titan.currentTime = 0;
