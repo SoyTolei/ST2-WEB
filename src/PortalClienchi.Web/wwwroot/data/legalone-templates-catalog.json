@@ -34,28 +34,22 @@
                   "section": "acceso"
                 },
                 {
-                  "id": "ticketServicio",
-                  "label": "¿Se solicitó ticket de servicio?",
-                  "type": "toggle-card",
-                  "section": "acceso"
-                },
-                {
                   "id": "pasos",
-                  "label": "Pasos (Steps)",
+                  "label": "Pasos",
                   "type": "textarea",
                   "placeholder": "",
                   "section": "detalle"
                 },
                 {
                   "id": "found",
-                  "label": "Resultado encontrado (Found Result)",
+                  "label": "Resultado encontrado",
                   "type": "textarea",
                   "placeholder": "",
                   "section": "detalle"
                 },
                 {
                   "id": "expected",
-                  "label": "Resultado esperado (Expected Result)",
+                  "label": "Resultado esperado",
                   "type": "textarea",
                   "placeholder": "",
                   "section": "detalle"
@@ -1991,7 +1985,7 @@
                 },
                 {
                   "id": "found",
-                  "label": "Resultado encontrado (Found result)",
+                  "label": "Resultado encontrado",
                   "type": "textarea",
                   "placeholder": "",
                   "section": "resultados",
@@ -1999,7 +1993,7 @@
                 },
                 {
                   "id": "expected",
-                  "label": "Resultado esperado (Expected result)",
+                  "label": "Resultado esperado",
                   "type": "textarea",
                   "placeholder": "",
                   "section": "resultados",

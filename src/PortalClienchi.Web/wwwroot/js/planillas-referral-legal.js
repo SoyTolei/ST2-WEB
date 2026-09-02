@@ -67,8 +67,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-one-n2";
-  const url = base.includes("?") ? base : `${base}?v=legal-one-n2`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-one-n2b";
+  const url = base.includes("?") ? base : `${base}?v=legal-one-n2b`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -532,15 +532,13 @@ function buildLegalOneN2Text(values, evidenciaEnlaces = []) {
   lines.push(`Login: ${highqInforma(v("login"))}`);
   lines.push(`Contraseña: ${highqInforma(v("password"))}`);
   lines.push("");
-  lines.push(`Ticket de servicio: ${/^s[ií]$/i.test(v("ticketServicio")) ? "Sí" : "No se informa"}`);
-  lines.push("");
-  lines.push("Steps:");
+  lines.push("Pasos:");
   lines.push(highqInforma(v("pasos")));
   lines.push("");
-  lines.push("Found Result:");
+  lines.push("Resultado encontrado:");
   lines.push(highqInforma(v("found")));
   lines.push("");
-  lines.push("Expected Result:");
+  lines.push("Resultado esperado:");
   lines.push(highqInforma(v("expected")));
   lines.push("");
   lines.push("Anexos/Evidencias:");
