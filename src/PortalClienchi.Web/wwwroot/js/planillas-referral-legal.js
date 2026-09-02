@@ -16,11 +16,11 @@ const LEGAL_ICONS = {
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
 
 const LEGAL_SECTION_LABELS = {
-  descripcion: "Descripción del caso",
   checklist: "Checklist",
-  adjuntos: "Adjuntos y evidencias",
+  descripcion: "Descripción y reproducción",
   found: "Resultado encontrado",
   expected: "Resultado esperado",
+  adjuntos: "Evidencias visuales",
 };
 
 const LEGAL_EVID_ACCEPT = "image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,.xml,application/xml,text/xml,.log,.har,application/json";
@@ -63,8 +63,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-n2b";
-  const url = base.includes("?") ? base : `${base}?v=highq-n2b`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-n2c";
+  const url = base.includes("?") ? base : `${base}?v=highq-n2c`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -370,23 +370,24 @@ function validateTemplate(template) {
   return missing;
 }
 
-function legalSectionDivider(title) {
-  return [
-    "--------------------------------------------",
-    `${title}:`,
-    "--------------------------------------------",
-  ];
+function mapHighqNa(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/^(n\/?a|na|n\.a\.?)$/i.test(text) || text === "N/A") return "No aplicable";
+  return text;
 }
 
-function formatStepsBlock(pasos, url) {
+function mapHighqAfectaUsuario(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  if (/^no$/i.test(text)) return "No";
+  if (/^sí\b|^si\b/i.test(text)) return text.replace(/^si\b/i, "Sí");
+  return `Sí - ${text}`;
+}
+
+function formatHighqSteps(pasos, url) {
   const raw = String(pasos || "").trim();
-  if (!raw) {
-    return [
-      "⚠️ NO INFORMADO",
-      "(Se recomienda completar este campo",
-      "antes de escalar a N2)",
-    ].join("\n");
-  }
+  if (!raw) return "";
   const lines = [];
   for (const line of raw.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -397,72 +398,78 @@ function formatStepsBlock(pasos, url) {
   return lines.join("\n");
 }
 
-function buildHighqN2Text(values, evidenciaEnlaces = [], productLabel = "HIGHQ") {
+function evidenciaFileNames(evidenciaEnlaces = []) {
+  if (evidenciaEnlaces.length) {
+    return evidenciaEnlaces.map((item) => item?.nombre || item?.name || "archivo");
+  }
+  return legalHubEvidenciaFiles.map((file) => file.name);
+}
+
+function buildHighqN2Text(values, evidenciaEnlaces = []) {
   const v = (id) => String(values[id] || "").trim();
-  const hasEvidencias = evidenciaEnlaces.length > 0 || legalHubEvidenciaFiles.length > 0;
-  let incompleteCount = 0;
-  const optional = (value, warn = "⚠️ NO INFORMADO") => {
+  const names = evidenciaFileNames(evidenciaEnlaces);
+  const hasEvidencias = names.length > 0;
+  let incomplete = false;
+
+  const mark = (value, warn = "No informado") => {
     const text = String(value || "").trim();
-    if (!text) incompleteCount += 1;
-    return text || warn;
+    if (text) return text;
+    incomplete = true;
+    return warn;
   };
-  const optionalFem = (value) => optional(value, "⚠️ NO INFORMADA");
 
   const lines = [];
-  lines.push("============================================");
-  lines.push(`     ESCALACIÓN N2 - TICKET ${String(productLabel || "HIGHQ").trim().toUpperCase()}`);
-  lines.push("============================================");
+  lines.push(`*Descripción/Asunto:* ${mark(v("descripcion"), "⚠️ No informada")}`);
   lines.push("");
-  lines.push("DESCRIPCIÓN/ASUNTO:");
-  lines.push(v("asunto"));
-  if (v("descripcion")) lines.push(v("descripcion"));
-  lines.push("");
-  lines.push(...legalSectionDivider("CHECKLIST"));
-  lines.push(`1. URL del cliente: ${optionalFem(v("url"))}`);
-  lines.push(`2. Usuario creado para N2: ${optional(v("usuarioN2"))}`);
-  lines.push(`3. ¿Afecta usuario específico?: ${optional(v("afectaUsuario"))}`);
-  lines.push(`4. Frecuencia: ${optionalFem(v("frecuencia"))}`);
-  lines.push(`5. Archivo HAR adjunto: ${optional(v("har"))}`);
-  lines.push(`6. Template del sitio adjunto: ${optional(v("templateSitio"))}`);
-  lines.push(`7. Template iSheet adjunto: ${optional(v("templateISheet"))}`);
-  lines.push(`8. Evidencias visuales: ${hasEvidencias ? "Sí" : "⚠️ NO - Sin adjuntos"}`);
-  if (!hasEvidencias) incompleteCount += 1;
-  lines.push("");
-  lines.push(...legalSectionDivider("PASO A PASO REALIZADO"));
-  lines.push(formatStepsBlock(v("pasos"), v("url")));
-  lines.push("");
-  lines.push(...legalSectionDivider("FOUND RESULT"));
-  if (v("found")) {
-    lines.push(v("found"));
+  lines.push("*Passo a Passo/Checklist:*");
+  lines.push(`1. URL del cliente: ${mark(v("url"), "⚠️ No informada")}`);
+  lines.push(`2. Usuario creado para N2: ${mark(v("usuarioN2"))}`);
+  lines.push(`3. ¿Problema ocurre solo con usuario específico?: ${mark(mapHighqAfectaUsuario(v("afectaUsuario")))}`);
+  lines.push(`4. Frecuencia: ${mark(v("frecuencia"))}`);
+  lines.push(`5. Archivo HAR adjunto: ${mark(mapHighqNa(v("har")))}`);
+  lines.push(`6. Template del sitio adjunto: ${mark(mapHighqNa(v("templateSitio")))}`);
+  lines.push(`7. Template iSheet adjunto: ${mark(mapHighqNa(v("templateISheet")))}`);
+  if (hasEvidencias) {
+    lines.push(`8. Evidencias visuales adjuntas: Sí - ${names.join(", ")}`);
   } else {
-    incompleteCount += 1;
-    lines.push("⚠️ Sin descripción detallada del error.");
-    if (v("asunto")) {
-      lines.push(`Solo se indica: ${v("asunto")}`);
-    }
+    incomplete = true;
+    lines.push("8. Evidencias visuales adjuntas: ⚠️ No - Sin adjuntos");
   }
   lines.push("");
-  lines.push(...legalSectionDivider("EXPECTED RESULT"));
-  lines.push(optional(v("expected")));
+  lines.push("*Steps:*");
+  const steps = formatHighqSteps(v("pasos"), v("url"));
+  if (steps) {
+    lines.push(steps);
+  } else {
+    incomplete = true;
+    lines.push("⚠️ No informado - Completar antes de escalar a N2");
+  }
   lines.push("");
-  lines.push(...legalSectionDivider("ADJUNTOS"));
-  if (evidenciaEnlaces.length) {
-    evidenciaEnlaces.forEach((item) => {
-      const name = item?.nombre || item?.name || "Archivo";
-      const url = item?.url || "";
-      lines.push(url ? `- ${name}: ${url}` : `- ${name}`);
-    });
-  } else if (legalHubEvidenciaFiles.length) {
-    legalHubEvidenciaFiles.forEach((file) => lines.push(`- ${file.name}`));
+  lines.push("*Found result:*");
+  if (v("found")) {
+    lines.push(v("found"));
+    if (hasEvidencias) {
+      lines.push(`Evidencias: Ver ${names.join(", ")} adjunto${names.length === 1 ? "" : "s"}`);
+    }
+  } else {
+    incomplete = true;
+    lines.push("⚠️ Sin descripción detallada del error.");
+  }
+  lines.push("");
+  lines.push("*Expected results:*");
+  lines.push(mark(v("expected"), "⚠️ No informado"));
+  lines.push("");
+  lines.push("*Anexos/Evidencias:*");
+  if (hasEvidencias) {
+    names.forEach((name) => lines.push(`- ${name} ✅`));
   } else {
     lines.push("- Sin adjuntos ⚠️");
   }
-  if (incompleteCount > 0) {
+  if (incomplete) {
     lines.push("");
     lines.push("============================================");
-    lines.push(`⚠️ ATENCIÓN: Este ticket tiene ${incompleteCount} campo${incompleteCount === 1 ? "" : "s"}`);
-    lines.push("sin completar. Se recomienda revisar");
-    lines.push("antes de escalar a N2.");
+    lines.push("⚠️ ATENCIÓN: Ticket con campos incompletos.");
+    lines.push("Revisar antes de escalar a N2.");
     lines.push("============================================");
   }
   return lines.join("\n");
@@ -571,7 +578,7 @@ function collectValues(template) {
 
 async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnlaces = []) {
   if (template.outputFormat === "highq-n2") {
-    return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces, productLabel);
+    return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces);
   }
   return buildTemplateText(template, productLabel);
 }

@@ -1956,34 +1956,13 @@
             {
               "title": "Plantilla - Escalamiento HighQ N2/N3",
               "outputFormat": "highq-n2",
-              "requiredFields": ["asunto", "descripcion", "pasos"],
+              "requiredFields": ["descripcion"],
               "fields": [
-                {
-                  "id": "asunto",
-                  "label": "Asunto/Error *",
-                  "type": "text",
-                  "placeholder": "Resumen del problema principal",
-                  "section": "descripcion"
-                },
-                {
-                  "id": "descripcion",
-                  "label": "Descripción del caso *",
-                  "type": "textarea",
-                  "placeholder": "Detalle completo del problema",
-                  "section": "descripcion"
-                },
-                {
-                  "id": "pasos",
-                  "label": "Paso a paso realizado *",
-                  "type": "textarea",
-                  "placeholder": "Ej.: Acceder al sitio\nAcceder al módulo: iSheet XPTO\nEjecutar acción: …\nResultado obtenido: …",
-                  "section": "descripcion"
-                },
                 {
                   "id": "url",
                   "label": "URL del cliente",
                   "type": "text",
-                  "placeholder": "https://cliente.highq.com/",
+                  "placeholder": "https://empresa.highq.com",
                   "section": "checklist"
                 },
                 {
@@ -2002,7 +1981,7 @@
                 },
                 {
                   "id": "frecuencia",
-                  "label": "Frecuencia del problema",
+                  "label": "Frecuencia",
                   "type": "select",
                   "options": ["Siempre", "Intermitente", "Una vez"],
                   "section": "checklist"
@@ -2029,10 +2008,18 @@
                   "section": "checklist"
                 },
                 {
-                  "id": "evidencias",
-                  "label": "Evidencias visuales",
-                  "type": "file",
-                  "section": "adjuntos"
+                  "id": "descripcion",
+                  "label": "Descripción del problema *",
+                  "type": "textarea",
+                  "placeholder": "Resumen del problema (Descripción/Asunto)",
+                  "section": "descripcion"
+                },
+                {
+                  "id": "pasos",
+                  "label": "Paso a paso para reproducir",
+                  "type": "textarea",
+                  "placeholder": "Acceder al sitio…\nAcceder al módulo…\nAbrir un registro…\nHacer clic en Guardar…\nResultado: …",
+                  "section": "descripcion"
                 },
                 {
                   "id": "found",
@@ -2047,10 +2034,16 @@
                   "type": "textarea",
                   "placeholder": "Qué debería pasar",
                   "section": "expected"
+                },
+                {
+                  "id": "evidencias",
+                  "label": "Evidencias visuales",
+                  "type": "file",
+                  "section": "adjuntos"
                 }
               ],
               "blocks": [
-                "Solo son obligatorios Asunto, Descripción y Paso a paso. El resto se completa en la planilla con advertencias si queda vacío."
+                "Solo es obligatorio completar Descripción del problema. El resto se completa en la planilla con advertencias si queda vacío."
               ],
               "actions": [
                 "Vista previa",
