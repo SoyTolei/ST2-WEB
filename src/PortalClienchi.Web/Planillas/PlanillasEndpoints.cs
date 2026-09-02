@@ -98,7 +98,7 @@ public static class PlanillasEndpoints
                         catalogCategoryId = i.CatalogCategoryId,
                     }),
                 }),
-                templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=legal-one-onedrive",
+                templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=legal-westlaw-cocounsel",
             },
             chile = new
             {

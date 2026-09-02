@@ -35,14 +35,14 @@
                 },
                 {
                   "id": "pasos",
-                  "label": "Pasos",
+                  "label": "Pasos realizados",
                   "type": "textarea",
                   "placeholder": "",
                   "section": "detalle"
                 },
                 {
                   "id": "found",
-                  "label": "Resultado encontrado",
+                  "label": "Resultado observado",
                   "type": "textarea",
                   "placeholder": "",
                   "section": "detalle"
@@ -56,7 +56,7 @@
                 },
                 {
                   "id": "evidencias",
-                  "label": "Evidencias visuales",
+                  "label": "Evidencia",
                   "type": "onedrive-link",
                   "placeholder": "Si subiste las evidencias a OneDrive, pegá el link compartido acá",
                   "section": "adjuntos"
@@ -2062,22 +2062,73 @@
           "label": "Westlaw",
           "templates": [
             {
-              "title": "Plantilla - Bug Westlaw",
+              "outputFormat": "westlaw-n2",
               "fields": [
-                { "id": "", "label": "", "type": "checkbox", "placeholder": "" },
-                { "id": "", "label": "Descripción del bug *", "type": "text", "placeholder": "Ej: Error al buscar jurisprudencia" },
-                { "id": "", "label": "URL del cliente *", "type": "text", "placeholder": "https://..." },
-                { "id": "", "label": "Usuario *", "type": "text", "placeholder": "Ej: usuario@cliente.com" },
-                { "id": "", "label": "Pasos para reproducir *", "type": "textarea", "placeholder": "Describí los pasos para reproducir el problema..." },
-                { "id": "", "label": "Resultado encontrado *", "type": "textarea", "placeholder": "Describí el comportamiento encontrado..." },
-                { "id": "", "label": "Resultado esperado *", "type": "textarea", "placeholder": "Describí el comportamiento esperado..." }
+                {
+                  "id": "mailCiam",
+                  "label": "Mail registrado en CIAM",
+                  "type": "text",
+                  "placeholder": "",
+                  "section": "acceso"
+                },
+                {
+                  "id": "sapId",
+                  "label": "SAP ID",
+                  "type": "text",
+                  "placeholder": "",
+                  "section": "acceso"
+                },
+                {
+                  "id": "materialesSap",
+                  "label": "Materiales SAP",
+                  "type": "text",
+                  "placeholder": "",
+                  "section": "acceso"
+                },
+                {
+                  "id": "descripcion",
+                  "label": "Descripción de la incidencia",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "pasos",
+                  "label": "Pasos realizados",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "found",
+                  "label": "Resultado observado",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "expected",
+                  "label": "Resultado esperado",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "evidencias",
+                  "label": "Evidencia",
+                  "type": "onedrive-link",
+                  "placeholder": "Si subiste las evidencias a OneDrive, pegá el link compartido acá",
+                  "section": "adjuntos"
+                }
               ],
-              "blocks": [
-                "Completá el formulario y hacé clic en \"Vista previa\" para ver la planilla"
+              "blocks": [],
+              "actions": [
+                "Vista previa",
+                "Limpiar",
+                "Copiar"
               ],
-              "actions": ["Generar plantilla", "Limpiar", "Copiar"],
               "id": "bug",
-              "label": "Bug"
+              "label": "Escalamiento a N2/N3"
             }
           ]
         }
@@ -2092,23 +2143,52 @@
           "label": "CoCounsel",
           "templates": [
             {
-              "title": "Plantilla - Bug CoCounsel",
+              "outputFormat": "cocounsel-n2",
               "fields": [
-                { "id": "", "label": "", "type": "checkbox", "placeholder": "" },
-                { "id": "", "label": "Descripción del bug *", "type": "text", "placeholder": "Ej: Error al generar respuesta con IA" },
-                { "id": "", "label": "URL del cliente *", "type": "text", "placeholder": "https://..." },
-                { "id": "", "label": "Usuario *", "type": "text", "placeholder": "Ej: usuario@cliente.com" },
-                { "id": "", "label": "Consulta o prompt utilizado (Opcional)", "type": "textarea", "placeholder": "Pegá la consulta o prompt si aplica..." },
-                { "id": "", "label": "Pasos para reproducir *", "type": "textarea", "placeholder": "Describí los pasos para reproducir el problema..." },
-                { "id": "", "label": "Resultado encontrado *", "type": "textarea", "placeholder": "Describí el comportamiento encontrado..." },
-                { "id": "", "label": "Resultado esperado *", "type": "textarea", "placeholder": "Describí el comportamiento esperado..." }
+                {
+                  "id": "descripcion",
+                  "label": "Descripción de la incidencia",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "pasos",
+                  "label": "Pasos realizados",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "found",
+                  "label": "Resultado observado",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "expected",
+                  "label": "Resultado esperado",
+                  "type": "textarea",
+                  "placeholder": "",
+                  "section": "detalle"
+                },
+                {
+                  "id": "evidencias",
+                  "label": "Evidencia",
+                  "type": "onedrive-link",
+                  "placeholder": "Si subiste las evidencias a OneDrive, pegá el link compartido acá",
+                  "section": "adjuntos"
+                }
               ],
-              "blocks": [
-                "Completá el formulario y hacé clic en \"Vista previa\" para ver la planilla"
+              "blocks": [],
+              "actions": [
+                "Vista previa",
+                "Limpiar",
+                "Copiar"
               ],
-              "actions": ["Generar plantilla", "Limpiar", "Copiar"],
               "id": "bug",
-              "label": "Bug"
+              "label": "Escalamiento a N2/N3"
             }
           ]
         }

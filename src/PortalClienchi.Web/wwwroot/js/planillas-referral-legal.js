@@ -16,6 +16,8 @@ const LEGAL_ICONS = {
 
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
 
+const LEGAL_N2_FORMATS = new Set(["highq-n2", "legal-one-n2", "westlaw-n2", "cocounsel-n2"]);
+
 const LEGAL_SECTION_LABELS = {
   minimo: "Datos del entorno",
   descripcion: "Descripción y reproducción",
@@ -68,8 +70,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-one-onedrive";
-  const url = base.includes("?") ? base : `${base}?v=legal-one-onedrive`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-westlaw-cocounsel";
+  const url = base.includes("?") ? base : `${base}?v=legal-westlaw-cocounsel`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -212,7 +214,7 @@ function fieldLabelHtml(field, index, template) {
 function renderField(field, index, template) {
   if (field.type === "checkbox" && !field.label) return "";
   const key = fieldKey(field, index);
-  const req = template?.outputFormat === "highq-n2" || template?.outputFormat === "legal-one-n2"
+  const req = LEGAL_N2_FORMATS.has(template?.outputFormat)
     ? ""
     : (fieldRequired(field, template) ? " required" : "");
   const labelHtml = fieldLabelHtml(field, index, template);
@@ -593,78 +595,124 @@ function formatHighqUsuarioN2(values) {
   return highqInforma(n2);
 }
 
-function buildLegalOneN2Text(values) {
-  const v = (id) => String(values[id] || "").trim();
-  const evidenciaLinks = collectOnedriveLinks("evidencias");
+function appendLegalReferralSection(lines, title) {
+  lines.push("==========================================");
+  lines.push(title);
+}
+
+function appendLegalReferralLine(lines, label, value) {
+  lines.push(`${label}: ${highqInforma(value)}`);
+}
+
+function appendLegalReferralBlock(lines, label, value) {
+  lines.push("");
+  lines.push(`${label}:`);
+  lines.push(highqInforma(value));
+}
+
+function buildLegalOnedriveAdjuntos(groupId = "evidencias") {
+  const links = collectOnedriveLinks(groupId);
+  if (!links.length) return ["- Evidencia OneDrive: No se informa"];
+  return links.map((link, index) => (
+    `- Evidencia OneDrive${links.length > 1 ? ` ${index + 1}` : ""}: ${link}`
+  ));
+}
+
+function buildLegalReferralShell(productLabel, bodyLines, adjuntoLines = []) {
   const lines = [];
-  lines.push(`URL: ${highqInforma(v("url"))}`);
-  lines.push(`Login: ${highqInforma(v("login"))}`);
-  lines.push(`Contraseña: ${highqInforma(v("password"))}`);
+  appendLegalReferralSection(lines, "DATOS DEL SISTEMA 🖥️");
+  lines.push("SISTEMA: LEGAL");
+  lines.push(`PRODUCTO: ${String(productLabel || "LEGAL").trim().toUpperCase()}`);
+  lines.push(`TIPO DE ESCALAMIENTO: ${LEGAL_ESCALAMIENTO_LABEL.toUpperCase()}`);
   lines.push("");
-  lines.push("Pasos:");
-  lines.push(highqInforma(v("pasos")));
+  appendLegalReferralSection(lines, "DETALLES DEL CASO 📝");
   lines.push("");
-  lines.push("Resultado encontrado:");
-  lines.push(highqInforma(v("found")));
+  lines.push(...bodyLines);
   lines.push("");
-  lines.push("Resultado esperado:");
-  lines.push(highqInforma(v("expected")));
-  lines.push("");
-  lines.push("Anexos/Evidencias:");
-  if (evidenciaLinks.length) {
-    evidenciaLinks.forEach((link) => lines.push(`- ${link}`));
-  } else {
-    lines.push("- No se informa");
-  }
+  appendLegalReferralSection(lines, "ADJUNTOS 🗃️");
+  lines.push(...(adjuntoLines.length ? adjuntoLines : ["- No se informa"]));
+  lines.push("==========================================");
   return lines.join("\n");
 }
 
-function buildHighqN2Text(values, evidenciaEnlaces = []) {
+function buildLegalOneN2Text(values, productLabel = "Legal One") {
+  const v = (id) => String(values[id] || "").trim();
+  const body = [];
+  appendLegalReferralLine(body, "URL", v("url"));
+  appendLegalReferralLine(body, "LOGIN", v("login"));
+  appendLegalReferralLine(body, "CONTRASEÑA", v("password"));
+  appendLegalReferralBlock(body, "PASOS REALIZADOS", v("pasos"));
+  appendLegalReferralBlock(body, "RESULTADO OBSERVADO", v("found"));
+  appendLegalReferralBlock(body, "RESULTADO ESPERADO", v("expected"));
+  return buildLegalReferralShell(productLabel, body, buildLegalOnedriveAdjuntos("evidencias"));
+}
+
+function buildWestlawN2Text(values, productLabel = "Westlaw") {
+  const v = (id) => String(values[id] || "").trim();
+  const body = [];
+  appendLegalReferralLine(body, "MAIL REGISTRADO EN CIAM", v("mailCiam"));
+  appendLegalReferralLine(body, "SAP ID", v("sapId"));
+  appendLegalReferralLine(body, "MATERIALES SAP", v("materialesSap"));
+  appendLegalReferralBlock(body, "DESCRIPCIÓN DE LA INCIDENCIA", v("descripcion"));
+  appendLegalReferralBlock(body, "PASOS REALIZADOS", v("pasos"));
+  appendLegalReferralBlock(body, "RESULTADO OBSERVADO", v("found"));
+  appendLegalReferralBlock(body, "RESULTADO ESPERADO", v("expected"));
+  return buildLegalReferralShell(productLabel, body, buildLegalOnedriveAdjuntos("evidencias"));
+}
+
+function buildCocounselN2Text(values, productLabel = "CoCounsel") {
+  const v = (id) => String(values[id] || "").trim();
+  const body = [];
+  appendLegalReferralBlock(body, "DESCRIPCIÓN DE LA INCIDENCIA", v("descripcion"));
+  appendLegalReferralBlock(body, "PASOS REALIZADOS", v("pasos"));
+  appendLegalReferralBlock(body, "RESULTADO OBSERVADO", v("found"));
+  appendLegalReferralBlock(body, "RESULTADO ESPERADO", v("expected"));
+  return buildLegalReferralShell(productLabel, body, buildLegalOnedriveAdjuntos("evidencias"));
+}
+
+function buildHighqN2Text(values, evidenciaEnlaces = [], productLabel = "HighQ") {
   const v = (id) => String(values[id] || "").trim();
   const names = evidenciaFileNames(evidenciaEnlaces);
   const hasEvidencias = names.length > 0;
 
-  const lines = [];
-  lines.push(`*Descripción/Asunto:* ${highqInforma(v("descripcion"))}`);
-  lines.push("");
-  lines.push("*Passo a Passo/Checklist:*");
-  lines.push(`1. URL del cliente: ${highqInforma(v("url"))}`);
-  lines.push(`2. Usuario creado para N2: ${formatHighqUsuarioN2(values)}`);
+  const body = [];
+  body.push(`DESCRIPCIÓN/ASUNTO: ${highqInforma(v("descripcion"))}`);
+  body.push("");
+  body.push("PASSO A PASSO/CHECKLIST:");
+  body.push(`1. URL del cliente: ${highqInforma(v("url"))}`);
+  body.push(`2. Usuario creado para N2: ${formatHighqUsuarioN2(values)}`);
   const afecta = mapHighqAfectaUsuario(v("afectaUsuario"));
-  lines.push(`3. ¿Problema ocurre solo con usuario específico?: ${afecta || "No se informa"}`);
-  lines.push(`4. Frecuencia: ${highqInforma(v("frecuencia"))}`);
+  body.push(`3. ¿Problema ocurre solo con usuario específico?: ${afecta || "No se informa"}`);
+  body.push(`4. Frecuencia: ${highqInforma(v("frecuencia"))}`);
   const har = v("har") ? (mapHighqNa(v("har")) || v("har")) : "No se informa";
-  lines.push(`5. Archivo HAR adjunto: ${har}`);
+  body.push(`5. Archivo HAR adjunto: ${har}`);
   const tplSitio = v("templateSitio") ? (mapHighqNa(v("templateSitio")) || v("templateSitio")) : "No se informa";
   const tplISheet = v("templateISheet") ? (mapHighqNa(v("templateISheet")) || v("templateISheet")) : "No se informa";
-  lines.push(`6. Template del sitio adjunto: ${tplSitio}`);
-  lines.push(`7. Template iSheet adjunto: ${tplISheet}`);
-  lines.push(`8. Evidencias visuales adjuntas: ${hasEvidencias ? `Sí - ${names.join(", ")}` : "No se informa"}`);
-  lines.push("");
-  lines.push("*Steps:*");
+  body.push(`6. Template del sitio adjunto: ${tplSitio}`);
+  body.push(`7. Template iSheet adjunto: ${tplISheet}`);
+  body.push(`8. Evidencias visuales adjuntas: ${hasEvidencias ? `Sí - ${names.join(", ")}` : "No se informa"}`);
+  body.push("");
+  body.push("STEPS:");
   const steps = formatHighqSteps(v("pasos"), v("url"));
-  lines.push(steps || "No se informa");
-  lines.push("");
-  lines.push("*Found result:*");
+  body.push(steps || "No se informa");
+  body.push("");
+  body.push("FOUND RESULT:");
   if (v("found")) {
-    lines.push(v("found"));
+    body.push(v("found"));
     if (hasEvidencias) {
-      lines.push(`Evidencias: Ver ${names.join(", ")} adjunto${names.length === 1 ? "" : "s"}`);
+      body.push(`Evidencias: Ver ${names.join(", ")} adjunto${names.length === 1 ? "" : "s"}`);
     }
   } else {
-    lines.push("No se informa");
+    body.push("No se informa");
   }
-  lines.push("");
-  lines.push("*Expected results:*");
-  lines.push(highqInforma(v("expected")));
-  lines.push("");
-  lines.push("*Anexos/Evidencias:*");
-  if (hasEvidencias) {
-    names.forEach((name) => lines.push(`- ${name} ✅`));
-  } else {
-    lines.push("- No se informa");
-  }
-  return lines.join("\n");
+  body.push("");
+  body.push("EXPECTED RESULT:");
+  body.push(highqInforma(v("expected")));
+
+  const adjuntos = hasEvidencias
+    ? names.map((name) => `- ${name}`)
+    : ["- Evidencias visuales: No se informa"];
+  return buildLegalReferralShell(productLabel, body, adjuntos);
 }
 
 function showTemplateForm(product, item, template) {
@@ -716,7 +764,7 @@ function showTemplateForm(product, item, template) {
   requestAnimationFrame(() => root.classList.add("is-ready"));
 
   const runGenerate = async ({ copy = false } = {}) => {
-    if (template.outputFormat !== "highq-n2" && template.outputFormat !== "legal-one-n2") {
+    if (!LEGAL_N2_FORMATS.has(template.outputFormat)) {
       const missing = validateTemplate(template);
       if (missing.length) {
         setStatus(`Completá los campos obligatorios: ${missing.join(", ")}.`, true);
@@ -776,39 +824,31 @@ function collectValues(template) {
 }
 
 async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnlaces = []) {
+  const values = collectValuesById(template);
   if (template.outputFormat === "highq-n2") {
-    return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces);
+    return buildHighqN2Text(values, evidenciaEnlaces, productLabel);
   }
   if (template.outputFormat === "legal-one-n2") {
-    return buildLegalOneN2Text(collectValuesById(template));
+    return buildLegalOneN2Text(values, productLabel);
+  }
+  if (template.outputFormat === "westlaw-n2") {
+    return buildWestlawN2Text(values, productLabel);
+  }
+  if (template.outputFormat === "cocounsel-n2") {
+    return buildCocounselN2Text(values, productLabel);
   }
   return buildTemplateText(template, productLabel);
 }
 
 function buildTemplateText(template, productLabel = "") {
   const values = collectValues(template);
-  const lines = [];
-  lines.push("==========================================");
-  lines.push("DATOS DEL CLIENTE 🪪");
-  if (productLabel) lines.push(`PRODUCTO: ${productLabel.trim().toUpperCase()}`);
-  lines.push(`TIPO DE ESCALAMIENTO: ${LEGAL_ESCALAMIENTO_LABEL.toUpperCase()}`);
-  lines.push("==========================================");
-  lines.push("DETALLES DEL CASO 📝");
-  lines.push("");
+  const body = [];
   for (const { label, value } of values) {
     if (!value) continue;
-    if (label) {
-      lines.push(`${label.trim().toUpperCase()}: ${value}`);
-    } else {
-      lines.push(value);
-    }
+    if (label) body.push(`${label.trim().toUpperCase()}: ${value}`);
+    else body.push(value);
   }
-  lines.push("");
-  lines.push("==========================================");
-  lines.push("INFORMACIÓN ADICIONAL");
-  lines.push("");
-  lines.push("==========================================");
-  return lines.join("\n");
+  return buildLegalReferralShell(productLabel, body.length ? body : ["- No se informa"]);
 }
 
 function setStatus(msg, isError = false) {
