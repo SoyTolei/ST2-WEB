@@ -16,29 +16,144 @@ function sistemaLabel(sistema) {
   return map[sistema] || sistema || "Planillas";
 }
 
-const TOUR_LABELS = {
-  welcome: "Bienvenida ST²",
-  "thom-tab": "THOM",
-  "ai-tab": "AI Platform",
-  "portal-tab": "Portal Cliente",
-  "oportunidad-menu": "Oportunidad",
-  "oportunidad-cargar": "Cargar oportunidad",
-  "oportunidad-gestor": "Gestor oportunidades",
-  "pdf-portal": "Generador PDF",
-  blanqueo: "Blanqueo",
-  "borrado-bases": "Borrado de bases",
-  "chile-soporte": "Soporte Chile",
-  "referral-legal-hub": "LEGAL · productos",
-  "referral-legal-form": "LEGAL · escalamiento",
+function buildTopNavTabSteps({ includeBarIntro = false } = {}) {
+  const steps = [];
+
+  if (includeBarIntro && visible(".tab-bar")) {
+    steps.push({
+      selector: ".tab-bar",
+      title: "Pestañas de arriba",
+      body: "Desde acá cambiás de módulo en ST². Empezá por Planillas; THOM, IA y Portal Cliente están al lado según tu perfil.",
+      placement: "bottom",
+    });
+  }
+
+  if (visible('.tab-btn[data-tab="planillas"]')) {
+    steps.push({
+      selector: '.tab-btn[data-tab="planillas"]',
+      title: "Sistema de Planillas",
+      body: "Acá trabajás el día a día: transferencias, referrals, oportunidades y herramientas según tu perfil. Es el punto de partida de ST².",
+      placement: "bottom",
+    });
+  }
+
+  if (visible('.tab-btn[data-tab="thom"]')) {
+    steps.push({
+      selector: '.tab-btn[data-tab="thom"]',
+      title: "THOM",
+      body: "Portal Thomson para consultas del cliente. Elegí SQL/ONVIO, LEGAL o Chile según el caso.",
+      placement: "bottom",
+    });
+  }
+
+  if (visible('.tab-btn[data-tab="ai"]')) {
+    steps.push({
+      selector: '.tab-btn[data-tab="ai"]',
+      title: "AI Platform",
+      body: "Herramientas de IA de Thomson integradas en el navegador, sin salir de ST².",
+      placement: "bottom",
+    });
+  }
+
+  if (visible("#tabPortalBtn")) {
+    steps.push({
+      selector: "#tabPortalBtn",
+      title: "Portal Cliente",
+      body: "Acceso al portal del cliente según el sistema que tengas habilitado.",
+      placement: "bottom",
+    });
+  }
+
+  return steps;
+}
+
+const MENU_MODULO_COPY = {
+  transferencia: {
+    BejermanSql:
+      "Derivá el caso entre mesas (Técnico, Flex, SaaS…). Completá cliente, módulo Bejerman, ambiente, asunto, descripción, capturas y backups SQL si corresponde. Al final copiás la planilla al ticket.",
+    OnvioWeb:
+      "Derivá casos ONVIO o Bejerman Web entre mesas. Indicá producto web, tenant, pantalla afectada, pasos y capturas. La planilla queda lista para pegar en el comentario del ticket.",
+    Chile:
+      "Derivá casos del flujo Chile entre mesas. Incluí RUT, producto local (Hyperrenta, etc.), síntoma claro y capturas. Copiás el texto generado al ticket de soporte.",
+  },
+  referral: {
+    BejermanSql:
+      "Escalamiento a I+D o N2 cuando el caso requiere desarrollo. Indicá versión y módulo Bejerman, asunto, descripción, paso a paso, planilla técnica, MAM, SDK y adjuntos según lo revisado.",
+    OnvioWeb:
+      "Escalamiento ONVIO/WEB a desarrollo o N2. Marcá si reproduciste el caso, si hay ticket de servicio y qué pantallas adjuntás. El TXT unifica sistema, detalle y adjuntos.",
+    Chile:
+      "Escalamiento a desarrollo o N2 del producto chileno. Elegí Hyperrenta u otro producto, año, RUT, versión y detallá pasos. Podés marcar pantallas o bases que vas a adjuntar.",
+    Legal:
+      "En LEGAL el referral se hace por producto: elegís HighQ, Legal One, Westlaw o CoCounsel y completás la plantilla N2/N3 con evidencias en OneDrive.",
+  },
+  oportunidad: {
+    BejermanSql:
+      "Registrá un lead comercial de Bejerman SQL: contacto, cliente, teléfono, horarios y descripción. Podés mejorar el texto con IA y generar PDF para el equipo comercial.",
+    OnvioWeb:
+      "Registrá oportunidades de venta ONVIO/WEB. Cargá datos del contacto y la consulta; desde el gestor confirmás seguimiento o exportás el registro.",
+    Chile:
+      "Registrá oportunidades del mercado Chile con los mismos datos de contacto y descripción. El gestor centraliza lo cargado por el equipo.",
+  },
+  pdfPortal: {
+    OnvioWeb:
+      "Armá PDFs listos para el Portal Cliente a partir de los datos del caso ONVIO/WEB: cliente, producto y detalle sin armar el documento a mano.",
+    BejermanSql:
+      "Generá PDFs para el Portal Cliente con los datos del caso Bejerman. Completá el formulario y descargá el archivo para enviar o adjuntar.",
+  },
+  blanqueo: {
+    OnvioWeb:
+      "Pedí blanqueo de contraseñas en ONVIO, On Balance o Portal Cliente. Indicá plataforma, número de caso y usuario; seguís el estado de cada solicitud en el listado.",
+  },
+  borradoBases: {
+    OnvioWeb:
+      "Solicitá borrado de bases web (IVA, SJ, CG). Completá cliente, bases afectadas y contacto; operaciones procesa el pedido y ves el avance acá.",
+  },
 };
 
-export function tourLabelForId(tourId) {
-  if (!tourId) return "Ver tutorial";
-  if (TOUR_LABELS[tourId]) return TOUR_LABELS[tourId];
-  if (tourId.startsWith("planillas-menu:")) return `Menú · ${sistemaLabel(tourId.split(":")[1])}`;
-  if (tourId.startsWith("transferencia:")) return `Transferencia · ${sistemaLabel(tourId.split(":")[1])}`;
-  if (tourId.startsWith("referral:")) return `Referral · ${sistemaLabel(tourId.split(":")[1])}`;
-  return "Ver tutorial";
+const LEGAL_PRODUCT_COPY = {
+  firm: {
+    title: "Legal One",
+    body: "Gestión jurídica y expedientes. Abrís el escalamiento N2/N3 con datos del entorno, descripción, pasos para reproducir y links de OneDrive para evidencias.",
+  },
+  highq: {
+    title: "HighQ",
+    body: "Colaboración y proyectos legales. La plantilla N2/N3 pide entorno, detalle del caso, resultados y evidencias como links de OneDrive (sin subir archivos pesados acá).",
+  },
+  westlaw: {
+    title: "Westlaw",
+    body: "Investigación legal. Escalamiento N2/N3 con contexto de la consulta, pasos realizados, resultado observado vs esperado y capturas en OneDrive.",
+  },
+  cocounsel: {
+    title: "CoCounsel",
+    body: "Asistente de IA legal. Documentá el prompt, el comportamiento observado, pasos de reproducción y evidencias de la sesión en OneDrive para N2/N3.",
+  },
+};
+
+const CHILE_SOPORTE_COPY = {
+  ".chile-saad": {
+    title: "SAAD · Facturación",
+    body: "Administración de documentos y facturación electrónica Chile. Consultá emisiones, errores SAAD y trámites sin abrir otra pestaña.",
+  },
+  ".chile-hr": {
+    title: "HR Consola Intranet",
+    body: "Consola de Recursos Humanos / Hyperrenta para consultas internas del equipo Chile. Se abre embebida dentro de ST².",
+  },
+  ".chile-wiki": {
+    title: "Wiki errores comunes",
+    body: "Base de conocimiento con soluciones frecuentes del soporte Chile. Buscá el error antes de escalar o derivar.",
+  },
+  ".chile-lp": {
+    title: "Servicios LP Contabilidad",
+    body: "Framework LP para procesos contables locales. Acceso directo a herramientas y servicios del ecosistema Chile.",
+  },
+  ".chile-powerapps": {
+    title: "PowerApps Chile",
+    body: "Aplicaciones internas en Power Platform (formularios y flujos del equipo Chile). Útil para trámites y registros específicos.",
+  },
+};
+
+export function tourLabelForId() {
+  return "Tutorial";
 }
 
 export function tourIdForReferralView(ctx) {
@@ -77,60 +192,26 @@ export function resolveCurrentTourId(ctx = {}) {
 export function buildWelcomeTour(ctx) {
   const steps = [
     {
-      selector: '.tab-btn[data-tab="planillas"]',
-      title: "Sistema de Planillas",
-      body: "Acá trabajás el día a día: transferencias, referrals, oportunidades y herramientas según tu perfil. Es el punto de partida de ST².",
+      selector: "#themeToggleBtn",
+      title: "Tema claro u oscuro",
+      body: "Cambiá el modo visual cuando quieras. La preferencia queda guardada en este navegador.",
       placement: "bottom",
+      when: () => visible("#themeToggleBtn"),
+    },
+    {
+      selector: "#st2-tour-header-btn",
+      title: "Tutorial",
+      body: "Este botón repite el tutorial de la pantalla en la que estás. En Planillas verás primero las pestañas de arriba y cada módulo de tu sistema.",
+      placement: "bottom",
+      when: () => visible("#st2-tour-header-btn"),
     },
   ];
-
-  if (visible('.tab-btn[data-tab="thom"]')) {
-    steps.push({
-      selector: '.tab-btn[data-tab="thom"]',
-      title: "THOM",
-      body: "Portal Thomson para consultas del cliente. Elegí SQL/ONVIO, LEGAL o Chile según el caso.",
-      placement: "bottom",
-    });
-  }
-
-  if (visible('.tab-btn[data-tab="ai"]')) {
-    steps.push({
-      selector: '.tab-btn[data-tab="ai"]',
-      title: "AI Platform",
-      body: "Herramientas de IA de Thomson integradas en el navegador, sin salir de ST².",
-      placement: "bottom",
-    });
-  }
-
-  if (visible("#tabPortalBtn")) {
-    steps.push({
-      selector: "#tabPortalBtn",
-      title: "Portal Cliente",
-      body: "Acceso al portal del cliente según el sistema que tengas habilitado.",
-      placement: "bottom",
-    });
-  }
-
-  steps.push({
-    selector: "#themeToggleBtn",
-    title: "Tema claro u oscuro",
-    body: "Cambiá el modo visual cuando quieras. La preferencia queda guardada en este navegador.",
-    placement: "bottom",
-  });
-
-  steps.push({
-    selector: "#st2-tour-header-btn",
-    title: "Tutorial contextual",
-    body: "Este botón siempre muestra el tutorial de la pantalla en la que estás. Si tenés dudas, apretalo de nuevo.",
-    placement: "bottom",
-    when: () => visible("#st2-tour-header-btn"),
-  });
 
   if (!visible("#st2-tour-header-btn")) {
     steps.push({
       center: true,
       title: "Tutorial siempre disponible",
-      body: "Cuando ingreses a un módulo, vas a ver un botón «Ver tutorial» arriba, al lado de tu correo.",
+      body: "Cuando ingreses a Planillas u otro módulo, vas a ver el botón «Tutorial» arriba, al lado de tu correo.",
     });
   }
 
@@ -139,13 +220,13 @@ export function buildWelcomeTour(ctx) {
 
 export function buildPlanillasMenuTour(ctx, sistema) {
   const label = sistemaLabel(sistema);
-  const steps = [];
+  const steps = [...buildTopNavTabSteps({ includeBarIntro: true })];
 
   if (visible("#plan-sistema-section")) {
     steps.push({
       selector: "#plan-sistema-section",
-      title: "Paso 1 · Elegí el sistema",
-      body: `Antes de abrir un módulo, confirmá que estás en ${label}. Cada sistema tiene sus propias planillas y campos.`,
+      title: "Elegí el sistema",
+      body: `Confirmá que estás en ${label}. Cada píldora (SQL, ONVIO/WEB, LEGAL, Chile) tiene sus propias planillas, campos y módulos habilitados para tu perfil.`,
       placement: "bottom",
     });
   }
@@ -154,18 +235,16 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-modulo-transferencia",
       title: "Transferencia de Casos",
-      body: "Usala para derivar un caso entre mesas (Técnico, Flex, SaaS…). Completás datos del cliente, descripción, capturas y copiás la planilla al ticket.",
+      body: MENU_MODULO_COPY.transferencia[sistema] || MENU_MODULO_COPY.transferencia.BejermanSql,
       placement: "top",
     });
   }
 
-  if (visible('[data-plan-modulo="referral"]')) {
+  if (visible('[data-plan-modulo="referral"]') && sistema !== "Legal") {
     steps.push({
       selector: '[data-plan-modulo="referral"]',
       title: "Referral I+D",
-      body: sistema === "Chile"
-        ? "Escalamiento a desarrollo o N2 con datos del producto chileno (Hyperrenta, etc.)."
-        : "Escalamiento a desarrollo o N2/N3. La planilla se genera lista para pegar en el ticket.",
+      body: MENU_MODULO_COPY.referral[sistema] || MENU_MODULO_COPY.referral.BejermanSql,
       placement: "top",
     });
   }
@@ -174,7 +253,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-modulo-oportunidad",
       title: "Oportunidad de Venta",
-      body: "Registrá leads comerciales: cargá una oportunidad nueva o revisá las ya cargadas en el gestor.",
+      body: MENU_MODULO_COPY.oportunidad[sistema] || MENU_MODULO_COPY.oportunidad.BejermanSql,
       placement: "top",
     });
   }
@@ -183,7 +262,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-modulo-pdf-portal",
       title: "Generador de PDFs",
-      body: "Armá PDFs para el Portal Cliente a partir de los datos del caso.",
+      body: MENU_MODULO_COPY.pdfPortal[sistema] || MENU_MODULO_COPY.pdfPortal.OnvioWeb,
       placement: "top",
     });
   }
@@ -192,7 +271,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-modulo-blanqueo",
       title: "Blanqueo de accesos",
-      body: "Solicitá blanqueo de contraseñas en ONVIO, On Balance o Portal Cliente. Seguís el estado desde el mismo módulo.",
+      body: MENU_MODULO_COPY.blanqueo.OnvioWeb,
       placement: "top",
     });
   }
@@ -201,7 +280,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-modulo-borrado-bases",
       title: "Borrado de bases",
-      body: "Pedí el borrado de bases web (IVA, SJ, CG). El flujo te guía con los datos que necesita operaciones.",
+      body: MENU_MODULO_COPY.borradoBases.OnvioWeb,
       placement: "top",
     });
   }
@@ -210,8 +289,19 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-legal-products-wrap",
       title: "Productos LEGAL",
-      body: "En LEGAL no hay un solo Referral: elegís el producto (HighQ, Legal One, Westlaw, CoCounsel) y completás la plantilla N2/N3 correspondiente.",
+      body: MENU_MODULO_COPY.referral.Legal,
       placement: "top",
+    });
+
+    Object.entries(LEGAL_PRODUCT_COPY).forEach(([productId, copy]) => {
+      const selector = `[data-legal-menu-product="${productId}"]`;
+      steps.push({
+        selector,
+        title: copy.title,
+        body: copy.body,
+        placement: "top",
+        when: () => visible(selector),
+      });
     });
   }
 
@@ -219,15 +309,25 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-chile-soporte-wrap",
       title: "Soporte técnico Chile",
-      body: "Accesos embebidos a SAAD, Hyperrenta, Wiki, LP y PowerApps sin salir de ST².",
+      body: "Accesos embebidos a herramientas del equipo Chile. Cada botón abre la herramienta dentro de ST²; usá «Volver» para regresar al menú.",
       placement: "top",
+    });
+
+    Object.entries(CHILE_SOPORTE_COPY).forEach(([selector, copy]) => {
+      steps.push({
+        selector,
+        title: copy.title,
+        body: copy.body,
+        placement: "top",
+        when: () => visible(selector),
+      });
     });
   }
 
   steps.push({
     selector: "#st2-tour-header-btn",
-    title: "¿Dudas después?",
-    body: "El botón de arriba repite este tutorial del menú, o el de cada módulo cuando entres a uno.",
+    title: "Tutorial",
+    body: "El botón de arriba repite este recorrido cuando lo necesites. Cada pantalla tiene su propio tutorial según lo que tengas habilitado.",
     placement: "left",
     when: () => visible("#st2-tour-header-btn"),
   });
@@ -236,14 +336,23 @@ export function buildPlanillasMenuTour(ctx, sistema) {
 }
 
 export function buildTransferenciaTour(ctx, sistema) {
-  const sys = sistemaLabel(sistema);
+  const introBySistema = {
+    BejermanSql:
+      "Elegí la mesa destino (Técnico, Flex, SaaS…) y completá cliente, módulo Bejerman, versión y ambiente. Los campos visibles dependen de la derivación.",
+    OnvioWeb:
+      "Elegí la mesa destino y completá producto ONVIO/WEB, tenant, usuario y pantalla afectada. Revisá que el contexto web quede claro para quien recibe.",
+    Chile:
+      "Elegí la mesa destino y completá RUT, producto Chile y datos del caso. Incluí todo lo que la mesa necesite para retomar sin llamarte.",
+    Legal:
+      "Completá los datos de derivación del caso LEGAL según la mesa destino y el producto involucrado.",
+  };
   return {
     id: `transferencia:${sistema}`,
     steps: [
       {
         selector: "#plan-trans-standard-fields, #plan-trans-legal-panel",
         title: "Datos de derivación",
-        body: `Elegí la mesa destino y completá los campos de ${sys}: cliente, producto, ambiente u otros según corresponda.`,
+        body: introBySistema[sistema] || introBySistema.BejermanSql,
         placement: "bottom",
       },
       {
@@ -290,27 +399,35 @@ export function buildTransferenciaTour(ctx, sistema) {
 
 export function buildReferralStandardTour(ctx, sistema) {
   const sys = sistemaLabel(sistema);
+  const asuntoCopy = {
+    BejermanSql:
+      "Los tres campos centrales del referral SQL: asunto breve, descripción del problema y paso a paso para reproducir. Incluí versión y módulo en el contexto.",
+    OnvioWeb:
+      "Asunto, descripción y pasos en ONVIO/WEB. Indicá tenant, pantalla y qué probaste; el N2 debe poder reproducir sin volver a preguntarte.",
+    Chile:
+      "Asunto, descripción y pasos del producto Chile. Detallá RUT, año y versión en el cuerpo si no están en campos separados.",
+  };
   return {
     id: `referral:${sistema}`,
     steps: [
       {
         selector: "#ref-bejerman-panel",
         title: "Versión y módulo",
-        body: "En Bejerman SQL indicá versión y módulo afectado. Eso define el contexto del escalamiento.",
+        body: "En Bejerman SQL indicá versión y módulo afectado (contabilidad, sueldos, etc.). Eso define el contexto del escalamiento a I+D o N2.",
         placement: "bottom",
         when: () => visible("#ref-bejerman-panel"),
       },
       {
         selector: "#ref-chile-panel",
         title: "Producto Chile",
-        body: "Elegí el producto (Hyperrenta, etc.), año, RUT y versión. Completá los campos que aparecen según el producto.",
+        body: "Elegí el producto (Hyperrenta, etc.), año, RUT y versión. Los campos extra aparecen según el producto seleccionado.",
         placement: "bottom",
         when: () => visible("#ref-chile-panel"),
       },
       {
         selector: "#ref-asunto",
         title: "Asunto, descripción y pasos",
-        body: `Los tres campos centrales del referral en ${sys}. El paso a paso debe permitir reproducir el caso sin llamarte.`,
+        body: asuntoCopy[sistema] || `Los tres campos centrales del referral en ${sys}. El paso a paso debe permitir reproducir el caso sin llamarte.`,
         placement: "bottom",
         when: () => visible("#ref-standard-flow"),
       },
@@ -324,21 +441,21 @@ export function buildReferralStandardTour(ctx, sistema) {
       {
         selector: "#ref-bejerman-post",
         title: "Comprobaciones (Bejerman)",
-        body: "Marcá planilla técnica, MAM, SDK y adjuntos según lo que revisaste. Perfil técnico desbloquea más opciones.",
+        body: "Marcá planilla técnica, MAM, SDK y adjuntos según lo que revisaste en el cliente. El perfil técnico desbloquea más opciones de comprobación.",
         placement: "top",
         when: () => visible("#ref-bejerman-post"),
       },
       {
         selector: "#ref-onvio-panel",
         title: "Comprobaciones (ONVIO)",
-        body: "Indicá si reproduciste el caso, si hay ticket de servicio y si adjuntás pantallas.",
+        body: "Indicá si reproduciste el caso en el tenant del cliente, si ya existe ticket de servicio y si vas a adjuntar pantallas o logs.",
         placement: "top",
         when: () => visible("#ref-onvio-panel"),
       },
       {
         selector: "#ref-chile-post",
         title: "Adjuntos Chile",
-        body: "Marcá si adjuntás pantallas o bases según lo que vayas a subir al ticket.",
+        body: "Marcá si adjuntás pantallas, bases o archivos del producto chileno. Eso orienta a N2 sobre qué esperar en el ticket.",
         placement: "top",
         when: () => visible("#ref-chile-post"),
       },
@@ -354,29 +471,42 @@ export function buildReferralStandardTour(ctx, sistema) {
 }
 
 export function buildReferralLegalHubTour() {
-  return {
-    id: "referral-legal-hub",
-    steps: [
-      {
-        selector: "#ref-legal-hub-root",
-        title: "Elegí el producto",
-        body: "HighQ, Legal One, Westlaw o CoCounsel. Cada uno tiene su plantilla de escalamiento N2/N3.",
-        placement: "bottom",
-      },
-      {
-        selector: "#ref-legal-templates-root",
-        title: "Plantilla de escalamiento",
-        body: "Seleccioná la plantilla (por ejemplo «Escalamiento a N2/N3»). Se abre el formulario con las secciones que pide soporte.",
-        placement: "top",
-        when: () => visible("#ref-legal-templates"),
-      },
-      {
-        center: true,
-        title: "Evidencias en OneDrive",
-        body: "En LEGAL las evidencias van como links de OneDrive (botón + para agregar más). No hace falta subir archivos pesados acá.",
-      },
-    ],
-  };
+  const steps = [
+    {
+      selector: "#ref-legal-hub-root",
+      title: "Elegí el producto",
+      body: "Cada producto LEGAL tiene su plantilla N2/N3. Elegí el que corresponda al caso antes de completar el formulario.",
+      placement: "bottom",
+    },
+  ];
+
+  Object.entries(LEGAL_PRODUCT_COPY).forEach(([productId, copy]) => {
+    const selector = `[data-legal-product="${productId}"]`;
+    steps.push({
+      selector,
+      title: copy.title,
+      body: copy.body,
+      placement: "top",
+      when: () => visible(selector),
+    });
+  });
+
+  steps.push(
+    {
+      selector: "#ref-legal-templates-root",
+      title: "Plantilla de escalamiento",
+      body: "Seleccioná la plantilla (por ejemplo «Escalamiento a N2/N3»). Se abre el formulario con las secciones que pide soporte.",
+      placement: "top",
+      when: () => visible("#ref-legal-templates"),
+    },
+    {
+      center: true,
+      title: "Evidencias en OneDrive",
+      body: "En LEGAL las evidencias van como links de OneDrive (botón + para agregar más). No hace falta subir archivos pesados acá.",
+    },
+  );
+
+  return { id: "referral-legal-hub", steps };
 }
 
 export function buildReferralLegalFormTour() {

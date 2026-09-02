@@ -57,10 +57,9 @@ export function syncHeaderTourButton() {
   btn.dataset.tourId = tourId || "";
 
   if (show) {
-    const label = tourLabelForId(tourId);
-    labelEl.textContent = label;
-    btn.title = `Ver tutorial: ${label}`;
-    btn.setAttribute("aria-label", `Ver tutorial: ${label}`);
+    labelEl.textContent = "Tutorial";
+    btn.title = "Tutorial";
+    btn.setAttribute("aria-label", "Tutorial");
   }
 }
 
