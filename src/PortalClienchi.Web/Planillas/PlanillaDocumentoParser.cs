@@ -14,6 +14,10 @@ public static class PlanillaDocumentoKeys
     public const string Telefono = "telefono";
     public const string Correo = "correo";
     public const string Horarios = "horarios";
+    public const string LegalDescripcion = "descripcion";
+    public const string LegalPasos = "pasos";
+    public const string LegalFound = "found";
+    public const string LegalExpected = "expected";
 }
 
 public static class PlanillaDocumentoParser
@@ -64,6 +68,72 @@ public static class PlanillaDocumentoParser
             result[PlanillaDocumentoKeys.Descripcion] = desc;
 
         return result;
+    }
+
+    public static IReadOnlyDictionary<string, string> ParseLegalN2(string documento)
+    {
+        var bloque = ExtractBlock(documento, "DETALLES DEL CASO", "==========================================");
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var fields = new (string Label, string Key)[]
+        {
+            ("DESCRIPCIÓN DE LA INCIDENCIA:", PlanillaDocumentoKeys.LegalDescripcion),
+            ("PASOS REALIZADOS:", PlanillaDocumentoKeys.LegalPasos),
+            ("RESULTADO OBSERVADO:", PlanillaDocumentoKeys.LegalFound),
+            ("RESULTADO ESPERADO:", PlanillaDocumentoKeys.LegalExpected),
+        };
+
+        foreach (var field in fields)
+        {
+            var stopLabels = fields
+                .Where(f => !string.Equals(f.Label, field.Label, StringComparison.OrdinalIgnoreCase))
+                .Select(f => f.Label)
+                .ToArray();
+            if (TryMultilineLegalField(bloque, field.Label, stopLabels, out var value))
+                result[field.Key] = value;
+        }
+
+        return result;
+    }
+
+    private static bool TryMultilineLegalField(string text, string label, string[] stopLabels, out string value)
+    {
+        value = "";
+        var lines = text.Split('\n');
+        var capture = false;
+        var buffer = new List<string>();
+
+        foreach (var raw in lines)
+        {
+            var line = raw.TrimEnd();
+            if (!capture)
+            {
+                if (line.TrimStart().StartsWith(label, StringComparison.OrdinalIgnoreCase))
+                {
+                    var rest = line.Trim();
+                    var inline = rest[label.Length..].Trim();
+                    if (inline.Length > 0)
+                        buffer.Add(inline);
+                    capture = true;
+                }
+
+                continue;
+            }
+
+            var trimmed = line.TrimStart();
+            if (line.StartsWith("========", StringComparison.Ordinal)
+                || line.StartsWith("────────────────", StringComparison.Ordinal)
+                || trimmed.StartsWith("PASO A PASO", StringComparison.OrdinalIgnoreCase)
+                || stopLabels.Any(s => trimmed.StartsWith(s, StringComparison.OrdinalIgnoreCase)))
+                break;
+
+            if (line.Length == 0 && buffer.Count == 0)
+                continue;
+
+            buffer.Add(line);
+        }
+
+        value = string.Join(Environment.NewLine, buffer).Trim();
+        return value.Length > 0;
     }
 
     private static void TryRegexField(string documento, string pattern, string key, Dictionary<string, string> result)

@@ -257,6 +257,11 @@ public sealed class ReferralMejorarRequest
     public ReferralGenerateRequest Form { get; set; } = new();
 }
 
+public sealed class LegalMejorarRequest
+{
+    public string Documento { get; set; } = "";
+}
+
 public sealed class OportunidadCargaRequest
 {
     public string Sistema { get; set; } = "";

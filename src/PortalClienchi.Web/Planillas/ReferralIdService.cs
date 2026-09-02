@@ -247,11 +247,16 @@ public sealed class ReferralIdService
 
     public async Task<string> MejorarConIaAsync(ReferralIdCase caso, CancellationToken ct = default)
     {
+        var documento = ReferralIdTextBuilder.Build(caso);
+        return await MejorarDocumentoConIaAsync(documento, ct).ConfigureAwait(false);
+    }
+
+    public async Task<string> MejorarDocumentoConIaAsync(string documento, CancellationToken ct = default)
+    {
         using var ia = new RedaccionIaService(_settings.RedaccionIa);
         if (!ia.IsConfigured)
             throw new InvalidOperationException("La redacción con IA no está configurada.");
 
-        var documento = ReferralIdTextBuilder.Build(caso);
         return await ia.MejorarDocumentoPlanillaAsync(documento, ct).ConfigureAwait(false);
     }
 

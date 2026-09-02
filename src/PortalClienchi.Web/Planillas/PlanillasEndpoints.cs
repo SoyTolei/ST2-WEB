@@ -98,7 +98,8 @@ public static class PlanillasEndpoints
                         catalogCategoryId = i.CatalogCategoryId,
                     }),
                 }),
-                templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=legal-westlaw-cocounsel",
+                templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=legal-ia-highq-onedrive",
+                iaConfigured = referral.IaConfigured,
             },
             chile = new
             {
@@ -413,6 +414,33 @@ public static class PlanillasEndpoints
                     asunto = parsed.GetValueOrDefault(PlanillaDocumentoKeys.Asunto),
                     descripcion = parsed.GetValueOrDefault(PlanillaDocumentoKeys.Descripcion),
                     pasoAPaso = parsed.GetValueOrDefault(PlanillaDocumentoKeys.PasoAPaso),
+                    texto = mejorado,
+                });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Error al mejorar con IA");
+            }
+        });
+
+        app.MapPost("/api/planillas/legal/mejorar", async (
+            LegalMejorarRequest body,
+            ReferralIdService svc,
+            CancellationToken ct) =>
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(body.Documento))
+                    return Results.BadRequest(new { error = "Falta el documento a mejorar." });
+
+                var mejorado = await svc.MejorarDocumentoConIaAsync(body.Documento, ct).ConfigureAwait(false);
+                var parsed = PlanillaDocumentoParser.ParseLegalN2(mejorado);
+                return Results.Ok(new
+                {
+                    descripcion = parsed.GetValueOrDefault(PlanillaDocumentoKeys.LegalDescripcion),
+                    pasos = parsed.GetValueOrDefault(PlanillaDocumentoKeys.LegalPasos),
+                    found = parsed.GetValueOrDefault(PlanillaDocumentoKeys.LegalFound),
+                    expected = parsed.GetValueOrDefault(PlanillaDocumentoKeys.LegalExpected),
                     texto = mejorado,
                 });
             }

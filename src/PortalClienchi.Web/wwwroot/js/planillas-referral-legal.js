@@ -4,6 +4,7 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 import { canSeeLegalProduct } from "./module-access.js";
 import { syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { normalizeOnedriveUrl, setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
+import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -37,6 +38,9 @@ let templatesCatalog = null;
 let openedFromMenu = false;
 let legalHubEventsBound = false;
 let legalHubEvidenciaFiles = [];
+let legalIaUndo = null;
+let legalIaTemplate = null;
+let legalIaProductLabel = "";
 let navStack = { product: null, item: null, category: null, template: null };
 
 const LEGAL_PRODUCT_BTN_CLASS = {
@@ -70,8 +74,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-westlaw-cocounsel";
-  const url = base.includes("?") ? base : `${base}?v=legal-westlaw-cocounsel`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-ia-highq-onedrive";
+  const url = base.includes("?") ? base : `${base}?v=legal-ia-highq-onedrive`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -670,15 +674,13 @@ function buildCocounselN2Text(values, productLabel = "CoCounsel") {
   return buildLegalReferralShell(productLabel, body, buildLegalOnedriveAdjuntos("evidencias"));
 }
 
-function buildHighqN2Text(values, evidenciaEnlaces = [], productLabel = "HighQ") {
+function buildHighqN2Text(values, productLabel = "HighQ") {
   const v = (id) => String(values[id] || "").trim();
-  const names = evidenciaFileNames(evidenciaEnlaces);
-  const hasEvidencias = names.length > 0;
 
   const body = [];
-  body.push(`DESCRIPCIÓN/ASUNTO: ${highqInforma(v("descripcion"))}`);
+  appendLegalReferralBlock(body, "DESCRIPCIÓN DE LA INCIDENCIA", v("descripcion"));
   body.push("");
-  body.push("PASSO A PASSO/CHECKLIST:");
+  body.push("PASO A PASO / CHECKLIST:");
   body.push(`1. URL del cliente: ${highqInforma(v("url"))}`);
   body.push(`2. Usuario creado para N2: ${formatHighqUsuarioN2(values)}`);
   const afecta = mapHighqAfectaUsuario(v("afectaUsuario"));
@@ -690,29 +692,86 @@ function buildHighqN2Text(values, evidenciaEnlaces = [], productLabel = "HighQ")
   const tplISheet = v("templateISheet") ? (mapHighqNa(v("templateISheet")) || v("templateISheet")) : "No se informa";
   body.push(`6. Template del sitio adjunto: ${tplSitio}`);
   body.push(`7. Template iSheet adjunto: ${tplISheet}`);
-  body.push(`8. Evidencias visuales adjuntas: ${hasEvidencias ? `Sí - ${names.join(", ")}` : "No se informa"}`);
-  body.push("");
-  body.push("STEPS:");
-  const steps = formatHighqSteps(v("pasos"), v("url"));
-  body.push(steps || "No se informa");
-  body.push("");
-  body.push("FOUND RESULT:");
-  if (v("found")) {
-    body.push(v("found"));
-    if (hasEvidencias) {
-      body.push(`Evidencias: Ver ${names.join(", ")} adjunto${names.length === 1 ? "" : "s"}`);
-    }
-  } else {
-    body.push("No se informa");
-  }
-  body.push("");
-  body.push("EXPECTED RESULT:");
-  body.push(highqInforma(v("expected")));
+  appendLegalReferralBlock(body, "PASOS REALIZADOS", formatHighqSteps(v("pasos"), v("url")));
+  appendLegalReferralBlock(body, "RESULTADO OBSERVADO", v("found"));
+  appendLegalReferralBlock(body, "RESULTADO ESPERADO", v("expected"));
 
-  const adjuntos = hasEvidencias
-    ? names.map((name) => `- ${name}`)
-    : ["- Evidencias visuales: No se informa"];
-  return buildLegalReferralShell(productLabel, body, adjuntos);
+  return buildLegalReferralShell(productLabel, body, buildLegalOnedriveAdjuntos("evidencias"));
+}
+
+function legalIaSupported(template) {
+  return LEGAL_N2_FORMATS.has(template?.outputFormat);
+}
+
+function getLegalIaFieldDefs(template) {
+  const allowed = new Set(["descripcion", "pasos", "found", "expected"]);
+  return (template?.fields || [])
+    .map((field, index) => ({ field, index }))
+    .filter(({ field }) => allowed.has(field.id) && field.type === "textarea")
+    .map(({ field, index }) => ({ id: fieldKey(field, index) }));
+}
+
+async function mejorarLegalReferralIa() {
+  const status = document.getElementById("ref-legal-form-status");
+  const btn = document.getElementById("ref-legal-btn-ia");
+  if (!legalIaTemplate) return;
+
+  legalIaUndo?.saveSnapshot();
+  if (btn) btn.disabled = true;
+  if (status) {
+    status.textContent = "";
+    status.classList.remove("error");
+  }
+
+  try {
+    const documento = buildTemplateText(legalIaTemplate, legalIaProductLabel);
+    const response = await fetch("/api/planillas/legal/mejorar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ documento }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      legalIaUndo?.clearSnapshot();
+      const msg = data.detail || data.title || data.error || `Error ${response.status}`;
+      setStatus(msg, true);
+      alert(msg);
+      return;
+    }
+
+    const fieldMap = [
+      ["descripcion", "descripcion"],
+      ["pasos", "pasos"],
+      ["found", "found"],
+      ["expected", "expected"],
+    ];
+    let updated = 0;
+    for (const [key, fieldId] of fieldMap) {
+      if (!data[key]) continue;
+      const el = document.getElementById(fieldId);
+      if (!el) continue;
+      el.value = data[key];
+      updated += 1;
+    }
+
+    if (updated === 0) {
+      legalIaUndo?.clearSnapshot();
+      const msg = "La IA respondió pero no se pudieron aplicar cambios en los campos.";
+      setStatus(msg, true);
+      alert(msg);
+      return;
+    }
+
+    setStatus("");
+    notifyIaUndoHint("ref-legal-btn-ia-undo");
+  } catch (ex) {
+    legalIaUndo?.clearSnapshot();
+    const msg = ex?.message || "Error al mejorar con IA";
+    setStatus(msg, true);
+    alert(msg);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function showTemplateForm(product, item, template) {
@@ -731,6 +790,15 @@ function showTemplateForm(product, item, template) {
     <div class="plan-legal-form-shell">
       ${blocks}
       <form id="ref-legal-template-form" class="plan-form-grid plan-legal-form-grid" autocomplete="off">${fields}</form>
+      <div class="plan-ia-bar plan-legal-ia-bar">
+        <div class="plan-ia-group" id="ref-legal-ia-group">
+          <button type="button" id="ref-legal-btn-ia" class="btn btn-secondary plan-ia-btn hidden">
+            <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
+            Mejorar redacción con IA
+          </button>
+          <button type="button" id="ref-legal-btn-ia-undo" class="plan-ia-undo-btn hidden" aria-label="Deshacer cambios de la IA" disabled>↩</button>
+        </div>
+      </div>
       ${planFormActionsHtml({
         copyId: "ref-legal-btn-copiar",
         previewId: "ref-legal-btn-ver-planilla",
@@ -741,9 +809,27 @@ function showTemplateForm(product, item, template) {
     </div>
   `;
 
+  legalIaTemplate = template;
+  legalIaProductLabel = product.label;
+  legalIaUndo = bindIaUndoButtons({
+    undoBtnId: "ref-legal-btn-ia-undo",
+    getSnapshot: () => snapshotFields(getLegalIaFieldDefs(template)),
+    onUndo: (snap) => restoreFields(getLegalIaFieldDefs(template), snap),
+  });
+  syncIaUndoBar(
+    "ref-legal-btn-ia",
+    "ref-legal-btn-ia-undo",
+    hubCtx?.getConfig()?.legal?.iaConfigured && legalIaSupported(template),
+  );
+  document.getElementById("ref-legal-btn-ia")?.addEventListener("click", () => {
+    void mejorarLegalReferralIa();
+  });
+  document.getElementById("ref-legal-btn-ia-undo")?.addEventListener("click", () => legalIaUndo?.undo());
+
   document.getElementById("ref-legal-btn-limpar")?.addEventListener("click", () => {
     document.getElementById("ref-legal-template-form")?.reset();
     legalHubEvidenciaFiles = [];
+    legalIaUndo?.clearSnapshot();
     resetLegalOnedriveLists();
     refreshLegalEvidenciaChips();
     refreshLegalEvidenciaEstado();
@@ -776,10 +862,7 @@ function showTemplateForm(product, item, template) {
     try {
       if (btnPreview) btnPreview.disabled = true;
       if (btnCopy) btnCopy.disabled = true;
-      const needsUpload = template.outputFormat === "highq-n2" && legalHubEvidenciaFiles.length;
-      if (needsUpload) setStatus("Subiendo evidencias…");
-      const evidenciaEnlaces = needsUpload ? await uploadLegalEvidencias(legalHubEvidenciaFiles) : [];
-      const text = await buildTemplateTextAsync(template, product.label, evidenciaEnlaces);
+      const text = buildTemplateText(template, product.label);
       if (!text) return "";
       if (copy) {
         await navigator.clipboard.writeText(text);
@@ -823,10 +906,14 @@ function collectValues(template) {
   return values;
 }
 
-async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnlaces = []) {
+async function buildTemplateTextAsync(template, productLabel = "") {
+  return buildTemplateText(template, productLabel);
+}
+
+function buildTemplateText(template, productLabel = "") {
   const values = collectValuesById(template);
   if (template.outputFormat === "highq-n2") {
-    return buildHighqN2Text(values, evidenciaEnlaces, productLabel);
+    return buildHighqN2Text(values, productLabel);
   }
   if (template.outputFormat === "legal-one-n2") {
     return buildLegalOneN2Text(values, productLabel);
@@ -837,13 +924,9 @@ async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnla
   if (template.outputFormat === "cocounsel-n2") {
     return buildCocounselN2Text(values, productLabel);
   }
-  return buildTemplateText(template, productLabel);
-}
-
-function buildTemplateText(template, productLabel = "") {
-  const values = collectValues(template);
+  const labeledValues = collectValues(template);
   const body = [];
-  for (const { label, value } of values) {
+  for (const { label, value } of labeledValues) {
     if (!value) continue;
     if (label) body.push(`${label.trim().toUpperCase()}: ${value}`);
     else body.push(value);
