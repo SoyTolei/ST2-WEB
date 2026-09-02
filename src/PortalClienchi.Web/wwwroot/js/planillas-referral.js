@@ -1,6 +1,6 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
-import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, handleLegalReferralBack } from "./planillas-referral-legal.js";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js";
 import {
   initChileReferral,
   buildChileReferralPanel,
@@ -169,7 +169,7 @@ export async function openReferral({ legalProductId = null } = {}) {
   ctx.showView("referral");
 }
 
-export { syncLegalMenuProducts };
+export { syncLegalMenuProducts, prefetchLegalCatalog };
 
 function sistemaLabel() {
   const id = ctx.getSistema();

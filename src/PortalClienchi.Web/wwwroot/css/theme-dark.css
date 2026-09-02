@@ -2160,6 +2160,16 @@ html.st2-theme-dark .plan-text-preview-body {
   color: #e5e7eb !important;
 }
 
+html.st2-theme-dark .plan-module-loading {
+  background: color-mix(in srgb, var(--panel, #0f0f0f) 88%, transparent);
+  color: var(--text-muted);
+}
+
+html.st2-theme-dark .plan-legal-evid-panel {
+  background: #1c1c1c;
+  border-color: #333;
+}
+
 html.st2-theme-dark .borrado-list-footer,
 html.st2-theme-dark .blanqueo-list-footer {
   border-top-color: #334155 !important;

@@ -548,7 +548,10 @@ function updateSistemaUi() {
     legalProductsWrap.setAttribute("aria-hidden", showLegalProducts ? "false" : "true");
   }
   if (showLegalProducts) {
-    void loadReferralModule().then((mod) => mod.syncLegalMenuProducts?.());
+    void loadReferralModule().then((mod) => {
+      mod.syncLegalMenuProducts?.();
+      mod.prefetchLegalCatalog?.();
+    });
   }
 
   if (oportunidadBtn) {
@@ -1474,10 +1477,15 @@ async function revealView(name, historyMode = "push") {
       showView("menu", { history: "replace" });
       return;
     }
-    openReferralShell(historyMode);
+    const legalProductId = pendingLegalProductId;
+    const legalDirectOpen = isLegal() && !!legalProductId;
+    if (legalDirectOpen) {
+      showView("referral", { history: historyMode });
+    } else {
+      openReferralShell(historyMode);
+    }
     try {
       const mod = await loadReferralModule();
-      const legalProductId = pendingLegalProductId;
       pendingLegalProductId = null;
       await mod.openReferral({ legalProductId });
       showView("referral", { history: historyMode });

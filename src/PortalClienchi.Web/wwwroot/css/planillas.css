@@ -3598,9 +3598,9 @@ body.st2-chile-embed-active #panel-planillas.active {
   justify-content: center;
   gap: 10px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(2px);
-  color: #6b7280;
+  background: color-mix(in srgb, var(--panel, #f4f6fa) 90%, transparent);
+  backdrop-filter: blur(4px);
+  color: var(--text-muted, #6b7280);
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -3616,8 +3616,8 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-module-loading-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #e5e7eb;
-  border-top-color: #1a1f2e;
+  border: 3px solid var(--border, #e5e7eb);
+  border-top-color: var(--primary, #d64000);
   border-radius: 50%;
   animation: planGestorSpin 0.85s linear infinite;
 }
@@ -4647,6 +4647,83 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin-top: 0;
 }
 
+#ref-legal-form-root {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+#ref-legal-form-root.is-ready {
+  opacity: 1;
+  transform: none;
+}
+
+.plan-legal-form-shell {
+  margin-top: 2px;
+}
+
+.plan-legal-form-heading {
+  margin-bottom: 4px;
+  font-size: 1.02rem;
+}
+
+.plan-legal-form-grid {
+  margin-top: 6px;
+}
+
+.plan-legal-section {
+  margin-bottom: 22px;
+}
+
+.plan-legal-section:last-child {
+  margin-bottom: 8px;
+}
+
+.plan-legal-section-body {
+  display: grid;
+  gap: 18px;
+}
+
+.plan-legal-checklist-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.plan-legal-form-grid .plan-field select.plan-select {
+  background: var(--white, #fff);
+  color: var(--dark);
+  font-size: 0.92rem;
+}
+
+.plan-legal-evid-panel {
+  margin-top: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--nav-well, #f8fafc);
+}
+
+.plan-legal-inline-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.plan-legal-inline-spinner {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: planGestorSpin 0.85s linear infinite;
+  flex-shrink: 0;
+}
+
 .plan-legal-product {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -4826,23 +4903,12 @@ body.st2-chile-embed-active #panel-planillas.active {
   color: var(--primary);
 }
 
-/* LEGAL ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ plantillas y formulario (estilo ST2 referral) */
-.plan-legal-form-panel .plan-ref-title { margin-top: 0; }
-.plan-legal-form-panel .plan-form-grid { margin-bottom: 0; }
-.plan-ref-section-title {
-  margin: 18px 0 10px;
-  padding-top: 4px;
-  border-top: 1px solid var(--border);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-.plan-legal-form-panel .plan-ref-section-title:first-of-type {
+/* LEGAL — plantillas y formulario (estilo ST2 referral) */
+.plan-legal-form-shell .plan-ref-title { margin-top: 0; }
+.plan-legal-form-shell .plan-form-grid { margin-bottom: 0; }
+.plan-legal-form-shell .plan-ref-actions {
   margin-top: 8px;
-  border-top: none;
-  padding-top: 0;
+  padding-top: 20px;
 }
 .plan-captura-chip {
   display: inline-flex;
@@ -4871,12 +4937,6 @@ body.st2-chile-embed-active #panel-planillas.active {
   padding: 0 2px;
 }
 .plan-captura-chip-remove:hover { color: var(--primary); }
-.plan-legal-file-field .plan-capturas-panel { margin-top: 6px; }
-.plan-legal-form-actions {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
 .plan-legal-check {
   display: flex;
   align-items: center;
@@ -4979,6 +5039,9 @@ body.st2-chile-embed-active #panel-planillas.active {
   .plan-chile-soporte-grid,
   .plan-legal-products-grid {
     grid-template-columns: 1fr !important;
+  }
+  .plan-legal-checklist-grid {
+    grid-template-columns: 1fr;
   }
   .plan-modulos-grid > * {
     grid-column: auto !important;

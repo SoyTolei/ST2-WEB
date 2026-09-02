@@ -1,4 +1,5 @@
 import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { enhancePlanSelect } from "./plan-custom-select.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { canSeeLegalProduct } from "./module-access.js";
 import { syncPlanModulosGridLayout } from "./plan-grid-layout.js";
@@ -183,18 +184,20 @@ function renderField(field, index) {
   const key = fieldKey(field, index);
   const req = fieldRequired(field) ? " required" : "";
   const label = fieldLabel(field, index);
+  const sectionAttr = field.section ? ` data-legal-section="${field.section}"` : "";
+  const wrap = (inner) => `<div class="plan-field"${sectionAttr}>${inner}</div>`;
   if (field.type === "textarea") {
-    return `<div class="plan-field"><label for="${key}">${label}</label><textarea id="${key}" data-legal-field rows="4" placeholder="${field.placeholder || ""}"${req}></textarea></div>`;
+    return wrap(`<label for="${key}">${label}</label><textarea id="${key}" data-legal-field rows="4" placeholder="${field.placeholder || ""}"${req}></textarea>`);
   }
   if (field.type === "select") {
     const options = (field.options || []).map((opt) => `<option value="${opt}">${opt}</option>`).join("");
-    return `<div class="plan-field"><label for="${key}">${label}</label><select id="${key}" data-legal-field${req}><option value="">Seleccionar…</option>${options}</select></div>`;
+    return wrap(`<label for="${key}">${label}</label><select id="${key}" class="plan-select" data-legal-field${req}><option value="">Seleccionar…</option>${options}</select>`);
   }
   if (field.type === "file") {
     return `
-      <div class="plan-field plan-legal-file-field" data-legal-file-field="${key}">
+      <div class="plan-field plan-legal-file-field"${sectionAttr}>
         <label>${label}</label>
-        <div class="plan-capturas-panel">
+        <div class="plan-capturas-panel plan-legal-evid-panel">
           <p class="plan-capturas-hint">Screenshots, videos, PDF, TXT, logs o HAR. Se suben al generar la vista previa.</p>
           <div class="plan-capturas-actions">
             <button type="button" id="ref-legal-hub-evid-agregar" class="plan-capturas-browse">
@@ -213,23 +216,54 @@ function renderField(field, index) {
   }
   const type = field.type === "checkbox" ? "checkbox" : "text";
   if (type === "checkbox") {
-    return `<label class="plan-field plan-legal-check"><input id="${key}" data-legal-field type="checkbox"/> ${label}</label>`;
+    return `<label class="plan-field plan-legal-check"${sectionAttr}><input id="${key}" data-legal-field type="checkbox"/> ${label}</label>`;
   }
-  return `<div class="plan-field"><label for="${key}">${label}</label><input id="${key}" data-legal-field type="text" placeholder="${field.placeholder || ""}"${req}/></div>`;
+  return wrap(`<label for="${key}">${label}</label><input id="${key}" data-legal-field type="text" placeholder="${field.placeholder || ""}"${req}/>`);
 }
 
 function renderTemplateFields(template) {
+  const fields = template.fields || [];
   let html = "";
-  let lastSection = "";
-  (template.fields || []).forEach((field, index) => {
-    if (field.section && field.section !== lastSection) {
-      const title = LEGAL_SECTION_LABELS[field.section] || field.section;
-      html += `<p class="plan-ref-section-title">${title}</p>`;
-      lastSection = field.section;
-    }
+  let currentSection = null;
+
+  const closeSection = () => {
+    if (!currentSection) return;
+    html += "</div></div>";
+    currentSection = null;
+  };
+
+  const openSection = (sectionId) => {
+    closeSection();
+    currentSection = sectionId;
+    const title = LEGAL_SECTION_LABELS[sectionId] || sectionId;
+    const bodyClass = sectionId === "checklist" ? " plan-legal-checklist-grid" : "";
+    html += `<div class="plan-legal-section" data-legal-section="${sectionId}">`;
+    html += `<p class="plan-ref-title">${title}</p>`;
+    html += `<div class="plan-legal-section-body${bodyClass}">`;
+  };
+
+  fields.forEach((field, index) => {
+    if (field.section && field.section !== currentSection) openSection(field.section);
+    else if (!field.section && currentSection) closeSection();
     html += renderField(field, index);
   });
+  closeSection();
   return html;
+}
+
+function showLegalFormLoading(productLabel = "") {
+  showView("ref-legal-form");
+  const crumb = document.getElementById("ref-legal-form-breadcrumb");
+  if (crumb) crumb.textContent = productLabel ? `${productLabel} › ${LEGAL_ESCALAMIENTO_LABEL}` : "";
+  const root = document.getElementById("ref-legal-form-root");
+  if (!root) return;
+  root.classList.remove("is-ready");
+  root.innerHTML = `
+    <div class="plan-legal-inline-loading" aria-live="polite" aria-busy="true">
+      <span class="plan-legal-inline-spinner" aria-hidden="true"></span>
+      <span>Cargando plantilla…</span>
+    </div>
+  `;
 }
 
 function refreshLegalEvidenciaEstado() {
@@ -399,10 +433,10 @@ function showTemplateForm(product, item, template) {
   const fields = renderTemplateFields(template);
 
   root.innerHTML = `
-    <div class="plan-well-box plan-legal-form-panel">
-      <p class="plan-ref-title">${template.title || template.label}</p>
+    <div class="plan-legal-form-shell">
+      <p class="plan-ref-title plan-legal-form-heading">${template.title || template.label}</p>
       ${blocks}
-      <form id="ref-legal-template-form" class="plan-form-grid" autocomplete="off">${fields}</form>
+      <form id="ref-legal-template-form" class="plan-form-grid plan-legal-form-grid" autocomplete="off">${fields}</form>
       ${planFormActionsHtml({
         copyId: "ref-legal-btn-copiar",
         previewId: "ref-legal-btn-ver-planilla",
@@ -425,7 +459,8 @@ function showTemplateForm(product, item, template) {
   setupLegalEvidenciasPanel();
   mountPlanTextPreview("ref-legal-text-preview");
   injectModuleHeaders();
-  root.scrollIntoView({ block: "start", behavior: "smooth" });
+  document.querySelectorAll("#ref-legal-template-form select.plan-select").forEach(enhancePlanSelect);
+  requestAnimationFrame(() => root.classList.add("is-ready"));
 
   const runGenerate = async ({ copy = false } = {}) => {
     const missing = validateTemplate(template);
@@ -533,12 +568,13 @@ function resolveTemplate(category, hubItem) {
 async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
   try {
     openedFromMenu = !!fromMenu;
-    showHubStatus("Cargando plantilla…");
-    templatesCatalog = null;
-    await ensureCatalog(true);
     const hubProduct = findHubProduct(productId);
     const hubItem = hubProduct?.items?.find((i) => i.id === itemId);
+    showLegalFormLoading(hubProduct?.label || "");
+    showHubStatus("");
+    await ensureCatalog();
     if (!hubProduct || !hubItem) {
+      showHub();
       showHubStatus("No se encontró el producto seleccionado.", true);
       return;
     }
@@ -547,6 +583,7 @@ async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
     const categoryId = resolveCatalogCategoryId(hubProduct, hubItem);
     const category = findCatalogCategory(catalogProductId, categoryId);
     if (!category?.templates?.length) {
+      showHub();
       showHubStatus(`Sin plantillas para ${hubProduct.label}.`, true);
       return;
     }
@@ -555,12 +592,14 @@ async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
     const item = { id: itemId, label: hubItem.label, icon: hubItem.icon };
     const tpl = resolveTemplate(category, hubItem);
     if (!tpl) {
+      showHub();
       showHubStatus("No se encontró la plantilla de escalamiento.", true);
       return;
     }
     showTemplateForm(product, item, tpl);
   } catch (err) {
     console.error(err);
+    showHub();
     showHubStatus(err?.message || "Error al cargar plantillas LEGAL.", true);
   }
 }
@@ -619,6 +658,11 @@ export function handleLegalReferralBack() {
   }
 
   return false;
+}
+
+export function prefetchLegalCatalog() {
+  if (!hubCtx) return Promise.resolve();
+  return ensureCatalog().catch(() => {});
 }
 
 export function initLegalReferralHub(context) {
