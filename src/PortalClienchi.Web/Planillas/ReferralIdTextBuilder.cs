@@ -67,12 +67,13 @@ public static class ReferralIdTextBuilder
         var ch = c.Chile;
 
         partes.Add("==========================================");
-        partes.Add("DATOS DEL CLIENTE 🪪");
+        partes.Add("DATOS DEL SISTEMA 🖥️");
+        partes.Add("SISTEMA: CHILE");
         AppendChileDatosSistema(partes, ch);
 
+        partes.Add("");
         partes.Add("==========================================");
         partes.Add("DETALLES DEL CASO 📝");
-        partes.Add("");
         partes.Add($"ASUNTO Y/O ERROR: {c.Asunto.Trim()}");
 
         if (IsRealText(c.Descripcion, ReferralIdConstants.PlaceholderDescripcion))
@@ -85,19 +86,19 @@ public static class ReferralIdTextBuilder
         }
 
         partes.Add("");
-        partes.Add("==========================================");
-        partes.Add("INFORMACIÓN ADICIONAL");
-        partes.Add("");
+        partes.Add("INFORMACIÓN ADICIONAL:");
         partes.Add($"- Usuario: {ch.Usuario.Trim()}");
         partes.Add($"- Clave: {ch.Clave.Trim()}");
         partes.Add($"- Sistema operativo: {ch.SistemaOperativo.Trim()}");
         if (!string.IsNullOrWhiteSpace(ch.VersionMotorSql))
             partes.Add($"- Versión motor SQL: {ch.VersionMotorSql.Trim()}");
 
-        var hayCapturas = ch.AdjuntaPantallas || c.CapturasEnlaces.Count > 0;
-        CapturasTextoHelper.AppendBloqueCapturas(partes, hayCapturas, c.CapturasEnlaces);
-
+        partes.Add("");
         partes.Add("==========================================");
+        partes.Add("ADJUNTOS 🗃️");
+        AppendAdjuntos(partes, c);
+        partes.Add("==========================================");
+
         return string.Join(Environment.NewLine, partes);
     }
 
@@ -119,26 +120,6 @@ public static class ReferralIdTextBuilder
 
         partes.Add($"AÑO: {ch.Anio.Trim()}");
         partes.Add($"RUT CON INCONVENIENTES: {ch.Rut.Trim()}");
-    }
-
-    private static void AppendChileDetalles(List<string> partes, ReferralIdCase c)
-    {
-        var ch = c.Chile;
-
-        partes.Add("");
-        partes.Add("==========================================");
-        partes.Add("INGRESO A SISTEMA 🔐");
-        partes.Add($"- Usuario: {ch.Usuario.Trim()}");
-        partes.Add($"- Clave: {ch.Clave.Trim()}");
-
-        partes.Add("");
-        partes.Add("==========================================");
-        partes.Add("ENTORNO 🖥️");
-        partes.Add($"- Sistema operativo: {ch.SistemaOperativo.Trim()}");
-        if (!string.IsNullOrWhiteSpace(ch.VersionMotorSql))
-            partes.Add($"- Versión motor SQL: {ch.VersionMotorSql.Trim()}");
-
-        partes.Add($"- Se adjuntan {CapturasTextoHelper.BuildSiNoLabel(c.CapturasEnlaces, ch.AdjuntaPantallas)}: {(ch.AdjuntaPantallas ? "SÍ" : "NO")}");
     }
 
     private static void AppendOnvioComprobaciones(List<string> partes, ReferralIdCase c)

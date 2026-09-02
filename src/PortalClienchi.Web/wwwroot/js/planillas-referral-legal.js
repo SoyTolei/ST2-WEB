@@ -211,6 +211,7 @@ function fieldShowWhenAttrs(field) {
 
 function fieldLabelHtml(field, index, template) {
   const label = fieldLabel(field, index);
+  if (LEGAL_N2_FORMATS.has(template?.outputFormat)) return label;
   if (fieldTier(field, template) === "required") return `${label} *`;
   return label;
 }
