@@ -323,22 +323,25 @@
 }
 
 .planillas-footer:hover .st2-suite-sig-stage,
-.app-header-user-zone:hover .app-header-fx-stage,
-.app-header-user-zone:focus-within .app-header-fx-stage {
+.app-header-user-zone:hover .app-header-fx-stage {
   opacity: 1;
   visibility: visible;
 }
 
 .planillas-footer:hover .st2-suite-sig::after,
-.app-header-user-zone:hover::after,
-.app-header-user-zone:focus-within::after {
+.app-header-user-zone:hover::after {
   opacity: 1;
 }
 
 .planillas-footer:hover .st2-suite-float,
-.app-header-user-zone:hover .st2-suite-float,
-.app-header-user-zone:focus-within .st2-suite-float {
+.app-header-user-zone:hover .st2-suite-float {
   animation-play-state: running;
+}
+
+.app-header-user-zone:not(:hover) .st2-suite-float {
+  animation-play-state: paused;
+  opacity: 0;
+  transition: opacity 0.28s ease;
 }
 
 .planillas-footer:hover .st2-suite-sig-brand {
