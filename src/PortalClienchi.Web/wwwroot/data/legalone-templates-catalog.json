@@ -2057,8 +2057,8 @@
                 }
               ],
               "blocks": [
-                "Obligatorios para escalar: URL, usuario N2, frecuencia, descripción, pasos, resultado encontrado y esperado.",
-                "Muy recomendados: evidencia visual, HAR y usuario afectado. Templates de sitio/iSheet solo si aplica al caso."
+                "Podés generar la planilla en cualquier momento. Los campos vacíos salen como «No se informa» en el texto.",
+                "Obligatorios para escalar a N2: URL, usuario N2, frecuencia, descripción, pasos, resultado encontrado y esperado."
               ],
               "actions": [
                 "Vista previa",

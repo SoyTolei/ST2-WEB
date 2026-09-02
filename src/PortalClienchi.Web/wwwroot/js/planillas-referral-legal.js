@@ -65,8 +65,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-tiers";
-  const url = base.includes("?") ? base : `${base}?v=highq-tiers`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-informa";
+  const url = base.includes("?") ? base : `${base}?v=highq-informa`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -203,7 +203,9 @@ function fieldLabelHtml(field, index, template) {
 function renderField(field, index, template) {
   if (field.type === "checkbox" && !field.label) return "";
   const key = fieldKey(field, index);
-  const req = fieldRequired(field, template) ? " required" : "";
+  const req = template?.outputFormat === "highq-n2"
+    ? ""
+    : (fieldRequired(field, template) ? " required" : "");
   const labelHtml = fieldLabelHtml(field, index, template);
   const tier = fieldTier(field, template);
   const tierClass = tier ? ` plan-field-tier-${tier}` : "";
@@ -430,60 +432,36 @@ function evidenciaFileNames(evidenciaEnlaces = []) {
   return legalHubEvidenciaFiles.map((file) => file.name);
 }
 
+function highqInforma(value) {
+  const text = String(value || "").trim();
+  return text || "No se informa";
+}
+
 function buildHighqN2Text(values, evidenciaEnlaces = []) {
   const v = (id) => String(values[id] || "").trim();
   const names = evidenciaFileNames(evidenciaEnlaces);
   const hasEvidencias = names.length > 0;
-  let missingRecommended = false;
-
-  const req = (value, warnFem = false) => {
-    const text = String(value || "").trim();
-    if (text) return text;
-    return warnFem ? "⚠️ No informada" : "⚠️ No informado";
-  };
-
-  const rec = (value, warn = false) => {
-    const text = String(value || "").trim();
-    if (text) return text;
-    if (warn) missingRecommended = true;
-    return "No informado";
-  };
-
-  const opt = (value) => {
-    const text = String(value || "").trim();
-    if (!text) return "No informado";
-    return mapHighqNa(text) || text;
-  };
 
   const lines = [];
-  lines.push(`*Descripción/Asunto:* ${req(v("descripcion"), true)}`);
+  lines.push(`*Descripción/Asunto:* ${highqInforma(v("descripcion"))}`);
   lines.push("");
   lines.push("*Passo a Passo/Checklist:*");
-  lines.push(`1. URL del cliente: ${req(v("url"), true)}`);
-  lines.push(`2. Usuario creado para N2: ${req(v("usuarioN2"))}`);
+  lines.push(`1. URL del cliente: ${highqInforma(v("url"))}`);
+  lines.push(`2. Usuario creado para N2: ${highqInforma(v("usuarioN2"))}`);
   const afecta = mapHighqAfectaUsuario(v("afectaUsuario"));
-  lines.push(`3. ¿Problema ocurre solo con usuario específico?: ${afecta || rec(v("afectaUsuario"))}`);
-  if (!afecta) missingRecommended = true;
-  lines.push(`4. Frecuencia: ${req(v("frecuencia"))}`);
-  const har = mapHighqNa(v("har"));
-  lines.push(`5. Archivo HAR adjunto: ${har || rec(v("har"))}`);
-  if (!har) missingRecommended = true;
-  lines.push(`6. Template del sitio adjunto: ${opt(v("templateSitio"))}`);
-  lines.push(`7. Template iSheet adjunto: ${opt(v("templateISheet"))}`);
-  if (hasEvidencias) {
-    lines.push(`8. Evidencias visuales adjuntas: Sí - ${names.join(", ")}`);
-  } else {
-    missingRecommended = true;
-    lines.push("8. Evidencias visuales adjuntas: ⚠️ No - Sin adjuntos");
-  }
+  lines.push(`3. ¿Problema ocurre solo con usuario específico?: ${afecta || "No se informa"}`);
+  lines.push(`4. Frecuencia: ${highqInforma(v("frecuencia"))}`);
+  const har = v("har") ? (mapHighqNa(v("har")) || v("har")) : "No se informa";
+  lines.push(`5. Archivo HAR adjunto: ${har}`);
+  const tplSitio = v("templateSitio") ? (mapHighqNa(v("templateSitio")) || v("templateSitio")) : "No se informa";
+  const tplISheet = v("templateISheet") ? (mapHighqNa(v("templateISheet")) || v("templateISheet")) : "No se informa";
+  lines.push(`6. Template del sitio adjunto: ${tplSitio}`);
+  lines.push(`7. Template iSheet adjunto: ${tplISheet}`);
+  lines.push(`8. Evidencias visuales adjuntas: ${hasEvidencias ? `Sí - ${names.join(", ")}` : "No se informa"}`);
   lines.push("");
   lines.push("*Steps:*");
   const steps = formatHighqSteps(v("pasos"), v("url"));
-  if (steps) {
-    lines.push(steps);
-  } else {
-    lines.push("⚠️ No informado - Completar antes de escalar a N2");
-  }
+  lines.push(steps || "No se informa");
   lines.push("");
   lines.push("*Found result:*");
   if (v("found")) {
@@ -492,24 +470,17 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
       lines.push(`Evidencias: Ver ${names.join(", ")} adjunto${names.length === 1 ? "" : "s"}`);
     }
   } else {
-    lines.push("⚠️ Sin descripción detallada del error.");
+    lines.push("No se informa");
   }
   lines.push("");
   lines.push("*Expected results:*");
-  lines.push(v("expected") || "⚠️ No informado");
+  lines.push(highqInforma(v("expected")));
   lines.push("");
   lines.push("*Anexos/Evidencias:*");
   if (hasEvidencias) {
     names.forEach((name) => lines.push(`- ${name} ✅`));
   } else {
-    lines.push("- Sin adjuntos ⚠️");
-  }
-  if (missingRecommended) {
-    lines.push("");
-    lines.push("============================================");
-    lines.push("⚠️ ATENCIÓN: Ticket con campos incompletos.");
-    lines.push("Revisar antes de escalar a N2.");
-    lines.push("============================================");
+    lines.push("- No se informa");
   }
   return lines.join("\n");
 }
@@ -559,10 +530,12 @@ function showTemplateForm(product, item, template) {
   requestAnimationFrame(() => root.classList.add("is-ready"));
 
   const runGenerate = async ({ copy = false } = {}) => {
-    const missing = validateTemplate(template);
-    if (missing.length) {
-      setStatus(`Completá los campos obligatorios: ${missing.join(", ")}.`, true);
-      return "";
+    if (template.outputFormat !== "highq-n2") {
+      const missing = validateTemplate(template);
+      if (missing.length) {
+        setStatus(`Completá los campos obligatorios: ${missing.join(", ")}.`, true);
+        return "";
+      }
     }
     const btnPreview = document.getElementById("ref-legal-btn-ver-planilla");
     const btnCopy = document.getElementById("ref-legal-btn-copiar");
