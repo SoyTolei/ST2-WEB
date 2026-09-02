@@ -1956,6 +1956,7 @@
             {
               "title": "Plantilla - Escalamiento HighQ N2/N3",
               "outputFormat": "highq-n2",
+              "requiredFields": ["asunto", "descripcion", "pasos"],
               "fields": [
                 {
                   "id": "asunto",
@@ -1980,49 +1981,49 @@
                 },
                 {
                   "id": "url",
-                  "label": "URL del cliente *",
+                  "label": "URL del cliente",
                   "type": "text",
                   "placeholder": "https://cliente.highq.com/",
                   "section": "checklist"
                 },
                 {
                   "id": "usuarioN2",
-                  "label": "¿Usuario N2 creado? *",
+                  "label": "¿Usuario N2 creado?",
                   "type": "select",
                   "options": ["Sí", "No"],
                   "section": "checklist"
                 },
                 {
                   "id": "afectaUsuario",
-                  "label": "¿Afecta usuario específico? *",
+                  "label": "¿Afecta usuario específico?",
                   "type": "text",
                   "placeholder": "Nombre del usuario o No",
                   "section": "checklist"
                 },
                 {
                   "id": "frecuencia",
-                  "label": "Frecuencia del problema *",
+                  "label": "Frecuencia del problema",
                   "type": "select",
                   "options": ["Siempre", "Intermitente", "Una vez"],
                   "section": "checklist"
                 },
                 {
                   "id": "har",
-                  "label": "¿Archivo HAR adjunto? *",
+                  "label": "¿Archivo HAR adjunto?",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
                   "section": "checklist"
                 },
                 {
                   "id": "templateSitio",
-                  "label": "¿Template del sitio adjunto? *",
+                  "label": "¿Template del sitio adjunto?",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
                   "section": "checklist"
                 },
                 {
                   "id": "templateISheet",
-                  "label": "¿Template iSheet adjunto? *",
+                  "label": "¿Template iSheet adjunto?",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
                   "section": "checklist"
@@ -2035,21 +2036,21 @@
                 },
                 {
                   "id": "found",
-                  "label": "Resultado encontrado *",
+                  "label": "Resultado encontrado",
                   "type": "textarea",
                   "placeholder": "Qué está pasando actualmente",
                   "section": "found"
                 },
                 {
                   "id": "expected",
-                  "label": "Resultado esperado *",
+                  "label": "Resultado esperado",
                   "type": "textarea",
                   "placeholder": "Qué debería pasar",
                   "section": "expected"
                 }
               ],
               "blocks": [
-                "Completá el formulario y hacé clic en \"Vista previa\" para ver la planilla de escalamiento"
+                "Solo son obligatorios Asunto, Descripción y Paso a paso. El resto se completa en la planilla con advertencias si queda vacío."
               ],
               "actions": [
                 "Vista previa",

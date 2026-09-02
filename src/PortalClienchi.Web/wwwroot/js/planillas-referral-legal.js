@@ -63,8 +63,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-n2";
-  const url = base.includes("?") ? base : `${base}?v=highq-n2`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-n2b";
+  const url = base.includes("?") ? base : `${base}?v=highq-n2b`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -343,11 +343,26 @@ function collectValuesById(template) {
   return values;
 }
 
-function validateTemplate(template) {
-  const missing = [];
+function getRequiredFieldIds(template) {
+  if (Array.isArray(template.requiredFields) && template.requiredFields.length) {
+    return template.requiredFields.map(String);
+  }
+  const ids = [];
   (template.fields || []).forEach((field, index) => {
     if (field.type === "file" || field.type === "checkbox") return;
     if (!fieldRequired(field)) return;
+    ids.push(field.id || fieldKey(field, index));
+  });
+  return ids;
+}
+
+function validateTemplate(template) {
+  const requiredIds = new Set(getRequiredFieldIds(template));
+  const missing = [];
+  (template.fields || []).forEach((field, index) => {
+    if (field.type === "file" || field.type === "checkbox") return;
+    const key = field.id || fieldKey(field, index);
+    if (!requiredIds.has(key)) return;
     const el = document.getElementById(fieldKey(field, index));
     const val = field.type === "checkbox" ? (el?.checked ? "Sí" : "") : String(el?.value || "").trim();
     if (!val) missing.push(fieldLabel(field, index));
@@ -355,55 +370,82 @@ function validateTemplate(template) {
   return missing;
 }
 
+function legalSectionDivider(title) {
+  return [
+    "--------------------------------------------",
+    `${title}:`,
+    "--------------------------------------------",
+  ];
+}
+
 function formatStepsBlock(pasos, url) {
-  const lines = [];
   const raw = String(pasos || "").trim();
   if (!raw) {
-    if (url) lines.push(`- Acceder al sitio: ${url}`);
-    return lines.join("\n");
+    return [
+      "⚠️ NO INFORMADO",
+      "(Se recomienda completar este campo",
+      "antes de escalar a N2)",
+    ].join("\n");
   }
+  const lines = [];
   for (const line of raw.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     lines.push(trimmed.startsWith("-") ? trimmed : `- ${trimmed}`);
   }
+  if (!lines.length && url) lines.push(`- Acceder al sitio: ${url}`);
   return lines.join("\n");
 }
 
-function buildHighqN2Text(values, evidenciaEnlaces = []) {
+function buildHighqN2Text(values, evidenciaEnlaces = [], productLabel = "HIGHQ") {
   const v = (id) => String(values[id] || "").trim();
   const hasEvidencias = evidenciaEnlaces.length > 0 || legalHubEvidenciaFiles.length > 0;
-  const evidenciasChecklist = hasEvidencias ? "Sí" : "No";
-  const lines = [];
+  let incompleteCount = 0;
+  const optional = (value, warn = "⚠️ NO INFORMADO") => {
+    const text = String(value || "").trim();
+    if (!text) incompleteCount += 1;
+    return text || warn;
+  };
+  const optionalFem = (value) => optional(value, "⚠️ NO INFORMADA");
 
+  const lines = [];
+  lines.push("============================================");
+  lines.push(`     ESCALACIÓN N2 - TICKET ${String(productLabel || "HIGHQ").trim().toUpperCase()}`);
+  lines.push("============================================");
+  lines.push("");
   lines.push("DESCRIPCIÓN/ASUNTO:");
-  lines.push(v("asunto") || "—");
-  if (v("descripcion")) {
-    lines.push("");
-    lines.push(v("descripcion"));
+  lines.push(v("asunto"));
+  if (v("descripcion")) lines.push(v("descripcion"));
+  lines.push("");
+  lines.push(...legalSectionDivider("CHECKLIST"));
+  lines.push(`1. URL del cliente: ${optionalFem(v("url"))}`);
+  lines.push(`2. Usuario creado para N2: ${optional(v("usuarioN2"))}`);
+  lines.push(`3. ¿Afecta usuario específico?: ${optional(v("afectaUsuario"))}`);
+  lines.push(`4. Frecuencia: ${optionalFem(v("frecuencia"))}`);
+  lines.push(`5. Archivo HAR adjunto: ${optional(v("har"))}`);
+  lines.push(`6. Template del sitio adjunto: ${optional(v("templateSitio"))}`);
+  lines.push(`7. Template iSheet adjunto: ${optional(v("templateISheet"))}`);
+  lines.push(`8. Evidencias visuales: ${hasEvidencias ? "Sí" : "⚠️ NO - Sin adjuntos"}`);
+  if (!hasEvidencias) incompleteCount += 1;
+  lines.push("");
+  lines.push(...legalSectionDivider("PASO A PASO REALIZADO"));
+  lines.push(formatStepsBlock(v("pasos"), v("url")));
+  lines.push("");
+  lines.push(...legalSectionDivider("FOUND RESULT"));
+  if (v("found")) {
+    lines.push(v("found"));
+  } else {
+    incompleteCount += 1;
+    lines.push("⚠️ Sin descripción detallada del error.");
+    if (v("asunto")) {
+      lines.push(`Solo se indica: ${v("asunto")}`);
+    }
   }
   lines.push("");
-  lines.push("CHECKLIST:");
-  lines.push(`1. URL del cliente: ${v("url") || "—"}`);
-  lines.push(`2. Usuario creado para N2: ${v("usuarioN2") || "—"}`);
-  lines.push(`3. ¿Afecta usuario específico?: ${v("afectaUsuario") || "No"}`);
-  lines.push(`4. Frecuencia: ${v("frecuencia") || "—"}`);
-  lines.push(`5. Archivo HAR adjunto: ${v("har") || "—"}`);
-  lines.push(`6. Template del sitio adjunto: ${v("templateSitio") || "—"}`);
-  lines.push(`7. Template iSheet adjunto: ${v("templateISheet") || "—"}`);
-  lines.push(`8. Evidencias visuales: ${evidenciasChecklist}`);
+  lines.push(...legalSectionDivider("EXPECTED RESULT"));
+  lines.push(optional(v("expected")));
   lines.push("");
-  lines.push("STEPS:");
-  lines.push(formatStepsBlock(v("pasos"), v("url")) || "—");
-  lines.push("");
-  lines.push("FOUND RESULT:");
-  lines.push(v("found") || "—");
-  lines.push(`Evidencias: ${hasEvidencias ? "Ver screenshots adjuntos" : "No"}`);
-  lines.push("");
-  lines.push("EXPECTED RESULT:");
-  lines.push(v("expected") || "—");
-  lines.push("");
-  lines.push("ADJUNTOS/EVIDENCIAS:");
+  lines.push(...legalSectionDivider("ADJUNTOS"));
   if (evidenciaEnlaces.length) {
     evidenciaEnlaces.forEach((item) => {
       const name = item?.nombre || item?.name || "Archivo";
@@ -413,7 +455,15 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
   } else if (legalHubEvidenciaFiles.length) {
     legalHubEvidenciaFiles.forEach((file) => lines.push(`- ${file.name}`));
   } else {
-    lines.push("- Sin archivos adjuntos");
+    lines.push("- Sin adjuntos ⚠️");
+  }
+  if (incompleteCount > 0) {
+    lines.push("");
+    lines.push("============================================");
+    lines.push(`⚠️ ATENCIÓN: Este ticket tiene ${incompleteCount} campo${incompleteCount === 1 ? "" : "s"}`);
+    lines.push("sin completar. Se recomienda revisar");
+    lines.push("antes de escalar a N2.");
+    lines.push("============================================");
   }
   return lines.join("\n");
 }
@@ -521,7 +571,7 @@ function collectValues(template) {
 
 async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnlaces = []) {
   if (template.outputFormat === "highq-n2") {
-    return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces);
+    return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces, productLabel);
   }
   return buildTemplateText(template, productLabel);
 }
