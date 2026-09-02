@@ -317,8 +317,8 @@ function renderTemplateFields(template) {
 
 function showLegalFormLoading(productLabel = "") {
   showView("ref-legal-form");
-  const crumb = document.getElementById("ref-legal-form-breadcrumb");
-  if (crumb) crumb.textContent = productLabel ? `${productLabel} › ${LEGAL_ESCALAMIENTO_LABEL}` : "";
+  const titleEl = document.getElementById("plan-referral-module-title");
+  if (titleEl && productLabel) titleEl.textContent = productLabel;
   const root = document.getElementById("ref-legal-form-root");
   if (!root) return;
   root.classList.remove("is-ready");
@@ -670,8 +670,6 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
 function showTemplateForm(product, item, template) {
   navStack = { ...navStack, product, item, template };
   showView("ref-legal-form");
-  const crumb = document.getElementById("ref-legal-form-breadcrumb");
-  if (crumb) crumb.textContent = `${product.label} › ${LEGAL_ESCALAMIENTO_LABEL}`;
   const titleEl = document.getElementById("plan-referral-module-title");
   if (titleEl) titleEl.textContent = product.label;
   document.title = `ST² · ${product.label}`;
@@ -683,7 +681,6 @@ function showTemplateForm(product, item, template) {
 
   root.innerHTML = `
     <div class="plan-legal-form-shell">
-      <p class="plan-ref-title plan-legal-form-heading">${template.title || template.label}</p>
       ${blocks}
       <form id="ref-legal-template-form" class="plan-form-grid plan-legal-form-grid" autocomplete="off">${fields}</form>
       ${planFormActionsHtml({

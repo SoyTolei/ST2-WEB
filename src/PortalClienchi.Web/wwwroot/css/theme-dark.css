@@ -1,18 +1,18 @@
 html.st2-theme-dark {
   color-scheme: dark;
   --panel: #0f0f0f;
-  --dark: #e5e5e5;
+  --dark: #ececec;
   --border: #333333;
   --white: #1a1a1a;
-  --text-muted: #9ca3af;
+  --text-muted: #d1d5db;
   --nav-well: #161616;
   --nav-hover: #2a2a2a;
   --header-top: #222222;
   --header-bottom: #161616;
   --header-line: rgba(255, 255, 255, 0.06);
   --header-accent: rgba(249, 115, 22, 0.62);
-  --portal-sub: #c5c5c5;
-  --portal-sub-hover: #e0e0e0;
+  --portal-sub: #e5e7eb;
+  --portal-sub-hover: #f3f4f6;
   --portal-sub-glow: rgba(0, 0, 0, 0.35);
   --portal-sub-soft: #171717;
   --st2-suite-surface: linear-gradient(155deg, #242424 0%, #1a1a1a 42%, #2a1810 100%);
@@ -444,7 +444,7 @@ html.st2-theme-dark .blanqueo-note-textarea {
 html.st2-theme-dark .planillas-app input::placeholder,
 html.st2-theme-dark .planillas-app textarea::placeholder,
 html.st2-theme-dark .pdf-portal-rich:empty::before {
-  color: #737373 !important;
+  color: #a3a3a3 !important;
   font-style: italic;
   opacity: 1;
 }
@@ -455,7 +455,7 @@ html.st2-theme-dark #planillas-transferencia textarea.placeholder-active,
 html.st2-theme-dark #planillas-transferencia input.placeholder-active,
 html.st2-theme-dark #planillas-referral textarea.placeholder-active,
 html.st2-theme-dark #planillas-referral input.placeholder-active {
-  color: #737373 !important;
+  color: #a3a3a3 !important;
   font-style: italic !important;
 }
 
@@ -551,7 +551,7 @@ html.st2-theme-dark .plan-bej-config {
 }
 
 html.st2-theme-dark .plan-bej-label {
-  color: #a3a3a3 !important;
+  color: #d4d4d4 !important;
 }
 
 html.st2-theme-dark .plan-action-btn.ghost,
@@ -565,7 +565,7 @@ html.st2-theme-dark .btn-secondary {
 html.st2-theme-dark .planillas-back {
   background: transparent !important;
   border: none !important;
-  color: #94a3b8 !important;
+  color: #d1d5db !important;
 }
 
 html.st2-theme-dark .planillas-back-icon {
@@ -686,7 +686,7 @@ html.st2-theme-dark .plan-module-sticky-head {
 }
 
 html.st2-theme-dark .plan-module-title {
-  color: #e5e5e5 !important;
+  color: #f3f4f6 !important;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -1547,8 +1547,9 @@ html.st2-theme-dark .planillas-app label,
 html.st2-theme-dark .plan-field label,
 html.st2-theme-dark .plan-gestor-field-label,
 html.st2-theme-dark .plan-gestor-panel-title,
-html.st2-theme-dark .plan-ref-title {
-  color: #a3a3a3 !important;
+html.st2-theme-dark .plan-ref-title,
+html.st2-theme-dark .plan-ref-hint {
+  color: #d8d8d8 !important;
 }
 
 html.st2-theme-dark .st2-about-tabs-list {
