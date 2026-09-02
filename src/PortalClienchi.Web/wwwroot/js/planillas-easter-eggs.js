@@ -51,6 +51,7 @@ export const PLANILLAS_EASTER_EGGS = [
     side: "left",
     size: "md",
     peekSrc: "/img/yohana-palermo.gif?v=1",
+    peekHeroTall: true,
     peekAudio: "/img/yohana-palermo.mp3",
   },
   {
