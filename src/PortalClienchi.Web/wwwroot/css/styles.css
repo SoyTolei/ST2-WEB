@@ -4920,6 +4920,75 @@ body.portal-tab-active .brand-icon {
   border-radius: 4px;
 }
 
+.st2-about-suggest {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  text-align: left;
+}
+
+.st2-about-suggest-title {
+  margin: 0 0 10px;
+  font-family: "Sora", system-ui, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.st2-about-suggest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.st2-about-suggest-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: "Sora", system-ui, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.st2-about-suggest-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.st2-about-suggest-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.st2-about-suggest-btn--mail {
+  background: #0078d4;
+}
+
+.st2-about-suggest-btn--teams {
+  background: #6264a7;
+}
+
+.st2-about-suggest-hint {
+  margin: 10px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.st2-about-suggest-hint strong {
+  display: block;
+  margin-top: 4px;
+  font-weight: 600;
+  color: #475569;
+}
+
 .st2-about-signature-bike-track {
   position: relative;
   display: inline-flex;
