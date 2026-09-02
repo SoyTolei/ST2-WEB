@@ -500,12 +500,70 @@
 }
 
 #planillas-hero-titan-img.planillas-hero-titan {
-  object-fit: contain;
+  width: min(520px, 94%);
+  max-height: 96%;
+  object-fit: cover;
+  object-position: center bottom;
+  opacity: 0.94;
+  filter: saturate(1.04) brightness(0.98);
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 7%,
+    #000 18%,
+    #000 82%,
+    rgba(0, 0, 0, 0.35) 93%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.35) 7%,
+    #000 18%,
+    #000 82%,
+    rgba(0, 0, 0, 0.35) 93%,
+    transparent 100%
+  );
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  transition:
+    transform 1.15s cubic-bezier(0.16, 1, 0.3, 1),
+    height 1.15s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.9s ease;
 }
 
-.planillas-hero.has-titan-peek:hover #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
-  object-fit: contain;
+.planillas-hero.has-titan-peek-img #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
+  transform: translate(-50%, calc(100% + 20px));
+}
+
+.planillas-hero.has-titan-peek-img:hover #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
+  top: -6px;
+  bottom: 0;
+  width: min(580px, 98%);
+  height: 112%;
+  max-height: none;
+  object-fit: cover;
   object-position: center bottom;
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.planillas-hero.has-titan-peek-img .planillas-hero-titan-clip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    var(--st2-suite-surface, #0f172a) 0%,
+    transparent 16%,
+    transparent 84%,
+    var(--st2-suite-surface, #0f172a) 100%
+  );
+  opacity: 0.72;
+  z-index: 2;
 }
 
 .planillas-hero.is-easter-banner {

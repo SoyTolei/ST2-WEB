@@ -1878,6 +1878,31 @@ function isTitanPeekImage(peekSrc) {
   return /\.(gif|png|jpe?g|webp|avif)(\?|$)/i.test(String(peekSrc || ""));
 }
 
+let titanPeekAudio = null;
+let titanPeekAudioSrc = "";
+
+function playTitanPeekAudio(src) {
+  const url = String(src || "").trim();
+  if (!url) return;
+  if (!titanPeekAudio || titanPeekAudioSrc !== url) {
+    titanPeekAudio = new Audio(url);
+    titanPeekAudioSrc = url;
+    titanPeekAudio.preload = "auto";
+  }
+  titanPeekAudio.currentTime = 0;
+  void titanPeekAudio.play().catch(() => {});
+}
+
+function stopTitanPeekAudio() {
+  if (!titanPeekAudio) return;
+  titanPeekAudio.pause();
+  try {
+    titanPeekAudio.currentTime = 0;
+  } catch {
+    /* ignore */
+  }
+}
+
 function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = resolvePlanillasEgg(email);
@@ -1925,6 +1950,12 @@ function syncPlanillasHeroEaster() {
   const peek = !!(showEgg && egg?.peekSrc);
   const peekImage = peek && isTitanPeekImage(egg.peekSrc);
   hero?.classList.toggle("has-titan-peek", peek);
+  hero?.classList.toggle("has-titan-peek-img", peekImage);
+  if (hero) {
+    const audio = peek && egg?.peekAudio ? String(egg.peekAudio).trim() : "";
+    if (audio) hero.dataset.peekAudio = audio;
+    else delete hero.dataset.peekAudio;
+  }
   if (titan) {
     const srcEl = document.getElementById("planillas-hero-titan-src");
     titan.muted = true;
@@ -1970,18 +2001,23 @@ function bindTitanPeekHover() {
   hero.dataset.titanPeekBound = "1";
   hero.addEventListener("mouseenter", () => {
     const titan = document.getElementById("planillas-hero-titan");
-    if (!titan || titan.classList.contains("is-hidden") || !titan.dataset.peekSrc) return;
-    titan.play().catch(() => {});
+    if (titan && !titan.classList.contains("is-hidden") && titan.dataset.peekSrc) {
+      titan.play().catch(() => {});
+    }
+    const audioSrc = hero.dataset.peekAudio;
+    if (audioSrc) playTitanPeekAudio(audioSrc);
   });
   hero.addEventListener("mouseleave", () => {
     const titan = document.getElementById("planillas-hero-titan");
-    if (!titan || titan.classList.contains("is-hidden")) return;
-    titan.pause();
-    try {
-      titan.currentTime = 0;
-    } catch {
-      /* ignore */
+    if (titan && !titan.classList.contains("is-hidden")) {
+      titan.pause();
+      try {
+        titan.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
     }
+    stopTitanPeekAudio();
   });
 }
 
