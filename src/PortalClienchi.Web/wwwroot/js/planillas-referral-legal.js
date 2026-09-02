@@ -21,6 +21,8 @@ const LEGAL_SECTION_LABELS = {
   resultados: "Resultados",
   recomendados: "Información adicional",
   opcionales: "Templates",
+  acceso: "Datos de acceso",
+  detalle: "Detalle del caso",
   checklist: "Checklist",
   adjuntos: "Evidencias visuales",
 };
@@ -65,8 +67,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-clean";
-  const url = base.includes("?") ? base : `${base}?v=highq-clean`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-one-n2";
+  const url = base.includes("?") ? base : `${base}?v=legal-one-n2`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -191,6 +193,15 @@ function fieldRequired(field, template) {
     || field.required === true;
 }
 
+function fieldShowWhenAttrs(field) {
+  if (!field.showWhen?.field) return { attrs: "", hidden: false };
+  const equals = field.showWhen.equals ?? "Sí";
+  return {
+    attrs: ` data-show-when-field="${field.showWhen.field}" data-show-when-value="${equals}"`,
+    hidden: true,
+  };
+}
+
 function fieldLabelHtml(field, index, template) {
   const label = fieldLabel(field, index);
   if (fieldTier(field, template) === "required") return `${label} *`;
@@ -200,14 +211,16 @@ function fieldLabelHtml(field, index, template) {
 function renderField(field, index, template) {
   if (field.type === "checkbox" && !field.label) return "";
   const key = fieldKey(field, index);
-  const req = template?.outputFormat === "highq-n2"
+  const req = template?.outputFormat === "highq-n2" || template?.outputFormat === "legal-one-n2"
     ? ""
     : (fieldRequired(field, template) ? " required" : "");
   const labelHtml = fieldLabelHtml(field, index, template);
   const tier = fieldTier(field, template);
   const tierClass = tier ? ` plan-field-tier-${tier}` : "";
   const sectionAttr = field.section ? ` data-legal-section="${field.section}"` : "";
-  const wrap = (inner) => `<div class="plan-field${tierClass}"${sectionAttr}>${inner}</div>`;
+  const { attrs: showWhenAttrs, hidden: showWhenHidden } = fieldShowWhenAttrs(field);
+  const hiddenClass = showWhenHidden ? " hidden" : "";
+  const wrap = (inner) => `<div class="plan-field${tierClass}${hiddenClass}"${sectionAttr}${showWhenAttrs}>${inner}</div>`;
   if (field.type === "textarea") {
     return wrap(`<label for="${key}">${labelHtml}</label><textarea id="${key}" data-legal-field rows="4" placeholder="${field.placeholder || ""}"${req}></textarea>`);
   }
@@ -217,7 +230,7 @@ function renderField(field, index, template) {
   }
   if (field.type === "file") {
     return `
-      <div class="plan-field plan-legal-file-field plan-field-tier-${tier}"${sectionAttr}>
+      <div class="plan-field plan-legal-file-field plan-field-tier-${tier}${hiddenClass}"${sectionAttr}${showWhenAttrs}>
         <label>${labelHtml}</label>
         <div class="plan-capturas-panel plan-legal-evid-panel">
           <p class="plan-capturas-hint">Screenshots, videos o PDF. N2 ve exactamente qué le aparece al usuario.</p>
@@ -234,6 +247,16 @@ function renderField(field, index, template) {
           <div id="ref-legal-hub-evid-chips" class="plan-capturas-thumbs"></div>
           <p id="ref-legal-hub-evid-estado" class="plan-capturas-estado"></p>
         </div>
+      </div>`;
+  }
+  if (field.type === "toggle-card") {
+    return `
+      <div class="plan-field plan-legal-toggle-field${hiddenClass}"${sectionAttr}${showWhenAttrs}>
+        <button type="button" class="plan-adj-card plan-ticket-card plan-legal-toggle-card" data-legal-toggle="${key}" aria-pressed="false">
+          <span>${labelHtml}</span>
+          <span class="card-mark" data-legal-toggle-mark="${key}">○</span>
+        </button>
+        <input id="${key}" data-legal-field type="checkbox" class="hidden"/>
       </div>`;
   }
   const type = field.type === "checkbox" ? "checkbox" : "text";
@@ -362,7 +385,9 @@ function collectValuesById(template) {
     const el = document.getElementById(fieldKey(field, index));
     if (!el) return;
     const key = field.id || fieldKey(field, index);
-    values[key] = field.type === "checkbox" ? (el.checked ? "Sí" : "No") : String(el.value || "").trim();
+    values[key] = field.type === "checkbox" || field.type === "toggle-card"
+      ? (el.checked ? "Sí" : "No")
+      : String(el.value || "").trim();
   });
   return values;
 }
@@ -434,6 +459,99 @@ function highqInforma(value) {
   return text || "No se informa";
 }
 
+function refreshConditionalFields() {
+  const form = document.getElementById("ref-legal-template-form");
+  if (!form) return;
+  form.querySelectorAll("[data-show-when-field]").forEach((el) => {
+    const driverId = el.dataset.showWhenField;
+    const expected = el.dataset.showWhenValue || "Sí";
+    const driver = document.getElementById(driverId);
+    const val = String(driver?.value || "").trim();
+    el.classList.toggle("hidden", val !== expected);
+  });
+}
+
+function setupConditionalFields() {
+  const form = document.getElementById("ref-legal-template-form");
+  if (!form || form.dataset.conditionalBound) {
+    refreshConditionalFields();
+    return;
+  }
+  form.dataset.conditionalBound = "1";
+  const drivers = new Set();
+  form.querySelectorAll("[data-show-when-field]").forEach((el) => {
+    drivers.add(el.dataset.showWhenField);
+  });
+  drivers.forEach((driverId) => {
+    document.getElementById(driverId)?.addEventListener("change", refreshConditionalFields);
+  });
+  refreshConditionalFields();
+}
+
+function syncLegalToggleCards() {
+  document.querySelectorAll("[data-legal-toggle]").forEach((btn) => {
+    const key = btn.dataset.legalToggle;
+    const input = document.getElementById(key);
+    const mark = document.querySelector(`[data-legal-toggle-mark="${key}"]`);
+    const on = !!input?.checked;
+    btn.classList.toggle("selected", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    if (mark) mark.textContent = on ? "✓" : "○";
+  });
+}
+
+function setupLegalToggleCards() {
+  document.querySelectorAll("[data-legal-toggle]").forEach((btn) => {
+    if (btn.dataset.toggleBound) return;
+    btn.dataset.toggleBound = "1";
+    const key = btn.dataset.legalToggle;
+    const input = document.getElementById(key);
+    btn.addEventListener("click", () => {
+      if (input) input.checked = !input.checked;
+      syncLegalToggleCards();
+    });
+  });
+  syncLegalToggleCards();
+}
+
+function formatHighqUsuarioN2(values) {
+  const n2 = String(values.usuarioN2 || "").trim();
+  if (!n2 || /^no$/i.test(n2)) return "No se informa";
+  if (/^s[ií]$/i.test(n2)) {
+    const email = String(values.usuarioN2Email || "").trim();
+    return email ? `Sí - ${email}` : "Sí - No se informa";
+  }
+  return highqInforma(n2);
+}
+
+function buildLegalOneN2Text(values, evidenciaEnlaces = []) {
+  const v = (id) => String(values[id] || "").trim();
+  const names = evidenciaFileNames(evidenciaEnlaces);
+  const lines = [];
+  lines.push(`URL: ${highqInforma(v("url"))}`);
+  lines.push(`Login: ${highqInforma(v("login"))}`);
+  lines.push(`Contraseña: ${highqInforma(v("password"))}`);
+  lines.push("");
+  lines.push(`Ticket de servicio: ${/^s[ií]$/i.test(v("ticketServicio")) ? "Sí" : "No se informa"}`);
+  lines.push("");
+  lines.push("Steps:");
+  lines.push(highqInforma(v("pasos")));
+  lines.push("");
+  lines.push("Found Result:");
+  lines.push(highqInforma(v("found")));
+  lines.push("");
+  lines.push("Expected Result:");
+  lines.push(highqInforma(v("expected")));
+  lines.push("");
+  lines.push("Anexos/Evidencias:");
+  if (names.length) {
+    names.forEach((name) => lines.push(`- ${name}`));
+  } else {
+    lines.push("- No se informa");
+  }
+  return lines.join("\n");
+}
+
 function buildHighqN2Text(values, evidenciaEnlaces = []) {
   const v = (id) => String(values[id] || "").trim();
   const names = evidenciaFileNames(evidenciaEnlaces);
@@ -444,7 +562,7 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
   lines.push("");
   lines.push("*Passo a Passo/Checklist:*");
   lines.push(`1. URL del cliente: ${highqInforma(v("url"))}`);
-  lines.push(`2. Usuario creado para N2: ${highqInforma(v("usuarioN2"))}`);
+  lines.push(`2. Usuario creado para N2: ${formatHighqUsuarioN2(values)}`);
   const afecta = mapHighqAfectaUsuario(v("afectaUsuario"));
   lines.push(`3. ¿Problema ocurre solo con usuario específico?: ${afecta || "No se informa"}`);
   lines.push(`4. Frecuencia: ${highqInforma(v("frecuencia"))}`);
@@ -516,18 +634,22 @@ function showTemplateForm(product, item, template) {
     legalHubEvidenciaFiles = [];
     refreshLegalEvidenciaChips();
     refreshLegalEvidenciaEstado();
+    refreshConditionalFields();
+    syncLegalToggleCards();
     clearPlanTextPreview("ref-legal-text-preview");
     setStatus("");
   });
 
   setupLegalEvidenciasPanel();
+  setupConditionalFields();
+  setupLegalToggleCards();
   mountPlanTextPreview("ref-legal-text-preview");
   injectModuleHeaders();
   document.querySelectorAll("#ref-legal-template-form select.plan-select").forEach(enhancePlanSelect);
   requestAnimationFrame(() => root.classList.add("is-ready"));
 
   const runGenerate = async ({ copy = false } = {}) => {
-    if (template.outputFormat !== "highq-n2") {
+    if (template.outputFormat !== "highq-n2" && template.outputFormat !== "legal-one-n2") {
       const missing = validateTemplate(template);
       if (missing.length) {
         setStatus(`Completá los campos obligatorios: ${missing.join(", ")}.`, true);
@@ -588,6 +710,9 @@ function collectValues(template) {
 async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnlaces = []) {
   if (template.outputFormat === "highq-n2") {
     return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces);
+  }
+  if (template.outputFormat === "legal-one-n2") {
+    return buildLegalOneN2Text(collectValuesById(template), evidenciaEnlaces);
   }
   return buildTemplateText(template, productLabel);
 }

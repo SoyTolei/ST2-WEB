@@ -9,91 +9,72 @@
           "label": "Sistema",
           "templates": [
             {
-              "title": "Plantilla - Bug Legal One",
+              "title": "Escalamiento Legal One N2/N3",
+              "outputFormat": "legal-one-n2",
               "fields": [
                 {
-                  "id": "",
-                  "label": "",
-                  "type": "checkbox",
-                  "placeholder": ""
-                },
-                {
-                  "id": "",
-                  "label": "Descripción del bug *",
+                  "id": "url",
+                  "label": "URL",
                   "type": "text",
-                  "placeholder": "Ej: Error al guardar proceso"
+                  "placeholder": "",
+                  "section": "acceso"
                 },
                 {
-                  "id": "",
-                  "label": "Producto *",
-                  "type": "select",
-                  "placeholder": ""
-                },
-                {
-                  "id": "",
-                  "label": "Tenancy *",
+                  "id": "login",
+                  "label": "Login",
                   "type": "text",
-                  "placeholder": "Ej: cliente123"
+                  "placeholder": "",
+                  "section": "acceso"
                 },
                 {
-                  "id": "",
-                  "label": "Usuario *",
+                  "id": "password",
+                  "label": "Contraseña",
                   "type": "text",
-                  "placeholder": "Ej: admin"
+                  "placeholder": "",
+                  "section": "acceso"
                 },
                 {
-                  "id": "",
-                  "label": "Contraseña *",
-                  "type": "text",
-                  "placeholder": "Contraseña de acceso"
+                  "id": "ticketServicio",
+                  "label": "¿Se solicitó ticket de servicio?",
+                  "type": "toggle-card",
+                  "section": "acceso"
                 },
                 {
-                  "id": "",
-                  "label": "Login del usuario que reportó (Opcional)",
-                  "type": "text",
-                  "placeholder": "Ej: usuario.cliente"
-                },
-                {
-                  "id": "",
-                  "label": "Nota adicional (Opcional)",
+                  "id": "pasos",
+                  "label": "Pasos (Steps)",
                   "type": "textarea",
-                  "placeholder": "Información adicional..."
+                  "placeholder": "",
+                  "section": "detalle"
                 },
                 {
-                  "id": "",
-                  "label": "Módulo *",
-                  "type": "select",
-                  "placeholder": ""
-                },
-                {
-                  "id": "",
-                  "label": "Módulo *",
+                  "id": "found",
+                  "label": "Resultado encontrado (Found Result)",
                   "type": "textarea",
-                  "placeholder": "Describí la acción..."
+                  "placeholder": "",
+                  "section": "detalle"
                 },
                 {
-                  "id": "",
-                  "label": "Resultado encontrado (qué ocurrió) *",
+                  "id": "expected",
+                  "label": "Resultado esperado (Expected Result)",
                   "type": "textarea",
-                  "placeholder": "Describí el comportamiento encontrado..."
+                  "placeholder": "",
+                  "section": "detalle"
                 },
                 {
-                  "id": "",
-                  "label": "Resultado esperado (qué debería ocurrir) *",
-                  "type": "textarea",
-                  "placeholder": "Describí el comportamiento esperado..."
+                  "id": "evidencias",
+                  "label": "Evidencias visuales",
+                  "type": "file",
+                  "section": "adjuntos"
                 }
               ],
-              "blocks": [
-                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
-              ],
+              "blocks": [],
               "actions": [
-                "Generar plantilla",
+                "Vista previa",
                 "Limpiar",
                 "Copiar"
               ],
               "id": "bug",
-              "label": "Bug"
+              "label": "Escalamiento a N2/N3"
             },
             {
               "title": "Plantilla - Backup Legal One",
@@ -1977,6 +1958,14 @@
                   "tier": "required"
                 },
                 {
+                  "id": "usuarioN2Email",
+                  "label": "Correo del usuario N2",
+                  "type": "text",
+                  "placeholder": "",
+                  "section": "minimo",
+                  "showWhen": { "field": "usuarioN2", "equals": "Sí" }
+                },
+                {
                   "id": "frecuencia",
                   "label": "Frecuencia del problema",
                   "type": "select",
@@ -2056,9 +2045,7 @@
                   "tier": "optional"
                 }
               ],
-              "blocks": [
-                "Los campos vacíos aparecen como «No se informa» en el texto generado."
-              ],
+              "blocks": [],
               "actions": [
                 "Vista previa",
                 "Limpiar",
