@@ -57,7 +57,8 @@
                 {
                   "id": "evidencias",
                   "label": "Evidencias visuales",
-                  "type": "file",
+                  "type": "onedrive-link",
+                  "placeholder": "Si subiste las evidencias a OneDrive, pegá el link compartido acá",
                   "section": "adjuntos"
                 }
               ],

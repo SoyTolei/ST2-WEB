@@ -3,6 +3,7 @@ import { enhancePlanSelect } from "./plan-custom-select.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { canSeeLegalProduct } from "./module-access.js";
 import { syncPlanModulosGridLayout } from "./plan-grid-layout.js";
+import { normalizeOnedriveUrl, setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -67,8 +68,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-one-n2b";
-  const url = base.includes("?") ? base : `${base}?v=legal-one-n2b`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=legal-one-onedrive";
+  const url = base.includes("?") ? base : `${base}?v=legal-one-onedrive`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -228,6 +229,16 @@ function renderField(field, index, template) {
     const options = (field.options || []).map((opt) => `<option value="${opt}">${opt}</option>`).join("");
     return wrap(`<label for="${key}">${labelHtml}</label><select id="${key}" class="plan-select" data-legal-field${req}><option value="">Seleccionar…</option>${options}</select>`);
   }
+  if (field.type === "onedrive-link") {
+    const placeholder = field.placeholder || "Si subiste las evidencias a OneDrive, pegá el link compartido acá";
+    return `
+      <div class="plan-field plan-legal-onedrive-field${hiddenClass}"${sectionAttr}${showWhenAttrs}>
+        <div class="plan-backup-onedrive">
+          <label for="${key}">${labelHtml}</label>
+          <input id="${key}" data-legal-field data-onedrive-link type="url" placeholder="${placeholder}" autocomplete="off"/>
+        </div>
+      </div>`;
+  }
   if (field.type === "file") {
     return `
       <div class="plan-field plan-legal-file-field plan-field-tier-${tier}${hiddenClass}"${sectionAttr}${showWhenAttrs}>
@@ -311,6 +322,10 @@ function showLegalFormLoading(productLabel = "") {
       <span>Cargando plantilla…</span>
     </div>
   `;
+}
+
+function setupLegalOnedriveLinks() {
+  document.querySelectorAll("#ref-legal-template-form [data-onedrive-link]").forEach(setupOnedrivePasteInput);
 }
 
 function refreshLegalEvidenciaEstado() {
@@ -524,9 +539,9 @@ function formatHighqUsuarioN2(values) {
   return highqInforma(n2);
 }
 
-function buildLegalOneN2Text(values, evidenciaEnlaces = []) {
+function buildLegalOneN2Text(values) {
   const v = (id) => String(values[id] || "").trim();
-  const names = evidenciaFileNames(evidenciaEnlaces);
+  const evidenciaLink = normalizeOnedriveUrl(v("evidencias"));
   const lines = [];
   lines.push(`URL: ${highqInforma(v("url"))}`);
   lines.push(`Login: ${highqInforma(v("login"))}`);
@@ -542,11 +557,7 @@ function buildLegalOneN2Text(values, evidenciaEnlaces = []) {
   lines.push(highqInforma(v("expected")));
   lines.push("");
   lines.push("Anexos/Evidencias:");
-  if (names.length) {
-    names.forEach((name) => lines.push(`- ${name}`));
-  } else {
-    lines.push("- No se informa");
-  }
+  lines.push(evidenciaLink ? `- ${evidenciaLink}` : "- No se informa");
   return lines.join("\n");
 }
 
@@ -638,7 +649,9 @@ function showTemplateForm(product, item, template) {
     setStatus("");
   });
 
-  setupLegalEvidenciasPanel();
+  const hasFileEvidencias = (template.fields || []).some((field) => field.type === "file");
+  if (hasFileEvidencias) setupLegalEvidenciasPanel();
+  setupLegalOnedriveLinks();
   setupConditionalFields();
   setupLegalToggleCards();
   mountPlanTextPreview("ref-legal-text-preview");
@@ -659,8 +672,9 @@ function showTemplateForm(product, item, template) {
     try {
       if (btnPreview) btnPreview.disabled = true;
       if (btnCopy) btnCopy.disabled = true;
-      if (legalHubEvidenciaFiles.length) setStatus("Subiendo evidencias…");
-      const evidenciaEnlaces = await uploadLegalEvidencias(legalHubEvidenciaFiles);
+      const needsUpload = template.outputFormat === "highq-n2" && legalHubEvidenciaFiles.length;
+      if (needsUpload) setStatus("Subiendo evidencias…");
+      const evidenciaEnlaces = needsUpload ? await uploadLegalEvidencias(legalHubEvidenciaFiles) : [];
       const text = await buildTemplateTextAsync(template, product.label, evidenciaEnlaces);
       if (!text) return "";
       if (copy) {
@@ -710,7 +724,7 @@ async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnla
     return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces);
   }
   if (template.outputFormat === "legal-one-n2") {
-    return buildLegalOneN2Text(collectValuesById(template), evidenciaEnlaces);
+    return buildLegalOneN2Text(collectValuesById(template));
   }
   return buildTemplateText(template, productLabel);
 }
