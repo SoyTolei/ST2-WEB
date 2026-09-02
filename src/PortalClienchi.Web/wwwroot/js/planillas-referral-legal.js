@@ -231,11 +231,17 @@ function renderField(field, index, template) {
   }
   if (field.type === "onedrive-link") {
     const placeholder = field.placeholder || "Si subiste las evidencias a OneDrive, pegá el link compartido acá";
+    const groupId = field.id || key;
     return `
       <div class="plan-field plan-legal-onedrive-field${hiddenClass}"${sectionAttr}${showWhenAttrs}>
-        <div class="plan-backup-onedrive">
-          <label for="${key}">${labelHtml}</label>
-          <input id="${key}" data-legal-field data-onedrive-link type="url" placeholder="${placeholder}" autocomplete="off"/>
+        <div class="plan-legal-onedrive-list" data-onedrive-field="${groupId}" data-onedrive-placeholder="${placeholder}">
+          <label>${labelHtml}</label>
+          <div class="plan-legal-onedrive-rows">
+            <div class="plan-legal-onedrive-row">
+              <input data-onedrive-link data-onedrive-group="${groupId}" type="url" placeholder="${placeholder}" autocomplete="off"/>
+            </div>
+          </div>
+          <button type="button" class="plan-legal-onedrive-add" data-onedrive-add="${groupId}" aria-label="Agregar otro link de OneDrive" title="Agregar otro link de OneDrive">+</button>
         </div>
       </div>`;
   }
@@ -324,8 +330,56 @@ function showLegalFormLoading(productLabel = "") {
   `;
 }
 
+function onedriveRowHtml(groupId, placeholder, removable = false) {
+  return `
+    <div class="plan-legal-onedrive-row">
+      <input data-onedrive-link data-onedrive-group="${groupId}" type="url" placeholder="${placeholder}" autocomplete="off"/>
+      ${removable ? '<button type="button" class="plan-legal-onedrive-remove" aria-label="Quitar link" title="Quitar link">×</button>' : ""}
+    </div>`;
+}
+
+function collectOnedriveLinks(groupId) {
+  return [...document.querySelectorAll(`[data-onedrive-group="${groupId}"]`)]
+    .map((el) => normalizeOnedriveUrl(el.value))
+    .filter(Boolean);
+}
+
+function resetLegalOnedriveLists() {
+  document.querySelectorAll(".plan-legal-onedrive-list").forEach((list) => {
+    const groupId = list.dataset.onedriveField;
+    const placeholder = list.dataset.onedrivePlaceholder || "";
+    const rows = list.querySelector(".plan-legal-onedrive-rows");
+    if (!rows || !groupId) return;
+    rows.innerHTML = onedriveRowHtml(groupId, placeholder, false);
+    setupOnedrivePasteInput(rows.querySelector("input"));
+  });
+}
+
 function setupLegalOnedriveLinks() {
-  document.querySelectorAll("#ref-legal-template-form [data-onedrive-link]").forEach(setupOnedrivePasteInput);
+  const form = document.getElementById("ref-legal-template-form");
+  if (!form) return;
+
+  form.addEventListener("click", (e) => {
+    const addBtn = e.target.closest("[data-onedrive-add]");
+    if (addBtn) {
+      const groupId = addBtn.dataset.onedriveAdd;
+      const list = addBtn.closest(".plan-legal-onedrive-list");
+      const placeholder = list?.dataset.onedrivePlaceholder || "";
+      const rows = list?.querySelector(".plan-legal-onedrive-rows");
+      if (!rows || !groupId) return;
+      const wrap = document.createElement("div");
+      wrap.innerHTML = onedriveRowHtml(groupId, placeholder, true);
+      const row = wrap.firstElementChild;
+      if (!row) return;
+      rows.appendChild(row);
+      setupOnedrivePasteInput(row.querySelector("input"));
+      row.querySelector("input")?.focus();
+      return;
+    }
+    e.target.closest(".plan-legal-onedrive-remove")?.closest(".plan-legal-onedrive-row")?.remove();
+  });
+
+  form.querySelectorAll("[data-onedrive-link]").forEach(setupOnedrivePasteInput);
 }
 
 function refreshLegalEvidenciaEstado() {
@@ -396,7 +450,7 @@ function collectValuesById(template) {
   const values = {};
   (template.fields || []).forEach((field, index) => {
     if (field.type === "checkbox" && !field.label) return;
-    if (field.type === "file") return;
+    if (field.type === "file" || field.type === "onedrive-link") return;
     const el = document.getElementById(fieldKey(field, index));
     if (!el) return;
     const key = field.id || fieldKey(field, index);
@@ -541,7 +595,7 @@ function formatHighqUsuarioN2(values) {
 
 function buildLegalOneN2Text(values) {
   const v = (id) => String(values[id] || "").trim();
-  const evidenciaLink = normalizeOnedriveUrl(v("evidencias"));
+  const evidenciaLinks = collectOnedriveLinks("evidencias");
   const lines = [];
   lines.push(`URL: ${highqInforma(v("url"))}`);
   lines.push(`Login: ${highqInforma(v("login"))}`);
@@ -557,7 +611,11 @@ function buildLegalOneN2Text(values) {
   lines.push(highqInforma(v("expected")));
   lines.push("");
   lines.push("Anexos/Evidencias:");
-  lines.push(evidenciaLink ? `- ${evidenciaLink}` : "- No se informa");
+  if (evidenciaLinks.length) {
+    evidenciaLinks.forEach((link) => lines.push(`- ${link}`));
+  } else {
+    lines.push("- No se informa");
+  }
   return lines.join("\n");
 }
 
@@ -641,6 +699,7 @@ function showTemplateForm(product, item, template) {
   document.getElementById("ref-legal-btn-limpar")?.addEventListener("click", () => {
     document.getElementById("ref-legal-template-form")?.reset();
     legalHubEvidenciaFiles = [];
+    resetLegalOnedriveLists();
     refreshLegalEvidenciaChips();
     refreshLegalEvidenciaEstado();
     refreshConditionalFields();

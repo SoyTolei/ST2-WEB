@@ -3470,6 +3470,76 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
+.plan-legal-onedrive-list label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+.plan-legal-onedrive-rows {
+  display: grid;
+  gap: 8px;
+}
+.plan-legal-onedrive-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.plan-legal-onedrive-row input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--dark);
+  background: #fff;
+}
+.plan-legal-onedrive-row input::placeholder {
+  font-style: italic;
+  color: #94a3b8;
+}
+.plan-legal-onedrive-row input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.plan-legal-onedrive-add {
+  margin-top: 8px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px dashed var(--border, #cbd5e1);
+  background: var(--panel, #fff);
+  color: var(--primary, #d64000);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.plan-legal-onedrive-add:hover {
+  border-color: var(--primary, #d64000);
+  background: color-mix(in srgb, var(--primary, #d64000) 6%, var(--panel, #fff));
+}
+.plan-legal-onedrive-remove {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border, #cbd5e1);
+  background: var(--panel, #fff);
+  color: #94a3b8;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.plan-legal-onedrive-remove:hover {
+  color: #dc2626;
+  border-color: #fecaca;
+}
 .plan-backup-base-card {
   border: 1px solid var(--border);
   border-radius: 8px;
