@@ -420,3 +420,24 @@ export function canSeeChileLp() {
 export function canSeeChilePowerapps() {
   return !!getCachedModuleFlags().chilePowerapps;
 }
+
+const PROFILE_PORTAL_MODULE = {
+  bejerman: "planillasSqlOnvio",
+  legal: "planillasLegal",
+  chile: "planillasChile",
+};
+
+/** THOM / Portal Cliente según sistema de planillas (SQL, LEGAL o Chile). */
+export function canSeeProfilePortal(portalId) {
+  const key = PROFILE_PORTAL_MODULE[String(portalId || "").trim().toLowerCase()];
+  if (!key) return false;
+  return !!getCachedModuleFlags()[key];
+}
+
+export function listVisibleProfilePortals() {
+  return Object.keys(PROFILE_PORTAL_MODULE).filter((id) => canSeeProfilePortal(id));
+}
+
+export function hasAnyProfilePortalAccess() {
+  return listVisibleProfilePortals().length > 0;
+}

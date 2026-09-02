@@ -1,6 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
-import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, refreshModuleFlags } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
@@ -34,6 +34,8 @@ const thomDirectGate = document.getElementById("thomDirectGate");
 const aiFrame = document.getElementById("aiFrame");
 const portalSistemaBar = document.getElementById("portalSistemaBar");
 const thomPortalBar = document.getElementById("thomPortalBar");
+const thomTabWrap = document.querySelector('.tab-btn[data-tab="thom"]')?.closest(".tab-portal-wrap");
+const portalTabWrap = document.querySelector('.tab-btn[data-tab="portal"]')?.closest(".tab-portal-wrap");
 const portalSistemaPills = document.getElementById("portalSistemaPills");
 
 let appConfig = null;
@@ -212,8 +214,24 @@ function setStatus(message) {
   if (statusText) statusText.textContent = message;
 }
 
+function getProfileFilteredPortals() {
+  const all = appConfig?.portals ?? [];
+  const allowed = new Set(listVisibleProfilePortals());
+  return all.filter((p) => allowed.has(p.id));
+}
+
+function resolveActivePortalId(portals, preferredId = null) {
+  if (!portals.length) return "";
+  const fromPath = portalIdFromPath(window.location.pathname);
+  const candidates = [preferredId, fromPath, activePortalId, appConfig?.defaultPortalId, portals[0]?.id];
+  for (const id of candidates) {
+    if (id && portals.some((p) => p.id === id)) return id;
+  }
+  return portals[0].id;
+}
+
 function getActivePortalConfig() {
-  const portals = appConfig?.portals ?? [];
+  const portals = getProfileFilteredPortals();
   return portals.find((p) => p.id === activePortalId) || portals[0] || null;
 }
 
@@ -245,13 +263,15 @@ function portalPickerLabel(id, label) {
 }
 
 function initPortalPicker() {
-  const portals = appConfig?.portals ?? [];
-  if (!portals.length || !portalSistemaPills) return;
+  const portals = getProfileFilteredPortals();
+  if (!portalSistemaPills) return;
+  if (!portals.length) {
+    portalSistemaPills.innerHTML = "";
+    activePortalId = "";
+    return;
+  }
 
-  const fromPath = portalIdFromPath(window.location.pathname);
-  activePortalId = (fromPath && portals.some((p) => p.id === fromPath))
-    ? fromPath
-    : (appConfig?.defaultPortalId ?? portals[0]?.id ?? "bejerman");
+  activePortalId = resolveActivePortalId(portals);
   portalSistemaPills.innerHTML = portals
     .map(
       (p) =>
@@ -272,7 +292,7 @@ function syncPortalFrameTitle() {
 }
 
 function switchPortal(portalId, { history = "push" } = {}) {
-  if (!portalId) return;
+  if (!portalId || !canSeeProfilePortal(portalId)) return;
   const same = portalId === activePortalId;
   activePortalId = portalId;
 
@@ -292,9 +312,54 @@ function switchPortal(portalId, { history = "push" } = {}) {
   }
 }
 
+function profileContextBarVisible(kind, tabId) {
+  if (tabId !== kind) return false;
+  return listVisibleProfilePortals().length > 1;
+}
+
+function syncProfilePortalAccess() {
+  const visible = listVisibleProfilePortals();
+  const visibleSet = new Set(visible);
+  const showTabs = visible.length > 0;
+
+  document.querySelectorAll("[data-thom-portal]").forEach((btn) => {
+    const id = btn.dataset.thomPortal;
+    const show = visibleSet.has(id);
+    btn.classList.toggle("hidden", !show);
+    btn.toggleAttribute("hidden", !show);
+    btn.setAttribute("aria-hidden", show ? "false" : "true");
+  });
+
+  thomTabWrap?.classList.toggle("hidden", !showTabs);
+  thomTabWrap?.toggleAttribute("hidden", !showTabs);
+  portalTabWrap?.classList.toggle("hidden", !showTabs);
+  portalTabWrap?.toggleAttribute("hidden", !showTabs);
+
+  if (visible.length && !visibleSet.has(thomPortalId)) {
+    setThomPortalId(visible[0]);
+  } else {
+    syncThomPortalUi();
+  }
+
+  if (appConfig) initPortalPicker();
+
+  const activeTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
+  if (!showTabs && (activeTab === "thom" || activeTab === "portal")) {
+    navigateTab("planillas", { history: "replace" });
+    return;
+  }
+
+  if (activeTab === "thom" || activeTab === "portal") {
+    const tabId = activeTab;
+    portalSistemaBar?.classList.toggle("hidden", !profileContextBarVisible("portal", tabId));
+    thomPortalBar?.classList.toggle("hidden", !profileContextBarVisible("thom", tabId));
+  }
+}
+
 async function loadAppConfig() {
   appConfig = await apiGet("/api/app-config");
   initPortalPicker();
+  syncProfilePortalAccess();
   applyEmbedZoom("thom");
   applyEmbedZoom("ai");
   applyEmbedZoom("portal");
@@ -3564,15 +3629,16 @@ let thomPortalId = loadThomPortalId();
 function loadThomPortalId() {
   try {
     const saved = localStorage.getItem(THOM_PORTAL_KEY);
-    if (saved && THOM_PORTALS[saved]) return saved;
+    if (saved && THOM_PORTALS[saved] && canSeeProfilePortal(saved)) return saved;
   } catch {
     // ignore
   }
-  return "bejerman";
+  const visible = listVisibleProfilePortals();
+  return visible[0] || "bejerman";
 }
 
 function setThomPortalId(id) {
-  if (!THOM_PORTALS[id]) return;
+  if (!THOM_PORTALS[id] || !canSeeProfilePortal(id)) return;
   thomPortalId = id;
   try {
     localStorage.setItem(THOM_PORTAL_KEY, id);
@@ -4342,6 +4408,10 @@ function navigateTab(tabId, { history = "push" } = {}) {
     navigateTab("planillas", { history: "replace" });
     return;
   }
+  if ((tabId === "thom" || tabId === "portal") && !hasAnyProfilePortalAccess()) {
+    navigateTab("planillas", { history: "replace" });
+    return;
+  }
   const currentTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
   if (tabId === "planillas") {
     switchTab("planillas");
@@ -4359,7 +4429,7 @@ function navigateTab(tabId, { history = "push" } = {}) {
   }
   if (tabId === "portal") {
     const fromPath = portalIdFromPath(window.location.pathname);
-    if (fromPath && fromPath !== activePortalId) {
+    if (fromPath && canSeeProfilePortal(fromPath) && fromPath !== activePortalId) {
       void switchPortal(fromPath, { history: "none" });
     }
   }
@@ -4371,11 +4441,15 @@ function applyTopTabEntry() {
 
   const tab = tabFromPath(window.location.pathname);
   if (tab === "planillas") return;
+  if ((tab === "thom" || tab === "portal") && !hasAnyProfilePortalAccess()) {
+    navigateTab("planillas", { history: "replace" });
+    return;
+  }
 
   const thom = thomPortalFromPath(window.location.pathname);
-  if (tab === "thom" && thom) setThomPortalId(thom);
+  if (tab === "thom" && thom && canSeeProfilePortal(thom)) setThomPortalId(thom);
   const portal = portalIdFromPath(window.location.pathname);
-  if (tab === "portal" && portal) activePortalId = portal;
+  if (tab === "portal" && portal && canSeeProfilePortal(portal)) activePortalId = portal;
 
   navigateTab(tab, { history: "replace" });
 }
@@ -4398,8 +4472,8 @@ function switchTab(tabId) {
   });
 
   statusBar?.classList.add("hidden");
-  portalSistemaBar?.classList.toggle("hidden", tabId !== "portal");
-  thomPortalBar?.classList.toggle("hidden", tabId !== "thom");
+  portalSistemaBar?.classList.toggle("hidden", !profileContextBarVisible("portal", tabId));
+  thomPortalBar?.classList.toggle("hidden", !profileContextBarVisible("thom", tabId));
   document.body.classList.toggle("portal-tab-active", tabId === "portal");
   document.body.classList.toggle("thom-tab-active", tabId === "thom");
   document.body.classList.toggle("admin-tab-active", tabId === ADMIN_TAB_ID);
@@ -4534,6 +4608,7 @@ async function bootstrapApp() {
   syncViewAsBanner();
   bindAboutToolsUi();
   await initPlanillas();
+  syncProfilePortalAccess();
   syncAdminTabVisibility();
   syncAboutToolsBadge();
   if (userCanSeeDesktopToolDownloads()) void refreshAboutTools({ silent: true });
@@ -4548,10 +4623,15 @@ async function bootstrapApp() {
         switchTab("planillas");
         return;
       }
+      if ((tab === "thom" || tab === "portal") && !hasAnyProfilePortalAccess()) {
+        switchTab("planillas");
+        document.title = titleForTab("planillas");
+        return;
+      }
       const thom = thomPortalFromPath(window.location.pathname);
-      if (tab === "thom" && thom) setThomPortalId(thom);
+      if (tab === "thom" && thom && canSeeProfilePortal(thom)) setThomPortalId(thom);
       const portal = portalIdFromPath(window.location.pathname);
-      if (tab === "portal" && portal) void switchPortal(portal, { history: "none" });
+      if (tab === "portal" && portal && canSeeProfilePortal(portal)) void switchPortal(portal, { history: "none" });
       switchTab(tab);
       document.title = titleForTab(tab);
     } finally {
@@ -4566,6 +4646,8 @@ async function bootstrapApp() {
     startSessionHeartbeat();
   }, 60000);
   initEmbedReminders();
+  document.addEventListener("st2:view-as-changed", () => syncProfilePortalAccess());
+  document.addEventListener("st2:modules-flags-refreshed", () => syncProfilePortalAccess());
 }
 
 void bootstrapApp();
