@@ -1878,32 +1878,6 @@ function isTitanPeekImage(peekSrc) {
   return /\.(gif|png|jpe?g|webp|avif)(\?|$)/i.test(String(peekSrc || ""));
 }
 
-let titanPeekAudio = null;
-let titanPeekAudioSrc = "";
-
-function playTitanPeekAudio(src) {
-  const url = String(src || "").trim();
-  if (!url) return;
-  if (!titanPeekAudio || titanPeekAudioSrc !== url) {
-    titanPeekAudio = new Audio(url);
-    titanPeekAudioSrc = url;
-    titanPeekAudio.preload = "auto";
-  }
-  titanPeekAudio.currentTime = 0;
-  titanPeekAudio.volume = 1;
-  void titanPeekAudio.play().catch(() => {});
-}
-
-function stopTitanPeekAudio() {
-  if (!titanPeekAudio) return;
-  titanPeekAudio.pause();
-  try {
-    titanPeekAudio.currentTime = 0;
-  } catch {
-    /* ignore */
-  }
-}
-
 function syncPlanillasHeroEaster() {
   const email = effectivePlanillasEmail();
   const egg = resolvePlanillasEgg(email);
@@ -1953,17 +1927,6 @@ function syncPlanillasHeroEaster() {
   hero?.classList.toggle("has-titan-peek", peek);
   hero?.classList.toggle("has-titan-peek-img", peekImage);
   hero?.classList.toggle("is-palermo-hero", !!(peekImage && egg?.peekHeroTall));
-  const heroEaster = document.getElementById("planillas-hero-easter");
-  if (heroEaster) {
-    const audio = showEgg && egg?.peekAudio ? String(egg.peekAudio).trim() : "";
-    if (audio && showVisual) {
-      heroEaster.dataset.easterAudio = audio;
-      heroEaster.classList.add("has-easter-audio");
-    } else {
-      delete heroEaster.dataset.easterAudio;
-      heroEaster.classList.remove("has-easter-audio");
-    }
-  }
   if (titan) {
     const srcEl = document.getElementById("planillas-hero-titan-src");
     titan.muted = true;
@@ -2005,21 +1968,6 @@ function syncPlanillasHeroEaster() {
   hotspot?.setAttribute("aria-hidden", peekImage ? "false" : "true");
   hero?.classList.remove("is-titan-img-active");
   bindTitanPeekHover();
-  bindEasterCornerAudio();
-}
-
-function bindEasterCornerAudio() {
-  const el = document.getElementById("planillas-hero-easter");
-  if (!el || el.dataset.easterAudioBound === "1") return;
-  el.dataset.easterAudioBound = "1";
-  el.addEventListener("mouseenter", () => {
-    const src = el.dataset.easterAudio;
-    if (!src || el.classList.contains("is-hidden")) return;
-    playTitanPeekAudio(src);
-  });
-  el.addEventListener("mouseleave", () => {
-    if (el.dataset.easterAudio) stopTitanPeekAudio();
-  });
 }
 
 function bindTitanPeekHover() {

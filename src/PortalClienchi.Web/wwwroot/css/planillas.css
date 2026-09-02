@@ -522,16 +522,11 @@
   display: none;
 }
 
-#planillas-hero-easter.has-easter-audio {
-  pointer-events: auto;
-  cursor: default;
-}
-
 #planillas-hero-titan-img.planillas-hero-titan {
   width: min(620px, 96%);
   height: auto;
   max-height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center bottom;
   opacity: 1;
   filter: saturate(1.05);
@@ -596,9 +591,9 @@
   top: auto;
   bottom: 0;
   width: min(700px, 108%);
-  height: auto;
-  max-height: 118%;
-  object-fit: contain;
+  height: 112%;
+  max-height: none;
+  object-fit: cover;
   object-position: center bottom;
   opacity: 1;
   transform: translate(-50%, 0);
