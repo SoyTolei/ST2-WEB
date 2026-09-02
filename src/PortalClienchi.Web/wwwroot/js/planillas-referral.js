@@ -152,7 +152,11 @@ export async function openReferral({ legalProductId = null } = {}) {
   if (ctx.getSistema() === "BejermanSql") {
     saveEsTecnico(false);
   }
-  resetReferralForm();
+  if (isLegal() && legalProductId) {
+    resetReferralForm({ keepLegalHub: true });
+  } else {
+    resetReferralForm();
+  }
   updateReferralPanels();
   if (isLegal()) {
     const productId = legalProductId || ctx.getPendingLegalProductId?.();
@@ -1330,9 +1334,9 @@ function setField(id, value, ph) {
   el.classList.remove("placeholder-active");
 }
 
-function resetReferralForm() {
+function resetReferralForm({ keepLegalHub = false } = {}) {
   referralIaUndo?.clearSnapshot();
-  if (isLegal()) resetLegalReferralHub();
+  if (isLegal() && !keepLegalHub) resetLegalReferralHub();
   resetChileReferral();
   versionSel = null;
   moduloSel = null;

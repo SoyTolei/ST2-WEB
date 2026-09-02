@@ -60,10 +60,11 @@ function showView(id) {
   document.getElementById(id)?.classList.remove("hidden");
 }
 
-async function ensureCatalog() {
-  if (templatesCatalog) return templatesCatalog;
-  const url = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json";
-  const res = await fetch(url);
+async function ensureCatalog(force = false) {
+  if (templatesCatalog && !force) return templatesCatalog;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-n2";
+  const url = base.includes("?") ? base : `${base}?v=highq-n2`;
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
   return templatesCatalog;
@@ -424,6 +425,7 @@ function showTemplateForm(product, item, template) {
   setupLegalEvidenciasPanel();
   mountPlanTextPreview("ref-legal-text-preview");
   injectModuleHeaders();
+  root.scrollIntoView({ block: "start", behavior: "smooth" });
 
   const runGenerate = async ({ copy = false } = {}) => {
     const missing = validateTemplate(template);
@@ -532,7 +534,8 @@ async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
   try {
     openedFromMenu = !!fromMenu;
     showHubStatus("Cargando plantilla…");
-    await ensureCatalog();
+    templatesCatalog = null;
+    await ensureCatalog(true);
     const hubProduct = findHubProduct(productId);
     const hubItem = hubProduct?.items?.find((i) => i.id === itemId);
     if (!hubProduct || !hubItem) {
@@ -624,12 +627,20 @@ export function initLegalReferralHub(context) {
 }
 
 export function openLegalProduct(productId) {
-  if (!canSeeLegalProduct(productId)) return Promise.resolve();
+  if (!canSeeLegalProduct(productId)) {
+    openLegalReferralHub();
+    showHubStatus("No tenés acceso a este producto LEGAL. Pedí el módulo HighQ en administración.", true);
+    return Promise.resolve();
+  }
   openedFromMenu = true;
   navStack = { product: null, item: null, category: null, template: null };
   const hubProduct = findHubProduct(productId);
   const bugItem = hubProduct?.items?.[0];
-  if (!hubProduct || !bugItem) return Promise.resolve();
+  if (!hubProduct || !bugItem) {
+    openLegalReferralHub();
+    showHubStatus("No se encontró la configuración del producto LEGAL.", true);
+    return Promise.resolve();
+  }
   return onHubItemPick(productId, bugItem.id, { fromMenu: true });
 }
 

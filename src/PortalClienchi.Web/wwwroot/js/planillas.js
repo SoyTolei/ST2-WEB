@@ -383,7 +383,9 @@ function canOpenRoute(route) {
     return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys) && canSeeTransferenciaModule(sys);
   }
   if (route.requires === "referral") {
-    return !!sys && canSeeSistema(sys) && !isSistemaPlaceholder(sys) && canSeeReferralModule(sys);
+    if (!sys || !canSeeSistema(sys) || isSistemaPlaceholder(sys)) return false;
+    if (sys === "Legal") return canSeeAnyLegalProduct();
+    return canSeeReferralModule(sys);
   }
   if (route.requires === "chile-soporte") {
     return canSeeSistema("Chile") && !!chileEmbedUrl;
