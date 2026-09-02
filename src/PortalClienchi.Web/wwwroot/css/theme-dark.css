@@ -2141,6 +2141,25 @@ html.st2-theme-dark #planillas-transferencia .plan-ia-undo-btn {
   color: #fdba74 !important;
 }
 
+html.st2-theme-dark .plan-text-preview {
+  background: #1c1c1c !important;
+  border-color: var(--st2-suite-border) !important;
+}
+
+html.st2-theme-dark .plan-text-preview-head {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-bottom-color: #333 !important;
+}
+
+html.st2-theme-dark .plan-text-preview-title {
+  color: #e5e5e5;
+}
+
+html.st2-theme-dark .plan-text-preview-body {
+  background: #121212 !important;
+  color: #e5e7eb !important;
+}
+
 html.st2-theme-dark .borrado-list-footer,
 html.st2-theme-dark .blanqueo-list-footer {
   border-top-color: #334155 !important;

@@ -4826,7 +4826,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin-top: 18px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--white);
   overflow: hidden;
 }
 .plan-text-preview-head {
@@ -4836,7 +4836,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   gap: 12px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
-  background: #fafafa;
+  background: var(--nav-well);
 }
 .plan-text-preview-title {
   margin: 0;
@@ -4883,13 +4883,13 @@ body.st2-chile-embed-active #panel-planillas.active {
   padding: 14px 16px;
   max-height: 420px;
   overflow: auto;
-  background: #f3f4f6;
+  background: var(--panel);
   white-space: pre-wrap;
   word-break: break-word;
   font-family: Consolas, "Courier New", monospace;
   font-size: 0.82rem;
   line-height: 1.5;
-  color: #1f2937;
+  color: var(--dark);
 }
 .plan-legal-form-panel .plan-text-preview { margin-top: 16px; }
 
