@@ -404,8 +404,7 @@
   visibility: visible;
 }
 
-.planillas-footer:hover .st2-suite-sig::after,
-.app-header-user-zone:hover::after {
+.planillas-footer:hover .st2-suite-sig::after {
   opacity: 1;
 }
 

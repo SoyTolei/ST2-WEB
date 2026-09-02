@@ -193,30 +193,9 @@ html, body {
   transition: opacity 0.45s ease, visibility 0.45s ease;
 }
 
-.app-header-user-zone::after {
-  content: "";
-  position: absolute;
-  inset: -4px -12px;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0;
-  border-radius: 12px;
-  transition: opacity 0.45s ease;
-  background: radial-gradient(
-    ellipse 90% 80% at 50% 50%,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.04) 55%,
-    transparent 78%
-  );
-}
-
 .app-header-user-zone:hover .app-header-fx-stage {
   opacity: 1;
   visibility: visible;
-}
-
-.app-header-user-zone:hover::after {
-  opacity: 1;
 }
 
 .app-header-user-zone:hover .st2-suite-float {
@@ -233,22 +212,6 @@ html, body {
 .app-header-user-zone .about-btn {
   position: relative;
   z-index: 2;
-  transition:
-    opacity 0.32s ease,
-    color 0.32s ease,
-    background-color 0.32s ease,
-    border-color 0.32s ease,
-    box-shadow 0.32s ease;
-}
-
-.app-header-user-zone:hover .st2-session-email,
-.app-header-user-zone:hover .about-btn,
-.app-header-user-zone:hover .about-btn:hover {
-  opacity: 0;
-  color: transparent;
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
 }
 
 .st2-session-email {
