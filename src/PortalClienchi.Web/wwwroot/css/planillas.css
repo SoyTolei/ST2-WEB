@@ -538,31 +538,53 @@
   object-position: center bottom;
   opacity: 1;
   filter: saturate(1.05);
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.55) 6%,
-    #000 14%,
-    #000 86%,
-    rgba(0, 0, 0, 0.55) 94%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.55) 6%,
-    #000 14%,
-    #000 86%,
-    rgba(0, 0, 0, 0.55) 94%,
-    transparent 100%
-  );
+  -webkit-mask-image:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 8%,
+      #000 18%,
+      #000 82%,
+      rgba(0, 0, 0, 0.4) 92%,
+      transparent 100%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.55) 6%,
+      #000 14%,
+      #000 86%,
+      rgba(0, 0, 0, 0.55) 94%,
+      transparent 100%
+    );
+  mask-image:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 8%,
+      #000 18%,
+      #000 82%,
+      rgba(0, 0, 0, 0.4) 92%,
+      transparent 100%
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.55) 6%,
+      #000 14%,
+      #000 86%,
+      rgba(0, 0, 0, 0.55) 94%,
+      transparent 100%
+    );
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   transition:
-    transform 1.15s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.9s ease;
+    transform 1.75s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 1.5s ease;
 }
 
 .planillas-hero.has-titan-peek-img .planillas-hero-titan-clip {
