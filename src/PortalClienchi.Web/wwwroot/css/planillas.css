@@ -136,6 +136,33 @@
   animation: st2SuiteDriftR 9.4s ease-in-out infinite 5s;
 }
 
+.st2-suite-float--crest6 {
+  left: 32%;
+  top: 6%;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  animation: st2SuiteDriftL 8.4s ease-in-out infinite 1.8s;
+}
+
+.st2-suite-float--crest7 {
+  right: 22%;
+  top: 36%;
+  width: 11px;
+  height: 11px;
+  object-fit: contain;
+  animation: st2SuiteDriftUp 9.8s ease-in-out infinite 4.2s;
+}
+
+.st2-suite-float--crest8 {
+  left: 78%;
+  top: 66%;
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
+  animation: st2SuiteDriftR 10.6s ease-in-out infinite 6.6s;
+}
+
 .st2-suite-float--portrait {
   left: 48%;
   top: 28%;
@@ -174,6 +201,27 @@
   top: 56%;
   font-size: 0.7rem;
   animation: st2SuiteDriftR 10.8s ease-in-out infinite 6.1s;
+}
+
+.st2-suite-float--bike5 {
+  left: 36%;
+  top: 72%;
+  font-size: 0.76rem;
+  animation: st2SuiteDriftL 9.2s ease-in-out infinite 2.6s;
+}
+
+.st2-suite-float--bike6 {
+  right: 54%;
+  top: 10%;
+  font-size: 0.8rem;
+  animation: st2SuiteDriftUp 10.4s ease-in-out infinite 5.4s;
+}
+
+.st2-suite-float--bike7 {
+  left: 84%;
+  top: 34%;
+  font-size: 0.68rem;
+  animation: st2SuiteDriftR 11.4s ease-in-out infinite 7.2s;
 }
 
 .st2-suite-float--web {
@@ -218,11 +266,39 @@
   animation: st2SuiteDriftL 9.2s ease-in-out infinite 7s;
 }
 
+.st2-suite-float--leaf2 {
+  right: 48%;
+  top: 4%;
+  font-size: 0.66rem;
+  animation: st2SuiteDriftR 8.6s ease-in-out infinite 3.8s;
+}
+
 .st2-suite-float--seed {
   left: 52%;
   top: 86%;
   font-size: 0.68rem;
   animation: st2SuiteDriftR 8.2s ease-in-out infinite 1.8s;
+}
+
+.st2-suite-float--palta {
+  left: 10%;
+  top: 28%;
+  font-size: 0.8rem;
+  animation: st2SuiteDriftUp 9s ease-in-out infinite 0.9s;
+}
+
+.st2-suite-float--palta2 {
+  right: 10%;
+  top: 76%;
+  font-size: 0.74rem;
+  animation: st2SuiteDriftL 10.2s ease-in-out infinite 4.8s;
+}
+
+.st2-suite-float--palta3 {
+  left: 62%;
+  top: 18%;
+  font-size: 0.72rem;
+  animation: st2SuiteDriftR 9.6s ease-in-out infinite 6.4s;
 }
 
 /* Recorren el bloque en horizontal; el recorte evita que se vayan para arriba. */

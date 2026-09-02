@@ -186,11 +186,9 @@ function updateSessionEmailDisplay() {
   if (!el) return;
   if (cachedEmail) {
     el.textContent = cachedEmail;
-    el.title = cachedEmail;
     el.classList.remove("hidden");
   } else {
     el.textContent = "";
-    el.title = "";
     el.classList.add("hidden");
   }
 }
