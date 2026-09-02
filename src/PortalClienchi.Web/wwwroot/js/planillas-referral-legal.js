@@ -5,6 +5,7 @@ import { canSeeLegalProduct } from "./module-access.js";
 import { syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { normalizeOnedriveUrl, setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
+import { autoTour } from "./st2-tour-init.js";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -160,6 +161,7 @@ function showHub() {
   showView("ref-legal-hub");
   renderHub();
   showHubStatus("");
+  autoTour("referral-legal-hub", { delay: 600 });
 }
 
 function showTemplateCards(product, item, category, templates) {
@@ -849,6 +851,7 @@ function showTemplateForm(product, item, template) {
   injectModuleHeaders();
   document.querySelectorAll("#ref-legal-template-form select.plan-select").forEach(enhancePlanSelect);
   requestAnimationFrame(() => root.classList.add("is-ready"));
+  autoTour("referral-legal-form", { delay: 650 });
 
   const runGenerate = async ({ copy = false } = {}) => {
     if (!LEGAL_N2_FORMATS.has(template.outputFormat)) {

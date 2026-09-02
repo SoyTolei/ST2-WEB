@@ -1,6 +1,7 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
 import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js";
+import { autoTourForReferral } from "./st2-tour-init.js";
 import {
   initChileReferral,
   buildChileReferralPanel,
@@ -168,6 +169,7 @@ export async function openReferral({ legalProductId = null } = {}) {
   }
   document.getElementById("ref-sistema-badge").textContent = sistemaLabel();
   ctx.showView("referral");
+  if (!isLegal()) autoTourForReferral(650);
 }
 
 export { syncLegalMenuProducts, prefetchLegalCatalog };

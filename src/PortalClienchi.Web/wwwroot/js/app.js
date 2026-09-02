@@ -1,4 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
+import { scheduleWelcomeTour } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
@@ -4608,6 +4609,7 @@ async function bootstrapApp() {
   syncViewAsBanner();
   bindAboutToolsUi();
   await initPlanillas();
+  scheduleWelcomeTour();
   syncProfilePortalAccess();
   syncAdminTabVisibility();
   syncAboutToolsBadge();

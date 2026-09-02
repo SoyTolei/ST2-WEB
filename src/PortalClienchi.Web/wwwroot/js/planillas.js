@@ -22,6 +22,14 @@ import {
 } from "./access-alerts.js";
 import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js";
 import { syncAguaEgg } from "./planillas-agua-egg.js";
+import {
+  initSt2Tours,
+  setTourContext,
+  autoTour,
+  mountModuleTourButtons,
+  mountMenuTourHelp,
+  refreshMenuTourHelp,
+} from "./st2-tour-init.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -572,6 +580,9 @@ function updateSistemaUi() {
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
   syncReferralModuleLabels();
+  refreshMenuTourHelp();
+  mountMenuTourHelp();
+  mountModuleTourButtons();
 }
 
 function selectSistema(id) {
@@ -1469,6 +1480,7 @@ async function revealView(name, historyMode = "push") {
     }
     initTransferenciaForm();
     showView("transferencia", { history: historyMode });
+    autoTour(`transferencia:${sistemaActual}`, { delay: 550 });
     return;
   }
 
@@ -1515,6 +1527,7 @@ async function revealView(name, historyMode = "push") {
     }
     mod.openOportunidadMenu();
     showView("oportunidadMenu", { history: historyMode });
+    autoTour("oportunidad-menu", { delay: 550 });
     return;
   }
 
@@ -2021,6 +2034,11 @@ function bindTitanPeekHover() {
 
 export function initPlanillas() {
   if (!views.menu) return Promise.resolve();
+
+  setTourContext({
+    getSistema: () => sistemaActual,
+  });
+  initSt2Tours();
 
   injectModuleHeaders();
   initTransferenciaIaUi();
