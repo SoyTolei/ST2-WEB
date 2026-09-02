@@ -500,28 +500,25 @@
 }
 
 #planillas-hero-titan-img.planillas-hero-titan {
-  width: min(520px, 94%);
-  max-height: 96%;
-  object-fit: cover;
+  width: min(620px, 96%);
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
   object-position: center bottom;
-  opacity: 0.94;
-  filter: saturate(1.04) brightness(0.98);
+  opacity: 1;
+  filter: saturate(1.05);
   -webkit-mask-image: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.35) 7%,
-    #000 18%,
-    #000 82%,
-    rgba(0, 0, 0, 0.35) 93%,
+    #000 11%,
+    #000 89%,
     transparent 100%
   );
   mask-image: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(0, 0, 0, 0.35) 7%,
-    #000 18%,
-    #000 82%,
-    rgba(0, 0, 0, 0.35) 93%,
+    #000 11%,
+    #000 89%,
     transparent 100%
   );
   -webkit-mask-size: 100% 100%;
@@ -530,24 +527,53 @@
   mask-repeat: no-repeat;
   transition:
     transform 1.15s cubic-bezier(0.16, 1, 0.3, 1),
-    height 1.15s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.9s ease;
 }
 
-.planillas-hero.has-titan-peek-img #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
-  transform: translate(-50%, calc(100% + 20px));
+.planillas-hero.has-titan-peek-img .planillas-hero-titan-clip {
+  inset: -10px 0 0;
+  overflow: hidden;
 }
 
-.planillas-hero.has-titan-peek-img:hover #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
-  top: -6px;
+.planillas-hero.has-titan-peek-img.is-titan-img-active .planillas-hero-titan-clip {
+  overflow: visible;
+}
+
+.planillas-hero-titan-hotspot {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: min(240px, 46%);
+  height: 62%;
+  z-index: 4;
+  cursor: default;
+  background: transparent;
+}
+
+.planillas-hero-titan-hotspot.is-hidden {
+  display: none !important;
+}
+
+.planillas-hero.has-titan-peek-img #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
+  transform: translate(-50%, calc(100% + 18px));
+  opacity: 0.001;
+}
+
+.planillas-hero.has-titan-peek-img.is-titan-img-active #planillas-hero-titan-img.planillas-hero-titan:not(.is-hidden) {
+  top: auto;
   bottom: 0;
-  width: min(580px, 98%);
-  height: 112%;
-  max-height: none;
-  object-fit: cover;
+  width: min(700px, 108%);
+  height: auto;
+  max-height: 118%;
+  object-fit: contain;
   object-position: center bottom;
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.planillas-hero.has-titan-peek-img.is-titan-img-active .planillas-hero-titan-clip::after {
+  opacity: 0.42;
 }
 
 .planillas-hero.has-titan-peek-img .planillas-hero-titan-clip::after {
@@ -558,11 +584,12 @@
   background: linear-gradient(
     90deg,
     var(--st2-suite-surface, #0f172a) 0%,
-    transparent 16%,
-    transparent 84%,
+    transparent 20%,
+    transparent 80%,
     var(--st2-suite-surface, #0f172a) 100%
   );
-  opacity: 0.72;
+  opacity: 0;
+  transition: opacity 0.55s ease;
   z-index: 2;
 }
 

@@ -1992,31 +1992,54 @@ function syncPlanillasHeroEaster() {
     titanImg.classList.toggle("is-hidden", !peek || !peekImage);
     titanImg.setAttribute("aria-hidden", peek && peekImage ? "false" : "true");
   }
+  const hotspot = document.getElementById("planillas-hero-titan-hotspot");
+  hotspot?.classList.toggle("is-hidden", !peekImage);
+  hotspot?.setAttribute("aria-hidden", peekImage ? "false" : "true");
+  hero?.classList.remove("is-titan-img-active");
   bindTitanPeekHover();
 }
 
 function bindTitanPeekHover() {
   const hero = document.querySelector("#planillas-menu .planillas-hero");
-  if (!hero || hero.dataset.titanPeekBound === "1") return;
-  hero.dataset.titanPeekBound = "1";
-  hero.addEventListener("mouseenter", () => {
-    const titan = document.getElementById("planillas-hero-titan");
-    if (titan && !titan.classList.contains("is-hidden") && titan.dataset.peekSrc) {
-      titan.play().catch(() => {});
-    }
+  const hotspot = document.getElementById("planillas-hero-titan-hotspot");
+  if (!hero) return;
+
+  if (hero.dataset.titanPeekBound !== "1") {
+    hero.dataset.titanPeekBound = "1";
+    hero.addEventListener("mouseenter", () => {
+      if (hero.classList.contains("has-titan-peek-img")) return;
+      const titan = document.getElementById("planillas-hero-titan");
+      if (titan && !titan.classList.contains("is-hidden") && titan.dataset.peekSrc) {
+        titan.play().catch(() => {});
+      }
+      const audioSrc = hero.dataset.peekAudio;
+      if (audioSrc) playTitanPeekAudio(audioSrc);
+    });
+    hero.addEventListener("mouseleave", () => {
+      if (hero.classList.contains("has-titan-peek-img")) return;
+      const titan = document.getElementById("planillas-hero-titan");
+      if (titan && !titan.classList.contains("is-hidden")) {
+        titan.pause();
+        try {
+          titan.currentTime = 0;
+        } catch {
+          /* ignore */
+        }
+      }
+      stopTitanPeekAudio();
+    });
+  }
+
+  if (!hotspot || hotspot.dataset.titanHotspotBound === "1") return;
+  hotspot.dataset.titanHotspotBound = "1";
+  hotspot.addEventListener("mouseenter", () => {
+    if (!hero.classList.contains("has-titan-peek-img")) return;
+    hero.classList.add("is-titan-img-active");
     const audioSrc = hero.dataset.peekAudio;
     if (audioSrc) playTitanPeekAudio(audioSrc);
   });
-  hero.addEventListener("mouseleave", () => {
-    const titan = document.getElementById("planillas-hero-titan");
-    if (titan && !titan.classList.contains("is-hidden")) {
-      titan.pause();
-      try {
-        titan.currentTime = 0;
-      } catch {
-        /* ignore */
-      }
-    }
+  hotspot.addEventListener("mouseleave", () => {
+    hero.classList.remove("is-titan-img-active");
     stopTitanPeekAudio();
   });
 }
