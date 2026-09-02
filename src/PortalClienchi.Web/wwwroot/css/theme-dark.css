@@ -2170,6 +2170,18 @@ html.st2-theme-dark .plan-legal-evid-panel {
   border-color: #333;
 }
 
+html.st2-theme-dark .plan-legal-tier-rec {
+  background: #3a2012;
+  color: #fdba74;
+  border-color: rgba(234, 88, 12, 0.45);
+}
+
+html.st2-theme-dark .plan-legal-tier-opt {
+  background: #1c1c1c;
+  color: var(--text-muted);
+  border-color: #333;
+}
+
 html.st2-theme-dark .borrado-list-footer,
 html.st2-theme-dark .blanqueo-list-footer {
   border-top-color: #334155 !important;

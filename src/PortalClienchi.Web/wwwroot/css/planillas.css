@@ -4910,6 +4910,28 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin-top: 8px;
   padding-top: 20px;
 }
+.plan-legal-tier {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+.plan-legal-tier-rec {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+}
+.plan-legal-tier-opt {
+  background: var(--nav-well, #f1f5f9);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.plan-field-tier-required label { color: #64748b; }
 .plan-captura-chip {
   display: inline-flex;
   align-items: center;

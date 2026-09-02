@@ -16,10 +16,12 @@ const LEGAL_ICONS = {
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
 
 const LEGAL_SECTION_LABELS = {
-  checklist: "Checklist",
+  minimo: "Mínimo necesario para escalar",
   descripcion: "Descripción y reproducción",
-  found: "Resultado encontrado",
-  expected: "Resultado esperado",
+  resultados: "Resultados",
+  recomendados: "Muy recomendados",
+  opcionales: "Opcionales / situacionales",
+  checklist: "Checklist",
   adjuntos: "Evidencias visuales",
 };
 
@@ -63,8 +65,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-n2c";
-  const url = base.includes("?") ? base : `${base}?v=highq-n2c`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-tiers";
+  const url = base.includes("?") ? base : `${base}?v=highq-tiers`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -175,30 +177,51 @@ function fieldLabel(field, index) {
   return (field.label || field.placeholder || `Campo ${index + 1}`).replace(/\*+$/, "").trim();
 }
 
-function fieldRequired(field) {
-  return field.label?.includes("*") || field.required === true;
+function fieldTier(field, template) {
+  if (field.tier) return field.tier;
+  const id = field.id || "";
+  if (template?.requiredFields?.includes(id)) return "required";
+  if (template?.recommendedFields?.includes(id)) return "recommended";
+  return "optional";
 }
 
-function renderField(field, index) {
+function fieldRequired(field, template) {
+  return fieldTier(field, template) === "required"
+    || field.label?.includes("*")
+    || field.required === true;
+}
+
+function fieldLabelHtml(field, index, template) {
+  const label = fieldLabel(field, index);
+  const tier = fieldTier(field, template);
+  if (tier === "required") return `${label} *`;
+  if (tier === "recommended") return `${label} <span class="plan-legal-tier plan-legal-tier-rec">Recomendado</span>`;
+  if (tier === "optional") return `${label} <span class="plan-legal-tier plan-legal-tier-opt">Opcional</span>`;
+  return label;
+}
+
+function renderField(field, index, template) {
   if (field.type === "checkbox" && !field.label) return "";
   const key = fieldKey(field, index);
-  const req = fieldRequired(field) ? " required" : "";
-  const label = fieldLabel(field, index);
+  const req = fieldRequired(field, template) ? " required" : "";
+  const labelHtml = fieldLabelHtml(field, index, template);
+  const tier = fieldTier(field, template);
+  const tierClass = tier ? ` plan-field-tier-${tier}` : "";
   const sectionAttr = field.section ? ` data-legal-section="${field.section}"` : "";
-  const wrap = (inner) => `<div class="plan-field"${sectionAttr}>${inner}</div>`;
+  const wrap = (inner) => `<div class="plan-field${tierClass}"${sectionAttr}>${inner}</div>`;
   if (field.type === "textarea") {
-    return wrap(`<label for="${key}">${label}</label><textarea id="${key}" data-legal-field rows="4" placeholder="${field.placeholder || ""}"${req}></textarea>`);
+    return wrap(`<label for="${key}">${labelHtml}</label><textarea id="${key}" data-legal-field rows="4" placeholder="${field.placeholder || ""}"${req}></textarea>`);
   }
   if (field.type === "select") {
     const options = (field.options || []).map((opt) => `<option value="${opt}">${opt}</option>`).join("");
-    return wrap(`<label for="${key}">${label}</label><select id="${key}" class="plan-select" data-legal-field${req}><option value="">Seleccionar…</option>${options}</select>`);
+    return wrap(`<label for="${key}">${labelHtml}</label><select id="${key}" class="plan-select" data-legal-field${req}><option value="">Seleccionar…</option>${options}</select>`);
   }
   if (field.type === "file") {
     return `
-      <div class="plan-field plan-legal-file-field"${sectionAttr}>
-        <label>${label}</label>
+      <div class="plan-field plan-legal-file-field plan-field-tier-${tier}"${sectionAttr}>
+        <label>${labelHtml}</label>
         <div class="plan-capturas-panel plan-legal-evid-panel">
-          <p class="plan-capturas-hint">Screenshots, videos, PDF, TXT, logs o HAR. Se suben al generar la vista previa.</p>
+          <p class="plan-capturas-hint">Screenshots, videos o PDF. N2 ve exactamente qué le aparece al usuario.</p>
           <div class="plan-capturas-actions">
             <button type="button" id="ref-legal-hub-evid-agregar" class="plan-capturas-browse">
               <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
@@ -216,9 +239,9 @@ function renderField(field, index) {
   }
   const type = field.type === "checkbox" ? "checkbox" : "text";
   if (type === "checkbox") {
-    return `<label class="plan-field plan-legal-check"${sectionAttr}><input id="${key}" data-legal-field type="checkbox"/> ${label}</label>`;
+    return `<label class="plan-field plan-legal-check${tierClass}"${sectionAttr}><input id="${key}" data-legal-field type="checkbox"/> ${labelHtml}</label>`;
   }
-  return wrap(`<label for="${key}">${label}</label><input id="${key}" data-legal-field type="text" placeholder="${field.placeholder || ""}"${req}/>`);
+  return wrap(`<label for="${key}">${labelHtml}</label><input id="${key}" data-legal-field type="text" placeholder="${field.placeholder || ""}"${req}/>`);
 }
 
 function renderTemplateFields(template) {
@@ -236,7 +259,9 @@ function renderTemplateFields(template) {
     closeSection();
     currentSection = sectionId;
     const title = LEGAL_SECTION_LABELS[sectionId] || sectionId;
-    const bodyClass = sectionId === "checklist" ? " plan-legal-checklist-grid" : "";
+    const bodyClass = sectionId === "minimo" || sectionId === "recomendados" || sectionId === "opcionales"
+      ? " plan-legal-checklist-grid"
+      : "";
     html += `<div class="plan-legal-section" data-legal-section="${sectionId}">`;
     html += `<p class="plan-ref-title">${title}</p>`;
     html += `<div class="plan-legal-section-body${bodyClass}">`;
@@ -245,7 +270,7 @@ function renderTemplateFields(template) {
   fields.forEach((field, index) => {
     if (field.section && field.section !== currentSection) openSection(field.section);
     else if (!field.section && currentSection) closeSection();
-    html += renderField(field, index);
+    html += renderField(field, index, template);
   });
   closeSection();
   return html;
@@ -350,7 +375,7 @@ function getRequiredFieldIds(template) {
   const ids = [];
   (template.fields || []).forEach((field, index) => {
     if (field.type === "file" || field.type === "checkbox") return;
-    if (!fieldRequired(field)) return;
+    if (!fieldRequired(field, template)) return;
     ids.push(field.id || fieldKey(field, index));
   });
   return ids;
@@ -409,30 +434,46 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
   const v = (id) => String(values[id] || "").trim();
   const names = evidenciaFileNames(evidenciaEnlaces);
   const hasEvidencias = names.length > 0;
-  let incomplete = false;
+  let missingRecommended = false;
 
-  const mark = (value, warn = "No informado") => {
+  const req = (value, warnFem = false) => {
     const text = String(value || "").trim();
     if (text) return text;
-    incomplete = true;
-    return warn;
+    return warnFem ? "⚠️ No informada" : "⚠️ No informado";
+  };
+
+  const rec = (value, warn = false) => {
+    const text = String(value || "").trim();
+    if (text) return text;
+    if (warn) missingRecommended = true;
+    return "No informado";
+  };
+
+  const opt = (value) => {
+    const text = String(value || "").trim();
+    if (!text) return "No informado";
+    return mapHighqNa(text) || text;
   };
 
   const lines = [];
-  lines.push(`*Descripción/Asunto:* ${mark(v("descripcion"), "⚠️ No informada")}`);
+  lines.push(`*Descripción/Asunto:* ${req(v("descripcion"), true)}`);
   lines.push("");
   lines.push("*Passo a Passo/Checklist:*");
-  lines.push(`1. URL del cliente: ${mark(v("url"), "⚠️ No informada")}`);
-  lines.push(`2. Usuario creado para N2: ${mark(v("usuarioN2"))}`);
-  lines.push(`3. ¿Problema ocurre solo con usuario específico?: ${mark(mapHighqAfectaUsuario(v("afectaUsuario")))}`);
-  lines.push(`4. Frecuencia: ${mark(v("frecuencia"))}`);
-  lines.push(`5. Archivo HAR adjunto: ${mark(mapHighqNa(v("har")))}`);
-  lines.push(`6. Template del sitio adjunto: ${mark(mapHighqNa(v("templateSitio")))}`);
-  lines.push(`7. Template iSheet adjunto: ${mark(mapHighqNa(v("templateISheet")))}`);
+  lines.push(`1. URL del cliente: ${req(v("url"), true)}`);
+  lines.push(`2. Usuario creado para N2: ${req(v("usuarioN2"))}`);
+  const afecta = mapHighqAfectaUsuario(v("afectaUsuario"));
+  lines.push(`3. ¿Problema ocurre solo con usuario específico?: ${afecta || rec(v("afectaUsuario"))}`);
+  if (!afecta) missingRecommended = true;
+  lines.push(`4. Frecuencia: ${req(v("frecuencia"))}`);
+  const har = mapHighqNa(v("har"));
+  lines.push(`5. Archivo HAR adjunto: ${har || rec(v("har"))}`);
+  if (!har) missingRecommended = true;
+  lines.push(`6. Template del sitio adjunto: ${opt(v("templateSitio"))}`);
+  lines.push(`7. Template iSheet adjunto: ${opt(v("templateISheet"))}`);
   if (hasEvidencias) {
     lines.push(`8. Evidencias visuales adjuntas: Sí - ${names.join(", ")}`);
   } else {
-    incomplete = true;
+    missingRecommended = true;
     lines.push("8. Evidencias visuales adjuntas: ⚠️ No - Sin adjuntos");
   }
   lines.push("");
@@ -441,7 +482,6 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
   if (steps) {
     lines.push(steps);
   } else {
-    incomplete = true;
     lines.push("⚠️ No informado - Completar antes de escalar a N2");
   }
   lines.push("");
@@ -452,12 +492,11 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
       lines.push(`Evidencias: Ver ${names.join(", ")} adjunto${names.length === 1 ? "" : "s"}`);
     }
   } else {
-    incomplete = true;
     lines.push("⚠️ Sin descripción detallada del error.");
   }
   lines.push("");
   lines.push("*Expected results:*");
-  lines.push(mark(v("expected"), "⚠️ No informado"));
+  lines.push(v("expected") || "⚠️ No informado");
   lines.push("");
   lines.push("*Anexos/Evidencias:*");
   if (hasEvidencias) {
@@ -465,7 +504,7 @@ function buildHighqN2Text(values, evidenciaEnlaces = []) {
   } else {
     lines.push("- Sin adjuntos ⚠️");
   }
-  if (incomplete) {
+  if (missingRecommended) {
     lines.push("");
     lines.push("============================================");
     lines.push("⚠️ ATENCIÓN: Ticket con campos incompletos.");

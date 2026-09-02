@@ -1956,94 +1956,109 @@
             {
               "title": "Plantilla - Escalamiento HighQ N2/N3",
               "outputFormat": "highq-n2",
-              "requiredFields": ["descripcion"],
+              "requiredFields": ["url", "usuarioN2", "frecuencia", "descripcion", "pasos", "found", "expected"],
+              "recommendedFields": ["afectaUsuario", "har", "evidencias"],
+              "optionalFields": ["templateSitio", "templateISheet"],
               "fields": [
                 {
                   "id": "url",
                   "label": "URL del cliente",
                   "type": "text",
                   "placeholder": "https://empresa.highq.com",
-                  "section": "checklist"
+                  "section": "minimo",
+                  "tier": "required"
                 },
                 {
                   "id": "usuarioN2",
                   "label": "¿Usuario N2 creado?",
                   "type": "select",
                   "options": ["Sí", "No"],
-                  "section": "checklist"
+                  "section": "minimo",
+                  "tier": "required"
+                },
+                {
+                  "id": "frecuencia",
+                  "label": "Frecuencia del problema",
+                  "type": "select",
+                  "options": ["Siempre", "Intermitente", "Una vez"],
+                  "section": "minimo",
+                  "tier": "required"
+                },
+                {
+                  "id": "descripcion",
+                  "label": "Descripción del problema",
+                  "type": "textarea",
+                  "placeholder": "Resumen del problema (Descripción/Asunto)",
+                  "section": "descripcion",
+                  "tier": "required"
+                },
+                {
+                  "id": "pasos",
+                  "label": "Paso a paso para reproducir",
+                  "type": "textarea",
+                  "placeholder": "Acceder al sitio…\nAcceder al módulo…\nEjecutar acción…\nResultado obtenido: …",
+                  "section": "descripcion",
+                  "tier": "required"
+                },
+                {
+                  "id": "found",
+                  "label": "Resultado encontrado",
+                  "type": "textarea",
+                  "placeholder": "Qué falla exactamente (pantalla blanca, error 403, loop, etc.)",
+                  "section": "resultados",
+                  "tier": "required"
+                },
+                {
+                  "id": "expected",
+                  "label": "Resultado esperado",
+                  "type": "textarea",
+                  "placeholder": "Qué debería pasar normalmente",
+                  "section": "resultados",
+                  "tier": "required"
                 },
                 {
                   "id": "afectaUsuario",
                   "label": "¿Afecta usuario específico?",
                   "type": "text",
                   "placeholder": "Nombre del usuario o No",
-                  "section": "checklist"
-                },
-                {
-                  "id": "frecuencia",
-                  "label": "Frecuencia",
-                  "type": "select",
-                  "options": ["Siempre", "Intermitente", "Una vez"],
-                  "section": "checklist"
+                  "section": "recomendados",
+                  "tier": "recommended"
                 },
                 {
                   "id": "har",
                   "label": "¿Archivo HAR adjunto?",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
-                  "section": "checklist"
+                  "section": "recomendados",
+                  "tier": "recommended"
+                },
+                {
+                  "id": "evidencias",
+                  "label": "Evidencias visuales",
+                  "type": "file",
+                  "section": "recomendados",
+                  "tier": "recommended"
                 },
                 {
                   "id": "templateSitio",
                   "label": "¿Template del sitio adjunto?",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
-                  "section": "checklist"
+                  "section": "opcionales",
+                  "tier": "optional"
                 },
                 {
                   "id": "templateISheet",
                   "label": "¿Template iSheet adjunto?",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
-                  "section": "checklist"
-                },
-                {
-                  "id": "descripcion",
-                  "label": "Descripción del problema *",
-                  "type": "textarea",
-                  "placeholder": "Resumen del problema (Descripción/Asunto)",
-                  "section": "descripcion"
-                },
-                {
-                  "id": "pasos",
-                  "label": "Paso a paso para reproducir",
-                  "type": "textarea",
-                  "placeholder": "Acceder al sitio…\nAcceder al módulo…\nAbrir un registro…\nHacer clic en Guardar…\nResultado: …",
-                  "section": "descripcion"
-                },
-                {
-                  "id": "found",
-                  "label": "Resultado encontrado",
-                  "type": "textarea",
-                  "placeholder": "Qué está pasando actualmente",
-                  "section": "found"
-                },
-                {
-                  "id": "expected",
-                  "label": "Resultado esperado",
-                  "type": "textarea",
-                  "placeholder": "Qué debería pasar",
-                  "section": "expected"
-                },
-                {
-                  "id": "evidencias",
-                  "label": "Evidencias visuales",
-                  "type": "file",
-                  "section": "adjuntos"
+                  "section": "opcionales",
+                  "tier": "optional"
                 }
               ],
               "blocks": [
-                "Solo es obligatorio completar Descripción del problema. El resto se completa en la planilla con advertencias si queda vacío."
+                "Obligatorios para escalar: URL, usuario N2, frecuencia, descripción, pasos, resultado encontrado y esperado.",
+                "Muy recomendados: evidencia visual, HAR y usuario afectado. Templates de sitio/iSheet solo si aplica al caso."
               ],
               "actions": [
                 "Vista previa",
