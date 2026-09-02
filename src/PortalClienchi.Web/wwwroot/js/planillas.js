@@ -26,9 +26,7 @@ import {
   initSt2Tours,
   setTourContext,
   autoTour,
-  mountModuleTourButtons,
-  mountMenuTourHelp,
-  refreshMenuTourHelp,
+  syncHeaderTourButton,
 } from "./st2-tour-init.js";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
@@ -157,6 +155,7 @@ function updateSistemaBetaUi() {
 
 let planillasConfig = null;
 let sistemaActual = null;
+let currentPlanillasView = "menu";
 let mesaActual = null;
 const SISTEMA_STORAGE_KEY = "st2-plan-sistema";
 const SISTEMA_BY_SLUG = {
@@ -470,6 +469,9 @@ function showView(name, { history = "push" } = {}) {
     renderBlanqueoAlertUi();
   }
   syncAguaEgg();
+  currentPlanillasView = name;
+  document.dispatchEvent(new CustomEvent("st2:planillas-view-changed", { detail: { view: name } }));
+  syncHeaderTourButton();
 }
 
 function setSistemaIndicator(index) {
@@ -580,9 +582,7 @@ function updateSistemaUi() {
   renderBlanqueoAlertUi();
   updateSistemaBetaUi();
   syncReferralModuleLabels();
-  refreshMenuTourHelp();
-  mountMenuTourHelp();
-  mountModuleTourButtons();
+  syncHeaderTourButton();
 }
 
 function selectSistema(id) {
@@ -2037,6 +2037,7 @@ export function initPlanillas() {
 
   setTourContext({
     getSistema: () => sistemaActual,
+    getPlanillasView: () => currentPlanillasView,
   });
   initSt2Tours();
 

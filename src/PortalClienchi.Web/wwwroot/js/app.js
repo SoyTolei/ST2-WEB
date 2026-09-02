@@ -1,5 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
-import { scheduleWelcomeTour } from "./st2-tour-init.js";
+import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
@@ -4501,6 +4501,10 @@ function switchTab(tabId) {
   }
 
   refreshBadges();
+  setTourContext({
+    getActiveTab: () => tabId,
+  });
+  syncHeaderTourButton();
 }
 
 function initEmbedReminders() {
@@ -4609,6 +4613,10 @@ async function bootstrapApp() {
   syncViewAsBanner();
   bindAboutToolsUi();
   await initPlanillas();
+  setTourContext({
+    getActiveTab: () => document.querySelector(".tab-btn.active")?.dataset?.tab || "planillas",
+  });
+  syncHeaderTourButton();
   scheduleWelcomeTour();
   syncProfilePortalAccess();
   syncAdminTabVisibility();

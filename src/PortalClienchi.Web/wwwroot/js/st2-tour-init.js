@@ -6,105 +6,90 @@ import {
   isTourCompleted,
   isTourSeen,
 } from "./st2-tour-engine.js";
-import { resolveTour, tourIdForReferralView } from "./st2-tour-catalog.js";
+import {
+  resolveTour,
+  resolveCurrentTourId,
+  tourIdForReferralView,
+  tourLabelForId,
+} from "./st2-tour-catalog.js";
 
 let tourContext = {};
+let headerBound = false;
 
 export function setTourContext(partial) {
   tourContext = { ...tourContext, ...partial };
+  syncHeaderTourButton();
+}
+
+export function getCurrentTourId() {
+  return resolveCurrentTourId(tourContext);
 }
 
 export function playTour(tourId, { force = true } = {}) {
-  const definition = resolveTour(tourId, tourContext);
+  const id = tourId || getCurrentTourId();
+  const definition = resolveTour(id, tourContext);
   if (!definition) return Promise.resolve(false);
   return startTour(definition, { force, ctx: tourContext });
 }
 
 export function autoTour(tourId, options = {}) {
-  const definition = resolveTour(tourId, tourContext);
+  const id = tourId || getCurrentTourId();
+  const definition = resolveTour(id, tourContext);
   if (!definition) return;
   maybeStartTour(definition, { ...options, ctx: tourContext });
 }
 
 export function autoTourForReferral(delay = 700) {
-  const tourId = tourIdForReferralView(tourContext);
-  autoTour(tourId, { delay });
+  autoTour(tourIdForReferralView(tourContext), { delay });
 }
 
-function createHelpButton(tourId, label = "Ver tutorial") {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "st2-tour-help-btn";
-  btn.dataset.tourId = tourId;
-  btn.title = "Ver tutorial de esta pantalla";
-  btn.setAttribute("aria-label", "Ver tutorial de esta pantalla");
-  btn.textContent = label;
-  btn.addEventListener("click", (e) => {
+export function syncHeaderTourButton() {
+  const btn = document.getElementById("st2-tour-header-btn");
+  const labelEl = document.getElementById("st2-tour-header-btn-label");
+  if (!btn || !labelEl) return;
+
+  const tourId = getCurrentTourId();
+  const definition = tourId ? resolveTour(tourId, tourContext) : null;
+  const show = !!definition?.steps?.length;
+
+  btn.classList.toggle("hidden", !show);
+  btn.toggleAttribute("hidden", !show);
+  btn.dataset.tourId = tourId || "";
+
+  if (show) {
+    const label = tourLabelForId(tourId);
+    labelEl.textContent = label;
+    btn.title = `Ver tutorial: ${label}`;
+    btn.setAttribute("aria-label", `Ver tutorial: ${label}`);
+  }
+}
+
+function bindHeaderTourButton() {
+  if (headerBound) return;
+  headerBound = true;
+  document.getElementById("st2-tour-header-btn")?.addEventListener("click", (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    const tourId = e.currentTarget?.dataset?.tourId || getCurrentTourId();
     void playTour(tourId, { force: true });
   });
-  return btn;
-}
-
-export function mountModuleTourButtons() {
-  const map = [
-    { viewId: "planillas-transferencia", tourId: () => `transferencia:${tourContext.getSistema?.()}` },
-    { viewId: "planillas-referral", tourId: () => tourIdForReferralView(tourContext) },
-    { viewId: "planillas-oportunidad-menu", tourId: () => "oportunidad-menu" },
-    { viewId: "planillas-oportunidad-cargar", tourId: () => "oportunidad-menu" },
-    { viewId: "planillas-oportunidad-gestor", tourId: () => "oportunidad-menu" },
-    { viewId: "planillas-blanqueo", tourId: null },
-    { viewId: "planillas-borrado-bases", tourId: null },
-    { viewId: "planillas-pdf-portal", tourId: null },
-  ];
-
-  map.forEach(({ viewId, tourId }) => {
-    if (!tourId) return;
-    const view = document.getElementById(viewId);
-    const bar = view?.querySelector(".plan-module-header-bar");
-    if (!bar || bar.querySelector(".st2-tour-help-btn")) return;
-    const id = tourId();
-    if (!id || !resolveTour(id, tourContext)) return;
-    bar.appendChild(createHelpButton(id));
-  });
-}
-
-export function mountMenuTourHelp() {
-  if (document.getElementById("st2-tour-menu-help")) {
-    refreshMenuTourHelp();
-    return;
-  }
-
-  const anchor = document.getElementById("plan-opciones-section-title")
-    || document.getElementById("plan-legal-products-wrap")
-    || document.getElementById("plan-sistema-section");
-  if (!anchor) return;
-
-  const wrap = document.createElement("div");
-  wrap.className = "plan-menu-tour-wrap";
-  const sistema = tourContext.getSistema?.() || "BejermanSql";
-  const btn = createHelpButton(`planillas-menu:${sistema}`, "Ver tutorial del menú");
-  btn.id = "st2-tour-menu-help";
-  wrap.appendChild(btn);
-  anchor.insertAdjacentElement("afterend", wrap);
-}
-
-export function refreshMenuTourHelp() {
-  const btn = document.getElementById("st2-tour-menu-help");
-  const sistema = tourContext.getSistema?.() || "BejermanSql";
-  const tourId = `planillas-menu:${sistema}`;
-  if (btn) btn.dataset.tourId = tourId;
 }
 
 export function initSt2Tours() {
-  mountMenuTourHelp();
-  mountModuleTourButtons();
+  bindHeaderTourButton();
+  document.getElementById("st2-tour-menu-help")?.closest(".plan-menu-tour-wrap")?.remove();
+  syncHeaderTourButton();
 
   document.addEventListener("st2:planillas-home", () => {
-    refreshMenuTourHelp();
-    mountModuleTourButtons();
+    syncHeaderTourButton();
     autoTour(`planillas-menu:${tourContext.getSistema?.()}`, { delay: 600 });
+  });
+
+  document.addEventListener("st2:planillas-view-changed", () => {
+    syncHeaderTourButton();
+  });
+
+  document.addEventListener("st2:tour-context-changed", () => {
+    syncHeaderTourButton();
   });
 
   document.addEventListener("keydown", (e) => {
@@ -113,6 +98,10 @@ export function initSt2Tours() {
       stopTour();
     }
   });
+}
+
+export function notifyTourContextChanged() {
+  document.dispatchEvent(new CustomEvent("st2:tour-context-changed"));
 }
 
 export function scheduleWelcomeTour(delay = 1800) {
@@ -131,4 +120,6 @@ export {
   isTourSeen,
   resolveTour,
   tourIdForReferralView,
+  resolveCurrentTourId,
+  tourLabelForId,
 };

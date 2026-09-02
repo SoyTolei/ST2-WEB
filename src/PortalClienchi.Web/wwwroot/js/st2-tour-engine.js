@@ -62,14 +62,17 @@ function ensureDom() {
   root.innerHTML = `
     <div class="st2-tour-spotlight" aria-hidden="true"></div>
     <div class="st2-tour-card" role="dialog" aria-modal="true" aria-labelledby="st2-tour-title">
-      <p class="st2-tour-kicker">Tutorial</p>
-      <h3 id="st2-tour-title" class="st2-tour-title"></h3>
-      <p class="st2-tour-body"></p>
-      <p class="st2-tour-progress"></p>
-      <div class="st2-tour-actions">
-        <button type="button" class="st2-tour-btn st2-tour-btn--ghost" data-tour-skip>Salir</button>
-        <button type="button" class="st2-tour-btn st2-tour-btn--ghost" data-tour-prev>Anterior</button>
-        <button type="button" class="st2-tour-btn st2-tour-btn--primary" data-tour-next>Siguiente</button>
+      <div class="st2-tour-card-accent" aria-hidden="true"></div>
+      <div class="st2-tour-card-inner">
+        <p class="st2-tour-kicker">Tutorial</p>
+        <h3 id="st2-tour-title" class="st2-tour-title"></h3>
+        <p class="st2-tour-body"></p>
+        <p class="st2-tour-progress"></p>
+        <div class="st2-tour-actions">
+          <button type="button" class="st2-tour-btn st2-tour-btn--ghost" data-tour-skip>Salir</button>
+          <button type="button" class="st2-tour-btn st2-tour-btn--ghost" data-tour-prev>Anterior</button>
+          <button type="button" class="st2-tour-btn st2-tour-btn--primary" data-tour-next>Siguiente</button>
+        </div>
       </div>
     </div>
   `;
