@@ -1954,49 +1954,110 @@
           "label": "HighQ",
           "templates": [
             {
-              "title": "Plantilla - Bug HighQ",
+              "title": "Plantilla - Escalamiento HighQ N2/N3",
+              "outputFormat": "highq-n2",
               "fields": [
                 {
-                  "id": "",
-                  "label": "",
-                  "type": "checkbox",
-                  "placeholder": ""
-                },
-                {
-                  "id": "",
-                  "label": "URL do cliente *",
+                  "id": "asunto",
+                  "label": "Asunto/Error *",
                   "type": "text",
-                  "placeholder": "https://latamdemo.highq.com/"
+                  "placeholder": "Resumen del problema principal",
+                  "section": "descripcion"
                 },
                 {
-                  "id": "",
-                  "label": "Describí los pasos para reproducir el problema *",
+                  "id": "descripcion",
+                  "label": "Descripción del caso *",
                   "type": "textarea",
-                  "placeholder": "Ejemplo:Acceder al sitio  \r\nAcceder al módulo: iSheet XPTO "
+                  "placeholder": "Detalle completo del problema",
+                  "section": "descripcion"
                 },
                 {
-                  "id": "",
-                  "label": "Found result (O que aconteceu) *",
+                  "id": "pasos",
+                  "label": "Paso a paso realizado *",
                   "type": "textarea",
-                  "placeholder": "Describí el comportamiento encontrado..."
+                  "placeholder": "Ej.: Acceder al sitio\nAcceder al módulo: iSheet XPTO\nEjecutar acción: …\nResultado obtenido: …",
+                  "section": "descripcion"
                 },
                 {
-                  "id": "",
-                  "label": "Expected results (O que deveria acontecer) *",
+                  "id": "url",
+                  "label": "URL del cliente *",
+                  "type": "text",
+                  "placeholder": "https://cliente.highq.com/",
+                  "section": "checklist"
+                },
+                {
+                  "id": "usuarioN2",
+                  "label": "¿Usuario N2 creado? *",
+                  "type": "select",
+                  "options": ["Sí", "No"],
+                  "section": "checklist"
+                },
+                {
+                  "id": "afectaUsuario",
+                  "label": "¿Afecta usuario específico? *",
+                  "type": "text",
+                  "placeholder": "Nombre del usuario o No",
+                  "section": "checklist"
+                },
+                {
+                  "id": "frecuencia",
+                  "label": "Frecuencia del problema *",
+                  "type": "select",
+                  "options": ["Siempre", "Intermitente", "Una vez"],
+                  "section": "checklist"
+                },
+                {
+                  "id": "har",
+                  "label": "¿Archivo HAR adjunto? *",
+                  "type": "select",
+                  "options": ["Sí", "No", "N/A"],
+                  "section": "checklist"
+                },
+                {
+                  "id": "templateSitio",
+                  "label": "¿Template del sitio adjunto? *",
+                  "type": "select",
+                  "options": ["Sí", "No", "N/A"],
+                  "section": "checklist"
+                },
+                {
+                  "id": "templateISheet",
+                  "label": "¿Template iSheet adjunto? *",
+                  "type": "select",
+                  "options": ["Sí", "No", "N/A"],
+                  "section": "checklist"
+                },
+                {
+                  "id": "evidencias",
+                  "label": "Evidencias visuales",
+                  "type": "file",
+                  "section": "adjuntos"
+                },
+                {
+                  "id": "found",
+                  "label": "Resultado encontrado *",
                   "type": "textarea",
-                  "placeholder": "Describí el comportamiento esperado..."
+                  "placeholder": "Qué está pasando actualmente",
+                  "section": "found"
+                },
+                {
+                  "id": "expected",
+                  "label": "Resultado esperado *",
+                  "type": "textarea",
+                  "placeholder": "Qué debería pasar",
+                  "section": "expected"
                 }
               ],
               "blocks": [
-                "Completá el formulario y hacé clic en \"Generar plantilla\" para ver la vista previa"
+                "Completá el formulario y hacé clic en \"Vista previa\" para ver la planilla de escalamiento"
               ],
               "actions": [
-                "Generar plantilla",
+                "Vista previa",
                 "Limpiar",
                 "Copiar"
               ],
               "id": "bug-geral",
-              "label": "Bug"
+              "label": "Escalamiento a N2/N3"
             }
           ]
         }

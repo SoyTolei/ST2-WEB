@@ -14,18 +14,29 @@ const LEGAL_ICONS = {
 
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
 
+const LEGAL_SECTION_LABELS = {
+  descripcion: "Descripción del caso",
+  checklist: "Checklist",
+  adjuntos: "Adjuntos y evidencias",
+  found: "Resultado encontrado",
+  expected: "Resultado esperado",
+};
+
+const LEGAL_EVID_ACCEPT = "image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,.xml,application/xml,text/xml,.log,.har,application/json";
+
+let hubCtx = null;
+let templatesCatalog = null;
+let openedFromMenu = false;
+let legalHubEventsBound = false;
+let legalHubEvidenciaFiles = [];
+let navStack = { product: null, item: null, category: null, template: null };
+
 const LEGAL_PRODUCT_BTN_CLASS = {
   firm: "legal-one",
   highq: "highq",
   westlaw: "westlaw",
   cocounsel: "cocounsel",
 };
-
-let hubCtx = null;
-let templatesCatalog = null;
-let openedFromMenu = false;
-let legalHubEventsBound = false;
-let navStack = { product: null, item: null, category: null, template: null };
 
 const LEGAL_CATALOG_PRODUCT_MAP = {
   firm: "legal-one",
@@ -158,22 +169,218 @@ function fieldKey(field, index) {
   return field.id || `field_${index}`;
 }
 
+function fieldLabel(field, index) {
+  return (field.label || field.placeholder || `Campo ${index + 1}`).replace(/\*+$/, "").trim();
+}
+
+function fieldRequired(field) {
+  return field.label?.includes("*") || field.required === true;
+}
+
 function renderField(field, index) {
   if (field.type === "checkbox" && !field.label) return "";
   const key = fieldKey(field, index);
-  const req = field.label?.includes("*") ? " required" : "";
-  const label = (field.label || field.placeholder || `Campo ${index + 1}`).replace(/\*+$/, "").trim();
+  const req = fieldRequired(field) ? " required" : "";
+  const label = fieldLabel(field, index);
   if (field.type === "textarea") {
-    return `<div class="plan-field"><label for="${key}">${label}</label><textarea id="${key}" data-legal-field rows="4" placeholder="${field.placeholder || ""}"></textarea></div>`;
+    return `<div class="plan-field"><label for="${key}">${label}</label><textarea id="${key}" data-legal-field rows="4" placeholder="${field.placeholder || ""}"${req}></textarea></div>`;
   }
   if (field.type === "select") {
-    return `<div class="plan-field"><label for="${key}">${label}</label><input id="${key}" data-legal-field type="text" placeholder="${field.placeholder || "Seleccionar / escribir…"}"${req}/></div>`;
+    const options = (field.options || []).map((opt) => `<option value="${opt}">${opt}</option>`).join("");
+    return `<div class="plan-field"><label for="${key}">${label}</label><select id="${key}" data-legal-field${req}><option value="">Seleccionar…</option>${options}</select></div>`;
+  }
+  if (field.type === "file") {
+    return `
+      <div class="plan-field plan-legal-file-field" data-legal-file-field="${key}">
+        <label>${label}</label>
+        <div class="plan-capturas-panel">
+          <p class="plan-capturas-hint">Screenshots, videos, PDF, TXT, logs o HAR. Se suben al generar la vista previa.</p>
+          <div class="plan-capturas-actions">
+            <button type="button" id="ref-legal-hub-evid-agregar" class="plan-capturas-browse">
+              <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+              <span class="plan-capturas-browse-text">
+                <strong>Examinar archivos</strong>
+                <small>Imágenes, video, PDF, TXT, Excel, XML, log o HAR</small>
+              </span>
+            </button>
+            <input id="ref-legal-hub-evid-input" type="file" accept="${LEGAL_EVID_ACCEPT}" multiple class="hidden"/>
+          </div>
+          <div id="ref-legal-hub-evid-chips" class="plan-capturas-thumbs"></div>
+          <p id="ref-legal-hub-evid-estado" class="plan-capturas-estado"></p>
+        </div>
+      </div>`;
   }
   const type = field.type === "checkbox" ? "checkbox" : "text";
   if (type === "checkbox") {
     return `<label class="plan-field plan-legal-check"><input id="${key}" data-legal-field type="checkbox"/> ${label}</label>`;
   }
   return `<div class="plan-field"><label for="${key}">${label}</label><input id="${key}" data-legal-field type="text" placeholder="${field.placeholder || ""}"${req}/></div>`;
+}
+
+function renderTemplateFields(template) {
+  let html = "";
+  let lastSection = "";
+  (template.fields || []).forEach((field, index) => {
+    if (field.section && field.section !== lastSection) {
+      const title = LEGAL_SECTION_LABELS[field.section] || field.section;
+      html += `<p class="plan-ref-section-title">${title}</p>`;
+      lastSection = field.section;
+    }
+    html += renderField(field, index);
+  });
+  return html;
+}
+
+function refreshLegalEvidenciaEstado() {
+  const estado = document.getElementById("ref-legal-hub-evid-estado");
+  if (!estado) return;
+  if (!legalHubEvidenciaFiles.length) {
+    estado.textContent = "";
+    return;
+  }
+  estado.textContent = `${legalHubEvidenciaFiles.length} archivo(s) listo(s) para subir al generar la planilla.`;
+}
+
+function refreshLegalEvidenciaChips() {
+  const chips = document.getElementById("ref-legal-hub-evid-chips");
+  if (!chips) return;
+  chips.innerHTML = legalHubEvidenciaFiles.map((file, index) => `
+    <span class="plan-captura-chip">
+      <span class="plan-captura-chip-name">${file.name}</span>
+      <button type="button" class="plan-captura-chip-remove" data-legal-evid-remove="${index}" aria-label="Quitar ${file.name}">×</button>
+    </span>
+  `).join("");
+  chips.querySelectorAll("[data-legal-evid-remove]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = Number(btn.dataset.legalEvidRemove);
+      if (!Number.isNaN(idx)) {
+        legalHubEvidenciaFiles.splice(idx, 1);
+        refreshLegalEvidenciaChips();
+        refreshLegalEvidenciaEstado();
+      }
+    });
+  });
+}
+
+function setupLegalEvidenciasPanel() {
+  legalHubEvidenciaFiles = [];
+  const input = document.getElementById("ref-legal-hub-evid-input");
+  const agregar = document.getElementById("ref-legal-hub-evid-agregar");
+  if (!input || !agregar) return;
+  agregar.addEventListener("click", () => input.click());
+  input.addEventListener("change", (e) => {
+    const incoming = Array.from(e.target.files || []);
+    for (const file of incoming) {
+      if (!legalHubEvidenciaFiles.some((f) => f.name === file.name && f.size === file.size)) {
+        legalHubEvidenciaFiles.push(file);
+      }
+    }
+    refreshLegalEvidenciaChips();
+    refreshLegalEvidenciaEstado();
+    e.target.value = "";
+  });
+  refreshLegalEvidenciaChips();
+  refreshLegalEvidenciaEstado();
+}
+
+async function uploadLegalEvidencias(files) {
+  if (!files.length) return [];
+  const form = new FormData();
+  files.forEach((f) => form.append("capturas", f, f.name || "evidencia"));
+  const response = await fetch("/api/planillas/capturas/upload", { method: "POST", body: form });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.detail || data.error || data.title || "Error al subir evidencias");
+  }
+  return (data.enlaces || []).filter((e) => e?.url);
+}
+
+function collectValuesById(template) {
+  const values = {};
+  (template.fields || []).forEach((field, index) => {
+    if (field.type === "checkbox" && !field.label) return;
+    if (field.type === "file") return;
+    const el = document.getElementById(fieldKey(field, index));
+    if (!el) return;
+    const key = field.id || fieldKey(field, index);
+    values[key] = field.type === "checkbox" ? (el.checked ? "Sí" : "No") : String(el.value || "").trim();
+  });
+  return values;
+}
+
+function validateTemplate(template) {
+  const missing = [];
+  (template.fields || []).forEach((field, index) => {
+    if (field.type === "file" || field.type === "checkbox") return;
+    if (!fieldRequired(field)) return;
+    const el = document.getElementById(fieldKey(field, index));
+    const val = field.type === "checkbox" ? (el?.checked ? "Sí" : "") : String(el?.value || "").trim();
+    if (!val) missing.push(fieldLabel(field, index));
+  });
+  return missing;
+}
+
+function formatStepsBlock(pasos, url) {
+  const lines = [];
+  const raw = String(pasos || "").trim();
+  if (!raw) {
+    if (url) lines.push(`- Acceder al sitio: ${url}`);
+    return lines.join("\n");
+  }
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    lines.push(trimmed.startsWith("-") ? trimmed : `- ${trimmed}`);
+  }
+  return lines.join("\n");
+}
+
+function buildHighqN2Text(values, evidenciaEnlaces = []) {
+  const v = (id) => String(values[id] || "").trim();
+  const hasEvidencias = evidenciaEnlaces.length > 0 || legalHubEvidenciaFiles.length > 0;
+  const evidenciasChecklist = hasEvidencias ? "Sí" : "No";
+  const lines = [];
+
+  lines.push("DESCRIPCIÓN/ASUNTO:");
+  lines.push(v("asunto") || "—");
+  if (v("descripcion")) {
+    lines.push("");
+    lines.push(v("descripcion"));
+  }
+  lines.push("");
+  lines.push("CHECKLIST:");
+  lines.push(`1. URL del cliente: ${v("url") || "—"}`);
+  lines.push(`2. Usuario creado para N2: ${v("usuarioN2") || "—"}`);
+  lines.push(`3. ¿Afecta usuario específico?: ${v("afectaUsuario") || "No"}`);
+  lines.push(`4. Frecuencia: ${v("frecuencia") || "—"}`);
+  lines.push(`5. Archivo HAR adjunto: ${v("har") || "—"}`);
+  lines.push(`6. Template del sitio adjunto: ${v("templateSitio") || "—"}`);
+  lines.push(`7. Template iSheet adjunto: ${v("templateISheet") || "—"}`);
+  lines.push(`8. Evidencias visuales: ${evidenciasChecklist}`);
+  lines.push("");
+  lines.push("STEPS:");
+  lines.push(formatStepsBlock(v("pasos"), v("url")) || "—");
+  lines.push("");
+  lines.push("FOUND RESULT:");
+  lines.push(v("found") || "—");
+  lines.push(`Evidencias: ${hasEvidencias ? "Ver screenshots adjuntos" : "No"}`);
+  lines.push("");
+  lines.push("EXPECTED RESULT:");
+  lines.push(v("expected") || "—");
+  lines.push("");
+  lines.push("ADJUNTOS/EVIDENCIAS:");
+  if (evidenciaEnlaces.length) {
+    evidenciaEnlaces.forEach((item) => {
+      const name = item?.nombre || item?.name || "Archivo";
+      const url = item?.url || "";
+      lines.push(url ? `- ${name}: ${url}` : `- ${name}`);
+    });
+  } else if (legalHubEvidenciaFiles.length) {
+    legalHubEvidenciaFiles.forEach((file) => lines.push(`- ${file.name}`));
+  } else {
+    lines.push("- Sin archivos adjuntos");
+  }
+  return lines.join("\n");
 }
 
 function showTemplateForm(product, item, template) {
@@ -188,7 +395,7 @@ function showTemplateForm(product, item, template) {
   if (!root) return;
 
   const blocks = (template.blocks || []).map((b) => `<p class="plan-ref-hint">${b}</p>`).join("");
-  const fields = (template.fields || []).map(renderField).join("");
+  const fields = renderTemplateFields(template);
 
   root.innerHTML = `
     <div class="plan-well-box plan-legal-form-panel">
@@ -207,28 +414,55 @@ function showTemplateForm(product, item, template) {
 
   document.getElementById("ref-legal-btn-limpar")?.addEventListener("click", () => {
     document.getElementById("ref-legal-template-form")?.reset();
+    legalHubEvidenciaFiles = [];
+    refreshLegalEvidenciaChips();
+    refreshLegalEvidenciaEstado();
     clearPlanTextPreview("ref-legal-text-preview");
     setStatus("");
   });
 
+  setupLegalEvidenciasPanel();
   mountPlanTextPreview("ref-legal-text-preview");
   injectModuleHeaders();
-  const templateText = () => buildTemplateText(template, product.label);
-  document.getElementById("ref-legal-btn-ver-planilla")?.addEventListener("click", () => {
-    const text = templateText();
-    if (!text) return;
-    showPlanTextPreview("ref-legal-text-preview", text);
-    setStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
-  });
-  document.getElementById("ref-legal-btn-copiar")?.addEventListener("click", async () => {
-    const text = templateText();
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      setStatus("Texto copiado al portapapeles.");
-    } catch {
-      setStatus("No se pudo copiar.", true);
+
+  const runGenerate = async ({ copy = false } = {}) => {
+    const missing = validateTemplate(template);
+    if (missing.length) {
+      setStatus(`Completá los campos obligatorios: ${missing.join(", ")}.`, true);
+      return "";
     }
+    const btnPreview = document.getElementById("ref-legal-btn-ver-planilla");
+    const btnCopy = document.getElementById("ref-legal-btn-copiar");
+    try {
+      if (btnPreview) btnPreview.disabled = true;
+      if (btnCopy) btnCopy.disabled = true;
+      if (legalHubEvidenciaFiles.length) setStatus("Subiendo evidencias…");
+      const evidenciaEnlaces = await uploadLegalEvidencias(legalHubEvidenciaFiles);
+      const text = await buildTemplateTextAsync(template, product.label, evidenciaEnlaces);
+      if (!text) return "";
+      if (copy) {
+        await navigator.clipboard.writeText(text);
+        setStatus("Texto copiado al portapapeles.");
+      } else {
+        showPlanTextPreview("ref-legal-text-preview", text);
+        setStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
+      }
+      return text;
+    } catch (err) {
+      console.error(err);
+      setStatus(err?.message || "No se pudo generar la planilla.", true);
+      return "";
+    } finally {
+      if (btnPreview) btnPreview.disabled = false;
+      if (btnCopy) btnCopy.disabled = false;
+    }
+  };
+
+  document.getElementById("ref-legal-btn-ver-planilla")?.addEventListener("click", () => {
+    void runGenerate();
+  });
+  document.getElementById("ref-legal-btn-copiar")?.addEventListener("click", () => {
+    void runGenerate({ copy: true });
   });
 }
 
@@ -246,6 +480,13 @@ function collectValues(template) {
     });
   });
   return values;
+}
+
+async function buildTemplateTextAsync(template, productLabel = "", evidenciaEnlaces = []) {
+  if (template.outputFormat === "highq-n2") {
+    return buildHighqN2Text(collectValuesById(template), evidenciaEnlaces);
+  }
+  return buildTemplateText(template, productLabel);
 }
 
 function buildTemplateText(template, productLabel = "") {
@@ -401,6 +642,7 @@ export function openLegalReferralHub() {
 
 export function resetLegalReferralHub() {
   openedFromMenu = false;
+  legalHubEvidenciaFiles = [];
   navStack = { product: null, item: null, category: null, template: null };
   hideAllLegalViews();
 }

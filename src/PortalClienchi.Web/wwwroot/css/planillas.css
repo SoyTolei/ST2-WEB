@@ -4829,6 +4829,49 @@ body.st2-chile-embed-active #panel-planillas.active {
 /* LEGAL ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ plantillas y formulario (estilo ST2 referral) */
 .plan-legal-form-panel .plan-ref-title { margin-top: 0; }
 .plan-legal-form-panel .plan-form-grid { margin-bottom: 0; }
+.plan-ref-section-title {
+  margin: 18px 0 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.plan-legal-form-panel .plan-ref-section-title:first-of-type {
+  margin-top: 8px;
+  border-top: none;
+  padding-top: 0;
+}
+.plan-captura-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 8px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--nav-well, #f8fafc);
+  font-size: 0.78rem;
+}
+.plan-captura-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 220px;
+}
+.plan-captura-chip-remove {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 2px;
+}
+.plan-captura-chip-remove:hover { color: var(--primary); }
+.plan-legal-file-field .plan-capturas-panel { margin-top: 6px; }
 .plan-legal-form-actions {
   margin-top: 16px;
   padding-top: 16px;
