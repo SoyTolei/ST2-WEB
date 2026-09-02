@@ -6,6 +6,28 @@ function visible(selector) {
   return style.display !== "none" && style.visibility !== "hidden";
 }
 
+function previewCopyStep(previewSelector, copySelector) {
+  return {
+    selector: `${previewSelector}, ${copySelector}`,
+    title: "Vista previa o copiar",
+    body:
+      "«Vista previa» muestra la planilla en pantalla para revisarla antes de enviar. «Copiar» lleva el texto al portapapeles para pegarlo en el ticket. Usá la que prefieras.",
+    placement: "top",
+    when: () => visible(previewSelector) || visible(copySelector),
+  };
+}
+
+function legalSectionStep(sectionId, title, body) {
+  const selector = `.plan-legal-section[data-legal-section="${sectionId}"]`;
+  return {
+    selector,
+    title,
+    body,
+    placement: "top",
+    when: () => visible(selector),
+  };
+}
+
 function sistemaLabel(sistema) {
   const map = {
     BejermanSql: "Bejerman SQL",
@@ -392,13 +414,7 @@ export function buildTransferenciaTour(ctx, sistema) {
       placement: "top",
       when: () => visible("#plan-capturas-card"),
     },
-    {
-      selector: "#plan-btn-ver-planilla, #plan-btn-copiar",
-      title: "Generar y copiar",
-      body: "Vista previa para revisar la planilla completa, o copiar directo al portapapeles y pegar en el ticket.",
-      placement: "top",
-      when: () => visible("#plan-btn-ver-planilla") || visible("#plan-btn-copiar"),
-    },
+    previewCopyStep("#plan-btn-ver-planilla", "#plan-btn-copiar"),
   );
 
   return { id: `transferencia:${sistema}`, steps };
@@ -476,13 +492,7 @@ export function buildReferralStandardTour(ctx, sistema) {
     });
   }
 
-  steps.push({
-    selector: "#ref-btn-ver-planilla, #ref-btn-copiar",
-    title: "Generar y copiar",
-    body: "Vista previa o copiar el TXT con secciones de sistema, detalle del caso y adjuntos.",
-    placement: "top",
-    when: () => visible("#ref-btn-ver-planilla") || visible("#ref-btn-copiar"),
-  });
+  steps.push(previewCopyStep("#ref-btn-ver-planilla", "#ref-btn-copiar"));
 
   return { id: `referral:${sistema}`, steps };
 }
@@ -502,6 +512,14 @@ export function buildReferralLegalHubTour() {
   });
 
   steps.push({
+    selector: "#ref-legal-templates-root",
+    title: "Plantilla de escalamiento",
+    body: "Elegí la plantilla del producto (por ejemplo «Escalamiento a N2/N3»). Se abre el formulario con las secciones a completar.",
+    placement: "top",
+    when: () => visible("#ref-legal-templates"),
+  });
+
+  steps.push({
     center: true,
     title: "Evidencias en OneDrive",
     body: "En LEGAL las evidencias van como links de OneDrive (botón + para agregar más). No hace falta subir archivos pesados acá.",
@@ -511,43 +529,65 @@ export function buildReferralLegalHubTour() {
 }
 
 export function buildReferralLegalFormTour() {
-  return {
-    id: "referral-legal-form",
-    steps: [
-      {
-        selector: "#ref-legal-template-form",
-        title: "Completá por secciones",
-        body: "Datos del entorno, descripción, pasos para reproducir, resultados observado/esperado y evidencias. Los obligatorios suelen estar arriba.",
-        placement: "top",
-      },
-      {
-        selector: ".plan-legal-onedrive-list",
-        title: "Links de OneDrive",
-        body: "Pegá el link compartido de las capturas o videos. Podés agregar varios con el botón +.",
-        placement: "top",
-        when: () => visible(".plan-legal-onedrive-list"),
-      },
-      {
-        selector: "#ref-legal-btn-ia",
-        title: "Mejorar redacción con IA",
-        body: "Mejorá descripción, pasos y resultados. El botón ↩ deshace si no te convence.",
-        placement: "top",
-        when: () => visible("#ref-legal-btn-ia"),
-      },
-      {
-        selector: "#ref-legal-btn-ver-planilla",
-        title: "Vista previa del TXT",
-        body: "Revisá la planilla unificada (DATOS DEL SISTEMA, DETALLES, ADJUNTOS) antes de copiar.",
-        placement: "top",
-      },
-      {
-        selector: "#ref-legal-btn-copiar",
-        title: "Copiar al ticket",
-        body: "Llevá el texto al escalamiento en el sistema de tickets.",
-        placement: "top",
-      },
-    ],
-  };
+  const steps = [
+    legalSectionStep(
+      "minimo",
+      "Datos del entorno",
+      "Tenant, sitio, ambiente (prod/test), usuario o módulo afectado. Es lo primero que N2 necesita para ubicar el caso en el producto LEGAL.",
+    ),
+    legalSectionStep(
+      "acceso",
+      "Datos de acceso",
+      "URLs, usuarios de prueba o credenciales si la plantilla lo pide. No pegues contraseñas reales si hay política de canal seguro.",
+    ),
+    legalSectionStep(
+      "descripcion",
+      "Descripción y reproducción",
+      "Qué falla, en qué pantalla y el paso a paso: menús, clics y datos usados. Debe permitir repetir el caso sin volver a preguntarte.",
+    ),
+    legalSectionStep(
+      "resultados",
+      "Resultados",
+      "Resultado observado (qué pasó) y resultado esperado (qué debería pasar). Contrastá ambos con claridad.",
+    ),
+    legalSectionStep(
+      "detalle",
+      "Detalle del caso",
+      "Impacto, usuarios afectados, si es intermitente o desde cuándo ocurre. Aporta contexto que no entra en la descripción.",
+    ),
+    legalSectionStep(
+      "checklist",
+      "Checklist",
+      "Marcá cada ítem que revisaste (caché, otro navegador, permisos, etc.) antes de escalar a N2/N3.",
+    ),
+    legalSectionStep(
+      "recomendados",
+      "Información adicional",
+      "Campos recomendados: workaround probado, frecuencia, urgencia u otros datos que aceleren la gestión.",
+    ),
+    legalSectionStep(
+      "opcionales",
+      "Templates opcionales",
+      "Datos opcionales según el producto. Completalos si suman contexto al escalamiento.",
+    ),
+    {
+      selector: ".plan-legal-onedrive-list",
+      title: "Links de OneDrive",
+      body: "Pegá el link compartido de capturas o videos. El botón + agrega más links si tenés varias evidencias.",
+      placement: "top",
+      when: () => visible(".plan-legal-onedrive-list"),
+    },
+    {
+      selector: "#ref-legal-btn-ia",
+      title: "Mejorar redacción con IA",
+      body: "Opcional: pulí descripción, pasos y resultados. El botón ↩ deshace si no te convence.",
+      placement: "top",
+      when: () => visible("#ref-legal-btn-ia"),
+    },
+    previewCopyStep("#ref-legal-btn-ver-planilla", "#ref-legal-btn-copiar"),
+  ];
+
+  return { id: "referral-legal-form", steps };
 }
 
 export function buildOportunidadMenuTour() {
@@ -654,18 +694,74 @@ export function buildBlanqueoTour() {
     id: "blanqueo",
     steps: [
       {
-        selector: ".blanqueo-form-panel",
-        title: "Nueva solicitud",
-        body: "Elegí plataforma (On Balance, ONVIO, Portal Cliente), número de caso y usuario a blanquear.",
+        selector: "#blanqueo-portal",
+        title: "Plataforma",
+        body: "On Balance, ONVIO o Portal Cliente. Define en qué sistema hay que blanquear o resetear el acceso.",
         placement: "bottom",
-        when: () => visible(".blanqueo-form-panel"),
+        when: () => visible("#blanqueo-portal"),
       },
       {
-        selector: ".blanqueo-list-panel, .plan-gestor-panel:not(.blanqueo-form-panel)",
-        title: "Seguimiento",
-        body: "Las solicitudes enviadas aparecen acá con su estado. Refrescá para ver avances.",
+        selector: "#blanqueo-caso",
+        title: "N° de caso",
+        body: "Número del ticket o caso de soporte vinculado al pedido de blanqueo.",
+        placement: "bottom",
+        when: () => visible("#blanqueo-caso"),
+      },
+      {
+        selector: "#blanqueo-cliente",
+        title: "N° de cliente",
+        body: "Identificador del cliente en la plataforma elegida.",
+        placement: "bottom",
+        when: () => visible("#blanqueo-cliente"),
+      },
+      {
+        selector: "#blanqueo-correo",
+        title: "Correo",
+        body: "Email del usuario a blanquear. Si son varios, agregá una fila por correo.",
+        placement: "bottom",
+        when: () => visible("#blanqueo-correo"),
+      },
+      {
+        selector: "#blanqueo-tipo",
+        title: "Tipo de solicitud",
+        body: "Blanqueo (solo contraseña), MFA (solo doble factor) o Blanqueo + MFA según lo que pida el caso.",
+        placement: "bottom",
+        when: () => visible("#blanqueo-tipo"),
+      },
+      {
+        selector: "#blanqueo-modulos-field",
+        title: "Módulos del Portal",
+        body: "Solo con Portal Cliente: marcá qué módulos habilitar (Sueldos SQL/WEB, ONVIO, Bejerman SQL, Contabilidad WEB).",
         placement: "top",
-        when: () => visible(".blanqueo-list-panel"),
+        when: () => visible("#blanqueo-modulos-field"),
+      },
+      {
+        selector: "#blanqueo-add",
+        title: "Agregar solicitud",
+        body: "Cargá la fila al listado. Operaciones la procesa y ves el estado en la tabla de abajo.",
+        placement: "top",
+        when: () => visible("#blanqueo-add"),
+      },
+      {
+        selector: "#blanqueo-clave-hint",
+        title: "Clave por defecto",
+        body: "La clave generada suele ser la que indica acá, salvo que en Aclaración figure otra. Podés copiarla con un clic.",
+        placement: "top",
+        when: () => visible("#blanqueo-clave-hint"),
+      },
+      {
+        selector: ".blanqueo-filter-bar",
+        title: "Filtros del listado",
+        body: "Filtrá por mes, plataforma o buscá por correo/caso/cliente. «Solo mis solicitudes» acota a lo que cargaste vos.",
+        placement: "top",
+        when: () => visible(".blanqueo-filter-bar"),
+      },
+      {
+        selector: ".blanqueo-table-wrap",
+        title: "Seguimiento",
+        body: "Estado de cada pedido: pendiente, confirmado u observación en Aclaración. Quién lo gestionó aparece en la última columna.",
+        placement: "top",
+        when: () => visible(".blanqueo-table-wrap"),
       },
     ],
   };
@@ -676,10 +772,81 @@ export function buildBorradoBasesTour() {
     id: "borrado-bases",
     steps: [
       {
-        selector: "#planillas-borrado-bases .borrado-form-panel, #planillas-borrado-bases .plan-gestor-panel",
-        title: "Solicitud de borrado",
-        body: "Indicá cliente, bases a borrar (IVA, SJ, CG) y datos de contacto. El equipo de operaciones procesa el pedido.",
+        selector: "#borrado-salesforce",
+        title: "Varias bases en Salesforce",
+        body: "Activá esto si el detalle completo está en Salesforce: solo cargás N° de caso y cliente y agregás con el botón.",
         placement: "bottom",
+        when: () => visible("#borrado-salesforce"),
+      },
+      {
+        selector: "#borrado-caso",
+        title: "N° de caso",
+        body: "Ticket o caso de soporte asociado al pedido de borrado.",
+        placement: "bottom",
+        when: () => visible("#borrado-caso"),
+      },
+      {
+        selector: "#borrado-cliente",
+        title: "N° de cliente",
+        body: "Cliente al que corresponde el borrado de bases web.",
+        placement: "bottom",
+        when: () => visible("#borrado-cliente"),
+      },
+      {
+        selector: "#borrado-empresa",
+        title: "Código de empresa",
+        body: "Código interno de la empresa en el sistema web. Va junto al nombre para que operaciones identifique la base.",
+        placement: "bottom",
+        when: () => visible("#borrado-empresa"),
+      },
+      {
+        selector: "#borrado-nombre-empresa",
+        title: "Nombre de empresa",
+        body: "Razón social o nombre visible de la empresa afectada.",
+        placement: "bottom",
+        when: () => visible("#borrado-nombre-empresa"),
+      },
+      {
+        selector: "#borrado-cuit",
+        title: "CUIT",
+        body: "Opcional. Ayuda a validar la empresa cuando hay homónimos o varias bases.",
+        placement: "bottom",
+        when: () => visible("#borrado-cuit"),
+      },
+      {
+        selector: "#borrado-field-bases",
+        title: "Bases a borrar",
+        body: "Marcá IVA, Sueldos y Jornales y/o Contabilidad General según lo que operaciones deba eliminar.",
+        placement: "top",
+        when: () => visible("#borrado-field-bases"),
+      },
+      {
+        selector: "#borrado-ejercicios",
+        title: "Ejercicios a borrar",
+        body: "Pegá el detalle del mail con los ejercicios o períodos a borrar cuando la plantilla lo requiera.",
+        placement: "top",
+        when: () => visible("#borrado-ejercicios"),
+      },
+      {
+        selector: "#borrado-add, #borrado-add-detalle",
+        title: "Agregar solicitud",
+        body: "«Agregar» en modo Salesforce (solo caso/cliente) o el de abajo con el detalle completo de empresa y bases.",
+        placement: "top",
+        when: () => visible("#borrado-add") || visible("#borrado-add-detalle"),
+      },
+      {
+        selector: ".borrado-filter-bar",
+        title: "Filtros del listado",
+        body: "Filtrá por mes o buscá por caso, cliente, empresa o CUIT. «Solo mis solicitudes» muestra lo que cargaste vos.",
+        placement: "top",
+        when: () => visible(".borrado-filter-bar"),
+      },
+      {
+        selector: ".borrado-table-wrap",
+        title: "Seguimiento",
+        body: "Estado de cada pedido: pendiente, listo, eliminada u observación. Doble clic en Estado confirma si tenés permiso.",
+        placement: "top",
+        when: () => visible(".borrado-table-wrap"),
       },
     ],
   };
