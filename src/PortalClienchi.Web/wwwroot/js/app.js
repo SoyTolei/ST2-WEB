@@ -1,7 +1,7 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
-import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
@@ -284,12 +284,22 @@ function initPortalPicker() {
     btn.addEventListener("click", () => switchPortal(btn.dataset.portalId));
   }
   syncPortalFrameTitle();
+  syncPortalTabLabel();
+}
+
+function syncPortalTabLabel() {
+  const label = getPortalClientTabLabel();
+  const labelEl = document.getElementById("tabPortalBtnLabel");
+  if (labelEl) labelEl.textContent = label;
+  document.getElementById("tabPortalBtn")?.setAttribute("aria-label", label);
+  portalSistemaPills?.setAttribute("aria-label", label);
 }
 
 function syncPortalFrameTitle() {
   const cfg = getActivePortalConfig();
-  const label = portalPickerLabel(activePortalId, cfg?.label) || activePortalId || "Portal Cliente";
-  if (portalFrame) portalFrame.title = `Portal Cliente · ${label}`;
+  const portalLabel = getPortalClientTabLabel();
+  const label = portalPickerLabel(activePortalId, cfg?.label) || activePortalId || portalLabel;
+  if (portalFrame) portalFrame.title = `${portalLabel} · ${label}`;
 }
 
 function switchPortal(portalId, { history = "push" } = {}) {
@@ -343,6 +353,7 @@ function syncProfilePortalAccess() {
   }
 
   if (appConfig) initPortalPicker();
+  syncPortalTabLabel();
 
   const activeTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
   if (!showTabs && (activeTab === "thom" || activeTab === "portal")) {
@@ -4381,7 +4392,7 @@ function titleForTab(tabId) {
   if (tabId === ADMIN_TAB_ID) return "ST² · ADMIN";
   if (tabId === "thom") return "ST² · THOM";
   if (tabId === "ai") return "ST² · AI Platform";
-  if (tabId === "portal") return "ST² · Portal Cliente";
+  if (tabId === "portal") return `ST² · ${getPortalClientTabLabel()}`;
   if (tabId === "planillas") return "ST² · Suite Web";
   return "ST² · Suite Web";
 }
@@ -4503,6 +4514,7 @@ function switchTab(tabId) {
   refreshBadges();
   setTourContext({
     getActiveTab: () => tabId,
+    getPortalTabLabel: () => getPortalClientTabLabel(),
   });
   syncHeaderTourButton();
 }
@@ -4615,6 +4627,7 @@ async function bootstrapApp() {
   await initPlanillas();
   setTourContext({
     getActiveTab: () => document.querySelector(".tab-btn.active")?.dataset?.tab || "planillas",
+    getPortalTabLabel: () => getPortalClientTabLabel(),
   });
   syncHeaderTourButton();
   scheduleWelcomeTour();

@@ -427,6 +427,15 @@ const PROFILE_PORTAL_MODULE = {
   chile: "planillasChile",
 };
 
+export function isChilePortalProfile() {
+  const visible = listVisibleProfilePortals();
+  return visible.length > 0 && visible.every((id) => id === "chile");
+}
+
+export function getPortalClientTabLabel() {
+  return isChilePortalProfile() ? "Centro de Soluciones" : "Portal Cliente";
+}
+
 /** THOM / Portal Cliente según sistema de planillas (SQL, LEGAL o Chile). */
 export function canSeeProfilePortal(portalId) {
   const key = PROFILE_PORTAL_MODULE[String(portalId || "").trim().toLowerCase()];
