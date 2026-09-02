@@ -1954,7 +1954,7 @@
           "label": "HighQ",
           "templates": [
             {
-              "title": "Plantilla - Escalamiento HighQ N2/N3",
+              "title": "Escalamiento HighQ N2/N3",
               "outputFormat": "highq-n2",
               "requiredFields": ["url", "usuarioN2", "frecuencia", "descripcion", "pasos", "found", "expected"],
               "recommendedFields": ["afectaUsuario", "har", "evidencias"],
@@ -1964,13 +1964,13 @@
                   "id": "url",
                   "label": "URL del cliente",
                   "type": "text",
-                  "placeholder": "https://empresa.highq.com",
+                  "placeholder": "",
                   "section": "minimo",
                   "tier": "required"
                 },
                 {
                   "id": "usuarioN2",
-                  "label": "¿Usuario N2 creado?",
+                  "label": "Usuario creado para N2",
                   "type": "select",
                   "options": ["Sí", "No"],
                   "section": "minimo",
@@ -1986,47 +1986,47 @@
                 },
                 {
                   "id": "descripcion",
-                  "label": "Descripción del problema",
+                  "label": "Descripción / Asunto",
                   "type": "textarea",
-                  "placeholder": "Resumen del problema (Descripción/Asunto)",
+                  "placeholder": "",
                   "section": "descripcion",
                   "tier": "required"
                 },
                 {
                   "id": "pasos",
-                  "label": "Paso a paso para reproducir",
+                  "label": "Pasos para reproducir",
                   "type": "textarea",
-                  "placeholder": "Acceder al sitio…\nAcceder al módulo…\nEjecutar acción…\nResultado obtenido: …",
+                  "placeholder": "",
                   "section": "descripcion",
                   "tier": "required"
                 },
                 {
                   "id": "found",
-                  "label": "Resultado encontrado",
+                  "label": "Resultado encontrado (Found result)",
                   "type": "textarea",
-                  "placeholder": "Qué falla exactamente (pantalla blanca, error 403, loop, etc.)",
+                  "placeholder": "",
                   "section": "resultados",
                   "tier": "required"
                 },
                 {
                   "id": "expected",
-                  "label": "Resultado esperado",
+                  "label": "Resultado esperado (Expected result)",
                   "type": "textarea",
-                  "placeholder": "Qué debería pasar normalmente",
+                  "placeholder": "",
                   "section": "resultados",
                   "tier": "required"
                 },
                 {
                   "id": "afectaUsuario",
-                  "label": "¿Afecta usuario específico?",
+                  "label": "Usuario afectado",
                   "type": "text",
-                  "placeholder": "Nombre del usuario o No",
+                  "placeholder": "",
                   "section": "recomendados",
                   "tier": "recommended"
                 },
                 {
                   "id": "har",
-                  "label": "¿Archivo HAR adjunto?",
+                  "label": "Archivo HAR adjunto",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
                   "section": "recomendados",
@@ -2041,7 +2041,7 @@
                 },
                 {
                   "id": "templateSitio",
-                  "label": "¿Template del sitio adjunto?",
+                  "label": "Template del sitio adjunto",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
                   "section": "opcionales",
@@ -2049,7 +2049,7 @@
                 },
                 {
                   "id": "templateISheet",
-                  "label": "¿Template iSheet adjunto?",
+                  "label": "Template iSheet adjunto",
                   "type": "select",
                   "options": ["Sí", "No", "N/A"],
                   "section": "opcionales",
@@ -2057,8 +2057,7 @@
                 }
               ],
               "blocks": [
-                "Podés generar la planilla en cualquier momento. Los campos vacíos salen como «No se informa» en el texto.",
-                "Obligatorios para escalar a N2: URL, usuario N2, frecuencia, descripción, pasos, resultado encontrado y esperado."
+                "Los campos vacíos aparecen como «No se informa» en el texto generado."
               ],
               "actions": [
                 "Vista previa",

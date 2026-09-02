@@ -16,11 +16,11 @@ const LEGAL_ICONS = {
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
 
 const LEGAL_SECTION_LABELS = {
-  minimo: "Mínimo necesario para escalar",
+  minimo: "Datos del entorno",
   descripcion: "Descripción y reproducción",
   resultados: "Resultados",
-  recomendados: "Muy recomendados",
-  opcionales: "Opcionales / situacionales",
+  recomendados: "Información adicional",
+  opcionales: "Templates",
   checklist: "Checklist",
   adjuntos: "Evidencias visuales",
 };
@@ -65,8 +65,8 @@ function showView(id) {
 
 async function ensureCatalog(force = false) {
   if (templatesCatalog && !force) return templatesCatalog;
-  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-informa";
-  const url = base.includes("?") ? base : `${base}?v=highq-informa`;
+  const base = hubCtx?.getConfig()?.legal?.templatesCatalogUrl || "/data/legalone-templates-catalog.json?v=highq-clean";
+  const url = base.includes("?") ? base : `${base}?v=highq-clean`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("No se pudo cargar el catálogo de plantillas LEGAL.");
   templatesCatalog = await res.json();
@@ -193,10 +193,7 @@ function fieldRequired(field, template) {
 
 function fieldLabelHtml(field, index, template) {
   const label = fieldLabel(field, index);
-  const tier = fieldTier(field, template);
-  if (tier === "required") return `${label} *`;
-  if (tier === "recommended") return `${label} <span class="plan-legal-tier plan-legal-tier-rec">Recomendado</span>`;
-  if (tier === "optional") return `${label} <span class="plan-legal-tier plan-legal-tier-opt">Opcional</span>`;
+  if (fieldTier(field, template) === "required") return `${label} *`;
   return label;
 }
 

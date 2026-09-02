@@ -98,7 +98,7 @@ public static class PlanillasEndpoints
                         catalogCategoryId = i.CatalogCategoryId,
                     }),
                 }),
-                templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=highq-informa",
+                templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=highq-clean",
             },
             chile = new
             {
