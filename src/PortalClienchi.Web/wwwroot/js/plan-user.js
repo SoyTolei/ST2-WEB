@@ -9,7 +9,7 @@ let appUnlocked = false;
 const SESSION_OPTS = { credentials: "include" };
 const ALLOWED_DOMAIN = "thomsonreuters.com";
 const SUPER_ADMIN_EMAIL = "leonel.gallo@thomsonreuters.com";
-const LOCAL_NAME_PATTERN = /^[a-z]{2,}\.[a-z]{2,}$/;
+const LOCAL_NAME_PATTERN = /^[a-z]{2,}(\.[a-z]{2,})+$/;
 
 const DEVICE_ID_KEY = "st2_device_id";
 

@@ -2995,7 +2995,7 @@ function isValidAccessProfileEmail(email) {
   const domain = normalized.slice(at + 1);
   if (!local || local.includes(" ") || local.includes("@")) return false;
   if (domain !== "thomsonreuters.com") return false;
-  return /^[a-z]{2,}\.[a-z]{2,}$/.test(local);
+  return /^[a-z]{2,}(\.[a-z]{2,})+$/.test(local);
 }
 
 function showAccessModulesError(message) {
@@ -3431,7 +3431,7 @@ async function saveAccessModules() {
       const email = String(accessModulesEmailInput?.value || "").trim().toLowerCase();
       if (!email) throw new Error("Ingresá el correo del perfil.");
       if (!isValidAccessProfileEmail(email)) {
-        throw new Error("Usá un correo @thomsonreuters.com con formato nombre.apellido.");
+        throw new Error("Usá un correo @thomsonreuters.com con formato nombre.apellido (puede incluir más segmentos).");
       }
       const autoName = parseAccessNameFromEmail(email).display;
       const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;

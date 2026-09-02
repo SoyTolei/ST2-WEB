@@ -13,9 +13,9 @@ public static class PlanUserIdentity
 
     private static readonly string[] AllowedDomains = ["thomsonreuters.com"];
 
-    /// <summary>nombre.apellido @ thomsonreuters.com (letras, segmentos de 2+).</summary>
+    /// <summary>nombre.apellido[.apellido…] @ thomsonreuters.com (letras, segmentos de 2+).</summary>
     private static readonly Regex LocalNamePattern = new(
-        @"^[a-z]{2,}\.[a-z]{2,}$",
+        @"^[a-z]{2,}(\.[a-z]{2,})+$",
         RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
     public static string? ValidateAndNormalize(string? email)
