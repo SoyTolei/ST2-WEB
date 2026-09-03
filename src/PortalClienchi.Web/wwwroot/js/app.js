@@ -179,6 +179,8 @@ const accessAdminKpiToday = document.getElementById("st2-access-admin-kpi-today"
 const accessAdminInbox = document.getElementById("st2-access-admin-inbox");
 const accessAdminTable = document.querySelector("#st2-access-admin-table-wrap .st2-access-admin-table");
 const accessAdminThHost = document.getElementById("st2-access-admin-th-host");
+const accessAdminThLast = document.getElementById("st2-access-admin-th-last");
+const accessAdminThLogins = document.getElementById("st2-access-admin-th-logins");
 const accessAdminPresetBtn = document.getElementById("st2-access-admin-preset");
 async function apiGet(url, signal) {
   const response = await fetch(url, { signal, credentials: "include", cache: "no-store" });
@@ -1329,9 +1331,18 @@ function setAccessAdminUpdatedHint(text) {
   accessAdminUpdated.classList.remove("hidden");
 }
 
+/** Admin web (no Leonel): solo Nombre, Permisos y lápiz — sin Equipo / Último acceso / Ingresos. */
+function canSeeAccessAdminOwnerColumns() {
+  return isPrimarySuperAdmin();
+}
+
 function syncAccessAdminHostColumn() {
   accessAdminPresetBtn?.classList.toggle("hidden", !isSt2SuperAdmin());
-  accessAdminThHost?.classList.remove("hidden");
+  const showOwnerCols = canSeeAccessAdminOwnerColumns();
+  accessAdminThHost?.classList.toggle("hidden", !showOwnerCols);
+  accessAdminThLast?.classList.toggle("hidden", !showOwnerCols);
+  accessAdminThLogins?.classList.toggle("hidden", !showOwnerCols);
+  accessAdminTable?.classList.toggle("is-admin-web-compact", !showOwnerCols);
 }
 
 function getFilteredAccessAdminItems() {
@@ -1416,11 +1427,20 @@ function renderAccessAdminTable() {
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
-    const hostCell = `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
-      accessAdminClientChangedEmails.has(item.email)
-        ? `<span class="st2-access-admin-host-attn" title="Cambió de equipo">⚠</span> `
-        : ""
-    }${escapeHtml(hostLabel)}</td>`;
+    const showOwnerCols = canSeeAccessAdminOwnerColumns();
+    const hostCell = showOwnerCols
+      ? `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
+          accessAdminClientChangedEmails.has(item.email)
+            ? `<span class="st2-access-admin-host-attn" title="Cambió de equipo">⚠</span> `
+            : ""
+        }${escapeHtml(hostLabel)}</td>`
+      : "";
+    const lastSeenCell = showOwnerCols
+      ? `<td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>`
+      : "";
+    const loginsCell = showOwnerCols
+      ? `<td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>`
+      : "";
     const ownerActions = isPrimarySuperAdmin();
     const extraActions = item.isPending
       ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
@@ -1438,8 +1458,8 @@ function renderAccessAdminTable() {
       </td>
       <td class="st2-access-admin-mods-cell">${permsHtml}</td>
       ${hostCell}
-      <td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>
-      <td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>
+      ${lastSeenCell}
+      ${loginsCell}
       <td class="st2-access-admin-actions-cell">
         ${extraActions}
       </td>

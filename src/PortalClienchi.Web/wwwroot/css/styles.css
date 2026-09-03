@@ -3605,6 +3605,8 @@ body.portal-tab-active .brand-icon {
 }
 
 .st2-access-admin-th-host.hidden,
+.st2-access-admin-th-last.hidden,
+.st2-access-admin-th-logins.hidden,
 .st2-access-admin-preset.hidden {
   display: none;
 }
