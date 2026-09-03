@@ -58,6 +58,14 @@ html.st2-theme-dark .st2-session-email {
   color: rgba(255, 255, 255, 0.84);
 }
 
+html.st2-theme-dark .st2-session-name {
+  color: #ffedd5;
+}
+
+html.st2-theme-dark .st2-session-mail {
+  color: rgba(203, 213, 225, 0.78);
+}
+
 html.st2-theme-dark .tab-bar {
   background: linear-gradient(180deg, #222222 0%, #161616 100%);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);

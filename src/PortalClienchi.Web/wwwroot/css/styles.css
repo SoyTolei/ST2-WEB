@@ -226,8 +226,8 @@ html, body {
 .app-header-left .st2-session-email {
   position: relative;
   z-index: 2;
-  flex: 0 1 auto;
-  max-width: min(220px, 28vw);
+  flex: 0 0 auto;
+  max-width: none;
   margin-left: 2px;
   padding-left: 14px;
   border-left: 1px solid rgba(255, 255, 255, 0.12);
@@ -243,17 +243,36 @@ html, body {
 }
 
 .st2-session-email {
-  max-width: min(240px, 40vw);
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  max-width: none;
+  overflow: visible;
   white-space: nowrap;
   font-size: 0.78rem;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.82);
-  padding: 6px 12px;
-  border-radius: 999px;
+  padding: 5px 12px 5px 12px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(255, 255, 255, 0.12);
+  line-height: 1.15;
+}
+
+.st2-session-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffedd5;
+}
+
+.st2-session-mail {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(226, 232, 240, 0.78);
+  font-variant-numeric: tabular-nums;
 }
 
 .st2-session-email.hidden {
@@ -2831,16 +2850,41 @@ body.portal-tab-active .brand-icon {
 
 .about-btn {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   border-color: rgba(255, 122, 51, 0.45);
   color: #ffe8d6;
   background: rgba(28, 22, 18, 0.92);
   box-shadow: 0 0 0 1px rgba(255, 122, 51, 0.08) inset;
+  padding: 6px 12px 6px 8px;
 }
 
 .about-btn:hover {
   border-color: rgba(255, 166, 87, 0.7);
   background: rgba(48, 32, 22, 0.96);
   color: #fff;
+}
+
+.about-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ea580c, #fb923c);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-style: italic;
+  font-family: Georgia, "Times New Roman", serif;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.about-btn-label {
+  white-space: nowrap;
 }
 
 .about-tools-badge {

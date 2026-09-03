@@ -181,14 +181,33 @@ function stopPendingPoll() {
   }
 }
 
+function displayNameFromEmail(email) {
+  const local = String(email || "").split("@")[0] || "";
+  if (!local) return "";
+  return local
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
+  const nameEl = document.getElementById("st2-session-name");
+  const mailEl = document.getElementById("st2-session-mail");
   if (!el) return;
   if (cachedEmail) {
-    el.textContent = cachedEmail;
+    const pretty = displayNameFromEmail(cachedEmail);
+    if (nameEl) nameEl.textContent = pretty || cachedEmail;
+    if (mailEl) mailEl.textContent = cachedEmail;
+    if (!nameEl && !mailEl) el.textContent = cachedEmail;
+    el.title = cachedEmail;
     el.classList.remove("hidden");
   } else {
-    el.textContent = "";
+    if (nameEl) nameEl.textContent = "";
+    if (mailEl) mailEl.textContent = "";
+    if (!nameEl && !mailEl) el.textContent = "";
+    el.removeAttribute("title");
     el.classList.add("hidden");
   }
 }
