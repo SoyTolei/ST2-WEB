@@ -1428,7 +1428,6 @@ function renderAccessAdminTable() {
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
-    const showOwnerCols = canSeeAccessAdminOwnerColumns();
     const hostCell = showOwnerCols
       ? `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
           accessAdminClientChangedEmails.has(item.email)
