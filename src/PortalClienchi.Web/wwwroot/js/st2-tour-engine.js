@@ -1,6 +1,7 @@
 const STORAGE_KEY = "st2-tour-progress-v1";
 
 let root = null;
+let overlay = null;
 let spotlight = null;
 let card = null;
 let titleEl = null;
@@ -97,6 +98,7 @@ function ensureDom() {
   root.className = "st2-tour-root";
   root.hidden = true;
   root.innerHTML = `
+    <div class="st2-tour-overlay" aria-hidden="true"></div>
     <div class="st2-tour-spotlight" aria-hidden="true"></div>
     <div class="st2-tour-card" role="dialog" aria-modal="true" aria-labelledby="st2-tour-title">
       <div class="st2-tour-card-accent" aria-hidden="true"></div>
@@ -115,6 +117,7 @@ function ensureDom() {
   `;
   document.body.appendChild(root);
 
+  overlay = root.querySelector(".st2-tour-overlay");
   spotlight = root.querySelector(".st2-tour-spotlight");
   card = root.querySelector(".st2-tour-card");
   titleEl = root.querySelector(".st2-tour-title");
@@ -234,8 +237,27 @@ function positionCard(target, placement = "bottom") {
   card.style.left = `${left}px`;
 }
 
+function positionOverlayHole(target) {
+  if (!overlay) return;
+  if (!target) {
+    overlay.style.clipPath = "none";
+    overlay.classList.add("is-full");
+    return;
+  }
+  overlay.classList.remove("is-full");
+  const rect = target.getBoundingClientRect();
+  const pad = 8;
+  const t = Math.max(0, rect.top - pad);
+  const l = Math.max(0, rect.left - pad);
+  const r = Math.min(window.innerWidth, rect.right + pad);
+  const b = Math.min(window.innerHeight, rect.bottom + pad);
+  // Hueco nítido: el blur/oscurecido queda solo afuera del target.
+  overlay.style.clipPath = `polygon(evenodd, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, ${l}px ${t}px, ${l}px ${b}px, ${r}px ${b}px, ${r}px ${t}px, ${l}px ${t}px)`;
+}
+
 function positionSpotlight(target) {
   if (!spotlight) return;
+  positionOverlayHole(target);
   if (!target) {
     spotlight.classList.add("is-center");
     return;
