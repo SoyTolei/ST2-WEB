@@ -157,22 +157,38 @@ function isVisible(el) {
   return rect.width > 0 && rect.height > 0;
 }
 
+/** Primer elemento visible del selector (evita remarcar un match oculto). */
+function queryVisible(selector) {
+  if (!selector) return null;
+  const nodes = document.querySelectorAll(selector);
+  for (const el of nodes) {
+    if (isVisible(el)) return el;
+  }
+  return null;
+}
+
 async function waitForElement(selector, timeout = 4000) {
   const start = Date.now();
   while (Date.now() - start < timeout) {
-    const el = selector ? document.querySelector(selector) : null;
-    if (!selector || isVisible(el)) return el;
+    const el = queryVisible(selector);
+    if (!selector || el) return el;
     await new Promise((r) => setTimeout(r, 80));
   }
-  return selector ? document.querySelector(selector) : null;
+  return queryVisible(selector);
 }
 
 function filterSteps(steps, ctx) {
   return (steps || []).filter((step) => {
     if (typeof step.when === "function" && !step.when(ctx)) return false;
-    if (step.selector && !document.querySelector(step.selector)) return false;
+    if (step.selector && !queryVisible(step.selector) && !document.querySelector(step.selector)) return false;
     return true;
   });
+}
+
+async function waitFrames(count = 2) {
+  for (let i = 0; i < count; i += 1) {
+    await new Promise((r) => requestAnimationFrame(r));
+  }
 }
 
 function positionCard(target, placement = "bottom") {
@@ -225,11 +241,18 @@ function positionSpotlight(target) {
   }
   spotlight.classList.remove("is-center");
   const rect = target.getBoundingClientRect();
-  const pad = 6;
+  const pad = 8;
   spotlight.style.top = `${Math.max(0, rect.top - pad)}px`;
   spotlight.style.left = `${Math.max(0, rect.left - pad)}px`;
-  spotlight.style.width = `${rect.width + pad * 2}px`;
-  spotlight.style.height = `${rect.height + pad * 2}px`;
+  spotlight.style.width = `${Math.max(24, rect.width + pad * 2)}px`;
+  spotlight.style.height = `${Math.max(24, rect.height + pad * 2)}px`;
+}
+
+async function fadeCard(out) {
+  if (!card) return;
+  card.classList.toggle("is-fading", out);
+  spotlight?.classList.toggle("is-moving", out);
+  await new Promise((r) => setTimeout(r, out ? 160 : 40));
 }
 
 async function renderStep() {
@@ -240,8 +263,11 @@ async function renderStep() {
     await step.beforeShow(activeTour.ctx);
   }
 
+  await fadeCard(true);
+
   const target = step.center ? null : await waitForElement(step.selector);
   if (step.selector && !step.center && !isVisible(target)) {
+    await fadeCard(false);
     if (stepIndex < activeSteps.length - 1) {
       goStep(stepIndex + 1);
       return;
@@ -251,8 +277,9 @@ async function renderStep() {
   }
 
   if (target) {
-    target.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    await new Promise((r) => setTimeout(r, 120));
+    target.scrollIntoView({ block: "nearest", behavior: "smooth", inline: "nearest" });
+    await new Promise((r) => setTimeout(r, 280));
+    await waitFrames(2);
   }
 
   titleEl.textContent = step.title || "";
@@ -264,6 +291,8 @@ async function renderStep() {
 
   positionSpotlight(target);
   positionCard(target, step.placement || "bottom");
+  await waitFrames(1);
+  await fadeCard(false);
 
   if (resizeObserver) resizeObserver.disconnect();
   if (target && typeof ResizeObserver !== "undefined") {

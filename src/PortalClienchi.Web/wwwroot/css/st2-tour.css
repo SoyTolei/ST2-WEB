@@ -19,35 +19,60 @@ body.st2-tour-active {
 
 .st2-tour-spotlight {
   position: fixed;
-  border-radius: 14px;
+  border-radius: 12px;
   box-shadow:
-    0 0 0 2px rgba(249, 115, 22, 0.55),
-    0 0 0 9999px rgba(10, 8, 7, 0.78);
-  transition: top 0.22s ease, left 0.22s ease, width 0.22s ease, height 0.22s ease;
+    0 0 0 1.5px rgba(251, 146, 60, 0.55),
+    0 0 0 9999px rgba(8, 7, 6, 0.58);
+  transition:
+    top 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease,
+    border-radius 0.3s ease;
   pointer-events: none;
   z-index: 1;
+  opacity: 1;
 }
 
 .st2-tour-spotlight.is-center {
-  display: none;
+  opacity: 0;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.st2-tour-spotlight.is-moving {
+  opacity: 0.72;
 }
 
 .st2-tour-card {
   position: fixed;
   z-index: 2;
-  width: min(24rem, calc(100vw - 2rem));
+  width: min(24rem, calc(100% - 2rem));
   padding: 0;
-  border-radius: 16px;
-  border: 1px solid rgba(251, 146, 60, 0.28);
-  background: rgba(24, 20, 18, 0.9);
+  border-radius: 14px;
+  border: 1px solid rgba(251, 146, 60, 0.22);
+  background: rgba(24, 20, 18, 0.92);
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   color: #f8fafc;
   box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    0 18px 48px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
   pointer-events: auto;
   overflow: hidden;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    top 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease,
+    transform 0.28s ease;
+}
+
+.st2-tour-card.is-fading {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 .st2-tour-card-inner {
@@ -55,13 +80,14 @@ body.st2-tour-active {
 }
 
 .st2-tour-card-accent {
-  height: 3px;
+  height: 2px;
   background: linear-gradient(90deg, #9a3412 0%, #ea580c 45%, #fb923c 100%);
+  opacity: 0.9;
 }
 
 .st2-tour-kicker {
   margin: 0 0 0.25rem;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -69,23 +95,23 @@ body.st2-tour-active {
 }
 
 .st2-tour-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.08rem;
+  margin: 0 0 0.45rem;
+  font-size: 1.02rem;
   line-height: 1.3;
   color: #fff7ed;
 }
 
 .st2-tour-body {
-  margin: 0 0 0.8rem;
-  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
   line-height: 1.5;
-  color: rgba(226, 232, 240, 0.92);
+  color: rgba(226, 232, 240, 0.9);
 }
 
 .st2-tour-progress {
-  margin: 0 0 0.8rem;
-  font-size: 0.76rem;
-  color: rgba(148, 163, 184, 0.95);
+  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  color: rgba(148, 163, 184, 0.9);
 }
 
 .st2-tour-actions {
@@ -99,17 +125,17 @@ body.st2-tour-active {
 .st2-tour-btn {
   border: 0;
   border-radius: 999px;
-  padding: 0.45rem 0.95rem;
+  padding: 0.42rem 0.9rem;
   font: inherit;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
 }
 
 .st2-tour-btn--ghost {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(148, 163, 184, 0.24);
   color: #cbd5e1;
 }
 
@@ -126,7 +152,7 @@ body.st2-tour-active {
 .st2-tour-btn--primary {
   background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+  box-shadow: 0 3px 12px rgba(234, 88, 12, 0.28);
 }
 
 .st2-tour-btn--primary:hover {
@@ -179,8 +205,8 @@ body.st2-tour-active {
 }
 
 html.st2-theme-dark .st2-tour-card {
-  background: rgba(15, 15, 18, 0.92);
-  border-color: rgba(251, 146, 60, 0.22);
+  background: rgba(15, 15, 18, 0.94);
+  border-color: rgba(251, 146, 60, 0.2);
 }
 
 html.st2-theme-dark .st2-tour-header-btn {
