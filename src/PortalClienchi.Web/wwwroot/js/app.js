@@ -2054,16 +2054,8 @@ function userCanSeeDesktopToolDownloads() {
 
 function syncAboutNoticeCopy() {
   const lead = document.getElementById("st2-about-notice-lead");
-  const text = document.getElementById("st2-about-notice-text");
-  if (!lead || !text) return;
-
-  if (userCanSeeDesktopToolDownloads()) {
-    lead.textContent = "Suite interna para soporte técnico";
-    text.innerHTML = "Todos ven las mismas pestañas superiores. Las planillas dependen de tu perfil; además podés descargar las herramientas de escritorio <strong>SQL</strong> y <strong>BAT</strong> de la suite.";
-  } else {
-    lead.textContent = "Suite web de uso interno";
-    text.innerHTML = "Todos ven las mismas pestañas superiores. Las planillas y herramientas dentro de cada una dependen de tu perfil.";
-  }
+  if (!lead) return;
+  lead.textContent = "Suite interna para mesa de ayuda";
 }
 
 function syncAboutToolsVisibility() {
