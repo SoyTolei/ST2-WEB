@@ -24,12 +24,12 @@ body.st2-tour-active {
     0 0 0 1.5px rgba(251, 146, 60, 0.55),
     0 0 0 9999px rgba(8, 7, 6, 0.58);
   transition:
-    top 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    left 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.28s ease,
-    border-radius 0.3s ease;
+    top 0.22s ease,
+    left 0.22s ease,
+    width 0.22s ease,
+    height 0.22s ease,
+    opacity 0.18s ease,
+    border-radius 0.18s ease;
   pointer-events: none;
   z-index: 1;
   opacity: 1;
@@ -39,10 +39,6 @@ body.st2-tour-active {
   opacity: 0;
   width: 0 !important;
   height: 0 !important;
-}
-
-.st2-tour-spotlight.is-moving {
-  opacity: 0.72;
 }
 
 .st2-tour-card {
@@ -61,18 +57,9 @@ body.st2-tour-active {
     0 0 0 1px rgba(255, 255, 255, 0.03) inset;
   pointer-events: auto;
   overflow: hidden;
-  opacity: 1;
-  transform: translateY(0);
   transition:
-    top 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    left 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.28s ease,
-    transform 0.28s ease;
-}
-
-.st2-tour-card.is-fading {
-  opacity: 0;
-  transform: translateY(6px);
+    top 0.22s ease,
+    left 0.22s ease;
 }
 
 .st2-tour-card-inner {

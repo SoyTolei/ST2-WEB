@@ -15,6 +15,7 @@ let activeSteps = [];
 let stepIndex = 0;
 let resizeObserver = null;
 let repositionTimer = null;
+let renderToken = 0;
 
 function loadProgress() {
   try {
@@ -145,7 +146,7 @@ function ensureDom() {
 function scheduleReposition() {
   if (!activeTour) return;
   if (repositionTimer) clearTimeout(repositionTimer);
-  repositionTimer = setTimeout(() => renderStep(), 60);
+  repositionTimer = setTimeout(() => repositionCurrentStep(), 40);
 }
 
 function isVisible(el) {
@@ -248,26 +249,36 @@ function positionSpotlight(target) {
   spotlight.style.height = `${Math.max(24, rect.height + pad * 2)}px`;
 }
 
-async function fadeCard(out) {
-  if (!card) return;
-  card.classList.toggle("is-fading", out);
-  spotlight?.classList.toggle("is-moving", out);
-  await new Promise((r) => setTimeout(r, out ? 160 : 40));
+function currentStepTarget() {
+  const step = activeSteps[stepIndex];
+  if (!step || step.center) return null;
+  return queryVisible(step.selector);
+}
+
+/** Solo mueve spotlight/card — sin fade ni re-render de texto (evita titileo). */
+function repositionCurrentStep() {
+  if (!activeTour) return;
+  const step = activeSteps[stepIndex];
+  if (!step) return;
+  const target = currentStepTarget();
+  positionSpotlight(target);
+  positionCard(target, step.placement || "bottom");
 }
 
 async function renderStep() {
+  const token = ++renderToken;
   const step = activeSteps[stepIndex];
   if (!step) return;
 
   if (typeof step.beforeShow === "function") {
     await step.beforeShow(activeTour.ctx);
+    if (token !== renderToken || !activeTour) return;
   }
 
-  await fadeCard(true);
-
   const target = step.center ? null : await waitForElement(step.selector);
+  if (token !== renderToken || !activeTour) return;
+
   if (step.selector && !step.center && !isVisible(target)) {
-    await fadeCard(false);
     if (stepIndex < activeSteps.length - 1) {
       goStep(stepIndex + 1);
       return;
@@ -277,9 +288,9 @@ async function renderStep() {
   }
 
   if (target) {
-    target.scrollIntoView({ block: "nearest", behavior: "smooth", inline: "nearest" });
-    await new Promise((r) => setTimeout(r, 280));
+    target.scrollIntoView({ block: "nearest", behavior: "auto", inline: "nearest" });
     await waitFrames(2);
+    if (token !== renderToken || !activeTour) return;
   }
 
   titleEl.textContent = step.title || "";
@@ -289,10 +300,12 @@ async function renderStep() {
   btnPrev.disabled = stepIndex === 0;
   btnNext.textContent = stepIndex >= activeSteps.length - 1 ? "Finalizar" : "Siguiente";
 
+  // Medir card con contenido nuevo antes de posicionar
+  await waitFrames(1);
+  if (token !== renderToken || !activeTour) return;
+
   positionSpotlight(target);
   positionCard(target, step.placement || "bottom");
-  await waitFrames(1);
-  await fadeCard(false);
 
   if (resizeObserver) resizeObserver.disconnect();
   if (target && typeof ResizeObserver !== "undefined") {
@@ -314,9 +327,12 @@ function finishTour(status) {
   if (status === "completed") markTourStatus(tourId, "completed");
   else if (status === "skipped") markTourStatus(tourId, "skipped");
 
+  renderToken += 1;
   activeTour = null;
   activeSteps = [];
   stepIndex = 0;
+  if (repositionTimer) clearTimeout(repositionTimer);
+  repositionTimer = null;
   if (resizeObserver) resizeObserver.disconnect();
   resizeObserver = null;
   root.classList.remove("is-active");
