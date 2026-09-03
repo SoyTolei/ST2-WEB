@@ -1,7 +1,7 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
-import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { syncStackedToastGreetings } from "./st2-toast-greet.js";
@@ -368,6 +368,8 @@ function syncProfilePortalAccess() {
     portalSistemaBar?.classList.toggle("hidden", !profileContextBarVisible("portal", tabId));
     thomPortalBar?.classList.toggle("hidden", !profileContextBarVisible("thom", tabId));
   }
+
+  syncAboutNoticeCopy();
 }
 
 async function loadAppConfig() {
@@ -998,6 +1000,7 @@ function syncAdminTabVisibility() {
   if (!show && document.querySelector(`.tab-btn.active[data-tab="${ADMIN_TAB_ID}"]`)) {
     navigateTab("planillas", { history: "replace" });
   }
+  syncAboutNoticeCopy();
 }
 
 function updateAdminTabBadge() {
@@ -2054,8 +2057,116 @@ function userCanSeeDesktopToolDownloads() {
 
 function syncAboutNoticeCopy() {
   const lead = document.getElementById("st2-about-notice-lead");
-  if (!lead) return;
-  lead.textContent = "Suite interna para mesa de ayuda";
+  if (lead) lead.textContent = "Suite interna para mesa de ayuda";
+  syncAboutTabsList();
+}
+
+function joinAboutItems(items) {
+  const list = (items || []).filter(Boolean);
+  if (!list.length) return "";
+  if (list.length === 1) return list[0];
+  if (list.length === 2) return `${list[0]} y ${list[1]}`;
+  return `${list.slice(0, -1).join(", ")} y ${list[list.length - 1]}`;
+}
+
+function aboutPortalLabels() {
+  return listVisibleProfilePortals().map((id) => portalPickerLabel(id));
+}
+
+function buildAboutPlanillasDetail() {
+  const blocks = [];
+
+  if (canSeePlanillasSqlOnvio()) {
+    const mods = [];
+    if (canSeePlanillasTransferencia()) mods.push("Transferencia de Casos");
+    if (canSeePlanillasReferral()) mods.push("Referral I+D");
+    if (canSeeOportunidadModule()) mods.push("Oportunidad de Venta");
+    if (canSeePdfPortalModule()) mods.push("Generador de PDFs");
+    if (canSeeBlanqueoModule()) mods.push("Blanqueo de accesos");
+    if (canSeeBorradoBasesModule()) mods.push("Borrado de Bases Web");
+    blocks.push(
+      mods.length
+        ? `BEJERMAN SQL / ONVIO/WEB: ${joinAboutItems(mods)}`
+        : "BEJERMAN SQL / ONVIO/WEB",
+    );
+  }
+
+  if (canSeePlanillasLegal()) {
+    const mods = [];
+    if (canSeeLegalFirm()) mods.push("Legal One");
+    if (canSeeLegalHighq()) mods.push("HighQ");
+    if (canSeeLegalWestlaw()) mods.push("Westlaw");
+    if (canSeeLegalCocounsel()) mods.push("CoCounsel");
+    blocks.push(mods.length ? `LEGAL: ${joinAboutItems(mods)}` : "LEGAL");
+  }
+
+  if (canSeePlanillasChile()) {
+    const mods = [];
+    if (canSeeChileTransferencia()) mods.push("Transferencia de Casos");
+    if (canSeeChileReferral()) mods.push("Referral I+D");
+    if (canSeeChileSaad()) mods.push("SAAD - Facturación");
+    if (canSeeChileHr()) mods.push("HR Consola Intranet");
+    if (canSeeChileWiki()) mods.push("Wiki errores comunes");
+    if (canSeeChileLp()) mods.push("Servicios LP Contabilidad");
+    if (canSeeChilePowerapps()) mods.push("PowerApps");
+    blocks.push(mods.length ? `CHILE: ${joinAboutItems(mods)}` : "CHILE");
+  }
+
+  return blocks.length ? blocks.join(" · ") : "Sin módulos de planillas en tu perfil.";
+}
+
+function syncAboutTabsList() {
+  const list = document.getElementById("st2-about-tabs-list");
+  if (!list) return;
+
+  const items = [];
+  const hasPlanillas =
+    canSeePlanillasSqlOnvio() || canSeePlanillasLegal() || canSeePlanillasChile();
+
+  if (hasPlanillas) {
+    items.push({
+      title: "Sistema de Planillas",
+      body: buildAboutPlanillasDetail(),
+    });
+  }
+
+  const portals = aboutPortalLabels();
+  if (portals.length) {
+    items.push({
+      title: "THOM",
+      body: `Acceso a THOM: ${joinAboutItems(portals)}.`,
+    });
+  }
+
+  items.push({
+    title: "AI Platform",
+    body: "Plataforma de inteligencia artificial integrada en el navegador.",
+  });
+
+  if (portals.length) {
+    const portalTab = getPortalClientTabLabel();
+    const onlyChile = portals.length === 1 && portals[0] === "CHILE";
+    items.push({
+      title: portalTab,
+      body: onlyChile && portalTab === "Centro de Soluciones"
+        ? "Acceso al Centro de Soluciones de Thomson Reuters Chile."
+        : `Búsqueda y acceso: ${joinAboutItems(portals)}.`,
+    });
+  }
+
+  if (isSt2SuperAdmin()) {
+    items.push({
+      title: "ADMIN",
+      body: "Panel de administración de accesos.",
+    });
+  }
+
+  list.innerHTML = items
+    .map(
+      (item) =>
+        `<li><strong>${escapeHtml(item.title)}</strong> — ${escapeHtml(item.body)}</li>`,
+    )
+    .join("");
 }
 
 function syncAboutToolsVisibility() {
