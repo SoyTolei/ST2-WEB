@@ -2119,6 +2119,13 @@ function markToolSeen(toolId) {
   markToolsSeen();
 }
 
+function setToolDownloadLabel(btn, text) {
+  if (!btn) return;
+  const label = btn.querySelector("[data-tool-dl-label]");
+  if (label) label.textContent = text;
+  else btn.textContent = text;
+}
+
 function renderAboutTools() {
   const copy = {
     sql: {
@@ -2152,7 +2159,7 @@ function renderAboutTools() {
       }
       if (btn) {
         btn.disabled = true;
-        btn.textContent = "Pronto";
+        setToolDownloadLabel(btn, "Pronto");
         btn.title = "Todavía no hay un paquete publicado";
       }
       continue;
@@ -2179,7 +2186,7 @@ function renderAboutTools() {
     }
     if (btn) {
       btn.disabled = false;
-      btn.textContent = "Descargar";
+      setToolDownloadLabel(btn, "Descargar");
       btn.removeAttribute("title");
     }
   }

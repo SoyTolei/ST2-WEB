@@ -204,15 +204,28 @@ html.st2-theme-dark .st2-about-tool.is-current {
 }
 
 html.st2-theme-dark .st2-about-tool-dl {
-  background: #161616;
+  background: #1a1f2a;
   border-color: #2b3445;
   color: #94a3b8;
 }
 
+html.st2-theme-dark .st2-about-tool-dl-icon {
+  background: rgba(148, 163, 184, 0.12);
+}
+
 html.st2-theme-dark .st2-about-tool-dl:not(:disabled) {
-  background: #2a2118;
-  border-color: #9a3412;
-  color: #fdba74;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+html.st2-theme-dark .st2-about-tool-dl:not(:disabled) .st2-about-tool-dl-icon {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+html.st2-theme-dark .st2-about-tool-dl:not(:disabled):hover {
+  background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
 }
 
 html.st2-theme-dark .st2-about-tool-upload {

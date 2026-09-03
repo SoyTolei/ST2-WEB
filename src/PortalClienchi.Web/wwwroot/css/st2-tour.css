@@ -170,7 +170,7 @@ body.st2-tour-active {
   border: 1px solid rgba(251, 146, 60, 0.35);
   border-radius: 999px;
   padding: 6px 12px 6px 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(28, 22, 18, 0.92);
   color: rgba(255, 247, 237, 0.95);
   font: inherit;
   font-size: 0.76rem;
@@ -180,12 +180,13 @@ body.st2-tour-active {
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
-  z-index: 2;
+  z-index: 3;
+  box-shadow: 0 0 0 1px rgba(255, 122, 51, 0.08) inset;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .st2-tour-header-btn:hover {
-  background: rgba(249, 115, 22, 0.18);
+  background: rgba(48, 32, 22, 0.96);
   border-color: rgba(251, 146, 60, 0.55);
 }
 
@@ -213,5 +214,5 @@ html.st2-theme-dark .st2-tour-card {
 }
 
 html.st2-theme-dark .st2-tour-header-btn {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(15, 15, 18, 0.94);
 }

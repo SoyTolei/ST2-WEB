@@ -192,7 +192,7 @@ html, body {
 .app-header-fx-stage {
   position: absolute;
   inset: -24px -80px;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   overflow: visible;
   opacity: 0;
@@ -215,10 +215,12 @@ html, body {
   transition: opacity 0.28s ease;
 }
 
+/* Los flotantes quedan detrás; botones con fondo más opaco para que no se vean “encima”. */
 .app-header-user-zone .st2-session-email,
-.app-header-user-zone .about-btn {
+.app-header-user-zone .about-btn,
+.app-header-user-zone .st2-tour-header-btn {
   position: relative;
-  z-index: 2;
+  z-index: 3;
 }
 
 .app-header-left .st2-session-email {
@@ -233,7 +235,7 @@ html, body {
 
 .app-header-actions {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -2482,27 +2484,66 @@ body.portal-tab-active .brand-icon {
 
 .st2-about-tool-dl {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #f8fafc;
+  border-radius: 999px;
+  background: #f1f5f9;
   color: #64748b;
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  padding: 6px 10px;
+  padding: 0.48rem 0.95rem 0.48rem 0.72rem;
   cursor: not-allowed;
+  letter-spacing: 0.01em;
+  box-shadow: none;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.st2-about-tool-dl-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 50%;
+  background: rgba(100, 116, 139, 0.14);
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.st2-about-tool-dl-icon svg {
+  display: block;
+}
+
+.st2-about-tool-dl:disabled .st2-about-tool-dl-icon {
+  opacity: 0.55;
 }
 
 .st2-about-tool-dl:not(:disabled) {
-  border-color: rgba(214, 64, 0, 0.35);
-  background: #fff7ed;
-  color: #c2410c;
+  border-color: transparent;
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  color: #fff;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.28);
+}
+
+.st2-about-tool-dl:not(:disabled) .st2-about-tool-dl-icon {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
 }
 
 .st2-about-tool-dl:not(:disabled):hover {
-  background: #ffedd5;
-  border-color: #ea580c;
+  background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.36);
+  transform: translateY(-1px);
+}
+
+.st2-about-tool-dl:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.28);
 }
 
 .st2-about-tool-url {
@@ -2792,12 +2833,13 @@ body.portal-tab-active .brand-icon {
   position: relative;
   border-color: rgba(255, 122, 51, 0.45);
   color: #ffe8d6;
-  background: rgba(255, 122, 51, 0.12);
+  background: rgba(28, 22, 18, 0.92);
+  box-shadow: 0 0 0 1px rgba(255, 122, 51, 0.08) inset;
 }
 
 .about-btn:hover {
   border-color: rgba(255, 166, 87, 0.7);
-  background: rgba(255, 122, 51, 0.22);
+  background: rgba(48, 32, 22, 0.96);
   color: #fff;
 }
 
