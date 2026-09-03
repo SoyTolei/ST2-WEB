@@ -36,19 +36,55 @@ export function getTourStatus(tourId) {
   return loadProgress()[tourId]?.status || null;
 }
 
+/** Agrupa tours por familia (p. ej. planillas-menu:BejermanSql → planillas-menu). */
+function tourFamilyId(tourId) {
+  if (!tourId) return null;
+  const colon = tourId.indexOf(":");
+  if (colon > 0) return tourId.slice(0, colon);
+  return tourId;
+}
+
 export function isTourCompleted(tourId) {
   return getTourStatus(tourId) === "completed";
 }
 
 export function isTourSeen(tourId) {
   const status = getTourStatus(tourId);
-  return status === "completed" || status === "skipped";
+  if (status === "completed" || status === "skipped") return true;
+
+  const family = tourFamilyId(tourId);
+  if (!family) return false;
+
+  const data = loadProgress();
+  if (family !== tourId) {
+    const familyStatus = data[family]?.status;
+    if (familyStatus === "completed" || familyStatus === "skipped") return true;
+  }
+
+  return Object.entries(data).some(([id, entry]) => {
+    if (id === tourId) return false;
+    if (!(id === family || id.startsWith(`${family}:`))) return false;
+    return entry?.status === "completed" || entry?.status === "skipped";
+  });
+}
+
+/** Autos solo para usuarios nuevos (sin ningún tutorial visto). Después: solo botón manual. */
+export function shouldAutoStartTours() {
+  const data = loadProgress();
+  return !Object.values(data).some(
+    (entry) => entry?.status === "completed" || entry?.status === "skipped",
+  );
 }
 
 export function markTourStatus(tourId, status) {
   if (!tourId) return;
   const data = loadProgress();
-  data[tourId] = { status, at: new Date().toISOString() };
+  const at = new Date().toISOString();
+  data[tourId] = { status, at };
+  const family = tourFamilyId(tourId);
+  if (family && family !== tourId) {
+    data[family] = { status, at };
+  }
   saveProgress(data);
 }
 
@@ -269,6 +305,7 @@ export function isTourRunning() {
 
 export async function startTour(definition, { force = false, ctx = {} } = {}) {
   if (!definition?.id || !definition.steps?.length) return false;
+  if (!force && !shouldAutoStartTours()) return false;
   if (!force && isTourSeen(definition.id)) return false;
   if (activeTour) stopTour();
 
@@ -291,10 +328,13 @@ export function maybeStartTour(resolveDefinition, options = {}) {
     ? resolveDefinition(ctx)
     : resolveDefinition;
   if (!definition?.id) return;
+  if (!force && !shouldAutoStartTours()) return;
   if (!force && isTourSeen(definition.id)) return;
 
   setTimeout(() => {
     if (isTourRunning()) return;
+    if (!force && !shouldAutoStartTours()) return;
+    if (!force && isTourSeen(definition.id)) return;
     void startTour(definition, { force, ctx });
   }, delay);
 }

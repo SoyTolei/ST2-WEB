@@ -1396,7 +1396,8 @@ function renderAccessAdminTable() {
     if (item.isUnseenNew) {
       badges.push('<span class="st2-access-admin-new-user" title="Primer ingreso hoy">Nuevo</span>');
     }
-    const liveHtml = item.isActive
+    const showOwnerCols = canSeeAccessAdminOwnerColumns();
+    const liveHtml = showOwnerCols && item.isActive
       ? '<span class="st2-access-admin-live" title="Activo ahora"><span class="st2-access-admin-live-dot" aria-hidden="true"></span></span>'
       : "";
     const badgeHtml = badges.length

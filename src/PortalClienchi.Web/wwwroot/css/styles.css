@@ -3515,6 +3515,32 @@ body.portal-tab-active .brand-icon {
   text-align: right;
 }
 
+/* Admin web: Nombre · Permisos · Gestión (sin Equipo / Último / Ingresos) */
+.st2-access-admin-table.is-admin-web-compact th:nth-child(1),
+.st2-access-admin-table.is-admin-web-compact td:nth-child(1) {
+  width: 34%;
+}
+
+.st2-access-admin-table.is-admin-web-compact th:nth-child(2),
+.st2-access-admin-table.is-admin-web-compact td:nth-child(2) {
+  width: 42%;
+  min-width: 8rem;
+}
+
+.st2-access-admin-table.is-admin-web-compact th:nth-child(3),
+.st2-access-admin-table.is-admin-web-compact td:nth-child(3) {
+  width: 24%;
+  min-width: 4.5rem;
+  text-align: right;
+  font-size: inherit;
+  color: inherit;
+  word-break: normal;
+}
+
+.st2-access-admin-table.is-admin-web-compact .st2-access-admin-actions-cell {
+  justify-content: flex-end;
+}
+
 .st2-access-admin-th-tight + .st2-access-admin-th-tight,
 .st2-access-admin-date {
   padding-right: 2px;

@@ -5,6 +5,7 @@ import {
   isTourRunning,
   isTourCompleted,
   isTourSeen,
+  shouldAutoStartTours,
 } from "./st2-tour-engine.js";
 import {
   resolveTour,
@@ -104,9 +105,11 @@ export function notifyTourContextChanged() {
 }
 
 export function scheduleWelcomeTour(delay = 1800) {
+  if (!shouldAutoStartTours()) return;
   if (isTourSeen("welcome")) return;
   setTimeout(() => {
     if (isTourRunning()) return;
+    if (!shouldAutoStartTours()) return;
     autoTour("welcome", { delay: 0, force: false });
   }, delay);
 }
