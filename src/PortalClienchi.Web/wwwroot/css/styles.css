@@ -214,6 +214,24 @@ html, body {
   z-index: 2;
 }
 
+.app-header-left .st2-session-email {
+  position: relative;
+  z-index: 2;
+  max-width: min(280px, 36vw);
+  margin-left: 2px;
+  padding-left: 14px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.app-header-actions {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .st2-session-email {
   max-width: min(240px, 40vw);
   overflow: hidden;

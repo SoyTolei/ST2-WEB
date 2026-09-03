@@ -637,6 +637,19 @@ let accessAdminSortKey = "lastSeen";
 let accessAdminSortDir = "desc";
 
 function sortAccessAdminItems(items) {
+  // Admin web: solo A→Z por nombre. Super-admin: orden actual (activo / último acceso / ingresos).
+  if (!isPrimarySuperAdmin()) {
+    return [...items].sort((a, b) => {
+      if (a.isPending !== b.isPending) return a.isPending ? -1 : 1;
+      if (a.isRejected !== b.isRejected) return a.isRejected ? 1 : -1;
+      const aName = formatAccessDisplayName(a.email, a.displayNameOverride).toLocaleLowerCase("es");
+      const bName = formatAccessDisplayName(b.email, b.displayNameOverride).toLocaleLowerCase("es");
+      const byName = aName.localeCompare(bName, "es", { sensitivity: "base" });
+      if (byName !== 0) return byName;
+      return String(a.email || "").localeCompare(String(b.email || ""), "es", { sensitivity: "base" });
+    });
+  }
+
   const dir = accessAdminSortDir === "asc" ? 1 : -1;
   return [...items].sort((a, b) => {
     if (a.isPending !== b.isPending) return a.isPending ? -1 : 1;
