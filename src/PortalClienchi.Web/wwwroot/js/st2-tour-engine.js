@@ -147,7 +147,6 @@ function ensureDom() {
     <div class="st2-tour-card" role="dialog" aria-modal="true" aria-labelledby="st2-tour-title">
       <div class="st2-tour-card-accent" aria-hidden="true"></div>
       <div class="st2-tour-card-inner">
-        <p class="st2-tour-kicker">Tutorial</p>
         <h3 id="st2-tour-title" class="st2-tour-title"></h3>
         <p class="st2-tour-body"></p>
         <p class="st2-tour-progress"></p>

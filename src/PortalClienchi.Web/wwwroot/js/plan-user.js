@@ -703,26 +703,4 @@ function showPlanUserModal(resolve) {
 
 function updatePlanUserBadge() {
   updateSessionEmailDisplay();
-  const badge = document.getElementById("op-gestor-user-badge");
-  if (!badge) return;
-  if (cachedEmail) {
-    badge.textContent = cachedEmail;
-    badge.title = "Clic para cambiar usuario";
-    badge.classList.remove("hidden");
-    if (!badge.dataset.bound) {
-      badge.dataset.bound = "1";
-      badge.style.cursor = "pointer";
-      badge.addEventListener("click", async () => {
-        await clearPlanUserSession();
-        const email = await ensurePlanUser({ forcePrompt: true });
-        if (email && typeof window.__st2ReloadGestor === "function") {
-          await window.__st2ReloadGestor(email);
-        }
-      });
-    }
-  } else {
-    badge.textContent = "";
-    badge.title = "";
-    badge.classList.add("hidden");
-  }
 }

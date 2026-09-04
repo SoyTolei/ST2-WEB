@@ -107,20 +107,12 @@ body.st2-tour-active {
   opacity: 0.9;
 }
 
-.st2-tour-kicker {
-  margin: 0 0 0.25rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fb923c;
-}
-
 .st2-tour-title {
   margin: 0 0 0.45rem;
   font-size: 1.02rem;
   line-height: 1.3;
-  color: #fff7ed;
+  color: #fb923c;
+  font-weight: 700;
 }
 
 .st2-tour-body {
