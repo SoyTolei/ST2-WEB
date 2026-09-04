@@ -4907,6 +4907,7 @@ function goHome() {
   hideAbout();
   closeThomPopup();
   switchTab("planillas");
+  // Siempre replace al menú: no depender del historial entre pestañas ST2 / módulos.
   goPlanillasHome({ history: "replace" });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -4993,7 +4994,9 @@ function navigateTab(tabId, { history = "push" } = {}) {
   if (tabId === "planillas") {
     switchTab("planillas");
     if (currentTab && currentTab !== "planillas") {
-      goPlanillasHome({ history });
+      // Al volver desde THOM/AI/Portal, reemplazar la URL actual por el menú
+      // (si hacemos push, “Volver al menú” + historial podía reabrir esa pestaña).
+      goPlanillasHome({ history: "replace" });
     }
     return;
   }

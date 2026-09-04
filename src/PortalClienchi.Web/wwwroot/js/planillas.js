@@ -1443,21 +1443,13 @@ function openReferralShell(historyMode = "push") {
 function goBackToPlanillasMenu() {
   closeChileEmbed();
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
-  const st = window.history.state?.st2;
-  if (st && st !== "menu" && st !== "chileEmbed") {
-    window.history.back();
-    return;
-  }
+  // Nunca history.back(): con varias vistas/pestañas ST2 en el stack (THOM, AI, otro módulo)
+  // el atrás del navegador te puede tirar a otra pestaña o a un refresh raro.
   showView("menu", { history: "replace" });
   void refreshModuleFlags().then(() => updateSistemaUi());
 }
 
 function goBackToOportunidadMenu() {
-  const st = window.history.state?.st2;
-  if (st === "oportunidadCargar" || st === "oportunidadGestor") {
-    window.history.back();
-    return;
-  }
   void revealView("oportunidadMenu", "replace");
 }
 
