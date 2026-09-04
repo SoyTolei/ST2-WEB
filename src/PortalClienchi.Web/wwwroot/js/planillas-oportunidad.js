@@ -203,6 +203,8 @@ async function generarPdf() {
   a.download = fileName;
   a.click();
   status.textContent = "PDF descargado.";
+  limpiarCargar();
+  status.textContent = "PDF descargado.";
 }
 
 async function mejorarOportunidadIa() {

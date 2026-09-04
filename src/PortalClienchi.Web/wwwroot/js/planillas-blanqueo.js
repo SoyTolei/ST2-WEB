@@ -762,13 +762,13 @@ async function createSolicitud() {
       if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
       ok += 1;
     }
-    // Mismo caso: limpio solo correos; dejo caso/cliente/plataforma/tipo.
-    clearForm({ keepCaso: true });
+    // Caso cerrado: limpio todo el formulario para el próximo ingreso.
+    clearForm();
     setStatus(ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`);
     scrollListToEndOnce = true;
     await reloadList();
     notifyBlanqueoChanged();
-    document.getElementById("blanqueo-correo")?.focus();
+    document.getElementById("blanqueo-caso")?.focus();
   } catch (err) {
     setStatus(err?.message || "No se pudo guardar.", true);
   }

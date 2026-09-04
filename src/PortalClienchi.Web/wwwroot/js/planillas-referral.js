@@ -1202,9 +1202,12 @@ async function generarReferral(copiar) {
 
     if (copiar) {
       await navigator.clipboard.writeText(data.texto);
+      resetReferralForm();
       status.textContent = `Texto copiado al portapapeles.${capturasMsg}${trazasMsg}${autoMsg}`;
     } else {
-      showPlanTextPreview("ref-text-preview", data.texto);
+      const texto = data.texto;
+      resetReferralForm();
+      showPlanTextPreview("ref-text-preview", texto);
       status.textContent = `Planilla lista.${capturasMsg}${trazasMsg}${autoMsg} Podés copiar desde el panel de vista previa.`;
     }
   } catch (ex) {

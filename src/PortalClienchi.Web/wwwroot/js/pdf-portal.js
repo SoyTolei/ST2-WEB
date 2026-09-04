@@ -172,6 +172,9 @@ export function initPdfPortalGenerator() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      if (brandInput) brandInput.value = "";
+      editor.innerHTML = "";
+      refreshPreview();
       setStatus(`PDF listo: ${fileName}`);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "No se pudo generar el PDF.", true);

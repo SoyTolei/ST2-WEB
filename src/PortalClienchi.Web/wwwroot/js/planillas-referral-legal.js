@@ -799,7 +799,7 @@ function showTemplateForm(product, item, template) {
           <button type="button" id="ref-legal-btn-ia" class="btn btn-secondary plan-ia-btn hidden">
             <span class="plan-ia-btn-icon" data-plan-icon="ia" aria-hidden="true"></span>
             Mejorar redacción con IA
-          </button>
+        </button>
           <button type="button" id="ref-legal-btn-ia-undo" class="plan-ia-undo-btn hidden" aria-label="Deshacer cambios de la IA" disabled>↩</button>
         </div>
       </div>
@@ -830,7 +830,7 @@ function showTemplateForm(product, item, template) {
   });
   document.getElementById("ref-legal-btn-ia-undo")?.addEventListener("click", () => legalIaUndo?.undo());
 
-  document.getElementById("ref-legal-btn-limpar")?.addEventListener("click", () => {
+  function limpiarLegalTemplateForm() {
     document.getElementById("ref-legal-template-form")?.reset();
     legalHubEvidenciaFiles = [];
     legalIaUndo?.clearSnapshot();
@@ -841,6 +841,10 @@ function showTemplateForm(product, item, template) {
     syncLegalToggleCards();
     clearPlanTextPreview("ref-legal-text-preview");
     setStatus("");
+  }
+
+  document.getElementById("ref-legal-btn-limpar")?.addEventListener("click", () => {
+    limpiarLegalTemplateForm();
   });
 
   const hasFileEvidencias = (template.fields || []).some((field) => field.type === "file");
@@ -872,8 +876,10 @@ function showTemplateForm(product, item, template) {
       if (!text) return "";
       if (copy) {
         await navigator.clipboard.writeText(text);
+        limpiarLegalTemplateForm();
         setStatus("Texto copiado al portapapeles.");
       } else {
+        limpiarLegalTemplateForm();
         showPlanTextPreview("ref-legal-text-preview", text);
         setStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
       }

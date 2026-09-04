@@ -1219,6 +1219,7 @@ async function onCopiarAlPortapapeles() {
     const data = await generarTexto();
     if (!data?.texto) return;
     await navigator.clipboard.writeText(data.texto);
+    limpiarTransferencia();
     setPlanStatus("Texto copiado al portapapeles.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
@@ -1235,7 +1236,9 @@ async function onVerPlanilla() {
   try {
     const data = await generarTexto();
     if (!data?.texto) return;
-    showPlanTextPreview("plan-text-preview", data.texto);
+    const texto = data.texto;
+    limpiarTransferencia();
+    showPlanTextPreview("plan-text-preview", texto);
     setPlanStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
