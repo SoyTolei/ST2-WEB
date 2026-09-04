@@ -1351,22 +1351,42 @@ function toggleAccessAdminPermsFilterPop() {
 }
 
 function updateAccessAdminSummaryLine() {
+  syncAccessAdminOwnerOnlyUi();
+  const ownerOnly = isPrimarySuperAdmin();
   const total = accessAdminItemsCache.filter((item) => !item.isRejected).length;
   const pending = accessAdminItemsCache.filter((item) => item.isPending).length;
   const today = accessAdminItemsCache.filter((item) => item.loggedInToday).length;
-  const concurrent = accessAdminItemsCache.filter((item) => item.hasConcurrentSessions).length;
-  const attention = accessAdminClientChangedEmails.size;
+  const concurrent = ownerOnly
+    ? accessAdminItemsCache.filter((item) => item.hasConcurrentSessions).length
+    : 0;
+  const attention = ownerOnly ? accessAdminClientChangedEmails.size : 0;
   const { activeCount } = accessAdminMeta;
   if (accessAdminKpiTotal) accessAdminKpiTotal.textContent = String(total);
   if (accessAdminKpiActive) accessAdminKpiActive.textContent = String(activeCount);
   if (accessAdminKpiPending) accessAdminKpiPending.textContent = String(pending);
   if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
-  if (accessAdminKpiConcurrent) accessAdminKpiConcurrent.textContent = String(concurrent || accessAdminConcurrentCount || 0);
-  if (accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(attention);
+  if (ownerOnly && accessAdminKpiConcurrent) {
+    accessAdminKpiConcurrent.textContent = String(concurrent || accessAdminConcurrentCount || 0);
+  }
+  if (ownerOnly && accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(attention);
   renderAccessAdminDaySummary({ total, pending, today, concurrent: concurrent || accessAdminConcurrentCount || 0, attention, activeCount });
   renderAccessAdminAudit();
   updateAdminTabBadge();
   renderAccessAdminInbox();
+}
+
+function syncAccessAdminOwnerOnlyUi() {
+  const show = isPrimarySuperAdmin();
+  document.querySelectorAll(".st2-access-admin-owner-only").forEach((el) => {
+    if (!(el instanceof HTMLElement)) return;
+    el.hidden = !show;
+    if (!show) el.classList.add("hidden");
+  });
+  document.getElementById("st2-access-admin-kpis")?.classList.toggle("is-owner-extra", show);
+  if (!show && (accessAdminListFilter === "attention" || accessAdminListFilter === "concurrent")) {
+    accessAdminListFilter = "";
+    syncAccessAdminQuickFilters();
+  }
 }
 
 function formatAccessAuditAction(action) {
@@ -1374,7 +1394,7 @@ function formatAccessAuditAction(action) {
     case "approve": return "aprobó";
     case "reject": return "rechazó";
     case "modules": return "cambió módulos de";
-    case "view_as": return "vió como";
+    case "view_as": return "vio como";
     case "preset": return "creó perfil";
     default: return action || "actuó sobre";
   }
@@ -1389,6 +1409,12 @@ function shortAccessActor(email) {
 
 function renderAccessAdminDaySummary({ total, pending, today, concurrent, attention, activeCount }) {
   if (!accessAdminDaySummary) return;
+  if (!isPrimarySuperAdmin()) {
+    accessAdminDaySummary.classList.add("hidden");
+    accessAdminDaySummary.hidden = true;
+    accessAdminDaySummary.textContent = "";
+    return;
+  }
   const parts = [
     `${activeCount} activos ahora`,
     `${today} ingresaron hoy`,
@@ -1398,10 +1424,18 @@ function renderAccessAdminDaySummary({ total, pending, today, concurrent, attent
   if (attention) parts.push(`${attention} con aviso de equipo`);
   accessAdminDaySummary.textContent = `Hoy · ${parts.join(" · ")} · ${total} en lista`;
   accessAdminDaySummary.classList.remove("hidden");
+  accessAdminDaySummary.hidden = false;
 }
 
 function renderAccessAdminAudit() {
   if (!accessAdminAudit || !accessAdminAuditList) return;
+  if (!isPrimarySuperAdmin()) {
+    accessAdminAudit.classList.add("hidden");
+    accessAdminAudit.hidden = true;
+    accessAdminAuditList.innerHTML = "";
+    if (accessAdminAuditCount) accessAdminAuditCount.textContent = "";
+    return;
+  }
   const rows = Array.isArray(accessAdminAuditToday) ? accessAdminAuditToday : [];
   if (!rows.length) {
     accessAdminAudit.classList.add("hidden");
@@ -1410,6 +1444,7 @@ function renderAccessAdminAudit() {
     return;
   }
   accessAdminAudit.classList.remove("hidden");
+  accessAdminAudit.hidden = false;
   if (accessAdminAuditCount) {
     accessAdminAuditCount.textContent = rows.length === 1 ? "1 acción" : `${rows.length} acciones`;
   }
@@ -1612,19 +1647,20 @@ function renderAccessAdminTable() {
     const historyLines = (item.clientHistory || [])
       .slice(0, 5)
       .map((h) => `${h.label || "—"}${h.lastSeenAt ? ` (${formatAccessRelative(h.lastSeenAt)})` : ""}`);
+    const showOwnerSignals = isPrimarySuperAdmin();
     const hostTitle = [
-      item.hasConcurrentSessions ? `⚠ Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
+      showOwnerSignals && item.hasConcurrentSessions ? `⚠ Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
       browserLabel ? `Navegador: ${browserLabel}` : "",
       deviceShort ? `Dispositivo: ${deviceShort}` : "",
       entornoHint ? `Entorno: ${entornoHint}` : "",
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
-      historyLines.length ? `Historial:\n- ${historyLines.join("\n- ")}` : "",
+      showOwnerSignals && historyLines.length ? `Historial:\n- ${historyLines.join("\n- ")}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
-    const historyHint = historyLines.length > 1
+    const historyHint = showOwnerSignals && historyLines.length > 1
       ? `<span class="st2-access-admin-host-meta">${escapeHtml(historyLines.length)} equipos recientes</span>`
       : "";
-    const concurrentHint = item.hasConcurrentSessions
+    const concurrentHint = showOwnerSignals && item.hasConcurrentSessions
       ? `<span class="st2-access-admin-host-meta st2-access-admin-host-concurrent">concurrente ×${escapeHtml(String(item.activeDeviceCount || 2))}</span>`
       : "";
     const hostCell = showOwnerCols
@@ -1849,6 +1885,7 @@ function showAccessAdminLogin() {
 function showAccessAdminPanel() {
   accessAdminLogin?.classList.add("hidden");
   accessAdminPanel?.classList.remove("hidden");
+  syncAccessAdminOwnerOnlyUi();
 }
 
 async function activateAdminTab() {
@@ -1859,6 +1896,7 @@ async function activateAdminTab() {
 
   showAccessAdminPanel();
   syncAccessAdminHostColumn();
+  syncAccessAdminOwnerOnlyUi();
   void loadAccessAdminRegistrations();
   startAccessAdminPolling();
 }

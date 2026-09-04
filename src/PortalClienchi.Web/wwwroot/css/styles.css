@@ -3301,9 +3301,13 @@ body.portal-tab-active .brand-icon {
 
 .st2-access-admin-kpis {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 0 0 10px;
+}
+
+.st2-access-admin-kpis.is-owner-extra {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .st2-access-admin-kpi {
@@ -3542,6 +3546,11 @@ body.portal-tab-active .brand-icon {
   color: #0f172a;
 }
 
+.st2-access-admin-audit-head strong {
+  color: inherit;
+  font-weight: 800;
+}
+
 .st2-access-admin-audit-head span {
   color: #64748b;
   font-weight: 600;
@@ -3563,8 +3572,17 @@ body.portal-tab-active .brand-icon {
   line-height: 1.35;
 }
 
+.st2-access-admin-audit-list li strong {
+  color: #0f172a;
+  font-weight: 700;
+}
+
 .st2-access-admin-audit-list li:first-child {
   border-top: 0;
+}
+
+.st2-access-admin-owner-only[hidden] {
+  display: none !important;
 }
 
 .st2-access-admin-host-meta {

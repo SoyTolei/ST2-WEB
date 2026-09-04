@@ -662,7 +662,7 @@ public static class PlanillasEndpoints
 
         app.MapGet("/api/access/registrations", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo, ModuleAccessRepository modules) =>
         {
-            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out var role, out var denied))
                 return denied!;
 
             try
@@ -681,13 +681,16 @@ public static class PlanillasEndpoints
                 }
 
                 var showClientMeta = true; // cualquier admin del panel ve Equipo
-                var concurrentEmails = showClientMeta
+                var isOwner = role == AccessPanelGate.Role.Owner;
+                var concurrentEmails = isOwner
                     ? accessRepo.ListConcurrentSessionEmails(activeWindow)
                     : (IReadOnlySet<string>)new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var clientHistory = showClientMeta
                     ? accessRepo.ListClientHistoryByEmail(items.Select(i => i.Email), 5)
                     : new Dictionary<string, IReadOnlyList<AppAccessClientHistoryDto>>(StringComparer.OrdinalIgnoreCase);
-                var auditToday = accessRepo.ListRecentAudit(limit: 40, todayOnly: true);
+                var auditToday = isOwner
+                    ? accessRepo.ListRecentAudit(limit: 40, todayOnly: true)
+                    : Array.Empty<AppAccessAuditDto>();
                 var mapped = items.Select(item =>
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);
@@ -697,7 +700,7 @@ public static class PlanillasEndpoints
                         : item.Status;
                     clientHistory.TryGetValue(item.Email, out var history);
                     history ??= Array.Empty<AppAccessClientHistoryDto>();
-                    var hasConcurrent = concurrentEmails.Contains(item.Email);
+                    var hasConcurrent = isOwner && concurrentEmails.Contains(item.Email);
                     return new
                     {
                         item.Email,
@@ -718,11 +721,11 @@ public static class PlanillasEndpoints
                         isRejected = status == AppAccessRepository.StatusRejected,
                         loggedInToday = AppAccessRepository.IsLoggedInToday(item.LastLoginAt),
                         isSt2Admin = St2SuperAdmin.Is(item.Email) || accessRepo.IsSt2Admin(item.Email),
-                        hasConcurrentSessions = showClientMeta && hasConcurrent,
-                        activeDeviceCount = showClientMeta
+                        hasConcurrentSessions = hasConcurrent,
+                        activeDeviceCount = isOwner
                             ? history.Count(h => AppAccessRepository.IsRecentlyActive(h.LastSeenAt, activeWindow))
                             : 0,
-                        clientHistory = showClientMeta
+                        clientHistory = isOwner
                             ? history.Select(h => new
                             {
                                 label = h.Label,
@@ -763,17 +766,19 @@ public static class PlanillasEndpoints
                     newTodayCount = summary.NewTodayCount,
                     pendingCount = summary.PendingCount,
                     loggedInTodayCount = summary.LoggedInTodayCount,
-                    concurrentCount = concurrentEmails.Count,
+                    concurrentCount = isOwner ? concurrentEmails.Count : 0,
                     activeWindowMinutes = summary.ActiveWindowMinutes,
-                    auditToday = auditToday.Select(a => new
-                    {
-                        id = a.Id,
-                        createdAt = a.CreatedAt,
-                        actorEmail = a.ActorEmail,
-                        action = a.Action,
-                        targetEmail = a.TargetEmail,
-                        detail = a.Detail,
-                    }),
+                    auditToday = isOwner
+                        ? auditToday.Select(a => (object)new
+                        {
+                            id = a.Id,
+                            createdAt = a.CreatedAt,
+                            actorEmail = a.ActorEmail,
+                            action = a.Action,
+                            targetEmail = a.TargetEmail,
+                            detail = a.Detail,
+                        }).ToList()
+                        : new List<object>(),
                 });
             }
             catch (Exception ex)
