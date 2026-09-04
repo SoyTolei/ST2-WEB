@@ -2322,3 +2322,48 @@ html.st2-theme-dark .blanqueo-col-confirmado,
 html.st2-theme-dark .borrado-col-confirmado {
   color: #94a3b8 !important;
 }
+
+/* Modal Generador PDF Portal - Modo Oscuro */
+html.st2-theme-dark .pdf-portal-modal-overlay {
+  background: rgba(3, 7, 18, 0.78);
+}
+
+html.st2-theme-dark .pdf-portal-modal-container {
+  background: #181d28 !important;
+  border-color: #2b3548 !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+}
+
+html.st2-theme-dark .pdf-portal-modal-header {
+  background: #111622 !important;
+  border-bottom-color: #2b3548 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-title {
+  color: #f1f5f9 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-subtitle {
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-close {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .pdf-portal-modal-close:hover {
+  background: #242c3d;
+  color: #f8fafc;
+}
+
+html.st2-theme-dark .portal-generate-pdf-btn {
+  background: #f36c00 !important;
+  border-color: #d95e00 !important;
+  color: #ffffff !important;
+}
+
+html.st2-theme-dark .portal-generate-pdf-btn:hover {
+  background: #ff7810 !important;
+  border-color: #f36c00 !important;
+}
+

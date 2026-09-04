@@ -33,6 +33,35 @@ export function syncPdfPortalModuleVisibility() {
   btn.setAttribute("aria-hidden", allowed ? "false" : "true");
 }
 
+export function openPdfPortalModal() {
+  const modal = document.getElementById("pdf-portal-modal");
+  if (!modal) return;
+  initPdfPortalGenerator();
+  modal.classList.remove("hidden");
+  modal.setAttribute("aria-hidden", "false");
+  const brand = document.getElementById("pdf-portal-brand");
+  const editor = document.getElementById("pdf-portal-editor");
+  setTimeout(() => {
+    if (brand && !brand.value) {
+      brand.focus();
+    } else if (editor) {
+      editor.focus();
+    }
+  }, 50);
+}
+
+export function closePdfPortalModal() {
+  const modal = document.getElementById("pdf-portal-modal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.setAttribute("aria-hidden", "true");
+  if (window.location.pathname === "/pdfportal" || window.location.pathname === "/pdf-portal") {
+    try {
+      window.history.replaceState({}, "", "/planillas");
+    } catch { /* ignore */ }
+  }
+}
+
 export function initPdfPortalGenerator() {
   // Visibilidad: usa cache de módulos; no fuerza otro GET en el arranque.
   syncPdfPortalModuleVisibility();
@@ -131,6 +160,25 @@ export function initPdfPortalGenerator() {
 
   generateBtn?.addEventListener("click", () => {
     void generatePdf();
+  });
+
+  const modal = document.getElementById("pdf-portal-modal");
+  const modalCloseBtn = document.getElementById("pdf-portal-modal-close");
+  const closeBtn = document.getElementById("pdf-portal-close-btn");
+
+  modalCloseBtn?.addEventListener("click", () => closePdfPortalModal());
+  closeBtn?.addEventListener("click", () => closePdfPortalModal());
+
+  modal?.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      closePdfPortalModal();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal && !modal.classList.contains("hidden")) {
+      closePdfPortalModal();
+    }
   });
 
   refreshPreview();

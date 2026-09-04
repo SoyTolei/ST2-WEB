@@ -1,4 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
+import { openPdfPortalModal } from "./pdf-portal.js";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
@@ -5187,6 +5188,9 @@ document.getElementById("portalReloadBtn")?.addEventListener("click", () => {
 document.getElementById("portalOpenBtn")?.addEventListener("click", () => {
   const url = getPortalExternalUrl();
   if (url) window.open(url, "_blank", "noopener");
+});
+document.getElementById("portalGeneratePdfBtn")?.addEventListener("click", () => {
+  openPdfPortalModal();
 });
 
 async function bootstrapApp() {

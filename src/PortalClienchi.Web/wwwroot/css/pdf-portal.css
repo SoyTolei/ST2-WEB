@@ -268,3 +268,136 @@
   color: #666;
   font-style: italic;
 }
+
+/* Modal overlay para Generador de PDFs */
+.pdf-portal-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1350;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.pdf-portal-modal-overlay.hidden {
+  display: none !important;
+}
+
+.pdf-portal-modal-container {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  width: min(96vw, 1180px);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.45);
+  overflow: hidden;
+  animation: pdf-portal-modal-fadein 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pdf-portal-modal-fadein {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.pdf-portal-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.pdf-portal-modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pdf-portal-modal-accent-bar {
+  width: 4px;
+  height: 38px;
+  border-radius: 2px;
+  background: #f36c00;
+  flex-shrink: 0;
+}
+
+.pdf-portal-modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pdf-portal-modal-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.pdf-portal-modal-close {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.pdf-portal-modal-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.pdf-portal-modal-body {
+  padding: 18px 24px 22px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1 1 auto;
+}
+
+/* Botón en toolbar de Portal Cliente */
+.portal-generate-pdf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f36c00 !important;
+  color: #ffffff !important;
+  border-color: #e06300 !important;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.portal-generate-pdf-btn:hover {
+  background: #e06300 !important;
+  border-color: #c95600 !important;
+  color: #ffffff !important;
+}
+
+.portal-pdf-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+

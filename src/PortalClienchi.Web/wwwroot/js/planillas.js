@@ -2,7 +2,7 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule } from "./pdf-portal.js";
+import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
@@ -186,7 +186,6 @@ const views = {
   oportunidadMenu: document.getElementById("planillas-oportunidad-menu"),
   oportunidadCargar: document.getElementById("planillas-oportunidad-cargar"),
   oportunidadGestor: document.getElementById("planillas-oportunidad-gestor"),
-  pdfPortal: document.getElementById("planillas-pdf-portal"),
   blanqueo: document.getElementById("planillas-blanqueo"),
   borradoBases: document.getElementById("planillas-borrado-bases"),
   chileEmbed: document.getElementById("planillas-chile-embed"),
@@ -1531,8 +1530,8 @@ async function revealView(name, historyMode = "push") {
       showView("menu", { history: "replace" });
       return;
     }
-    initPdfPortalGenerator();
-    showView("pdfPortal", { history: historyMode });
+    showView("menu", { history: historyMode });
+    openPdfPortalModal();
     return;
   }
 
