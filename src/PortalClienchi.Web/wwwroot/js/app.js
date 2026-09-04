@@ -176,6 +176,14 @@ const accessAdminKpiTotal = document.getElementById("st2-access-admin-kpi-total"
 const accessAdminKpiActive = document.getElementById("st2-access-admin-kpi-active");
 const accessAdminKpiPending = document.getElementById("st2-access-admin-kpi-pending");
 const accessAdminKpiToday = document.getElementById("st2-access-admin-kpi-today");
+const accessAdminKpiConcurrent = document.getElementById("st2-access-admin-kpi-concurrent");
+const accessAdminKpiAttention = document.getElementById("st2-access-admin-kpi-attention");
+const accessAdminDaySummary = document.getElementById("st2-access-admin-day-summary");
+const accessAdminAudit = document.getElementById("st2-access-admin-audit");
+const accessAdminAuditCount = document.getElementById("st2-access-admin-audit-count");
+const accessAdminAuditList = document.getElementById("st2-access-admin-audit-list");
+const accessAdminExportBtn = document.getElementById("st2-access-admin-export");
+const accessAdminQuickFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-quick-filter"));
 const accessAdminInbox = document.getElementById("st2-access-admin-inbox");
 const accessAdminTable = document.querySelector("#st2-access-admin-table-wrap .st2-access-admin-table");
 const accessAdminThHost = document.getElementById("st2-access-admin-th-host");
@@ -702,6 +710,7 @@ let accessAdminLastKnownEmails = [];
 let accessAdminItemsCache = [];
 let accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
 let accessAdminQuery = "";
+let accessAdminListFilter = "";
 let accessAdminModFilters = new Set();
 let accessAdminPermsFilterOpen = false;
 let accessAdminLastClientByEmail = new Map();
@@ -709,6 +718,8 @@ let accessAdminClientWatchReady = false;
 let accessAdminClientWatchTimer = null;
 let accessAdminClientChangedEmails = new Set();
 let accessAdminClientWatchBusy = false;
+let accessAdminAuditToday = [];
+let accessAdminConcurrentCount = 0;
 
 function resolveAccessDeviceShort(item) {
   const raw = String(item?.lastClientDevice || "").trim().toLowerCase();
@@ -1014,6 +1025,7 @@ function syncAdminClientAttentionUi() {
     thAttn.setAttribute("aria-hidden", n === 0 ? "true" : "false");
     thAttn.textContent = n > 0 ? "⚠" : "";
   }
+  if (accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(n);
 }
 
 function clearAdminClientAttention() {
@@ -1193,6 +1205,17 @@ function normalizeAccessAdminItems(items) {
       lastClientHint: (item.lastClientHint ?? item.LastClientHint ?? "").trim() || null,
       lastClientDevice: (item.lastClientDevice ?? item.LastClientDevice ?? "").trim() || null,
       lastClientBrowser: (item.lastClientBrowser ?? item.LastClientBrowser ?? "").trim() || null,
+      hasConcurrentSessions: !!(item.hasConcurrentSessions ?? item.HasConcurrentSessions),
+      activeDeviceCount: Number(item.activeDeviceCount ?? item.ActiveDeviceCount ?? 0) || 0,
+      clientHistory: Array.isArray(item.clientHistory ?? item.ClientHistory)
+        ? (item.clientHistory ?? item.ClientHistory).map((h) => ({
+          label: String(h.label ?? h.Label ?? "").trim(),
+          browser: String(h.browser ?? h.Browser ?? "").trim(),
+          deviceId: String(h.deviceId ?? h.DeviceId ?? "").trim(),
+          lastSeenAt: String(h.lastSeenAt ?? h.LastSeenAt ?? ""),
+          firstSeenAt: String(h.firstSeenAt ?? h.FirstSeenAt ?? ""),
+        }))
+        : [],
       modules: normalizeAccessModules(modules),
     };
   });
@@ -1237,10 +1260,14 @@ function resetAccessAdminSnapshot() {
   accessAdminItemsCache = [];
   accessAdminMeta = { activeCount: 0, activeWindowMinutes: 5 };
   accessAdminQuery = "";
+  accessAdminListFilter = "";
   accessAdminModFilters = new Set();
+  accessAdminAuditToday = [];
+  accessAdminConcurrentCount = 0;
   if (accessAdminSearch) accessAdminSearch.value = "";
   closeAccessAdminPermsFilterPop();
   syncAccessAdminModFilterUi();
+  syncAccessAdminQuickFilters();
 }
 
 function itemMatchesModFilters(item) {
@@ -1327,13 +1354,120 @@ function updateAccessAdminSummaryLine() {
   const total = accessAdminItemsCache.filter((item) => !item.isRejected).length;
   const pending = accessAdminItemsCache.filter((item) => item.isPending).length;
   const today = accessAdminItemsCache.filter((item) => item.loggedInToday).length;
+  const concurrent = accessAdminItemsCache.filter((item) => item.hasConcurrentSessions).length;
+  const attention = accessAdminClientChangedEmails.size;
   const { activeCount } = accessAdminMeta;
   if (accessAdminKpiTotal) accessAdminKpiTotal.textContent = String(total);
   if (accessAdminKpiActive) accessAdminKpiActive.textContent = String(activeCount);
   if (accessAdminKpiPending) accessAdminKpiPending.textContent = String(pending);
   if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
+  if (accessAdminKpiConcurrent) accessAdminKpiConcurrent.textContent = String(concurrent || accessAdminConcurrentCount || 0);
+  if (accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(attention);
+  renderAccessAdminDaySummary({ total, pending, today, concurrent: concurrent || accessAdminConcurrentCount || 0, attention, activeCount });
+  renderAccessAdminAudit();
   updateAdminTabBadge();
   renderAccessAdminInbox();
+}
+
+function formatAccessAuditAction(action) {
+  switch (String(action || "").toLowerCase()) {
+    case "approve": return "aprobó";
+    case "reject": return "rechazó";
+    case "modules": return "cambió módulos de";
+    case "view_as": return "vió como";
+    case "preset": return "creó perfil";
+    default: return action || "actuó sobre";
+  }
+}
+
+function shortAccessActor(email) {
+  const raw = String(email || "").trim();
+  if (!raw) return "admin";
+  const at = raw.indexOf("@");
+  return at > 0 ? raw.slice(0, at) : raw;
+}
+
+function renderAccessAdminDaySummary({ total, pending, today, concurrent, attention, activeCount }) {
+  if (!accessAdminDaySummary) return;
+  const parts = [
+    `${activeCount} activos ahora`,
+    `${today} ingresaron hoy`,
+  ];
+  if (pending) parts.push(`${pending} pendientes`);
+  if (concurrent) parts.push(`${concurrent} con sesiones concurrentes`);
+  if (attention) parts.push(`${attention} con aviso de equipo`);
+  accessAdminDaySummary.textContent = `Hoy · ${parts.join(" · ")} · ${total} en lista`;
+  accessAdminDaySummary.classList.remove("hidden");
+}
+
+function renderAccessAdminAudit() {
+  if (!accessAdminAudit || !accessAdminAuditList) return;
+  const rows = Array.isArray(accessAdminAuditToday) ? accessAdminAuditToday : [];
+  if (!rows.length) {
+    accessAdminAudit.classList.add("hidden");
+    accessAdminAuditList.innerHTML = "";
+    if (accessAdminAuditCount) accessAdminAuditCount.textContent = "";
+    return;
+  }
+  accessAdminAudit.classList.remove("hidden");
+  if (accessAdminAuditCount) {
+    accessAdminAuditCount.textContent = rows.length === 1 ? "1 acción" : `${rows.length} acciones`;
+  }
+  accessAdminAuditList.innerHTML = rows.slice(0, 12).map((row) => {
+    const when = formatAccessRelative(row.createdAt);
+    const actor = shortAccessActor(row.actorEmail);
+    const target = shortAccessActor(row.targetEmail);
+    const verb = formatAccessAuditAction(row.action);
+    return `<li title="${escapeHtml(row.actorEmail)} → ${escapeHtml(row.targetEmail)}">${escapeHtml(when)} · <strong>${escapeHtml(actor)}</strong> ${escapeHtml(verb)} <strong>${escapeHtml(target)}</strong></li>`;
+  }).join("");
+}
+
+function syncAccessAdminQuickFilters() {
+  accessAdminQuickFilterButtons.forEach((btn) => {
+    const key = btn.dataset.listFilter || "";
+    btn.classList.toggle("is-on", key === accessAdminListFilter);
+  });
+}
+
+function setAccessAdminListFilter(key) {
+  accessAdminListFilter = key || "";
+  syncAccessAdminQuickFilters();
+  renderAccessAdminTable();
+}
+
+function exportAccessAdminCsv() {
+  const items = getFilteredAccessAdminItems();
+  const headers = ["Nombre", "Email", "Permisos", "Equipo", "Último acceso", "Ingresos", "Activo", "Concurrente"];
+  const lines = [headers.join(",")];
+  for (const item of items) {
+    const name = formatAccessDisplayName(item.email, item.displayNameOverride);
+    const mods = item.modules || {};
+    const perms = [
+      mods.planillasSqlOnvio ? "SQL" : "",
+      mods.planillasLegal ? "LEG" : "",
+      mods.planillasChile ? "CL" : "",
+      item.isSt2Admin ? "ADM" : "",
+    ].filter(Boolean).join("|");
+    const row = [
+      name,
+      item.email,
+      perms,
+      formatAccessClientLabel(item) || "",
+      formatAccessDate(item.lastSeenAt),
+      String(item.loginCount ?? 0),
+      item.isActive ? "sí" : "no",
+      item.hasConcurrentSessions ? "sí" : "no",
+    ].map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`);
+    lines.push(row.join(","));
+  }
+  const blob = new Blob([`\uFEFF${lines.join("\n")}`], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `st2-accesos-${stamp}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function renderAccessAdminInbox() {
@@ -1395,6 +1529,9 @@ function getFilteredAccessAdminItems() {
   return accessAdminItemsCache.filter((item) => {
     // Pendientes van solo al inbox; rechazados no se listan.
     if (item.isRejected || item.isPending) return false;
+    if (accessAdminListFilter === "active" && !item.isActive) return false;
+    if (accessAdminListFilter === "attention" && !accessAdminClientChangedEmails.has(item.email)) return false;
+    if (accessAdminListFilter === "concurrent" && !item.hasConcurrentSessions) return false;
     if (!itemMatchesModFilters(item)) return false;
     if (q) {
       const email = item.email.toLowerCase();
@@ -1424,9 +1561,15 @@ function renderAccessAdminTable() {
   if (!items.length) {
     accessAdminStatus.textContent = accessAdminQuery.trim()
       ? "Sin resultados para esa búsqueda."
-      : accessAdminModFilters.size
-        ? "Nadie coincide con ese filtro de permisos."
-        : "Sin usuarios en la lista.";
+      : accessAdminListFilter === "active"
+        ? "Nadie activo ahora."
+        : accessAdminListFilter === "attention"
+          ? "Nadie con aviso de equipo."
+          : accessAdminListFilter === "concurrent"
+            ? "Nadie con sesiones concurrentes."
+            : accessAdminModFilters.size
+              ? "Nadie coincide con ese filtro de permisos."
+              : "Sin usuarios en la lista.";
     accessAdminBody.innerHTML = "";
     accessAdminTableWrap?.classList.remove("hidden");
     return;
@@ -1466,19 +1609,30 @@ function renderAccessAdminTable() {
       .replace(/\s{2,}/g, " ")
       .replace(/^[·\s]+|[·\s]+$/g, "")
       .trim();
+    const historyLines = (item.clientHistory || [])
+      .slice(0, 5)
+      .map((h) => `${h.label || "—"}${h.lastSeenAt ? ` (${formatAccessRelative(h.lastSeenAt)})` : ""}`);
     const hostTitle = [
+      item.hasConcurrentSessions ? `⚠ Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
       browserLabel ? `Navegador: ${browserLabel}` : "",
       deviceShort ? `Dispositivo: ${deviceShort}` : "",
       entornoHint ? `Entorno: ${entornoHint}` : "",
       item.lastClientHost ? `Host: ${item.lastClientHost}` : "",
       item.lastClientIp ? `IP: ${item.lastClientIp}` : "",
+      historyLines.length ? `Historial:\n- ${historyLines.join("\n- ")}` : "",
     ].filter(Boolean).join("\n") || hostLabel;
+    const historyHint = historyLines.length > 1
+      ? `<span class="st2-access-admin-host-meta">${escapeHtml(historyLines.length)} equipos recientes</span>`
+      : "";
+    const concurrentHint = item.hasConcurrentSessions
+      ? `<span class="st2-access-admin-host-meta st2-access-admin-host-concurrent">concurrente ×${escapeHtml(String(item.activeDeviceCount || 2))}</span>`
+      : "";
     const hostCell = showOwnerCols
       ? `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
           accessAdminClientChangedEmails.has(item.email)
             ? `<span class="st2-access-admin-host-attn" title="Cambió de equipo">⚠</span> `
             : ""
-        }${escapeHtml(hostLabel)}</td>`
+        }${escapeHtml(hostLabel)}${concurrentHint}${historyHint}</td>`
       : "";
     const lastSeenCell = showOwnerCols
       ? `<td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>`
@@ -1818,6 +1972,17 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
       activeCount,
       activeWindowMinutes: data.activeWindowMinutes ?? 5,
     };
+    accessAdminConcurrentCount = Number(data.concurrentCount ?? 0) || 0;
+    accessAdminAuditToday = Array.isArray(data.auditToday)
+      ? data.auditToday.map((row) => ({
+        id: row.id,
+        createdAt: row.createdAt || "",
+        actorEmail: row.actorEmail || "",
+        action: row.action || "",
+        targetEmail: row.targetEmail || "",
+        detail: row.detail || null,
+      }))
+      : [];
 
     updateAccessAdminSummaryLine();
 
@@ -2935,6 +3100,15 @@ accessAdminSearch?.addEventListener("input", () => {
   accessAdminQuery = accessAdminSearch.value || "";
   renderAccessAdminTable();
 });
+accessAdminQuickFilterButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setAccessAdminListFilter(btn.dataset.listFilter || "");
+  });
+});
+accessAdminExportBtn?.addEventListener("click", () => {
+  exportAccessAdminCsv();
+});
+syncAccessAdminQuickFilters();
 accessAdminPermsFilterBtn?.addEventListener("click", (e) => {
   e.stopPropagation();
   toggleAccessAdminPermsFilterPop();
@@ -3395,14 +3569,23 @@ function startAccessProfilePreview(email, modulesOverride = null) {
   const current = accessAdminItemsCache.find((item) => item.email === email);
   if (!current || current.isPending) return;
   const displayName = formatAccessDisplayName(current.email, current.displayNameOverride);
-  startViewAsProfile({
-    email: current.email,
-    displayName,
-    modules: modulesOverride || current.modules || {},
-    st2Admin: !!current.isSt2Admin,
-  });
-  window.location.hash = "#/planillas";
-  window.location.reload();
+  const run = () => {
+    startViewAsProfile({
+      email: current.email,
+      displayName,
+      modules: modulesOverride || current.modules || {},
+      st2Admin: !!current.isSt2Admin,
+    });
+    window.location.hash = "#/planillas";
+    window.location.reload();
+  };
+  // Auditoría best-effort; la vista previa no depende del POST.
+  fetch("/api/access/view-as", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: current.email }),
+  }).catch(() => {}).finally(run);
 }
 
 function modulesFromAccessForm() {

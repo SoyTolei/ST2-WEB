@@ -70,6 +70,13 @@ public sealed class AppAccessRepository
             return 0;
 
         using var conn = Open();
+        using (var hist = conn.CreateCommand())
+        {
+            hist.CommandText = "DELETE FROM app_access_client_history WHERE lower(email) = lower($email)";
+            hist.Parameters.AddWithValue("$email", email.Trim());
+            hist.ExecuteNonQuery();
+        }
+
         using var cmd = conn.CreateCommand();
         cmd.CommandText = "DELETE FROM app_access WHERE lower(email) = lower($email)";
         cmd.Parameters.AddWithValue("$email", email.Trim());
@@ -258,25 +265,250 @@ public sealed class AppAccessRepository
         var device = AppAccessClientInfo.ResolveDeviceId(deviceId, hint);
         // Solo DNS reverso real; no rellenar con el hint (antes Host y Cliente salían iguales).
         var host = AppAccessClientInfo.TryResolveHost(ip);
+        var browser = AppAccessClientInfo.SummarizeBrowser(userAgent);
+        var nowIso = UtcNowIso();
+
+        using var conn = Open();
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = """
+                UPDATE app_access
+                SET last_client_ip = $ip,
+                    last_client_host = $host,
+                    last_client_hint = COALESCE($hint, last_client_hint),
+                    last_client_device = COALESCE($device, last_client_device),
+                    last_user_agent = COALESCE($ua, last_user_agent)
+                WHERE lower(email) = lower($email)
+                """;
+            cmd.Parameters.AddWithValue("$email", email.Trim());
+            cmd.Parameters.AddWithValue("$ip", (object?)ip ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$host", (object?)host ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$hint", (object?)hint ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$device", (object?)device ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$ua", (object?)userAgent ?? DBNull.Value);
+            cmd.ExecuteNonQuery();
+        }
+
+        if (!string.IsNullOrWhiteSpace(device))
+            UpsertClientHistory(conn, email.Trim(), device!, hint, userAgent, browser, ip, host, nowIso);
+    }
+
+    private static void UpsertClientHistory(
+        SqliteConnection conn,
+        string email,
+        string deviceId,
+        string? hint,
+        string? userAgent,
+        string? browser,
+        string? ip,
+        string? host,
+        string nowIso)
+    {
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = """
+                INSERT INTO app_access_client_history (
+                    email, device_id, client_hint, user_agent, browser, client_ip, client_host, first_seen_at, last_seen_at)
+                VALUES ($email, $device, $hint, $ua, $browser, $ip, $host, $now, $now)
+                ON CONFLICT(email, device_id) DO UPDATE SET
+                    client_hint = COALESCE(excluded.client_hint, app_access_client_history.client_hint),
+                    user_agent = COALESCE(excluded.user_agent, app_access_client_history.user_agent),
+                    browser = COALESCE(excluded.browser, app_access_client_history.browser),
+                    client_ip = COALESCE(excluded.client_ip, app_access_client_history.client_ip),
+                    client_host = COALESCE(excluded.client_host, app_access_client_history.client_host),
+                    last_seen_at = excluded.last_seen_at
+                """;
+            cmd.Parameters.AddWithValue("$email", email.ToLowerInvariant());
+            cmd.Parameters.AddWithValue("$device", deviceId);
+            cmd.Parameters.AddWithValue("$hint", (object?)hint ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$ua", (object?)userAgent ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$browser", (object?)browser ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$ip", (object?)ip ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$host", (object?)host ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("$now", nowIso);
+            cmd.ExecuteNonQuery();
+        }
+
+        // Mantener solo las 5 identidades más recientes por correo.
+        using (var trim = conn.CreateCommand())
+        {
+            trim.CommandText = """
+                DELETE FROM app_access_client_history
+                WHERE lower(email) = lower($email)
+                  AND id NOT IN (
+                    SELECT id FROM app_access_client_history
+                    WHERE lower(email) = lower($email)
+                    ORDER BY last_seen_at DESC, id DESC
+                    LIMIT 5
+                  )
+                """;
+            trim.Parameters.AddWithValue("$email", email);
+            trim.ExecuteNonQuery();
+        }
+    }
+
+    public IReadOnlyDictionary<string, IReadOnlyList<AppAccessClientHistoryDto>> ListClientHistoryByEmail(
+        IEnumerable<string> emails,
+        int perEmail = 5)
+    {
+        var result = new Dictionary<string, IReadOnlyList<AppAccessClientHistoryDto>>(StringComparer.OrdinalIgnoreCase);
+        if (!StorageReady)
+            return result;
+
+        var targets = emails
+            .Select(e => (e ?? "").Trim().ToLowerInvariant())
+            .Where(e => e.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (targets.Count == 0)
+            return result;
+
+        var take = Math.Clamp(perEmail, 1, 10);
+        using var conn = Open();
+        foreach (var email in targets)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = """
+                SELECT device_id, client_hint, user_agent, browser, client_ip, client_host, first_seen_at, last_seen_at
+                FROM app_access_client_history
+                WHERE lower(email) = lower($email)
+                ORDER BY last_seen_at DESC, id DESC
+                LIMIT $limit
+                """;
+            cmd.Parameters.AddWithValue("$email", email);
+            cmd.Parameters.AddWithValue("$limit", take);
+            var rows = new List<AppAccessClientHistoryDto>();
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var device = reader.IsDBNull(0) ? "" : reader.GetString(0);
+                var hint = reader.IsDBNull(1) ? null : reader.GetString(1);
+                var ua = reader.IsDBNull(2) ? null : reader.GetString(2);
+                var browser = reader.IsDBNull(3) ? null : reader.GetString(3);
+                browser ??= AppAccessClientInfo.SummarizeBrowser(ua);
+                rows.Add(new AppAccessClientHistoryDto
+                {
+                    DeviceId = device,
+                    ClientHint = hint,
+                    UserAgent = ua,
+                    Browser = browser,
+                    ClientIp = reader.IsDBNull(4) ? null : reader.GetString(4),
+                    ClientHost = reader.IsDBNull(5) ? null : reader.GetString(5),
+                    FirstSeenAt = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                    LastSeenAt = reader.IsDBNull(7) ? "" : reader.GetString(7),
+                    Label = AppAccessClientInfo.BuildDisplayLabel(
+                        reader.IsDBNull(5) ? null : reader.GetString(5),
+                        hint,
+                        reader.IsDBNull(4) ? null : reader.GetString(4),
+                        device,
+                        browser) ?? "—",
+                });
+            }
+
+            if (rows.Count > 0)
+                result[email] = rows;
+        }
+
+        return result;
+    }
+
+    /// <summary>Correos con 2+ device ids distintos activos dentro de la ventana.</summary>
+    public IReadOnlySet<string> ListConcurrentSessionEmails(TimeSpan activeWindow)
+    {
+        var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (!StorageReady)
+            return set;
+
+        var since = DateTime.UtcNow.Subtract(activeWindow).ToString("O", CultureInfo.InvariantCulture);
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT lower(email)
+            FROM app_access_client_history
+            WHERE last_seen_at >= $since
+            GROUP BY lower(email)
+            HAVING COUNT(DISTINCT device_id) >= 2
+            """;
+        cmd.Parameters.AddWithValue("$since", since);
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            if (!reader.IsDBNull(0))
+                set.Add(reader.GetString(0));
+        }
+
+        return set;
+    }
+
+    public void AddAudit(string actorEmail, string action, string targetEmail, string? detail = null)
+    {
+        if (!StorageReady) return;
+        var actor = (actorEmail ?? "").Trim().ToLowerInvariant();
+        var target = (targetEmail ?? "").Trim().ToLowerInvariant();
+        var act = (action ?? "").Trim().ToLowerInvariant();
+        if (actor.Length == 0 || target.Length == 0 || act.Length == 0) return;
 
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            UPDATE app_access
-            SET last_client_ip = $ip,
-                last_client_host = $host,
-                last_client_hint = COALESCE($hint, last_client_hint),
-                last_client_device = COALESCE($device, last_client_device),
-                last_user_agent = COALESCE($ua, last_user_agent)
-            WHERE lower(email) = lower($email)
+            INSERT INTO app_access_audit (created_at, actor_email, action, target_email, detail)
+            VALUES ($created, $actor, $action, $target, $detail)
             """;
-        cmd.Parameters.AddWithValue("$email", email.Trim());
-        cmd.Parameters.AddWithValue("$ip", (object?)ip ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$host", (object?)host ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$hint", (object?)hint ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$device", (object?)device ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$ua", (object?)userAgent ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$created", UtcNowIso());
+        cmd.Parameters.AddWithValue("$actor", actor);
+        cmd.Parameters.AddWithValue("$action", act);
+        cmd.Parameters.AddWithValue("$target", target);
+        cmd.Parameters.AddWithValue("$detail", (object?)detail ?? DBNull.Value);
         cmd.ExecuteNonQuery();
+    }
+
+    public IReadOnlyList<AppAccessAuditDto> ListRecentAudit(int limit = 40, bool todayOnly = false)
+    {
+        if (!StorageReady) return Array.Empty<AppAccessAuditDto>();
+        var take = Math.Clamp(limit, 1, 100);
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        if (todayOnly)
+        {
+            var nowLocal = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone);
+            var startLocal = nowLocal.Date;
+            var startUtc = TimeZoneInfo.ConvertTimeToUtc(startLocal, ArgentinaTimeZone);
+            cmd.CommandText = """
+                SELECT id, created_at, actor_email, action, target_email, detail
+                FROM app_access_audit
+                WHERE created_at >= $since
+                ORDER BY created_at DESC, id DESC
+                LIMIT $limit
+                """;
+            cmd.Parameters.AddWithValue("$since", startUtc.ToString("O", CultureInfo.InvariantCulture));
+        }
+        else
+        {
+            cmd.CommandText = """
+                SELECT id, created_at, actor_email, action, target_email, detail
+                FROM app_access_audit
+                ORDER BY created_at DESC, id DESC
+                LIMIT $limit
+                """;
+        }
+
+        cmd.Parameters.AddWithValue("$limit", take);
+        var list = new List<AppAccessAuditDto>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new AppAccessAuditDto
+            {
+                Id = reader.GetInt32(0),
+                CreatedAt = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                ActorEmail = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                Action = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                TargetEmail = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                Detail = reader.IsDBNull(5) ? null : reader.GetString(5),
+            });
+        }
+
+        return list;
     }
 
     public AppAccessRecordDto CreatePresetProfile(
@@ -636,6 +868,55 @@ public sealed class AppAccessRepository
                 """;
             idx.ExecuteNonQuery();
         }
+        using (var hist = conn.CreateCommand())
+        {
+            hist.CommandText = """
+                CREATE TABLE IF NOT EXISTS app_access_client_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL,
+                    device_id TEXT NOT NULL,
+                    client_hint TEXT NULL,
+                    user_agent TEXT NULL,
+                    browser TEXT NULL,
+                    client_ip TEXT NULL,
+                    client_host TEXT NULL,
+                    first_seen_at TEXT NOT NULL,
+                    last_seen_at TEXT NOT NULL,
+                    UNIQUE(email, device_id)
+                )
+                """;
+            hist.ExecuteNonQuery();
+        }
+        using (var histIdx = conn.CreateCommand())
+        {
+            histIdx.CommandText = """
+                CREATE INDEX IF NOT EXISTS idx_app_access_client_history_email_last
+                ON app_access_client_history (email, last_seen_at DESC)
+                """;
+            histIdx.ExecuteNonQuery();
+        }
+        using (var audit = conn.CreateCommand())
+        {
+            audit.CommandText = """
+                CREATE TABLE IF NOT EXISTS app_access_audit (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT NOT NULL,
+                    actor_email TEXT NOT NULL,
+                    action TEXT NOT NULL,
+                    target_email TEXT NOT NULL,
+                    detail TEXT NULL
+                )
+                """;
+            audit.ExecuteNonQuery();
+        }
+        using (var auditIdx = conn.CreateCommand())
+        {
+            auditIdx.CommandText = """
+                CREATE INDEX IF NOT EXISTS idx_app_access_audit_created
+                ON app_access_audit (created_at DESC, id DESC)
+                """;
+            auditIdx.ExecuteNonQuery();
+        }
         using (var backfill = conn.CreateCommand())
         {
             backfill.CommandText = """
@@ -856,6 +1137,29 @@ public sealed class AppAccessRecordDto
     public string? LastClientHint { get; init; }
     public string? LastUserAgent { get; init; }
     public string? LastClientDevice { get; init; }
+}
+
+public sealed class AppAccessClientHistoryDto
+{
+    public string DeviceId { get; init; } = "";
+    public string? ClientHint { get; init; }
+    public string? UserAgent { get; init; }
+    public string? Browser { get; init; }
+    public string? ClientIp { get; init; }
+    public string? ClientHost { get; init; }
+    public string FirstSeenAt { get; init; } = "";
+    public string LastSeenAt { get; init; } = "";
+    public string Label { get; init; } = "";
+}
+
+public sealed class AppAccessAuditDto
+{
+    public int Id { get; init; }
+    public string CreatedAt { get; init; } = "";
+    public string ActorEmail { get; init; } = "";
+    public string Action { get; init; } = "";
+    public string TargetEmail { get; init; } = "";
+    public string? Detail { get; init; }
 }
 
 public sealed class AccessSummaryDto

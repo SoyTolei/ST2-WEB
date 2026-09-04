@@ -1857,12 +1857,35 @@
                 <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-today">—</span>
                 <span class="st2-access-admin-kpi-l">Ingresaron hoy</span>
               </div>
+              <div class="st2-access-admin-kpi is-warn" title="Mismo correo activo en 2+ equipos a la vez">
+                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-concurrent">—</span>
+                <span class="st2-access-admin-kpi-l">Concurrentes</span>
+              </div>
+              <div class="st2-access-admin-kpi is-warn" title="Cambios de equipo detectados en esta sesión">
+                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-attention">—</span>
+                <span class="st2-access-admin-kpi-l">Atención equipo</span>
+              </div>
+            </div>
+            <div id="st2-access-admin-day-summary" class="st2-access-admin-day-summary hidden" aria-live="polite"></div>
+            <div id="st2-access-admin-audit" class="st2-access-admin-audit hidden">
+              <div class="st2-access-admin-audit-head">
+                <strong>Actividad de hoy</strong>
+                <span id="st2-access-admin-audit-count"></span>
+              </div>
+              <ul id="st2-access-admin-audit-list" class="st2-access-admin-audit-list"></ul>
             </div>
           </div>
           <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>
           <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
           <div id="st2-access-admin-toolbar" class="st2-access-admin-toolbar hidden">
             <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar correo o nombre…" autocomplete="off" spellcheck="false"/>
+            <div class="st2-access-admin-quick-filters" role="group" aria-label="Filtros rápidos">
+              <button type="button" class="st2-access-admin-quick-filter is-on" data-list-filter="" title="Todos">Todos</button>
+              <button type="button" class="st2-access-admin-quick-filter" data-list-filter="active" title="Solo activos ahora">Activos</button>
+              <button type="button" class="st2-access-admin-quick-filter" data-list-filter="attention" title="Con aviso de equipo">⚠ Equipo</button>
+              <button type="button" class="st2-access-admin-quick-filter" data-list-filter="concurrent" title="Sesiones concurrentes">Concurrentes</button>
+            </div>
+            <button type="button" id="st2-access-admin-export" class="st2-access-admin-export" title="Exportar la lista filtrada a CSV">CSV</button>
           </div>
           <div class="st2-access-admin-table-wrap hidden" id="st2-access-admin-table-wrap">
             <table class="st2-access-admin-table">

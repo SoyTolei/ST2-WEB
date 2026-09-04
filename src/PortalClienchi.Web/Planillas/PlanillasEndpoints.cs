@@ -681,6 +681,13 @@ public static class PlanillasEndpoints
                 }
 
                 var showClientMeta = true; // cualquier admin del panel ve Equipo
+                var concurrentEmails = showClientMeta
+                    ? accessRepo.ListConcurrentSessionEmails(activeWindow)
+                    : (IReadOnlySet<string>)new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var clientHistory = showClientMeta
+                    ? accessRepo.ListClientHistoryByEmail(items.Select(i => i.Email), 5)
+                    : new Dictionary<string, IReadOnlyList<AppAccessClientHistoryDto>>(StringComparer.OrdinalIgnoreCase);
+                var auditToday = accessRepo.ListRecentAudit(limit: 40, todayOnly: true);
                 var mapped = items.Select(item =>
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);
@@ -688,6 +695,9 @@ public static class PlanillasEndpoints
                     var status = string.IsNullOrWhiteSpace(item.Status)
                         ? AppAccessRepository.StatusApproved
                         : item.Status;
+                    clientHistory.TryGetValue(item.Email, out var history);
+                    history ??= Array.Empty<AppAccessClientHistoryDto>();
+                    var hasConcurrent = concurrentEmails.Contains(item.Email);
                     return new
                     {
                         item.Email,
@@ -708,6 +718,20 @@ public static class PlanillasEndpoints
                         isRejected = status == AppAccessRepository.StatusRejected,
                         loggedInToday = AppAccessRepository.IsLoggedInToday(item.LastLoginAt),
                         isSt2Admin = St2SuperAdmin.Is(item.Email) || accessRepo.IsSt2Admin(item.Email),
+                        hasConcurrentSessions = showClientMeta && hasConcurrent,
+                        activeDeviceCount = showClientMeta
+                            ? history.Count(h => AppAccessRepository.IsRecentlyActive(h.LastSeenAt, activeWindow))
+                            : 0,
+                        clientHistory = showClientMeta
+                            ? history.Select(h => new
+                            {
+                                label = h.Label,
+                                browser = h.Browser,
+                                deviceId = AppAccessClientInfo.ShortDevice(h.DeviceId),
+                                lastSeenAt = h.LastSeenAt,
+                                firstSeenAt = h.FirstSeenAt,
+                            }).ToList()
+                            : null,
                         lastClientIp = showClientMeta ? item.LastClientIp : null,
                         lastClientHost = showClientMeta ? item.LastClientHost : null,
                         lastClientHint = showClientMeta ? item.LastClientHint : null,
@@ -739,7 +763,17 @@ public static class PlanillasEndpoints
                     newTodayCount = summary.NewTodayCount,
                     pendingCount = summary.PendingCount,
                     loggedInTodayCount = summary.LoggedInTodayCount,
+                    concurrentCount = concurrentEmails.Count,
                     activeWindowMinutes = summary.ActiveWindowMinutes,
+                    auditToday = auditToday.Select(a => new
+                    {
+                        id = a.Id,
+                        createdAt = a.CreatedAt,
+                        actorEmail = a.ActorEmail,
+                        action = a.Action,
+                        targetEmail = a.TargetEmail,
+                        detail = a.Detail,
+                    }),
                 });
             }
             catch (Exception ex)
@@ -830,12 +864,14 @@ public static class PlanillasEndpoints
             if (email is null)
                 return Results.BadRequest(new { error = "Correo inválido." });
 
+            var actor = AccessPanelGate.ResolveActorLabel(ctx, config);
             var action = (body.Action ?? "").Trim().ToLowerInvariant();
             if (action is "reject" or "rechazar")
             {
                 // Marcar rechazado (no borrar): así no se recrea pending si el usuario sigue con la pantalla abierta.
                 if (accessRepo.SetStatus(email, AppAccessRepository.StatusRejected) <= 0)
                     return Results.NotFound(new { error = "No se encontró esa solicitud." });
+                accessRepo.AddAudit(actor, "reject", email);
                 return Results.Ok(new { ok = true, email, status = AppAccessRepository.StatusRejected });
             }
 
@@ -850,6 +886,7 @@ public static class PlanillasEndpoints
             if (accessRepo.SetStatus(email, status) <= 0)
                 return Results.NotFound(new { error = "No se encontró esa solicitud." });
 
+            accessRepo.AddAudit(actor, "approve", email);
             return Results.Ok(new { ok = true, email, status });
         });
 
@@ -876,6 +913,15 @@ public static class PlanillasEndpoints
                     isSt2Admin = St2SuperAdmin.Is(email) || accessRepo.IsSt2Admin(email);
                 }
 
+                if (email is not null)
+                {
+                    accessRepo.AddAudit(
+                        AccessPanelGate.ResolveActorLabel(ctx, config),
+                        "modules",
+                        email,
+                        isSt2Admin ? "admin=1" : null);
+                }
+
                 return Results.Ok(new
                 {
                     ok = true,
@@ -888,6 +934,31 @@ public static class PlanillasEndpoints
             {
                 return Results.BadRequest(new { error = ex.Message });
             }
+        });
+
+        app.MapPost("/api/access/view-as", (
+            HttpContext ctx,
+            IConfiguration config,
+            AppAccessRepository accessRepo,
+            AccessDecisionRequest body) =>
+        {
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
+                return denied!;
+
+            var email = PlanUserIdentity.ValidateAndNormalize(body.Email);
+            if (email is null)
+                return Results.BadRequest(new { error = "Correo inválido." });
+
+            var rec = accessRepo.Find(email);
+            if (rec is null)
+                return Results.NotFound(new { error = "No se encontró ese acceso." });
+
+            accessRepo.AddAudit(
+                AccessPanelGate.ResolveActorLabel(ctx, config),
+                "view_as",
+                email);
+
+            return Results.Ok(new { ok = true, email });
         });
 
         app.MapPost("/api/access/registrations/preset", (
@@ -954,6 +1025,8 @@ public static class PlanillasEndpoints
                 }
 
                 var actorEmail = PlanUserIdentity.GetFromRequest(ctx);
+                var actorLabel = AccessPanelGate.ResolveActorLabel(ctx, config);
+                accessRepo.AddAudit(actorLabel, "preset", email);
                 if (role == AccessPanelGate.Role.Manager
                     && actorEmail is not null
                     && !St2SuperAdmin.Is(actorEmail))

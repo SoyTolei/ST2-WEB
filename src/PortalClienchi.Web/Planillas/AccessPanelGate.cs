@@ -55,4 +55,18 @@ public static class AccessPanelGate
         error = null;
         return true;
     }
+
+    /// <summary>Quién actúa en el panel: correo de sesión ST2 o usuario de cookie admin.</summary>
+    public static string ResolveActorLabel(HttpContext ctx, IConfiguration config)
+    {
+        var email = PlanUserIdentity.GetFromRequest(ctx);
+        if (!string.IsNullOrWhiteSpace(email))
+            return email.Trim().ToLowerInvariant();
+
+        var cookieUser = St2AccessAdminAuth.TryGetConfiguredUsername(config);
+        if (!string.IsNullOrWhiteSpace(cookieUser))
+            return cookieUser.Trim().ToLowerInvariant();
+
+        return "admin";
+    }
 }

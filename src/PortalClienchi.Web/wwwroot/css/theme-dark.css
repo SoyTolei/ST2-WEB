@@ -379,6 +379,7 @@ html.st2-theme-dark .st2-access-admin-inbox-name {
 }
 
 html.st2-theme-dark .st2-access-admin-kpi.is-pending,
+html.st2-theme-dark .st2-access-admin-kpi.is-warn,
 html.st2-theme-dark .st2-access-admin-inbox,
 html.st2-theme-dark .st2-access-admin-table tr.is-pending {
   background: #3a1d12;
@@ -1820,6 +1821,9 @@ html.st2-theme-dark .st2-access-admin-search,
 html.st2-theme-dark .st2-access-admin-cancel,
 html.st2-theme-dark .st2-access-admin-refresh,
 html.st2-theme-dark .st2-access-admin-toolbar,
+html.st2-theme-dark .st2-access-admin-audit,
+html.st2-theme-dark .st2-access-admin-quick-filter,
+html.st2-theme-dark .st2-access-admin-export,
 html.st2-theme-dark .st2-access-admin-table-wrap,
 html.st2-theme-dark .st2-access-admin-table,
 html.st2-theme-dark .st2-access-admin-table th,

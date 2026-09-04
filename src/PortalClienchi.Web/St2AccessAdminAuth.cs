@@ -15,6 +15,13 @@ public static class St2AccessAdminAuth
         return !string.IsNullOrWhiteSpace(user) && !string.IsNullOrWhiteSpace(pass);
     }
 
+    /// <summary>Usuario configurado del login por cookie (si existe).</summary>
+    public static string? TryGetConfiguredUsername(IConfiguration configuration)
+    {
+        var (user, _) = GetCredentials(configuration);
+        return user;
+    }
+
     public static bool ValidateLogin(IConfiguration configuration, string? username, string? password)
     {
         var (expectedUser, expectedPass) = GetCredentials(configuration);
