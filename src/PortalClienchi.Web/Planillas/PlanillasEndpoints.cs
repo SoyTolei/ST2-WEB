@@ -681,14 +681,17 @@ public static class PlanillasEndpoints
                 }
 
                 var showClientMeta = true; // cualquier admin del panel ve Equipo
-                var isOwner = role == AccessPanelGate.Role.Owner;
-                var concurrentEmails = isOwner
+                // Sensible solo para Leonel (o cookie de dueño). ADMIN WEB = Manager: no ve esto.
+                var viewerEmail = PlanUserIdentity.GetFromRequest(ctx);
+                var isPrimaryOwner = St2SuperAdmin.Is(viewerEmail)
+                    || (viewerEmail is null && role == AccessPanelGate.Role.Owner);
+                var concurrentEmails = isPrimaryOwner
                     ? accessRepo.ListConcurrentSessionEmails(activeWindow)
                     : (IReadOnlySet<string>)new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 var clientHistory = showClientMeta
                     ? accessRepo.ListClientHistoryByEmail(items.Select(i => i.Email), 5)
                     : new Dictionary<string, IReadOnlyList<AppAccessClientHistoryDto>>(StringComparer.OrdinalIgnoreCase);
-                var auditToday = isOwner
+                var auditToday = isPrimaryOwner
                     ? accessRepo.ListRecentAudit(limit: 40, todayOnly: true)
                     : Array.Empty<AppAccessAuditDto>();
                 var mapped = items.Select(item =>
@@ -700,7 +703,7 @@ public static class PlanillasEndpoints
                         : item.Status;
                     clientHistory.TryGetValue(item.Email, out var history);
                     history ??= Array.Empty<AppAccessClientHistoryDto>();
-                    var hasConcurrent = isOwner && concurrentEmails.Contains(item.Email);
+                    var hasConcurrent = isPrimaryOwner && concurrentEmails.Contains(item.Email);
                     return new
                     {
                         item.Email,
@@ -722,10 +725,10 @@ public static class PlanillasEndpoints
                         loggedInToday = AppAccessRepository.IsLoggedInToday(item.LastLoginAt),
                         isSt2Admin = St2SuperAdmin.Is(item.Email) || accessRepo.IsSt2Admin(item.Email),
                         hasConcurrentSessions = hasConcurrent,
-                        activeDeviceCount = isOwner
+                        activeDeviceCount = isPrimaryOwner
                             ? history.Count(h => AppAccessRepository.IsRecentlyActive(h.LastSeenAt, activeWindow))
                             : 0,
-                        clientHistory = isOwner
+                        clientHistory = isPrimaryOwner
                             ? history.Select(h => new
                             {
                                 label = h.Label,
@@ -766,9 +769,9 @@ public static class PlanillasEndpoints
                     newTodayCount = summary.NewTodayCount,
                     pendingCount = summary.PendingCount,
                     loggedInTodayCount = summary.LoggedInTodayCount,
-                    concurrentCount = isOwner ? concurrentEmails.Count : 0,
+                    concurrentCount = isPrimaryOwner ? concurrentEmails.Count : 0,
                     activeWindowMinutes = summary.ActiveWindowMinutes,
-                    auditToday = isOwner
+                    auditToday = isPrimaryOwner
                         ? auditToday.Select(a => (object)new
                         {
                             id = a.Id,

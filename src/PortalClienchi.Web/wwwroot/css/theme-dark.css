@@ -1835,18 +1835,42 @@ html.st2-theme-dark .st2-access-admin-table td {
 
 html.st2-theme-dark .st2-access-admin-audit-head,
 html.st2-theme-dark .st2-access-admin-audit-head strong,
-html.st2-theme-dark .st2-access-admin-audit-list li strong {
+html.st2-theme-dark .st2-access-admin-audit-list li strong,
+html.st2-theme-dark .st2-access-admin-audit-actor-main,
+html.st2-theme-dark .st2-access-admin-audit-actor-main strong {
   color: #f1f5f9 !important;
 }
 
 html.st2-theme-dark .st2-access-admin-audit-head span,
 html.st2-theme-dark .st2-access-admin-audit-list li,
-html.st2-theme-dark .st2-access-admin-day-summary {
+html.st2-theme-dark .st2-access-admin-day-summary,
+html.st2-theme-dark .st2-access-admin-audit-actor-last,
+html.st2-theme-dark .st2-access-admin-audit-recent-label {
   color: #94a3b8 !important;
 }
 
 html.st2-theme-dark .st2-access-admin-audit-list li {
   border-top-color: #2a3344 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-audit-actor,
+html.st2-theme-dark .st2-access-admin-audit-detail {
+  background: #1c1c1c !important;
+  border-color: #3d4b61 !important;
+  color: #e5e5e5 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-audit-actor.is-open,
+html.st2-theme-dark .st2-access-admin-audit-actor:hover,
+html.st2-theme-dark .st2-access-admin-audit-detail {
+  background: #3a1d12 !important;
+  border-color: #7c2d12 !important;
+}
+
+html.st2-theme-dark .st2-access-admin-audit-detail-head,
+html.st2-theme-dark .st2-access-admin-audit-detail-close,
+html.st2-theme-dark .st2-access-admin-audit-more {
+  color: #fdba74 !important;
 }
 
 html.st2-theme-dark .st2-access-admin-quick-filter.is-on {
