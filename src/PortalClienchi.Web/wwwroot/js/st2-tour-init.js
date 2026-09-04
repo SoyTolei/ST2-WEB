@@ -16,6 +16,7 @@ import {
 
 let tourContext = {};
 let headerBound = false;
+let homeAutoTimer = null;
 
 export function setTourContext(partial) {
   tourContext = { ...tourContext, ...partial };
@@ -81,7 +82,13 @@ export function initSt2Tours() {
 
   document.addEventListener("st2:planillas-home", () => {
     syncHeaderTourButton();
-    autoTour(`planillas-menu:${tourContext.getSistema?.()}`, { delay: 600 });
+    // Debounce: planillas-home se dispara varias veces al iniciar.
+    if (homeAutoTimer) clearTimeout(homeAutoTimer);
+    homeAutoTimer = setTimeout(() => {
+      homeAutoTimer = null;
+      if (!shouldAutoStartTours()) return;
+      autoTour(`planillas-menu:${tourContext.getSistema?.()}`, { delay: 0 });
+    }, 700);
   });
 
   document.addEventListener("st2:planillas-view-changed", () => {
@@ -104,13 +111,17 @@ export function notifyTourContextChanged() {
   document.dispatchEvent(new CustomEvent("st2:tour-context-changed"));
 }
 
+/** Bienvenida: solo usuarios nuevos (gate on). Ya no es un tour de un solo paso del tema. */
 export function scheduleWelcomeTour(delay = 1800) {
   if (!shouldAutoStartTours()) return;
-  if (isTourSeen("welcome")) return;
+  if (isTourSeen("welcome") || isTourSeen("planillas-menu")) return;
   setTimeout(() => {
     if (isTourRunning()) return;
     if (!shouldAutoStartTours()) return;
-    autoTour("welcome", { delay: 0, force: false });
+    if (isTourSeen("welcome") || isTourSeen("planillas-menu")) return;
+    // Preferimos el menú de planillas (incluye tema + módulos). Welcome queda de respaldo.
+    const sistema = tourContext.getSistema?.() || "BejermanSql";
+    autoTour(`planillas-menu:${sistema}`, { delay: 0, force: false });
   }, delay);
 }
 

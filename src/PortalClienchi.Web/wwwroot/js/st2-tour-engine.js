@@ -1,4 +1,6 @@
 const STORAGE_KEY = "st2-tour-progress-v1";
+/** Gate permanente: "on" = puede autoiniciar; "off" = solo manual (usuarios que ya usaban ST2). */
+const AUTOS_GATE_KEY = "st2-tour-autos-v1";
 
 let root = null;
 let overlay = null;
@@ -70,13 +72,55 @@ export function isTourSeen(tourId) {
   });
 }
 
-/** Autos solo para usuarios nuevos (sin ningún tutorial visto). Después: solo botón manual. */
+/** Autos solo para usuarios realmente nuevos. Quien ya usaba ST2 no recibe popups automáticos. */
 export function shouldAutoStartTours() {
+  ensureAutosGate();
+  try {
+    if (localStorage.getItem(AUTOS_GATE_KEY) === "off") return false;
+  } catch {
+    return false;
+  }
+
   const data = loadProgress();
   return !Object.values(data).some(
     (entry) => entry?.status === "completed" || entry?.status === "skipped",
   );
 }
+
+function looksLikeReturningUser() {
+  try {
+    if (localStorage.getItem("st2_plan_user_hint")) return true;
+    if (localStorage.getItem("st2-plan-sistema")) return true;
+    if (localStorage.getItem("st2-tools-notice-v3")) return true;
+    const progress = loadProgress();
+    if (Object.keys(progress).length > 0) return true;
+  } catch {
+    /* ignore */
+  }
+  return false;
+}
+
+function ensureAutosGate() {
+  try {
+    const gate = localStorage.getItem(AUTOS_GATE_KEY);
+    if (gate === "on" || gate === "off") return;
+    // Evaluar UNA vez al primer load: usuarios previos → off; navegador limpio → on.
+    const returning = looksLikeReturningUser();
+    localStorage.setItem(AUTOS_GATE_KEY, returning ? "off" : "on");
+    if (returning) {
+      const data = loadProgress();
+      if (!Object.keys(data).length) {
+        data.__autos_opt_out__ = { status: "skipped", at: new Date().toISOString() };
+        saveProgress(data);
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+// Al cargar el módulo (antes del login) fijamos el gate con el estado del navegador.
+ensureAutosGate();
 
 export function markTourStatus(tourId, status) {
   if (!tourId) return;

@@ -210,6 +210,7 @@ export function resolveCurrentTourId(ctx = {}) {
 }
 
 export function buildWelcomeTour(ctx) {
+  // Intro corto (ya no se autoinicia para usuarios viejos). Incluye tema + planillas.
   return {
     id: "welcome",
     steps: [
@@ -220,13 +221,30 @@ export function buildWelcomeTour(ctx) {
         placement: "bottom",
         when: () => visible("#themeToggleBtn"),
       },
+      ...buildTopNavTabSteps(ctx),
+      {
+        selector: "#st2-tour-header-btn",
+        title: "Tutorial",
+        body: "Cuando necesites ayuda en otra pantalla, usá el botón Tutorial de arriba. Cada vista tiene su propio recorrido.",
+        placement: "left",
+        when: () => visible("#st2-tour-header-btn"),
+      },
     ],
   };
 }
 
 export function buildPlanillasMenuTour(ctx, sistema) {
   const label = sistemaLabel(sistema);
-  const steps = [...buildTopNavTabSteps(ctx)];
+  const steps = [
+    {
+      selector: "#themeToggleBtn",
+      title: "Tema claro u oscuro",
+      body: "Cambiá el modo visual cuando quieras. La preferencia queda guardada en este navegador.",
+      placement: "bottom",
+      when: () => visible("#themeToggleBtn"),
+    },
+    ...buildTopNavTabSteps(ctx),
+  ];
 
   if (visible("#plan-sistema-section")) {
     steps.push({
