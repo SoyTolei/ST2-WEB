@@ -4530,6 +4530,8 @@ function safeCloseWindow(win) {
   }
 }
 
+/** Solo para pagehide: recuperar ventana huérfana. En home/navegación NO usar:
+ *  window.open("", name) enfoca otra pestaña del navegador o abre una en blanco. */
 function reclaimNamedWindow(name) {
   try {
     const win = window.open("", name);
@@ -4540,7 +4542,7 @@ function reclaimNamedWindow(name) {
   return null;
 }
 
-function closeThomPopup() {
+function closeThomPopup({ reclaim = false } = {}) {
   // Cancela cualquier openThomWindow pendiente (doble rAF).
   thomOpenGeneration += 1;
   stopThomPopupWatch();
@@ -4548,12 +4550,16 @@ function closeThomPopup() {
   safeCloseWindow(thomPopup);
   thomPopup = null;
 
-  // Por si perdimos la referencia tras navegar a css-latam (cross-origin).
-  safeCloseWindow(reclaimNamedWindow(THOM_POPUP_NAME));
+  if (reclaim) {
+    // Por si perdimos la referencia tras navegar a css-latam (cross-origin).
+    safeCloseWindow(reclaimNamedWindow(THOM_POPUP_NAME));
+  }
 
   safeCloseWindow(thomBrowserTab);
   thomBrowserTab = null;
-  safeCloseWindow(reclaimNamedWindow(THOM_TAB_NAME));
+  if (reclaim) {
+    safeCloseWindow(reclaimNamedWindow(THOM_TAB_NAME));
+  }
 
   updateThomDirectUi();
 }
@@ -4904,8 +4910,9 @@ function setEmbedHint(kind, message) {
 }
 
 function goHome() {
-  hideAbout();
-  closeThomPopup();
+  hideAbout({ history: "none" });
+  // Sin reclaim: window.open("", "st2Thom…") enfocaba otra pestaña del navegador.
+  closeThomPopup({ reclaim: false });
   switchTab("planillas");
   // Siempre replace al menú: no depender del historial entre pestañas ST2 / módulos.
   goPlanillasHome({ history: "replace" });
@@ -5060,7 +5067,7 @@ function switchTab(tabId) {
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai" || tabId === "portal");
 
   if (tabId !== "thom") {
-    closeThomPopup();
+    closeThomPopup({ reclaim: false });
   }
 
   stopEngagementTimer();
@@ -5104,7 +5111,7 @@ function initEmbedReminders() {
   window.addEventListener("resize", scheduleThomPopupReposition);
   window.addEventListener("scroll", scheduleThomPopupReposition, { passive: true });
   // Sin esto quedan ventanas THOM huérfanas al cerrar o recargar ST2.
-  window.addEventListener("pagehide", () => closeThomPopup());
+  window.addEventListener("pagehide", () => closeThomPopup({ reclaim: true }));
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) scheduleThomPopupReposition();
   });
@@ -5113,7 +5120,7 @@ function initEmbedReminders() {
 }
 
 document.getElementById("thomGateOpenBtn")?.addEventListener("click", () => focusThomPopup());
-document.getElementById("thomGateCloseBtn")?.addEventListener("click", () => closeThomPopup());
+document.getElementById("thomGateCloseBtn")?.addEventListener("click", () => closeThomPopup({ reclaim: true }));
 document.getElementById("thomOpenBtn")?.addEventListener("click", openThomBrowserTab);
 document.getElementById("thomProxyOpenBtn")?.addEventListener("click", openThomBrowserTab);
 
