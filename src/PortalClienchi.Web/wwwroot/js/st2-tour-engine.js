@@ -183,6 +183,17 @@ function ensureDom() {
     if (e.key === "Escape") {
       e.preventDefault();
       finishTour("skipped");
+      return;
+    }
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      if (stepIndex >= activeSteps.length - 1) finishTour("completed");
+      else goStep(stepIndex + 1);
+      return;
+    }
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (stepIndex > 0) goStep(stepIndex - 1);
     }
   });
 
@@ -215,6 +226,74 @@ function queryVisible(selector) {
   return null;
 }
 
+function queryVisibleAll(selector) {
+  if (!selector) return [];
+  return [...document.querySelectorAll(selector)].filter(isVisible);
+}
+
+function revealTourTargets(selector) {
+  const nodes = [...document.querySelectorAll(selector)];
+  for (const el of nodes) {
+    el.classList.remove("hidden");
+    el.removeAttribute("hidden");
+    el.closest(".plan-ia-group")?.classList.remove("hidden");
+  }
+  return nodes.filter((el) => {
+    if (el.closest(".hidden,[hidden]") && !el.matches(selector)) return false;
+    const style = window.getComputedStyle(el);
+    if (style.display === "none" || style.visibility === "hidden") return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
+}
+
+function unionRect(els) {
+  let top = Infinity;
+  let left = Infinity;
+  let right = -Infinity;
+  let bottom = -Infinity;
+  for (const el of els) {
+    const r = el.getBoundingClientRect();
+    top = Math.min(top, r.top);
+    left = Math.min(left, r.left);
+    right = Math.max(right, r.right);
+    bottom = Math.max(bottom, r.bottom);
+  }
+  return {
+    top,
+    left,
+    right,
+    bottom,
+    width: Math.max(0, right - left),
+    height: Math.max(0, bottom - top),
+  };
+}
+
+function rectAsTarget(rect) {
+  return {
+    getBoundingClientRect: () => ({
+      top: rect.top,
+      left: rect.left,
+      right: rect.right,
+      bottom: rect.bottom,
+      width: rect.width,
+      height: rect.height,
+      x: rect.left,
+      y: rect.top,
+      toJSON() {},
+    }),
+  };
+}
+
+function resolveStepTargets(step) {
+  if (!step?.selector) return [];
+  let nodes = queryVisibleAll(step.selector);
+  if (!nodes.length && step.revealHidden) {
+    nodes = revealTourTargets(step.selector);
+  }
+  return nodes;
+}
+
 async function waitForElement(selector, timeout = 4000) {
   const start = Date.now();
   while (Date.now() - start < timeout) {
@@ -228,8 +307,10 @@ async function waitForElement(selector, timeout = 4000) {
 function filterSteps(steps, ctx) {
   return (steps || []).filter((step) => {
     if (typeof step.when === "function" && !step.when(ctx)) return false;
-    if (step.selector && !queryVisible(step.selector) && !document.querySelector(step.selector)) return false;
-    return true;
+    if (!step.selector || step.center) return true;
+    if (queryVisible(step.selector)) return true;
+    if (step.revealHidden && document.querySelector(step.selector)) return true;
+    return false;
   });
 }
 
@@ -318,7 +399,10 @@ function positionSpotlight(target) {
 function currentStepTarget() {
   const step = activeSteps[stepIndex];
   if (!step || step.center) return null;
-  return queryVisible(step.selector);
+  const nodes = resolveStepTargets(step);
+  if (!nodes.length) return null;
+  if (nodes.length === 1) return nodes[0];
+  return rectAsTarget(unionRect(nodes));
 }
 
 /** Solo mueve spotlight/card — sin fade ni re-render de texto (evita titileo). */
@@ -331,20 +415,41 @@ function repositionCurrentStep() {
   positionCard(target, step.placement || "bottom");
 }
 
+async function softStepTransition() {
+  if (!card) return;
+  card.classList.add("is-step-changing");
+  await new Promise((r) => setTimeout(r, 120));
+  if (!activeTour) return;
+  card.classList.remove("is-step-changing");
+}
+
 async function renderStep() {
   const token = ++renderToken;
   const step = activeSteps[stepIndex];
   if (!step) return;
+
+  await softStepTransition();
+  if (token !== renderToken || !activeTour) return;
 
   if (typeof step.beforeShow === "function") {
     await step.beforeShow(activeTour.ctx);
     if (token !== renderToken || !activeTour) return;
   }
 
-  const target = step.center ? null : await waitForElement(step.selector);
+  let nodes = [];
+  if (!step.center && step.selector) {
+    const start = Date.now();
+    while (Date.now() - start < 4000) {
+      nodes = resolveStepTargets(step);
+      if (nodes.length) break;
+      await new Promise((r) => setTimeout(r, 80));
+      if (token !== renderToken || !activeTour) return;
+    }
+  }
+
   if (token !== renderToken || !activeTour) return;
 
-  if (step.selector && !step.center && !isVisible(target)) {
+  if (step.selector && !step.center && !nodes.length) {
     if (stepIndex < activeSteps.length - 1) {
       goStep(stepIndex + 1);
       return;
@@ -353,8 +458,12 @@ async function renderStep() {
     return;
   }
 
-  if (target) {
-    target.scrollIntoView({ block: "nearest", behavior: "auto", inline: "nearest" });
+  const target = nodes.length > 1
+    ? rectAsTarget(unionRect(nodes))
+    : (nodes[0] || null);
+
+  if (nodes[0]) {
+    nodes[0].scrollIntoView({ block: "nearest", behavior: "auto", inline: "nearest" });
     await waitFrames(2);
     if (token !== renderToken || !activeTour) return;
   }
@@ -366,17 +475,17 @@ async function renderStep() {
   btnPrev.disabled = stepIndex === 0;
   btnNext.textContent = stepIndex >= activeSteps.length - 1 ? "Finalizar" : "Siguiente";
 
-  // Medir card con contenido nuevo antes de posicionar
   await waitFrames(1);
   if (token !== renderToken || !activeTour) return;
 
   positionSpotlight(target);
   positionCard(target, step.placement || "bottom");
+  root?.focus?.({ preventScroll: true });
 
   if (resizeObserver) resizeObserver.disconnect();
-  if (target && typeof ResizeObserver !== "undefined") {
+  if (nodes.length && typeof ResizeObserver !== "undefined") {
     resizeObserver = new ResizeObserver(scheduleReposition);
-    resizeObserver.observe(target);
+    nodes.forEach((el) => resizeObserver.observe(el));
   }
 }
 
@@ -428,8 +537,10 @@ export async function startTour(definition, { force = false, ctx = {} } = {}) {
   stepIndex = 0;
   root.hidden = false;
   root.classList.add("is-active");
+  root.tabIndex = -1;
   document.body.classList.add("st2-tour-active");
   await renderStep();
+  root.focus({ preventScroll: true });
   return true;
 }
 

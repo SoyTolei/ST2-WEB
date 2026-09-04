@@ -23,14 +23,14 @@ body.st2-tour-active {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: rgba(8, 7, 6, 0.34);
-  backdrop-filter: blur(2.5px);
-  -webkit-backdrop-filter: blur(2.5px);
-  transition: background 0.22s ease;
+  background: rgba(8, 7, 6, 0.42);
+  backdrop-filter: blur(3.5px);
+  -webkit-backdrop-filter: blur(3.5px);
+  transition: background 0.28s ease;
 }
 
 .st2-tour-overlay.is-full {
-  background: rgba(8, 7, 6, 0.4);
+  background: rgba(8, 7, 6, 0.48);
 }
 
 .st2-tour-spotlight {
@@ -40,12 +40,12 @@ body.st2-tour-active {
     0 0 0 1.5px rgba(251, 146, 60, 0.55),
     0 0 0 9999px rgba(8, 7, 6, 0.18);
   transition:
-    top 0.22s ease,
-    left 0.22s ease,
-    width 0.22s ease,
-    height 0.22s ease,
-    opacity 0.18s ease,
-    border-radius 0.18s ease;
+    top 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease,
+    border-radius 0.2s ease;
   pointer-events: none;
   z-index: 1;
   opacity: 1;
@@ -74,12 +74,31 @@ body.st2-tour-active {
   pointer-events: auto;
   overflow: hidden;
   transition:
-    top 0.22s ease,
-    left 0.22s ease;
+    top 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.st2-tour-card.is-step-changing {
+  opacity: 0.55;
+  transform: translateY(4px);
 }
 
 .st2-tour-card-inner {
   padding: 1rem 1.15rem 0.95rem;
+  animation: st2TourInnerIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes st2TourInnerIn {
+  from {
+    opacity: 0.35;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .st2-tour-card-accent {

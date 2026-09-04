@@ -17,6 +17,29 @@ function previewCopyStep(previewSelector, copySelector) {
   };
 }
 
+function iaStep(btnId, body) {
+  return {
+    selector: `#${btnId}`,
+    title: "Mejorar redacción con IA",
+    body:
+      body ||
+      "Opcional: pulí el texto con IA. El botón ↩ deshace si no te convence.",
+    placement: "top",
+    revealHidden: true,
+    when: () => !!document.getElementById(btnId),
+  };
+}
+
+function fieldStep(selector, title, body, placement = "bottom") {
+  return {
+    selector,
+    title,
+    body,
+    placement,
+    when: () => visible(selector),
+  };
+}
+
 function legalSectionStep(sectionId, title, body) {
   const selector = `.plan-legal-section[data-legal-section="${sectionId}"]`;
   return {
@@ -432,6 +455,14 @@ export function buildTransferenciaTour(ctx, sistema) {
       placement: "top",
       when: () => visible("#plan-capturas-card"),
     },
+    {
+      selector: "#plan-ticket-wrap",
+      title: "Ticket de servicio",
+      body: "Indicá si ya se pidió ticket de servicio y, si corresponde, el número. Aparece según sistema y mesa destino.",
+      placement: "top",
+      when: () => visible("#plan-ticket-wrap"),
+    },
+    iaStep("plan-btn-ia", "Opcional: pulí asunto y descripción con IA. El botón ↩ deshace el cambio."),
     previewCopyStep("#plan-btn-ver-planilla", "#plan-btn-copiar"),
   );
 
@@ -446,13 +477,23 @@ export function buildReferralStandardTour(ctx, sistema) {
       "Producto chileno (Hyperrenta, etc.), año, RUT y versión. Los campos extra dependen del producto elegido.",
   };
   const textoCopy = {
-    BejermanSql:
-      "Asunto: error en una línea. Descripción: qué falla y en qué contexto. Paso a paso: cómo reproducirlo (menús, datos de prueba). La IA puede mejorar los tres campos.",
-    OnvioWeb:
-      "Asunto: fallo web concreto. Descripción: tenant, pantalla y síntoma. Paso a paso: acciones hasta reproducir el error.",
-    Chile:
-      "Asunto: problema del producto local. Descripción: RUT, año y contexto. Paso a paso: menús y datos usados en la prueba.",
+    BejermanSql: {
+      asunto: "Asunto: error en una línea (módulo, pantalla, síntoma).",
+      descripcion: "Descripción: qué falla y en qué contexto.",
+      paso: "Paso a paso: menús, datos de prueba y cómo reproducirlo.",
+    },
+    OnvioWeb: {
+      asunto: "Asunto: fallo web concreto (pantalla y acción).",
+      descripcion: "Descripción: tenant, pantalla y síntoma.",
+      paso: "Paso a paso: acciones hasta reproducir el error.",
+    },
+    Chile: {
+      asunto: "Asunto: problema del producto local en una línea.",
+      descripcion: "Descripción: RUT, año y contexto del caso.",
+      paso: "Paso a paso: menús y datos usados en la prueba.",
+    },
   };
+  const copy = textoCopy[sistema] || textoCopy.BejermanSql;
 
   const steps = [];
 
@@ -474,13 +515,12 @@ export function buildReferralStandardTour(ctx, sistema) {
     });
   }
 
-  steps.push({
-    selector: "#ref-standard-flow",
-    title: "Asunto, descripción y pasos",
-    body: textoCopy[sistema] || textoCopy.BejermanSql,
-    placement: "bottom",
-    when: () => visible("#ref-standard-flow"),
-  });
+  steps.push(
+    fieldStep("#ref-asunto", "Asunto", copy.asunto),
+    fieldStep("#ref-descripcion", "Descripción del caso", copy.descripcion),
+    fieldStep("#ref-paso", "Paso a paso", copy.paso),
+    iaStep("ref-btn-ia"),
+  );
 
   if (sistema === "BejermanSql") {
     steps.push({
@@ -501,13 +541,22 @@ export function buildReferralStandardTour(ctx, sistema) {
       when: () => visible("#ref-onvio-panel"),
     });
   } else if (sistema === "Chile") {
-    steps.push({
-      selector: "#ref-chile-post",
-      title: "Adjuntos Chile",
-      body: "Indicá si adjuntás pantallas, bases u otros archivos del producto chileno para orientar a N2.",
-      placement: "top",
-      when: () => visible("#ref-chile-post"),
-    });
+    steps.push(
+      {
+        selector: "#ref-chile-post .plan-form-2col, #ref-chile-usuario",
+        title: "Ingreso y entorno",
+        body: "Usuario, clave, sistema operativo y motor SQL si corresponde. Datos para que N2 retome el entorno del cliente.",
+        placement: "top",
+        when: () => visible("#ref-chile-usuario") || visible("#ref-chile-post"),
+      },
+      {
+        selector: "#ref-chile-post .plan-adj-grid, #ref-card-chile-pantallas",
+        title: "Adjuntos Chile",
+        body: "Indicá si adjuntás pantallas, bases u otros archivos del producto chileno para orientar a N2.",
+        placement: "top",
+        when: () => visible("#ref-card-chile-pantallas") || visible("#ref-chile-post"),
+      },
+    );
   }
 
   steps.push(previewCopyStep("#ref-btn-ver-planilla", "#ref-btn-copiar"));
@@ -600,7 +649,8 @@ export function buildReferralLegalFormTour() {
       title: "Mejorar redacción con IA",
       body: "Opcional: pulí descripción, pasos y resultados. El botón ↩ deshace si no te convence.",
       placement: "top",
-      when: () => visible("#ref-legal-btn-ia"),
+      revealHidden: true,
+      when: () => !!document.getElementById("ref-legal-btn-ia"),
     },
     previewCopyStep("#ref-legal-btn-ver-planilla", "#ref-legal-btn-copiar"),
   ];
@@ -612,12 +662,6 @@ export function buildOportunidadMenuTour() {
   return {
     id: "oportunidad-menu",
     steps: [
-      {
-        selector: "#planillas-oportunidad-menu .plan-op-card",
-        title: "Dos caminos",
-        body: "Cargar: registrás una oportunidad nueva. Gestor: ves, confirmás o exportás las que ya cargaste.",
-        placement: "bottom",
-      },
       {
         selector: '[data-op-view="cargar"]',
         title: "Cargar oportunidad",
@@ -641,11 +685,18 @@ export function buildOportunidadCargarTour() {
     id: "oportunidad-cargar",
     steps: [
       {
-        selector: "#planillas-oportunidad-cargar .plan-form-grid",
-        title: "Datos del contacto",
-        body: "Completá método de ingreso, cliente, razón social, teléfono, correo y horarios de contacto.",
+        selector: "#op-metodo-radios",
+        title: "Cómo ingresó el contacto",
+        body: "Telefónicamente, WhatsApp o Email. Define el canal por el que llegó la consulta.",
         placement: "bottom",
-        when: () => visible("#planillas-oportunidad-cargar .plan-form-grid"),
+        when: () => visible("#op-metodo-radios"),
+      },
+      {
+        selector: "#planillas-oportunidad-cargar .plan-op-form-grid",
+        title: "Datos del contacto",
+        body: "Completá cliente, razón social, nombre, teléfono, correo y horarios de contacto.",
+        placement: "bottom",
+        when: () => visible("#planillas-oportunidad-cargar .plan-op-form-grid"),
       },
       {
         selector: "#op-descripcion",
@@ -654,13 +705,7 @@ export function buildOportunidadCargarTour() {
         placement: "bottom",
         when: () => visible("#op-descripcion"),
       },
-      {
-        selector: "#op-btn-ia",
-        title: "Mejorar con IA",
-        body: "Opcional: pulí la descripción antes de generar el PDF.",
-        placement: "top",
-        when: () => visible("#op-btn-ia"),
-      },
+      iaStep("op-btn-ia", "Opcional: pulí la descripción antes de generar el PDF."),
       {
         selector: "#op-btn-pdf",
         title: "Generar PDF",
@@ -677,17 +722,32 @@ export function buildOportunidadGestorTour() {
     id: "oportunidad-gestor",
     steps: [
       {
-        selector: "#planillas-oportunidad-gestor",
-        title: "Listado de oportunidades",
-        body: "Acá ves todo lo cargado: fecha, descripción y estado. Usá los filtros si hay muchos registros.",
+        selector: ".plan-gestor-panel-new",
+        title: "Nueva oportunidad",
+        body: "Cargá fecha, descripción y link. «Agregar» la suma al listado del mes.",
         placement: "bottom",
+        when: () => visible(".plan-gestor-panel-new"),
       },
       {
-        selector: ".plan-gestor-table-wrap, .plan-op-gestor-table",
-        title: "Acciones por fila",
-        body: "Confirmá contacto, abrí el detalle o exportá según lo que necesites hacer con cada oportunidad.",
+        selector: ".plan-gestor-filter-bar",
+        title: "Filtro por mes",
+        body: "Elegí el mes para ver solo las oportunidades de ese período.",
+        placement: "bottom",
+        when: () => visible(".plan-gestor-filter-bar"),
+      },
+      {
+        selector: ".plan-gestor-table-wrap",
+        title: "Listado",
+        body: "Cada fila: fecha, descripción, link y si está confirmada. Clic derecho abre más acciones.",
         placement: "top",
-        when: () => visible(".plan-gestor-table-wrap") || visible(".plan-op-gestor-table"),
+        when: () => visible(".plan-gestor-table-wrap"),
+      },
+      {
+        selector: ".plan-gestor-footer-actions",
+        title: "Acciones",
+        body: "Editar, eliminar o confirmar la fila seleccionada. También podés paginar el listado.",
+        placement: "top",
+        when: () => visible(".plan-gestor-footer-actions"),
       },
     ],
   };
