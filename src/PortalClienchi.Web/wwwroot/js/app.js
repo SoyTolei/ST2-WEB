@@ -639,19 +639,6 @@ let accessAdminSortKey = "lastSeen";
 let accessAdminSortDir = "desc";
 
 function sortAccessAdminItems(items) {
-  // Admin web: solo A→Z por nombre. Super-admin: orden actual (activo / último acceso / ingresos).
-  if (!isPrimarySuperAdmin()) {
-    return [...items].sort((a, b) => {
-      if (a.isPending !== b.isPending) return a.isPending ? -1 : 1;
-      if (a.isRejected !== b.isRejected) return a.isRejected ? 1 : -1;
-      const aName = formatAccessDisplayName(a.email, a.displayNameOverride).toLocaleLowerCase("es");
-      const bName = formatAccessDisplayName(b.email, b.displayNameOverride).toLocaleLowerCase("es");
-      const byName = aName.localeCompare(bName, "es", { sensitivity: "base" });
-      if (byName !== 0) return byName;
-      return String(a.email || "").localeCompare(String(b.email || ""), "es", { sensitivity: "base" });
-    });
-  }
-
   const dir = accessAdminSortDir === "asc" ? 1 : -1;
   return [...items].sort((a, b) => {
     if (a.isPending !== b.isPending) return a.isPending ? -1 : 1;
@@ -770,12 +757,41 @@ function buildAccessClientKey(item) {
   return "";
 }
 
+function normalizeAccessBrowserFamily(label) {
+  const b = String(label || "").trim().toLowerCase();
+  if (b.startsWith("edge")) return "edge";
+  if (b.startsWith("chrome") || b.startsWith("chromium")) return "chrome";
+  if (b.startsWith("firefox")) return "firefox";
+  if (b.startsWith("safari")) return "safari";
+  if (b.startsWith("opera")) return "opera";
+  return b;
+}
+
+/** Edge ↔ Chrome en el mismo usuario es habitual; no alertar. */
+function isBenignCrossBrowserSwap(prevBrowser, nextBrowser) {
+  const a = normalizeAccessBrowserFamily(prevBrowser);
+  const b = normalizeAccessBrowserFamily(nextBrowser);
+  if (!a || !b || a === b) return false;
+  const pair = new Set([a, b]);
+  return pair.has("edge") && pair.has("chrome");
+}
+
 function isBenignClientKeyMigration(prevKey, nextKey) {
   if (!prevKey || !nextKey || prevKey === nextKey) return false;
   // Primera vez que aparece device id tras el deploy: no alertar.
   if (nextKey.startsWith("d:") && !prevKey.startsWith("d:")) return true;
   // Formato viejo host|ip|hint → nuevo sin IP.
   if (prevKey.includes("|") && !nextKey.includes("|")) return true;
+  return false;
+}
+
+function isBenignAccessClientChange(prev, next) {
+  if (!prev || !next || prev.key === next.key) return true;
+  if (isBenignClientKeyMigration(prev.key, next.key)) return true;
+  // Mismo device id con otro label: no es cambio de equipo.
+  if (prev.device && next.device && prev.device === next.device) return true;
+  // Cambiar entre Edge y Chrome (perfiles distintos) no implica otra persona.
+  if (isBenignCrossBrowserSwap(prev.browser, next.browser)) return true;
   return false;
 }
 
@@ -875,6 +891,8 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
       key,
       label: formatAccessClientLabel(item) || key,
       displayName: formatAccessDisplayName(item.email, item.displayNameOverride),
+      browser: resolveAccessBrowserLabel(item),
+      device: resolveAccessDeviceShort(item),
     });
   }
 
@@ -886,13 +904,17 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
   for (const [email, next] of nextMap.entries()) {
     const prev = accessAdminLastClientByEmail.get(email);
-    if (!prev || prev.key === next.key) continue;
-    if (isBenignClientKeyMigration(prev.key, next.key)) continue;
+    if (!prev) continue;
+    if (isBenignAccessClientChange(prev, next)) continue;
+    // Solo alertar fuerte si es el mismo navegador (p. ej. dos Edge / dos Chrome) u otro cambio no benigno.
+    const sameBrowser = normalizeAccessBrowserFamily(prev.browser)
+      && normalizeAccessBrowserFamily(prev.browser) === normalizeAccessBrowserFamily(next.browser);
     changes.push({
       email,
       displayName: next.displayName,
       previousLabel: prev.label,
       nextLabel: next.label,
+      sameBrowser,
     });
   }
 
@@ -906,17 +928,28 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
   if (showHint) {
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-    const first = changes[0];
-    const label = changes.length === 1
-      ? `⚠ Equipo distinto: ${first.displayName} · ${first.nextLabel}`
-      : `⚠ ${changes.length} cambios de equipo`;
-    setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+    setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} · ${nowLabel}`);
   }
 
   return changes;
   } finally {
     accessAdminClientWatchBusy = false;
   }
+}
+
+function formatAccessClientChangeHint(changes) {
+  if (!changes?.length) return "";
+  if (changes.length > 1) return `⚠ ${changes.length} posibles equipos distintos`;
+  const first = changes[0];
+  const prefix = first.sameBrowser
+    ? `⚠ Mismo navegador, otro equipo: ${first.displayName}`
+    : `⚠ Equipo distinto: ${first.displayName}`;
+  const trail = first.previousLabel && first.nextLabel
+    ? ` · ${first.previousLabel} → ${first.nextLabel}`
+    : first.nextLabel
+      ? ` · ${first.nextLabel}`
+      : "";
+  return `${prefix}${trail}`;
 }
 
 async function pollAccessAdminClientWatch() {
@@ -943,11 +976,7 @@ async function pollAccessAdminClientWatch() {
         renderAccessAdminTable();
       }
       const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-      const first = changes[0];
-      const label = changes.length === 1
-        ? `⚠ Equipo distinto: ${first.displayName} · ${first.nextLabel}`
-        : `⚠ ${changes.length} cambios de equipo`;
-      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} · ${nowLabel}`);
     }
   } catch {
     /* ignore */
@@ -1347,9 +1376,9 @@ function setAccessAdminUpdatedHint(text) {
   accessAdminUpdated.classList.remove("hidden");
 }
 
-/** Admin web (no Leonel): solo Nombre, Permisos y lápiz — sin Equipo / Último acceso / Ingresos. */
+/** Admin web y owner: Nombre, Permisos, Equipo, Último acceso, Ingresos. */
 function canSeeAccessAdminOwnerColumns() {
-  return isPrimarySuperAdmin();
+  return isSt2SuperAdmin();
 }
 
 function syncAccessAdminHostColumn() {
@@ -1458,10 +1487,11 @@ function renderAccessAdminTable() {
       ? `<td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>`
       : "";
     const ownerActions = isPrimarySuperAdmin();
+    const canPreview = isSt2SuperAdmin();
     const extraActions = item.isPending
       ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
              <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
-      : `${ownerActions ? `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>` : ""}
+      : `${canPreview ? `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>` : ""}
         <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-modules-email="${escapeHtml(item.email)}" title="Editar perfil y módulos" aria-label="Editar perfil y módulos de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
         ${ownerActions ? `<button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>` : ""}`;
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
@@ -1794,11 +1824,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
     const newPending = items.filter((item) => item.isPending && newRegistrationEmails.includes(item.email));
     if (clientChanges.length > 0) {
-      const first = clientChanges[0];
-      const label = clientChanges.length === 1
-        ? `⚠ Equipo distinto: ${first.displayName} · ${first.nextLabel}`
-        : `⚠ ${clientChanges.length} cambios de equipo`;
-      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(clientChanges)} · ${nowLabel}`);
     } else if (newPending.length > 0) {
       const label = newPending.length === 1
         ? `Nueva solicitud: ${newPending[0].email}`
@@ -2992,7 +3018,7 @@ accessAdminBody?.addEventListener("click", (e) => {
   if (!(target instanceof Element)) return;
   const previewBtn = target.closest("[data-preview-email]");
   if (previewBtn instanceof HTMLElement) {
-    if (!isPrimarySuperAdmin()) return;
+    if (!isSt2SuperAdmin()) return;
     startAccessProfilePreview(previewBtn.dataset.previewEmail || "");
     return;
   }
@@ -3364,7 +3390,7 @@ function syncAccessSystemModuleGroups() {
 }
 
 function startAccessProfilePreview(email, modulesOverride = null) {
-  if (!isPrimarySuperAdmin()) return;
+  if (!isSt2SuperAdmin()) return;
   if (!email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   if (!current || current.isPending) return;
