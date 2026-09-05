@@ -42,8 +42,8 @@ export function syncSheetThemeUi() {
   const previewLogo = document.getElementById("pdf-portal-preview-logo");
   if (previewLogo) {
     previewLogo.src = isDark
-      ? "/img/portal-cliente-logo-dark.png?v=20260905h"
-      : "/img/portal-cliente-logo.png?v=20260905h";
+      ? "/img/portal-cliente-logo-dark.png?v=20260905i"
+      : "/img/portal-cliente-logo.png?v=20260905i";
   }
 }
 
@@ -629,8 +629,6 @@ export function initPdfPortalGenerator() {
     refreshPreview();
   };
 
-  pasteToolbarBtn?.addEventListener("mousedown", (ev) => ev.preventDefault());
-  pasteToolbarBtn?.addEventListener("click", onPasteClick);
   pasteActionBtn?.addEventListener("click", onPasteClick);
 
   clearBtn?.addEventListener("click", () => {

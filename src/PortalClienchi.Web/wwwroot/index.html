@@ -59,13 +59,13 @@
       white-space: nowrap;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260905h"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20260905h"/>
-  <link rel="stylesheet" href="/css/pdf-portal.css?v=20260905h"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20260905h"/>
-  <link rel="stylesheet" href="/css/borrado-bases.css?v=20260905h"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260905h"/>
-  <link rel="stylesheet" href="/css/st2-tour.css?v=20260905h"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260905i"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20260905i"/>
+  <link rel="stylesheet" href="/css/pdf-portal.css?v=20260905i"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20260905i"/>
+  <link rel="stylesheet" href="/css/borrado-bases.css?v=20260905i"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260905i"/>
+  <link rel="stylesheet" href="/css/st2-tour.css?v=20260905i"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -2466,17 +2466,17 @@
     </div>
   </div>
 
-  <div id="pdf-portal-modal" class="pdf-portal-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pdf-portal-modal-title">
+  <div id="pdf-portal-modal" class="pdf-portal-modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pdf-portal-modal-title" onclick="if(event.target===this)this.classList.add('hidden')">
     <div class="pdf-portal-modal-container" id="planillas-pdf-portal">
       <div class="pdf-portal-modal-header">
         <div class="pdf-portal-modal-title-group">
           <div class="pdf-portal-modal-accent-bar" aria-hidden="true"></div>
           <div>
             <h2 id="pdf-portal-modal-title" class="pdf-portal-modal-title">Generador Corporativo de PDFs</h2>
-            <p class="pdf-portal-modal-subtitle">Instructivos y notas con membrete oficial Thomson Reuters · Formato A4</p>
+            <p class="pdf-portal-modal-subtitle">Instructivos y notas con membrete oficial Portal Cliente · Formato A4</p>
           </div>
         </div>
-        <button type="button" id="pdf-portal-modal-close" class="pdf-portal-modal-close" aria-label="Cerrar ventana" title="Cerrar (Esc)">✕</button>
+        <button type="button" id="pdf-portal-modal-close" class="pdf-portal-modal-close" aria-label="Cerrar ventana" title="Cerrar (Esc)" onclick="document.getElementById('pdf-portal-modal')?.classList.add('hidden')">✕</button>
       </div>
 
       <div class="pdf-portal-modal-body">
@@ -2578,7 +2578,7 @@
               <div id="pdf-portal-preview" class="pdf-portal-preview" aria-live="polite">
                 <div class="pdf-portal-preview-header">
                   <div id="pdf-portal-preview-brand" class="pdf-portal-preview-brand hidden"></div>
-                  <img id="pdf-portal-preview-logo" src="/img/portal-cliente-logo.png?v=20260905h" alt="Portal Cliente" class="pdf-portal-preview-logo"/>
+                  <img id="pdf-portal-preview-logo" src="/img/portal-cliente-logo.png?v=20260905i" alt="Portal Cliente" class="pdf-portal-preview-logo"/>
                 </div>
                 <div id="pdf-portal-preview-body" class="pdf-portal-preview-body"></div>
               </div>
@@ -2631,6 +2631,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260905h" type="module"></script>
+  <script src="/js/app.js?v=20260905i" type="module"></script>
 </body>
 </html>

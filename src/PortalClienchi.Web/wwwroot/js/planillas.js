@@ -2,7 +2,7 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20260905h";
+import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20260905i";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
