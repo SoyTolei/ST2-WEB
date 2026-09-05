@@ -42,8 +42,8 @@ export function syncSheetThemeUi() {
   const previewLogo = document.getElementById("pdf-portal-preview-logo");
   if (previewLogo) {
     previewLogo.src = isDark
-      ? "/img/portal-cliente-logo-dark.png?v=20260905e"
-      : "/img/portal-cliente-logo.png?v=20260905e";
+      ? "/img/portal-cliente-logo-dark.png?v=20260905g"
+      : "/img/portal-cliente-logo.png?v=20260905g";
   }
 }
 

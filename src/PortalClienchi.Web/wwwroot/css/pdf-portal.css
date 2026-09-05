@@ -384,7 +384,8 @@
   padding: 0 0 6px;
   line-height: 1.25;
   border-bottom: 3px solid #f36c00;
-  max-width: 60%;
+  max-width: 65%;
+  flex: 1 1 auto;
 }
 
 .pdf-portal-preview {
@@ -418,14 +419,16 @@
   display: none !important;
 }
 
+.pdf-portal-preview-header .pdf-portal-preview-logo,
 .pdf-portal-preview-logo {
-  height: 28px;
-  width: auto;
-  max-width: 200px;
-  object-fit: contain;
-  flex: 0 0 auto;
-  margin: 0;
-  display: block;
+  height: 24px !important;
+  max-height: 25px !important;
+  width: auto !important;
+  max-width: 140px !important;
+  object-fit: contain !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  display: block !important;
 }
 
 .pdf-portal-preview-body {
@@ -518,7 +521,7 @@
   margin: 14px 0;
 }
 
-.pdf-portal-preview img,
+.pdf-portal-preview-body img,
 .pdf-portal-rich img {
   max-width: 100%;
   height: auto;

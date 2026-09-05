@@ -174,8 +174,8 @@ public static class PortalPdfService
                     footerCol.Item().LineHorizontal(0.5f).LineColor(theme.LineColor);
                     footerCol.Item().PaddingTop(6).Row(row =>
                     {
-                        row.RelativeItem().Text("Thomson Reuters · Portal de Clientes")
-                            .FontSize(8f)
+                        row.RelativeItem().Text("Portal Cliente")
+                            .FontSize(8.5f)
                             .FontColor(theme.FooterText);
 
                         row.RelativeItem().AlignRight().Text(text =>
