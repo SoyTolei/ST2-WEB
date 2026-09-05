@@ -29,21 +29,21 @@ export function syncSheetThemeUi() {
   }
   if (badgeText) {
     badgeText.textContent = isDark
-      ? "Cambiar fondo del PDF a blanco ☀️ 🖨️"
+      ? "Cambiar fondo PDF a blanco ☀️ 🖨️"
       : "Cambiar fondo PDF a Oscuro 🌙";
   }
   if (toggleBtn) {
     toggleBtn.setAttribute("title", isDark
-      ? "Vista previa y PDF en hoja oscura. Clic para cambiar fondo del PDF a blanco para imprimir."
+      ? "Vista previa y PDF en hoja oscura. Clic para cambiar fondo PDF a blanco para imprimir."
       : "Vista previa y PDF en hoja blanca. Clic para cambiar fondo PDF a oscuro.");
-    toggleBtn.setAttribute("aria-label", isDark ? "Cambiar fondo del PDF a blanco" : "Cambiar fondo PDF a Oscuro");
+    toggleBtn.setAttribute("aria-label", isDark ? "Cambiar fondo PDF a blanco" : "Cambiar fondo PDF a Oscuro");
   }
 
   const previewLogo = document.getElementById("pdf-portal-preview-logo");
   if (previewLogo) {
     previewLogo.src = isDark
-      ? "/img/portal-cliente-logo-dark.png?v=20260905g"
-      : "/img/portal-cliente-logo.png?v=20260905g";
+      ? "/img/portal-cliente-logo-dark.png?v=20260905h"
+      : "/img/portal-cliente-logo.png?v=20260905h";
   }
 }
 
@@ -523,7 +523,6 @@ export function initPdfPortalGenerator() {
   const fontSizeSel = document.getElementById("pdf-portal-font-size");
   const fontColorInp = document.getElementById("pdf-portal-font-color");
   const linkBtn = document.getElementById("pdf-portal-link");
-  const pasteToolbarBtn = document.getElementById("pdf-portal-paste-toolbar-btn");
   const pasteActionBtn = document.getElementById("pdf-portal-paste-action");
 
   if (!editor || pdfPortalInited) {
@@ -646,10 +645,8 @@ export function initPdfPortalGenerator() {
 
   const modal = document.getElementById("pdf-portal-modal");
   const modalCloseBtn = document.getElementById("pdf-portal-modal-close");
-  const closeBtn = document.getElementById("pdf-portal-close-btn");
 
   modalCloseBtn?.addEventListener("click", () => closePdfPortalModal());
-  closeBtn?.addEventListener("click", () => closePdfPortalModal());
 
   modal?.addEventListener("click", (e) => {
     if (e.target === modal) {
@@ -692,9 +689,18 @@ export function initPdfPortalGenerator() {
       const blob = await response.blob();
       const cd = response.headers.get("Content-Disposition") || "";
       const match = /filename\*?=(?:UTF-8''|")?([^\";]+)/i.exec(cd);
-      const fileName = match
-        ? decodeURIComponent(match[1].replace(/"/g, "").trim())
-        : `portal-${Date.now()}.pdf`;
+      const defaultName = payload.brand
+        ? `Portal Cliente - ${payload.brand.replace(/[\\/:*?"<>|]/g, " ").trim()}.pdf`
+        : "Portal Cliente.pdf";
+      let fileName = defaultName;
+      if (match && match[1]) {
+        const raw = match[1].replace(/"/g, "").trim();
+        try {
+          fileName = decodeURIComponent(raw);
+        } catch {
+          fileName = raw;
+        }
+      }
 
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

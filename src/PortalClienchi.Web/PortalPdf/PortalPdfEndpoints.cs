@@ -26,12 +26,21 @@ public static class PortalPdfEndpoints
                 var pdf = await Task.Run(() => PortalPdfService.GeneratePdfBytes(body, env.ContentRootPath), ct)
                     .ConfigureAwait(false);
 
-                var safeBrand = string.IsNullOrWhiteSpace(brand)
-                    ? "portal"
-                    : string.Concat(brand.Where(ch => char.IsLetterOrDigit(ch) || ch is '-' or '_')).ToLowerInvariant();
-                if (string.IsNullOrEmpty(safeBrand))
-                    safeBrand = "portal";
-                var fileName = $"portal-{safeBrand}-{DateTime.Now:yyyyMMdd-HHmm}.pdf";
+                var invalidChars = Path.GetInvalidFileNameChars();
+                var cleanBrand = string.IsNullOrWhiteSpace(brand)
+                    ? ""
+                    : string.Join("", brand.Select(ch => invalidChars.Contains(ch) ? ' ' : ch))
+                        .Trim();
+
+                while (cleanBrand.Contains("  "))
+                    cleanBrand = cleanBrand.Replace("  ", " ");
+
+                if (cleanBrand.Length > 80)
+                    cleanBrand = cleanBrand[..80].Trim();
+
+                var fileName = string.IsNullOrWhiteSpace(cleanBrand)
+                    ? "Portal Cliente.pdf"
+                    : $"Portal Cliente - {cleanBrand}.pdf";
                 return Results.File(pdf, "application/pdf", fileName);
             }
             catch (OperationCanceledException)
