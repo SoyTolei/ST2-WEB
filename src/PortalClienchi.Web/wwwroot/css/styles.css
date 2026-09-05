@@ -762,7 +762,11 @@ body.portal-tab-active.st2-has-update.st2-has-modules-update.st2-has-tools-updat
 }
 
 body.portal-tab-active .tab-bar {
-  margin-bottom: 62px;
+  margin-bottom: 8px;
+}
+
+body.portal-tab-active.portal-context-active .tab-bar {
+  margin-bottom: 44px;
 }
 
 .tab-portal-wrap {
@@ -1819,7 +1823,7 @@ body.portal-tab-active .combo-box {
   background: #fff;
 }
 
-/* Densidad ~88%: entra más contenido del sitio embebido sin achicar las pestañas ST2. */
+/* Densidad ~90%: entra más contenido del sitio embebido sin achicar las pestañas ST2. */
 body.embed-active #panel-thom .embed-frame-wrap,
 body.embed-active #panel-ai .embed-frame-wrap,
 body.embed-active #panel-portal .embed-frame-wrap {
@@ -1829,9 +1833,9 @@ body.embed-active #panel-portal .embed-frame-wrap {
 body.embed-active #panel-thom .embed-frame-wrap > .embed-frame,
 body.embed-active #panel-ai .embed-frame-wrap > .embed-frame,
 body.embed-active #panel-portal .embed-frame-wrap > .embed-frame {
-  width: 113.636%; /* 100 / 0.88 */
-  height: 113.636%;
-  transform: scale(0.88);
+  width: 111.111%; /* 100 / 0.90 */
+  height: 111.111%;
+  transform: scale(0.90);
   transform-origin: 0 0;
 }
 
@@ -1931,10 +1935,15 @@ body.embed-active #panel-portal .embed-frame-wrap > .embed-frame {
   box-shadow: 0 2px 8px rgba(26, 31, 46, 0.08);
 }
 
-/* El selector flota debajo de la pestaña: hueco para st2-context-bar. */
+/* El selector flota debajo de la pestaña si hay sub-opciones activas. */
 body.thom-tab-active .tab-bar,
 body.embed-active.thom-tab-active .tab-bar {
-  margin-bottom: 50px;
+  margin-bottom: 8px;
+}
+
+body.thom-tab-active.thom-context-active .tab-bar,
+body.embed-active.thom-tab-active.thom-context-active .tab-bar {
+  margin-bottom: 44px;
 }
 
 .thom-proxy-open {

@@ -7,7 +7,7 @@ import { canSeePdfPortalModule as canSeeFromAccess } from "./module-access.js";
  */
 const FORCE_KEY = "st2-pdf-portal-force";
 const DEFAULT_EDITOR_COLOR = "#0f172a";
-const DEFAULT_PREVIEW_COLOR = "#f2f2f2";
+const DEFAULT_PREVIEW_COLOR = "#1e293b";
 
 let pdfPortalInited = false;
 
@@ -634,17 +634,22 @@ function handleRichPaste(e, editor) {
   editor.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-/** Normaliza el HTML del editor a párrafos/br simples para el PDF. */
+function isSafeImgSrc(src) {
+  if (!src) return false;
+  const s = src.trim();
+  return s.startsWith("data:image/") || s.startsWith("/") || isSafeHref(s);
+}
+
+/** Normaliza el HTML del editor a párrafos/br simples para el PDF, respetando tablas e imágenes. */
 function normalizeEditorHtmlForPdf(root) {
   const clone = root.cloneNode(true);
-  // Chrome suele usar DIV por línea → P para el parser.
   clone.querySelectorAll("div").forEach((div) => {
     if (div.closest("ul,ol,li,table")) return;
     const p = document.createElement("p");
     const align = div.style.textAlign || div.getAttribute("align") || "";
     if (align) p.style.textAlign = align;
     while (div.firstChild) p.appendChild(div.firstChild);
-    if (!p.textContent?.trim() && !p.querySelector("img,br")) {
+    if (!p.textContent?.trim() && !p.querySelector("img,br,table")) {
       p.appendChild(document.createElement("br"));
     }
     div.replaceWith(p);
@@ -698,6 +703,7 @@ function sanitizePasteHtml(html) {
     const allowed = new Set([
       "p", "div", "br", "span", "b", "strong", "i", "em", "u", "s", "strike", "del",
       "ul", "ol", "li", "a", "h1", "h2", "h3", "h4", "h5", "h6", "font", "blockquote",
+      "table", "thead", "tbody", "tfoot", "tr", "th", "td", "hr", "img",
     ]);
 
     if (!allowed.has(tag)) {
@@ -715,15 +721,46 @@ function sanitizePasteHtml(html) {
       keep.rel = "noopener noreferrer";
     }
 
+    if (tag === "img") {
+      const src = el.getAttribute("src");
+      if (src && isSafeImgSrc(src)) {
+        keep.src = src;
+        const alt = el.getAttribute("alt");
+        if (alt) keep.alt = alt;
+      } else {
+        el.remove();
+        return;
+      }
+    }
+
+    if (tag === "th" || tag === "td") {
+      const cs = el.getAttribute("colspan");
+      if (cs) keep.colspan = cs;
+      const rs = el.getAttribute("rowspan");
+      if (rs) keep.rowspan = rs;
+    }
+
+    const isHeading = /^h[1-6]$/.test(tag);
     const styleKeep = [];
     const style = el.getAttribute("style") || "";
+
     const align = /text-align\s*:\s*(left|center|right|justify)/i.exec(style);
-    if (align) styleKeep.push(`text-align:${align[1].toLowerCase()}`);
+    if (align) {
+      const a = align[1].toLowerCase();
+      // Títulos corporativos nunca van justificados para no estirar palabras
+      styleKeep.push(`text-align:${isHeading && a === "justify" ? "left" : a}`);
+    } else if (isHeading) {
+      styleKeep.push("text-align:left");
+    }
+
     const color = /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(style);
     if (color) {
       const c = editorSafeColor(color[1].trim()) || DEFAULT_EDITOR_COLOR;
       styleKeep.push(`color:${c}`);
+    } else if (tag === "h1" || tag === "h2") {
+      styleKeep.push("color:#e05a10");
     }
+
     const size = /font-size\s*:\s*([^;]+)/i.exec(style);
     if (size) styleKeep.push(`font-size:${size[1].trim()}`);
     const weight = /font-weight\s*:\s*([^;]+)/i.exec(style);
@@ -735,7 +772,8 @@ function sanitizePasteHtml(html) {
 
     const alignAttr = el.getAttribute("align");
     if (alignAttr && /^(left|center|right|justify)$/i.test(alignAttr)) {
-      styleKeep.push(`text-align:${alignAttr.toLowerCase()}`);
+      const a = alignAttr.toLowerCase();
+      styleKeep.push(`text-align:${isHeading && a === "justify" ? "left" : a}`);
     }
 
     if (tag === "font") {
@@ -769,6 +807,7 @@ function sanitizePreviewHtml(html) {
       const allowed = new Set([
         "p", "div", "br", "span", "b", "strong", "i", "em", "u", "s", "strike", "del",
         "ul", "ol", "li", "a", "h1", "h2", "h3", "h4", "h5", "h6", "font",
+        "table", "thead", "tbody", "tfoot", "tr", "th", "td", "hr", "img",
       ]);
       if (!allowed.has(tag)) {
         const parent = el.parentNode;
@@ -787,18 +826,42 @@ function sanitizePreviewHtml(html) {
         }
       }
 
+      if (tag === "img") {
+        const src = el.getAttribute("src");
+        if (src && isSafeImgSrc(src)) {
+          keep.src = src;
+          const alt = el.getAttribute("alt");
+          if (alt) keep.alt = alt;
+        } else {
+          el.remove();
+          return;
+        }
+      }
+
+      if (tag === "th" || tag === "td") {
+        const cs = el.getAttribute("colspan");
+        if (cs) keep.colspan = cs;
+        const rs = el.getAttribute("rowspan");
+        if (rs) keep.rowspan = rs;
+      }
+
+      const isHeading = /^h[1-6]$/.test(tag);
       const styleKeep = [];
       const style = el.getAttribute("style") || "";
       const align = /text-align\s*:\s*(left|center|right|justify)/i.exec(style);
-      if (align) styleKeep.push(`text-align:${align[1].toLowerCase()}`);
+      if (align) {
+        const a = align[1].toLowerCase();
+        styleKeep.push(`text-align:${isHeading && a === "justify" ? "left" : a}`);
+      } else if (isHeading) {
+        styleKeep.push("text-align:left");
+      }
 
       const color = /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(style);
       if (color) {
-        const c = normalizeCssColor(color[1].trim()) || DEFAULT_EDITOR_COLOR;
+        const c = normalizeCssColor(color[1].trim()) || DEFAULT_PREVIEW_COLOR;
         styleKeep.push(`color:${previewSafeColor(c)}`);
-      } else {
-        // Sin color explícito → claro para fondo oscuro de preview
-        styleKeep.push(`color:${DEFAULT_PREVIEW_COLOR}`);
+      } else if (tag === "h1" || tag === "h2") {
+        styleKeep.push("color:#e05a10");
       }
 
       const size = /font-size\s*:\s*([^;]+)/i.exec(style);
@@ -822,7 +885,8 @@ function sanitizePreviewHtml(html) {
 
       const alignAttr = el.getAttribute("align");
       if (alignAttr && /^(left|center|right|justify)$/i.test(alignAttr)) {
-        styleKeep.push(`text-align:${alignAttr.toLowerCase()}`);
+        const a = alignAttr.toLowerCase();
+        styleKeep.push(`text-align:${isHeading && a === "justify" ? "left" : a}`);
       }
 
       [...el.attributes].forEach((attr) => el.removeAttribute(attr.name));
@@ -846,7 +910,7 @@ function editorSafeColor(raw) {
   return lum > 0.82 ? DEFAULT_EDITOR_COLOR : n;
 }
 
-/** Preview/PDF (fondo oscuro): colores muy oscuros → claro. */
+/** Preview/PDF (fondo blanco hoja A4): colores casi blancos → oscuro. */
 function previewSafeColor(hex) {
   const n = normalizeCssColor(hex);
   if (!n) return DEFAULT_PREVIEW_COLOR;
@@ -854,7 +918,7 @@ function previewSafeColor(hex) {
   const g = parseInt(n.slice(3, 5), 16);
   const b = parseInt(n.slice(5, 7), 16);
   const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  return lum < 0.18 ? DEFAULT_PREVIEW_COLOR : n;
+  return lum > 0.88 ? DEFAULT_PREVIEW_COLOR : n;
 }
 
 function normalizeCssColor(raw) {

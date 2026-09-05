@@ -5,58 +5,54 @@ using QuestPDF.Infrastructure;
 namespace PortalClienchi.Web.PortalPdf;
 
 /// <summary>
-/// Misma base que <see cref="Planillas.OportunidadPdfService"/>:
-/// QuestPDF + Fonts.Arial (probado en Railway) + layout en Content sin elementos vacíos.
+/// Generador corporativo de PDFs para instructivos y notas del Portal de Clientes Thomson Reuters.
+/// Formato estándar A4 vertical (Portrait), fondo blanco, cabecera con membrete oficial y
+/// soporte para tablas, títulos corporativos, listas e imágenes.
 /// </summary>
 public static class PortalPdfService
 {
-    private static readonly Color PageBg = Color.FromHex("#1A1A1A");
-    private static readonly Color BrandText = Color.FromHex("#F2F2F2");
+    private static readonly Color BrandText = Color.FromHex("#1E293B");
     private static readonly Color BrandAccent = Color.FromHex("#F36C00");
-    private static readonly Color BodyText = Color.FromHex("#F2F2F2");
-    private static readonly Color LinkText = Color.FromHex("#7DD3FC");
+    private static readonly Color BodyText = Color.FromHex("#1E293B");
+    private static readonly Color LinkText = Color.FromHex("#0284C7");
+    private static readonly Color HeaderBg = Color.FromHex("#6B7280");
+    private static readonly Color TableBorder = Color.FromHex("#CBD5E1");
 
     public static byte[] GeneratePdfBytes(PortalPdfGenerateRequest request, string? contentRoot = null)
     {
         QuestPDF.Settings.License = LicenseType.Community;
 
         var brand = (request.Brand ?? "").Trim();
-        var blocks = PortalPdfHtmlParser.Parse(request.Html, request.Text);
+        var elements = PortalPdfHtmlParser.Parse(request.Html, request.Text);
         var logo = FindThomsonLogoBytes(contentRoot);
-        var lines = GroupLines(blocks).ToList();
-        var pageSize = BuildAdaptivePageSize(lines);
 
         return Document.Create(container =>
         {
             container.Page(page =>
             {
-                // Ancho A4; alto ajustado al contenido para no dejar vacío abajo.
-                page.Size(pageSize);
-                // Márgenes asimétricos: logo bien pegado a la esquina superior derecha.
-                page.MarginLeft(24);
-                page.MarginRight(8);
-                page.MarginTop(8);
-                page.MarginBottom(24);
-                page.PageColor(PageBg);
-                // Igual que Oportunidad: Arial (fonts-liberation en Docker / sistema en Windows).
-                page.DefaultTextStyle(x => x.FontSize(11f).FontFamily(Fonts.Arial).FontColor(BodyText));
+                // Hoja estándar A4 Vertical (Portrait: 595.28 x 841.89 pt)
+                page.Size(PageSizes.A4);
+                page.MarginHorizontal(36);
+                page.MarginVertical(32);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10.5f).FontFamily(Fonts.Arial).FontColor(BodyText));
 
-                page.Content().Column(col =>
+                // Cabecera corporativa con logo y título / marca
+                page.Header().Column(headerCol =>
                 {
-                    // Header: título y logo centrados a la misma altura.
-                    col.Item().PaddingBottom(16).Row(row =>
+                    headerCol.Item().Row(row =>
                     {
                         if (!string.IsNullOrWhiteSpace(brand))
                         {
                             row.RelativeItem().AlignLeft().AlignMiddle().Column(brandCol =>
                             {
                                 brandCol.Item()
-                                    .Text(brand)
-                                    .FontSize(16f)
+                                    .Text(brand.ToUpperInvariant())
+                                    .FontSize(13f)
                                     .SemiBold()
                                     .FontColor(BrandText)
                                     .FontFamily(Fonts.Arial);
-                                brandCol.Item().PaddingTop(6).Width(48).Height(3).Background(BrandAccent);
+                                brandCol.Item().PaddingTop(4).Width(40).Height(3).Background(BrandAccent);
                             });
                         }
                         else
@@ -64,126 +60,229 @@ public static class PortalPdfService
                             row.RelativeItem();
                         }
 
-                        row.ConstantItem(4);
+                        row.ConstantItem(8);
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(290).AlignRight().AlignMiddle().Height(80).Image(logo).FitHeight();
+                            row.ConstantItem(210).AlignRight().AlignMiddle().Height(36).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(290).AlignRight().AlignMiddle()
+                            row.ConstantItem(210).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(13f)
-                                .FontColor(Colors.White)
+                                .FontSize(12f)
+                                .SemiBold()
+                                .FontColor(BrandText)
                                 .FontFamily(Fonts.Arial);
                         }
                     });
 
-                    if (lines.Count == 0)
+                    headerCol.Item().PaddingTop(10).LineHorizontal(1).LineColor(Color.FromHex("#E2E8F0"));
+                });
+
+                // Contenido del documento
+                page.Content().PaddingTop(12).Column(col =>
+                {
+                    if (elements.Count == 0)
                     {
-                        col.Item().Text(" ").FontSize(11f);
+                        col.Item().Text(" ").FontSize(10.5f);
                         return;
                     }
 
-                    foreach (var line in lines)
+                    foreach (var elem in elements)
                     {
-                        if (line.Count == 0 || (line.Count == 1 && line[0].Text == "\n"))
+                        switch (elem)
                         {
-                            col.Item().Height(14);
-                            continue;
+                            case PortalPdfParagraphElement para:
+                                RenderParagraph(col, para);
+                                break;
+
+                            case PortalPdfTableElement table:
+                                RenderTable(col, table);
+                                break;
+
+                            case PortalPdfHrElement:
+                                col.Item().PaddingVertical(8).LineHorizontal(1).LineColor(Color.FromHex("#CBD5E1"));
+                                break;
+
+                            case PortalPdfImageElement img when img.ImageBytes.Length > 0:
+                                col.Item().PaddingVertical(8).MaxWidth(480).Image(img.ImageBytes).FitWidth();
+                                break;
                         }
-
-                        var align = NormalizeAlign(line[0].Align);
-                        col.Item().Element(item =>
-                        {
-                            item = align switch
-                            {
-                                "center" => item.AlignCenter(),
-                                "right" => item.AlignRight(),
-                                _ => item.AlignLeft(),
-                            };
-
-                            item.Text(text =>
-                            {
-                                // Sin Justify(): en algunos hosts Skia falla; left/center/right bastan.
-                                if (align == "center")
-                                    text.AlignCenter();
-                                else if (align == "right")
-                                    text.AlignRight();
-                                else
-                                    text.AlignLeft();
-
-                                text.ParagraphSpacing(2);
-
-                                foreach (var run in line)
-                                {
-                                    if (run.Text == "\n") continue;
-                                    var content = Sanitize(run.Text);
-                                    if (content.Length == 0) continue;
-
-                                    // Links: subrayado + color (sin API Hyperlink, más estable en Linux).
-                                    var isLink = !string.IsNullOrWhiteSpace(run.LinkUrl) && IsSafePdfLink(run.LinkUrl!);
-                                    var span = text.Span(content)
-                                        .FontFamily(Fonts.Arial)
-                                        .FontColor(isLink ? LinkText : ResolveRunColor(run.Color))
-                                        .FontSize(run.FontSize ?? 12f);
-
-                                    if (run.Bold) span.Bold();
-                                    if (run.Italic) span.Italic();
-                                    if (run.Underline || isLink) span.Underline();
-                                    if (run.Strike) span.Strikethrough();
-                                }
-                            });
-                        });
-
-                        col.Item().Height(8);
                     }
+                });
+
+                // Pie de página corporativo
+                page.Footer().Column(footerCol =>
+                {
+                    footerCol.Item().LineHorizontal(0.5f).LineColor(Color.FromHex("#E2E8F0"));
+                    footerCol.Item().PaddingTop(6).Row(row =>
+                    {
+                        row.RelativeItem().Text("Thomson Reuters · Portal de Clientes")
+                            .FontSize(8f)
+                            .FontColor(Colors.Grey.Medium);
+
+                        row.RelativeItem().AlignRight().Text(text =>
+                        {
+                            text.DefaultTextStyle(x => x.FontSize(8f).FontColor(Colors.Grey.Medium));
+                            text.Span("Página ");
+                            text.CurrentPageNumber();
+                            text.Span(" de ");
+                            text.TotalPages();
+                        });
+                    });
                 });
             });
         }).GeneratePdf();
     }
 
-    private static PageSize BuildAdaptivePageSize(IReadOnlyList<List<PortalPdfBlock>> lines)
+    private static void RenderParagraph(ColumnDescriptor col, PortalPdfParagraphElement para)
     {
-        var width = PageSizes.A4.Width;
-        var maxHeight = PageSizes.A4.Height;
-        const float minHeight = 340f;
-        const float margins = 32f; // top 8 + bottom 24
-        const float header = 104f;
-
-        float body = 0f;
-        foreach (var line in lines)
+        if (para.Runs.Count == 0 || (para.Runs.Count == 1 && string.IsNullOrWhiteSpace(para.Runs[0].Text)))
         {
-            if (line.Count == 0 || (line.Count == 1 && line[0].Text == "\n"))
+            col.Item().Height(8);
+            return;
+        }
+
+        var align = NormalizeAlign(para.Align);
+
+        var topPad = para.HeadingLevel switch
+        {
+            1 => 14f,
+            2 => 10f,
+            3 => 8f,
+            _ => 0f,
+        };
+
+        var botPad = para.HeadingLevel switch
+        {
+            1 => 6f,
+            2 => 5f,
+            3 => 4f,
+            _ => 6f,
+        };
+
+        if (para.IsListItem)
+        {
+            col.Item().PaddingTop(2).PaddingBottom(4).PaddingLeft(12).Row(r =>
             {
-                body += 14f;
+                r.ConstantItem(12).Text("•").Bold().FontColor(Color.FromHex("#E05A10"));
+                r.RelativeItem().Text(text =>
+                {
+                    ConfigureTextAlignment(text, align);
+                    text.ParagraphSpacing(1);
+                    RenderRuns(text, para.Runs);
+                });
+            });
+            return;
+        }
+
+        col.Item().PaddingTop(topPad).PaddingBottom(botPad).Text(text =>
+        {
+            ConfigureTextAlignment(text, para.HeadingLevel > 0 ? "left" : align);
+            text.ParagraphSpacing(2);
+            RenderRuns(text, para.Runs);
+        });
+    }
+
+    private static void ConfigureTextAlignment(TextDescriptor text, string align)
+    {
+        if (align == "center")
+            text.AlignCenter();
+        else if (align == "right")
+            text.AlignRight();
+        else
+            text.AlignLeft();
+    }
+
+    private static void RenderRuns(TextDescriptor text, IReadOnlyList<PortalPdfBlock> runs)
+    {
+        foreach (var run in runs)
+        {
+            if (run.Text == "\n")
+            {
+                text.EmptyLine();
                 continue;
             }
 
-            var textLen = 0;
-            var fontSize = 12f;
-            foreach (var run in line)
-            {
-                if (run.Text == "\n") continue;
-                textLen += run.Text?.Length ?? 0;
-                if (run.FontSize is > 0)
-                    fontSize = Math.Max(fontSize, run.FontSize.Value);
-            }
+            var content = Sanitize(run.Text);
+            if (content.Length == 0) continue;
 
-            // ~90 caracteres por línea a 12pt en ancho útil A4.
-            var charsPerLine = Math.Max(36, (int)(90f * (12f / fontSize)));
-            var wrapped = Math.Max(1, (int)Math.Ceiling(Math.Max(1, textLen) / (double)charsPerLine));
-            body += (wrapped * (fontSize * 1.4f)) + 8f;
+            var isLink = !string.IsNullOrWhiteSpace(run.LinkUrl) && IsSafePdfLink(run.LinkUrl!);
+            var span = text.Span(content)
+                .FontFamily(Fonts.Arial)
+                .FontColor(isLink ? LinkText : ResolveRunColor(run.Color))
+                .FontSize(run.FontSize ?? 10.5f);
+
+            if (run.Bold) span.Bold();
+            if (run.Italic) span.Italic();
+            if (run.Underline || isLink) span.Underline();
+            if (run.Strike) span.Strikethrough();
+        }
+    }
+
+    private static void RenderTable(ColumnDescriptor col, PortalPdfTableElement table)
+    {
+        if (table.Rows.Count == 0) return;
+
+        var maxCols = 1;
+        foreach (var r in table.Rows)
+        {
+            if (r.Count > maxCols) maxCols = r.Count;
         }
 
-        if (body <= 0)
-            body = 40f;
+        col.Item().PaddingVertical(8).Table(tbl =>
+        {
+            tbl.ColumnsDefinition(cols =>
+            {
+                for (var i = 0; i < maxCols; i++)
+                    cols.RelativeColumn();
+            });
 
-        var estimated = margins + header + body + 20f;
-        // Si supera A4, usamos A4 completo (QuestPDF paginará el resto).
-        var height = estimated >= maxHeight ? maxHeight : Math.Max(minHeight, estimated);
-        return new PageSize(width, height);
+            foreach (var row in table.Rows)
+            {
+                foreach (var cell in row)
+                {
+                    var isH = cell.IsHeader;
+                    var bg = isH ? HeaderBg : Colors.White;
+                    var defaultCellColor = isH ? Colors.White : BodyText;
+
+                    tbl.Cell()
+                        .Border(0.75f)
+                        .BorderColor(TableBorder)
+                        .Background(bg)
+                        .PaddingVertical(5)
+                        .PaddingHorizontal(8)
+                        .Text(text =>
+                        {
+                            ConfigureTextAlignment(text, cell.Align);
+                            if (cell.Content.Count == 0)
+                            {
+                                text.Span(" ");
+                                return;
+                            }
+
+                            foreach (var run in cell.Content)
+                            {
+                                if (run.Text == "\n") continue;
+                                var content = Sanitize(run.Text);
+                                if (content.Length == 0) continue;
+
+                                var runColor = isH ? Colors.White : ResolveRunColor(run.Color);
+                                var span = text.Span(content)
+                                    .FontFamily(Fonts.Arial)
+                                    .FontColor(runColor)
+                                    .FontSize(run.FontSize ?? 9.5f);
+
+                                if (run.Bold || isH) span.Bold();
+                                if (run.Italic) span.Italic();
+                                if (run.Underline) span.Underline();
+                                if (run.Strike) span.Strikethrough();
+                            }
+                        });
+                }
+            }
+        });
     }
 
     private static string NormalizeAlign(string? align)
@@ -207,64 +306,22 @@ public static class PortalPdfService
         if (string.IsNullOrEmpty(normalized))
             return BodyText;
 
-        if (IsNearBlack(normalized))
+        // Si el color es casi blanco (copiado de un tema oscuro de prueba), normalizar a oscuro sobre fondo blanco
+        if (IsNearWhite(normalized))
             return BodyText;
 
         try { return Color.FromHex(normalized); }
         catch { return BodyText; }
     }
 
-    private static bool IsNearBlack(string hex)
+    private static bool IsNearWhite(string hex)
     {
         if (hex.Length != 7 || hex[0] != '#') return false;
         if (!int.TryParse(hex.AsSpan(1, 2), System.Globalization.NumberStyles.HexNumber, null, out var r)) return false;
         if (!int.TryParse(hex.AsSpan(3, 2), System.Globalization.NumberStyles.HexNumber, null, out var g)) return false;
         if (!int.TryParse(hex.AsSpan(5, 2), System.Globalization.NumberStyles.HexNumber, null, out var b)) return false;
-        var lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
-        return lum < 0.18;
-    }
-
-    private static IEnumerable<List<PortalPdfBlock>> GroupLines(IReadOnlyList<PortalPdfBlock> blocks)
-    {
-        var current = new List<PortalPdfBlock>();
-        foreach (var b in blocks)
-        {
-            if (b.Text == "\n")
-            {
-                yield return current;
-                current = new List<PortalPdfBlock>();
-                continue;
-            }
-
-            var parts = b.Text.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
-            for (var i = 0; i < parts.Length; i++)
-            {
-                if (i > 0)
-                {
-                    yield return current;
-                    current = new List<PortalPdfBlock>();
-                }
-
-                if (parts[i].Length == 0 && i < parts.Length - 1)
-                    continue;
-
-                current.Add(new PortalPdfBlock
-                {
-                    Text = parts[i],
-                    Italic = b.Italic,
-                    Bold = b.Bold,
-                    Underline = b.Underline,
-                    Strike = b.Strike,
-                    Align = b.Align,
-                    Color = b.Color,
-                    FontSize = b.FontSize,
-                    LinkUrl = b.LinkUrl,
-                });
-            }
-        }
-
-        if (current.Count > 0)
-            yield return current;
+        var lum = (0.2126f * r + 0.7152f * g + 0.0722f * b) / 255f;
+        return lum > 0.88f;
     }
 
     private static string Sanitize(string? text)
@@ -281,21 +338,18 @@ public static class PortalPdfService
         {
             candidates.Add(Path.Combine(contentRoot, "wwwroot", "img", "thomson-reuters-logo.png"));
             candidates.Add(Path.Combine(contentRoot, "img", "thomson-reuters-logo.png"));
-            // Mismos nombres que Oportunidad, por si existen en el root publicado.
-            candidates.Add(Path.Combine(contentRoot, "wwwroot", "logo.png"));
-            candidates.Add(Path.Combine(contentRoot, "logo.png"));
         }
 
         candidates.Add(Path.Combine(AppContext.BaseDirectory, "wwwroot", "img", "thomson-reuters-logo.png"));
         candidates.Add(Path.Combine(AppContext.BaseDirectory, "img", "thomson-reuters-logo.png"));
-        candidates.Add(Path.Combine(AppContext.BaseDirectory, "wwwroot", "logo.png"));
-        candidates.Add(Path.Combine(AppContext.BaseDirectory, "logo.png"));
 
-        foreach (var path in candidates.Distinct(StringComparer.OrdinalIgnoreCase))
+        foreach (var path in candidates)
         {
-            if (!File.Exists(path))
-                continue;
-            try { return File.ReadAllBytes(path); }
+            try
+            {
+                if (File.Exists(path))
+                    return File.ReadAllBytes(path);
+            }
             catch { /* ignore */ }
         }
 

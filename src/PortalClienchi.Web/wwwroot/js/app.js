@@ -380,8 +380,12 @@ function syncProfilePortalAccess() {
 
   if (activeTab === "thom" || activeTab === "portal") {
     const tabId = activeTab;
-    portalSistemaBar?.classList.toggle("hidden", !profileContextBarVisible("portal", tabId));
-    thomPortalBar?.classList.toggle("hidden", !profileContextBarVisible("thom", tabId));
+    const portalCtxVisible = profileContextBarVisible("portal", tabId);
+    const thomCtxVisible = profileContextBarVisible("thom", tabId);
+    portalSistemaBar?.classList.toggle("hidden", !portalCtxVisible);
+    thomPortalBar?.classList.toggle("hidden", !thomCtxVisible);
+    document.body.classList.toggle("portal-context-active", tabId === "portal" && portalCtxVisible);
+    document.body.classList.toggle("thom-context-active", tabId === "thom" && thomCtxVisible);
   }
 
   syncAboutNoticeCopy();
@@ -5060,10 +5064,14 @@ function switchTab(tabId) {
   });
 
   statusBar?.classList.add("hidden");
-  portalSistemaBar?.classList.toggle("hidden", !profileContextBarVisible("portal", tabId));
-  thomPortalBar?.classList.toggle("hidden", !profileContextBarVisible("thom", tabId));
+  const portalCtxVisible = profileContextBarVisible("portal", tabId);
+  const thomCtxVisible = profileContextBarVisible("thom", tabId);
+  portalSistemaBar?.classList.toggle("hidden", !portalCtxVisible);
+  thomPortalBar?.classList.toggle("hidden", !thomCtxVisible);
   document.body.classList.toggle("portal-tab-active", tabId === "portal");
+  document.body.classList.toggle("portal-context-active", tabId === "portal" && portalCtxVisible);
   document.body.classList.toggle("thom-tab-active", tabId === "thom");
+  document.body.classList.toggle("thom-context-active", tabId === "thom" && thomCtxVisible);
   document.body.classList.toggle("admin-tab-active", tabId === ADMIN_TAB_ID);
   document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai" || tabId === "portal");
 

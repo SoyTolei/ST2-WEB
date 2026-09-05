@@ -440,7 +440,6 @@ html.st2-theme-dark .plan-placeholder-module,
 html.st2-theme-dark .plan-status-bar,
 html.st2-theme-dark .pdf-portal-formatbar,
 html.st2-theme-dark .pdf-portal-editor-shell,
-html.st2-theme-dark .pdf-portal-preview,
 html.st2-theme-dark .blanqueo-toolbar,
 html.st2-theme-dark .blanqueo-form-panel,
 html.st2-theme-dark .borrado-form-panel,
@@ -2454,17 +2453,51 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich:focus {
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview {
-  background: #141414 !important;
-  border-color: #262626 !important;
-  box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.8) !important;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.7) !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-brand {
+  color: #0f172a !important;
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-body {
-  color: #f2f2f2 !important;
+  color: #1e293b !important;
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-body:empty::before {
-  color: #666666 !important;
+  color: #94a3b8 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview td {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border-color: #d1d5db !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview th {
+  background: #737373 !important;
+  color: #ffffff !important;
+  border-color: #525252 !important;
+}
+
+/* En el editor izquierdo en modo oscuro, celdas de tabla legibles */
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich table {
+  border-color: #374151 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich th {
+  background: #374151 !important;
+  color: #f8fafc !important;
+  border-color: #4b5563 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich td {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
 }
 
 html.st2-theme-dark .pdf-portal-sheet-badge {
