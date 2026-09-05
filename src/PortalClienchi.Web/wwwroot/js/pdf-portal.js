@@ -41,7 +41,9 @@ export function syncSheetThemeUi() {
 
   const previewLogo = document.getElementById("pdf-portal-preview-logo");
   if (previewLogo) {
-    previewLogo.src = isDark ? "/img/thomson-reuters-logo-dark.svg" : "/img/thomson-reuters-logo.svg";
+    previewLogo.src = isDark
+      ? "/img/portal-cliente-logo-dark.svg?v=20260905c"
+      : "/img/portal-cliente-logo.svg?v=20260905c";
   }
 }
 

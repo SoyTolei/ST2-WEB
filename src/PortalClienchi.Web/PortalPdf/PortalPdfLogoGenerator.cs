@@ -108,11 +108,15 @@ public static class PortalPdfLogoGenerator
             var imgDir = Path.Combine(webRootPath, "img");
             if (!Directory.Exists(imgDir)) Directory.CreateDirectory(imgDir);
 
-            var lightFile = Path.Combine(imgDir, "thomson-reuters-logo.png");
-            var darkFile = Path.Combine(imgDir, "thomson-reuters-logo-dark.png");
+            var lightFile = Path.Combine(imgDir, "portal-cliente-logo.png");
+            var darkFile = Path.Combine(imgDir, "portal-cliente-logo-dark.png");
 
             File.WriteAllBytes(lightFile, GetLogoBytes(false));
             File.WriteAllBytes(darkFile, GetLogoBytes(true));
+
+            // Compatibilidad
+            File.WriteAllBytes(Path.Combine(imgDir, "thomson-reuters-logo.png"), GetLogoBytes(false));
+            File.WriteAllBytes(Path.Combine(imgDir, "thomson-reuters-logo-dark.png"), GetLogoBytes(true));
         }
         catch { /* ignore */ }
     }
