@@ -104,11 +104,11 @@ public static class PortalPdfService
                             {
                                 brandCol.Item()
                                     .Text(brand.ToUpperInvariant())
-                                    .FontSize(13f)
+                                    .FontSize(11.5f)
                                     .SemiBold()
                                     .FontColor(theme.BrandText)
                                     .FontFamily(Fonts.Arial);
-                                brandCol.Item().PaddingTop(4).Width(40).Height(3).Background(theme.BrandAccent);
+                                brandCol.Item().PaddingTop(3).Width(32).Height(2f).Background(theme.BrandAccent);
                             });
                         }
                         else
@@ -120,20 +120,20 @@ public static class PortalPdfService
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(210).AlignRight().AlignMiddle().Height(36).Image(logo).FitHeight();
+                            row.ConstantItem(150).AlignRight().AlignMiddle().Height(24).Image(logo).FitHeight();
                         }
                         else
                         {
-                            row.ConstantItem(210).AlignRight().AlignMiddle()
+                            row.ConstantItem(150).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(12f)
+                                .FontSize(10.5f)
                                 .SemiBold()
                                 .FontColor(theme.BrandText)
                                 .FontFamily(Fonts.Arial);
                         }
                     });
 
-                    headerCol.Item().PaddingTop(10).LineHorizontal(1).LineColor(theme.LineColor);
+                    headerCol.Item().PaddingTop(6).LineHorizontal(0.75f).LineColor(theme.LineColor);
                 });
 
                 // Contenido del documento

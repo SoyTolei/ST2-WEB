@@ -404,10 +404,8 @@ export async function openPdfPortalModal(initialData = null) {
     if (editor) {
       if (initialData.html && initialData.html.trim()) {
         editor.innerHTML = sanitizePasteHtml(initialData.html);
-        applied = true;
       } else if (initialData.text) {
         editor.innerText = initialData.text;
-        applied = true;
       }
       fixInvisibleEditorColors(editor);
       editor.dispatchEvent(new Event("input", { bubbles: true }));
@@ -421,19 +419,9 @@ export async function openPdfPortalModal(initialData = null) {
         statusEl.className = "pdf-portal-status is-success";
       }
     }
-  }
-
-  // Si no vino contenido de iframe y el editor está vacío, intentar auto-pegar del portapapeles
-  if (!applied && editor && !editor.textContent?.trim()) {
-    try {
-      const pasted = await pasteFromClipboardToEditor({ silent: true });
-      if (pasted && statusEl) {
-        statusEl.textContent = "✓ Contenido pegado automáticamente desde el portapapeles.";
-        statusEl.className = "pdf-portal-status is-success";
-      }
-    } catch {
-      // Ignorar si el navegador pide permisos explícitos
-    }
+  } else {
+    // Si se abre de forma normal sin datos iniciales, limpiar estado para no mostrar residuos
+    clearPdfPortalState();
   }
 
   setTimeout(() => {
@@ -445,11 +433,35 @@ export async function openPdfPortalModal(initialData = null) {
   }, 50);
 }
 
+export function clearPdfPortalState() {
+  const brandInput = document.getElementById("pdf-portal-brand");
+  const editor = document.getElementById("pdf-portal-editor");
+  const previewBrand = document.getElementById("pdf-portal-preview-brand");
+  const previewBody = document.getElementById("pdf-portal-preview-body");
+  const statusEl = document.getElementById("pdf-portal-status");
+
+  if (brandInput) brandInput.value = "";
+  if (editor) editor.innerHTML = "";
+  if (previewBrand) {
+    previewBrand.textContent = "";
+    previewBrand.classList.add("hidden");
+  }
+  if (previewBody) {
+    previewBody.innerHTML = "";
+  }
+  if (statusEl) {
+    statusEl.textContent = "";
+    statusEl.className = "pdf-portal-status";
+  }
+  lastRecordedSelection = null;
+}
+
 export function closePdfPortalModal() {
   const modal = document.getElementById("pdf-portal-modal");
   if (!modal) return;
   modal.classList.add("hidden");
   modal.setAttribute("aria-hidden", "true");
+  clearPdfPortalState();
   if (window.location.pathname === "/pdfportal" || window.location.pathname === "/pdf-portal") {
     try {
       window.history.replaceState({}, "", "/planillas");
@@ -582,9 +594,7 @@ export function initPdfPortalGenerator() {
   pasteActionBtn?.addEventListener("click", onPasteClick);
 
   clearBtn?.addEventListener("click", () => {
-    if (brandInput) brandInput.value = "";
-    editor.innerHTML = "";
-    setStatus("");
+    clearPdfPortalState();
     refreshPreview();
     editor.focus();
   });
