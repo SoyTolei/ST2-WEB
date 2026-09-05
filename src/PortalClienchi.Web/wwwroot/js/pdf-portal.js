@@ -33,14 +33,262 @@ export function syncPdfPortalModuleVisibility() {
   btn.setAttribute("aria-hidden", allowed ? "false" : "true");
 }
 
-export function openPdfPortalModal() {
+let lastRecordedSelection = null;
+
+export function bindPortalFrameContentWatcher(frame = document.getElementById("portalFrame")) {
+  if (!frame) return;
+  const attach = () => {
+    try {
+      const doc = frame.contentDocument || frame.contentWindow?.document;
+      if (!doc) return;
+      const onSelect = () => {
+        try {
+          const win = frame.contentWindow;
+          const sel = win?.getSelection();
+          if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
+            const text = sel.toString().trim();
+            if (text.length > 0) {
+              const range = sel.getRangeAt(0);
+              const div = document.createElement("div");
+              div.appendChild(range.cloneContents());
+              lastRecordedSelection = {
+                title: findPortalDocTitle(doc),
+                html: div.innerHTML,
+                text: text,
+                source: "selection",
+                timestamp: Date.now(),
+              };
+            }
+          }
+        } catch { /* ignore */ }
+      };
+      doc.removeEventListener("selectionchange", onSelect);
+      doc.removeEventListener("mouseup", onSelect);
+      doc.removeEventListener("keyup", onSelect);
+      doc.addEventListener("selectionchange", onSelect, { passive: true });
+      doc.addEventListener("mouseup", onSelect, { passive: true });
+      doc.addEventListener("keyup", onSelect, { passive: true });
+    } catch { /* cross-origin or restricted */ }
+  };
+
+  frame.addEventListener("load", attach);
+  attach();
+}
+
+function findPortalDocTitle(doc) {
+  if (!doc) return "";
+  const titleSelectors = [
+    "h1",
+    ".article-title",
+    ".knowledge-title",
+    ".faq-title",
+    ".document-title",
+    ".topic-title",
+    ".title-header",
+    ".page-header h1",
+    ".page-header h2",
+    "h2.title",
+    ".card-title",
+  ];
+  for (const sel of titleSelectors) {
+    const el = doc.querySelector(sel);
+    if (el) {
+      const text = (el.textContent || "").trim();
+      if (text.length >= 3 && text.length < 160) {
+        return text;
+      }
+    }
+  }
+
+  const rawTitle = (doc.title || "").trim();
+  if (rawTitle) {
+    const clean = rawTitle
+      .replace(/^portal\s+del?\s+cliente\s*[-|–—:]\s*/i, "")
+      .replace(/^thomson\s+reuters\s*[-|–—:]\s*/i, "")
+      .replace(/\s*[-|–—:]\s*thomson\s+reuters.*$/i, "")
+      .replace(/\s*[-|–—:]\s*portal.*$/i, "")
+      .trim();
+    if (clean.length >= 3 && clean.length < 160) return clean;
+  }
+  return "";
+}
+
+function cleanPortalNoiseElements(root) {
+  if (!root) return;
+  const removeSelectors = [
+    "script",
+    "style",
+    "noscript",
+    "svg",
+    "nav",
+    "header",
+    "footer",
+    "aside",
+    "button",
+    "input",
+    "select",
+    "textarea",
+    "form",
+    ".navbar",
+    ".nav",
+    ".menu",
+    ".sidebar",
+    ".header",
+    ".footer",
+    ".toolbar",
+    ".breadcrumb",
+    ".pagination",
+    ".search-bar",
+    ".search-form",
+    ".actions-bar",
+    ".btn",
+    "[role='navigation']",
+    "[role='search']",
+  ];
+  root.querySelectorAll(removeSelectors.join(",")).forEach((el) => {
+    if (el !== root) el.remove();
+  });
+}
+
+function extractArticleFromPortalDoc(doc) {
+  if (!doc || !doc.body) return null;
+
+  const title = findPortalDocTitle(doc);
+
+  const contentSelectors = [
+    "article",
+    ".article-content",
+    ".article-body",
+    ".knowledge-content",
+    ".knowledge-body",
+    ".knowledge-detail",
+    ".faq-content",
+    ".faq-body",
+    ".document-body",
+    ".instruction-content",
+    ".instruction-body",
+    ".topic-content",
+    ".guide-content",
+    ".detail-content",
+    ".content-detail",
+    ".post-content",
+    ".entry-content",
+    "[role='main']",
+    "main",
+    "#main-content",
+    ".main-content",
+    ".content-view",
+    ".view-content",
+    ".modal-body",
+    ".card-body",
+  ];
+
+  let targetEl = null;
+  for (const sel of contentSelectors) {
+    const found = doc.querySelector(sel);
+    if (found && (found.innerText || found.textContent || "").trim().length > 30) {
+      targetEl = found;
+      break;
+    }
+  }
+
+  const sourceNode = targetEl || doc.body;
+  const clone = sourceNode.cloneNode(true);
+  cleanPortalNoiseElements(clone);
+
+  const rawText = (clone.innerText || clone.textContent || "").trim();
+  if (!rawText || rawText.length < 15) {
+    return title ? { title, html: "", text: "", source: "title-only" } : null;
+  }
+
+  return {
+    title: title || "",
+    html: clone.innerHTML,
+    text: rawText,
+    source: targetEl ? "article" : "page",
+  };
+}
+
+export function extractContentFromPortalFrame(frame = document.getElementById("portalFrame")) {
+  if (!frame) return null;
+
+  let doc = null;
+  let win = null;
+  try {
+    doc = frame.contentDocument || frame.contentWindow?.document;
+    win = frame.contentWindow;
+  } catch (e) {
+    console.warn("No se pudo acceder al iframe de Portal:", e);
+    return null;
+  }
+
+  // 1. Prioridad: ¿hay texto seleccionado activamente en el iframe?
+  try {
+    const sel = win?.getSelection();
+    if (sel && !sel.isCollapsed && sel.rangeCount > 0) {
+      const text = sel.toString().trim();
+      if (text.length > 0) {
+        const range = sel.getRangeAt(0);
+        const div = document.createElement("div");
+        div.appendChild(range.cloneContents());
+        return {
+          title: findPortalDocTitle(doc),
+          html: div.innerHTML,
+          text: text,
+          source: "selection",
+        };
+      }
+    }
+  } catch { /* ignore */ }
+
+  // 2. ¿Hubo una selección reciente en los últimos 4 segundos?
+  if (lastRecordedSelection && Date.now() - lastRecordedSelection.timestamp < 4000) {
+    return lastRecordedSelection;
+  }
+
+  // 3. Si no hay selección, extraer el instructivo o contenido principal que se está viendo
+  if (doc) {
+    return extractArticleFromPortalDoc(doc);
+  }
+
+  return null;
+}
+
+export function openPdfPortalModal(initialData = null) {
   const modal = document.getElementById("pdf-portal-modal");
   if (!modal) return;
   initPdfPortalGenerator();
   modal.classList.remove("hidden");
   modal.setAttribute("aria-hidden", "false");
+
   const brand = document.getElementById("pdf-portal-brand");
   const editor = document.getElementById("pdf-portal-editor");
+  const statusEl = document.getElementById("pdf-portal-status");
+
+  if (initialData) {
+    if (initialData.title && brand) {
+      brand.value = initialData.title;
+    }
+    if (editor) {
+      if (initialData.html && initialData.html.trim()) {
+        editor.innerHTML = sanitizePasteHtml(initialData.html);
+      } else if (initialData.text) {
+        editor.innerText = initialData.text;
+      }
+      fixInvisibleEditorColors(editor);
+      editor.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    if (statusEl) {
+      if (initialData.source === "selection") {
+        statusEl.textContent = "Texto seleccionado en el portal copiado al generador.";
+        statusEl.classList.remove("is-error");
+      } else if (initialData.source === "article" || initialData.source === "page") {
+        statusEl.textContent = "Contenido extraído automáticamente del portal.";
+        statusEl.classList.remove("is-error");
+      }
+    }
+  }
+
   setTimeout(() => {
     if (brand && !brand.value) {
       brand.focus();

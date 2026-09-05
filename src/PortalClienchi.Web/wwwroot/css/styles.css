@@ -1046,25 +1046,6 @@ body.admin-tab-active {
   flex: 1;
   min-height: 0;
   position: relative;
-  isolation: isolate;
-}
-
-#panel-portal.active::before {
-  content: "";
-  position: absolute;
-  inset: -8px -4px -4px;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(920px 340px at 8% -10%, rgba(214, 64, 0, 0.2), transparent 58%),
-    radial-gradient(720px 280px at 92% 0%, rgba(28, 36, 51, 0.12), transparent 55%),
-    linear-gradient(180deg, #f3ebe4 0%, #ebe7e1 38%, #e4e8ef 100%);
-  border-radius: 16px;
-}
-
-#panel-portal .portal-layout {
-  position: relative;
-  z-index: 1;
 }
 
 @keyframes fadeSlide {
@@ -1797,14 +1778,24 @@ body.portal-tab-active .combo-box {
 
 .embed-toolbar {
   display: flex;
-  gap: 6px;
-  margin-bottom: 2px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 10;
 }
 
 .embed-toolbar .btn {
-  padding: 5px 10px;
-  font-size: 12px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .embed-toolbar.embed-toolbar-compact {

@@ -1,5 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
-import { openPdfPortalModal } from "./pdf-portal.js";
+import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
@@ -5099,6 +5099,7 @@ function initEmbedReminders() {
   bindEmbedEngagement(thomFrame, "thom");
   bindEmbedEngagement(aiFrame, "ai");
   bindEmbedEngagement(portalFrame, "portal");
+  bindPortalFrameContentWatcher(portalFrame);
   window.addEventListener("message", onThomEmbedMessage);
   thomFrame?.addEventListener("load", () => {
     if (isEmbedFrameEmpty(thomFrame)) return;
@@ -5190,7 +5191,8 @@ document.getElementById("portalOpenBtn")?.addEventListener("click", () => {
   if (url) window.open(url, "_blank", "noopener");
 });
 document.getElementById("portalGeneratePdfBtn")?.addEventListener("click", () => {
-  openPdfPortalModal();
+  const extracted = extractContentFromPortalFrame(portalFrame);
+  openPdfPortalModal(extracted);
 });
 
 async function bootstrapApp() {

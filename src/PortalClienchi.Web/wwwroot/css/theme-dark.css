@@ -2356,6 +2356,17 @@ html.st2-theme-dark .pdf-portal-modal-close:hover {
   color: #f8fafc;
 }
 
+html.st2-theme-dark .embed-toolbar .btn-secondary {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #3b465c !important;
+}
+
+html.st2-theme-dark .embed-toolbar .btn-secondary:hover {
+  background: #2b384e !important;
+  color: #ffffff !important;
+}
+
 html.st2-theme-dark .portal-generate-pdf-btn {
   background: #f36c00 !important;
   border-color: #d95e00 !important;
