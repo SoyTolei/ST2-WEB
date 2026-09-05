@@ -289,13 +289,17 @@
 }
 
 .pdf-portal-sheet-badge {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 600;
   color: #f36c00;
   background: rgba(243, 108, 0, 0.12);
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 999px;
   border: 1px solid rgba(243, 108, 0, 0.28);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.3;
 }
 
 .pdf-portal-sheet-badge-btn {

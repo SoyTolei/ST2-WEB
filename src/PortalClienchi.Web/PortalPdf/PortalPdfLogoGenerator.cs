@@ -83,25 +83,15 @@ public static class PortalPdfLogoGenerator
             canvas.DrawCircle(x, y, 2.9f * scale, dotPaint);
         }
 
-        // Texto secundario: "the answer company™"
-        using var subPaint = new SKPaint
-        {
-            Color = isDark ? SKColor.Parse("#FB923C") : SKColor.Parse("#E05A10"),
-            IsAntialias = true,
-            TextSize = 11.5f * scale,
-            Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.SemiBold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
-        };
-        canvas.DrawText("the answer company™", 76f * scale, 27f * scale, subPaint);
-
-        // Texto principal: "THOMSON REUTERS"
+        // Texto principal: "PORTAL CLIENTE"
         using var mainPaint = new SKPaint
         {
             Color = isDark ? SKColors.White : SKColor.Parse("#1E293B"),
             IsAntialias = true,
-            TextSize = 22f * scale,
+            TextSize = 23f * scale,
             Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Bold, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright)
         };
-        canvas.DrawText("THOMSON REUTERS", 76f * scale, 53f * scale, mainPaint);
+        canvas.DrawText("PORTAL CLIENTE", 76f * scale, 43f * scale, mainPaint);
 
         using var image = surface.Snapshot();
         using var data = image.Encode(SKEncodedImageFormat.Png, 100);

@@ -2472,8 +2472,23 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview .pdf-portal-preview-body,
-html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body {
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body p,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body div,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body li {
   color: #f2f2f2 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container #pdf-portal-editor,
+html.st2-theme-dark #pdf-portal-editor {
+  background: #141414 !important;
+  color: #f2f2f2 !important;
+}
+
+html.st2-theme-dark #pdf-portal-editor p,
+html.st2-theme-dark #pdf-portal-editor div,
+html.st2-theme-dark #pdf-portal-editor li {
+  color: #f2f2f2;
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview h1,

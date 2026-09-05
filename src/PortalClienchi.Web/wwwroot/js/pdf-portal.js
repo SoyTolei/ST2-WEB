@@ -29,14 +29,14 @@ export function syncSheetThemeUi() {
   }
   if (badgeText) {
     badgeText.textContent = isDark
-      ? "📄 Hoja A4 Oscura · Cambiar a Blanca 🖨️"
-      : "📄 Hoja A4 Blanca para imprimir · Cambiar a Oscura 🌙";
+      ? "Cambiar fondo del PDF a blanco ☀️ 🖨️"
+      : "Cambiar fondo PDF a Oscuro 🌙";
   }
   if (toggleBtn) {
     toggleBtn.setAttribute("title", isDark
-      ? "Vista previa y PDF en hoja oscura. Clic para cambiar a hoja blanca para imprimir."
-      : "Vista previa y PDF en hoja blanca. Clic para cambiar a hoja oscura.");
-    toggleBtn.setAttribute("aria-label", isDark ? "Cambiar a hoja blanca" : "Cambiar a hoja oscura");
+      ? "Vista previa y PDF en hoja oscura. Clic para cambiar fondo del PDF a blanco para imprimir."
+      : "Vista previa y PDF en hoja blanca. Clic para cambiar fondo PDF a oscuro.");
+    toggleBtn.setAttribute("aria-label", isDark ? "Cambiar fondo del PDF a blanco" : "Cambiar fondo PDF a Oscuro");
   }
 
   const previewLogo = document.getElementById("pdf-portal-preview-logo");
@@ -299,6 +299,42 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
+function extractDocumentTitle(cleanText, cleanHtml) {
+  // A. Si hay texto plano copiado, la primera línea separada del cuerpo es el título
+  if (cleanText) {
+    const lines = cleanText
+      .split(/\r?\n/)
+      .map((l) => l.trim().replace(/\s+/g, " "))
+      .filter(Boolean);
+    if (lines.length > 0) {
+      const firstLine = lines[0];
+      if (firstLine.length >= 3 && firstLine.length <= 160) {
+        return firstLine;
+      }
+    }
+  }
+
+  // B. Si hay HTML, buscar el primer encabezado o bloque con texto
+  if (cleanHtml) {
+    try {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = cleanHtml;
+      const titleElem = tmp.querySelector("h1, h2, h3, .article-title, .title, .topic-title, .knowledge-title, .page-header");
+      if (titleElem) {
+        const text = (titleElem.textContent || "").trim().replace(/\s+/g, " ");
+        if (text.length >= 3 && text.length <= 160) return text;
+      }
+      const firstBlock = tmp.querySelector("p, div, li, span");
+      if (firstBlock) {
+        const text = (firstBlock.textContent || "").trim().replace(/\s+/g, " ");
+        if (text.length >= 3 && text.length <= 160) return text;
+      }
+    } catch { /* ignore */ }
+  }
+
+  return "";
+}
+
 export async function pasteFromClipboardToEditor({ silent = false } = {}) {
   const brand = document.getElementById("pdf-portal-brand");
   const editor = document.getElementById("pdf-portal-editor");
@@ -349,30 +385,28 @@ export async function pasteFromClipboardToEditor({ silent = false } = {}) {
     return false;
   }
 
-  // 3. Detección inteligente de título si el campo de marca está vacío
-  const fullText = cleanText || cleanHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  const lines = fullText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  if (brand && !brand.value && lines.length > 1) {
-    const candidateTitle = lines[0];
-    if (candidateTitle.length >= 4 && candidateTitle.length <= 85 && !candidateTitle.endsWith(".")) {
-      brand.value = candidateTitle;
-      if (!cleanHtml) {
-        text = lines.slice(1).join("\n\n");
-      }
-    }
+  // 3. Detección inteligente de título: siempre toma la primera línea copiada separada del cuerpo
+  const candidateTitle = extractDocumentTitle(cleanText, cleanHtml);
+  if (brand && candidateTitle) {
+    brand.value = candidateTitle;
+    brand.dispatchEvent(new Event("input", { bubbles: true }));
   }
 
   // 4. Inyectar contenido en el editor
   if (cleanHtml) {
     editor.innerHTML = sanitizePasteHtml(cleanHtml);
   } else if (text) {
-    const paras = text.split(/\r?\n\r?\n/).filter((p) => p.trim());
+    const rawLines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const bodyText = candidateTitle && rawLines.length > 1 && rawLines[0] === candidateTitle
+      ? rawLines.slice(1).join("\n\n")
+      : text;
+    const paras = bodyText.split(/\r?\n\r?\n/).filter((p) => p.trim());
     if (paras.length > 1) {
       editor.innerHTML = paras
         .map((p) => `<p>${escapeHtml(p).replace(/\r?\n/g, "<br/>")}</p>`)
         .join("");
     } else {
-      editor.innerText = text;
+      editor.innerText = bodyText;
     }
   }
 
@@ -969,15 +1003,28 @@ function sanitizePreviewHtml(html) {
   return tmp.innerHTML;
 }
 
-/** Editor (fondo blanco): colores muy claros → oscuro. */
+/** Editor: garantiza contraste según el tema activo del editor (oscuro o claro). */
 function editorSafeColor(raw) {
+  const isDark = document.documentElement.classList.contains("st2-theme-dark");
   const n = normalizeCssColor(raw);
-  if (!n) return DEFAULT_EDITOR_COLOR;
+  const defaultCol = isDark ? "#f2f2f2" : DEFAULT_EDITOR_COLOR;
+  if (!n) return defaultCol;
   const r = parseInt(n.slice(1, 3), 16);
   const g = parseInt(n.slice(3, 5), 16);
   const b = parseInt(n.slice(5, 7), 16);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const sat = max === 0 ? 0 : (max - min) / max;
   const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  return lum > 0.82 ? DEFAULT_EDITOR_COLOR : n;
+
+  if (isDark) {
+    // En tema oscuro: grises neutros y oscuros pasan a blanco puro claro
+    if (sat < 0.35 || lum < 0.25) return defaultCol;
+  } else {
+    // En tema claro: colores casi blancos pasan a oscuro
+    if (lum > 0.82) return defaultCol;
+  }
+  return n;
 }
 
 /** Preview/PDF: garantiza contraste bimodal según la hoja sea oscura o blanca. */
@@ -989,9 +1036,20 @@ function previewSafeColor(hex) {
   const r = parseInt(n.slice(1, 3), 16);
   const g = parseInt(n.slice(3, 5), 16);
   const b = parseInt(n.slice(5, 7), 16);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const sat = max === 0 ? 0 : (max - min) / max;
   const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  if (isDark && lum < 0.20) return defaultCol; // muy oscuro en hoja oscura -> claro
-  if (!isDark && lum > 0.82) return defaultCol; // muy claro en hoja blanca -> oscuro
+
+  if (isDark) {
+    // En hoja oscura: los grises neutros (sat < 0.35) y tonos oscuros (lum < 0.25)
+    // se transforman en blanco puro claro (#f2f2f2) igual que en el documento PDF final.
+    // Los acentos de color vivos (naranjas, azules, verdes) se preservan intactos.
+    if (sat < 0.35 || lum < 0.25) return defaultCol;
+  } else {
+    // En hoja blanca: colores muy claros (lum > 0.80) se normalizan a oscuro
+    if (lum > 0.80) return defaultCol;
+  }
   return n;
 }
 

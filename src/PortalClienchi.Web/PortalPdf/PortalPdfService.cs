@@ -125,7 +125,7 @@ public static class PortalPdfService
                         else
                         {
                             row.ConstantItem(185).AlignRight().AlignMiddle()
-                                .Text("THOMSON REUTERS")
+                                .Text("PORTAL CLIENTE")
                                 .FontSize(12.5f)
                                 .Bold()
                                 .FontColor(theme.BrandText)
