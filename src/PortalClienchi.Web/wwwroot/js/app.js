@@ -5190,9 +5190,9 @@ document.getElementById("portalOpenBtn")?.addEventListener("click", () => {
   const url = getPortalExternalUrl();
   if (url) window.open(url, "_blank", "noopener");
 });
-document.getElementById("portalGeneratePdfBtn")?.addEventListener("click", () => {
+document.getElementById("portalGeneratePdfBtn")?.addEventListener("click", async () => {
   const extracted = extractContentFromPortalFrame(portalFrame);
-  openPdfPortalModal(extracted);
+  await openPdfPortalModal(extracted);
 });
 
 async function bootstrapApp() {

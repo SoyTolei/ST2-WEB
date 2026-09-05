@@ -254,7 +254,104 @@ export function extractContentFromPortalFrame(frame = document.getElementById("p
   return null;
 }
 
-export function openPdfPortalModal(initialData = null) {
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+export async function pasteFromClipboardToEditor({ silent = false } = {}) {
+  const brand = document.getElementById("pdf-portal-brand");
+  const editor = document.getElementById("pdf-portal-editor");
+  const statusEl = document.getElementById("pdf-portal-status");
+  if (!editor) return false;
+
+  let text = "";
+  let html = "";
+
+  // 1. Intentar leer formato enriquecido HTML desde el portapapeles
+  if (navigator.clipboard?.read) {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        if (item.types.includes("text/html")) {
+          const blob = await item.getType("text/html");
+          html = await blob.text();
+        }
+        if (!text && item.types.includes("text/plain")) {
+          const blob = await item.getType("text/plain");
+          text = await blob.text();
+        }
+      }
+    } catch {
+      // Fallback a readText
+    }
+  }
+
+  // 2. Si no se obtuvo HTML o falló el item, intentar con readText
+  if (!html && !text && navigator.clipboard?.readText) {
+    try {
+      text = await navigator.clipboard.readText();
+    } catch (e) {
+      if (!silent) {
+        console.warn("No se pudo leer el portapapeles:", e);
+      }
+    }
+  }
+
+  const cleanText = (text || "").trim();
+  const cleanHtml = (html || "").trim();
+
+  if (!cleanText && !cleanHtml) {
+    if (!silent && statusEl) {
+      statusEl.textContent = "El portapapeles está vacío. Copiá el texto en el portal (Ctrl+C) y tocalo acá.";
+      statusEl.className = "pdf-portal-status is-error";
+    }
+    return false;
+  }
+
+  // 3. Detección inteligente de título si el campo de marca está vacío
+  const fullText = cleanText || cleanHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const lines = fullText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (brand && !brand.value && lines.length > 1) {
+    const candidateTitle = lines[0];
+    if (candidateTitle.length >= 4 && candidateTitle.length <= 85 && !candidateTitle.endsWith(".")) {
+      brand.value = candidateTitle;
+      if (!cleanHtml) {
+        text = lines.slice(1).join("\n\n");
+      }
+    }
+  }
+
+  // 4. Inyectar contenido en el editor
+  if (cleanHtml) {
+    editor.innerHTML = sanitizePasteHtml(cleanHtml);
+  } else if (text) {
+    const paras = text.split(/\r?\n\r?\n/).filter((p) => p.trim());
+    if (paras.length > 1) {
+      editor.innerHTML = paras
+        .map((p) => `<p>${escapeHtml(p).replace(/\r?\n/g, "<br/>")}</p>`)
+        .join("");
+    } else {
+      editor.innerText = text;
+    }
+  }
+
+  fixInvisibleEditorColors(editor);
+  editor.dispatchEvent(new Event("input", { bubbles: true }));
+
+  if (statusEl) {
+    statusEl.textContent = "✓ Contenido pegado con éxito desde el portapapeles.";
+    statusEl.className = "pdf-portal-status is-success";
+  }
+
+  return true;
+}
+
+export async function openPdfPortalModal(initialData = null) {
   const modal = document.getElementById("pdf-portal-modal");
   if (!modal) return;
   initPdfPortalGenerator();
@@ -265,6 +362,8 @@ export function openPdfPortalModal(initialData = null) {
   const editor = document.getElementById("pdf-portal-editor");
   const statusEl = document.getElementById("pdf-portal-status");
 
+  let applied = false;
+
   if (initialData) {
     if (initialData.title && brand) {
       brand.value = initialData.title;
@@ -272,8 +371,10 @@ export function openPdfPortalModal(initialData = null) {
     if (editor) {
       if (initialData.html && initialData.html.trim()) {
         editor.innerHTML = sanitizePasteHtml(initialData.html);
+        applied = true;
       } else if (initialData.text) {
         editor.innerText = initialData.text;
+        applied = true;
       }
       fixInvisibleEditorColors(editor);
       editor.dispatchEvent(new Event("input", { bubbles: true }));
@@ -281,11 +382,24 @@ export function openPdfPortalModal(initialData = null) {
     if (statusEl) {
       if (initialData.source === "selection") {
         statusEl.textContent = "Texto seleccionado en el portal copiado al generador.";
-        statusEl.classList.remove("is-error");
+        statusEl.className = "pdf-portal-status is-success";
       } else if (initialData.source === "article" || initialData.source === "page") {
         statusEl.textContent = "Contenido extraído automáticamente del portal.";
-        statusEl.classList.remove("is-error");
+        statusEl.className = "pdf-portal-status is-success";
       }
+    }
+  }
+
+  // Si no vino contenido de iframe y el editor está vacío, intentar auto-pegar del portapapeles
+  if (!applied && editor && !editor.textContent?.trim()) {
+    try {
+      const pasted = await pasteFromClipboardToEditor({ silent: true });
+      if (pasted && statusEl) {
+        statusEl.textContent = "✓ Contenido pegado automáticamente desde el portapapeles.";
+        statusEl.className = "pdf-portal-status is-success";
+      }
+    } catch {
+      // Ignorar si el navegador pide permisos explícitos
     }
   }
 
@@ -323,6 +437,8 @@ export function initPdfPortalGenerator() {
   const fontSizeSel = document.getElementById("pdf-portal-font-size");
   const fontColorInp = document.getElementById("pdf-portal-font-color");
   const linkBtn = document.getElementById("pdf-portal-link");
+  const pasteToolbarBtn = document.getElementById("pdf-portal-paste-toolbar-btn");
+  const pasteActionBtn = document.getElementById("pdf-portal-paste-action");
 
   if (!editor || pdfPortalInited) {
     syncPdfPortalModuleVisibility();
@@ -331,6 +447,12 @@ export function initPdfPortalGenerator() {
   pdfPortalInited = true;
 
   syncPdfPortalModuleVisibility();
+
+  // En tema oscuro, inicializar color de texto con blanco/claro
+  const isDark = document.documentElement.classList.contains("st2-theme-dark");
+  if (fontColorInp && isDark && (fontColorInp.value === "#0f172a" || !fontColorInp.value)) {
+    fontColorInp.value = "#f2f2f2";
+  }
 
   const refreshPreview = () => {
     fixInvisibleEditorColors(editor);
@@ -397,6 +519,16 @@ export function initPdfPortalGenerator() {
     document.execCommand("createLink", false, trimmed);
     refreshPreview();
   });
+
+  const onPasteClick = async () => {
+    await pasteFromClipboardToEditor({ silent: false });
+    editor.focus();
+    refreshPreview();
+  };
+
+  pasteToolbarBtn?.addEventListener("mousedown", (ev) => ev.preventDefault());
+  pasteToolbarBtn?.addEventListener("click", onPasteClick);
+  pasteActionBtn?.addEventListener("click", onPasteClick);
 
   clearBtn?.addEventListener("click", () => {
     if (brandInput) brandInput.value = "";

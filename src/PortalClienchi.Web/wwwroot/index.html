@@ -2472,8 +2472,8 @@
         <div class="pdf-portal-modal-title-group">
           <div class="pdf-portal-modal-accent-bar" aria-hidden="true"></div>
           <div>
-            <h2 id="pdf-portal-modal-title" class="pdf-portal-modal-title">Generador de PDFs para Portal</h2>
-            <p class="pdf-portal-modal-subtitle">Membrete corporativo Thomson Reuters · Pegá el contenido y descargá el PDF</p>
+            <h2 id="pdf-portal-modal-title" class="pdf-portal-modal-title">Generador Corporativo de PDFs</h2>
+            <p class="pdf-portal-modal-subtitle">Instructivos y notas con membrete oficial Thomson Reuters · Formato A4</p>
           </div>
         </div>
         <button type="button" id="pdf-portal-modal-close" class="pdf-portal-modal-close" aria-label="Cerrar ventana" title="Cerrar (Esc)">✕</button>
@@ -2483,16 +2483,34 @@
         <div class="pdf-portal-app">
           <div class="pdf-portal-grid">
             <div class="pdf-portal-editor">
-              <label class="pdf-portal-label" for="pdf-portal-brand">Título / Marca izquierda</label>
-              <input id="pdf-portal-brand" type="text" class="pdf-portal-input" placeholder="Ej. FACTURA ELECTRÓNICA — vacío = sin caja" autocomplete="off" spellcheck="false"/>
+              <div class="pdf-portal-label-row">
+                <label class="pdf-portal-label" for="pdf-portal-brand">Título / Marca superior</label>
+                <span class="pdf-portal-label-hint">Opcional — si lo dejás vacío se genera sin caja</span>
+              </div>
+              <input id="pdf-portal-brand" type="text" class="pdf-portal-input" placeholder="Ej. FACTURA ELECTRÓNICA — CONFIGURACIÓN" autocomplete="off" spellcheck="false"/>
 
               <div class="pdf-portal-formatbar" role="toolbar" aria-label="Formato de texto">
-                <button type="button" class="pdf-fmt-btn" data-cmd="bold" title="Negrita"><b>B</b></button>
-                <button type="button" class="pdf-fmt-btn" data-cmd="italic" title="Cursiva"><i>I</i></button>
-                <button type="button" class="pdf-fmt-btn" data-cmd="underline" title="Subrayado"><u>U</u></button>
-                <button type="button" class="pdf-fmt-btn" data-cmd="strikeThrough" title="Tachado"><s>S</s></button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="bold" title="Negrita (Ctrl+B)">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+                </button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="italic" title="Cursiva (Ctrl+I)">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+                </button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="underline" title="Subrayado (Ctrl+U)">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3v7a6 6 0 0 0 12 0V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg>
+                </button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="strikeThrough" title="Tachado">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4H9a3 3 0 0 0-2.83 4M14 12a4 4 0 0 1 0 8H6"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+                </button>
                 <span class="pdf-fmt-sep" aria-hidden="true"></span>
-                <label class="pdf-fmt-field" title="Tamaño">
+                <button type="button" class="pdf-fmt-btn" data-cmd="insertUnorderedList" title="Lista con viñetas">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
+                </button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="insertOrderedList" title="Lista numerada">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                </button>
+                <span class="pdf-fmt-sep" aria-hidden="true"></span>
+                <label class="pdf-fmt-field" title="Tamaño de texto">
                   <span>Tam.</span>
                   <select id="pdf-portal-font-size" aria-label="Tamaño de fuente">
                     <option value="">—</option>
@@ -2503,36 +2521,64 @@
                     <option value="6">Muy grande</option>
                   </select>
                 </label>
-                <label class="pdf-fmt-field" title="Color">
+                <label class="pdf-fmt-field pdf-fmt-color-field" title="Color de texto">
                   <span>Color</span>
-                  <input id="pdf-portal-font-color" type="color" value="#0f172a" aria-label="Color de texto"/>
+                  <input id="pdf-portal-font-color" type="color" value="#f2f2f2" aria-label="Color de texto"/>
                 </label>
                 <span class="pdf-fmt-sep" aria-hidden="true"></span>
-                <button type="button" class="pdf-fmt-btn" data-cmd="justifyLeft" title="Izquierda">☰</button>
-                <button type="button" class="pdf-fmt-btn" data-cmd="justifyCenter" title="Centrar">≡</button>
-                <button type="button" class="pdf-fmt-btn" data-cmd="justifyRight" title="Derecha">☰</button>
-                <button type="button" class="pdf-fmt-btn" data-cmd="justifyFull" title="Justificar">≣</button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="justifyLeft" title="Alinear a la izquierda">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                </button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="justifyCenter" title="Centrar">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="10" x2="6" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="18" y1="18" x2="6" y2="18"/></svg>
+                </button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="justifyRight" title="Alinear a la derecha">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="7" y2="18"/></svg>
+                </button>
+                <button type="button" class="pdf-fmt-btn" data-cmd="justifyFull" title="Justificar">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+                </button>
                 <span class="pdf-fmt-sep" aria-hidden="true"></span>
-                <button type="button" class="pdf-fmt-btn" id="pdf-portal-link" title="Hipervínculo">🔗</button>
+                <button type="button" class="pdf-fmt-btn" id="pdf-portal-link" title="Insertar enlace">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                </button>
+                <span class="pdf-fmt-sep" aria-hidden="true"></span>
+                <button type="button" class="pdf-fmt-btn pdf-fmt-btn-paste" id="pdf-portal-paste-toolbar-btn" title="Pegar portapapeles (Ctrl+V)">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                  <span>Pegar</span>
+                </button>
               </div>
 
-              <label class="pdf-portal-label" for="pdf-portal-editor">Contenido</label>
+              <div class="pdf-portal-label-row">
+                <label class="pdf-portal-label" for="pdf-portal-editor">Contenido del documento</label>
+                <span class="pdf-portal-label-hint">Podés seleccionar texto en el portal, copiar (Ctrl+C) y pegar acá</span>
+              </div>
               <div class="pdf-portal-editor-shell">
-                <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Pegá aquí el texto del portal…"></div>
+                <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="💡 Seleccioná texto en el portal, copiá con Ctrl+C y pegá acá (o tocá 'Pegar portapapeles')…"></div>
                 <span class="pdf-portal-editor-resize-hint" title="Arrastrá la esquina para agrandar" aria-hidden="true"></span>
               </div>
 
-              <p id="pdf-portal-status" class="pdf-portal-status" role="status"></p>
+              <div id="pdf-portal-status" class="pdf-portal-status" role="status"></div>
 
               <div class="pdf-portal-actions plan-actions">
-                <button type="button" id="pdf-portal-generate" class="btn btn-primary">Generar PDF</button>
+                <button type="button" id="pdf-portal-generate" class="btn btn-primary pdf-portal-btn-gen">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Generar PDF
+                </button>
+                <button type="button" id="pdf-portal-paste-action" class="btn btn-secondary pdf-portal-btn-paste" title="Pegar texto copiado del portapapeles">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                  Pegar portapapeles
+                </button>
                 <button type="button" id="pdf-portal-clear" class="btn btn-secondary">Limpiar</button>
                 <button type="button" id="pdf-portal-close-btn" class="btn btn-secondary">Cerrar</button>
               </div>
             </div>
 
             <div class="pdf-portal-preview-wrap">
-              <p class="pdf-portal-label">Vista previa</p>
+              <div class="pdf-portal-preview-label-row">
+                <span class="pdf-portal-label">Vista previa</span>
+                <span class="pdf-portal-sheet-badge">📄 Hoja A4 Corporativa</span>
+              </div>
               <div id="pdf-portal-preview" class="pdf-portal-preview" aria-live="polite">
                 <div class="pdf-portal-preview-header">
                   <div id="pdf-portal-preview-brand" class="pdf-portal-preview-brand hidden"></div>

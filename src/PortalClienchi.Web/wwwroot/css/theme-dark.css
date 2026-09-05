@@ -2325,18 +2325,18 @@ html.st2-theme-dark .borrado-col-confirmado {
 
 /* Modal Generador PDF Portal - Modo Oscuro */
 html.st2-theme-dark .pdf-portal-modal-overlay {
-  background: rgba(3, 7, 18, 0.78);
+  background: rgba(3, 7, 18, 0.82);
 }
 
 html.st2-theme-dark .pdf-portal-modal-container {
-  background: #181d28 !important;
-  border-color: #2b3548 !important;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+  background: #111827 !important;
+  border-color: #1f293d !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9);
 }
 
 html.st2-theme-dark .pdf-portal-modal-header {
-  background: #111622 !important;
-  border-bottom-color: #2b3548 !important;
+  background: #0b0f19 !important;
+  border-bottom-color: #1f293d !important;
 }
 
 html.st2-theme-dark .pdf-portal-modal-title {
@@ -2354,6 +2354,159 @@ html.st2-theme-dark .pdf-portal-modal-close {
 html.st2-theme-dark .pdf-portal-modal-close:hover {
   background: #242c3d;
   color: #f8fafc;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-label {
+  color: #cbd5e1 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-label-hint {
+  color: #64748b !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-input {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-input::placeholder {
+  color: #64748b !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-input:focus {
+  border-color: #f36c00 !important;
+  box-shadow: 0 0 0 2px rgba(243, 108, 0, 0.28) !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-formatbar {
+  background: #182234 !important;
+  border-color: #2b3648 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn:hover {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn:active {
+  background: #1e293b !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn-paste {
+  background: #1e293b !important;
+  color: #f36c00 !important;
+  border-color: #3b465c !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn-paste:hover {
+  background: #2b384e !important;
+  color: #ff8522 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-sep {
+  background: #334155 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-field {
+  color: #94a3b8 !important;
+}
+
+/* Selector de tamaño y color sin fondo blanco en dark mode */
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-field select,
+html.st2-theme-dark #pdf-portal-font-size {
+  background: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-field select:focus,
+html.st2-theme-dark #pdf-portal-font-size:focus {
+  border-color: #f36c00 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-color-field input[type="color"] {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich {
+  background: #0b0f19 !important;
+  color: #f8fafc !important;
+  border-color: #2b3648 !important;
+  caret-color: #f8fafc !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich:empty::before {
+  color: #64748b !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich:focus {
+  border-color: #f36c00 !important;
+  box-shadow: 0 0 0 2px rgba(243, 108, 0, 0.28) !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview {
+  background: #141414 !important;
+  border-color: #262626 !important;
+  box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.8) !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-body {
+  color: #f2f2f2 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-body:empty::before {
+  color: #666666 !important;
+}
+
+html.st2-theme-dark .pdf-portal-sheet-badge {
+  background: rgba(243, 108, 0, 0.15) !important;
+  color: #ff8522 !important;
+  border-color: rgba(243, 108, 0, 0.35) !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-actions {
+  border-top-color: #1f293d !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .btn-secondary {
+  background: #1e293b !important;
+  border-color: #3b465c !important;
+  color: #f1f5f9 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .btn-secondary:hover {
+  background: #2d3b52 !important;
+  border-color: #4f5d75 !important;
+  color: #ffffff !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-btn-paste {
+  background: #1e293b !important;
+  border-color: #f36c00 !important;
+  color: #f36c00 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-btn-paste:hover {
+  background: rgba(243, 108, 0, 0.15) !important;
+  color: #ff8522 !important;
+  border-color: #ff8522 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-status.is-success {
+  color: #34d399 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-status.is-error {
+  color: #f87171 !important;
 }
 
 html.st2-theme-dark .embed-toolbar .btn-secondary {
