@@ -38,6 +38,11 @@ export function syncSheetThemeUi() {
       : "Vista previa y PDF en hoja blanca. Clic para cambiar a hoja oscura.");
     toggleBtn.setAttribute("aria-label", isDark ? "Cambiar a hoja blanca" : "Cambiar a hoja oscura");
   }
+
+  const previewLogo = document.getElementById("pdf-portal-preview-logo");
+  if (previewLogo) {
+    previewLogo.src = isDark ? "/img/thomson-reuters-logo-dark.svg" : "/img/thomson-reuters-logo.svg";
+  }
 }
 
 let pdfPortalInited = false;

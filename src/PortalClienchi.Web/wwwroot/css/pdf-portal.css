@@ -402,11 +402,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 12px;
+  gap: 16px;
+  margin-bottom: 14px;
   padding-bottom: 8px;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
+  min-height: 36px;
 }
 
 .pdf-portal-preview-brand.hidden {
@@ -416,11 +417,11 @@
 .pdf-portal-preview-logo {
   height: 24px;
   width: auto;
-  max-width: 150px;
+  max-width: 140px;
   object-fit: contain;
   flex: 0 0 auto;
-  margin-top: 0;
-  margin-right: -2px;
+  margin: 0;
+  display: block;
 }
 
 .pdf-portal-preview-body {

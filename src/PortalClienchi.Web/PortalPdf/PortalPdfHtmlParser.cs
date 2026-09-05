@@ -11,7 +11,7 @@ namespace PortalClienchi.Web.PortalPdf;
 /// </summary>
 public static partial class PortalPdfHtmlParser
 {
-    private const float DefaultFontSize = 10.5f;
+    private const float DefaultFontSize = 11.5f;
 
     public static IReadOnlyList<PortalPdfElement> Parse(string? html, string? plainFallback)
     {
@@ -348,7 +348,7 @@ public static partial class PortalPdfHtmlParser
 
         if (name == "h1")
         {
-            st.FontSize = 18f;
+            st.FontSize = 20f;
             st.Bold = true;
             st.HeadingLevel = 1;
             st.Color ??= "#E05A10"; // Thomson Reuters corporate orange
@@ -356,7 +356,7 @@ public static partial class PortalPdfHtmlParser
         }
         else if (name == "h2")
         {
-            st.FontSize = 15f;
+            st.FontSize = 16.5f;
             st.Bold = true;
             st.HeadingLevel = 2;
             st.Color ??= "#E05A10";
@@ -364,7 +364,7 @@ public static partial class PortalPdfHtmlParser
         }
         else if (name == "h3")
         {
-            st.FontSize = 12.5f;
+            st.FontSize = 14f;
             st.Bold = true;
             st.HeadingLevel = 3;
             st.Color ??= "#1E293B";
@@ -372,7 +372,7 @@ public static partial class PortalPdfHtmlParser
         }
         else if (name is "h4" or "h5" or "h6")
         {
-            st.FontSize = 11.5f;
+            st.FontSize = 12.5f;
             st.Bold = true;
             st.HeadingLevel = 3;
             st.Align = "left";

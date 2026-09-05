@@ -96,6 +96,10 @@ catch (Exception ex)
 try
 {
     var env = app.Services.GetRequiredService<IWebHostEnvironment>();
+    if (!string.IsNullOrEmpty(env.WebRootPath))
+    {
+        PortalPdfLogoGenerator.EnsureFilesWritten(env.WebRootPath);
+    }
     var tools = app.Services.GetRequiredService<St2ToolsStore>();
     tools.SetBundledRoots(AppContext.BaseDirectory, env.ContentRootPath);
     app.Logger.LogInformation(

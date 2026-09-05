@@ -80,7 +80,7 @@ public static class PortalPdfService
         var theme = GetTheme(request.DarkMode);
         var brand = (request.Brand ?? "").Trim();
         var elements = PortalPdfHtmlParser.Parse(request.Html, request.Text);
-        var logo = FindThomsonLogoBytes(contentRoot);
+        var logo = PortalPdfLogoGenerator.GetLogoBytes(theme.IsDark);
 
         return Document.Create(container =>
         {
@@ -91,7 +91,7 @@ public static class PortalPdfService
                 page.MarginHorizontal(36);
                 page.MarginVertical(32);
                 page.PageColor(theme.PageBg);
-                page.DefaultTextStyle(x => x.FontSize(10.5f).FontFamily(Fonts.Arial).FontColor(theme.BodyText));
+                page.DefaultTextStyle(x => x.FontSize(11.5f).FontFamily(Fonts.Arial).FontColor(theme.BodyText));
 
                 // Cabecera corporativa con logo y título / marca
                 page.Header().Column(headerCol =>
@@ -104,11 +104,11 @@ public static class PortalPdfService
                             {
                                 brandCol.Item()
                                     .Text(brand.ToUpperInvariant())
-                                    .FontSize(11.5f)
-                                    .SemiBold()
+                                    .FontSize(13f)
+                                    .Bold()
                                     .FontColor(theme.BrandText)
                                     .FontFamily(Fonts.Arial);
-                                brandCol.Item().PaddingTop(3).Width(32).Height(2f).Background(theme.BrandAccent);
+                                brandCol.Item().PaddingTop(3).Width(42).Height(2.5f).Background(theme.BrandAccent);
                             });
                         }
                         else
@@ -116,28 +116,28 @@ public static class PortalPdfService
                             row.RelativeItem();
                         }
 
-                        row.ConstantItem(8);
+                        row.ConstantItem(12);
 
                         if (logo is { Length: > 0 })
                         {
-                            row.ConstantItem(150).AlignRight().AlignMiddle().Height(24).Image(logo).FitHeight();
+                            row.ConstantItem(185).AlignRight().AlignMiddle().Height(36).Image(logo).FitArea();
                         }
                         else
                         {
-                            row.ConstantItem(150).AlignRight().AlignMiddle()
+                            row.ConstantItem(185).AlignRight().AlignMiddle()
                                 .Text("THOMSON REUTERS")
-                                .FontSize(10.5f)
-                                .SemiBold()
+                                .FontSize(12.5f)
+                                .Bold()
                                 .FontColor(theme.BrandText)
                                 .FontFamily(Fonts.Arial);
                         }
                     });
 
-                    headerCol.Item().PaddingTop(6).LineHorizontal(0.75f).LineColor(theme.LineColor);
+                    headerCol.Item().PaddingTop(8).LineHorizontal(1f).LineColor(theme.LineColor);
                 });
 
                 // Contenido del documento
-                page.Content().PaddingTop(12).Column(col =>
+                page.Content().PaddingTop(14).Column(col =>
                 {
                     if (elements.Count == 0)
                     {
@@ -244,7 +244,7 @@ public static class PortalPdfService
         col.Item().PaddingTop(topPad).PaddingBottom(botPad).Text(text =>
         {
             ConfigureTextAlignment(text, para.HeadingLevel > 0 ? "left" : align);
-            text.ParagraphSpacing(2);
+            text.ParagraphSpacing(3.5f);
             RenderRuns(text, para.Runs, theme, defaultHeadingColor);
         });
     }
@@ -282,7 +282,7 @@ public static class PortalPdfService
             var span = text.Span(content)
                 .FontFamily(Fonts.Arial)
                 .FontColor(runColor)
-                .FontSize(run.FontSize ?? 10.5f);
+                .FontSize(run.FontSize ?? 11.5f);
 
             if (run.Bold) span.Bold();
             if (run.Italic) span.Italic();
@@ -345,7 +345,7 @@ public static class PortalPdfService
                                 var span = text.Span(content)
                                     .FontFamily(Fonts.Arial)
                                     .FontColor(runColor)
-                                    .FontSize(run.FontSize ?? 9.5f);
+                                    .FontSize(run.FontSize ?? 10.5f);
 
                                 if (run.Bold || isH) span.Bold();
                                 if (run.Italic) span.Italic();
@@ -422,30 +422,5 @@ public static class PortalPdfService
         if (string.IsNullOrEmpty(text))
             return "";
         return new string(text.Where(c => !char.IsControl(c) || c is '\n' or '\r' or '\t').ToArray());
-    }
-
-    private static byte[]? FindThomsonLogoBytes(string? contentRoot)
-    {
-        var candidates = new List<string>();
-        if (!string.IsNullOrWhiteSpace(contentRoot))
-        {
-            candidates.Add(Path.Combine(contentRoot, "wwwroot", "img", "thomson-reuters-logo.png"));
-            candidates.Add(Path.Combine(contentRoot, "img", "thomson-reuters-logo.png"));
-        }
-
-        candidates.Add(Path.Combine(AppContext.BaseDirectory, "wwwroot", "img", "thomson-reuters-logo.png"));
-        candidates.Add(Path.Combine(AppContext.BaseDirectory, "img", "thomson-reuters-logo.png"));
-
-        foreach (var path in candidates)
-        {
-            try
-            {
-                if (File.Exists(path))
-                    return File.ReadAllBytes(path);
-            }
-            catch { /* ignore */ }
-        }
-
-        return null;
     }
 }
