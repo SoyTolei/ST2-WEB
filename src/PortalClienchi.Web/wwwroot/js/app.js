@@ -1,5 +1,5 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
-import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905e";
+import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905f";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
