@@ -419,9 +419,9 @@
 }
 
 .pdf-portal-preview-logo {
-  height: 25px;
+  height: 28px;
   width: auto;
-  max-width: 170px;
+  max-width: 200px;
   object-fit: contain;
   flex: 0 0 auto;
   margin: 0;

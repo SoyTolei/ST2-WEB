@@ -17,6 +17,32 @@ public static class PortalPdfLogoGenerator
         if (isDark && _darkCache != null) return _darkCache;
         if (!isDark && _lightCache != null) return _lightCache;
 
+        var fileName = isDark ? "portal-cliente-logo-dark.png" : "portal-cliente-logo.png";
+        var candidatePaths = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "wwwroot", "img", fileName),
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img", fileName),
+            Path.Combine(Directory.GetCurrentDirectory(), "src", "PortalClienchi.Web", "wwwroot", "img", fileName),
+        };
+
+        foreach (var path in candidatePaths)
+        {
+            if (File.Exists(path))
+            {
+                try
+                {
+                    var fileBytes = File.ReadAllBytes(path);
+                    if (fileBytes.Length > 0)
+                    {
+                        if (isDark) _darkCache = fileBytes;
+                        else _lightCache = fileBytes;
+                        return fileBytes;
+                    }
+                }
+                catch { /* continue */ }
+            }
+        }
+
         var bytes = RenderLogoPng(isDark);
         if (isDark) _darkCache = bytes;
         else _lightCache = bytes;
@@ -111,12 +137,14 @@ public static class PortalPdfLogoGenerator
             var lightFile = Path.Combine(imgDir, "portal-cliente-logo.png");
             var darkFile = Path.Combine(imgDir, "portal-cliente-logo-dark.png");
 
-            File.WriteAllBytes(lightFile, GetLogoBytes(false));
-            File.WriteAllBytes(darkFile, GetLogoBytes(true));
+            if (!File.Exists(lightFile)) File.WriteAllBytes(lightFile, GetLogoBytes(false));
+            if (!File.Exists(darkFile)) File.WriteAllBytes(darkFile, GetLogoBytes(true));
 
             // Compatibilidad
-            File.WriteAllBytes(Path.Combine(imgDir, "thomson-reuters-logo.png"), GetLogoBytes(false));
-            File.WriteAllBytes(Path.Combine(imgDir, "thomson-reuters-logo-dark.png"), GetLogoBytes(true));
+            var lightOld = Path.Combine(imgDir, "thomson-reuters-logo.png");
+            var darkOld = Path.Combine(imgDir, "thomson-reuters-logo-dark.png");
+            if (!File.Exists(lightOld)) File.WriteAllBytes(lightOld, GetLogoBytes(false));
+            if (!File.Exists(darkOld)) File.WriteAllBytes(darkOld, GetLogoBytes(true));
         }
         catch { /* ignore */ }
     }
