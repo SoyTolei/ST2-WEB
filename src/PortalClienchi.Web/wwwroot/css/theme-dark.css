@@ -2452,35 +2452,123 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich:focus {
   box-shadow: 0 0 0 2px rgba(243, 108, 0, 0.28) !important;
 }
 
-html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview {
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark {
+  background: #141414 !important;
+  color: #f2f2f2 !important;
+  border-color: #334155 !important;
+  box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.85) !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview .pdf-portal-preview-brand,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-brand {
+  color: #f2f2f2 !important;
+  border-bottom: 3px solid #f36c00 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview .pdf-portal-preview-header,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-header {
+  border-bottom-color: #334155 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview .pdf-portal-preview-body,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body {
+  color: #f2f2f2 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview h1,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview h2,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark h1,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark h2 {
+  color: #fb923c !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview h3,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark h3 {
+  color: #f2f2f2 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview a,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark a {
+  color: #7dd3fc !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview .pdf-portal-preview-body:empty::before,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body:empty::before {
+  color: #64748b !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview td,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark td {
+  background: #262626 !important;
+  color: #f2f2f2 !important;
+  border-color: #3b465c !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview th,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark th {
+  background: #374151 !important;
+  color: #ffffff !important;
+  border-color: #4b5563 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview hr,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark hr {
+  border-top-color: #334155 !important;
+}
+
+/* Si en tema oscuro el usuario toca la opción de hoja blanca para imprimir */
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light {
   background: #ffffff !important;
   color: #1e293b !important;
   border-color: #94a3b8 !important;
   box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.7) !important;
 }
 
-html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-brand {
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light .pdf-portal-preview-brand {
   color: #0f172a !important;
+  border-bottom: 3px solid #f36c00 !important;
 }
 
-html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-body {
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light .pdf-portal-preview-header {
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light .pdf-portal-preview-body {
   color: #1e293b !important;
 }
 
-html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview-body:empty::before {
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light h1,
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light h2 {
+  color: #e05a10 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light h3 {
+  color: #1e293b !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light a {
+  color: #0284c7 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light .pdf-portal-preview-body:empty::before {
   color: #94a3b8 !important;
 }
 
-html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview td {
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light td {
   background: #ffffff !important;
   color: #1e293b !important;
   border-color: #d1d5db !important;
 }
 
-html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview th {
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light th {
   background: #737373 !important;
   color: #ffffff !important;
   border-color: #525252 !important;
+}
+
+html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-light hr {
+  border-top-color: #cbd5e1 !important;
 }
 
 /* En el editor izquierdo en modo oscuro, celdas de tabla legibles */

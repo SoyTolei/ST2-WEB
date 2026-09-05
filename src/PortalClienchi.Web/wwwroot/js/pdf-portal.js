@@ -9,6 +9,37 @@ const FORCE_KEY = "st2-pdf-portal-force";
 const DEFAULT_EDITOR_COLOR = "#0f172a";
 const DEFAULT_PREVIEW_COLOR = "#1e293b";
 
+let userSheetThemeOverride = null; // null = sincroniza con tema de ST2; "dark" | "light"
+
+export function isSheetDarkMode() {
+  if (userSheetThemeOverride === "dark") return true;
+  if (userSheetThemeOverride === "light") return false;
+  return document.documentElement.classList.contains("st2-theme-dark");
+}
+
+export function syncSheetThemeUi() {
+  const isDark = isSheetDarkMode();
+  const preview = document.getElementById("pdf-portal-preview");
+  const badgeText = document.getElementById("pdf-portal-sheet-badge-text");
+  const toggleBtn = document.getElementById("pdf-portal-sheet-toggle");
+
+  if (preview) {
+    preview.classList.toggle("sheet-dark", isDark);
+    preview.classList.toggle("sheet-light", !isDark);
+  }
+  if (badgeText) {
+    badgeText.textContent = isDark
+      ? "📄 Hoja A4 Oscura · Cambiar a Blanca 🖨️"
+      : "📄 Hoja A4 Blanca para imprimir · Cambiar a Oscura 🌙";
+  }
+  if (toggleBtn) {
+    toggleBtn.setAttribute("title", isDark
+      ? "Vista previa y PDF en hoja oscura. Clic para cambiar a hoja blanca para imprimir."
+      : "Vista previa y PDF en hoja blanca. Clic para cambiar a hoja oscura.");
+    toggleBtn.setAttribute("aria-label", isDark ? "Cambiar a hoja blanca" : "Cambiar a hoja oscura");
+  }
+}
+
 let pdfPortalInited = false;
 
 export function canSeePdfPortalModule(email = getPlanUserEmail()) {
@@ -355,6 +386,8 @@ export async function openPdfPortalModal(initialData = null) {
   const modal = document.getElementById("pdf-portal-modal");
   if (!modal) return;
   initPdfPortalGenerator();
+  userSheetThemeOverride = null; // Al abrir, arranca sincronizado con el modo actual del usuario
+  syncSheetThemeUi();
   modal.classList.remove("hidden");
   modal.setAttribute("aria-hidden", "false");
 
@@ -455,6 +488,7 @@ export function initPdfPortalGenerator() {
   }
 
   const refreshPreview = () => {
+    syncSheetThemeUi();
     fixInvisibleEditorColors(editor);
     const brand = (brandInput?.value || "").trim();
     if (previewBrand) {
@@ -470,6 +504,23 @@ export function initPdfPortalGenerator() {
       previewBody.innerHTML = sanitizePreviewHtml(editor.innerHTML);
     }
   };
+
+  const sheetToggleBtn = document.getElementById("pdf-portal-sheet-toggle");
+  sheetToggleBtn?.addEventListener("click", () => {
+    userSheetThemeOverride = isSheetDarkMode() ? "light" : "dark";
+    syncSheetThemeUi();
+    refreshPreview();
+  });
+
+  const mainThemeToggle = document.getElementById("themeToggleBtn");
+  mainThemeToggle?.addEventListener("click", () => {
+    if (userSheetThemeOverride === null) {
+      setTimeout(() => {
+        syncSheetThemeUi();
+        refreshPreview();
+      }, 50);
+    }
+  });
 
   brandInput?.addEventListener("input", refreshPreview);
   editor.addEventListener("input", refreshPreview);
@@ -568,10 +619,12 @@ export function initPdfPortalGenerator() {
     generateBtn.disabled = true;
     try {
       fixInvisibleEditorColors(editor);
+      const isDark = isSheetDarkMode();
       const payload = {
         brand: (brandInput?.value || "").trim(),
         html: normalizeEditorHtmlForPdf(editor),
         text: editor.innerText || "",
+        darkMode: isDark,
       };
       const response = await fetch("/api/portal-pdf/generate", {
         method: "POST",
@@ -856,12 +909,14 @@ function sanitizePreviewHtml(html) {
         styleKeep.push("text-align:left");
       }
 
+      const isDark = isSheetDarkMode();
+      const defaultPreviewCol = isDark ? "#f2f2f2" : "#1e293b";
       const color = /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(style);
       if (color) {
-        const c = normalizeCssColor(color[1].trim()) || DEFAULT_PREVIEW_COLOR;
+        const c = normalizeCssColor(color[1].trim()) || defaultPreviewCol;
         styleKeep.push(`color:${previewSafeColor(c)}`);
       } else if (tag === "h1" || tag === "h2") {
-        styleKeep.push("color:#e05a10");
+        styleKeep.push(`color:${isDark ? "#fb923c" : "#e05a10"}`);
       }
 
       const size = /font-size\s*:\s*([^;]+)/i.exec(style);
@@ -910,15 +965,19 @@ function editorSafeColor(raw) {
   return lum > 0.82 ? DEFAULT_EDITOR_COLOR : n;
 }
 
-/** Preview/PDF (fondo blanco hoja A4): colores casi blancos → oscuro. */
+/** Preview/PDF: garantiza contraste bimodal según la hoja sea oscura o blanca. */
 function previewSafeColor(hex) {
   const n = normalizeCssColor(hex);
-  if (!n) return DEFAULT_PREVIEW_COLOR;
+  const isDark = isSheetDarkMode();
+  const defaultCol = isDark ? "#f2f2f2" : "#1e293b";
+  if (!n) return defaultCol;
   const r = parseInt(n.slice(1, 3), 16);
   const g = parseInt(n.slice(3, 5), 16);
   const b = parseInt(n.slice(5, 7), 16);
   const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-  return lum > 0.88 ? DEFAULT_PREVIEW_COLOR : n;
+  if (isDark && lum < 0.20) return defaultCol; // muy oscuro en hoja oscura -> claro
+  if (!isDark && lum > 0.82) return defaultCol; // muy claro en hoja blanca -> oscuro
+  return n;
 }
 
 function normalizeCssColor(raw) {

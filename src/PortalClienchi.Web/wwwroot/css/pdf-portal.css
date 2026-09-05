@@ -293,9 +293,81 @@
   font-weight: 600;
   color: #f36c00;
   background: rgba(243, 108, 0, 0.12);
-  padding: 2px 9px;
+  padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid rgba(243, 108, 0, 0.28);
+}
+
+.pdf-portal-sheet-badge-btn {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.pdf-portal-sheet-badge-btn:hover {
+  background: rgba(243, 108, 0, 0.22);
+  border-color: #f36c00;
+  transform: translateY(-1px);
+}
+
+.pdf-portal-sheet-badge-btn:active {
+  transform: translateY(0);
+}
+
+/* Hoja oscura cuando se activa explícitamente o en dark mode */
+.pdf-portal-preview.sheet-dark {
+  background: #141414 !important;
+  color: #f2f2f2 !important;
+  border-color: #334155 !important;
+  box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.85) !important;
+}
+
+.pdf-portal-preview.sheet-dark .pdf-portal-preview-brand {
+  color: #f2f2f2 !important;
+  border-bottom: 3px solid #f36c00 !important;
+}
+
+.pdf-portal-preview.sheet-dark .pdf-portal-preview-header {
+  border-bottom: 1px solid #334155 !important;
+}
+
+.pdf-portal-preview.sheet-dark .pdf-portal-preview-body {
+  color: #f2f2f2 !important;
+}
+
+.pdf-portal-preview.sheet-dark .pdf-portal-preview-body:empty::before {
+  color: #64748b !important;
+}
+
+.pdf-portal-preview.sheet-dark h1,
+.pdf-portal-preview.sheet-dark h2 {
+  color: #fb923c !important;
+}
+
+.pdf-portal-preview.sheet-dark h3 {
+  color: #f2f2f2 !important;
+}
+
+.pdf-portal-preview.sheet-dark a {
+  color: #7dd3fc !important;
+}
+
+.pdf-portal-preview.sheet-dark th {
+  background: #374151 !important;
+  color: #ffffff !important;
+  border: 1px solid #4b5563 !important;
+}
+
+.pdf-portal-preview.sheet-dark td {
+  background: #262626 !important;
+  color: #f2f2f2 !important;
+  border: 1px solid #3b465c !important;
+}
+
+.pdf-portal-preview.sheet-dark hr {
+  border-top: 1px solid #334155 !important;
 }
 
 .pdf-portal-preview-brand {

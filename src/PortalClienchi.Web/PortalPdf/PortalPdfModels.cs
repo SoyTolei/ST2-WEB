@@ -10,6 +10,9 @@ public sealed class PortalPdfGenerateRequest
 
     /// <summary>Texto plano de respaldo si no hay HTML.</summary>
     public string? Text { get; set; }
+
+    /// <summary>True = hoja oscura (para pantallas oscuras); False = hoja blanca (imprimir en papel / modo claro).</summary>
+    public bool DarkMode { get; set; }
 }
 
 public sealed class PortalPdfBlock
