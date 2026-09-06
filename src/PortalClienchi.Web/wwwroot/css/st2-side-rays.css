@@ -1,0 +1,50 @@
+/* SideRays: fondo detrás de pestañas y panel principal */
+.st2-side-rays {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.92;
+}
+
+.st2-side-rays[hidden] {
+  display: none !important;
+}
+
+.st2-side-rays-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+/* El shell queda encima del fondo animado */
+.main-shell {
+  position: relative;
+  z-index: 1;
+}
+
+.app-header {
+  position: relative;
+  z-index: 2;
+}
+
+/* En modo claro bajamos un poco la intensidad visual */
+html:not(.st2-theme-dark) .st2-side-rays {
+  opacity: 0.45;
+}
+
+html:not(.st2-theme-dark) .st2-side-rays-canvas {
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-side-rays {
+    display: none !important;
+  }
+}
