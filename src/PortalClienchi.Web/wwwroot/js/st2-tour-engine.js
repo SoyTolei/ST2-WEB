@@ -64,7 +64,7 @@ function buildGradientVars(colors) {
   return vars;
 }
 
-function applyGlowVars(el, { transparent = false } = {}) {
+function applyGlowVars(el) {
   if (!el) return;
   const vars = {
     ...buildGlowColorVars(GLOW_COLOR_HSL, GLOW_INTENSITY),
@@ -75,14 +75,8 @@ function applyGlowVars(el, { transparent = false } = {}) {
   el.style.setProperty("--border-radius", "28px");
   el.style.setProperty("--glow-padding", "40px");
   el.style.setProperty("--cone-spread", "25");
-  if (transparent) {
-    el.style.setProperty("--fill-opacity", "0");
-    el.style.setProperty("--card-bg", "transparent");
-    el.style.setProperty("--edge-proximity", "82");
-  } else {
-    el.style.setProperty("--fill-opacity", "0.5");
-    el.style.setProperty("--card-bg", "#120F17");
-  }
+  el.style.setProperty("--fill-opacity", "0.5");
+  el.style.setProperty("--card-bg", "#120F17");
 }
 
 function getCardCenter(el) {
@@ -262,6 +256,25 @@ export function markTourStatus(tourId, status) {
   saveProgress(data);
 }
 
+function ensureFocusCorners(host) {
+  if (!host) return;
+  host.querySelectorAll(":scope > .st2-tour-edge-light").forEach((el) => el.remove());
+  const needed = ["top-left", "top-right", "bottom-left", "bottom-right"];
+  const existing = new Set(
+    [...host.querySelectorAll(":scope > .st2-tour-focus-corner")].map((el) => {
+      for (const name of needed) if (el.classList.contains(name)) return name;
+      return "";
+    }),
+  );
+  for (const name of needed) {
+    if (existing.has(name)) continue;
+    const corner = document.createElement("span");
+    corner.className = `st2-tour-focus-corner ${name}`;
+    corner.setAttribute("aria-hidden", "true");
+    host.appendChild(corner);
+  }
+}
+
 function ensureDom() {
   if (root) {
     if (card && !card.querySelector(":scope > .st2-tour-edge-light")) {
@@ -270,14 +283,8 @@ function ensureDom() {
       edge.setAttribute("aria-hidden", "true");
       card.prepend(edge);
     }
-    if (spotlight && !spotlight.querySelector(":scope > .st2-tour-edge-light")) {
-      const edge = document.createElement("span");
-      edge.className = "st2-tour-edge-light";
-      edge.setAttribute("aria-hidden", "true");
-      spotlight.appendChild(edge);
-    }
+    ensureFocusCorners(spotlight);
     applyGlowVars(card);
-    applyGlowVars(spotlight, { transparent: true });
     return;
   }
 
@@ -288,7 +295,10 @@ function ensureDom() {
   root.innerHTML = `
     <div class="st2-tour-overlay" aria-hidden="true"></div>
     <div class="st2-tour-spotlight" aria-hidden="true">
-      <span class="st2-tour-edge-light" aria-hidden="true"></span>
+      <span class="st2-tour-focus-corner top-left" aria-hidden="true"></span>
+      <span class="st2-tour-focus-corner top-right" aria-hidden="true"></span>
+      <span class="st2-tour-focus-corner bottom-left" aria-hidden="true"></span>
+      <span class="st2-tour-focus-corner bottom-right" aria-hidden="true"></span>
     </div>
     <div class="st2-tour-card" role="dialog" aria-modal="true" aria-labelledby="st2-tour-title">
       <span class="st2-tour-edge-light" aria-hidden="true"></span>
@@ -311,7 +321,6 @@ function ensureDom() {
   spotlight = root.querySelector(".st2-tour-spotlight");
   card = root.querySelector(".st2-tour-card");
   applyGlowVars(card);
-  applyGlowVars(spotlight, { transparent: true });
   titleEl = root.querySelector(".st2-tour-title");
   bodyEl = root.querySelector(".st2-tour-body");
   progressEl = root.querySelector(".st2-tour-progress");

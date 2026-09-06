@@ -30,125 +30,82 @@ body.st2-tour-active {
   z-index: 0;
   pointer-events: none;
   background: rgba(8, 7, 6, 0.5);
-  backdrop-filter: blur(3.5px);
-  -webkit-backdrop-filter: blur(3.5px);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
   transition: background 0.28s ease;
 }
 
 .st2-tour-overlay.is-full {
-  background: rgba(8, 7, 6, 0.48);
+  background: rgba(8, 7, 6, 0.52);
 }
 
-/* Spotlight del módulo: mismo Border Glow, centro transparente (no tapa la opción). */
+/* Spotlight del módulo: True Focus (esquinas), sin Border Glow. */
 .st2-tour-spotlight {
-  --edge-proximity: 82;
-  --cursor-angle: 45deg;
-  --edge-sensitivity: 30;
-  --color-sensitivity: calc(var(--edge-sensitivity) + 20);
-  --border-radius: 28px;
-  --glow-padding: 40px;
-  --cone-spread: 25;
-  --fill-opacity: 0;
-  --card-bg: transparent;
+  --border-color: #f97316;
+  --glow-color: rgba(249, 115, 22, 0.6);
+  --focus-duration: 0.5s;
 
   position: fixed;
-  border-radius: var(--border-radius);
-  isolation: isolate;
-  transform: translate3d(0, 0, 0.01px);
-  display: block;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 0;
   background: transparent;
+  border: none;
+  box-shadow: none;
   overflow: visible;
   box-sizing: border-box;
   pointer-events: none;
   z-index: 1;
   opacity: 1;
-  animation: st2TourGlowSpin 8s linear infinite;
   transition:
-    top 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    left 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    width 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.2s ease,
-    border-radius 0.2s ease;
+    top var(--focus-duration) ease,
+    left var(--focus-duration) ease,
+    width var(--focus-duration) ease,
+    height var(--focus-duration) ease,
+    opacity 0.2s ease;
 }
 
 .st2-tour-spotlight.is-center {
   opacity: 0;
   width: 0 !important;
   height: 0 !important;
-  animation: none;
 }
 
-.st2-tour-spotlight::before,
-.st2-tour-spotlight > .st2-tour-edge-light {
-  content: "";
+.st2-tour-focus-corner {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  width: 1rem;
+  height: 1rem;
+  border: 3px solid var(--border-color, #f97316);
+  filter: drop-shadow(0 0 4px var(--border-color, #f97316));
+  border-radius: 3px;
   pointer-events: none;
-  transition: opacity 0.25s ease-out;
+  box-sizing: border-box;
 }
 
-/* Borde mesh (igual que la card) */
-.st2-tour-spotlight::before {
-  border: 1.5px solid transparent;
-  background:
-    linear-gradient(transparent 0 100%) padding-box,
-    linear-gradient(rgb(255 255 255 / 0%) 0% 100%) border-box,
-    var(--gradient-one) border-box,
-    var(--gradient-two) border-box,
-    var(--gradient-three) border-box,
-    var(--gradient-four) border-box,
-    var(--gradient-five) border-box,
-    var(--gradient-six) border-box,
-    var(--gradient-seven) border-box,
-    var(--gradient-base) border-box;
-  opacity: calc((var(--edge-proximity) - var(--color-sensitivity)) / (100 - var(--color-sensitivity)));
-  mask-image:
-    conic-gradient(
-      from var(--cursor-angle) at center,
-      black calc(var(--cone-spread) * 1%),
-      transparent calc((var(--cone-spread) + 15) * 1%),
-      transparent calc((100 - var(--cone-spread) - 15) * 1%),
-      black calc((100 - var(--cone-spread)) * 1%)
-    );
-  z-index: 2;
+.st2-tour-focus-corner.top-left {
+  top: -10px;
+  left: -10px;
+  border-right: none;
+  border-bottom: none;
 }
 
-/* Glow exterior — solo hacia afuera para no tapar el módulo */
-.st2-tour-spotlight > .st2-tour-edge-light {
-  inset: calc(var(--glow-padding) * -1);
-  z-index: 0;
-  mask-image:
-    conic-gradient(
-      from var(--cursor-angle) at center,
-      black 2.5%,
-      transparent 10%,
-      transparent 90%,
-      black 97.5%
-    );
-  opacity: calc((var(--edge-proximity) - var(--edge-sensitivity)) / (100 - var(--edge-sensitivity)));
-  mix-blend-mode: plus-lighter;
+.st2-tour-focus-corner.top-right {
+  top: -10px;
+  right: -10px;
+  border-left: none;
+  border-bottom: none;
 }
 
-.st2-tour-spotlight > .st2-tour-edge-light::before {
-  content: "";
-  position: absolute;
-  inset: var(--glow-padding);
-  border-radius: inherit;
-  box-shadow:
-    0 0 0 1px var(--glow-color),
-    0 0 4px 0 var(--glow-color-60),
-    0 0 10px 1px var(--glow-color-40),
-    0 0 18px 2px var(--glow-color-30),
-    0 0 28px 2px var(--glow-color-20),
-    0 0 42px 2px var(--glow-color-10);
+.st2-tour-focus-corner.bottom-left {
+  bottom: -10px;
+  left: -10px;
+  border-right: none;
+  border-top: none;
 }
 
-@keyframes st2TourGlowSpin {
-  from { --cursor-angle: 0deg; }
-  to { --cursor-angle: 360deg; }
+.st2-tour-focus-corner.bottom-right {
+  bottom: -10px;
+  right: -10px;
+  border-left: none;
+  border-top: none;
 }
 
 /* Card del tip: Border Glow en el borde (React Bits). */
