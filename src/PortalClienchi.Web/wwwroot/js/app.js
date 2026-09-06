@@ -1,6 +1,7 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initSideRays } from "./st2-side-rays.js?v=20260906c";
+import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906d";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
@@ -331,6 +332,11 @@ function switchPortal(portalId, { history = "push" } = {}) {
     btn.setAttribute("aria-selected", active ? "true" : "false");
   }
   syncPortalFrameTitle();
+
+  if (!same) {
+    const activeBtn = portalSistemaPills?.querySelector(`.st2-context-btn[data-portal-id="${portalId}"]`);
+    if (activeBtn) playGooeyNav(activeBtn);
+  }
 
   if (history !== "none" && document.querySelector('.tab-btn.active[data-tab="portal"]')) {
     syncTabHistory("portal", history);
@@ -4275,6 +4281,11 @@ function onThomPortalChange(id) {
   const same = id === thomPortalId;
   if (!same) setThomPortalId(id);
 
+  if (!same) {
+    const activeBtn = document.querySelector(`[data-thom-portal="${id}"]`);
+    if (activeBtn) playGooeyNav(activeBtn);
+  }
+
   // Las pastillas siempre abren/reabren THOM (no dejar al usuario en el gate).
   if (!document.querySelector('.tab-btn.active[data-tab="thom"]')) return;
 
@@ -5059,6 +5070,11 @@ function switchTab(tabId) {
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
 
+  if (prevTab !== tabId) {
+    const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+    if (activeBtn) playGooeyNav(activeBtn);
+  }
+
   document.querySelectorAll(".tab-panel").forEach((panel) => {
     panel.classList.toggle("active", panel.id === `panel-${tabId}`);
     panel.classList.toggle("hidden", panel.id !== `panel-${tabId}`);
@@ -5210,6 +5226,7 @@ async function bootstrapApp() {
   syncAboutToolsBadge();
   initAccessBirthdayPicker();
   await ensureAppAccess();
+  initGooeyNav();
   initSideRays({
     speed: 3.4,
     rayColor1: "#626160",
