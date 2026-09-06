@@ -23,9 +23,9 @@ let glowPointerBound = false;
 let glowSweepRafs = [];
 let glowSweepTimers = [];
 
-const GLOW_COLORS = ["#c084fc", "#f472b6", "#38bdf8"];
-const GLOW_COLOR_HSL = "40 80 80";
-const GLOW_INTENSITY = 1;
+const GLOW_COLORS = ["#ea580c", "#fb923c", "#fdba74"];
+const GLOW_COLOR_HSL = "24 95 53";
+const GLOW_INTENSITY = 0.85;
 const GRADIENT_POSITIONS = ["80% 55%", "69% 34%", "8% 6%", "41% 38%", "86% 85%", "82% 18%", "51% 4%"];
 const GRADIENT_KEYS = [
   "--gradient-one",
