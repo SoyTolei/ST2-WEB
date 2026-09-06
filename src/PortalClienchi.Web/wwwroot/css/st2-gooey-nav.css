@@ -1,4 +1,4 @@
-/* Gooey burst en pestañas / sistemas — no altera el naranja activo */
+/* Burst de partículas en pestañas — sin filtro gooey agresivo (evita manchas rojas). */
 
 .st2-gooey-host {
   position: relative;
@@ -26,41 +26,40 @@
   display: grid;
   place-items: center;
   z-index: 4;
-}
-
-.st2-gooey-filter {
-  filter: blur(7px) contrast(100) blur(0);
-  mix-blend-mode: lighten;
   overflow: visible;
 }
 
-.st2-gooey-filter::before {
-  content: "";
-  position: absolute;
-  inset: -75px;
-  z-index: -2;
-  background: #000;
+/* Sin blur/contrast ni capa negra: eso chocaba con SideRays y generaba blobs rojos */
+.st2-gooey-filter {
+  overflow: visible;
 }
 
 .st2-gooey-filter::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: #f97316;
-  transform: scale(0);
+  border-radius: 100vw;
+  background: radial-gradient(circle at center, rgba(249, 115, 22, 0.35) 0%, transparent 70%);
+  transform: scale(0.6);
   opacity: 0;
   z-index: -1;
-  border-radius: 100vw;
 }
 
 .st2-gooey-filter.is-active::after {
-  animation: st2-gooey-pill 0.3s ease both;
+  animation: st2-gooey-pulse 0.45s ease-out both;
 }
 
-@keyframes st2-gooey-pill {
-  to {
-    transform: scale(1);
-    opacity: 0.85;
+@keyframes st2-gooey-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
   }
 }
 
@@ -68,8 +67,8 @@
 .st2-gooey-point {
   display: block;
   opacity: 0;
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
   border-radius: 100%;
   transform-origin: center;
 }
@@ -77,15 +76,16 @@
 .st2-gooey-particle {
   --time: 5s;
   position: absolute;
-  top: calc(50% - 8px);
-  left: calc(50% - 8px);
-  animation: st2-gooey-particle calc(var(--time)) ease 1 -350ms;
+  top: calc(50% - 5px);
+  left: calc(50% - 5px);
+  animation: st2-gooey-particle calc(var(--time)) ease 1 -200ms;
 }
 
 .st2-gooey-point {
   background: var(--color);
   opacity: 1;
-  animation: st2-gooey-point calc(var(--time)) ease 1 -350ms;
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color) 55%, transparent);
+  animation: st2-gooey-point calc(var(--time)) ease 1 -200ms;
 }
 
 @keyframes st2-gooey-particle {
@@ -95,17 +95,13 @@
     animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
   70% {
-    transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.2), calc(var(--end-y) * 1.2));
+    transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.05), calc(var(--end-y) * 1.05));
     opacity: 1;
     animation-timing-function: ease;
   }
-  85% {
-    transform: rotate(calc(var(--rotate) * 0.66)) translate(var(--end-x), var(--end-y));
-    opacity: 1;
-  }
   100% {
-    transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5));
-    opacity: 1;
+    transform: rotate(calc(var(--rotate) * 0.9)) translate(calc(var(--end-x) * 0.55), calc(var(--end-y) * 0.55));
+    opacity: 0;
   }
 }
 
@@ -115,33 +111,18 @@
     opacity: 0;
     animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
-  25% {
-    transform: scale(calc(var(--scale) * 0.25));
-  }
-  38% {
+  30% {
+    transform: scale(calc(var(--scale) * 0.55));
     opacity: 1;
   }
-  65% {
+  70% {
     transform: scale(var(--scale));
-    opacity: 1;
-    animation-timing-function: ease;
-  }
-  85% {
-    transform: scale(var(--scale));
-    opacity: 1;
+    opacity: 0.95;
   }
   100% {
     transform: scale(0);
     opacity: 0;
   }
-}
-
-html:not(.st2-theme-dark) .st2-gooey-filter {
-  mix-blend-mode: multiply;
-}
-
-html:not(.st2-theme-dark) .st2-gooey-filter::before {
-  background: #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -72,16 +72,16 @@ void main() {
 }`;
 
 const DEFAULTS = {
-  speed: 3.4,
-  rayColor1: "#626160",
-  rayColor2: "#F97316",
+  speed: 2.5,
+  rayColor1: "#F97316",
+  rayColor2: "#ab8468",
   intensity: 2,
-  spread: 2.6,
+  spread: 2,
   origin: "top-right",
-  tilt: 15,
-  saturation: 1.2,
-  blend: 0.79,
-  falloff: 1.3,
+  tilt: 0,
+  saturation: 1.5,
+  blend: 0.75,
+  falloff: 1.6,
   opacity: 1,
 };
 

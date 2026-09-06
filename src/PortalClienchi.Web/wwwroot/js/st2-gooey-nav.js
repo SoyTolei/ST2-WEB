@@ -4,11 +4,11 @@
  */
 
 const DEFAULTS = {
-  particleCount: 19,
-  particleDistances: [90, 10],
-  particleR: 300,
-  animationTime: 600,
-  timeVariance: 400,
+  particleCount: 14,
+  particleDistances: [42, 8],
+  particleR: 120,
+  animationTime: 480,
+  timeVariance: 220,
   colors: [1, 2, 3, 1, 2, 3, 1, 4],
 };
 

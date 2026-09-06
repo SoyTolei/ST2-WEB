@@ -1,7 +1,7 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
-import { initSideRays } from "./st2-side-rays.js?v=20260906c";
-import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906d";
+import { initSideRays } from "./st2-side-rays.js?v=20260906f";
+import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
@@ -5228,16 +5228,16 @@ async function bootstrapApp() {
   await ensureAppAccess();
   initGooeyNav();
   initSideRays({
-    speed: 3.4,
-    rayColor1: "#626160",
-    rayColor2: "#F97316",
+    speed: 2.5,
+    rayColor1: "#F97316",
+    rayColor2: "#ab8468",
     intensity: 2,
-    spread: 2.6,
+    spread: 2,
     origin: "top-right",
-    tilt: 15,
-    saturation: 1.2,
-    blend: 0.79,
-    falloff: 1.3,
+    tilt: 0,
+    saturation: 1.5,
+    blend: 0.75,
+    falloff: 1.6,
     opacity: 1,
   });
   if (isPrimarySuperAdmin()) startAccessAdminClientWatch();
