@@ -2,6 +2,7 @@ import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initSideRays } from "./st2-side-rays.js?v=20260906f";
 import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";
+import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260906i";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
@@ -5240,6 +5241,7 @@ async function bootstrapApp() {
     falloff: 1.6,
     opacity: 1,
   });
+  initSpotlightCards();
   if (isPrimarySuperAdmin()) startAccessAdminClientWatch();
   syncAdminTabVisibility();
   syncViewAsBanner();
