@@ -19,6 +19,213 @@ let stepIndex = 0;
 let resizeObserver = null;
 let repositionTimer = null;
 let renderToken = 0;
+let glowPointerBound = false;
+let glowSweepRafs = [];
+let glowSweepTimers = [];
+
+const GLOW_COLORS = ["#c084fc", "#f472b6", "#38bdf8"];
+const GLOW_COLOR_HSL = "40 80 80";
+const GLOW_INTENSITY = 1;
+const GRADIENT_POSITIONS = ["80% 55%", "69% 34%", "8% 6%", "41% 38%", "86% 85%", "82% 18%", "51% 4%"];
+const GRADIENT_KEYS = [
+  "--gradient-one",
+  "--gradient-two",
+  "--gradient-three",
+  "--gradient-four",
+  "--gradient-five",
+  "--gradient-six",
+  "--gradient-seven",
+];
+const COLOR_MAP = [0, 1, 2, 0, 1, 2, 1];
+
+function parseHSL(hslStr) {
+  const match = String(hslStr || "").match(/([\d.]+)\s*([\d.]+)%?\s*([\d.]+)%?/);
+  if (!match) return { h: 40, s: 80, l: 80 };
+  return { h: parseFloat(match[1]), s: parseFloat(match[2]), l: parseFloat(match[3]) };
+}
+
+function buildGlowColorVars(glowColor, intensity) {
+  const { h, s, l } = parseHSL(glowColor);
+  const base = `${h}deg ${s}% ${l}%`;
+  const opacities = [100, 60, 50, 40, 30, 20, 10];
+  const keys = ["", "-60", "-50", "-40", "-30", "-20", "-10"];
+  const vars = {};
+  for (let i = 0; i < opacities.length; i += 1) {
+    vars[`--glow-color${keys[i]}`] = `hsl(${base} / ${Math.min(opacities[i] * intensity, 100)}%)`;
+  }
+  return vars;
+}
+
+function buildGradientVars(colors) {
+  const vars = {};
+  for (let i = 0; i < 7; i += 1) {
+    const c = colors[Math.min(COLOR_MAP[i], colors.length - 1)];
+    vars[GRADIENT_KEYS[i]] = `radial-gradient(at ${GRADIENT_POSITIONS[i]}, ${c} 0px, transparent 50%)`;
+  }
+  vars["--gradient-base"] = `linear-gradient(${colors[0]} 0 100%)`;
+  return vars;
+}
+
+function applySpotlightGlowVars(el) {
+  if (!el) return;
+  const vars = {
+    ...buildGlowColorVars(GLOW_COLOR_HSL, GLOW_INTENSITY),
+    ...buildGradientVars(GLOW_COLORS),
+  };
+  Object.entries(vars).forEach(([key, value]) => el.style.setProperty(key, value));
+}
+
+function easeOutCubic(x) {
+  return 1 - Math.pow(1 - x, 3);
+}
+
+function easeInCubic(x) {
+  return x * x * x;
+}
+
+function clearGlowSweep() {
+  glowSweepRafs.forEach((id) => cancelAnimationFrame(id));
+  glowSweepTimers.forEach((id) => clearTimeout(id));
+  glowSweepRafs = [];
+  glowSweepTimers = [];
+  if (spotlight) {
+    spotlight.classList.remove("sweep-active");
+    spotlight.style.setProperty("--edge-proximity", "0");
+  }
+}
+
+function animateGlowValue({ start = 0, end = 100, duration = 1000, delay = 0, ease = easeOutCubic, onUpdate, onEnd }) {
+  const timerId = setTimeout(() => {
+    const t0 = performance.now();
+    const tick = (now) => {
+      const elapsed = now - t0;
+      const t = Math.min(elapsed / duration, 1);
+      onUpdate(start + (end - start) * ease(t));
+      if (t < 1) {
+        const rafId = requestAnimationFrame(tick);
+        glowSweepRafs.push(rafId);
+      } else if (onEnd) {
+        onEnd();
+      }
+    };
+    const rafId = requestAnimationFrame(tick);
+    glowSweepRafs.push(rafId);
+  }, delay);
+  glowSweepTimers.push(timerId);
+}
+
+function playSpotlightSweep() {
+  if (!spotlight || spotlight.classList.contains("is-center")) return;
+  clearGlowSweep();
+  const angleStart = 110;
+  const angleEnd = 465;
+  spotlight.classList.add("sweep-active");
+  spotlight.style.setProperty("--cursor-angle", `${angleStart}deg`);
+
+  animateGlowValue({
+    duration: 500,
+    onUpdate: (v) => spotlight.style.setProperty("--edge-proximity", String(v)),
+  });
+  animateGlowValue({
+    ease: easeInCubic,
+    duration: 1500,
+    end: 50,
+    onUpdate: (v) => {
+      spotlight.style.setProperty(
+        "--cursor-angle",
+        `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`,
+      );
+    },
+  });
+  animateGlowValue({
+    ease: easeOutCubic,
+    delay: 1500,
+    duration: 2250,
+    start: 50,
+    end: 100,
+    onUpdate: (v) => {
+      spotlight.style.setProperty(
+        "--cursor-angle",
+        `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`,
+      );
+    },
+  });
+  animateGlowValue({
+    ease: easeInCubic,
+    delay: 2500,
+    duration: 1500,
+    start: 100,
+    end: 0,
+    onUpdate: (v) => spotlight.style.setProperty("--edge-proximity", String(v)),
+    onEnd: () => spotlight?.classList.remove("sweep-active"),
+  });
+}
+
+function getSpotlightCenter(el) {
+  const { width, height } = el.getBoundingClientRect();
+  return [width / 2, height / 2];
+}
+
+function getEdgeProximity(el, x, y) {
+  const [cx, cy] = getSpotlightCenter(el);
+  const dx = x - cx;
+  const dy = y - cy;
+  let kx = Infinity;
+  let ky = Infinity;
+  if (dx !== 0) kx = cx / Math.abs(dx);
+  if (dy !== 0) ky = cy / Math.abs(dy);
+  return Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+}
+
+function getCursorAngle(el, x, y) {
+  const [cx, cy] = getSpotlightCenter(el);
+  const dx = x - cx;
+  const dy = y - cy;
+  if (dx === 0 && dy === 0) return 0;
+  const radians = Math.atan2(dy, dx);
+  let degrees = radians * (180 / Math.PI) + 90;
+  if (degrees < 0) degrees += 360;
+  return degrees;
+}
+
+function onTourPointerMove(e) {
+  if (!activeTour || !spotlight || spotlight.classList.contains("is-center")) return;
+  if (spotlight.classList.contains("sweep-active")) return;
+
+  const rect = spotlight.getBoundingClientRect();
+  if (rect.width < 8 || rect.height < 8) return;
+
+  const pad = 64;
+  const outside =
+    e.clientX < rect.left - pad
+    || e.clientX > rect.right + pad
+    || e.clientY < rect.top - pad
+    || e.clientY > rect.bottom + pad;
+
+  if (outside) {
+    spotlight.style.setProperty("--edge-proximity", "0");
+    return;
+  }
+
+  const x = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
+  const y = Math.min(Math.max(e.clientY - rect.top, 0), rect.height);
+  const edge = getEdgeProximity(spotlight, x, y);
+  const angle = getCursorAngle(spotlight, x, y);
+  spotlight.style.setProperty("--edge-proximity", `${(edge * 100).toFixed(3)}`);
+  spotlight.style.setProperty("--cursor-angle", `${angle.toFixed(3)}deg`);
+}
+
+function bindGlowPointer() {
+  if (glowPointerBound) return;
+  window.addEventListener("pointermove", onTourPointerMove, { passive: true });
+  glowPointerBound = true;
+}
+
+function unbindGlowPointer() {
+  if (!glowPointerBound) return;
+  window.removeEventListener("pointermove", onTourPointerMove);
+  glowPointerBound = false;
+}
 
 function loadProgress() {
   try {
@@ -143,7 +350,9 @@ function ensureDom() {
   root.hidden = true;
   root.innerHTML = `
     <div class="st2-tour-overlay" aria-hidden="true"></div>
-    <div class="st2-tour-spotlight" aria-hidden="true"></div>
+    <div class="st2-tour-spotlight" aria-hidden="true">
+      <span class="st2-tour-edge-light" aria-hidden="true"></span>
+    </div>
     <div class="st2-tour-card" role="dialog" aria-modal="true" aria-labelledby="st2-tour-title">
       <div class="st2-tour-card-accent" aria-hidden="true"></div>
       <div class="st2-tour-card-inner">
@@ -162,6 +371,7 @@ function ensureDom() {
 
   overlay = root.querySelector(".st2-tour-overlay");
   spotlight = root.querySelector(".st2-tour-spotlight");
+  applySpotlightGlowVars(spotlight);
   card = root.querySelector(".st2-tour-card");
   titleEl = root.querySelector(".st2-tour-title");
   bodyEl = root.querySelector(".st2-tour-body");
@@ -379,11 +589,13 @@ function positionOverlayHole(target) {
   overlay.style.clipPath = `polygon(evenodd, 0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, ${l}px ${t}px, ${l}px ${b}px, ${r}px ${b}px, ${r}px ${t}px, ${l}px ${t}px)`;
 }
 
-function positionSpotlight(target) {
+function positionSpotlight(target, { animateSweep = false } = {}) {
   if (!spotlight) return;
   positionOverlayHole(target);
   if (!target) {
+    clearGlowSweep();
     spotlight.classList.add("is-center");
+    spotlight.style.setProperty("--edge-proximity", "0");
     return;
   }
   spotlight.classList.remove("is-center");
@@ -393,6 +605,7 @@ function positionSpotlight(target) {
   spotlight.style.left = `${Math.max(0, rect.left - pad)}px`;
   spotlight.style.width = `${Math.max(24, rect.width + pad * 2)}px`;
   spotlight.style.height = `${Math.max(24, rect.height + pad * 2)}px`;
+  if (animateSweep) playSpotlightSweep();
 }
 
 function currentStepTarget() {
@@ -477,7 +690,7 @@ async function renderStep() {
   await waitFrames(1);
   if (token !== renderToken || !activeTour) return;
 
-  positionSpotlight(target);
+  positionSpotlight(target, { animateSweep: true });
   positionCard(target, step.placement || "bottom");
   root?.focus?.({ preventScroll: true });
 
@@ -509,6 +722,8 @@ function finishTour(status) {
   repositionTimer = null;
   if (resizeObserver) resizeObserver.disconnect();
   resizeObserver = null;
+  clearGlowSweep();
+  unbindGlowPointer();
   root.classList.remove("is-active");
   root.hidden = true;
   document.body.classList.remove("st2-tour-active");
@@ -538,6 +753,7 @@ export async function startTour(definition, { force = false, ctx = {} } = {}) {
   root.classList.add("is-active");
   root.tabIndex = -1;
   document.body.classList.add("st2-tour-active");
+  bindGlowPointer();
   await renderStep();
   root.focus({ preventScroll: true });
   return true;
