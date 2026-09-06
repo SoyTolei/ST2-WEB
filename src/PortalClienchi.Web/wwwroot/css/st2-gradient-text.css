@@ -1,0 +1,137 @@
+/* GradientText (React Bits → CSS) — ST² Suite Web branding */
+
+.st2-animated-gradient {
+  --st2-grad-colors: linear-gradient(to right, #7d8084, #f97316, #a855f7, #7d8084);
+  --st2-grad-speed: 4.5s;
+  --st2-grad-fill: #120f17;
+
+  position: relative;
+  margin: 0 auto;
+  display: inline-flex;
+  max-width: fit-content;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.st2-animated-gradient.with-border {
+  padding: 0.35rem 0.85rem;
+}
+
+.st2-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--st2-grad-colors);
+  background-size: 300% 100%;
+  background-repeat: repeat;
+  animation: st2-grad-shift var(--st2-grad-speed) ease-in-out infinite alternate;
+}
+
+.st2-gradient-overlay::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 2px);
+  height: calc(100% - 2px);
+  border-radius: inherit;
+  background-color: var(--st2-grad-fill);
+  z-index: 0;
+}
+
+.st2-gradient-text-content {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.st2-boot-splash-brand .st2-gradient-text-content {
+  gap: 22px;
+}
+
+.st2-access-brand-head .st2-gradient-text-content {
+  gap: 16px;
+}
+
+.planillas-hero-head .st2-gradient-text-content {
+  gap: 14px;
+}
+
+/* Texto con gradiente animado (yoyo) */
+.st2-animated-gradient .st2-boot-splash-st,
+.st2-animated-gradient .st2-boot-splash-sup,
+.st2-animated-gradient .st2-boot-splash-suite,
+.st2-animated-gradient .st2-access-title-st,
+.st2-animated-gradient .st2-access-title-sup,
+.st2-animated-gradient .st2-access-suite,
+.st2-animated-gradient .st2-access-suite-sep,
+.st2-animated-gradient .planillas-hero-st2-st,
+.st2-animated-gradient .planillas-hero-st2-sup,
+.st2-animated-gradient .planillas-hero-title-main {
+  background-image: var(--st2-grad-colors) !important;
+  background-size: 300% 100% !important;
+  background-repeat: repeat !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: st2-grad-shift var(--st2-grad-speed) ease-in-out infinite alternate;
+}
+
+@keyframes st2-grad-shift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+/* Fondos del “borde” según contexto */
+.st2-boot-splash .st2-animated-gradient {
+  --st2-grad-fill: #1a1a1a;
+}
+
+.st2-access-gate .st2-animated-gradient {
+  --st2-grad-fill: #f8fafc;
+}
+
+html.st2-theme-dark .st2-access-gate .st2-animated-gradient {
+  --st2-grad-fill: #1c1c1c;
+}
+
+.planillas-hero .st2-animated-gradient {
+  --st2-grad-fill: transparent;
+}
+
+html.st2-theme-dark .planillas-hero .st2-animated-gradient {
+  --st2-grad-fill: rgba(15, 15, 15, 0.92);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-gradient-overlay,
+  .st2-animated-gradient .st2-boot-splash-st,
+  .st2-animated-gradient .st2-boot-splash-sup,
+  .st2-animated-gradient .st2-boot-splash-suite,
+  .st2-animated-gradient .st2-access-title-st,
+  .st2-animated-gradient .st2-access-title-sup,
+  .st2-animated-gradient .st2-access-suite,
+  .st2-animated-gradient .st2-access-suite-sep,
+  .st2-animated-gradient .planillas-hero-st2-st,
+  .st2-animated-gradient .planillas-hero-st2-sup,
+  .st2-animated-gradient .planillas-hero-title-main {
+    animation: none;
+    background-position: 40% 50%;
+  }
+}
