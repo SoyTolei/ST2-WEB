@@ -64,7 +64,7 @@ function buildGradientVars(colors) {
   return vars;
 }
 
-function applyCardGlowVars(el) {
+function applyGlowVars(el, { transparent = false } = {}) {
   if (!el) return;
   const vars = {
     ...buildGlowColorVars(GLOW_COLOR_HSL, GLOW_INTENSITY),
@@ -75,8 +75,14 @@ function applyCardGlowVars(el) {
   el.style.setProperty("--border-radius", "28px");
   el.style.setProperty("--glow-padding", "40px");
   el.style.setProperty("--cone-spread", "25");
-  el.style.setProperty("--fill-opacity", "0.5");
-  el.style.setProperty("--card-bg", "#120F17");
+  if (transparent) {
+    el.style.setProperty("--fill-opacity", "0");
+    el.style.setProperty("--card-bg", "transparent");
+    el.style.setProperty("--edge-proximity", "82");
+  } else {
+    el.style.setProperty("--fill-opacity", "0.5");
+    el.style.setProperty("--card-bg", "#120F17");
+  }
 }
 
 function getCardCenter(el) {
@@ -264,7 +270,14 @@ function ensureDom() {
       edge.setAttribute("aria-hidden", "true");
       card.prepend(edge);
     }
-    applyCardGlowVars(card);
+    if (spotlight && !spotlight.querySelector(":scope > .st2-tour-edge-light")) {
+      const edge = document.createElement("span");
+      edge.className = "st2-tour-edge-light";
+      edge.setAttribute("aria-hidden", "true");
+      spotlight.appendChild(edge);
+    }
+    applyGlowVars(card);
+    applyGlowVars(spotlight, { transparent: true });
     return;
   }
 
@@ -274,7 +287,9 @@ function ensureDom() {
   root.hidden = true;
   root.innerHTML = `
     <div class="st2-tour-overlay" aria-hidden="true"></div>
-    <div class="st2-tour-spotlight" aria-hidden="true"></div>
+    <div class="st2-tour-spotlight" aria-hidden="true">
+      <span class="st2-tour-edge-light" aria-hidden="true"></span>
+    </div>
     <div class="st2-tour-card" role="dialog" aria-modal="true" aria-labelledby="st2-tour-title">
       <span class="st2-tour-edge-light" aria-hidden="true"></span>
       <div class="st2-tour-card-accent" aria-hidden="true"></div>
@@ -295,7 +310,8 @@ function ensureDom() {
   overlay = root.querySelector(".st2-tour-overlay");
   spotlight = root.querySelector(".st2-tour-spotlight");
   card = root.querySelector(".st2-tour-card");
-  applyCardGlowVars(card);
+  applyGlowVars(card);
+  applyGlowVars(spotlight, { transparent: true });
   titleEl = root.querySelector(".st2-tour-title");
   bodyEl = root.querySelector(".st2-tour-body");
   progressEl = root.querySelector(".st2-tour-progress");
