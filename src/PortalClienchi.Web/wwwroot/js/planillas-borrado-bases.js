@@ -1554,7 +1554,7 @@ function showCtx(x, y, item) {
     const action = btn.getAttribute("data-borrado-ctx");
     let show = false;
     if (action === "editar" || action === "eliminar") show = confirm || canOwnerMutate(item);
-    else if (["listo", "unlisto", "aclaracion-incorrecto"].includes(action || "")) {
+    else if (["listo", "unlisto", "aclaracion-incorrecto", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
       show = confirm;
     }
     btn.classList.toggle("hidden", !show);
@@ -1605,6 +1605,16 @@ async function handleCtxAction(action) {
     } else if (action === "aclaracion-incorrecto") {
       openIncorrectoModal(item);
       return;
+    } else if (action === "aclaracion-manual") {
+      openNoteModal(item);
+      return;
+    } else if (action === "clear-aclaracion") {
+      const { resultado } = parseAclaracion(item.aclaracion);
+      if (resultado) {
+        await patchItem(selectedId, { aclaracion: resultado });
+      } else {
+        await patchItem(selectedId, { clearAclaracion: true });
+      }
     } else if (action === "eliminar") {
       if (!canConfirm && !canOwnerMutate(item)) {
         setStatus("Solo se puede eliminar en estado pendiente.", true);

@@ -69,7 +69,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
         return cachedAlerts;
       }
 
-      // Igual que borrado: ?mode=confirm solo en vista previa de confirmador.
+      // Confirmador: siempre cola pendiente. Vista previa / ver como: ?mode=confirm.
       const alertsUrl = isViewingAsProfile() && canConfirmBlanqueoModule()
         ? "/api/planillas/blanqueo/alerts?mode=confirm"
         : "/api/planillas/blanqueo/alerts";
@@ -205,8 +205,8 @@ function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
     const text = n === 1
-      ? "Tenés 1 blanqueo para confirmar o revisar"
-      : `Tenés ${n} blanqueos para confirmar o revisar`;
+      ? "Tenés 1 blanqueo pendiente para confirmar"
+      : `Tenés ${n} blanqueos pendientes para confirmar`;
     return {
       tone: "warn",
       text,

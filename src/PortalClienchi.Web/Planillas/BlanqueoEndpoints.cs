@@ -124,30 +124,11 @@ public static class BlanqueoEndpoints
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
-            // Quien confirma: avisos personales primero; ?mode=confirm fuerza la cola
-            // (vista previa / “ver como”), igual que borrado de bases.
+            // Quien confirma ve solo la cola pendiente (sin listo / sin aclaración).
+            // ?mode=confirm en “ver como” fuerza esa cola. Los avisos personales
+            // (listo / no registrado / nota) son para el solicitante, no para el confirmador.
             if (flags.BlanqueoConfirm)
             {
-                var forceConfirmQueue = string.Equals(
-                    ctx.Request.Query["mode"].ToString(),
-                    "confirm",
-                    StringComparison.OrdinalIgnoreCase);
-
-                if (!forceConfirmQueue)
-                {
-                    var personal = repo.ListUnseenAlerts(email!);
-                    if (personal.Count > 0)
-                    {
-                        return Results.Ok(new
-                        {
-                            mode = "requester",
-                            count = personal.Count,
-                            items = personal,
-                            claveBlanqueo = BlanqueoClave.Actual,
-                        });
-                    }
-                }
-
                 var pending = repo.ListPendingForConfirm();
                 return Results.Ok(new
                 {
