@@ -191,6 +191,35 @@ export async function markBlanqueoAlertsSeen(ids = null) {
   renderBlanqueoAlertUi();
 }
 
+/**
+ * Al entrar al módulo:
+ * - confirm/pendientes: no tocar el toast (sigue hasta que confirmen/denieguen).
+ * - solicitante: solo marca “listo sin observación”; notas / no registrado esperan a abrirlas.
+ */
+export async function markBlanqueoAlertsSeenOnEnter() {
+  if (alertMode === "confirm") return;
+  const readyIds = cachedAlerts
+    .filter((a) => a.kind === KIND_READY)
+    .map((a) => a.id)
+    .filter((id) => id > 0);
+  if (!readyIds.length) return;
+  await markBlanqueoAlertsSeen(readyIds);
+}
+
+/** Al abrir/ver una observación (pop o modal) del solicitante. */
+export async function markBlanqueoObservationOpened(solicitudId) {
+  if (alertMode === "confirm") return;
+  const sid = Number(solicitudId) || 0;
+  if (!sid) return;
+  const ids = cachedAlerts
+    .filter((a) => (a.solicitudId || a.id) === sid)
+    .filter((a) => a.kind === KIND_NOTE || a.kind === KIND_NO_REG)
+    .map((a) => a.id)
+    .filter((id) => id > 0);
+  if (!ids.length) return;
+  await markBlanqueoAlertsSeen(ids);
+}
+
 /** X en modo confirm: ocultar toast hasta que cambie la cola (badge sigue). */
 function dismissBlanqueoToastOnly() {
   if (alertMode !== "confirm") return;
@@ -274,7 +303,7 @@ export function renderBlanqueoAlertUi({ forceHide = false } = {}) {
     clearSt2AlertToast(ST2_TOAST.blanqueo);
   } else {
     const openBlanqueo = () => {
-      void markBlanqueoAlertsSeen();
+      // No marcar todo visto acá: al abrir el módulo se aplica la regla OnEnter.
       document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
       document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
     };

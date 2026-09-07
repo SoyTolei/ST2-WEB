@@ -1,4 +1,4 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907v";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907w";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";

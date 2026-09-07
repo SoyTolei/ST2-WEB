@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js";
+import { notifyBorradoChanged, markBorradoAlertsSeenOnEnter, markBorradoObservationOpened } from "./borrado-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -265,7 +265,7 @@ export function initBorradoBasesModule() {
 
 export async function openBorradoBasesModule() {
   if (!canSeeBorradoBasesModule()) return;
-  void markBorradoAlertsSeen();
+  void markBorradoAlertsSeenOnEnter();
   initBorradoBasesModule();
   // Permisos desde cache; refresco en paralelo (no bloquea el listado).
   canConfirm = canConfirmBorrado();
@@ -941,6 +941,8 @@ function showBasePop(anchor, label, detail) {
   if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
   pop.style.left = `${Math.max(pad, left)}px`;
   pop.style.top = `${Math.max(pad, top)}px`;
+
+  if (isNote && selectedId) void markBorradoObservationOpened(selectedId);
 }
 
 async function copyBasePopText() {
@@ -1072,6 +1074,23 @@ function buildRow(item) {
     });
   });
 
+  row.querySelectorAll(
+    ".borrado-aclaracion-incorrecto, .borrado-aclaracion-marks, .borrado-aclaracion-listo, .borrado-aclaracion-full",
+  ).forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedId = item.id;
+      const label = el.classList.contains("borrado-aclaracion-incorrecto")
+        ? "Incorrecto"
+        : el.classList.contains("borrado-aclaracion-marks")
+          ? "Aclaración"
+          : "Aclaración";
+      showBasePop(el, label, el.textContent || "");
+      void markBorradoObservationOpened(item.id);
+    });
+  });
+
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
     if (e.target.closest("[data-borrado-copy-value]")) return;
@@ -1080,12 +1099,17 @@ function buildRow(item) {
       e.preventDefault();
       e.stopPropagation();
       selectedId = item.id;
+      const label = pill.getAttribute("data-borrado-base-label") || "";
       // Misma ventanita que CG (ejercicios): Ver muestra el texto, no abre el editor.
       showBasePop(
         pill,
-        pill.getAttribute("data-borrado-base-label") || "",
+        label,
         pill.getAttribute("data-borrado-base-detail") || "",
       );
+      // Incorrecto / resultado con Ver también cuenta como “abrir” la novedad.
+      if (/incorrecto|aclaraci[oó]n|observaci[oó]n/i.test(label)) {
+        void markBorradoObservationOpened(item.id);
+      }
       return;
     }
     hideBasePop();
@@ -1775,6 +1799,7 @@ function openNoteModal(item) {
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   text?.focus();
+  void markBorradoObservationOpened(item.id);
 }
 
 function hideNoteModal() {

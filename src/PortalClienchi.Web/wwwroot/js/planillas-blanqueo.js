@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBlanqueoChanged, markBlanqueoAlertsSeen } from "./blanqueo-alerts.js";
+import { notifyBlanqueoChanged, markBlanqueoAlertsSeenOnEnter, markBlanqueoObservationOpened } from "./blanqueo-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -279,7 +279,7 @@ export function initBlanqueoModule() {
 
 export async function openBlanqueoModule() {
   if (!canSeeBlanqueoModule()) return;
-  void markBlanqueoAlertsSeen();
+  void markBlanqueoAlertsSeenOnEnter();
   initBlanqueoModule();
   // Permisos desde cache; refresco en paralelo (no bloquea el listado).
   canConfirm = canConfirmBlanqueo();
@@ -664,6 +664,7 @@ function showAclaracionPop(anchor, detail) {
   if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
   pop.style.left = `${Math.max(pad, left)}px`;
   pop.style.top = `${Math.max(pad, top)}px`;
+  if (selectedId) void markBlanqueoObservationOpened(selectedId);
 }
 
 async function copyAclaracionPopText() {
@@ -1154,8 +1155,18 @@ function buildRow(item) {
   row.querySelector(".blanqueo-clave-previa-pill")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
+    selectedId = item.id;
     const btn = e.currentTarget;
     showAclaracionPop(btn, btn.getAttribute("data-blanqueo-aclaracion-detail") || "");
+  });
+
+  row.querySelector(".blanqueo-col-aclaracion .blanqueo-pill")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    selectedId = item.id;
+    const pill = e.currentTarget;
+    const detail = pill.getAttribute("title") || pill.textContent || "";
+    showAclaracionPop(pill, detail);
   });
 
   row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
@@ -1524,6 +1535,7 @@ function openNoteModal(item) {
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   text?.focus();
+  void markBlanqueoObservationOpened(item.id);
 }
 
 function hideNoteModal() {

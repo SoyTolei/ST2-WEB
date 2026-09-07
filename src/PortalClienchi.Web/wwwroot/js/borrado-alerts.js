@@ -197,6 +197,35 @@ export async function markBorradoAlertsSeen(ids = null) {
   renderBorradoAlertUi();
 }
 
+/**
+ * Al entrar al módulo:
+ * - confirm/pendientes: no tocar el toast.
+ * - solicitante: solo “eliminada/listo” sin observación; el resto espera a abrirla.
+ */
+export async function markBorradoAlertsSeenOnEnter() {
+  if (alertMode === "confirm") return;
+  const readyIds = cachedAlerts
+    .filter((a) => a.kind === KIND_READY)
+    .map((a) => a.id)
+    .filter((id) => id > 0);
+  if (!readyIds.length) return;
+  await markBorradoAlertsSeen(readyIds);
+}
+
+/** Al abrir/ver una observación o resultado con nota (pop / modal). */
+export async function markBorradoObservationOpened(solicitudId) {
+  if (alertMode === "confirm") return;
+  const sid = Number(solicitudId) || 0;
+  if (!sid) return;
+  const ids = cachedAlerts
+    .filter((a) => (a.solicitudId || a.id) === sid)
+    .filter((a) => a.kind === KIND_NOTE || a.kind === KIND_PARTIAL || a.kind === KIND_INCORRECTO)
+    .map((a) => a.id)
+    .filter((id) => id > 0);
+  if (!ids.length) return;
+  await markBorradoAlertsSeen(ids);
+}
+
 /** Cerrar la X solo en cola de confirmación; avisos personales no se “tragan”. */
 function dismissBorradoToastOnly() {
   if (alertMode !== "confirm") return;
@@ -288,7 +317,6 @@ export function renderBorradoAlertUi() {
     clearSt2AlertToast(ST2_TOAST.borrado);
   } else {
     const openBorrado = () => {
-      void markBorradoAlertsSeen();
       document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
       document.dispatchEvent(new CustomEvent("st2:open-borrado-from-alert"));
     };
