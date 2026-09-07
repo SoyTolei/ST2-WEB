@@ -273,7 +273,8 @@ export function renderBlanqueoAlertUi({ forceHide = false } = {}) {
     setSt2AlertToast({
       id: ST2_TOAST.blanqueo,
       body: summary.text,
-      tone: summary.tone === "bad" ? "bad" : "warn",
+      // confirmado → ok (verde); observación → warn; no registrado → bad
+      tone: summary.tone,
       actionLabel: "Ver",
       sticky: true,
       onAction: openBlanqueo,

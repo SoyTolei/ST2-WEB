@@ -283,7 +283,8 @@ export function renderBorradoAlertUi({ forceHide = false } = {}) {
     setSt2AlertToast({
       id: ST2_TOAST.borrado,
       body: summary.text,
-      tone: "warn",
+      // eliminada → ok (verde); pendientes / obs / parcial / incorrecto → warn
+      tone: summary.tone,
       actionLabel: "Ver",
       sticky: true,
       onAction: openBorrado,
