@@ -1,10 +1,124 @@
-/* Ajustes mínimos sobre sonner-wc (estilos van en shadow DOM del bundle). */
+/* Sonner ST2: anclado bajo Tutorial / Acerca de + glow suave por tipo. */
+
 #st2-sonner {
   z-index: 3200;
+  --border-radius: 18px;
+  --width: 360px;
+  --gap: 12px;
+  /* Defaults; JS los pisa según .app-header-actions */
+  --offset-top: 72px;
+  --offset-right: 16px;
+  --offset-bottom: 24px;
+  --offset-left: 24px;
 }
 
-/* Bajo el gate de acceso / splash, no tapar login. */
 body.st2-access-pending #st2-sonner,
 body.st2-access-restoring #st2-sonner {
   display: none !important;
+}
+
+/*
+ * Glow tipo BorderGlow (borde luminoso), estático y por color de notificación.
+ * El host sonner-toast es el box visible; el interior sigue en shadow DOM.
+ */
+sonner-toast.st2-sonner-toast {
+  border-radius: 18px !important;
+  overflow: visible;
+  isolation: isolate;
+}
+
+sonner-toast.st2-sonner-toast.st2-sonner-ok {
+  box-shadow:
+    0 0 0 1px rgba(16, 185, 129, 0.55),
+    0 0 0 3px rgba(16, 185, 129, 0.18),
+    0 10px 28px rgba(15, 23, 42, 0.22),
+    0 0 22px rgba(16, 185, 129, 0.28),
+    0 0 48px rgba(5, 150, 105, 0.16);
+}
+
+sonner-toast.st2-sonner-toast.st2-sonner-warn {
+  box-shadow:
+    0 0 0 1px rgba(14, 165, 233, 0.55),
+    0 0 0 3px rgba(14, 165, 233, 0.18),
+    0 10px 28px rgba(15, 23, 42, 0.22),
+    0 0 22px rgba(14, 165, 233, 0.28),
+    0 0 48px rgba(2, 132, 199, 0.16);
+}
+
+sonner-toast.st2-sonner-toast.st2-sonner-bad {
+  box-shadow:
+    0 0 0 1px rgba(239, 68, 68, 0.55),
+    0 0 0 3px rgba(239, 68, 68, 0.18),
+    0 10px 28px rgba(15, 23, 42, 0.22),
+    0 0 22px rgba(239, 68, 68, 0.28),
+    0 0 48px rgba(220, 38, 38, 0.16);
+}
+
+sonner-toast.st2-sonner-toast.st2-sonner-tools {
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.55),
+    0 0 0 3px rgba(99, 102, 241, 0.18),
+    0 10px 28px rgba(15, 23, 42, 0.22),
+    0 0 22px rgba(99, 102, 241, 0.28),
+    0 0 48px rgba(79, 70, 229, 0.16);
+}
+
+sonner-toast.st2-sonner-toast.st2-sonner-agua {
+  box-shadow:
+    0 0 0 1px rgba(14, 165, 233, 0.55),
+    0 0 0 3px rgba(56, 189, 248, 0.2),
+    0 10px 28px rgba(15, 23, 42, 0.22),
+    0 0 22px rgba(56, 189, 248, 0.3),
+    0 0 48px rgba(14, 165, 233, 0.16);
+}
+
+html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-ok {
+  box-shadow:
+    0 0 0 1px rgba(52, 211, 153, 0.65),
+    0 0 0 3px rgba(16, 185, 129, 0.22),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 26px rgba(16, 185, 129, 0.35),
+    0 0 52px rgba(5, 150, 105, 0.2);
+}
+
+html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-warn {
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.65),
+    0 0 0 3px rgba(14, 165, 233, 0.22),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 26px rgba(56, 189, 248, 0.35),
+    0 0 52px rgba(2, 132, 199, 0.2);
+}
+
+html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-bad {
+  box-shadow:
+    0 0 0 1px rgba(248, 113, 113, 0.65),
+    0 0 0 3px rgba(239, 68, 68, 0.22),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 26px rgba(248, 113, 113, 0.35),
+    0 0 52px rgba(220, 38, 38, 0.2);
+}
+
+html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-tools {
+  box-shadow:
+    0 0 0 1px rgba(165, 180, 252, 0.65),
+    0 0 0 3px rgba(99, 102, 241, 0.22),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 26px rgba(129, 140, 248, 0.35),
+    0 0 52px rgba(79, 70, 229, 0.2);
+}
+
+html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-agua {
+  box-shadow:
+    0 0 0 1px rgba(125, 211, 252, 0.65),
+    0 0 0 3px rgba(56, 189, 248, 0.22),
+    0 12px 32px rgba(0, 0, 0, 0.45),
+    0 0 26px rgba(56, 189, 248, 0.38),
+    0 0 52px rgba(14, 165, 233, 0.2);
+}
+
+@media (max-width: 600px) {
+  #st2-sonner {
+    --width: min(356px, calc(100vw - 24px));
+  }
 }

@@ -51,6 +51,38 @@ function currentTheme() {
   return document.documentElement.classList.contains("st2-theme-dark") ? "dark" : "light";
 }
 
+function toneClass(tone) {
+  if (tone === "bad" || tone === "error") return "st2-sonner-bad";
+  if (tone === "warn" || tone === "warning") return "st2-sonner-warn";
+  if (tone === "agua") return "st2-sonner-agua";
+  if (tone === "tools" || tone === "info") return "st2-sonner-tools";
+  return "st2-sonner-ok";
+}
+
+/** Ancla el stack justo debajo de Tutorial / Acerca de. */
+export function syncSonnerPlacement() {
+  const toaster = document.getElementById(TOASTER_ID);
+  const anchor =
+    document.querySelector(".app-header-actions") ||
+    document.getElementById("aboutBtn") ||
+    document.querySelector(".app-header-right");
+  if (!toaster) return;
+
+  if (!anchor) {
+    toaster.style.setProperty("--offset-top", "72px");
+    toaster.style.setProperty("--offset-right", "16px");
+    return;
+  }
+
+  const rect = anchor.getBoundingClientRect();
+  const top = Math.max(56, Math.round(rect.bottom + 10));
+  const right = Math.max(10, Math.round(window.innerWidth - rect.right));
+  toaster.style.setProperty("--offset-top", `${top}px`);
+  toaster.style.setProperty("--offset-right", `${right}px`);
+  toaster.style.setProperty("--mobile-offset-top", `${top}px`);
+  toaster.style.setProperty("--mobile-offset-right", `${Math.max(8, right)}px`);
+}
+
 export function syncSonnerTheme() {
   const el = document.getElementById(TOASTER_ID);
   if (el) el.setAttribute("theme", currentTheme());
@@ -59,6 +91,7 @@ export function syncSonnerTheme() {
 export function initSt2Sonner() {
   if (inited) {
     syncSonnerTheme();
+    syncSonnerPlacement();
     return;
   }
   inited = true;
@@ -74,11 +107,22 @@ export function initSt2Sonner() {
   toaster.setAttribute("rich-colors", "");
   toaster.setAttribute("close-button", "");
   toaster.setAttribute("visible-toasts", "5");
-  toaster.setAttribute("offset", "72px");
   toaster.setAttribute("container-aria-label", "Notificaciones");
   toaster.setAttribute("theme", currentTheme());
+  // Evitar que el attr offset pise el ancla dinámico
+  toaster.removeAttribute("offset");
 
   syncSonnerTheme();
+  syncSonnerPlacement();
+
+  window.addEventListener("resize", syncSonnerPlacement, { passive: true });
+  if (typeof ResizeObserver !== "undefined") {
+    const header = document.querySelector(".app-header");
+    if (header) {
+      const ro = new ResizeObserver(() => syncSonnerPlacement());
+      ro.observe(header);
+    }
+  }
 }
 
 /**
@@ -175,6 +219,7 @@ function paintOne(id, title, tone) {
     richColors: true,
     closeButton: true,
     dismissible: true,
+    className: `st2-sonner-toast ${toneClass(tone)}`,
     action: entry.onAction
       ? {
           label: entry.actionLabel || "Ver",
