@@ -34,7 +34,7 @@ const TOASTER_ID = "st2-sonner";
  */
 const STICKY_MS = 1000 * 60 * 60 * 24 * 7; // 7 días
 
-/** @type {Map<string, { body: string, tone: string, actionLabel: string, onAction?: () => void, onDismiss?: () => void }>} */
+/** @type {Map<string, { body: string, tone: string, actionLabel: string, sticky?: boolean, onAction?: () => void, onDismiss?: () => void }>} */
 const registry = new Map();
 
 let inited = false;
@@ -203,6 +203,7 @@ export function setSt2AlertToast({
   body,
   tone = "ok",
   actionLabel = "Ver",
+  sticky = false,
   onAction,
   onDismiss,
 }) {
@@ -217,6 +218,7 @@ export function setSt2AlertToast({
     body: text,
     tone,
     actionLabel,
+    sticky: !!sticky,
     onAction,
     onDismiss,
   });
@@ -288,6 +290,12 @@ function makeActionButton(id, entry, tone) {
   btn.textContent = entry.actionLabel || "Ver";
   btn.addEventListener("click", () => {
     entry.onAction?.();
+    lastPainted.delete(id);
+    if (entry.sticky) {
+      // Seguir en registry: al volver al home se re-pinta (pendientes / obs).
+      dismissProgrammatically(id);
+      return;
+    }
     registry.delete(id);
     dismissProgrammatically(id);
     if (GREET_STACK.includes(id)) paintGreetStack();
@@ -333,6 +341,13 @@ function paintOne(id, title, tone) {
     onDismiss: () => {
       if (dismissingLocally.has(id)) return;
       lastPainted.delete(id);
+      if (entry.sticky) {
+        // X / cierre fantasma: no “tragar” el aviso; reponer.
+        window.setTimeout(() => {
+          if (registry.has(id) && shouldShowSonnerToasts()) paintGreetStack();
+        }, 280);
+        return;
+      }
       registry.delete(id);
       entry.onDismiss?.();
       if (GREET_STACK.includes(id)) paintGreetStack();

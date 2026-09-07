@@ -11,7 +11,12 @@ import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
 const REFRESH_THROTTLE_MS = 2500;
-const DISMISS_KEY = "st2-borrado-confirm-toast-dismissed-v4";
+const DISMISS_KEYS_LEGACY = [
+  "st2-borrado-confirm-toast-dismissed-v1",
+  "st2-borrado-confirm-toast-dismissed-v2",
+  "st2-borrado-confirm-toast-dismissed-v3",
+  "st2-borrado-confirm-toast-dismissed-v4",
+];
 
 let pollTimer = null;
 let retryTimer = null;
@@ -20,8 +25,14 @@ let cachedAlerts = [];
 let alertMode = "requester"; // "confirm" | "requester"
 let refreshInFlight = null;
 let lastRefreshAt = 0;
-/** En modo confirm: oculta el toast hasta que cambie la cola. */
-let confirmToastDismissedSig = "";
+
+function clearLegacyDismissKeys() {
+  try {
+    for (const key of DISMISS_KEYS_LEGACY) sessionStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
 
 const KIND_READY = "ready";
 const KIND_NOTE = "note";
@@ -88,17 +99,7 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
       alertMode = String(data.mode || "").toLowerCase() === "confirm" ? "confirm" : "requester";
       cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
       if (alertMode === "confirm") {
-        const sig = pendingSignature(cachedAlerts);
-        const stored = readDismissedSig();
-        if (stored && stored !== sig) {
-          confirmToastDismissedSig = "";
-          writeDismissedSig("");
-        } else if (stored && stored === sig) {
-          confirmToastDismissedSig = sig;
-        }
-        notifyBorradoDesktop(cachedAlerts.length, sig);
-      } else {
-        confirmToastDismissedSig = "";
+        notifyBorradoDesktop(cachedAlerts.length, pendingSignature(cachedAlerts));
       }
       lastRefreshAt = Date.now();
     } catch {
@@ -131,23 +132,6 @@ function pendingSignature(alerts) {
     .join(",");
 }
 
-function readDismissedSig() {
-  try {
-    return sessionStorage.getItem(DISMISS_KEY) || "";
-  } catch {
-    return "";
-  }
-}
-
-function writeDismissedSig(sig) {
-  try {
-    if (!sig) sessionStorage.removeItem(DISMISS_KEY);
-    else sessionStorage.setItem(DISMISS_KEY, sig);
-  } catch {
-    // ignore
-  }
-}
-
 function normalizeAlert(raw) {
   const src = raw || {};
   const kindRaw = String(src.kind ?? src.Kind ?? KIND_READY).trim().toLowerCase();
@@ -170,13 +154,7 @@ function normalizeAlert(raw) {
 }
 
 export async function markBorradoAlertsSeen(ids = null) {
-  if (alertMode === "confirm") {
-    const sig = pendingSignature(cachedAlerts);
-    confirmToastDismissedSig = sig;
-    writeDismissedSig(sig);
-    renderBorradoAlertUi();
-    return;
-  }
+  if (alertMode === "confirm") return;
 
   if (!cachedAlerts.length && !ids?.length) return;
   try {
@@ -224,16 +202,6 @@ export async function markBorradoObservationOpened(solicitudId) {
     .filter((id) => id > 0);
   if (!ids.length) return;
   await markBorradoAlertsSeen(ids);
-}
-
-/** Cerrar la X solo en cola de confirmación; avisos personales no se “tragan”. */
-function dismissBorradoToastOnly() {
-  if (alertMode !== "confirm") return;
-  const sig = pendingSignature(cachedAlerts);
-  if (!sig) return;
-  confirmToastDismissedSig = sig;
-  writeDismissedSig(sig);
-  renderBorradoAlertUi();
 }
 
 function summarizeAlerts(alerts) {
@@ -291,11 +259,6 @@ export function renderBorradoAlertUi() {
   const count = cachedAlerts.length;
   const label = count > 99 ? "99+" : String(count);
   const summary = count ? summarizeAlerts(cachedAlerts) : null;
-  const sig = pendingSignature(cachedAlerts);
-  const hideToast = alertMode === "confirm"
-    && !!count
-    && !!sig
-    && (confirmToastDismissedSig === sig || readDismissedSig() === sig);
   const sistema = document.body.dataset.planSistema;
   const hideForSistema = sistema === "Legal" || sistema === "Chile";
 
@@ -313,7 +276,7 @@ export function renderBorradoAlertUi() {
     modBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
   }
 
-  if (count === 0 || !summary || hideToast || hideForSistema) {
+  if (count === 0 || !summary || hideForSistema) {
     clearSt2AlertToast(ST2_TOAST.borrado);
   } else {
     const openBorrado = () => {
@@ -325,8 +288,8 @@ export function renderBorradoAlertUi() {
       body: summary.text,
       tone: "warn",
       actionLabel: "Ver",
+      sticky: true,
       onAction: openBorrado,
-      onDismiss: dismissBorradoToastOnly,
     });
   }
 }
@@ -347,7 +310,7 @@ function schedulePollTick() {
 
 export function startBorradoAlertsPolling() {
   stopBorradoAlertsPolling();
-  confirmToastDismissedSig = readDismissedSig();
+  clearLegacyDismissKeys();
   void refreshBorradoAlerts({ force: true });
   schedulePollTick();
 
@@ -371,8 +334,7 @@ export function stopBorradoAlertsPolling() {
 }
 
 function onViewAsChanged() {
-  confirmToastDismissedSig = "";
-  writeDismissedSig("");
+  clearLegacyDismissKeys();
   void refreshBorradoAlerts({ force: true });
 }
 

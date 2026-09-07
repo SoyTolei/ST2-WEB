@@ -11,8 +11,14 @@ import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
 const REFRESH_THROTTLE_MS = 2500;
-/** Solo para modo confirm: ocultar toast tras X hasta que cambie la cola. */
+/** Legacy: ya no ocultamos pendientes con X; se limpia al cargar. */
 const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed-v4";
+const DISMISS_KEYS_LEGACY = [
+  "st2-blanqueo-confirm-toast-dismissed-v1",
+  "st2-blanqueo-confirm-toast-dismissed-v2",
+  "st2-blanqueo-confirm-toast-dismissed-v3",
+  DISMISS_KEY,
+];
 
 let pollTimer = null;
 let retryTimer = null;
@@ -21,7 +27,14 @@ let cachedAlerts = [];
 let alertMode = "requester"; // "confirm" | "requester"
 let refreshInFlight = null;
 let lastRefreshAt = 0;
-let confirmToastDismissedSig = "";
+
+function clearLegacyDismissKeys() {
+  try {
+    for (const key of DISMISS_KEYS_LEGACY) sessionStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
 
 const KIND_READY = "ready";
 const KIND_NOTE = "note";
@@ -82,18 +95,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
       alertMode = String(data.mode || "").toLowerCase() === "confirm" ? "confirm" : "requester";
       cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
       if (alertMode === "confirm") {
-        const sig = pendingSignature(cachedAlerts);
-        const stored = readDismissedSig();
-        if (stored && stored !== sig) {
-          confirmToastDismissedSig = "";
-          writeDismissedSig("");
-        } else if (stored && stored === sig) {
-          confirmToastDismissedSig = sig;
-        }
-        notifyBlanqueoDesktop(cachedAlerts.length, sig);
-      } else {
-        // Avisos personales: no heredar dismiss de cola de confirmación.
-        confirmToastDismissedSig = "";
+        notifyBlanqueoDesktop(cachedAlerts.length, pendingSignature(cachedAlerts));
       }
       lastRefreshAt = Date.now();
     } catch {
@@ -126,23 +128,6 @@ function pendingSignature(alerts) {
     .join(",");
 }
 
-function readDismissedSig() {
-  try {
-    return sessionStorage.getItem(DISMISS_KEY) || "";
-  } catch {
-    return "";
-  }
-}
-
-function writeDismissedSig(sig) {
-  try {
-    if (!sig) sessionStorage.removeItem(DISMISS_KEY);
-    else sessionStorage.setItem(DISMISS_KEY, sig);
-  } catch {
-    // ignore
-  }
-}
-
 function normalizeAlert(raw) {
   const src = raw || {};
   const kindRaw = String(src.kind ?? src.Kind ?? KIND_READY).trim().toLowerCase();
@@ -164,13 +149,8 @@ function normalizeAlert(raw) {
 }
 
 export async function markBlanqueoAlertsSeen(ids = null) {
-  if (alertMode === "confirm") {
-    const sig = pendingSignature(cachedAlerts);
-    confirmToastDismissedSig = sig;
-    writeDismissedSig(sig);
-    renderBlanqueoAlertUi();
-    return;
-  }
+  // Confirm/pendientes: el toast vive mientras haya cola; no hay “visto” por UI.
+  if (alertMode === "confirm") return;
 
   if (!cachedAlerts.length && !ids?.length) return;
   try {
@@ -220,16 +200,6 @@ export async function markBlanqueoObservationOpened(solicitudId) {
   await markBlanqueoAlertsSeen(ids);
 }
 
-/** X en modo confirm: ocultar toast hasta que cambie la cola (badge sigue). */
-function dismissBlanqueoToastOnly() {
-  if (alertMode !== "confirm") return;
-  const sig = pendingSignature(cachedAlerts);
-  if (!sig) return;
-  confirmToastDismissedSig = sig;
-  writeDismissedSig(sig);
-  renderBlanqueoAlertUi();
-}
-
 function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
@@ -276,12 +246,6 @@ export function renderBlanqueoAlertUi({ forceHide = false } = {}) {
   const count = cachedAlerts.length;
   const label = count > 99 ? "99+" : String(count);
   const summary = count ? summarizeAlerts(cachedAlerts) : null;
-  const sig = pendingSignature(cachedAlerts);
-  // Solo en cola de confirmación la X oculta el toast; avisos personales vuelven al poll.
-  const hideToast = alertMode === "confirm"
-    && !!count
-    && !!sig
-    && (confirmToastDismissedSig === sig || readDismissedSig() === sig);
   const sistema = document.body.dataset.planSistema;
   const hideForSistema = forceHide || sistema === "Legal" || sistema === "Chile";
 
@@ -299,22 +263,20 @@ export function renderBlanqueoAlertUi({ forceHide = false } = {}) {
     modBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
   }
 
-  if (count === 0 || !summary || hideToast || hideForSistema) {
+  if (count === 0 || !summary || hideForSistema) {
     clearSt2AlertToast(ST2_TOAST.blanqueo);
   } else {
     const openBlanqueo = () => {
-      // No marcar todo visto acá: al abrir el módulo se aplica la regla OnEnter.
       document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
       document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
     };
     setSt2AlertToast({
       id: ST2_TOAST.blanqueo,
       body: summary.text,
-      // warn/bad: el tono "ok"/success de Sonner se estaba auto-cerrando en algunos casos.
       tone: summary.tone === "bad" ? "bad" : "warn",
       actionLabel: "Ver",
+      sticky: true,
       onAction: openBlanqueo,
-      onDismiss: dismissBlanqueoToastOnly,
     });
   }
 }
@@ -335,7 +297,7 @@ function schedulePollTick() {
 
 export function startBlanqueoAlertsPolling() {
   stopBlanqueoAlertsPolling();
-  confirmToastDismissedSig = readDismissedSig();
+  clearLegacyDismissKeys();
   void refreshBlanqueoAlerts({ force: true });
   schedulePollTick();
 
@@ -359,8 +321,7 @@ export function stopBlanqueoAlertsPolling() {
 }
 
 function onViewAsChanged() {
-  confirmToastDismissedSig = "";
-  writeDismissedSig("");
+  clearLegacyDismissKeys();
   void refreshBlanqueoAlerts({ force: true });
 }
 
