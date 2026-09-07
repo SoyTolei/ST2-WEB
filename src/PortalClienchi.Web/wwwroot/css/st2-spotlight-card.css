@@ -33,11 +33,13 @@
 }
 
 /* El spotlight hace la luz; evitamos el brightness uniforme que aplana el efecto. */
-.plan-modulo-btn.st2-card-spotlight:hover:not(:disabled) {
+.plan-modulo-btn.st2-card-spotlight:hover:not(:disabled),
+html.st2-theme-dark .plan-modulo-btn.st2-card-spotlight:hover:not(:disabled) {
   filter: none;
 }
 
-.plan-modulo-btn.st2-card-spotlight:active:not(:disabled) {
+.plan-modulo-btn.st2-card-spotlight:active:not(:disabled),
+html.st2-theme-dark .plan-modulo-btn.st2-card-spotlight:active:not(:disabled) {
   filter: brightness(0.97);
 }
 
