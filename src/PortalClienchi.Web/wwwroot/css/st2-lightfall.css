@@ -1,0 +1,42 @@
+/* Lightfall wallpaper del splash de carga. */
+
+.st2-splash-lightfall {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #ce6319;
+}
+
+.st2-lightfall-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.st2-splash-lightfall.is-ready .st2-lightfall-canvas {
+  opacity: 1;
+}
+
+.st2-splash-lightfall.is-fallback {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 35%, rgba(255, 159, 252, 0.45) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 70% at 20% 80%, rgba(249, 115, 22, 0.55) 0%, transparent 55%),
+    #ce6319;
+}
+
+.st2-boot-splash {
+  position: relative;
+  overflow: hidden;
+  background: #ce6319 !important;
+}
+
+.st2-boot-splash-brand,
+.st2-boot-splash-status {
+  position: relative;
+  z-index: 2;
+}

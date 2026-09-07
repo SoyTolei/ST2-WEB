@@ -70,11 +70,13 @@
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-border-glow.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-topography.css?v=20260907b"/>
+  <link rel="stylesheet" href="/css/st2-lightfall.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907o"/>
   <link rel="modulepreload" href="/js/st2-topography.js?v=20260907b"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260907c"/>
-  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260907a"/>
+  <link rel="modulepreload" href="/js/st2-lightfall.js?v=20260907a"/>
+  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260907b"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -84,10 +86,11 @@
     }
   } catch (e) { /* ignore */ }
 </script>
-  <script type="module" src="/js/st2-login-boot.js?v=20260907a"></script>
+  <script type="module" src="/js/st2-login-boot.js?v=20260907b"></script>
   <div id="st2-light-rays" class="st2-light-rays" aria-hidden="true"></div>
   <sonner-toaster id="st2-sonner" position="top-right" rich-colors close-button visible-toasts="5" container-aria-label="Notificaciones"></sonner-toaster>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">
+    <div id="st2-splash-lightfall" class="st2-splash-lightfall" aria-hidden="true"></div>
     <div class="st2-boot-splash-brand">
       <span class="st2-boot-splash-st2-mark" aria-hidden="true">
         <span class="st2-boot-splash-st">ST</span><sup class="st2-boot-splash-sup">2</sup>
@@ -2624,6 +2627,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260907ag" type="module"></script>
+  <script src="/js/app.js?v=20260907ah" type="module"></script>
 </body>
 </html>
