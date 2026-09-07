@@ -212,7 +212,34 @@ public static class BorradoBasesEndpoints
             if (!repo.Delete(id))
                 return Results.NotFound(new { error = "Solicitud no encontrada." });
 
-            return Results.Ok(new { ok = true });
+            return Results.Ok(new { ok = true, id, canUndo = true });
+        });
+
+        app.MapPost("/api/planillas/borrado-bases/{id:int}/restore", (
+            HttpContext ctx,
+            int id,
+            BorradoBasesRepository repo,
+            ModuleAccessRepository modules) =>
+        {
+            if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
+                return error!;
+
+            var current = repo.GetByIdIncludingDeleted(id);
+            if (current is null)
+                return Results.NotFound(new { error = "Solicitud no encontrada." });
+
+            // Si ya está activa, no hay nada que restaurar.
+            if (repo.GetById(id) is not null)
+                return Results.Ok(new { ok = true, alreadyActive = true, item = repo.GetById(id) });
+
+            if (!IsOwner(current, email!) && !flags.BorradoBasesConfirm)
+                return Results.Json(new { error = "Solo podés restaurar tus propias solicitudes." }, statusCode: StatusCodes.Status403Forbidden);
+
+            if (!repo.Restore(id))
+                return Results.NotFound(new { error = "No hay una eliminación reciente para restaurar." });
+
+            var restored = repo.GetById(id);
+            return Results.Ok(new { ok = true, item = restored });
         });
     }
 

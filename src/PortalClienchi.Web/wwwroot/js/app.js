@@ -1,4 +1,4 @@
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907k";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907m";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";
@@ -71,7 +71,7 @@ function applyTheme(dark) {
   syncSonnerPlacement();
 }
 
-/** Oscuro por defecto; solo "light" explícito deja el tema claro. */
+/** Oscuro por defecto; solo "light" explÃ­cito deja el tema claro. */
 function initThemeFromStorage() {
   let dark = true;
   try {
@@ -321,7 +321,7 @@ function syncPortalFrameTitle() {
   const cfg = getActivePortalConfig();
   const portalLabel = getPortalClientTabLabel();
   const label = portalPickerLabel(activePortalId, cfg?.label) || activePortalId || portalLabel;
-  if (portalFrame) portalFrame.title = `${portalLabel} · ${label}`;
+  if (portalFrame) portalFrame.title = `${portalLabel} Â· ${label}`;
 }
 
 function switchPortal(portalId, { history = "push" } = {}) {
@@ -429,7 +429,7 @@ function getAboutUpdatedLabel() {
   if (fromConfig) return fromConfig;
   const meta = document.querySelector('meta[name="st2-updated-label"]');
   if (meta?.content?.trim()) return meta.content.trim();
-  return "Último update de la web: —";
+  return "Ãšltimo update de la web: â€”";
 }
 
 function applyAboutUpdated() {
@@ -439,8 +439,8 @@ function applyAboutUpdated() {
 }
 
 /**
- * Parte tokens pegados sin separador: vanesageorgina → vanesa + georgina,
- * velasquezmunoz → velasquez + munoz.
+ * Parte tokens pegados sin separador: vanesageorgina â†’ vanesa + georgina,
+ * velasquezmunoz â†’ velasquez + munoz.
  * Acepta corte si ambos son conocidos, o si uno es conocido y el otro parece nombre.
  */
 function splitGluedAccessNamePart(raw, depth = 0) {
@@ -542,7 +542,7 @@ function parseAccessNameFromEmail(email) {
   const rawParts = tokenizeAccessEmailLocal(local);
   const parts = rawParts.map(titleAccessNameToken).filter(Boolean);
   if (!parts.length) {
-    return { firstName: "", secondName: "", lastName: "", secondLastName: "", display: email || "—" };
+    return { firstName: "", secondName: "", lastName: "", secondLastName: "", display: email || "â€”" };
   }
 
   let firstName = "";
@@ -607,7 +607,7 @@ function parseAccessNameFromEmail(email) {
     secondName,
     lastName,
     secondLastName,
-    display: merged.join(" ").replace(/\s+/g, " ").trim() || email || "—",
+    display: merged.join(" ").replace(/\s+/g, " ").trim() || email || "â€”",
   };
 }
 
@@ -618,7 +618,7 @@ function formatAccessDisplayName(email, override) {
 }
 
 function formatAccessDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "â€”";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleString("es-AR", {
@@ -631,7 +631,7 @@ function formatAccessDate(iso) {
 }
 
 function formatAccessRelative(iso) {
-  if (!iso) return "—";
+  if (!iso) return "â€”";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
@@ -646,7 +646,7 @@ function formatAccessRelative(iso) {
 }
 
 function formatAccessDateCompact(iso) {
-  if (!iso) return "—";
+  if (!iso) return "â€”";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   const now = new Date();
@@ -700,7 +700,7 @@ function syncAccessAdminSortHeaders() {
     if (active) {
       const desc = accessAdminSortDir === "desc";
       th.setAttribute("aria-sort", desc ? "descending" : "ascending");
-      if (mark) mark.textContent = desc ? "↓" : "↑";
+      if (mark) mark.textContent = desc ? "â†“" : "â†‘";
     } else {
       th.setAttribute("aria-sort", "none");
       if (mark) mark.textContent = "";
@@ -767,7 +767,7 @@ function resolveAccessBrowserLabel(item) {
 function formatAccessClientLabel(item) {
   const browser = resolveAccessBrowserLabel(item);
   const device = resolveAccessDeviceShort(item);
-  if (browser && device) return `${browser} · ${device}`;
+  if (browser && device) return `${browser} Â· ${device}`;
   if (device) return `id ${device}`;
   if (browser) return browser;
   return item?.lastClientLabel
@@ -801,7 +801,7 @@ function normalizeAccessBrowserFamily(label) {
   return b;
 }
 
-/** Edge ↔ Chrome en el mismo usuario es habitual; no alertar. */
+/** Edge â†” Chrome en el mismo usuario es habitual; no alertar. */
 function isBenignCrossBrowserSwap(prevBrowser, nextBrowser) {
   const a = normalizeAccessBrowserFamily(prevBrowser);
   const b = normalizeAccessBrowserFamily(nextBrowser);
@@ -814,7 +814,7 @@ function isBenignClientKeyMigration(prevKey, nextKey) {
   if (!prevKey || !nextKey || prevKey === nextKey) return false;
   // Primera vez que aparece device id tras el deploy: no alertar.
   if (nextKey.startsWith("d:") && !prevKey.startsWith("d:")) return true;
-  // Formato viejo host|ip|hint → nuevo sin IP.
+  // Formato viejo host|ip|hint â†’ nuevo sin IP.
   if (prevKey.includes("|") && !nextKey.includes("|")) return true;
   return false;
 }
@@ -852,14 +852,14 @@ function buildAccessAdminPermsCell(item) {
   if (item.isSt2Admin) systems.push({ key: "adm", label: "ADM", title: "Administrador web (ADMIN)" });
   const extras = buildAccessAdminExtraModules(item);
   if (!systems.length && !extras.length) {
-    return '<span class="st2-access-admin-perm-empty">—</span>';
+    return '<span class="st2-access-admin-perm-empty">â€”</span>';
   }
   const sysHtml = systems.map((sys) => (
     `<span class="st2-access-admin-perm-sys st2-access-admin-perm-sys--${sys.key} is-on" title="${escapeHtml(sys.title)}">${escapeHtml(sys.label)}</span>`
   )).join("");
   const extrasHtml = extras.length
     ? `<details class="st2-access-admin-perm-detail">
-        <summary class="st2-access-admin-perm-more-btn" aria-label="Ver ${extras.length} módulo${extras.length === 1 ? "" : "s"} extra">+</summary>
+        <summary class="st2-access-admin-perm-more-btn" aria-label="Ver ${extras.length} mÃ³dulo${extras.length === 1 ? "" : "s"} extra">+</summary>
         <div class="st2-access-admin-perm-pop" role="list">
           ${extras.map((label) => `<span class="st2-access-admin-perm-pop-item" role="listitem">${escapeHtml(label)}</span>`).join("")}
         </div>
@@ -956,13 +956,13 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
   if (!notify || !changes.length) return changes;
 
-  // Acumular atención en panel (⚠ en Equipo / pestaña ADMIN). Sin push de escritorio.
+  // Acumular atenciÃ³n en panel (âš  en Equipo / pestaÃ±a ADMIN). Sin push de escritorio.
   for (const c of changes) accessAdminClientChangedEmails.add(c.email);
   syncAdminClientAttentionUi();
 
   if (showHint) {
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-    setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} · ${nowLabel}`);
+    setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} Â· ${nowLabel}`);
   }
 
   return changes;
@@ -973,15 +973,15 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
 function formatAccessClientChangeHint(changes) {
   if (!changes?.length) return "";
-  if (changes.length > 1) return `⚠ ${changes.length} posibles equipos distintos`;
+  if (changes.length > 1) return `âš  ${changes.length} posibles equipos distintos`;
   const first = changes[0];
   const prefix = first.sameBrowser
-    ? `⚠ Mismo navegador, otro equipo: ${first.displayName}`
-    : `⚠ Equipo distinto: ${first.displayName}`;
+    ? `âš  Mismo navegador, otro equipo: ${first.displayName}`
+    : `âš  Equipo distinto: ${first.displayName}`;
   const trail = first.previousLabel && first.nextLabel
-    ? ` · ${first.previousLabel} → ${first.nextLabel}`
+    ? ` Â· ${first.previousLabel} â†’ ${first.nextLabel}`
     : first.nextLabel
-      ? ` · ${first.nextLabel}`
+      ? ` Â· ${first.nextLabel}`
       : "";
   return `${prefix}${trail}`;
 }
@@ -1010,7 +1010,7 @@ async function pollAccessAdminClientWatch() {
         renderAccessAdminTable();
       }
       const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} · ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} Â· ${nowLabel}`);
     }
   } catch {
     /* ignore */
@@ -1031,22 +1031,22 @@ function stopAccessAdminClientWatch() {
   accessAdminClientWatchTimer = null;
 }
 
-/** Cartelito ⚠ en pestaña ADMIN / columna Equipo cuando alguien cambió de terminal. */
+/** Cartelito âš  en pestaÃ±a ADMIN / columna Equipo cuando alguien cambiÃ³ de terminal. */
 function syncAdminClientAttentionUi() {
   const n = accessAdminClientChangedEmails.size;
   tabAdminBtn?.classList.toggle("has-client-attention", n > 0 && isPrimarySuperAdmin());
   if (n > 0) {
     tabAdminBtn?.setAttribute("title", n === 1
-      ? "Un usuario cambió de equipo"
+      ? "Un usuario cambiÃ³ de equipo"
       : `${n} usuarios cambiaron de equipo`);
-  } else if (tabAdminBtn && !tabAdminBtn.title?.includes("administración")) {
-    tabAdminBtn.title = "Panel de administración de accesos";
+  } else if (tabAdminBtn && !tabAdminBtn.title?.includes("administraciÃ³n")) {
+    tabAdminBtn.title = "Panel de administraciÃ³n de accesos";
   }
   const thAttn = document.getElementById("st2-access-admin-host-attention");
   if (thAttn) {
     thAttn.classList.toggle("hidden", n === 0);
     thAttn.setAttribute("aria-hidden", n === 0 ? "true" : "false");
-    thAttn.textContent = n > 0 ? "⚠" : "";
+    thAttn.textContent = n > 0 ? "âš " : "";
   }
   if (accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(n);
 }
@@ -1321,7 +1321,7 @@ function syncAccessAdminModFilterUi() {
       accessAdminPermsFilterMark.classList.add("hidden");
     } else {
       const labels = { sql: "SQL", leg: "LEG", cl: "CL", adm: "ADM" };
-      accessAdminPermsFilterMark.textContent = [...accessAdminModFilters].map((key) => labels[key] || key).join(" · ");
+      accessAdminPermsFilterMark.textContent = [...accessAdminModFilters].map((key) => labels[key] || key).join(" Â· ");
       accessAdminPermsFilterMark.classList.remove("hidden");
     }
   }
@@ -1416,12 +1416,12 @@ function syncAccessAdminOwnerOnlyUi() {
 
 function formatAccessAuditAction(action) {
   switch (String(action || "").toLowerCase()) {
-    case "approve": return "aprobó";
-    case "reject": return "rechazó";
-    case "modules": return "cambió módulos de";
+    case "approve": return "aprobÃ³";
+    case "reject": return "rechazÃ³";
+    case "modules": return "cambiÃ³ mÃ³dulos de";
     case "view_as": return "vio como";
-    case "preset": return "creó perfil";
-    default: return action || "actuó sobre";
+    case "preset": return "creÃ³ perfil";
+    default: return action || "actuÃ³ sobre";
   }
 }
 
@@ -1447,7 +1447,7 @@ function renderAccessAdminDaySummary({ total, pending, today, concurrent, attent
   if (pending) parts.push(`${pending} pendientes`);
   if (concurrent) parts.push(`${concurrent} con sesiones concurrentes`);
   if (attention) parts.push(`${attention} con aviso de equipo`);
-  accessAdminDaySummary.textContent = `Hoy · ${parts.join(" · ")} · ${total} en lista`;
+  accessAdminDaySummary.textContent = `Hoy Â· ${parts.join(" Â· ")} Â· ${total} en lista`;
   accessAdminDaySummary.classList.remove("hidden");
   accessAdminDaySummary.hidden = false;
 }
@@ -1462,8 +1462,8 @@ function formatAccessAuditLine(row) {
     actor,
     target,
     verb,
-    html: `${escapeHtml(when)} · <strong>${escapeHtml(actor)}</strong> ${escapeHtml(verb)} <strong>${escapeHtml(target)}</strong>`,
-    title: `${row.actorEmail || ""} → ${row.targetEmail || ""}`,
+    html: `${escapeHtml(when)} Â· <strong>${escapeHtml(actor)}</strong> ${escapeHtml(verb)} <strong>${escapeHtml(target)}</strong>`,
+    title: `${row.actorEmail || ""} â†’ ${row.targetEmail || ""}`,
   };
 }
 
@@ -1472,7 +1472,7 @@ function isAccessAuditAdminWebActor(email) {
   if (!e || e === PRIMARY_ADMIN_EMAIL) return false;
   const item = accessAdminItemsCache.find((row) => String(row.email || "").toLowerCase() === e);
   if (item) return !!item.isSt2Admin;
-  // Actuó en el panel y no sos vos: lo mostramos igual (p. ej. cookie admin / ex-admin).
+  // ActuÃ³ en el panel y no sos vos: lo mostramos igual (p. ej. cookie admin / ex-admin).
   return true;
 }
 
@@ -1529,7 +1529,7 @@ function openAccessAdminAuditDetail(email, { toggle = true } = {}) {
     .slice(0, 10);
   accessAdminAuditDetailEmail = target;
   if (accessAdminAuditDetailTitle) {
-    accessAdminAuditDetailTitle.textContent = `${shortAccessActor(target)} · ${rows.length} acción${rows.length === 1 ? "" : "es"}`;
+    accessAdminAuditDetailTitle.textContent = `${shortAccessActor(target)} Â· ${rows.length} acciÃ³n${rows.length === 1 ? "" : "es"}`;
   }
   if (accessAdminAuditDetailList) {
     accessAdminAuditDetailList.innerHTML = rows.map((row) => {
@@ -1585,7 +1585,7 @@ function renderAccessAdminAudit() {
   accessAdminAudit.classList.remove("hidden");
   accessAdminAudit.hidden = false;
   if (accessAdminAuditCount) {
-    accessAdminAuditCount.textContent = rows.length === 1 ? "1 acción" : `${rows.length} acciones`;
+    accessAdminAuditCount.textContent = rows.length === 1 ? "1 acciÃ³n" : `${rows.length} acciones`;
   }
 
   const summaries = buildAccessAuditActorSummaries(rows);
@@ -1598,11 +1598,11 @@ function renderAccessAdminAudit() {
       accessAdminAuditActors.hidden = false;
       accessAdminAuditActors.innerHTML = summaries.map((sum) => {
         const open = accessAdminAuditDetailEmail === sum.email;
-        const countLabel = sum.count === 1 ? "1 acción" : `${sum.count} acciones`;
+        const countLabel = sum.count === 1 ? "1 acciÃ³n" : `${sum.count} acciones`;
         return `<li>
           <button type="button" class="st2-access-admin-audit-actor${open ? " is-open" : ""}" data-audit-actor="${escapeHtml(sum.email)}" aria-expanded="${open ? "true" : "false"}" title="Ver detalle de ${escapeHtml(sum.email)}">
-            <span class="st2-access-admin-audit-actor-main"><strong>${escapeHtml(shortAccessActor(sum.email))}</strong> · ${escapeHtml(countLabel)}</span>
-            <span class="st2-access-admin-audit-actor-last">última: ${escapeHtml(sum.latestLabel)} · ${escapeHtml(sum.when)}</span>
+            <span class="st2-access-admin-audit-actor-main"><strong>${escapeHtml(shortAccessActor(sum.email))}</strong> Â· ${escapeHtml(countLabel)}</span>
+            <span class="st2-access-admin-audit-actor-last">Ãºltima: ${escapeHtml(sum.latestLabel)} Â· ${escapeHtml(sum.when)}</span>
           </button>
         </li>`;
       }).join("");
@@ -1627,7 +1627,7 @@ function renderAccessAdminAudit() {
     const canMore = rows.length > 5;
     accessAdminAuditMore.hidden = !canMore;
     accessAdminAuditMore.classList.toggle("hidden", !canMore);
-    accessAdminAuditMore.textContent = accessAdminAuditShowAll ? "Ver menos" : `Ver más (${rows.length - 5})`;
+    accessAdminAuditMore.textContent = accessAdminAuditShowAll ? "Ver menos" : `Ver mÃ¡s (${rows.length - 5})`;
   }
 }
 
@@ -1646,7 +1646,7 @@ function setAccessAdminListFilter(key) {
 
 function exportAccessAdminCsv() {
   const items = getFilteredAccessAdminItems();
-  const headers = ["Nombre", "Email", "Permisos", "Equipo", "Último acceso", "Ingresos", "Activo", "Concurrente"];
+  const headers = ["Nombre", "Email", "Permisos", "Equipo", "Ãšltimo acceso", "Ingresos", "Activo", "Concurrente"];
   const lines = [headers.join(",")];
   for (const item of items) {
     const name = formatAccessDisplayName(item.email, item.displayNameOverride);
@@ -1664,8 +1664,8 @@ function exportAccessAdminCsv() {
       formatAccessClientLabel(item) || "",
       formatAccessDate(item.lastSeenAt),
       String(item.loginCount ?? 0),
-      item.isActive ? "sí" : "no",
-      item.hasConcurrentSessions ? "sí" : "no",
+      item.isActive ? "sÃ­" : "no",
+      item.hasConcurrentSessions ? "sÃ­" : "no",
     ].map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`);
     lines.push(row.join(","));
   }
@@ -1719,7 +1719,7 @@ function setAccessAdminUpdatedHint(text) {
   accessAdminUpdated.classList.remove("hidden");
 }
 
-/** Admin web y owner: Nombre, Permisos, Equipo, Último acceso, Ingresos. */
+/** Admin web y owner: Nombre, Permisos, Equipo, Ãšltimo acceso, Ingresos. */
 function canSeeAccessAdminOwnerColumns() {
   return isSt2SuperAdmin();
 }
@@ -1758,7 +1758,7 @@ function renderAccessAdminTable() {
   if (!accessAdminBody) return;
 
   if (!accessAdminItemsCache.length) {
-    accessAdminStatus.textContent = "Todavía no hay accesos registrados.";
+    accessAdminStatus.textContent = "TodavÃ­a no hay accesos registrados.";
     accessAdminToolbar?.classList.add("hidden");
     accessAdminTableWrap?.classList.add("hidden");
     accessAdminBody.innerHTML = "";
@@ -1769,7 +1769,7 @@ function renderAccessAdminTable() {
 
   if (!items.length) {
     accessAdminStatus.textContent = accessAdminQuery.trim()
-      ? "Sin resultados para esa búsqueda."
+      ? "Sin resultados para esa bÃºsqueda."
       : accessAdminListFilter === "active"
         ? "Nadie activo ahora."
         : accessAdminListFilter === "attention"
@@ -1788,7 +1788,7 @@ function renderAccessAdminTable() {
   accessAdminBody.innerHTML = items.map((item) => {
     const badges = [];
     if (item.isPending) {
-      badges.push('<span class="st2-access-admin-pending-tag" title="Esperando aprobación">Pendiente</span>');
+      badges.push('<span class="st2-access-admin-pending-tag" title="Esperando aprobaciÃ³n">Pendiente</span>');
     }
     if (item.isUnseenNew) {
       badges.push('<span class="st2-access-admin-new-user" title="Primer ingreso hoy">Nuevo</span>');
@@ -1808,22 +1808,22 @@ function renderAccessAdminTable() {
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
     const permsHtml = buildAccessAdminPermsCell(item);
-    const hostLabel = formatAccessClientLabel(item) || "—";
+    const hostLabel = formatAccessClientLabel(item) || "â€”";
     const deviceShort = resolveAccessDeviceShort(item);
     const browserLabel = resolveAccessBrowserLabel(item);
     const entornoHint = String(item.lastClientHint || "")
-      .replace(/\s*·\s*id:[a-z0-9-]{6,32}\b/gi, "")
+      .replace(/\s*Â·\s*id:[a-z0-9-]{6,32}\b/gi, "")
       .replace(/\bid:[a-z0-9-]{6,32}\b/gi, "")
-      .replace(/\s*·\s*(Edge|Chrome|Firefox|Safari|Opera)\b/gi, "")
+      .replace(/\s*Â·\s*(Edge|Chrome|Firefox|Safari|Opera)\b/gi, "")
       .replace(/\s{2,}/g, " ")
-      .replace(/^[·\s]+|[·\s]+$/g, "")
+      .replace(/^[Â·\s]+|[Â·\s]+$/g, "")
       .trim();
     const historyLines = (item.clientHistory || [])
       .slice(0, 5)
-      .map((h) => `${h.label || "—"}${h.lastSeenAt ? ` (${formatAccessRelative(h.lastSeenAt)})` : ""}`);
+      .map((h) => `${h.label || "â€”"}${h.lastSeenAt ? ` (${formatAccessRelative(h.lastSeenAt)})` : ""}`);
     const showOwnerSignals = isPrimarySuperAdmin();
     const hostTitle = [
-      showOwnerSignals && item.hasConcurrentSessions ? `⚠ Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
+      showOwnerSignals && item.hasConcurrentSessions ? `âš  Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
       browserLabel ? `Navegador: ${browserLabel}` : "",
       deviceShort ? `Dispositivo: ${deviceShort}` : "",
       entornoHint ? `Entorno: ${entornoHint}` : "",
@@ -1835,12 +1835,12 @@ function renderAccessAdminTable() {
       ? `<span class="st2-access-admin-host-meta">${escapeHtml(historyLines.length)} equipos recientes</span>`
       : "";
     const concurrentHint = showOwnerSignals && item.hasConcurrentSessions
-      ? `<span class="st2-access-admin-host-meta st2-access-admin-host-concurrent">concurrente ×${escapeHtml(String(item.activeDeviceCount || 2))}</span>`
+      ? `<span class="st2-access-admin-host-meta st2-access-admin-host-concurrent">concurrente Ã—${escapeHtml(String(item.activeDeviceCount || 2))}</span>`
       : "";
     const hostCell = showOwnerCols
       ? `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
           accessAdminClientChangedEmails.has(item.email)
-            ? `<span class="st2-access-admin-host-attn" title="Cambió de equipo">⚠</span> `
+            ? `<span class="st2-access-admin-host-attn" title="CambiÃ³ de equipo">âš </span> `
             : ""
         }${escapeHtml(hostLabel)}${concurrentHint}${historyHint}</td>`
       : "";
@@ -1848,7 +1848,7 @@ function renderAccessAdminTable() {
       ? `<td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>`
       : "";
     const loginsCell = showOwnerCols
-      ? `<td class="st2-access-admin-num" title="Días distintos que abrió ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>`
+      ? `<td class="st2-access-admin-num" title="DÃ­as distintos que abriÃ³ ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>`
       : "";
     const ownerActions = isPrimarySuperAdmin();
     const canPreview = isSt2SuperAdmin();
@@ -1856,8 +1856,8 @@ function renderAccessAdminTable() {
       ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
              <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
       : `${canPreview ? `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>` : ""}
-        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-modules-email="${escapeHtml(item.email)}" title="Editar perfil y módulos" aria-label="Editar perfil y módulos de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
-        ${ownerActions ? `<button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">×</button>` : ""}`;
+        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-modules-email="${escapeHtml(item.email)}" title="Editar perfil y mÃ³dulos" aria-label="Editar perfil y mÃ³dulos de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
+        ${ownerActions ? `<button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">Ã—</button>` : ""}`;
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
@@ -1923,7 +1923,7 @@ async function saveAccessNameEdit(displayName) {
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
       closeAccessNameEditModal();
-      setAccessAdminUpdatedHint("No tenés permiso para editar el nombre.");
+      setAccessAdminUpdatedHint("No tenÃ©s permiso para editar el nombre.");
       return;
     }
     if (!response.ok) {
@@ -1938,7 +1938,7 @@ async function saveAccessNameEdit(displayName) {
     accessAdminLastSnapshot = buildAccessAdminSnapshot(accessAdminItemsCache, accessAdminMeta.activeCount);
     renderAccessAdminTable();
     closeAccessNameEditModal();
-    setAccessAdminUpdatedHint(value ? `Nombre guardado: ${value}` : "Nombre automático restaurado.");
+    setAccessAdminUpdatedHint(value ? `Nombre guardado: ${value}` : "Nombre automÃ¡tico restaurado.");
   } catch {
     if (accessNameEditError) accessNameEditError.textContent = "No se pudo contactar al servidor.";
   } finally {
@@ -1958,7 +1958,7 @@ async function decideAccessAdminEmail(email, action) {
   if (action === "reject") {
     const ok = await confirmSt2({
       title: "Rechazar acceso",
-      body: `¿Rechazar el acceso de ${name}?`,
+      body: `Â¿Rechazar el acceso de ${name}?`,
       detail: email,
       confirmLabel: "Rechazar",
     });
@@ -1973,7 +1973,7 @@ async function decideAccessAdminEmail(email, action) {
     });
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      setAccessAdminUpdatedHint("No tenés permiso para esa acción.");
+      setAccessAdminUpdatedHint("No tenÃ©s permiso para esa acciÃ³n.");
       return;
     }
     if (!response.ok) {
@@ -1997,7 +1997,7 @@ async function deleteAccessAdminEmail(email) {
   const name = formatAccessDisplayName(email, current?.displayNameOverride);
   const ok = await confirmSt2({
     title: "Eliminar acceso",
-    body: `¿Eliminar el acceso de ${name}? Esta acción no se puede deshacer.`,
+    body: `Â¿Eliminar el acceso de ${name}? Esta acciÃ³n no se puede deshacer.`,
     detail: email,
     confirmLabel: "Eliminar",
   });
@@ -2010,7 +2010,7 @@ async function deleteAccessAdminEmail(email) {
     });
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      setAccessAdminUpdatedHint("Solo el dueño de ST2 puede quitar un acceso.");
+      setAccessAdminUpdatedHint("Solo el dueÃ±o de ST2 puede quitar un acceso.");
       return;
     }
     if (!response.ok) {
@@ -2086,7 +2086,7 @@ async function submitAccessAdminLogin() {
   const password = accessAdminPass?.value || "";
   if (accessAdminError) accessAdminError.textContent = "";
   if (!username || !password) {
-    if (accessAdminError) accessAdminError.textContent = "Completá usuario y contraseña.";
+    if (accessAdminError) accessAdminError.textContent = "CompletÃ¡ usuario y contraseÃ±a.";
     return;
   }
 
@@ -2107,7 +2107,7 @@ async function submitAccessAdminLogin() {
         if (accessAdminError) {
           accessAdminError.textContent = response.status === 404
             ? "Panel no configurado en el servidor (faltan variables de admin)."
-            : `Respuesta inválida del servidor (${response.status}).`;
+            : `Respuesta invÃ¡lida del servidor (${response.status}).`;
         }
         return;
       }
@@ -2121,7 +2121,7 @@ async function submitAccessAdminLogin() {
     }
     if (!response.ok) {
       if (accessAdminError) {
-        accessAdminError.textContent = data.error || "Usuario o contraseña incorrectos.";
+        accessAdminError.textContent = data.error || "Usuario o contraseÃ±a incorrectos.";
       }
       return;
     }
@@ -2141,7 +2141,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
   accessAdminRefresh?.classList.toggle("is-loading", force || !silent);
 
   if (!silent) {
-    accessAdminStatus.textContent = "Cargando…";
+    accessAdminStatus.textContent = "Cargandoâ€¦";
     accessAdminTableWrap?.classList.add("hidden");
     accessAdminToolbar?.classList.add("hidden");
   }
@@ -2154,7 +2154,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     }
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      accessAdminStatus.textContent = "No tenés permiso para ver este panel.";
+      accessAdminStatus.textContent = "No tenÃ©s permiso para ver este panel.";
       return;
     }
     if (!response.ok) {
@@ -2201,19 +2201,19 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
     const newPending = items.filter((item) => item.isPending && newRegistrationEmails.includes(item.email));
     if (clientChanges.length > 0) {
-      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(clientChanges)} · ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(clientChanges)} Â· ${nowLabel}`);
     } else if (newPending.length > 0) {
       const label = newPending.length === 1
         ? `Nueva solicitud: ${newPending[0].email}`
         : `${newPending.length} solicitudes nuevas`;
-      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${label} Â· ${nowLabel}`);
     } else if (newRegistrationEmails.length > 0) {
       const label = newRegistrationEmails.length === 1
         ? `Nuevo registro: ${newRegistrationEmails[0]}`
         : `${newRegistrationEmails.length} registros nuevos`;
-      setAccessAdminUpdatedHint(`${label} · ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${label} Â· ${nowLabel}`);
     } else if (newActiveEmails.length > 0) {
-      setAccessAdminUpdatedHint(`Nuevo activo · ${nowLabel}`);
+      setAccessAdminUpdatedHint(`Nuevo activo Â· ${nowLabel}`);
     } else if (!silent || force) {
       setAccessAdminUpdatedHint(`Actualizado ${nowLabel}`);
     }
@@ -2332,7 +2332,7 @@ function uploadedLabelFor(id, tool) {
 
 function listNewTools() {
   const seen = readSeenToolVersions();
-  // Avisos home: solo SQL. BAT queda en Acerca de (mesa técnica).
+  // Avisos home: solo SQL. BAT queda en Acerca de (mesa tÃ©cnica).
   return toolsForNotice().filter((t) => {
     if (!t?.available || t.id === "bat") return false;
     const stamp = toolIdentity(t);
@@ -2405,14 +2405,14 @@ function toolsUpdateMessage(newer) {
   const hasSql = list.some((t) => t.id === "sql");
   const hasBat = list.some((t) => t.id === "bat");
   if (hasSql && !hasBat) {
-    return 'hay una nueva versión para descargar del aplicativo para realizar backups "Herramientas SQL"';
+    return 'hay una nueva versiÃ³n para descargar del aplicativo para realizar backups "Herramientas SQL"';
   }
   if (hasBat && !hasSql) {
-    return "hay una nueva versión de ST2.BAT disponible para descargar.";
+    return "hay una nueva versiÃ³n de ST2.BAT disponible para descargar.";
   }
   const names = list.map((t) => toolPackageLabel(t.id));
   if (names.length === 1) {
-    return `hay una nueva versión de ${names[0]} disponible para descargar.`;
+    return `hay una nueva versiÃ³n de ${names[0]} disponible para descargar.`;
   }
   const last = names.pop();
   return `hay nuevas versiones de ${names.join(", ")} y de ${last} disponibles para descargar.`;
@@ -2502,7 +2502,7 @@ function buildAboutPlanillasDetail() {
     const mods = [];
     if (canSeeChileTransferencia()) mods.push("Transferencia de Casos");
     if (canSeeChileReferral()) mods.push("Referral I+D");
-    if (canSeeChileSaad()) mods.push("SAAD - Facturación");
+    if (canSeeChileSaad()) mods.push("SAAD - FacturaciÃ³n");
     if (canSeeChileHr()) mods.push("HR Consola Intranet");
     if (canSeeChileWiki()) mods.push("Wiki errores comunes");
     if (canSeeChileLp()) mods.push("Servicios LP Contabilidad");
@@ -2510,7 +2510,7 @@ function buildAboutPlanillasDetail() {
     blocks.push(mods.length ? `CHILE: ${joinAboutItems(mods)}` : "CHILE");
   }
 
-  return blocks.length ? blocks.join(" · ") : "Sin módulos de planillas en tu perfil.";
+  return blocks.length ? blocks.join(" Â· ") : "Sin mÃ³dulos de planillas en tu perfil.";
 }
 
 function syncAboutTabsList() {
@@ -2548,21 +2548,21 @@ function syncAboutTabsList() {
       title: portalTab,
       body: onlyChile && portalTab === "Centro de Soluciones"
         ? "Acceso al Centro de Soluciones de Thomson Reuters Chile."
-        : `Búsqueda y acceso: ${joinAboutItems(portals)}.`,
+        : `BÃºsqueda y acceso: ${joinAboutItems(portals)}.`,
     });
   }
 
   if (isSt2SuperAdmin()) {
     items.push({
       title: "ADMIN",
-      body: "Panel de administración de accesos.",
+      body: "Panel de administraciÃ³n de accesos.",
     });
   }
 
   list.innerHTML = items
     .map(
       (item) =>
-        `<li><strong>${escapeHtml(item.title)}</strong> — ${escapeHtml(item.body)}</li>`,
+        `<li><strong>${escapeHtml(item.title)}</strong> â€” ${escapeHtml(item.body)}</li>`,
     )
     .join("");
 }
@@ -2589,7 +2589,7 @@ function syncAboutToolsBadge() {
   if (aboutToolsBadge) {
     aboutToolsBadge.classList.toggle("hidden", !hasNew);
     aboutToolsBadge.setAttribute("aria-hidden", hasNew ? "false" : "true");
-    aboutToolsBadge.title = hasNew ? "Nueva versión de Herramientas SQL para descargar" : "";
+    aboutToolsBadge.title = hasNew ? "Nueva versiÃ³n de Herramientas SQL para descargar" : "";
   }
 
   const msg = toolsUpdateMessage(newer);
@@ -2657,7 +2657,7 @@ function renderAboutTools() {
       if (btn) {
         btn.disabled = true;
         setToolDownloadLabel(btn, "Pronto");
-        btn.title = "Todavía no hay un paquete publicado";
+        btn.title = "TodavÃ­a no hay un paquete publicado";
       }
       continue;
     }
@@ -2725,7 +2725,7 @@ async function uploadTool(toolId, file) {
   // Archivos grandes: pedir URL en el modal de ST2 (no el prompt de Chrome).
   if (file.size > 8 * 1024 * 1024) {
     openToolUrlDialog(toolId, {
-      lead: `“${file.name}” pesa ${formatToolSize(file.size)}. Pegá un link de descarga directa.`,
+      lead: `â€œ${file.name}â€ pesa ${formatToolSize(file.size)}. PegÃ¡ un link de descarga directa.`,
       fileName: file.name,
     });
     return;
@@ -2752,22 +2752,22 @@ async function uploadTool(toolId, file) {
   const version = new Date().toISOString().slice(0, 10).replace(/-/g, ".");
   const originalName = file.name || `st2-${toolId}.bin`;
   let stage = "inicio";
-  showBusy(`Preparando ${originalName}…`, 4);
-  setAboutToolsStatus(`Subiendo ${originalName} (${formatToolSize(file.size)})…`);
+  showBusy(`Preparando ${originalName}â€¦`, 4);
+  setAboutToolsStatus(`Subiendo ${originalName} (${formatToolSize(file.size)})â€¦`);
 
   try {
     stage = "ping";
-    showBusy("Verificando volume…", 8);
+    showBusy("Verificando volumeâ€¦", 8);
     const ping = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/ping`, null);
     if (!ping?.ok) {
-      throw Object.assign(new Error(ping?.error || "Canario de tools falló."), {
+      throw Object.assign(new Error(ping?.error || "Canario de tools fallÃ³."), {
         reached: !!ping?.reached,
         stage,
       });
     }
 
     stage = "encode";
-    showBusy(`Codificando ${originalName}…`, 12);
+    showBusy(`Codificando ${originalName}â€¦`, 12);
     const plain = new Uint8Array(await file.arrayBuffer());
     const wired = new Uint8Array(plain.length);
     for (let i = 0; i < plain.length; i++) wired[i] = plain[i] ^ 0xa5;
@@ -2779,7 +2779,7 @@ async function uploadTool(toolId, file) {
       .join("");
 
     stage = "begin";
-    showBusy(`Iniciando subida (${total} partes)…`, 16);
+    showBusy(`Iniciando subida (${total} partes)â€¦`, 16);
     await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/begin`, {
       u: uploadId,
       t: total,
@@ -2790,7 +2790,7 @@ async function uploadTool(toolId, file) {
       const slice = wired.subarray(i * chunkSize, Math.min(wired.length, (i + 1) * chunkSize));
       const hex = bytesToHex(slice);
       const pct = 16 + Math.round(((i + 1) / total) * 70);
-      showBusy(`Enviando parte ${i + 1}/${total}…`, pct);
+      showBusy(`Enviando parte ${i + 1}/${total}â€¦`, pct);
       setAboutToolsStatus(`Enviando ${originalName}: parte ${i + 1}/${total}`);
       await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/push`, {
         u: uploadId,
@@ -2801,7 +2801,7 @@ async function uploadTool(toolId, file) {
     }
 
     stage = "commit";
-    showBusy("Publicando paquete…", 92);
+    showBusy("Publicando paqueteâ€¦", 92);
     const data = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/commit`, {
       u: uploadId,
       t: total,
@@ -2816,7 +2816,7 @@ async function uploadTool(toolId, file) {
     markToolsSeen();
   } catch (err) {
     const status = err?.status ? `HTTP ${err.status}` : "sin HTTP";
-    let msg = `Falló en ${err?.stage || stage} (${status}): ${err?.message || "No se pudo subir."}`;
+    let msg = `FallÃ³ en ${err?.stage || stage} (${status}): ${err?.message || "No se pudo subir."}`;
     if (err?.cfRay) msg += `\ncf-ray: ${err.cfRay}`;
     try {
       const dig = await fetch("/api/tools", { credentials: "include", cache: "no-store" }).then(async (r) => {
@@ -2826,7 +2826,7 @@ async function uploadTool(toolId, file) {
       if (dig?.body?.lastError) {
         msg += `\n\nDetalle servidor:\n${String(dig.body.lastError).slice(0, 600)}`;
       } else {
-        msg += `\n(dataDir: ${dig?.body?.dataDir || "?"}; lastError vacío)`;
+        msg += `\n(dataDir: ${dig?.body?.dataDir || "?"}; lastError vacÃ­o)`;
       }
     } catch (e2) {
       msg += `\n(no pude leer /api/tools: ${e2?.message || e2})`;
@@ -2871,8 +2871,8 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
     fileName = toolId === "bat" ? `st2-${toolId}.bat` : `st2-${toolId}.zip`;
   }
 
-  showBusy(`Descargando desde URL…`, 20);
-  setAboutToolsStatus(`Publicando ${fileName} desde URL…`);
+  showBusy(`Descargando desde URLâ€¦`, 20);
+  setAboutToolsStatus(`Publicando ${fileName} desde URLâ€¦`);
   try {
     const data = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/from-url`, {
       url,
@@ -2937,7 +2937,7 @@ function showToolDownloadNotice(toolId) {
   const fileKind = toolId === "bat" ? "el .bat" : "el .exe";
   showSt2Message(
     "",
-    `Antes de descomprimir, borrá las versiones anteriores de ${label} para no mezclar archivos viejos con los nuevos. La clave para abrir ${fileKind} es ${ST2_DESKTOP_TOOL_PASSWORD}.`,
+    `Antes de descomprimir, borrÃ¡ las versiones anteriores de ${label} para no mezclar archivos viejos con los nuevos. La clave para abrir ${fileKind} es ${ST2_DESKTOP_TOOL_PASSWORD}.`,
     { okLabel: "Cerrar", downloadNotice: true },
   );
 }
@@ -3008,7 +3008,7 @@ function openToolUrlDialog(toolId, { lead = "", fileName = "", url = "" } = {}) 
   if (titleEl) titleEl.textContent = `Publicar ${label}`;
   if (leadEl) {
     leadEl.textContent = lead
-      || "Pegá el link de descarga y el nombre del archivo con su extensión.";
+      || "PegÃ¡ el link de descarga y el nombre del archivo con su extensiÃ³n.";
   }
   if (urlInput) urlInput.value = url || "";
   if (nameInput) {
@@ -3054,12 +3054,12 @@ function bindToolUrlDialog() {
     };
     if (!toolUrlDialogToolId) return;
     if (!/^https?:\/\//i.test(url)) {
-      showErr("Pegá un link http/https válido.");
+      showErr("PegÃ¡ un link http/https vÃ¡lido.");
       document.getElementById("st2-tool-url-input")?.focus();
       return;
     }
     if (!fileName || !fileName.includes(".")) {
-      showErr("Indicá el nombre con extensión (ej. st2ps.bat o paquete.zip).");
+      showErr("IndicÃ¡ el nombre con extensiÃ³n (ej. st2ps.bat o paquete.zip).");
       document.getElementById("st2-tool-url-name")?.focus();
       return;
     }
@@ -3149,7 +3149,7 @@ async function copySt2DesktopToolPassword(btn) {
       if (btn) btn.title = prevTitle || "Clic para copiar la clave";
     }, 1600);
   } catch {
-    window.prompt("Copiá la clave:", value);
+    window.prompt("CopiÃ¡ la clave:", value);
   }
 }
 
@@ -3182,7 +3182,7 @@ function showAbout({ history = "push" } = {}) {
   const webMeta = document.getElementById("st2-about-web-meta");
   if (webMeta) {
     webMeta.textContent = getAboutVersionLabel();
-    webMeta.title = "Estás usando esta aplicación web";
+    webMeta.title = "EstÃ¡s usando esta aplicaciÃ³n web";
   }
   applyAboutUpdated();
   syncAboutToolsVisibility();
@@ -3195,7 +3195,7 @@ function showAbout({ history = "push" } = {}) {
   clearSt2AlertToast(ST2_TOAST.tools);
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
-  document.title = "ST² · Acerca de";
+  document.title = "STÂ² Â· Acerca de";
   if (history !== "none") {
     const current = normalizeShellPath(window.location.pathname);
     if (!isHerramientasPath(current)) pathBeforeAbout = current || "/";
@@ -3547,7 +3547,7 @@ function closeAccessModulesModal() {
   accessModulesEmailInput?.classList.add("hidden");
   if (accessModulesEmailInput) accessModulesEmailInput.value = "";
   if (accessModulesError) accessModulesError.textContent = "";
-  if (accessModulesTitle) accessModulesTitle.textContent = "Módulos habilitados";
+  if (accessModulesTitle) accessModulesTitle.textContent = "MÃ³dulos habilitados";
   if (accessModulesSave) {
     accessModulesSave.disabled = false;
     accessModulesSave.textContent = "Guardar";
@@ -3724,7 +3724,7 @@ function setAccessSysBodyOpen(sys, open) {
     btn.classList.toggle("is-open", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     const icon = btn.querySelector(".st2-access-modules-sys-expand-icon");
-    if (icon) icon.textContent = open ? "−" : "+";
+    if (icon) icon.textContent = open ? "âˆ’" : "+";
   }
 }
 
@@ -3796,7 +3796,7 @@ function startAccessProfilePreview(email, modulesOverride = null) {
     window.location.hash = "#/planillas";
     window.location.reload();
   };
-  // Auditoría best-effort; la vista previa no depende del POST.
+  // AuditorÃ­a best-effort; la vista previa no depende del POST.
   fetch("/api/access/view-as", {
     method: "POST",
     credentials: "include",
@@ -3832,7 +3832,7 @@ function syncViewAsBanner() {
     viewAsBanner.toggleAttribute("hidden", !show);
   }
   if (viewAsBannerText && viewAs) {
-    viewAsBannerText.textContent = `Vista previa: cómo ve ST2 ${viewAs.displayName || viewAs.email} (módulos, permisos y pantallas)`;
+    viewAsBannerText.textContent = `Vista previa: cÃ³mo ve ST2 ${viewAs.displayName || viewAs.email} (mÃ³dulos, permisos y pantallas)`;
   }
   document.body.classList.toggle("st2-viewing-as-profile", show);
 }
@@ -3850,10 +3850,10 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   accessModulesAfterApprove = !!afterApprove;
   const displayName = formatAccessDisplayName(email, current?.displayNameOverride);
   if (accessModulesTitle) {
-    accessModulesTitle.textContent = afterApprove ? "¿Qué módulos ve?" : "Módulos habilitados";
+    accessModulesTitle.textContent = afterApprove ? "Â¿QuÃ© mÃ³dulos ve?" : "MÃ³dulos habilitados";
   }
   if (accessModulesSave) accessModulesSave.textContent = afterApprove ? "Listo" : "Guardar";
-  if (accessModulesCancel) accessModulesCancel.textContent = afterApprove ? "Después" : "Cancelar";
+  if (accessModulesCancel) accessModulesCancel.textContent = afterApprove ? "DespuÃ©s" : "Cancelar";
   if (accessModulesName) accessModulesName.value = displayName;
   if (accessModulesBirthday) {
     accessModulesBirthday.value = current?.birthdayDisplay || "";
@@ -3944,7 +3944,7 @@ accessModBlanqueoConfirm?.addEventListener("change", () => {
   if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
     accessModBlanqueo.checked = true;
   }
-  // Al marcar confirmador, por defecto solo listado (podés reactivar “cargar”).
+  // Al marcar confirmador, por defecto solo listado (podÃ©s reactivar â€œcargarâ€).
   if (accessModBlanqueoConfirm.checked && accessModBlanqueoLoad && !accessModBlanqueoLoad.dataset.userTouched) {
     accessModBlanqueoLoad.checked = false;
   }
@@ -3994,7 +3994,7 @@ async function saveAccessModules() {
   accessModulesSaving = true;
   if (accessModulesSave) {
     accessModulesSave.disabled = true;
-    accessModulesSave.textContent = accessModulesPresetMode ? "Creando…" : "Guardando…";
+    accessModulesSave.textContent = accessModulesPresetMode ? "Creandoâ€¦" : "Guardandoâ€¦";
   }
   if (accessModulesCancel) accessModulesCancel.disabled = true;
   if (accessModulesError) accessModulesError.textContent = "";
@@ -4010,9 +4010,9 @@ async function saveAccessModules() {
 
     if (accessModulesPresetMode) {
       const email = String(accessModulesEmailInput?.value || "").trim().toLowerCase();
-      if (!email) throw new Error("Ingresá el correo del perfil.");
+      if (!email) throw new Error("IngresÃ¡ el correo del perfil.");
       if (!isValidAccessProfileEmail(email)) {
-        throw new Error("Usá un correo @thomsonreuters.com con formato nombre.apellido (puede incluir más segmentos).");
+        throw new Error("UsÃ¡ un correo @thomsonreuters.com con formato nombre.apellido (puede incluir mÃ¡s segmentos).");
       }
       const autoName = parseAccessNameFromEmail(email).display;
       const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;
@@ -4082,7 +4082,7 @@ async function saveAccessModules() {
     const fromApprove = accessModulesAfterApprove;
     closeAccessModulesModal();
     renderAccessAdminTable();
-    if (fromApprove) setAccessAdminUpdatedHint("Aprobado. Módulos guardados.");
+    if (fromApprove) setAccessAdminUpdatedHint("Aprobado. MÃ³dulos guardados.");
   } catch (err) {
     showAccessModulesError(err?.message || "No se pudo guardar.");
   } finally {
@@ -4155,7 +4155,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 function getEmbedFrameUrl(kind) {
   if (kind === "thom") {
     const tap = getThomExternalUrl();
-    // Solo el portal Bejerman usa el proxy embebido cuando está disponible.
+    // Solo el portal Bejerman usa el proxy embebido cuando estÃ¡ disponible.
     if (thomPortalId === "bejerman" && appConfig?.thomFrameUrl && isThomEmbeddedProxy()) {
       return appConfig.thomFrameUrl;
     }
@@ -4262,10 +4262,10 @@ function syncThomPortalUi() {
     btn.classList.toggle("active", btn.dataset.thomPortal === thomPortalId);
   });
   const title = document.getElementById("thomGateTitle");
-  if (title) title.textContent = `THOM · ${meta.label}`;
+  if (title) title.textContent = `THOM Â· ${meta.label}`;
   const loading = document.getElementById("thomEmbedLoadingText");
-  if (loading) loading.textContent = `Cargando THOM · ${meta.label}…`;
-  if (thomFrame) thomFrame.title = `THOM · ${meta.label}`;
+  if (loading) loading.textContent = `Cargando THOM Â· ${meta.label}â€¦`;
+  if (thomFrame) thomFrame.title = `THOM Â· ${meta.label}`;
   updateThomDirectUi();
 }
 
@@ -4308,7 +4308,7 @@ const THOM_TAB_NAME = "st2ThomBrowserTab";
 
 let thomPopup = null;
 let thomBrowserTab = null;
-/** Invalida aperturas programadas con rAF si el usuario ya salió de THOM. */
+/** Invalida aperturas programadas con rAF si el usuario ya saliÃ³ de THOM. */
 let thomOpenGeneration = 0;
 let thomPopupResizeTimer = null;
 
@@ -4328,7 +4328,7 @@ function measureThomPopupChrome(popup = thomPopup) {
   return THOM_POPUP_CHROME_WITH_URL;
 }
 
-/** Holgura mínima debajo de las pestañas ST2 (el ancla real es el panel). */
+/** Holgura mÃ­nima debajo de las pestaÃ±as ST2 (el ancla real es el panel). */
 const THOM_POPUP_TAB_GAP = 4;
 
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
@@ -4339,7 +4339,7 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
 
   let viewportTop;
   if (wrapRect && wrapRect.height > 60) {
-    // Encaja en el hueco del panel: deja header + pestañas + hint visibles.
+    // Encaja en el hueco del panel: deja header + pestaÃ±as + hint visibles.
     viewportTop = Math.round(wrapRect.top);
   } else if (tabRect) {
     viewportTop = Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP);
@@ -4347,7 +4347,7 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
     return { top: 160, left: 0, width: 1100, height: 720 };
   }
 
-  // Nunca tapar la barra de pestañas ni el selector de portal, que flota debajo.
+  // Nunca tapar la barra de pestaÃ±as ni el selector de portal, que flota debajo.
   if (tabRect) {
     viewportTop = Math.max(viewportTop, Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP));
   }
@@ -4401,7 +4401,7 @@ function repositionThomPopup() {
     thomPopup.moveTo(rect.left, rect.top);
     thomPopup.resizeTo(rect.width, rect.height);
 
-    // Edge a veces coloca el popup más arriba de lo pedido y tapa las pestañas ST2.
+    // Edge a veces coloca el popup mÃ¡s arriba de lo pedido y tapa las pestaÃ±as ST2.
     const actualTop = Number.isFinite(thomPopup.screenTop) ? thomPopup.screenTop : thomPopup.screenY;
     const driftY = rect.top - actualTop;
     if (Number.isFinite(driftY) && Math.abs(driftY) > 2 && Math.abs(driftY) < 220) {
@@ -4424,7 +4424,7 @@ function scheduleThomPopupReposition() {
 
 /**
  * El popup debe comportarse como parte del panel: sigue a la ventana ST2 cuando
- * se mueve o cambia de tamaño, y el gate vuelve a su estado inicial si el
+ * se mueve o cambia de tamaÃ±o, y el gate vuelve a su estado inicial si el
  * usuario lo cierra desde la barra del navegador.
  */
 let thomPopupWatchTimer = null;
@@ -4510,7 +4510,7 @@ function requestThomHelpCollapse(targetWindow) {
       return true;
     }
   } catch {
-    // Ventana cross-origin (THOM directo en web pública).
+    // Ventana cross-origin (THOM directo en web pÃºblica).
   }
   try {
     targetWindow.postMessage({ type: "st2-collapse-help" }, "*");
@@ -4540,8 +4540,8 @@ function safeCloseWindow(win) {
   }
 }
 
-/** Solo para pagehide: recuperar ventana huérfana. En home/navegación NO usar:
- *  window.open("", name) enfoca otra pestaña del navegador o abre una en blanco. */
+/** Solo para pagehide: recuperar ventana huÃ©rfana. En home/navegaciÃ³n NO usar:
+ *  window.open("", name) enfoca otra pestaÃ±a del navegador o abre una en blanco. */
 function reclaimNamedWindow(name) {
   try {
     const win = window.open("", name);
@@ -4578,7 +4578,7 @@ function updateThomDirectUi() {
   const windowMode = isThomWindowMode();
   const embedded = isThomEmbeddedProxy();
   const active = windowMode && !!(thomPopup && !thomPopup.closed);
-  const openLabel = windowMode ? "Abrir en otra pestaña del navegador" : "Abrir en navegador";
+  const openLabel = windowMode ? "Abrir en otra pestaÃ±a del navegador" : "Abrir en navegador";
   const openBtn = document.getElementById("thomOpenBtn");
   const proxyOpenBtn = document.getElementById("thomProxyOpenBtn");
   if (openBtn) openBtn.textContent = openLabel;
@@ -4589,7 +4589,7 @@ function updateThomDirectUi() {
   thomDirectGate?.classList.toggle("embed-panel-active", active);
 
   const gateOpenBtn = document.getElementById("thomGateOpenBtn");
-  if (gateOpenBtn) gateOpenBtn.textContent = active ? "Enfocar THOM" : "Abrir THOM aquí";
+  if (gateOpenBtn) gateOpenBtn.textContent = active ? "Enfocar THOM" : "Abrir THOM aquÃ­";
   document.getElementById("thomGateCloseBtn")?.classList.toggle("hidden", !active);
   document.getElementById("thomGateStatus")?.classList.toggle("hidden", !active);
   document.getElementById("thomGateZscaler")?.classList.toggle("hidden", active);
@@ -4630,7 +4630,7 @@ function openThomWindow({ reload = false } = {}) {
       try {
         thomPopup.location.href = url;
       } catch {
-        // Cross-origin: forzar reopen más abajo.
+        // Cross-origin: forzar reopen mÃ¡s abajo.
         safeCloseWindow(thomPopup);
         thomPopup = null;
       }
@@ -4662,7 +4662,7 @@ function openThomWindow({ reload = false } = {}) {
   thomPopup = window.open("about:blank", THOM_POPUP_NAME, features);
   if (!thomPopup) {
     thomBrowserTab = window.open(url, THOM_TAB_NAME);
-    setEmbedHint("thom", "Permití ventanas emergentes para abrir THOM en este espacio.");
+    setEmbedHint("thom", "PermitÃ­ ventanas emergentes para abrir THOM en este espacio.");
     updateThomDirectUi();
     return null;
   }
@@ -4708,7 +4708,7 @@ function openThomWindow({ reload = false } = {}) {
 
 function openThomBrowserTab() {
   const url = getThomTapUrl();
-  // Misma pestaña nombrada: no acumula una nueva cada vez, y ST2 la cierra al salir de THOM.
+  // Misma pestaÃ±a nombrada: no acumula una nueva cada vez, y ST2 la cierra al salir de THOM.
   if (thomBrowserTab && !thomBrowserTab.closed) {
     try {
       thomBrowserTab.location.href = url;
@@ -4785,14 +4785,14 @@ function isThomAuthPath(path = "") {
     || path.includes("login.microsoftonline.com");
 }
 
-function showThomLoading(message = "Cargando THOM…") {
+function showThomLoading(message = "Cargando THOMâ€¦") {
   thomEmbedLoading?.classList.remove("hidden");
   const msg = thomEmbedLoading?.querySelector("p");
   if (msg) msg.textContent = message;
   clearTimeout(thomLoadTimer);
   thomLoadTimer = setTimeout(() => {
     if (!thomRendered) {
-      setEmbedHint("thom", "THOM tarda más de lo normal. Verificá ZScaler.");
+      setEmbedHint("thom", "THOM tarda mÃ¡s de lo normal. VerificÃ¡ ZScaler.");
     }
   }, 20000);
 }
@@ -4824,8 +4824,8 @@ function scheduleThomBlankCheck(delayMs = 12000) {
     try {
       const loc = thomFrame?.contentWindow?.location?.href ?? "";
       if (isThomAuthPath(loc)) {
-        showThomLoading("Iniciando sesión corporativa…");
-        setEmbedHint("thom", "Iniciando sesión corporativa… Completá el login si aparece el formulario.");
+        showThomLoading("Iniciando sesiÃ³n corporativaâ€¦");
+        setEmbedHint("thom", "Iniciando sesiÃ³n corporativaâ€¦ CompletÃ¡ el login si aparece el formulario.");
         scheduleThomBlankCheck(15000);
         return;
       }
@@ -4838,16 +4838,16 @@ function scheduleThomBlankCheck(delayMs = 12000) {
         return;
       }
       if (thomBridgeAlive || thomBlankAttempts < 4) {
-        showThomLoading(thomBridgeAlive ? "Autenticando en THOM…" : "Cargando THOM…");
-        setEmbedHint("thom", "THOM está iniciando. Si pedís login corporativo, completalo en el panel.");
+        showThomLoading(thomBridgeAlive ? "Autenticando en THOMâ€¦" : "Cargando THOMâ€¦");
+        setEmbedHint("thom", "THOM estÃ¡ iniciando. Si pedÃ­s login corporativo, completalo en el panel.");
         scheduleThomBlankCheck(15000);
         return;
       }
-      showThomLoading("THOM no cargó en el panel");
-      setEmbedHint("thom", "No se pudo mostrar THOM acá. Verificá ZScaler o usá «Abrir en otra pestaña del navegador».");
+      showThomLoading("THOM no cargÃ³ en el panel");
+      setEmbedHint("thom", "No se pudo mostrar THOM acÃ¡. VerificÃ¡ ZScaler o usÃ¡ Â«Abrir en otra pestaÃ±a del navegadorÂ».");
     } catch {
-      showThomLoading("Iniciando sesión corporativa…");
-      setEmbedHint("thom", "Autenticando con SSO corporativo…");
+      showThomLoading("Iniciando sesiÃ³n corporativaâ€¦");
+      setEmbedHint("thom", "Autenticando con SSO corporativoâ€¦");
       scheduleThomBlankCheck(15000);
     }
   }, delayMs);
@@ -4871,14 +4871,14 @@ function onThomEmbedMessage(event) {
   }
 
   if (isThomAuthPath(data.path ?? "")) {
-    showThomLoading("Iniciando sesión corporativa…");
-    setEmbedHint("thom", "Iniciando sesión corporativa… Completá el login si aparece el formulario.");
+    showThomLoading("Iniciando sesiÃ³n corporativaâ€¦");
+    setEmbedHint("thom", "Iniciando sesiÃ³n corporativaâ€¦ CompletÃ¡ el login si aparece el formulario.");
     scheduleThomBlankCheck(15000);
     return;
   }
 
   if (!thomRendered) {
-    showThomLoading("Autenticando en THOM…");
+    showThomLoading("Autenticando en THOMâ€¦");
     scheduleThomBlankCheck(15000);
   }
 }
@@ -4913,7 +4913,7 @@ function setEmbedHint(kind, message) {
   const id = kind === "thom" ? "thomEmbedHint" : kind === "portal" ? "portalEmbedHint" : "aiEmbedHint";
   const el = document.getElementById(id);
   if (!el) return;
-  // Hints de embed ocultos: el toolbar ya tiene «Abrir en navegador».
+  // Hints de embed ocultos: el toolbar ya tiene Â«Abrir en navegadorÂ».
   el.classList.add("hidden");
   el.setAttribute("aria-hidden", "true");
   el.textContent = "";
@@ -4921,10 +4921,10 @@ function setEmbedHint(kind, message) {
 
 function goHome() {
   hideAbout({ history: "none" });
-  // Sin reclaim: window.open("", "st2Thom…") enfocaba otra pestaña del navegador.
+  // Sin reclaim: window.open("", "st2Thomâ€¦") enfocaba otra pestaÃ±a del navegador.
   closeThomPopup({ reclaim: false });
   switchTab("planillas");
-  // Siempre replace al menú: no depender del historial entre pestañas ST2 / módulos.
+  // Siempre replace al menÃº: no depender del historial entre pestaÃ±as ST2 / mÃ³dulos.
   goPlanillasHome({ history: "replace" });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -4972,12 +4972,12 @@ function pathForTab(tabId) {
 }
 
 function titleForTab(tabId) {
-  if (tabId === ADMIN_TAB_ID) return "ST² · ADMIN";
-  if (tabId === "thom") return "ST² · THOM";
-  if (tabId === "ai") return "ST² · AI Platform";
-  if (tabId === "portal") return `ST² · ${getPortalClientTabLabel()}`;
-  if (tabId === "planillas") return "ST² · Suite Web";
-  return "ST² · Suite Web";
+  if (tabId === ADMIN_TAB_ID) return "STÂ² Â· ADMIN";
+  if (tabId === "thom") return "STÂ² Â· THOM";
+  if (tabId === "ai") return "STÂ² Â· AI Platform";
+  if (tabId === "portal") return `STÂ² Â· ${getPortalClientTabLabel()}`;
+  if (tabId === "planillas") return "STÂ² Â· Suite Web";
+  return "STÂ² Â· Suite Web";
 }
 
 let shellRouteSyncing = false;
@@ -5011,8 +5011,8 @@ function navigateTab(tabId, { history = "push" } = {}) {
   if (tabId === "planillas") {
     switchTab("planillas");
     if (currentTab && currentTab !== "planillas") {
-      // Al volver desde THOM/AI/Portal, reemplazar la URL actual por el menú
-      // (si hacemos push, “Volver al menú” + historial podía reabrir esa pestaña).
+      // Al volver desde THOM/AI/Portal, reemplazar la URL actual por el menÃº
+      // (si hacemos push, â€œVolver al menÃºâ€ + historial podÃ­a reabrir esa pestaÃ±a).
       goPlanillasHome({ history: "replace" });
     }
     return;
@@ -5101,7 +5101,7 @@ function switchTab(tabId) {
     startEngagementTimer("portal");
   } else if (tabId === ADMIN_TAB_ID) {
     void activateAdminTab();
-    // Tras ver el panel, limpia el ⚠ (ya quedó el hint en pantalla).
+    // Tras ver el panel, limpia el âš  (ya quedÃ³ el hint en pantalla).
     window.setTimeout(() => clearAdminClientAttention(), 14000);
   }
 
@@ -5131,7 +5131,7 @@ function initEmbedReminders() {
   });
   window.addEventListener("resize", scheduleThomPopupReposition);
   window.addEventListener("scroll", scheduleThomPopupReposition, { passive: true });
-  // Sin esto quedan ventanas THOM huérfanas al cerrar o recargar ST2.
+  // Sin esto quedan ventanas THOM huÃ©rfanas al cerrar o recargar ST2.
   window.addEventListener("pagehide", () => closeThomPopup({ reclaim: true }));
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) scheduleThomPopupReposition();
@@ -5324,7 +5324,7 @@ function setUpdateBannerVisible(show) {
   document.body.classList.toggle("st2-has-update", !!show);
 }
 
-/** Cartel único de “recargá” (versión web o permisos nuevos). */
+/** Cartel Ãºnico de â€œrecargÃ¡â€ (versiÃ³n web o permisos nuevos). */
 function requestUnifiedReloadBanner() {
   reloadBannerForced = true;
   setUpdateBannerVisible(true);

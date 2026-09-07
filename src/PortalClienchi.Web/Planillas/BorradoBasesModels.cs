@@ -76,8 +76,18 @@ public static class BorradoAlertKinds
     public const string Pending = "pending";
     public const string Incorrecto = "incorrecto";
 
-    public static bool IsIncorrecto(string? aclaracion) =>
-        string.Equals((aclaracion ?? "").Trim(), "Incorrecto", StringComparison.OrdinalIgnoreCase);
+    public static bool IsIncorrecto(string? aclaracion)
+    {
+        var text = (aclaracion ?? "").Trim();
+        if (string.IsNullOrEmpty(text))
+            return false;
+        // Solo el resumen (antes de ---); puede ser "Incorrecto" o "Incorrecto IVA, SJ".
+        var resultado = text;
+        var sep = text.IndexOf("---", StringComparison.Ordinal);
+        if (sep >= 0)
+            resultado = text[..sep].Trim();
+        return resultado.StartsWith("Incorrecto", StringComparison.OrdinalIgnoreCase);
+    }
 
     /// <summary>Confirmación con alguna base marcada ✗ (no hecha).</summary>
     public static bool IsPartialListo(string? aclaracion)

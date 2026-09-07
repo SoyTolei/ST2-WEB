@@ -1,4 +1,4 @@
-import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
+﻿import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import {
   canSeeBorradoBasesModule as canSeeFromAccess,
   canConfirmBorradoBasesModule as canConfirmFromAccess,
@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907k";
+import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907m";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -43,6 +43,12 @@ export function stopBorradoLiveRefresh() {
 }
 /** @type {number | null} */
 let pendingListoId = null;
+/** @type {number | null} */
+let pendingIncorrectoId = null;
+/** @type {number | null} */
+let pendingUndoDeleteId = null;
+/** @type {ReturnType<typeof setTimeout> | null} */
+let undoDeleteTimer = null;
 
 export function canSeeBorradoBasesModule(email = getPlanUserEmail()) {
   if (isViewingAsProfile()) return canSeeFromAccess();
@@ -152,8 +158,8 @@ export function initBorradoBasesModule() {
     } catch { /* ignore */ }
     syncLoadFormVisibility();
     setStatus(on
-      ? "Vista confirmador: solo listado (ocultá el formulario)."
-      : "Formulario de carga visible. Marcá “Vista confirmador” para volver al listado.");
+      ? "Vista confirmador: solo listado (ocultÃ¡ el formulario)."
+      : "Formulario de carga visible. MarcÃ¡ â€œVista confirmadorâ€ para volver al listado.");
   });
   document.getElementById("borrado-th-fecha")?.addEventListener("click", () => {
     fechaSortDir = fechaSortDir === "desc" ? "asc" : "desc";
@@ -195,6 +201,17 @@ export function initBorradoBasesModule() {
   });
   document.getElementById("borrado-listo-has-note")?.addEventListener("change", () => {
     syncListoNoteVisibility({ focus: true });
+  });
+
+  document.getElementById("borrado-incorrecto-cancel")?.addEventListener("click", () => hideIncorrectoModal());
+  document.getElementById("borrado-incorrecto-confirm")?.addEventListener("click", () => {
+    void confirmIncorrectoModal();
+  });
+  document.getElementById("borrado-incorrecto-overlay")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) hideIncorrectoModal();
+  });
+  document.getElementById("borrado-incorrecto-has-note")?.addEventListener("change", () => {
+    syncIncorrectoNoteVisibility({ focus: true });
   });
 
   const ctx = document.getElementById("borrado-ctx");
@@ -258,7 +275,7 @@ export async function openBorradoBasesModule() {
   syncLoadFormVisibility();
   clearForm();
   monthFilterTouched = false;
-  setStatus("Cargando solicitudes…");
+  setStatus("Cargando solicitudesâ€¦");
   await reloadList();
   liveList.start();
 }
@@ -400,9 +417,61 @@ function toggleDetailField(fieldId, inputId, show) {
 function setStatus(msg, isError = false) {
   const el = document.getElementById("borrado-status");
   if (!el) return;
-  el.textContent = msg || "";
+  el.replaceChildren();
   el.classList.toggle("hidden", !msg);
   el.classList.toggle("is-error", !!isError && !!msg);
+  if (!msg) return;
+  el.appendChild(document.createTextNode(msg));
+}
+
+function setStatusWithUndo(msg, undoId) {
+  const el = document.getElementById("borrado-status");
+  if (!el) return;
+  clearUndoDeleteTimer();
+  pendingUndoDeleteId = undoId;
+  el.replaceChildren();
+  el.classList.remove("hidden", "is-error");
+  el.appendChild(document.createTextNode(`${msg} `));
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.id = "borrado-undo-delete";
+  btn.className = "borrado-undo-btn";
+  btn.textContent = "Deshacer";
+  btn.addEventListener("click", () => {
+    void restoreDeletedSolicitud();
+  });
+  el.appendChild(btn);
+  undoDeleteTimer = setTimeout(() => {
+    if (pendingUndoDeleteId === undoId) {
+      pendingUndoDeleteId = null;
+      setStatus("Solicitud eliminada.");
+    }
+  }, 45000);
+}
+
+function clearUndoDeleteTimer() {
+  if (undoDeleteTimer) {
+    clearTimeout(undoDeleteTimer);
+    undoDeleteTimer = null;
+  }
+}
+
+async function restoreDeletedSolicitud() {
+  if (!pendingUndoDeleteId) return;
+  const id = pendingUndoDeleteId;
+  clearUndoDeleteTimer();
+  pendingUndoDeleteId = null;
+  try {
+    const res = await planUserFetch(`/api/planillas/borrado-bases/${id}/restore`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+    selectedId = id;
+    setStatus("Solicitud restaurada.");
+    await reloadList();
+    notifyBorradoChanged();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo restaurar.", true);
+  }
 }
 
 function clearForm() {
@@ -454,7 +523,7 @@ function isOwner(item) {
   return String(item.solicitadoPorEmail || "").trim().toLowerCase() === currentEmail();
 }
 
-/** Pendiente = sin listo y sin aclaración. Ahí el solicitante puede editar/eliminar. */
+/** Pendiente = sin listo y sin aclaraciÃ³n. AhÃ­ el solicitante puede editar/eliminar. */
 function isPendingSolicitud(item) {
   return !item?.listo && !String(item?.aclaracion || "").trim();
 }
@@ -465,7 +534,7 @@ function canOwnerMutate(item) {
 
 async function createSolicitud() {
   if (!effectiveCanLoad()) {
-    setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
+    setStatus("Tu perfil es solo listado: no podÃ©s cargar solicitudes.", true);
     return;
   }
   const detalleEnSalesforce = isSalesforceFormMode();
@@ -473,7 +542,7 @@ async function createSolicitud() {
   const nroCliente = document.getElementById("borrado-cliente")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente) {
-    setStatus("Completá caso y cliente.", true);
+    setStatus("CompletÃ¡ caso y cliente.", true);
     return;
   }
 
@@ -488,15 +557,15 @@ async function createSolicitud() {
     const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
 
     if (!nroEmpresa || !nombreEmpresa) {
-      setStatus("Completá código y nombre de empresa.", true);
+      setStatus("CompletÃ¡ cÃ³digo y nombre de empresa.", true);
       return;
     }
     if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
-      setStatus("Marcá al menos una base a borrar.", true);
+      setStatus("MarcÃ¡ al menos una base a borrar.", true);
       return;
     }
     if (bases.contabilidad && !ejerciciosDetalle) {
-      setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
+      setStatus("Si marcÃ¡s CG, pegÃ¡ los ejercicios a borrar.", true);
       return;
     }
 
@@ -512,7 +581,7 @@ async function createSolicitud() {
     };
   }
 
-  setStatus("Guardando…");
+  setStatus("Guardandoâ€¦");
   try {
     const res = await planUserFetch("/api/planillas/borrado-bases", {
       method: "POST",
@@ -561,8 +630,8 @@ function listFingerprint(list) {
 }
 
 function isBorradoUiBusy() {
-  if (editingId) return true;
-  for (const id of ["borrado-edit-overlay", "borrado-note-overlay", "borrado-delete-overlay"]) {
+  if (editingId || pendingListoId != null || pendingIncorrectoId != null) return true;
+  for (const id of ["borrado-edit-overlay", "borrado-note-overlay", "borrado-delete-overlay", "borrado-listo-overlay", "borrado-incorrecto-overlay"]) {
     const el = document.getElementById(id);
     if (el && !el.classList.contains("hidden")) return true;
   }
@@ -690,9 +759,9 @@ function syncFechaSortHeader() {
   const desc = fechaSortDir === "desc";
   th.setAttribute("aria-sort", desc ? "descending" : "ascending");
   th.title = desc
-    ? "Lo más nuevo arriba — clic para invertir"
-    : "Lo más antiguo arriba — clic para invertir";
-  if (mark) mark.textContent = desc ? "↓" : "↑";
+    ? "Lo mÃ¡s nuevo arriba â€” clic para invertir"
+    : "Lo mÃ¡s antiguo arriba â€” clic para invertir";
+  if (mark) mark.textContent = desc ? "â†“" : "â†‘";
 }
 
 function applyFilters() {
@@ -708,7 +777,7 @@ function applyFilters() {
 
 async function exportExcel() {
   if (!canConfirm) return;
-  setStatus("Generando Excel…");
+  setStatus("Generando Excelâ€¦");
   try {
     const res = await planUserFetch("/api/planillas/borrado-bases/export");
     if (!res.ok) {
@@ -736,7 +805,7 @@ function basesLabel(item) {
   if (item.iva) parts.push("IVA");
   if (item.sueldos) parts.push("SJ");
   if (item.contabilidad) parts.push("CG");
-  return parts.join(", ") || "—";
+  return parts.join(", ") || "â€”";
 }
 
 function formatBasesPills(item) {
@@ -756,10 +825,10 @@ function formatBasesPills(item) {
     const count = splitEjercicios(detail).length || 1;
     pills.push(basePillHtml("CG", display, true, count));
   }
-  return pills.length ? pills.join(" ") : "—";
+  return pills.length ? pills.join(" ") : "â€”";
 }
 
-/** Separa varios ejercicios (saltos de línea, “y”, comas, etc.). */
+/** Separa varios ejercicios (saltos de lÃ­nea, â€œyâ€, comas, etc.). */
 function splitEjercicios(raw) {
   const text = String(raw || "").trim();
   if (!text) return [];
@@ -768,12 +837,12 @@ function splitEjercicios(raw) {
   const parts = [];
 
   for (const line of lines) {
-    // "Ejercicio 2023, y Ejercicio 2024" | "Ejercicio 2025, ejercicio 2023" | "… ; …"
+    // "Ejercicio 2023, y Ejercicio 2024" | "Ejercicio 2025, ejercicio 2023" | "â€¦ ; â€¦"
     const chunks = line
       .split(
-        /\s*(?:,\s*y\s+|\s+y\s+|,\s*|;|\||\s+[-–—]\s+)\s*(?=(?:ejercicio|ej\.?)\b)/i
+        /\s*(?:,\s*y\s+|\s+y\s+|,\s*|;|\||\s+[-â€“â€”]\s+)\s*(?=(?:ejercicio|ej\.?)\b)/i
       )
-      .map((s) => s.trim().replace(/^[-–—]\s*/, "").replace(/^,\s*/, "").replace(/^y\s+/i, ""))
+      .map((s) => s.trim().replace(/^[-â€“â€”]\s*/, "").replace(/^,\s*/, "").replace(/^y\s+/i, ""))
       .filter(Boolean);
 
     if (chunks.length > 1) {
@@ -781,21 +850,21 @@ function splitEjercicios(raw) {
       continue;
     }
 
-    // Solo años: "2025, 2023 y 2024"
+    // Solo aÃ±os: "2025, 2023 y 2024"
     const years = line.match(/\b20\d{2}\b/g);
     if (years && years.length > 1 && /^(?:ejercicio|ej\.?)?\s*20\d{2}(?:\s*[,;y&]\s*(?:ejercicio|ej\.?)?\s*20\d{2})+$/i.test(line.replace(/\s+/g, " ").trim())) {
       parts.push(...years.map((y) => `Ejercicio ${y}`));
       continue;
     }
 
-    parts.push(line.replace(/^[-–—]\s*/, ""));
+    parts.push(line.replace(/^[-â€“â€”]\s*/, ""));
   }
 
   return parts;
 }
 
 function formatEjercicioLabel(part) {
-  const cleaned = String(part || "").trim().replace(/^[-–—]\s*/, "");
+  const cleaned = String(part || "").trim().replace(/^[-â€“â€”]\s*/, "");
   if (!cleaned) return "";
   const m = cleaned.match(/^(?:ejercicio|ej\.?)\s*(20\d{2})\b/i);
   if (m) return `Ejercicio ${m[1]}`;
@@ -807,7 +876,7 @@ function formatEjercicioLabel(part) {
 function formatEjerciciosSeparated(raw) {
   const parts = splitEjercicios(raw).map(formatEjercicioLabel).filter(Boolean);
   if (parts.length === 0) return "Sin ejercicios";
-  // Una línea por ejercicio: "- Ejercicio 2025"
+  // Una lÃ­nea por ejercicio: "- Ejercicio 2025"
   return parts.map((p) => `- ${p}`).join("\n");
 }
 
@@ -842,7 +911,7 @@ function showBasePop(anchor, label, detail) {
     const raw = String(label || "").trim();
     title.textContent = raw === "CG" ? "Contabilidad General" : (raw || "Base");
   }
-  if (text) text.textContent = detail || "—";
+  if (text) text.textContent = detail || "â€”";
   if (copyBtn) {
     copyBtn.classList.remove("is-copied");
     copyBtn.setAttribute("data-copy-hint", "Copiar");
@@ -942,7 +1011,7 @@ function buildRow(item) {
   const { nota } = parseAclaracion(item.aclaracion);
   const hasNota = !incorrecto && !!String(nota || "").trim();
   const hasAclaracion = !incorrecto && !!String(item.aclaracion || "").trim();
-  const partial = !!(item.listo && item.aclaracion && /✗/.test(String(item.aclaracion)));
+  const partial = !!(item.listo && item.aclaracion && /âœ—/.test(String(item.aclaracion)));
   if (incorrecto) row.classList.add("borrado-row-incorrecto");
   else if (partial) row.classList.add("borrado-row-partial");
   else if (item.listo && hasNota) row.classList.add("borrado-row-listo-nota");
@@ -956,19 +1025,19 @@ function buildRow(item) {
   const cliente = String(item.nroCliente || "").trim();
   const caso = String(item.nroCaso || "").trim();
   const aclaracion = String(item.aclaracion || "").trim();
-  const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
+  const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "â€”"));
   const copyBtn = (value, kind) => {
-    if (!value || !canConfirm) return escapeHtml(value || "—");
+    if (!value || !canConfirm) return escapeHtml(value || "â€”");
     const label = kind === "caso" ? "caso" : "cliente";
-    return `<button type="button" class="borrado-cliente-copy" data-borrado-copy-value="${escapeHtml(value)}" data-borrado-copy-kind="${label}" title="Clic para copiar N° de ${label}">
-            <span class="borrado-cliente-copy-icon" aria-hidden="true">📋</span>
+    return `<button type="button" class="borrado-cliente-copy" data-borrado-copy-value="${escapeHtml(value)}" data-borrado-copy-kind="${label}" title="Clic para copiar NÂ° de ${label}">
+            <span class="borrado-cliente-copy-icon" aria-hidden="true">ðŸ“‹</span>
             <span class="borrado-cliente-copy-text">${escapeHtml(value)}</span>
             <span class="borrado-cliente-copy-hint" aria-hidden="true">copiar</span>
           </button>`;
   };
   const allowCopy = isDetalleSalesforce(item) || canConfirm;
-  const casoCell = !caso ? "—" : allowCopy ? copyBtn(caso, "caso") : escapeHtml(caso);
-  const clienteCell = !cliente ? "—" : allowCopy ? copyBtn(cliente, "cliente") : escapeHtml(cliente);
+  const casoCell = !caso ? "â€”" : allowCopy ? copyBtn(caso, "caso") : escapeHtml(caso);
+  const clienteCell = !cliente ? "â€”" : allowCopy ? copyBtn(cliente, "cliente") : escapeHtml(cliente);
   row.innerHTML = `
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="borrado-col-caso" title="${escapeHtml(caso)}">${casoCell}</td>
@@ -1001,7 +1070,7 @@ function buildRow(item) {
       e.preventDefault();
       e.stopPropagation();
       selectedId = item.id;
-      // Observación: Ver abre el editor (si podés confirmar) para ver/completar el texto.
+      // ObservaciÃ³n: Ver abre el editor (si podÃ©s confirmar) para ver/completar el texto.
       if (pill.classList.contains("borrado-aclaracion-pill") && canConfirm) {
         hideBasePop();
         openNoteModal(item);
@@ -1032,8 +1101,8 @@ function buildRow(item) {
   });
 
   row.title = canConfirm
-    ? "Doble clic: marcar / quitar listo · Clic derecho: menú"
-    : "Clic derecho: menú (si sos el solicitante)";
+    ? "Doble clic: marcar / quitar listo Â· Clic derecho: menÃº"
+    : "Clic derecho: menÃº (si sos el solicitante)";
 
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -1063,7 +1132,7 @@ async function toggleListoByDoubleClick(item) {
   try {
     if (item.listo) {
       await unsetListo(item);
-      setStatus("Se quitó el listo.");
+      setStatus("Se quitÃ³ el listo.");
       await reloadList();
       notifyBorradoChanged();
       return;
@@ -1133,6 +1202,124 @@ function hideListoModal() {
   document.getElementById("borrado-listo-note-wrap")?.classList.add("hidden");
 }
 
+function openIncorrectoModal(item) {
+  pendingIncorrectoId = item.id;
+  selectedId = item.id;
+  const overlay = document.getElementById("borrado-incorrecto-overlay");
+  const wrapIva = document.getElementById("borrado-incorrecto-iva-wrap");
+  const wrapSj = document.getElementById("borrado-incorrecto-sueldos-wrap");
+  const wrapCg = document.getElementById("borrado-incorrecto-contabilidad-wrap");
+  const chkIva = document.getElementById("borrado-incorrecto-iva");
+  const chkSj = document.getElementById("borrado-incorrecto-sueldos");
+  const chkCg = document.getElementById("borrado-incorrecto-contabilidad");
+  const sf = isDetalleSalesforce(item);
+  const { resultado, nota } = parseAclaracion(item.aclaracion);
+  const hasNota = !!String(nota || "").trim();
+
+  wrapIva?.classList.toggle("hidden", !sf && !item.iva);
+  wrapSj?.classList.toggle("hidden", !sf && !item.sueldos);
+  wrapCg?.classList.toggle("hidden", !sf && !item.contabilidad);
+  if (chkIva) chkIva.checked = false;
+  if (chkSj) chkSj.checked = false;
+  if (chkCg) chkCg.checked = false;
+
+  if (isIncorrectoResultado(resultado)) {
+    const upper = resultado.toUpperCase();
+    if (chkIva && item.iva) chkIva.checked = /\bIVA\b/.test(upper);
+    if (chkSj && item.sueldos) chkSj.checked = /\bSJ\b/.test(upper);
+    if (chkCg && item.contabilidad) chkCg.checked = /\bCG\b/.test(upper);
+  }
+
+  document.getElementById("borrado-incorrecto-hint")?.classList.toggle("hidden", sf);
+  document.getElementById("borrado-incorrecto-salesforce-hint")?.classList.toggle("hidden", !sf);
+  document.getElementById("borrado-incorrecto-checks")?.classList.toggle("hidden", sf);
+  const hasNoteChk = document.getElementById("borrado-incorrecto-has-note");
+  const noteText = document.getElementById("borrado-incorrecto-note");
+  if (hasNoteChk) hasNoteChk.checked = hasNota;
+  if (noteText) noteText.value = nota || "";
+  syncIncorrectoNoteVisibility();
+
+  overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  document.getElementById("borrado-incorrecto-confirm")?.focus();
+}
+
+function syncIncorrectoNoteVisibility({ focus = false } = {}) {
+  const hasNote = !!document.getElementById("borrado-incorrecto-has-note")?.checked;
+  const wrap = document.getElementById("borrado-incorrecto-note-wrap");
+  wrap?.classList.toggle("hidden", !hasNote);
+  if (focus && hasNote) document.getElementById("borrado-incorrecto-note")?.focus();
+}
+
+function hideIncorrectoModal() {
+  pendingIncorrectoId = null;
+  const overlay = document.getElementById("borrado-incorrecto-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+  document.getElementById("borrado-incorrecto-hint")?.classList.remove("hidden");
+  document.getElementById("borrado-incorrecto-salesforce-hint")?.classList.add("hidden");
+  document.getElementById("borrado-incorrecto-checks")?.classList.remove("hidden");
+  const hasNoteChk = document.getElementById("borrado-incorrecto-has-note");
+  const noteText = document.getElementById("borrado-incorrecto-note");
+  if (hasNoteChk) hasNoteChk.checked = false;
+  if (noteText) noteText.value = "";
+  document.getElementById("borrado-incorrecto-note-wrap")?.classList.add("hidden");
+}
+
+async function confirmIncorrectoModal() {
+  if (!pendingIncorrectoId) return;
+  const item = items.find((x) => x.id === pendingIncorrectoId);
+  if (!item) {
+    hideIncorrectoModal();
+    return;
+  }
+
+  const sf = isDetalleSalesforce(item);
+  const marked = {
+    iva: !!document.getElementById("borrado-incorrecto-iva")?.checked,
+    sueldos: !!document.getElementById("borrado-incorrecto-sueldos")?.checked,
+    contabilidad: !!document.getElementById("borrado-incorrecto-contabilidad")?.checked,
+  };
+  if (!sf) {
+    const anyBase = !!(item.iva || item.sueldos || item.contabilidad);
+    const anyMarked = !!(marked.iva || marked.sueldos || marked.contabilidad);
+    if (anyBase && !anyMarked) {
+      setStatus("MarcÃ¡ al menos una base incorrecta.", true);
+      return;
+    }
+  }
+
+  const summary = sf ? INCORRECTO_LABEL : buildIncorrectoSummary(item, marked);
+  const wantNote = !!document.getElementById("borrado-incorrecto-has-note")?.checked;
+  const noteFromUi = String(document.getElementById("borrado-incorrecto-note")?.value || "").trim();
+  const notaFinal = wantNote ? noteFromUi : "";
+  if (wantNote && !notaFinal) {
+    setStatus("EscribÃ­ la observaciÃ³n o desmarcÃ¡ â€œÂ¿Hay observaciÃ³n?â€.", true);
+    return;
+  }
+  const aclaracion = composeAclaracion(summary, notaFinal);
+
+  try {
+    await patchItem(pendingIncorrectoId, { listo: false, aclaracion });
+    hideIncorrectoModal();
+    setStatus(`Marcado: ${summary}`);
+    await reloadList();
+    notifyBorradoChanged();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo actualizar.", true);
+  }
+}
+
+/** Resumen: "Incorrecto" o "Incorrecto IVA, SJ". */
+function buildIncorrectoSummary(item, marked) {
+  const parts = [];
+  if (item.iva && marked.iva) parts.push("IVA");
+  if (item.sueldos && marked.sueldos) parts.push("SJ");
+  if (item.contabilidad && marked.contabilidad) parts.push("CG");
+  if (!parts.length) return INCORRECTO_LABEL;
+  return `${INCORRECTO_LABEL} ${parts.join(", ")}`;
+}
+
 async function confirmListoModal() {
   if (!pendingListoId) return;
   const item = items.find((x) => x.id === pendingListoId);
@@ -1170,7 +1357,7 @@ async function confirmListoModal() {
   }
 }
 
-/** Resumen al confirmar solicitudes Salesforce: solo las bases marcadas (el detalle está en Salesforce). */
+/** Resumen al confirmar solicitudes Salesforce: solo las bases marcadas (el detalle estÃ¡ en Salesforce). */
 function buildListoSummarySalesforce(done) {
   const parts = [];
   if (done.iva) parts.push("IVA");
@@ -1180,7 +1367,7 @@ function buildListoSummarySalesforce(done) {
   return `Listo ${parts.join(", ")}`;
 }
 
-/** Resumen al confirmar: "Listo IVA, SJ, CG" o "✓ IVA · ✗ SJ · ✓ CG". */
+/** Resumen al confirmar: "Listo IVA, SJ, CG" o "âœ“ IVA Â· âœ— SJ Â· âœ“ CG". */
 function buildListoSummary(item, done) {
   const parts = [];
   if (item.iva) parts.push({ label: "IVA", ok: !!done.iva });
@@ -1190,27 +1377,36 @@ function buildListoSummary(item, done) {
 
   const allOk = parts.every((p) => p.ok);
   if (allOk) return `Listo ${parts.map((p) => p.label).join(", ")}`;
-  return parts.map((p) => `${p.ok ? "✓" : "✗"} ${p.label}`).join(" · ");
+  return parts.map((p) => `${p.ok ? "âœ“" : "âœ—"} ${p.label}`).join(" Â· ");
 }
 
 const ACLARACION_SEP = "\n---\n";
 const INCORRECTO_LABEL = "Incorrecto";
 
-/** Solicitud con datos erróneos / no corresponde procesar (análogo a “No registrado” en blanqueo). */
+function isIncorrectoResultado(text) {
+  return /^Incorrecto\b/i.test(String(text || "").trim());
+}
+
+/** Solicitud con datos errÃ³neos / no corresponde procesar (anÃ¡logo a â€œNo registradoâ€ en blanqueo). */
 function isIncorrecto(value) {
-  return String(value || "").trim().toLowerCase() === "incorrecto";
+  const text = String(value || "").trim();
+  if (!text) return false;
+  if (text.includes("---")) {
+    return isIncorrectoResultado(text.slice(0, text.indexOf("---")).trim());
+  }
+  const firstLine = text.split(/\n+/)[0].trim();
+  return isIncorrectoResultado(firstLine);
 }
 
 function isResultadoAclaracion(text) {
   const t = String(text || "").trim();
-  return /^Listo\b/i.test(t) || /[✓✗]/.test(t);
+  return /^Listo\b/i.test(t) || isIncorrectoResultado(t) || /[âœ“âœ—]/.test(t);
 }
 
-/** Separa resultado de bases (checks) y observación libre. */
+/** Separa resultado de bases (checks) y observaciÃ³n libre. */
 function parseAclaracion(raw) {
   const text = String(raw || "").trim();
   if (!text) return { resultado: "", nota: "" };
-  if (isIncorrecto(text)) return { resultado: "", nota: "" };
 
   if (text.includes(ACLARACION_SEP.trim()) || text.includes("\n---\n")) {
     const idx = text.indexOf("---");
@@ -1242,7 +1438,7 @@ function composeAclaracion(resultado, nota) {
 function formatFecha(iso) {
   const raw = String(iso || "").trim();
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
-  if (!m) return raw || "—";
+  if (!m) return raw || "â€”";
   const day = Number(m[3]);
   const month = MONTHS[Number(m[2]) - 1] || m[2];
   const year = Number(m[1]);
@@ -1253,25 +1449,25 @@ function formatFecha(iso) {
 
 function formatCuit(raw) {
   const digits = String(raw || "").replace(/\D/g, "");
-  if (!digits) return "—";
+  if (!digits) return "â€”";
   if (digits.length === 11) {
     return `${digits.slice(0, 2)}-${digits.slice(2, 10)}-${digits.slice(10)}`;
   }
-  return String(raw || "").trim() || "—";
+  return String(raw || "").trim() || "â€”";
 }
 
 function isPartialListo(item) {
   if (!item?.listo) return false;
   if (isDetalleSalesforce(item)) return false;
   const { resultado } = parseAclaracion(item.aclaracion);
-  return /✗/.test(String(resultado || ""));
+  return /âœ—/.test(String(resultado || ""));
 }
 
 function formatGestionadoPorCell(item) {
   const nombre = String(item.confirmadoPorNombre || "").trim();
   const gestionado = !!item?.listo || !!String(item?.aclaracion || "").trim();
-  if (!gestionado) return "—";
-  return escapeHtml(nombre || "—");
+  if (!gestionado) return "â€”";
+  return escapeHtml(nombre || "â€”");
 }
 
 function formatEstadoCell(item) {
@@ -1284,27 +1480,30 @@ function formatEstadoCell(item) {
       return '<span class="borrado-pill partial" title="Algunas bases quedaron pendientes">Parcial</span>';
     }
     if (String(nota || "").trim()) {
-      return '<span class="borrado-pill ok-note" title="Eliminada con observación">Eliminada · nota</span>';
+      return '<span class="borrado-pill ok-note" title="Eliminada con observaciÃ³n">Eliminada Â· nota</span>';
     }
     return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada</span>';
   }
   if (!resultado && !nota) {
-    return '<span class="borrado-estado-pending" title="Pendiente de confirmación">Pendiente</span>';
+    return '<span class="borrado-estado-pending" title="Pendiente de confirmaciÃ³n">Pendiente</span>';
   }
-  return '<span class="borrado-pill note" title="Con observación">Nota</span>';
+  return '<span class="borrado-pill note" title="Con observaciÃ³n">Nota</span>';
 }
 
 function formatResultadoHtml(resultado) {
   const raw = String(resultado || "").trim();
   if (!raw) return "";
-  if (/[✓✗]/.test(raw)) {
+  if (/[âœ“âœ—]/.test(raw)) {
     const html = escapeHtml(raw)
-      .replace(/✓/g, '<span class="borrado-mark-ok" aria-hidden="true">✓</span>')
-      .replace(/✗/g, '<span class="borrado-mark-no" aria-hidden="true">✗</span>');
+      .replace(/âœ“/g, '<span class="borrado-mark-ok" aria-hidden="true">âœ“</span>')
+      .replace(/âœ—/g, '<span class="borrado-mark-no" aria-hidden="true">âœ—</span>');
     return `<span class="borrado-aclaracion-full borrado-aclaracion-marks">${html}</span>`;
   }
   if (/^Listo\b/i.test(raw)) {
     return `<span class="borrado-aclaracion-full borrado-aclaracion-listo">${escapeHtml(raw)}</span>`;
+  }
+  if (/^Incorrecto\b/i.test(raw)) {
+    return `<span class="borrado-aclaracion-full borrado-aclaracion-incorrecto">${escapeHtml(raw)}</span>`;
   }
   return `<span class="borrado-aclaracion-full">${escapeHtml(raw)}</span>`;
 }
@@ -1312,31 +1511,31 @@ function formatResultadoHtml(resultado) {
 function shouldAclaracionUsePill(text) {
   const raw = String(text || "").trim();
   if (!raw) return false;
-  if (/[✓✗]/.test(raw)) return false;
+  if (/[âœ“âœ—]/.test(raw)) return false;
   if (/^Listo\b/i.test(raw) && raw.length < 60) return false;
+  if (/^Incorrecto\b/i.test(raw) && raw.length < 60) return false;
   return raw.length > 36 || raw.includes("\n");
 }
 
 function formatAclaracionNotaPill(label, detail) {
   const text = String(detail || "").trim();
   if (!text) return "";
-  const tip = text.length > 80 ? `${text.slice(0, 80)}…` : text;
+  const tip = text.length > 80 ? `${text.slice(0, 80)}â€¦` : text;
   return `<span class="borrado-base-cg"><button type="button" class="borrado-base-pill has-detail borrado-aclaracion-pill" title="${escapeAttr(tip)}" aria-label="Ver ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(text)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">Ver</span></button></span>`;
 }
 
 function formatAclaracionCell(text) {
-  if (isIncorrecto(text)) return "—";
   const { resultado, nota } = parseAclaracion(text);
-  if (!resultado && !nota) return "—";
+  if (!resultado && !nota) return "â€”";
   const parts = [];
   if (resultado) {
     if (shouldAclaracionUsePill(resultado)) {
-      parts.push(formatAclaracionNotaPill("Aclaración", resultado));
+      parts.push(formatAclaracionNotaPill("AclaraciÃ³n", resultado));
     } else {
       parts.push(formatResultadoHtml(resultado));
     }
   }
-  if (nota) parts.push(formatAclaracionNotaPill("Observación", nota));
+  if (nota) parts.push(formatAclaracionNotaPill("ObservaciÃ³n", nota));
   return `<div class="borrado-aclaracion-stack">${parts.join("")}</div>`;
 }
 
@@ -1399,7 +1598,8 @@ async function handleCtxAction(action) {
     } else if (action === "unlisto") {
       await unsetListo(item);
     } else if (action === "aclaracion-incorrecto") {
-      await patchItem(selectedId, { listo: false, aclaracion: INCORRECTO_LABEL });
+      openIncorrectoModal(item);
+      return;
     } else if (action === "eliminar") {
       if (!canConfirm && !canOwnerMutate(item)) {
         setStatus("Solo se puede eliminar en estado pendiente.", true);
@@ -1460,7 +1660,7 @@ async function saveEdit() {
   const nroCliente = document.getElementById("borrado-edit-cliente")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente) {
-    setStatus("Completá caso y cliente.", true);
+    setStatus("CompletÃ¡ caso y cliente.", true);
     return;
   }
 
@@ -1475,15 +1675,15 @@ async function saveEdit() {
     const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
 
     if (!nroEmpresa || !nombreEmpresa) {
-      setStatus("Completá código y nombre de empresa.", true);
+      setStatus("CompletÃ¡ cÃ³digo y nombre de empresa.", true);
       return;
     }
     if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
-      setStatus("Marcá al menos una base a borrar.", true);
+      setStatus("MarcÃ¡ al menos una base a borrar.", true);
       return;
     }
     if (bases.contabilidad && !ejerciciosDetalle) {
-      setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
+      setStatus("Si marcÃ¡s CG, pegÃ¡ los ejercicios a borrar.", true);
       return;
     }
 
@@ -1521,7 +1721,7 @@ function openDeleteModal(item) {
   const overlay = document.getElementById("borrado-delete-overlay");
   const desc = document.getElementById("borrado-delete-desc");
   if (desc) {
-    desc.textContent = `${item.nroCaso || "—"} · ${item.cuit || "—"} · ${item.nombreEmpresa || "—"}`;
+    desc.textContent = `${item.nroCaso || "â€”"} Â· ${item.cuit || "â€”"} Â· ${item.nombreEmpresa || "â€”"}`;
   }
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
@@ -1536,13 +1736,14 @@ function hideDeleteModal() {
 
 async function confirmDeleteModal() {
   if (!selectedId) return;
+  const deletedId = selectedId;
   try {
     const res = await planUserFetch(`/api/planillas/borrado-bases/${selectedId}`, { method: "DELETE" });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
     selectedId = null;
     hideDeleteModal();
-    setStatus("Solicitud eliminada.");
+    setStatusWithUndo("Solicitud eliminada.", deletedId);
     await reloadList();
     notifyBorradoChanged();
   } catch (err) {
@@ -1570,9 +1771,11 @@ function hideNoteModal() {
 async function saveNoteModal() {
   if (!selectedId) return;
   const item = items.find((x) => x.id === selectedId);
-  const { resultado } = parseAclaracion(isIncorrecto(item?.aclaracion) ? "" : item?.aclaracion);
+  const { resultado } = parseAclaracion(item?.aclaracion);
   const nota = String(document.getElementById("borrado-note-text")?.value || "").trim();
-  if (isIncorrecto(nota)) {
+  // Si el usuario escribe solo "Incorrecto", abrir flujo completo vÃ­a modal no aplica acÃ¡:
+  // normalizamos a etiqueta base sin bases.
+  if (!resultado && isIncorrecto(nota)) {
     try {
       await patchItem(selectedId, { listo: false, aclaracion: INCORRECTO_LABEL });
       hideNoteModal();
@@ -1580,7 +1783,7 @@ async function saveNoteModal() {
       await reloadList();
       notifyBorradoChanged();
     } catch (err) {
-      setStatus(err?.message || "No se pudo guardar la observación.", true);
+      setStatus(err?.message || "No se pudo guardar la observaciÃ³n.", true);
     }
     return;
   }
@@ -1589,14 +1792,16 @@ async function saveNoteModal() {
     if (!aclaracion) {
       await patchItem(selectedId, { clearAclaracion: true });
     } else {
-      await patchItem(selectedId, { aclaracion });
+      const body = { aclaracion };
+      if (isIncorrectoResultado(resultado)) body.listo = false;
+      await patchItem(selectedId, body);
     }
     hideNoteModal();
-    setStatus("Observación guardada.");
+    setStatus("ObservaciÃ³n guardada.");
     await reloadList();
     notifyBorradoChanged();
   } catch (err) {
-    setStatus(err?.message || "No se pudo guardar la observación.", true);
+    setStatus(err?.message || "No se pudo guardar la observaciÃ³n.", true);
   }
 }
 

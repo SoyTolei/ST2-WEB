@@ -37,6 +37,7 @@ public sealed class BorradoBasesRepository
         cmd.CommandText = $"""
             SELECT {SelectColumns}
             FROM borrado_bases_solicitudes
+            WHERE deleted_at IS NULL OR trim(deleted_at) = ''
             ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) DESC, id DESC
             """;
         using var r = cmd.ExecuteReader();
@@ -51,7 +52,8 @@ public sealed class BorradoBasesRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = $"""
             SELECT {SelectColumns}
-            FROM borrado_bases_solicitudes WHERE id = $id
+            FROM borrado_bases_solicitudes
+            WHERE id = $id AND (deleted_at IS NULL OR trim(deleted_at) = '')
             """;
         cmd.Parameters.AddWithValue("$id", id);
         using var r = cmd.ExecuteReader();
@@ -144,7 +146,7 @@ public sealed class BorradoBasesRepository
         else if (BorradoAlertKinds.IsIncorrecto(aclaracion))
         {
             listo = false;
-            aclaracion = "Incorrecto";
+            // Conservar detalle ("Incorrecto IVA, SJ" + observación).
         }
 
         var wasListo = current.Listo;
@@ -363,14 +365,48 @@ public sealed class BorradoBasesRepository
         cmd.ExecuteNonQuery();
     }
 
-    public bool Delete(int id)
+    public bool Delete(int id) => SoftDelete(id);
+
+    /// <summary>Marca como eliminada (recuperable con Restore).</summary>
+    public bool SoftDelete(int id)
     {
         using var conn = Open();
         DeleteAlertBySolicitud(conn, id);
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM borrado_bases_solicitudes WHERE id = $id";
+        cmd.CommandText = """
+            UPDATE borrado_bases_solicitudes
+            SET deleted_at = $at
+            WHERE id = $id AND (deleted_at IS NULL OR trim(deleted_at) = '')
+            """;
+        cmd.Parameters.AddWithValue("$id", id);
+        cmd.Parameters.AddWithValue("$at", DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture));
+        return cmd.ExecuteNonQuery() > 0;
+    }
+
+    public bool Restore(int id)
+    {
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE borrado_bases_solicitudes
+            SET deleted_at = NULL
+            WHERE id = $id AND deleted_at IS NOT NULL AND trim(deleted_at) != ''
+            """;
         cmd.Parameters.AddWithValue("$id", id);
         return cmd.ExecuteNonQuery() > 0;
+    }
+
+    public BorradoBasesRecordDto? GetByIdIncludingDeleted(int id)
+    {
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = $"""
+            SELECT {SelectColumns}
+            FROM borrado_bases_solicitudes WHERE id = $id
+            """;
+        cmd.Parameters.AddWithValue("$id", id);
+        using var r = cmd.ExecuteReader();
+        return r.Read() ? ReadRow(r) : null;
     }
 
     public int SyncRequesterDisplayName(string email, string? displayName)
@@ -459,6 +495,7 @@ public sealed class BorradoBasesRepository
         EnsureColumn(conn, "sueldos_detalle", "TEXT NULL");
         EnsureColumn(conn, "cuit", "TEXT NOT NULL DEFAULT ''");
         EnsureColumn(conn, "confirmado_por_nombre", "TEXT NULL");
+        EnsureColumn(conn, "deleted_at", "TEXT NULL");
         MigrateCuilToCuit(conn);
         BackfillGestionadoHistoricoAlexis(conn);
         EnsureAlertsTable(conn);

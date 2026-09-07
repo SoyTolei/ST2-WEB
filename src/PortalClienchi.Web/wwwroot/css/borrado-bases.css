@@ -880,6 +880,38 @@ button.borrado-aclaracion-pill:focus-visible {
   border-style: solid;
 }
 
+/* Ver siempre visible en observación / aclaración (no solo al hover). */
+button.borrado-aclaracion-pill .borrado-base-pill-action {
+  max-width: 2.75rem;
+  margin-left: 0.28rem;
+  opacity: 1;
+  color: #b45309;
+}
+
+.borrado-aclaracion-incorrecto {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.borrado-undo-btn {
+  margin-left: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #64748b;
+  background: #f8fafc;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.borrado-undo-btn:hover,
+.borrado-undo-btn:focus-visible {
+  background: #e2e8f0;
+  border-color: #334155;
+}
+
 .borrado-aclaracion-nota {
   color: #3730a3;
   background: #e0e7ff;

@@ -1604,6 +1604,29 @@ html.st2-theme-dark button.borrado-aclaracion-pill:focus-visible {
   color: #fff7ed;
 }
 
+html.st2-theme-dark button.borrado-aclaracion-pill .borrado-base-pill-action,
+html.st2-theme-dark button.borrado-aclaracion-pill:hover .borrado-base-pill-action,
+html.st2-theme-dark button.borrado-aclaracion-pill:focus-visible .borrado-base-pill-action {
+  color: #fef3c7;
+  text-decoration-color: #fde68a;
+}
+
+html.st2-theme-dark .borrado-aclaracion-incorrecto {
+  color: #fca5a5;
+}
+
+html.st2-theme-dark .borrado-undo-btn {
+  background: #1e293b;
+  border-color: #64748b;
+  color: #f8fafc;
+}
+
+html.st2-theme-dark .borrado-undo-btn:hover,
+html.st2-theme-dark .borrado-undo-btn:focus-visible {
+  background: #334155;
+  border-color: #94a3b8;
+}
+
 html.st2-theme-dark .borrado-filter-month select,
 html.st2-theme-dark .borrado-filter-search input {
   background: #1c1c1c;
