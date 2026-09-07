@@ -1,6 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
-import { initLightRays } from "./st2-light-rays.js?v=20260907c";
+import { initLightRays } from "./st2-light-rays.js?v=20260907d";
 import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
@@ -5230,14 +5230,14 @@ async function bootstrapApp() {
   initGooeyNav();
   initLightRays({
     raysOrigin: "top-center",
-    raysColor: "#fe791e",
-    raysSpeed: 1.9,
-    lightSpread: 0.5,
+    raysColor: "#cd601c",
+    raysSpeed: 0.3,
+    lightSpread: 1.7,
     rayLength: 3,
     followMouse: true,
-    mouseInfluence: 0.1,
+    mouseInfluence: 0,
     noiseAmount: 0.3,
-    distortion: 0.1,
+    distortion: 0,
     pulsating: false,
     fadeDistance: 1.7,
     saturation: 1.3,

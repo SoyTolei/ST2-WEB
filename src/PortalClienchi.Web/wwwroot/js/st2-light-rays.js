@@ -117,17 +117,17 @@ void main() {
 
 const DEFAULTS = {
   raysOrigin: "top-center",
-  raysColor: "#fe791e",
-  raysSpeed: 1.9,
-  lightSpread: 0.5,
+  raysColor: "#cd601c",
+  raysSpeed: 0.3,
+  lightSpread: 1.7,
   rayLength: 3,
   pulsating: false,
   fadeDistance: 1.7,
   saturation: 1.3,
   followMouse: true,
-  mouseInfluence: 0.1,
+  mouseInfluence: 0,
   noiseAmount: 0.3,
-  distortion: 0.1,
+  distortion: 0,
   lightMode: false,
 };
 
