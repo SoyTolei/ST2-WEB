@@ -83,6 +83,31 @@ export function syncSonnerPlacement() {
   toaster.style.setProperty("--mobile-offset-right", `${Math.max(8, right)}px`);
 }
 
+/** Solo home de Planillas (menú principal), no otras pestañas ni módulos. */
+export function isPlanillasHomeSurface() {
+  const tab = document.querySelector('.tab-btn[data-tab="planillas"]');
+  if (!tab?.classList.contains("active")) return false;
+  const panel = document.getElementById("panel-planillas");
+  if (panel && !panel.classList.contains("active")) return false;
+  const menu = document.getElementById("planillas-menu");
+  return !!(menu && !menu.classList.contains("hidden"));
+}
+
+/** Muestra/oculta el toaster según si estamos en la página principal. */
+export function syncSonnerHomeVisibility() {
+  const onHome = isPlanillasHomeSurface();
+  document.body.classList.toggle("st2-sonner-home", onHome);
+  const toaster = document.getElementById(TOASTER_ID);
+  if (toaster) {
+    toaster.toggleAttribute("hidden", !onHome);
+    toaster.setAttribute("aria-hidden", onHome ? "false" : "true");
+  }
+  if (onHome) {
+    syncSonnerPlacement();
+    if (registry.size) syncStackedToastGreetings();
+  }
+}
+
 export function syncSonnerTheme() {
   const el = document.getElementById(TOASTER_ID);
   if (el) el.setAttribute("theme", currentTheme());
@@ -92,6 +117,7 @@ export function initSt2Sonner() {
   if (inited) {
     syncSonnerTheme();
     syncSonnerPlacement();
+    syncSonnerHomeVisibility();
     return;
   }
   inited = true;
@@ -114,6 +140,7 @@ export function initSt2Sonner() {
 
   syncSonnerTheme();
   syncSonnerPlacement();
+  syncSonnerHomeVisibility();
 
   window.addEventListener("resize", syncSonnerPlacement, { passive: true });
   if (typeof ResizeObserver !== "undefined") {
@@ -130,6 +157,11 @@ export function initSt2Sonner() {
   };
   document.addEventListener("st2:view-as-changed", refreshGreet);
   document.addEventListener("st2:session-changed", refreshGreet);
+  document.addEventListener("st2:planillas-view-changed", () => syncSonnerHomeVisibility());
+  document.addEventListener("st2:planillas-home", () => {
+    // El menú puede montarse un tick después del evento.
+    requestAnimationFrame(() => syncSonnerHomeVisibility());
+  });
 }
 
 /**
@@ -245,6 +277,8 @@ function makeActionButton(id, entry, tone) {
 function paintOne(id, title, tone) {
   const entry = registry.get(id);
   if (!entry) return;
+  // Fuera del home: guardar estado pero no mostrar.
+  if (!isPlanillasHomeSurface()) return;
   const method = toneToMethod(tone);
   const opts = {
     id,
