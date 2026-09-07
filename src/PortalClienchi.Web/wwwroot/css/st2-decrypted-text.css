@@ -1,0 +1,34 @@
+/* DecryptedText (vanilla) — scramble → reveal en splash. */
+
+.st2-decrypt {
+  display: inline-block;
+  white-space: pre-wrap;
+  position: relative;
+}
+
+.st2-decrypt-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  visibility: hidden;
+}
+
+.st2-decrypt-char {
+  display: inline-block;
+  min-width: 0.55ch;
+}
+
+.st2-decrypt-char.is-encrypted {
+  opacity: 0.72;
+  font-variant-numeric: tabular-nums;
+}
+
+.st2-boot-splash-status .st2-decrypt {
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
