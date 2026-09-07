@@ -107,6 +107,13 @@
       font: 700 2.55rem/1.1 "Segoe UI", system-ui, sans-serif;
       white-space: nowrap;
     }
+    /* Splash: sin flash naranja antes de Lightfall */
+    body.st2-access-restoring .st2-boot-splash {
+      background: #1a0a04 !important;
+    }
+    #st2-splash-lightfall {
+      background: #1a0a04;
+    }
   </style>
   <link rel="stylesheet" href="/css/styles.css?v=20260907i"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20260907t"/>
@@ -119,17 +126,17 @@
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-border-glow.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-topography.css?v=20260907b"/>
-  <link rel="stylesheet" href="/css/st2-lightfall.css?v=20260907b"/>
-  <link rel="stylesheet" href="/css/st2-glitch-text.css?v=20260907c"/>
+  <link rel="stylesheet" href="/css/st2-lightfall.css?v=20260907c"/>
+  <link rel="stylesheet" href="/css/st2-glitch-text.css?v=20260907d"/>
   <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907o"/>
   <link rel="modulepreload" href="/js/st2-topography.js?v=20260907b"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260907c"/>
-  <link rel="modulepreload" href="/js/st2-lightfall.js?v=20260907a"/>
-  <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907c"/>
+  <link rel="modulepreload" href="/js/st2-lightfall.js?v=20260907b"/>
+  <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907d"/>
   <link rel="modulepreload" href="/js/st2-decrypted-text.js?v=20260907c"/>
-  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260907f"/>
+  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260907g"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -139,7 +146,7 @@
     }
   } catch (e) { /* ignore */ }
 </script>
-  <script type="module" src="/js/st2-login-boot.js?v=20260907f"></script>
+  <script type="module" src="/js/st2-login-boot.js?v=20260907g"></script>
   <div id="st2-light-rays" class="st2-light-rays" aria-hidden="true"></div>
   <sonner-toaster id="st2-sonner" position="top-right" rich-colors close-button visible-toasts="5" container-aria-label="Notificaciones"></sonner-toaster>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">

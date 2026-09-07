@@ -8,7 +8,8 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
-  background: #ce6319;
+  /* Oscuro hasta el primer frame WebGL — evita flash naranja sólido */
+  background: #1a0a04;
 }
 
 .st2-lightfall-canvas {
@@ -19,7 +20,6 @@
   height: 100% !important;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.35s ease;
 }
 
 .st2-splash-lightfall.is-ready .st2-lightfall-canvas {
@@ -30,7 +30,7 @@
   background:
     radial-gradient(ellipse 70% 55% at 50% 35%, rgba(255, 159, 252, 0.45) 0%, transparent 60%),
     radial-gradient(ellipse 80% 70% at 20% 80%, rgba(249, 115, 22, 0.55) 0%, transparent 55%),
-    #ce6319;
+    #1a0a04;
 }
 
 /* No tocar position:fixed del splash; solo fondo + stacking */

@@ -27,15 +27,6 @@ export function mountGlitchText(el, opts = {}) {
 }
 
 export function initSuiteGlitchText() {
-  const splash = document.querySelector(".st2-boot-splash-suite");
-  if (splash) {
-    mountGlitchText(splash, {
-      speed: 1,
-      enableShadows: false,
-      enableOnHover: false,
-    });
-  }
-
   const access = document.querySelector("#st2-access-gate .st2-access-suite");
   if (access) {
     mountGlitchText(access, {

@@ -92,11 +92,6 @@
 }
 
 /* Contextos: fondo de capas ≈ superficie detrás del título */
-.st2-boot-splash .st2-glitch {
-  --st2-glitch-bg: transparent;
-  color: #f3f4f6;
-}
-
 .st2-access-suite.st2-glitch {
   --st2-glitch-bg: #ffffff;
 }

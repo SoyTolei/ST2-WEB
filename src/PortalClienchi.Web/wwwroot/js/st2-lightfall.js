@@ -435,8 +435,15 @@ function initGl(container) {
   resizeObs.observe(host);
   if (opts.mouseInteraction) canvas.addEventListener("pointermove", onPointerMove);
   document.addEventListener("visibilitychange", onVisibility);
+
+  // Primer frame sync: evita ver el fondo placeholder antes del efecto
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.uniform1f(locs.iTime, 0.9);
+  gl.uniform2f(locs.iMouse, mouseCur[0], mouseCur[1]);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  host.classList.add("is-ready");
   startLoop();
-  requestAnimationFrame(() => host.classList.add("is-ready"));
   return true;
 }
 
