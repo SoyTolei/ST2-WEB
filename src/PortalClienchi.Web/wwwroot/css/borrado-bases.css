@@ -889,8 +889,13 @@ button.borrado-aclaracion-pill .borrado-base-pill-action {
 }
 
 .borrado-aclaracion-incorrecto {
-  color: #b91c1c;
+  color: #fff;
+  background: #dc2626;
+  border: 1px solid #b91c1c;
   font-weight: 700;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  white-space: nowrap;
 }
 
 .borrado-undo-btn {

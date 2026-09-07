@@ -235,7 +235,7 @@ function paintGreetStack() {
     const entry = registry.get(id);
     if (!entry) return;
     const title = plainTitle(
-      formatToastMessage(entry.body, { greet: index === 0, stackIndex: index }),
+      formatToastMessage(entry.body, { greet: index === 0 }),
     );
     paintOne(id, title, entry.tone);
   });

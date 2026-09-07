@@ -1612,7 +1612,9 @@ html.st2-theme-dark button.borrado-aclaracion-pill:focus-visible .borrado-base-p
 }
 
 html.st2-theme-dark .borrado-aclaracion-incorrecto {
-  color: #fca5a5;
+  color: #fff;
+  background: #b91c1c;
+  border-color: #f87171;
 }
 
 html.st2-theme-dark .borrado-undo-btn {

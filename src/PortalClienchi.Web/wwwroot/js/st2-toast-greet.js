@@ -86,16 +86,19 @@ export function greetLine(name) {
   return `Hola ${name}!`;
 }
 
-export function formatToastMessage(body, { greet = false, stackIndex = 0 } = {}) {
+export function formatToastMessage(body, { greet = false } = {}) {
   const msg = String(body || "").trim();
   if (!msg) return msg;
-  const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
+
+  // Solo el primer toast del stack lleva saludo; el resto solo explica el aviso
+  // (con Sonner apilados, “también/además” ya no tiene sentido).
+  if (!greet) return msg;
+
   const name = toastFirstName();
-  if (greet && name) {
-    const line = greetLine(name);
-    if (isBirthdayGreetingForEmail(toastUserEmail())) return `${line} ${lowered}`;
-    return `${TOAST_FOOD_MARK} ${line} ${lowered}`;
-  }
-  const connector = stackIndex >= 2 ? "Y además," : "También";
-  return `${TOAST_FOOD_MARK} ${connector} ${lowered}`;
+  if (!name) return msg;
+
+  const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
+  const line = greetLine(name);
+  if (isBirthdayGreetingForEmail(toastUserEmail())) return `${line} ${lowered}`;
+  return `${TOAST_FOOD_MARK} ${line} ${lowered}`;
 }
