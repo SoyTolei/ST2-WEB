@@ -85,7 +85,7 @@ function toneClass(tone) {
   return "st2-sonner-ok";
 }
 
-/** Ancla el stack justo debajo de Tutorial / Acerca de. */
+/** Ancla el stack justo debajo de Tutorial / Acerca de (y bajo la barra de update si hay). */
 export function syncSonnerPlacement() {
   const toaster = document.getElementById(TOASTER_ID);
   const anchor =
@@ -101,7 +101,14 @@ export function syncSonnerPlacement() {
   }
 
   const rect = anchor.getBoundingClientRect();
-  const top = Math.max(56, Math.round(rect.bottom + 10));
+  let top = Math.max(56, Math.round(rect.bottom + 10));
+  if (document.body.classList.contains("st2-has-update")) {
+    const banner = document.getElementById("st2-update-banner");
+    if (banner && !banner.classList.contains("hidden") && !banner.hasAttribute("hidden")) {
+      const br = banner.getBoundingClientRect();
+      if (br.height > 0) top = Math.max(top, Math.round(br.bottom + 12));
+    }
+  }
   const right = Math.max(10, Math.round(window.innerWidth - rect.right));
   toaster.style.setProperty("--offset-top", `${top}px`);
   toaster.style.setProperty("--offset-right", `${right}px`);
@@ -197,6 +204,17 @@ export function initSt2Sonner() {
     requestAnimationFrame(() => syncSonnerHomeVisibility());
   });
   document.addEventListener("st2:tour-active-changed", () => syncSonnerHomeVisibility());
+  document.addEventListener("st2:update-ui-changed", () => {
+    syncSonnerPlacement();
+    syncSonnerHomeVisibility();
+  });
+  if (typeof ResizeObserver !== "undefined") {
+    const banner = document.getElementById("st2-update-banner");
+    if (banner) {
+      const bro = new ResizeObserver(() => syncSonnerPlacement());
+      bro.observe(banner);
+    }
+  }
 }
 
 /**

@@ -59,12 +59,12 @@
       white-space: nowrap;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260907f"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260907g"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260907f"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20260907s"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907q"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907r"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907a"/>
@@ -156,6 +156,19 @@
   <div id="st2-update-banner" class="st2-update-banner hidden" role="status" aria-live="polite" hidden>
     <p class="st2-update-banner-text">Hay una nueva versión de la página. Por favor actualiza ahora para ver los cambios.</p>
     <button type="button" id="st2-update-reload" class="st2-update-banner-reload">Recargar ahora</button>
+  </div>
+  <div id="st2-update-modal" class="st2-update-modal hidden" role="dialog" aria-modal="true" aria-labelledby="st2-update-modal-title" hidden>
+    <div class="st2-update-modal-card">
+      <p class="st2-update-modal-kicker">Actualización disponible</p>
+      <h2 id="st2-update-modal-title" class="st2-update-modal-title">Hay una nueva versión</h2>
+      <p class="st2-update-modal-text">
+        Actualizá para ver los cambios. Si estás cargando o editando algo, podés dejarlo para después y seguir trabajando.
+      </p>
+      <div class="st2-update-modal-actions">
+        <button type="button" id="st2-update-reload-now" class="st2-update-modal-primary">Recargar ahora</button>
+        <button type="button" id="st2-update-later" class="st2-update-modal-secondary">Actualizar luego</button>
+      </div>
+    </div>
   </div>
   <div id="st2-view-as-banner" class="st2-view-as-banner hidden" role="status" aria-live="polite" hidden>
     <p id="st2-view-as-banner-text" class="st2-view-as-banner-text">Viendo el perfil de otro usuario</p>
@@ -2604,6 +2617,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260907ab" type="module"></script>
+  <script src="/js/app.js?v=20260907ac" type="module"></script>
 </body>
 </html>

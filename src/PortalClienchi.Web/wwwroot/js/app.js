@@ -1,4 +1,4 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ab";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ac";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";
@@ -5293,10 +5293,13 @@ async function bootstrapApp() {
 void bootstrapApp();
 
 const UPDATE_CHECK_MS = 45000;
+const UPDATE_DEFER_KEY = "st2-update-deferred-signal";
 let lastLiveBuild = "";
 let updateCheckerStarted = false;
 /** Banner forzado por permisos nuevos (no lo apaga el check de build). */
 let reloadBannerForced = false;
+/** "hidden" | "modal" | "banner" */
+let updateUiMode = "hidden";
 
 function loadedAppBuild() {
   const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
@@ -5316,6 +5319,31 @@ function buildsDiffer(loaded, live) {
   return a.slice(0, 7) !== b.slice(0, 7);
 }
 
+function currentUpdateSignal() {
+  if (buildsDiffer(loadedAppBuild(), lastLiveBuild)) {
+    return `build:${normalizeBuild(lastLiveBuild)}`;
+  }
+  if (reloadBannerForced) return "forced:modules";
+  return "";
+}
+
+function readDeferredUpdateSignal() {
+  try {
+    return sessionStorage.getItem(UPDATE_DEFER_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function writeDeferredUpdateSignal(signal) {
+  try {
+    if (signal) sessionStorage.setItem(UPDATE_DEFER_KEY, signal);
+    else sessionStorage.removeItem(UPDATE_DEFER_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 function setUpdateBannerVisible(show) {
   const banner = document.getElementById("st2-update-banner");
   if (!banner) return;
@@ -5324,10 +5352,55 @@ function setUpdateBannerVisible(show) {
   document.body.classList.toggle("st2-has-update", !!show);
 }
 
+function setUpdateModalVisible(show) {
+  const modal = document.getElementById("st2-update-modal");
+  if (!modal) return;
+  modal.classList.toggle("hidden", !show);
+  modal.toggleAttribute("hidden", !show);
+  document.body.classList.toggle("st2-update-modal-open", !!show);
+}
+
+/**
+ * @param {"hidden"|"modal"|"banner"} mode
+ */
+function setUpdateUiMode(mode) {
+  updateUiMode = mode;
+  if (mode === "modal") {
+    setUpdateBannerVisible(false);
+    setUpdateModalVisible(true);
+  } else if (mode === "banner") {
+    setUpdateModalVisible(false);
+    setUpdateBannerVisible(true);
+  } else {
+    setUpdateModalVisible(false);
+    setUpdateBannerVisible(false);
+  }
+  document.dispatchEvent(new CustomEvent("st2:update-ui-changed", { detail: { mode } }));
+}
+
+function showUpdatePrompt() {
+  const signal = currentUpdateSignal();
+  if (!signal) {
+    setUpdateUiMode("hidden");
+    return;
+  }
+  if (readDeferredUpdateSignal() === signal) {
+    setUpdateUiMode("banner");
+    return;
+  }
+  setUpdateUiMode("modal");
+}
+
+function deferUpdatePrompt() {
+  const signal = currentUpdateSignal();
+  if (signal) writeDeferredUpdateSignal(signal);
+  setUpdateUiMode("banner");
+}
+
 /** Cartel único de "recargá" (versión web o permisos nuevos). */
 function requestUnifiedReloadBanner() {
   reloadBannerForced = true;
-  setUpdateBannerVisible(true);
+  showUpdatePrompt();
 }
 
 document.addEventListener("st2:request-reload-banner", () => {
@@ -5339,10 +5412,15 @@ function applyLiveBuild(liveBuild) {
   if (!live) return;
   lastLiveBuild = live;
   if (!buildsDiffer(loadedAppBuild(), live)) {
-    if (!reloadBannerForced) setUpdateBannerVisible(false);
+    if (!reloadBannerForced) {
+      writeDeferredUpdateSignal("");
+      setUpdateUiMode("hidden");
+    } else {
+      showUpdatePrompt();
+    }
     return;
   }
-  setUpdateBannerVisible(true);
+  showUpdatePrompt();
   notifyWebUpdateDesktop(live);
 }
 
@@ -5360,8 +5438,13 @@ async function checkAppVersion() {
 function startUpdateChecker() {
   if (updateCheckerStarted) return;
   updateCheckerStarted = true;
-  document.getElementById("st2-update-reload")?.addEventListener("click", () => {
+  const reload = () => {
     window.location.reload();
+  };
+  document.getElementById("st2-update-reload")?.addEventListener("click", reload);
+  document.getElementById("st2-update-reload-now")?.addEventListener("click", reload);
+  document.getElementById("st2-update-later")?.addEventListener("click", () => {
+    deferUpdatePrompt();
   });
   const tick = () => {
     void checkAppVersion();
