@@ -28,9 +28,13 @@ export function createPlanillasLiveList({ viewId, reload, isBusy }) {
   }
 
   return {
-    start() {
+    /**
+     * @param {{ immediate?: boolean }} [opts]
+     * immediate=false evita un segundo fetch justo después del reload de apertura.
+     */
+    start({ immediate = true } = {}) {
       this.stop();
-      tick();
+      if (immediate) tick();
       schedule();
       onVisibility = () => {
         schedule();

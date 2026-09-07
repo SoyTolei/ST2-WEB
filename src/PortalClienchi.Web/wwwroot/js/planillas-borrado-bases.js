@@ -267,7 +267,7 @@ export async function openBorradoBasesModule() {
   if (!canSeeBorradoBasesModule()) return;
   void markBorradoAlertsSeen();
   initBorradoBasesModule();
-  await refreshModuleFlags();
+  // Permisos desde cache; refresco en paralelo (no bloquea el listado).
   canConfirm = canConfirmBorrado();
   canLoad = canLoadBorrado();
   syncSolicitanteBadge();
@@ -276,8 +276,16 @@ export async function openBorradoBasesModule() {
   clearForm();
   monthFilterTouched = false;
   setStatus("Cargando solicitudes…");
+  const flagsTask = refreshModuleFlags().then(() => {
+    canConfirm = canConfirmBorrado();
+    canLoad = canLoadBorrado();
+    syncSolicitanteBadge();
+    syncMineFilterVisibility();
+    syncLoadFormVisibility();
+  });
   await reloadList();
-  liveList.start();
+  void flagsTask;
+  liveList.start({ immediate: false });
 }
 
 function ensureConfirmViewDefault() {
@@ -907,8 +915,9 @@ function showBasePop(anchor, label, detail) {
   if (!pop || !anchor) return;
 
   hideCtx();
+  const raw = String(label || "").trim();
+  const isNote = /observaci[oó]n|aclaraci[oó]n/i.test(raw);
   if (title) {
-    const raw = String(label || "").trim();
     title.textContent = raw === "CG" ? "Contabilidad General" : (raw || "Base");
   }
   if (text) text.textContent = detail || "—";
@@ -918,12 +927,13 @@ function showBasePop(anchor, label, detail) {
     copyBtn.textContent = "Copiar";
   }
 
+  pop.classList.toggle("borrado-base-pop--note", isNote);
   pop.classList.remove("hidden");
   pop.setAttribute("aria-hidden", "false");
 
   const rect = anchor.getBoundingClientRect();
   const pad = 8;
-  const w = pop.offsetWidth || 280;
+  const w = pop.offsetWidth || (isNote ? 320 : 280);
   const h = pop.offsetHeight || 140;
   let left = rect.left;
   let top = rect.bottom + 6;
@@ -1070,12 +1080,7 @@ function buildRow(item) {
       e.preventDefault();
       e.stopPropagation();
       selectedId = item.id;
-      // Observación: Ver abre el editor (si podés confirmar) para ver/completar el texto.
-      if (pill.classList.contains("borrado-aclaracion-pill") && canConfirm) {
-        hideBasePop();
-        openNoteModal(item);
-        return;
-      }
+      // Misma ventanita que CG (ejercicios): Ver muestra el texto, no abre el editor.
       showBasePop(
         pill,
         pill.getAttribute("data-borrado-base-label") || "",

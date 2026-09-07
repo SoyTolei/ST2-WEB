@@ -727,6 +727,15 @@ button.borrado-base-pill:focus-visible .borrado-base-pill-action {
   display: none !important;
 }
 
+.borrado-base-pop--note {
+  width: min(22rem, calc(100vw - 1.5rem));
+  max-height: min(18rem, 55vh);
+}
+
+.borrado-base-pop--note .borrado-base-pop-text {
+  max-height: 14rem;
+}
+
 .borrado-base-pop-head {
   display: flex;
   align-items: center;

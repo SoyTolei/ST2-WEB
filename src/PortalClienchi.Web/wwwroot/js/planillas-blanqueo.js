@@ -281,8 +281,7 @@ export async function openBlanqueoModule() {
   if (!canSeeBlanqueoModule()) return;
   void markBlanqueoAlertsSeen();
   initBlanqueoModule();
-  // Usa cache de permisos (evita otro /modules al abrir).
-  await refreshModuleFlags();
+  // Permisos desde cache; refresco en paralelo (no bloquea el listado).
   canConfirm = canConfirmBlanqueo();
   canLoad = canLoadBlanqueo();
   syncSolicitanteBadge();
@@ -293,8 +292,16 @@ export async function openBlanqueoModule() {
   syncTipoOptions("blanqueo-tipo", getFormPortal());
   syncClaveVisibility();
   setStatus("Cargando solicitudes…");
+  const flagsTask = refreshModuleFlags().then(() => {
+    canConfirm = canConfirmBlanqueo();
+    canLoad = canLoadBlanqueo();
+    syncSolicitanteBadge();
+    syncMineFilterVisibility();
+    syncLoadFormVisibility();
+  });
   await reloadList();
-  liveList.start();
+  void flagsTask;
+  liveList.start({ immediate: false });
 }
 
 function ensureConfirmViewDefault() {
