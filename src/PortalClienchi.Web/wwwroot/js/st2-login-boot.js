@@ -20,7 +20,7 @@ initSplashLightfall({
   density: 0.6,
   twinkle: 0.9,
   zoom: 3,
-  backgroundGlow: 0.5,
+  backgroundGlow: 0.85,
   opacity: 1,
   mouseInteraction: true,
   mouseStrength: 0,
