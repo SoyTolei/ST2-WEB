@@ -10,14 +10,6 @@ const TOAST_FOOD_EMOJIS = [
   "🌭", "🍝", "🧁", "🍓", "🥑", "🧀",
 ];
 
-const STACKED_TOAST_IDS = [
-  "tools-ready-toast",
-  "blanqueo-ready-toast",
-  "borrado-ready-toast",
-  "access-ready-toast",
-  "access-owner-toast",
-];
-
 export function firstNameFromEmail(email) {
   const local = String(email || "").split("@")[0] || "";
   const first = local.split(/[._\-]+/).filter(Boolean)[0] || "";
@@ -70,6 +62,7 @@ export function escapeToastHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+/** @deprecated Prefer plain text + Sonner; se mantiene por compat. */
 export function setToastText(el, text) {
   if (!el) return;
   const food = foodForToast(text);
@@ -103,20 +96,6 @@ export function formatToastMessage(body, { greet = false, stackIndex = 0 } = {})
     if (isBirthdayGreetingForEmail(toastUserEmail())) return `${line} ${lowered}`;
     return `${TOAST_FOOD_MARK} ${line} ${lowered}`;
   }
-  // 2.ª: «También…» · 3.ª+: «Y además…» (sin repetir saludo ni «también»)
   const connector = stackIndex >= 2 ? "Y además," : "También";
   return `${TOAST_FOOD_MARK} ${connector} ${lowered}`;
-}
-
-/** El saludo “Hola …” solo en el primer toast visible del stack. */
-export function syncStackedToastGreetings() {
-  const visible = STACKED_TOAST_IDS
-    .map((id) => document.getElementById(id))
-    .filter((el) => el && !el.classList.contains("hidden"));
-
-  visible.forEach((toast, index) => {
-    const body = toast.dataset.toastBody || "";
-    const textEl = toast.querySelector(".blanqueo-ready-toast-text");
-    setToastText(textEl, formatToastMessage(body, { greet: index === 0, stackIndex: index }));
-  });
 }

@@ -7,8 +7,8 @@ import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
+import { syncSonnerTheme, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js?v=20260907f";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
-import { syncStackedToastGreetings } from "./st2-toast-greet.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -67,6 +67,7 @@ function applyTheme(dark) {
     /* ignore */
   }
   syncThemeToggle();
+  syncSonnerTheme();
 }
 
 /** Oscuro por defecto; solo "light" explícito deja el tema claro. */
@@ -2424,27 +2425,22 @@ function hideToolsTopBanner() {
 }
 
 function renderToolsToast(newer, message) {
-  const toast = document.getElementById("tools-ready-toast");
-  const toastCount = document.getElementById("tools-ready-toast-count");
-  if (!toast) return;
   const n = (newer || []).length;
   const show = n > 0 && !aboutRouteOpen && userCanSeeDesktopToolDownloads();
   if (!show) {
-    toast.classList.add("hidden");
-    toast.setAttribute("aria-hidden", "true");
-    delete toast.dataset.toastBody;
+    clearSt2AlertToast(ST2_TOAST.tools);
     syncStackedToastGreetings();
     return;
   }
-  if (toastCount) {
-    toastCount.textContent = String(n);
-    toastCount.setAttribute("aria-hidden", n > 1 ? "false" : "true");
-    toastCount.classList.toggle("hidden", n < 2);
-  }
-  toast.dataset.toastBody = String(message || "").trim();
-  toast.classList.remove("hidden");
-  toast.setAttribute("aria-hidden", "false");
-  syncStackedToastGreetings();
+  setSt2AlertToast({
+    id: ST2_TOAST.tools,
+    body: String(message || "").trim(),
+    tone: "tools",
+    actionLabel: "Ver",
+    onAction: () => {
+      showAbout();
+    },
+  });
 }
 
 function userCanSeeDesktopToolDownloads() {
@@ -2579,11 +2575,7 @@ function syncAboutToolsVisibility() {
     aboutToolsBadge?.classList.add("hidden");
     aboutToolsBadge?.setAttribute("aria-hidden", "true");
     hideToolsTopBanner();
-    const toast = document.getElementById("tools-ready-toast");
-    if (toast) {
-      toast.classList.add("hidden");
-      toast.setAttribute("aria-hidden", "true");
-    }
+    clearSt2AlertToast(ST2_TOAST.tools);
   }
 }
 
@@ -3181,9 +3173,6 @@ function bindAboutToolsUi() {
     document.getElementById("st2-tools-banner-open")?.addEventListener("click", () => {
       showAbout();
     });
-    document.getElementById("tools-ready-toast-open")?.addEventListener("click", () => {
-      showAbout();
-    });
   }
 }
 
@@ -3202,6 +3191,7 @@ function showAbout({ history = "push" } = {}) {
       if (isSt2SuperAdmin()) void refreshToolsDiagHint();
     });
   }
+  clearSt2AlertToast(ST2_TOAST.tools);
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
   document.title = "ST² · Acerca de";
@@ -5240,6 +5230,7 @@ async function bootstrapApp() {
     fadeDistance: 1.7,
     saturation: 1.3,
   });
+  initSt2Sonner();
   await ensureAppAccess();
   initGooeyNav();
   initSpotlightCards();

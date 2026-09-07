@@ -1,0 +1,10 @@
+/* Ajustes mínimos sobre sonner-wc (estilos van en shadow DOM del bundle). */
+#st2-sonner {
+  z-index: 3200;
+}
+
+/* Bajo el gate de acceso / splash, no tapar login. */
+body.st2-access-pending #st2-sonner,
+body.st2-access-restoring #st2-sonner {
+  display: none !important;
+}

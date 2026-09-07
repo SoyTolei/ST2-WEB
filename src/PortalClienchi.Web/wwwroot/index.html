@@ -59,16 +59,17 @@
       white-space: nowrap;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260907e"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20260907a"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260907f"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20260907f"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20260907a"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20260907f"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907a"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907f"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907b"/>
+  <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907f"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -79,6 +80,7 @@
   } catch (e) { /* ignore */ }
 </script>
   <div id="st2-light-rays" class="st2-light-rays" aria-hidden="true"></div>
+  <sonner-toaster id="st2-sonner" position="top-right" rich-colors close-button visible-toasts="5" offset="72px" container-aria-label="Notificaciones"></sonner-toaster>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">
     <div class="st2-boot-splash-brand">
       <span class="st2-boot-splash-st2-mark" aria-hidden="true">
@@ -239,71 +241,6 @@
                 <p class="planillas-hero-tagline">Sistema de planillas automáticas y registro de solicitudes</p>
               </div>
               <div class="accent-bar"></div>
-            </div>
-
-            <div id="tools-ready-toast" class="blanqueo-ready-toast is-tools hidden" role="status" aria-live="polite" aria-hidden="true">
-              <div class="blanqueo-ready-toast-main">
-                <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
-                <span id="tools-ready-toast-count" class="blanqueo-ready-toast-count hidden" aria-hidden="true">1</span>
-                <p id="tools-ready-toast-text" class="blanqueo-ready-toast-text">Hay una nueva versión para descargar del aplicativo para realizar backups "Herramientas SQL"</p>
-              </div>
-              <div class="blanqueo-ready-toast-actions">
-                <button type="button" id="tools-ready-toast-open" class="blanqueo-ready-toast-btn">Ver</button>
-              </div>
-            </div>
-
-            <div id="blanqueo-ready-toast" class="blanqueo-ready-toast hidden" role="status" aria-live="polite" aria-hidden="true">
-              <div class="blanqueo-ready-toast-main">
-                <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
-                <span id="blanqueo-ready-toast-count" class="blanqueo-ready-toast-count" aria-hidden="true">1</span>
-                <p id="blanqueo-ready-toast-text" class="blanqueo-ready-toast-text">Blanqueo listo</p>
-              </div>
-              <div class="blanqueo-ready-toast-actions">
-                <button type="button" id="blanqueo-ready-toast-open" class="blanqueo-ready-toast-btn">Ver</button>
-              </div>
-            </div>
-
-            <div id="borrado-ready-toast" class="blanqueo-ready-toast hidden" role="status" aria-live="polite" aria-hidden="true">
-              <div class="blanqueo-ready-toast-main">
-                <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
-                <span id="borrado-ready-toast-count" class="blanqueo-ready-toast-count" aria-hidden="true">1</span>
-                <p id="borrado-ready-toast-text" class="blanqueo-ready-toast-text">Borrado listo</p>
-              </div>
-              <div class="blanqueo-ready-toast-actions">
-                <button type="button" id="borrado-ready-toast-open" class="blanqueo-ready-toast-btn">Ver</button>
-              </div>
-            </div>
-
-            <div id="access-ready-toast" class="blanqueo-ready-toast hidden" role="status" aria-live="polite" aria-hidden="true">
-              <div class="blanqueo-ready-toast-main">
-                <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
-                <span id="access-ready-toast-count" class="blanqueo-ready-toast-count" aria-hidden="true">1</span>
-                <p id="access-ready-toast-text" class="blanqueo-ready-toast-text">Solicitud de acceso</p>
-              </div>
-              <div class="blanqueo-ready-toast-actions">
-                <button type="button" id="access-ready-toast-open" class="blanqueo-ready-toast-btn">Ver</button>
-              </div>
-            </div>
-
-            <div id="access-owner-toast" class="blanqueo-ready-toast is-warn hidden" role="status" aria-live="polite" aria-hidden="true">
-              <div class="blanqueo-ready-toast-main">
-                <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
-                <span id="access-owner-toast-count" class="blanqueo-ready-toast-count" aria-hidden="true">1</span>
-                <p id="access-owner-toast-text" class="blanqueo-ready-toast-text">Perfil creado por ADMIN WEB</p>
-              </div>
-              <div class="blanqueo-ready-toast-actions">
-                <button type="button" id="access-owner-toast-open" class="blanqueo-ready-toast-btn">Ver</button>
-              </div>
-            </div>
-
-            <div id="agua-ready-toast" class="blanqueo-ready-toast is-agua hidden" role="status" aria-live="polite" aria-hidden="true">
-              <div class="blanqueo-ready-toast-main">
-                <span class="blanqueo-ready-toast-dot" aria-hidden="true"></span>
-                <p id="agua-ready-toast-text" class="blanqueo-ready-toast-text">¿Tomaste agua hoy?</p>
-              </div>
-              <div class="blanqueo-ready-toast-actions">
-                <button type="button" id="agua-ready-toast-open" class="blanqueo-ready-toast-btn">¡Sí!</button>
-              </div>
             </div>
 
             <div id="plan-sistema-section" class="plan-sistema-section">
@@ -2635,6 +2572,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260907e" type="module"></script>
+  <script src="/js/app.js?v=20260907f" type="module"></script>
 </body>
 </html>

@@ -5267,34 +5267,6 @@ body.st2-chile-embed-active #panel-planillas.active {
   z-index: 1;
 }
 
-.blanqueo-ready-toast.is-agua {
-  border-color: #7dd3fc;
-  background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
-  justify-content: flex-start;
-  gap: 8px;
-}
-
-.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-main {
-  flex: 0 1 auto;
-}
-
-.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-actions {
-  flex-shrink: 0;
-}
-
-.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-dot {
-  background: #0ea5e9;
-}
-
-.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-btn {
-  background: #0284c7;
-  color: #fff;
-}
-
-.blanqueo-ready-toast.is-agua .blanqueo-ready-toast-btn:hover {
-  background: #0369a1;
-}
-
 .st2-agua-overlay {
   position: fixed;
   inset: 0;
@@ -5392,16 +5364,6 @@ body.st2-chile-embed-active #panel-planillas.active {
 .st2-agua-overlay.is-open .st2-agua-overlay-caption {
   opacity: 1;
   transform: translateY(0);
-}
-
-html.st2-theme-dark .blanqueo-ready-toast.is-agua {
-  background: linear-gradient(180deg, #0c1a28 0%, #102433 100%);
-  border-color: #0284c7;
-}
-
-html.st2-theme-dark .blanqueo-ready-toast.is-agua .blanqueo-ready-toast-text,
-html.st2-theme-dark .blanqueo-ready-toast.is-agua .blanqueo-ready-toast-x {
-  color: #e0f2fe;
 }
 
 .st2-agua-stage-gif {

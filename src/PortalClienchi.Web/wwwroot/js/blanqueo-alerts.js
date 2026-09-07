@@ -5,8 +5,8 @@ import {
   isViewingAsProfile,
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
-import { syncStackedToastGreetings } from "./st2-toast-greet.js";
 import { notifyBlanqueoDesktop } from "./st2-desktop-notif.js";
+import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -18,7 +18,6 @@ let retryTimer = null;
 let retryCount = 0;
 let cachedAlerts = [];
 let alertMode = "requester"; // "confirm" | "requester"
-let toastBound = false;
 let refreshInFlight = null;
 let lastRefreshAt = 0;
 /** En modo confirm: oculta el toast hasta que cambie la cola. */
@@ -259,27 +258,25 @@ export function renderBlanqueoAlertUi() {
     modBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
   }
 
-  const toast = document.getElementById("blanqueo-ready-toast");
-  const toastText = document.getElementById("blanqueo-ready-toast-text");
-  const toastCount = document.getElementById("blanqueo-ready-toast-count");
-  if (toast && toastText) {
-    toast.classList.remove("is-ok", "is-warn", "is-bad");
-    if (count === 0 || !summary || hideToast || hideForSistema) {
-      toast.classList.add("hidden");
-      toast.setAttribute("aria-hidden", "true");
-      delete toast.dataset.toastBody;
-    } else {
-      if (toastCount) {
-        toastCount.textContent = label;
-        toastCount.setAttribute("aria-hidden", "false");
-      }
-      toast.dataset.toastBody = summary.text;
-      toast.classList.add(summary.tone === "bad" ? "is-bad" : summary.tone === "warn" ? "is-warn" : "is-ok");
-      toast.classList.remove("hidden");
-      toast.setAttribute("aria-hidden", "false");
-    }
+  if (count === 0 || !summary || hideToast || hideForSistema) {
+    clearSt2AlertToast(ST2_TOAST.blanqueo);
+  } else {
+    const openBlanqueo = () => {
+      void markBlanqueoAlertsSeen();
+      document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
+      document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
+    };
+    setSt2AlertToast({
+      id: ST2_TOAST.blanqueo,
+      body: summary.text,
+      tone: summary.tone === "bad" ? "bad" : summary.tone === "warn" ? "warn" : "ok",
+      actionLabel: "Ver",
+      onAction: openBlanqueo,
+      onDismiss: () => {
+        void markBlanqueoAlertsSeen();
+      },
+    });
   }
-  syncStackedToastGreetings();
 }
 
 function pollIntervalMs() {
@@ -304,7 +301,6 @@ export function startBlanqueoAlertsPolling() {
 
   document.addEventListener("visibilitychange", onVisibility);
   window.addEventListener("focus", onWindowFocus);
-  bindToastOnce();
 }
 
 export function stopBlanqueoAlertsPolling() {
@@ -330,14 +326,4 @@ function onVisibility() {
 function onWindowFocus() {
   if (document.visibilityState !== "visible") return;
   void refreshBlanqueoAlerts({ force: true });
-}
-
-function bindToastOnce() {
-  if (toastBound) return;
-  toastBound = true;
-  document.getElementById("blanqueo-ready-toast-open")?.addEventListener("click", () => {
-    void markBlanqueoAlertsSeen();
-    document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
-    document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
-  });
 }

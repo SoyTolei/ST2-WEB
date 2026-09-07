@@ -1,7 +1,7 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, isViewingAsProfile } from "./module-access.js";
-import { syncStackedToastGreetings } from "./st2-toast-greet.js";
 import { notifyOwnerPresetDesktop } from "./st2-desktop-notif.js";
+import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -14,7 +14,6 @@ let retryTimer = null;
 let retryCount = 0;
 let cachedAlerts = [];
 let cachedOwnerNotices = [];
-let toastBound = false;
 let refreshInFlight = null;
 let lastRefreshAt = 0;
 let confirmToastDismissedSig = "";
@@ -259,49 +258,42 @@ export function renderAccessAlertUi() {
     adminBadge.setAttribute("aria-hidden", badgeTotal && isSt2SuperAdmin() ? "false" : "true");
   }
 
-  const toast = document.getElementById("access-ready-toast");
-  const toastText = document.getElementById("access-ready-toast-text");
-  const toastCount = document.getElementById("access-ready-toast-count");
-  if (toast && toastText) {
-    toast.classList.remove("is-ok", "is-warn", "is-bad");
-    if (count === 0 || !summary || hideToast) {
-      toast.classList.add("hidden");
-      toast.setAttribute("aria-hidden", "true");
-      delete toast.dataset.toastBody;
-    } else {
-      if (toastCount) {
-        toastCount.textContent = label;
-        toastCount.setAttribute("aria-hidden", "false");
-      }
-      toast.dataset.toastBody = summary.text;
-      toast.classList.add("is-warn");
-      toast.classList.remove("hidden");
-      toast.setAttribute("aria-hidden", "false");
-    }
+  const openAdmin = () => {
+    document.dispatchEvent(new CustomEvent("st2:open-admin-from-alert"));
+  };
+
+  if (count === 0 || !summary || hideToast) {
+    clearSt2AlertToast(ST2_TOAST.access);
+  } else {
+    setSt2AlertToast({
+      id: ST2_TOAST.access,
+      body: summary.text,
+      tone: "warn",
+      actionLabel: "Ver",
+      onAction: openAdmin,
+      onDismiss: () => {
+        markAccessAlertsSeen();
+      },
+    });
   }
 
-  const ownerToast = document.getElementById("access-owner-toast");
-  const ownerToastText = document.getElementById("access-owner-toast-text");
-  const ownerToastCount = document.getElementById("access-owner-toast-count");
-  if (ownerToast && ownerToastText) {
-    ownerToast.classList.remove("is-ok", "is-warn", "is-bad");
-    if (!isPrimarySuperAdmin() || ownerCount === 0 || !ownerSummary || hideOwnerToast) {
-      ownerToast.classList.add("hidden");
-      ownerToast.setAttribute("aria-hidden", "true");
-      delete ownerToast.dataset.toastBody;
-    } else {
-      if (ownerToastCount) {
-        ownerToastCount.textContent = ownerLabel;
-        ownerToastCount.setAttribute("aria-hidden", "false");
-      }
-      ownerToast.dataset.toastBody = ownerSummary.text;
-      ownerToast.classList.add("is-warn");
-      ownerToast.classList.remove("hidden");
-      ownerToast.setAttribute("aria-hidden", "false");
-    }
+  if (!isPrimarySuperAdmin() || ownerCount === 0 || !ownerSummary || hideOwnerToast) {
+    clearSt2AlertToast(ST2_TOAST.accessOwner);
+  } else {
+    setSt2AlertToast({
+      id: ST2_TOAST.accessOwner,
+      body: ownerSummary.text,
+      tone: "warn",
+      actionLabel: "Ver",
+      onAction: () => {
+        void markOwnerNoticesSeen();
+        openAdmin();
+      },
+      onDismiss: () => {
+        void markOwnerNoticesSeen();
+      },
+    });
   }
-
-  syncStackedToastGreetings();
 }
 
 function pollIntervalMs() {
@@ -326,7 +318,6 @@ export function startAccessAlertsPolling() {
   schedulePollTick();
   document.addEventListener("visibilitychange", onVisibility);
   window.addEventListener("focus", onWindowFocus);
-  bindToastOnce();
 }
 
 export function stopAccessAlertsPolling() {
@@ -352,16 +343,4 @@ function onVisibility() {
 function onWindowFocus() {
   if (document.visibilityState !== "visible") return;
   void refreshAccessAlerts({ force: true });
-}
-
-function bindToastOnce() {
-  if (toastBound) return;
-  toastBound = true;
-  document.getElementById("access-ready-toast-open")?.addEventListener("click", () => {
-    document.dispatchEvent(new CustomEvent("st2:open-admin-from-alert"));
-  });
-  document.getElementById("access-owner-toast-open")?.addEventListener("click", () => {
-    void markOwnerNoticesSeen();
-    document.dispatchEvent(new CustomEvent("st2:open-admin-from-alert"));
-  });
 }

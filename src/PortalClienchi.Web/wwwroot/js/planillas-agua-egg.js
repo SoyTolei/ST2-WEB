@@ -6,7 +6,7 @@
  */
 import { getPlanUserEmail, getPlanUserDisplayName } from "./plan-user.js";
 import { getViewAsProfile } from "./module-access.js";
-import { setToastText } from "./st2-toast-greet.js";
+import { setSt2AguaToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 
 const TARGET_EMAIL = "jorgeeduardo.teti@thomsonreuters.com";
 const LEVELS = [
@@ -129,10 +129,6 @@ function meterFill() {
   return document.getElementById("st2-agua-meter-fill");
 }
 
-function toastEl() {
-  return document.getElementById("agua-ready-toast");
-}
-
 function overlayEl() {
   return document.getElementById("st2-agua-overlay");
 }
@@ -184,28 +180,25 @@ function isOnPlanillasMenu() {
 }
 
 function hideToast() {
-  const toast = toastEl();
-  if (!toast) return;
-  toast.classList.add("hidden");
-  toast.setAttribute("aria-hidden", "true");
+  clearSt2AlertToast(ST2_TOAST.agua);
 }
 
 function showToast() {
   if (!isAguaEggUser() || !isOnPlanillasMenu()) return;
   const state = readState();
-  const toast = toastEl();
-  const text = document.getElementById("agua-ready-toast-text");
-  if (!toast || !text) return;
 
   const name = aguaFirstName();
   const body = state.level >= MAX_LEVEL
     ? `${name}, ¡hoy ya cumpliste el agua! 💧`
     : `Hola ${name}, ¿tomaste agua hoy? 💧`;
 
-  setToastText(text, body);
-  toast.dataset.toastBody = body;
-  toast.classList.remove("hidden");
-  toast.setAttribute("aria-hidden", "false");
+  setSt2AguaToast({
+    body,
+    onAction: () => {
+      markPromptAnswered();
+      void drinkOnce();
+    },
+  });
   state.lastPromptAt = Date.now();
   writeState(state);
 }
@@ -301,10 +294,6 @@ function bindOnce() {
   if (started) return;
   started = true;
 
-  document.getElementById("agua-ready-toast-open")?.addEventListener("click", () => {
-    markPromptAnswered();
-    void drinkOnce();
-  });
   bottleBtn()?.addEventListener("dblclick", (e) => {
     if (!isViewAsTarget()) return;
     e.preventDefault();
