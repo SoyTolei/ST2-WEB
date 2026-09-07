@@ -28,17 +28,22 @@ const GREET_STACK = [
 
 const TOASTER_ID = "st2-sonner";
 
+/**
+ * Duración “persistente”. No usar Infinity en setTimeout (en engines se clamp a 1ms).
+ * Sonner evita el timer si duration===Infinity, pero un número alto es más seguro.
+ */
+const STICKY_MS = 1000 * 60 * 60 * 24 * 7; // 7 días
+
 /** @type {Map<string, { body: string, tone: string, actionLabel: string, onAction?: () => void, onDismiss?: () => void }>} */
 const registry = new Map();
 
 let inited = false;
 /**
- * Evita que onDismiss dispare markSeen cuando nosotros cerramos el toast.
- * Sonner llama onDismiss ~200ms después del dismiss (animación); no usar
- * queueMicrotask o el flag ya no está y se “ven” alertas que no tocó el usuario.
+ * Evita que onDismiss dispare callbacks de “cerré el toast” cuando lo cerramos nosotros
+ * (Sonner llama onDismiss ~200ms después del dismiss por la animación).
  */
 const dismissingLocally = new Set();
-const DISMISS_GUARD_MS = 400;
+const DISMISS_GUARD_MS = 500;
 
 function dismissProgrammatically(id) {
   if (!id) return;
@@ -126,6 +131,11 @@ export function syncSonnerHomeVisibility() {
   if (show) {
     syncSonnerPlacement();
     if (registry.size) syncStackedToastGreetings();
+  } else {
+    // Sacar del DOM sin “marcar visto”: el registry se conserva y al volver a home se re-pinta.
+    for (const id of [...registry.keys()]) {
+      dismissProgrammatically(id);
+    }
   }
 }
 
@@ -154,11 +164,9 @@ export function initSt2Sonner() {
   toaster.setAttribute("rich-colors", "");
   toaster.setAttribute("close-button", "");
   toaster.setAttribute("visible-toasts", "5");
-  // Persistentes por defecto (Sonner default = 4s).
-  toaster.setAttribute("duration", "Infinity");
+  toaster.setAttribute("duration", String(STICKY_MS));
   toaster.setAttribute("container-aria-label", "Notificaciones");
   toaster.setAttribute("theme", currentTheme());
-  // Evitar que el attr offset pise el ancla dinámico
   toaster.removeAttribute("offset");
 
   syncSonnerTheme();
@@ -174,7 +182,6 @@ export function initSt2Sonner() {
     }
   }
 
-  // Al entrar/salir de “ver como”, rearmar el saludo con el nombre correcto.
   const refreshGreet = () => {
     syncStackedToastGreetings();
   };
@@ -182,7 +189,6 @@ export function initSt2Sonner() {
   document.addEventListener("st2:session-changed", refreshGreet);
   document.addEventListener("st2:planillas-view-changed", () => syncSonnerHomeVisibility());
   document.addEventListener("st2:planillas-home", () => {
-    // El menú puede montarse un tick después del evento.
     requestAnimationFrame(() => syncSonnerHomeVisibility());
   });
   document.addEventListener("st2:tour-active-changed", () => syncSonnerHomeVisibility());
@@ -253,9 +259,6 @@ function paintGreetStack() {
     paintOne(id, title, entry.tone);
   });
 
-  // Solo dismiss de IDs del stack que ya no están en ESTE registry.
-  // (Importante: un solo módulo st2-sonner.js; si hay ?v= distinto, se duplica el registry
-  // y un paintGreetStack se come los toasts del otro.)
   for (const id of GREET_STACK) {
     if (!registry.has(id)) dismissProgrammatically(id);
   }
@@ -278,9 +281,8 @@ function makeActionButton(id, entry, tone) {
   btn.textContent = entry.actionLabel || "Ver";
   btn.addEventListener("click", () => {
     entry.onAction?.();
-    // onAction ya marca “visto”; no volver a disparar onDismiss→markSeen.
-    dismissProgrammatically(id);
     registry.delete(id);
+    dismissProgrammatically(id);
     if (GREET_STACK.includes(id)) paintGreetStack();
   });
   return btn;
@@ -289,20 +291,30 @@ function makeActionButton(id, entry, tone) {
 function paintOne(id, title, tone) {
   const entry = registry.get(id);
   if (!entry) return;
-  // Fuera del home o con tutorial activo: guardar estado pero no mostrar.
   if (!shouldShowSonnerToasts()) return;
   const method = toneToMethod(tone);
   const opts = {
     id,
     toasterId: TOASTER_ID,
-    duration: Number.POSITIVE_INFINITY,
+    duration: STICKY_MS,
     richColors: true,
     closeButton: true,
     dismissible: true,
     className: `st2-sonner-toast ${toneClass(tone)}`,
     action: entry.onAction ? makeActionButton(id, entry, tone) : undefined,
+    onAutoClose: () => {
+      // Si el timer dispara igual, no tratarlo como “cerré a mano”: reponer desde registry.
+      dismissingLocally.add(id);
+      window.setTimeout(() => {
+        dismissingLocally.delete(id);
+        if (registry.has(id) && shouldShowSonnerToasts()) {
+          paintGreetStack();
+        }
+      }, DISMISS_GUARD_MS);
+    },
     onDismiss: () => {
       if (dismissingLocally.has(id)) return;
+      // Solo cierre manual (X / swipe). No borra el aviso en servidor: eso es Ver / abrir módulo.
       registry.delete(id);
       entry.onDismiss?.();
       if (GREET_STACK.includes(id)) paintGreetStack();

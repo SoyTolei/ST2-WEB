@@ -11,7 +11,7 @@ import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
 const REFRESH_THROTTLE_MS = 2500;
-const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed-v2";
+const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed-v3";
 
 let pollTimer = null;
 let retryTimer = null;
@@ -193,6 +193,15 @@ export async function markBlanqueoAlertsSeen(ids = null) {
   renderBlanqueoAlertUi();
 }
 
+/** Cerrar la X solo oculta el toast en esta sesión; no marca avisos como vistos. */
+function dismissBlanqueoToastOnly() {
+  const sig = pendingSignature(cachedAlerts);
+  if (!sig) return;
+  confirmToastDismissedSig = sig;
+  writeDismissedSig(sig);
+  renderBlanqueoAlertUi();
+}
+
 function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
@@ -240,9 +249,11 @@ export function renderBlanqueoAlertUi() {
   const count = cachedAlerts.length;
   const label = count > 99 ? "99+" : String(count);
   const summary = count ? summarizeAlerts(cachedAlerts) : null;
-  const hideToast = alertMode === "confirm"
-    && !!count
-    && (confirmToastDismissedSig === pendingSignature(cachedAlerts) || readDismissedSig() === pendingSignature(cachedAlerts));
+  const sig = pendingSignature(cachedAlerts);
+  // X / cierre: ocultar toast (confirm y solicitante) hasta que cambie la cola.
+  const hideToast = !!count
+    && !!sig
+    && (confirmToastDismissedSig === sig || readDismissedSig() === sig);
   const sistema = document.body.dataset.planSistema;
   const hideForSistema = sistema === "Legal" || sistema === "Chile";
 
@@ -274,9 +285,7 @@ export function renderBlanqueoAlertUi() {
       tone: summary.tone === "bad" ? "bad" : summary.tone === "warn" ? "warn" : "ok",
       actionLabel: "Ver",
       onAction: openBlanqueo,
-      onDismiss: () => {
-        void markBlanqueoAlertsSeen();
-      },
+      onDismiss: dismissBlanqueoToastOnly,
     });
   }
 }

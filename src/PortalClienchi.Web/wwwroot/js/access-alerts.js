@@ -6,8 +6,8 @@ import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
 const REFRESH_THROTTLE_MS = 2500;
-const DISMISS_KEY = "st2-access-confirm-toast-dismissed-v1";
-const OWNER_DISMISS_KEY = "st2-access-owner-toast-dismissed-v1";
+const DISMISS_KEY = "st2-access-confirm-toast-dismissed-v3";
+const OWNER_DISMISS_KEY = "st2-access-owner-toast-dismissed-v3";
 
 let pollTimer = null;
 let retryTimer = null;
@@ -186,6 +186,15 @@ export function markAccessAlertsSeen() {
   renderAccessAlertUi();
 }
 
+/** Cerrar la X del toast de owner: solo oculta; no marca seen en servidor. */
+function dismissOwnerToastOnly() {
+  const sig = ownerNoticesSignature(cachedOwnerNotices);
+  if (!sig) return;
+  ownerToastDismissedSig = sig;
+  writeOwnerDismissedSig(sig);
+  renderAccessAlertUi();
+}
+
 export async function markOwnerNoticesSeen() {
   if (!isPrimarySuperAdmin() || !cachedOwnerNotices.length) {
     ownerToastDismissedSig = ownerNoticesSignature(cachedOwnerNotices);
@@ -271,9 +280,7 @@ export function renderAccessAlertUi() {
       tone: "warn",
       actionLabel: "Ver",
       onAction: openAdmin,
-      onDismiss: () => {
-        markAccessAlertsSeen();
-      },
+      onDismiss: markAccessAlertsSeen,
     });
   }
 
@@ -289,9 +296,7 @@ export function renderAccessAlertUi() {
         void markOwnerNoticesSeen();
         openAdmin();
       },
-      onDismiss: () => {
-        void markOwnerNoticesSeen();
-      },
+      onDismiss: dismissOwnerToastOnly,
     });
   }
 }
