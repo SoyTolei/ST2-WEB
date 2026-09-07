@@ -1,11 +1,11 @@
 /**
  * SpotlightCard — port vanilla del efecto React Bits.
- * Sigue el cursor sobre .plan-modulo-btn y tintea el glow con el color de la tarjeta.
+ * El glow sigue el cursor; el tinte respeta el color de cada tarjeta.
  */
 
 const SELECTOR = ".plan-modulo-btn";
 const CLASS_NAME = "st2-card-spotlight";
-const DEFAULT_SPOTLIGHT = "rgba(0, 229, 255, 0.2)";
+const DEFAULT_SPOTLIGHT = "rgba(255, 255, 255, 0.55)";
 
 function parseRgb(bg) {
   const m = String(bg || "").match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
@@ -13,11 +13,11 @@ function parseRgb(bg) {
   return [Number(m[1]), Number(m[2]), Number(m[3])];
 }
 
-/** Mezcla el fondo con blanco y aplica alpha para el radial. */
-function spotlightFromBackground(bg, alpha = 0.32) {
+/** Fondo → spotlight bien claro (casi blanco + matiz) para que se note en cards sólidas. */
+function spotlightFromBackground(bg, alpha = 0.9) {
   const rgb = parseRgb(bg);
   if (!rgb) return DEFAULT_SPOTLIGHT;
-  const lift = 0.55;
+  const lift = 0.78;
   const r = Math.min(255, Math.round(rgb[0] + (255 - rgb[0]) * lift));
   const g = Math.min(255, Math.round(rgb[1] + (255 - rgb[1]) * lift));
   const b = Math.min(255, Math.round(rgb[2] + (255 - rgb[2]) * lift));
@@ -26,28 +26,52 @@ function spotlightFromBackground(bg, alpha = 0.32) {
 
 function ensureSpotlightColor(card) {
   if (card.dataset.spotlightReady === "1") return;
-  const inline = getComputedStyle(card).getPropertyValue("--spotlight-color").trim();
-  if (!inline || inline === DEFAULT_SPOTLIGHT) {
+  const fromCss = getComputedStyle(card).getPropertyValue("--spotlight-color").trim();
+  if (!fromCss || fromCss === DEFAULT_SPOTLIGHT) {
     const bg = getComputedStyle(card).backgroundColor;
     card.style.setProperty("--spotlight-color", spotlightFromBackground(bg));
   }
   card.dataset.spotlightReady = "1";
 }
 
-function enhanceCard(card) {
-  if (!(card instanceof HTMLElement)) return;
-  if (card.classList.contains(CLASS_NAME)) return;
-  card.classList.add(CLASS_NAME);
+function setMouse(card, clientX, clientY) {
+  const rect = card.getBoundingClientRect();
+  card.style.setProperty("--mouse-x", `${clientX - rect.left}px`);
+  card.style.setProperty("--mouse-y", `${clientY - rect.top}px`);
 }
 
-function onPointerMove(e) {
-  const card = e.target.closest?.(SELECTOR);
-  if (!card || card.disabled) return;
-  enhanceCard(card);
+function enhanceCard(card) {
+  if (!(card instanceof HTMLElement) || card.disabled) return;
+  if (card.dataset.spotlightBound === "1") return;
+
+  card.classList.add(CLASS_NAME);
+  card.dataset.spotlightBound = "1";
   ensureSpotlightColor(card);
-  const rect = card.getBoundingClientRect();
-  card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
-  card.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`);
+
+  card.addEventListener(
+    "pointerenter",
+    (e) => {
+      card.classList.add("is-spotlight-on");
+      setMouse(card, e.clientX, e.clientY);
+    },
+    { passive: true }
+  );
+
+  card.addEventListener(
+    "pointermove",
+    (e) => {
+      setMouse(card, e.clientX, e.clientY);
+    },
+    { passive: true }
+  );
+
+  card.addEventListener(
+    "pointerleave",
+    () => {
+      card.classList.remove("is-spotlight-on");
+    },
+    { passive: true }
+  );
 }
 
 function scan(root = document) {
@@ -60,8 +84,6 @@ export function initSpotlightCards(root = document) {
     return;
   }
   initSpotlightCards._ready = true;
-
-  document.addEventListener("pointermove", onPointerMove, { passive: true });
 
   scan(root);
 

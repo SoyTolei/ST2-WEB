@@ -1,10 +1,12 @@
-/* SpotlightCard (React Bits) — solo el glow al cursor; tamaño/colores base intactos. */
+/* SpotlightCard — glow que sigue el cursor (sin cambiar tamaño/fondos base). */
 
 .plan-modulo-btn.st2-card-spotlight {
   overflow: hidden;
+  isolation: isolate;
   --mouse-x: 50%;
   --mouse-y: 50%;
-  --spotlight-color: rgba(0, 229, 255, 0.2);
+  --spotlight-color: rgba(255, 255, 255, 0.55);
+  --spotlight-size: 220px;
 }
 
 .plan-modulo-btn.st2-card-spotlight::before {
@@ -13,83 +15,94 @@
   inset: 0;
   border-radius: inherit;
   background: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    var(--spotlight-color),
-    transparent 80%
+    var(--spotlight-size) circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color) 0%,
+    transparent 72%
   );
   opacity: 0;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.35s ease;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
+  mix-blend-mode: soft-light;
 }
 
 .plan-modulo-btn.st2-card-spotlight:hover::before,
-.plan-modulo-btn.st2-card-spotlight:focus-visible::before {
-  opacity: 0.6;
+.plan-modulo-btn.st2-card-spotlight:focus-visible::before,
+.plan-modulo-btn.st2-card-spotlight.is-spotlight-on::before {
+  opacity: 1;
+}
+
+/* El spotlight hace la luz; evitamos el brightness uniforme que aplana el efecto. */
+.plan-modulo-btn.st2-card-spotlight:hover:not(:disabled) {
+  filter: none;
+}
+
+.plan-modulo-btn.st2-card-spotlight:active:not(:disabled) {
+  filter: brightness(0.97);
 }
 
 .plan-modulo-btn.st2-card-spotlight > * {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
-/* Spotlight tintado con el color de cada tarjeta (versión más clara). */
+/* Tinte claro por tarjeta (blanco + matiz del color propio). */
 .plan-modulo-btn.st2-card-spotlight.transfer {
-  --spotlight-color: rgba(74, 222, 128, 0.32);
+  --spotlight-color: rgba(187, 247, 208, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.referral {
-  --spotlight-color: rgba(251, 146, 60, 0.32);
+  --spotlight-color: rgba(254, 215, 170, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.oportunidad {
-  --spotlight-color: rgba(232, 121, 249, 0.32);
+  --spotlight-color: rgba(245, 208, 254, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.pdf-portal {
-  --spotlight-color: rgba(34, 211, 238, 0.32);
+  --spotlight-color: rgba(165, 243, 252, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.blanqueo {
-  --spotlight-color: rgba(96, 165, 250, 0.32);
+  --spotlight-color: rgba(191, 219, 254, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.borrado-bases {
-  --spotlight-color: rgba(251, 113, 133, 0.32);
+  --spotlight-color: rgba(254, 205, 211, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.chile-saad {
-  --spotlight-color: rgba(34, 211, 238, 0.32);
+  --spotlight-color: rgba(165, 243, 252, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.chile-hr {
-  --spotlight-color: rgba(167, 139, 250, 0.32);
+  --spotlight-color: rgba(221, 214, 254, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.chile-wiki {
-  --spotlight-color: rgba(251, 191, 36, 0.32);
+  --spotlight-color: rgba(254, 243, 199, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.chile-lp {
-  --spotlight-color: rgba(74, 222, 128, 0.32);
+  --spotlight-color: rgba(187, 247, 208, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.chile-powerapps {
-  --spotlight-color: rgba(216, 180, 254, 0.32);
+  --spotlight-color: rgba(233, 213, 255, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.legal-one {
-  --spotlight-color: rgba(96, 165, 250, 0.32);
+  --spotlight-color: rgba(191, 219, 254, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.highq {
-  --spotlight-color: rgba(45, 212, 191, 0.32);
+  --spotlight-color: rgba(153, 246, 228, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.westlaw {
-  --spotlight-color: rgba(251, 146, 60, 0.32);
+  --spotlight-color: rgba(254, 215, 170, 0.9);
 }
 
 .plan-modulo-btn.st2-card-spotlight.cocounsel {
-  --spotlight-color: rgba(167, 139, 250, 0.32);
+  --spotlight-color: rgba(221, 214, 254, 0.9);
 }
