@@ -93,16 +93,21 @@ export function isPlanillasHomeSurface() {
   return !!(menu && !menu.classList.contains("hidden"));
 }
 
-/** Muestra/oculta el toaster según si estamos en la página principal. */
+/** Visible solo en home de Planillas y fuera del tutorial. */
+export function shouldShowSonnerToasts() {
+  return isPlanillasHomeSurface() && !document.body.classList.contains("st2-tour-active");
+}
+
+/** Muestra/oculta el toaster según home + tutorial. */
 export function syncSonnerHomeVisibility() {
-  const onHome = isPlanillasHomeSurface();
-  document.body.classList.toggle("st2-sonner-home", onHome);
+  const show = shouldShowSonnerToasts();
+  document.body.classList.toggle("st2-sonner-home", show);
   const toaster = document.getElementById(TOASTER_ID);
   if (toaster) {
-    toaster.toggleAttribute("hidden", !onHome);
-    toaster.setAttribute("aria-hidden", onHome ? "false" : "true");
+    toaster.toggleAttribute("hidden", !show);
+    toaster.setAttribute("aria-hidden", show ? "false" : "true");
   }
-  if (onHome) {
+  if (show) {
     syncSonnerPlacement();
     if (registry.size) syncStackedToastGreetings();
   }
@@ -162,6 +167,7 @@ export function initSt2Sonner() {
     // El menú puede montarse un tick después del evento.
     requestAnimationFrame(() => syncSonnerHomeVisibility());
   });
+  document.addEventListener("st2:tour-active-changed", () => syncSonnerHomeVisibility());
 }
 
 /**
@@ -277,8 +283,8 @@ function makeActionButton(id, entry, tone) {
 function paintOne(id, title, tone) {
   const entry = registry.get(id);
   if (!entry) return;
-  // Fuera del home: guardar estado pero no mostrar.
-  if (!isPlanillasHomeSurface()) return;
+  // Fuera del home o con tutorial activo: guardar estado pero no mostrar.
+  if (!shouldShowSonnerToasts()) return;
   const method = toneToMethod(tone);
   const opts = {
     id,

@@ -6,7 +6,7 @@ import {
   isTourCompleted,
   isTourSeen,
   shouldAutoStartTours,
-} from "./st2-tour-engine.js?v=20260906h";
+} from "./st2-tour-engine.js?v=20260907j";
 import {
   resolveTour,
   resolveCurrentTourId,

@@ -671,6 +671,7 @@ function finishTour(status) {
   root.classList.remove("is-active");
   root.hidden = true;
   document.body.classList.remove("st2-tour-active");
+  document.dispatchEvent(new CustomEvent("st2:tour-active-changed", { detail: { active: false } }));
 }
 
 export function stopTour() {
@@ -697,6 +698,7 @@ export async function startTour(definition, { force = false, ctx = {} } = {}) {
   root.classList.add("is-active");
   root.tabIndex = -1;
   document.body.classList.add("st2-tour-active");
+  document.dispatchEvent(new CustomEvent("st2:tour-active-changed", { detail: { active: true } }));
   bindGlowPointer();
   await renderStep();
   root.focus({ preventScroll: true });

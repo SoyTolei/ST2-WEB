@@ -14,6 +14,7 @@
 
 body.st2-access-pending #st2-sonner,
 body.st2-access-restoring #st2-sonner,
+body.st2-tour-active #st2-sonner,
 #st2-sonner[hidden],
 body:not(.st2-sonner-home) #st2-sonner {
   display: none !important;
