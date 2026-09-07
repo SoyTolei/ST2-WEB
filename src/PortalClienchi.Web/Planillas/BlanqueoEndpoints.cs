@@ -124,14 +124,30 @@ public static class BlanqueoEndpoints
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
-            // Quien confirma ve la cola de pendientes; el resto, avisos personales.
-            // ?mode=confirm: en “ver como” el front pide la cola aunque el usuario real
-            // no sea confirmador (solo superadmin / panel puede pedirlo).
-            var modeQ = ctx.Request.Query["mode"].ToString();
-            var forceConfirm = string.Equals(modeQ, "confirm", StringComparison.OrdinalIgnoreCase)
-                && St2SuperAdmin.Is(email!);
-            if (flags.BlanqueoConfirm || forceConfirm)
+            // Quien confirma: avisos personales primero; ?mode=confirm fuerza la cola
+            // (vista previa / “ver como”), igual que borrado de bases.
+            if (flags.BlanqueoConfirm)
             {
+                var forceConfirmQueue = string.Equals(
+                    ctx.Request.Query["mode"].ToString(),
+                    "confirm",
+                    StringComparison.OrdinalIgnoreCase);
+
+                if (!forceConfirmQueue)
+                {
+                    var personal = repo.ListUnseenAlerts(email!);
+                    if (personal.Count > 0)
+                    {
+                        return Results.Ok(new
+                        {
+                            mode = "requester",
+                            count = personal.Count,
+                            items = personal,
+                            claveBlanqueo = BlanqueoClave.Actual,
+                        });
+                    }
+                }
+
                 var pending = repo.ListPendingForConfirm();
                 return Results.Ok(new
                 {

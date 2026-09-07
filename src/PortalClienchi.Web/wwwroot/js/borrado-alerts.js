@@ -11,7 +11,7 @@ import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
 const REFRESH_THROTTLE_MS = 2500;
-const DISMISS_KEY = "st2-borrado-confirm-toast-dismissed-v3";
+const DISMISS_KEY = "st2-borrado-confirm-toast-dismissed-v4";
 
 let pollTimer = null;
 let retryTimer = null;
@@ -97,6 +97,8 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
           confirmToastDismissedSig = sig;
         }
         notifyBorradoDesktop(cachedAlerts.length, sig);
+      } else {
+        confirmToastDismissedSig = "";
       }
       lastRefreshAt = Date.now();
     } catch {
@@ -195,8 +197,9 @@ export async function markBorradoAlertsSeen(ids = null) {
   renderBorradoAlertUi();
 }
 
-/** Cerrar la X solo oculta el toast en esta sesión; no marca avisos como vistos. */
+/** Cerrar la X solo en cola de confirmación; avisos personales no se “tragan”. */
 function dismissBorradoToastOnly() {
+  if (alertMode !== "confirm") return;
   const sig = pendingSignature(cachedAlerts);
   if (!sig) return;
   confirmToastDismissedSig = sig;
@@ -260,7 +263,8 @@ export function renderBorradoAlertUi() {
   const label = count > 99 ? "99+" : String(count);
   const summary = count ? summarizeAlerts(cachedAlerts) : null;
   const sig = pendingSignature(cachedAlerts);
-  const hideToast = !!count
+  const hideToast = alertMode === "confirm"
+    && !!count
     && !!sig
     && (confirmToastDismissedSig === sig || readDismissedSig() === sig);
   const sistema = document.body.dataset.planSistema;
@@ -291,7 +295,7 @@ export function renderBorradoAlertUi() {
     setSt2AlertToast({
       id: ST2_TOAST.borrado,
       body: summary.text,
-      tone: summary.tone === "warn" ? "warn" : "ok",
+      tone: "warn",
       actionLabel: "Ver",
       onAction: openBorrado,
       onDismiss: dismissBorradoToastOnly,

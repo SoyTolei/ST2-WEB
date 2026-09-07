@@ -11,7 +11,8 @@ import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
 const REFRESH_THROTTLE_MS = 2500;
-const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed-v3";
+/** Solo para modo confirm: ocultar toast tras X hasta que cambie la cola. */
+const DISMISS_KEY = "st2-blanqueo-confirm-toast-dismissed-v4";
 
 let pollTimer = null;
 let retryTimer = null;
@@ -20,7 +21,6 @@ let cachedAlerts = [];
 let alertMode = "requester"; // "confirm" | "requester"
 let refreshInFlight = null;
 let lastRefreshAt = 0;
-/** En modo confirm: oculta el toast hasta que cambie la cola. */
 let confirmToastDismissedSig = "";
 
 const KIND_READY = "ready";
@@ -36,7 +36,6 @@ export function getBlanqueoAlerts() {
   return cachedAlerts.slice();
 }
 
-/** Refresca alertas al instante (p. ej. tras confirmar o cargar una solicitud). */
 export function notifyBlanqueoChanged() {
   void refreshBlanqueoAlerts({ force: true });
 }
@@ -45,9 +44,9 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
   const email = getPlanUserEmail();
   const canSee = canSeeBlanqueoModule() || canConfirmBlanqueoModule();
   if (!email || !canSee) {
-    cachedAlerts = [];
+    // No vaciar cache por un flicker de permisos: solo ocultar UI.
     alertMode = "requester";
-    renderBlanqueoAlertUi();
+    renderBlanqueoAlertUi({ forceHide: true });
     if (!email) scheduleAlertsRetry();
     return cachedAlerts;
   }
@@ -62,7 +61,6 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
 
   refreshInFlight = (async () => {
     try {
-      // “Ver como” un perfil sin confirmar: no mostrar cola ajena.
       if (isViewingAsProfile() && !canConfirmBlanqueoModule()) {
         cachedAlerts = [];
         alertMode = "requester";
@@ -71,15 +69,13 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
         return cachedAlerts;
       }
 
-      // Confirmador (real o en ver como): pedir cola de pendientes.
-      const alertsUrl = canConfirmBlanqueoModule()
+      // Igual que borrado: ?mode=confirm solo en vista previa de confirmador.
+      const alertsUrl = isViewingAsProfile() && canConfirmBlanqueoModule()
         ? "/api/planillas/blanqueo/alerts?mode=confirm"
         : "/api/planillas/blanqueo/alerts";
       const res = await planUserFetch(alertsUrl);
       if (res.status === 401 || res.status === 403) {
-        cachedAlerts = [];
-        alertMode = "requester";
-        renderBlanqueoAlertUi();
+        renderBlanqueoAlertUi({ forceHide: true });
         return cachedAlerts;
       }
       const data = await res.json().catch(() => ({}));
@@ -88,7 +84,6 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
       if (alertMode === "confirm") {
         const sig = pendingSignature(cachedAlerts);
         const stored = readDismissedSig();
-        // Si la cola cambió (nuevas / resueltas), reabrir el toast.
         if (stored && stored !== sig) {
           confirmToastDismissedSig = "";
           writeDismissedSig("");
@@ -96,6 +91,9 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
           confirmToastDismissedSig = sig;
         }
         notifyBlanqueoDesktop(cachedAlerts.length, sig);
+      } else {
+        // Avisos personales: no heredar dismiss de cola de confirmación.
+        confirmToastDismissedSig = "";
       }
       lastRefreshAt = Date.now();
     } catch {
@@ -193,8 +191,9 @@ export async function markBlanqueoAlertsSeen(ids = null) {
   renderBlanqueoAlertUi();
 }
 
-/** Cerrar la X solo oculta el toast en esta sesión; no marca avisos como vistos. */
+/** X en modo confirm: ocultar toast hasta que cambie la cola (badge sigue). */
 function dismissBlanqueoToastOnly() {
+  if (alertMode !== "confirm") return;
   const sig = pendingSignature(cachedAlerts);
   if (!sig) return;
   confirmToastDismissedSig = sig;
@@ -222,7 +221,6 @@ function summarizeAlerts(alerts) {
     else counts.ready += 1;
   }
 
-  // Prioridad visual: rojo > amarillo > verde
   let tone = "ok";
   let text = "";
   if (counts.no_registrado > 0) {
@@ -245,21 +243,22 @@ function summarizeAlerts(alerts) {
   return { tone, text, counts };
 }
 
-export function renderBlanqueoAlertUi() {
+export function renderBlanqueoAlertUi({ forceHide = false } = {}) {
   const count = cachedAlerts.length;
   const label = count > 99 ? "99+" : String(count);
   const summary = count ? summarizeAlerts(cachedAlerts) : null;
   const sig = pendingSignature(cachedAlerts);
-  // X / cierre: ocultar toast (confirm y solicitante) hasta que cambie la cola.
-  const hideToast = !!count
+  // Solo en cola de confirmación la X oculta el toast; avisos personales vuelven al poll.
+  const hideToast = alertMode === "confirm"
+    && !!count
     && !!sig
     && (confirmToastDismissedSig === sig || readDismissedSig() === sig);
   const sistema = document.body.dataset.planSistema;
-  const hideForSistema = sistema === "Legal" || sistema === "Chile";
+  const hideForSistema = forceHide || sistema === "Legal" || sistema === "Chile";
 
   const tabHidden = count === 0 || hideForSistema;
   setPlanillasTabAlertPart("blanqueo", {
-    count,
+    count: hideForSistema ? 0 : count,
     title: summary?.text || "",
     hidden: tabHidden,
   });
@@ -282,7 +281,8 @@ export function renderBlanqueoAlertUi() {
     setSt2AlertToast({
       id: ST2_TOAST.blanqueo,
       body: summary.text,
-      tone: summary.tone === "bad" ? "bad" : summary.tone === "warn" ? "warn" : "ok",
+      // warn/bad: el tono "ok"/success de Sonner se estaba auto-cerrando en algunos casos.
+      tone: summary.tone === "bad" ? "bad" : "warn",
       actionLabel: "Ver",
       onAction: openBlanqueo,
       onDismiss: dismissBlanqueoToastOnly,
@@ -330,7 +330,6 @@ export function stopBlanqueoAlertsPolling() {
 }
 
 function onViewAsChanged() {
-  // Al cambiar perfil, reabrir toasts (no heredar “cerré el toast” del perfil anterior).
   confirmToastDismissedSig = "";
   writeDismissedSig("");
   void refreshBlanqueoAlerts({ force: true });

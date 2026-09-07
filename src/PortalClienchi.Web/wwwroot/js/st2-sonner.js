@@ -244,9 +244,13 @@ export function setSt2AguaToast({ body, onAction }) {
 export function clearSt2AlertToast(id) {
   if (!id) return;
   const had = registry.delete(id);
+  lastPainted.delete(id);
   dismissProgrammatically(id);
   if (had && GREET_STACK.includes(id)) paintGreetStack();
 }
+
+/** @type {Map<string, { title: string, tone: string }>} */
+const lastPainted = new Map();
 
 function paintGreetStack() {
   const visible = GREET_STACK.filter((id) => registry.has(id));
@@ -260,7 +264,10 @@ function paintGreetStack() {
   });
 
   for (const id of GREET_STACK) {
-    if (!registry.has(id)) dismissProgrammatically(id);
+    if (!registry.has(id)) {
+      lastPainted.delete(id);
+      dismissProgrammatically(id);
+    }
   }
 }
 
@@ -292,6 +299,17 @@ function paintOne(id, title, tone) {
   const entry = registry.get(id);
   if (!entry) return;
   if (!shouldShowSonnerToasts()) return;
+
+  const prev = lastPainted.get(id);
+  let existing = null;
+  try {
+    existing = toast.getToast?.(id) || null;
+  } catch {
+    existing = null;
+  }
+  // Evitar re-crear/actualizar el toast en cada poll si no cambió (glitches de Sonner).
+  if (existing && prev && prev.title === title && prev.tone === tone) return;
+
   const method = toneToMethod(tone);
   const opts = {
     id,
@@ -303,8 +321,8 @@ function paintOne(id, title, tone) {
     className: `st2-sonner-toast ${toneClass(tone)}`,
     action: entry.onAction ? makeActionButton(id, entry, tone) : undefined,
     onAutoClose: () => {
-      // Si el timer dispara igual, no tratarlo como “cerré a mano”: reponer desde registry.
       dismissingLocally.add(id);
+      lastPainted.delete(id);
       window.setTimeout(() => {
         dismissingLocally.delete(id);
         if (registry.has(id) && shouldShowSonnerToasts()) {
@@ -314,13 +332,14 @@ function paintOne(id, title, tone) {
     },
     onDismiss: () => {
       if (dismissingLocally.has(id)) return;
-      // Solo cierre manual (X / swipe). No borra el aviso en servidor: eso es Ver / abrir módulo.
+      lastPainted.delete(id);
       registry.delete(id);
       entry.onDismiss?.();
       if (GREET_STACK.includes(id)) paintGreetStack();
     },
   };
 
+  lastPainted.set(id, { title, tone });
   if (method === "error") toast.error(title, opts);
   else if (method === "warning") toast.warning(title, opts);
   else if (method === "info") toast.info(title, opts);
