@@ -1,6 +1,6 @@
 import { initPlanillas, goPlanillasHome } from "./planillas.js";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
-import { initSideRays } from "./st2-side-rays.js?v=20260906f";
+import { initLightRays } from "./st2-light-rays.js?v=20260907c";
 import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
@@ -5228,18 +5228,19 @@ async function bootstrapApp() {
   initAccessBirthdayPicker();
   await ensureAppAccess();
   initGooeyNav();
-  initSideRays({
-    speed: 2.5,
-    rayColor1: "#F97316",
-    rayColor2: "#ab8468",
-    intensity: 2,
-    spread: 2,
-    origin: "top-right",
-    tilt: 0,
-    saturation: 1.5,
-    blend: 0.75,
-    falloff: 1.6,
-    opacity: 1,
+  initLightRays({
+    raysOrigin: "top-center",
+    raysColor: "#fe791e",
+    raysSpeed: 1.9,
+    lightSpread: 0.5,
+    rayLength: 3,
+    followMouse: true,
+    mouseInfluence: 0.1,
+    noiseAmount: 0.3,
+    distortion: 0.1,
+    pulsating: false,
+    fadeDistance: 1.7,
+    saturation: 1.3,
   });
   initSpotlightCards();
   if (isPrimarySuperAdmin()) startAccessAdminClientWatch();

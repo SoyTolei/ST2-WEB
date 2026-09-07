@@ -29,7 +29,7 @@
   overflow: visible;
 }
 
-/* Sin blur/contrast ni capa negra: eso chocaba con SideRays y generaba blobs rojos */
+/* Sin blur/contrast ni capa negra: eso chocaba con LightRays y generaba blobs rojos */
 .st2-gooey-filter {
   overflow: visible;
 }

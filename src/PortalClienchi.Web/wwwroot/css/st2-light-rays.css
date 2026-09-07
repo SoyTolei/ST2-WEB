@@ -1,5 +1,5 @@
-/* SideRays: fondo detrás de pestañas y panel principal */
-.st2-side-rays {
+/* LightRays: wallpaper detrás de pestañas y panel principal */
+.st2-light-rays {
   position: fixed;
   top: 64px;
   left: 0;
@@ -8,14 +8,14 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.92;
+  opacity: 0.95;
 }
 
-.st2-side-rays[hidden] {
+.st2-light-rays[hidden] {
   display: none !important;
 }
 
-.st2-side-rays-canvas {
+.st2-light-rays-canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -23,7 +23,6 @@
   mix-blend-mode: screen;
 }
 
-/* El shell queda encima del fondo animado */
 .main-shell {
   position: relative;
   z-index: 1;
@@ -34,17 +33,16 @@
   z-index: 2;
 }
 
-/* En modo claro bajamos un poco la intensidad visual */
-html:not(.st2-theme-dark) .st2-side-rays {
-  opacity: 0.45;
+html:not(.st2-theme-dark) .st2-light-rays {
+  opacity: 0.5;
 }
 
-html:not(.st2-theme-dark) .st2-side-rays-canvas {
+html:not(.st2-theme-dark) .st2-light-rays-canvas {
   mix-blend-mode: multiply;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .st2-side-rays {
+  .st2-light-rays {
     display: none !important;
   }
 }
