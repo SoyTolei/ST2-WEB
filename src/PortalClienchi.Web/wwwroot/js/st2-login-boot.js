@@ -4,8 +4,8 @@
 import { startLoginTopography, stopLoginTopography, initLoginTopography } from "./st2-topography.js?v=20260907b";
 import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907c";
 import { initSplashLightfall, startSplashLightfall, stopSplashLightfall } from "./st2-lightfall.js?v=20260907a";
-import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907a";
-import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260907a";
+import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907b";
+import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260907b";
 
 const restoring = document.body.classList.contains("st2-access-restoring");
 

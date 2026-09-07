@@ -70,6 +70,8 @@ export function mountDecryptedText(el, opts = {}) {
     encryptedClassName = "",
     parentClassName = "",
     animateOn = "view",
+    loop = false,
+    loopPause = 1100,
   } = opts;
 
   const original = String(text || "");
@@ -96,6 +98,7 @@ export function mountDecryptedText(el, opts = {}) {
   let isAnimating = false;
   let hasAnimated = false;
   let intervalId = null;
+  let loopTimer = null;
 
   const paint = (display, done = false) => {
     sr.textContent = display;
@@ -109,14 +112,19 @@ export function mountDecryptedText(el, opts = {}) {
       clearInterval(intervalId);
       intervalId = null;
     }
+    if (loopTimer != null) {
+      clearTimeout(loopTimer);
+      loopTimer = null;
+    }
     isAnimating = false;
   };
 
-  const triggerDecrypt = () => {
+  const startCycle = () => {
     if (isAnimating) return;
     revealed = new Set();
     isAnimating = true;
     let currentIteration = 0;
+    paint(shuffleText(original, revealed, availableChars), false);
 
     intervalId = setInterval(() => {
       if (sequential) {
@@ -126,8 +134,13 @@ export function mountDecryptedText(el, opts = {}) {
           revealed.add(nextIndex);
           paint(shuffleText(original, revealed, availableChars), false);
         } else {
-          stop();
+          clearInterval(intervalId);
+          intervalId = null;
+          isAnimating = false;
           paint(original, true);
+          if (loop) {
+            loopTimer = setTimeout(() => startCycle(), loopPause);
+          }
         }
         return;
       }
@@ -135,12 +148,19 @@ export function mountDecryptedText(el, opts = {}) {
       paint(shuffleText(original, revealed, availableChars), false);
       currentIteration += 1;
       if (currentIteration >= maxIterations) {
-        stop();
+        clearInterval(intervalId);
+        intervalId = null;
+        isAnimating = false;
         revealed = new Set(Array.from({ length: original.length }, (_, i) => i));
         paint(original, true);
+        if (loop) {
+          loopTimer = setTimeout(() => startCycle(), loopPause);
+        }
       }
     }, speed);
   };
+
+  const triggerDecrypt = () => startCycle();
 
   if (animateOn === "view") {
     const observer = new IntersectionObserver(
@@ -148,9 +168,6 @@ export function mountDecryptedText(el, opts = {}) {
         for (const entry of entries) {
           if (entry.isIntersecting && !hasAnimated) {
             hasAnimated = true;
-            // Arranca scrambleado y revela
-            revealed = new Set();
-            paint(shuffleText(original, revealed, availableChars), false);
             triggerDecrypt();
             observer.disconnect();
           }
@@ -160,13 +177,10 @@ export function mountDecryptedText(el, opts = {}) {
     );
     observer.observe(el);
 
-    // Splash suele estar visible ya: forzar si está en viewport / restoring
     if (document.body.classList.contains("st2-access-restoring")) {
       requestAnimationFrame(() => {
         if (!hasAnimated) {
           hasAnimated = true;
-          revealed = new Set();
-          paint(shuffleText(original, revealed, availableChars), false);
           triggerDecrypt();
           observer.disconnect();
         }
@@ -196,11 +210,13 @@ export function initSplashDecryptedText() {
 
   mountDecryptedText(target, {
     text: "Cargando",
-    speed: 40,
+    speed: 75,
     maxIterations: 12,
     sequential: true,
     revealDirection: "start",
     animateOn: "view",
+    loop: true,
+    loopPause: 1200,
     characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$",
     encryptedClassName: "st2-decrypt-encrypted",
     className: "st2-decrypt-revealed",

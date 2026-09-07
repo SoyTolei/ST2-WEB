@@ -105,6 +105,14 @@ html.st2-theme-dark .st2-access-suite.st2-glitch {
   --st2-glitch-bg: #1a1a1a;
 }
 
+/* Login: glitch más legible a tipografía grande */
+#st2-access-gate .st2-access-suite.st2-glitch:not(.enable-on-hover)::after {
+  left: 8px;
+}
+#st2-access-gate .st2-access-suite.st2-glitch:not(.enable-on-hover)::before {
+  left: -8px;
+}
+
 html.st2-theme-dark .planillas-hero-title-main.st2-glitch {
   --st2-glitch-bg: #1a1a1a;
 }

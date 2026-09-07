@@ -39,9 +39,9 @@ export function initSuiteGlitchText() {
   const access = document.querySelector("#st2-access-gate .st2-access-suite");
   if (access) {
     mountGlitchText(access, {
-      speed: 1,
+      speed: 0.85,
       enableShadows: true,
-      enableOnHover: true,
+      enableOnHover: false,
     });
   }
 
