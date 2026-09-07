@@ -62,6 +62,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
 
   refreshInFlight = (async () => {
     try {
+      // “Ver como” un perfil sin confirmar: no mostrar cola ajena.
       if (isViewingAsProfile() && !canConfirmBlanqueoModule()) {
         cachedAlerts = [];
         alertMode = "requester";
@@ -70,7 +71,8 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
         return cachedAlerts;
       }
 
-      const alertsUrl = isViewingAsProfile() && canConfirmBlanqueoModule()
+      // Confirmador (real o en ver como): pedir cola de pendientes.
+      const alertsUrl = canConfirmBlanqueoModule()
         ? "/api/planillas/blanqueo/alerts?mode=confirm"
         : "/api/planillas/blanqueo/alerts";
       const res = await planUserFetch(alertsUrl);
@@ -301,6 +303,7 @@ export function startBlanqueoAlertsPolling() {
 
   document.addEventListener("visibilitychange", onVisibility);
   window.addEventListener("focus", onWindowFocus);
+  document.addEventListener("st2:view-as-changed", onViewAsChanged);
 }
 
 export function stopBlanqueoAlertsPolling() {
@@ -314,6 +317,14 @@ export function stopBlanqueoAlertsPolling() {
   }
   document.removeEventListener("visibilitychange", onVisibility);
   window.removeEventListener("focus", onWindowFocus);
+  document.removeEventListener("st2:view-as-changed", onViewAsChanged);
+}
+
+function onViewAsChanged() {
+  // Al cambiar perfil, reabrir toasts (no heredar “cerré el toast” del perfil anterior).
+  confirmToastDismissedSig = "";
+  writeDismissedSig("");
+  void refreshBlanqueoAlerts({ force: true });
 }
 
 function onVisibility() {

@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907o";
+import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907p";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -159,7 +159,7 @@ export function initBorradoBasesModule() {
     syncLoadFormVisibility();
     setStatus(on
       ? "Vista confirmador: solo listado (ocultá el formulario)."
-      : "Formulario de carga visible. Marcá "Vista confirmador" para volver al listado.");
+      : "Formulario de carga visible. Marcá «Vista confirmador» para volver al listado.");
   });
   document.getElementById("borrado-th-fecha")?.addEventListener("click", () => {
     fechaSortDir = fechaSortDir === "desc" ? "asc" : "desc";
@@ -1294,7 +1294,7 @@ async function confirmIncorrectoModal() {
   const noteFromUi = String(document.getElementById("borrado-incorrecto-note")?.value || "").trim();
   const notaFinal = wantNote ? noteFromUi : "";
   if (wantNote && !notaFinal) {
-    setStatus("Escribí la observación o desmarcá "¿Hay observación?".", true);
+    setStatus("Escribí la observación o desmarcá «¿Hay observación?».", true);
     return;
   }
   const aclaracion = composeAclaracion(summary, notaFinal);

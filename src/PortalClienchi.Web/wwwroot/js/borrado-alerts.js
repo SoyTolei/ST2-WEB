@@ -313,6 +313,7 @@ export function startBorradoAlertsPolling() {
 
   document.addEventListener("visibilitychange", onVisibility);
   window.addEventListener("focus", onWindowFocus);
+  document.addEventListener("st2:view-as-changed", onViewAsChanged);
 }
 
 export function stopBorradoAlertsPolling() {
@@ -326,6 +327,13 @@ export function stopBorradoAlertsPolling() {
   }
   document.removeEventListener("visibilitychange", onVisibility);
   window.removeEventListener("focus", onWindowFocus);
+  document.removeEventListener("st2:view-as-changed", onViewAsChanged);
+}
+
+function onViewAsChanged() {
+  confirmToastDismissedSig = "";
+  writeDismissedSig("");
+  void refreshBorradoAlerts({ force: true });
 }
 
 function onVisibility() {

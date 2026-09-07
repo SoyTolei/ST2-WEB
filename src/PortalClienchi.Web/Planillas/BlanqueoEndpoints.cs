@@ -125,7 +125,12 @@ public static class BlanqueoEndpoints
                 return error!;
 
             // Quien confirma ve la cola de pendientes; el resto, avisos personales.
-            if (flags.BlanqueoConfirm)
+            // ?mode=confirm: en “ver como” el front pide la cola aunque el usuario real
+            // no sea confirmador (solo superadmin / panel puede pedirlo).
+            var modeQ = ctx.Request.Query["mode"].ToString();
+            var forceConfirm = string.Equals(modeQ, "confirm", StringComparison.OrdinalIgnoreCase)
+                && St2SuperAdmin.Is(email!);
+            if (flags.BlanqueoConfirm || forceConfirm)
             {
                 var pending = repo.ListPendingForConfirm();
                 return Results.Ok(new
