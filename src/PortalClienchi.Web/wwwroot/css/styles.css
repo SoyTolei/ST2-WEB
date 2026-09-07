@@ -5659,8 +5659,8 @@ body.st2-access-restoring .st2-boot-splash {
 .st2-boot-splash-suite {
   margin: 0;
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 3.2rem;
-  font-weight: 600;
+  font-size: 4.15rem;
+  font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1.1;
   white-space: nowrap;
@@ -5692,8 +5692,8 @@ body.st2-access-restoring .st2-boot-splash {
 
 .st2-boot-splash-status {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 500;
+  font-size: 1.35rem;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #9ca3af;
@@ -5746,11 +5746,11 @@ body.st2-access-restoring .st2-boot-splash {
   }
 
   .st2-boot-splash-suite {
-    font-size: 2.25rem;
+    font-size: 2.95rem;
   }
 
   .st2-boot-splash-status {
-    font-size: 0.92rem;
+    font-size: 1.12rem;
   }
 
   .st2-access-title.st2-access-title-mark {

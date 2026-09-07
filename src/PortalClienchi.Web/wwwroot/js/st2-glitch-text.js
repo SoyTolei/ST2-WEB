@@ -41,7 +41,7 @@ export function initSuiteGlitchText() {
     mountGlitchText(access, {
       speed: 0.85,
       enableShadows: true,
-      enableOnHover: false,
+      enableOnHover: true,
     });
   }
 

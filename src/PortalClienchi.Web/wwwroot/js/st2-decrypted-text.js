@@ -210,13 +210,13 @@ export function initSplashDecryptedText() {
 
   mountDecryptedText(target, {
     text: "Cargando",
-    speed: 75,
+    speed: 42,
     maxIterations: 12,
     sequential: true,
     revealDirection: "start",
     animateOn: "view",
     loop: true,
-    loopPause: 1200,
+    loopPause: 380,
     characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$",
     encryptedClassName: "st2-decrypt-encrypted",
     className: "st2-decrypt-revealed",
