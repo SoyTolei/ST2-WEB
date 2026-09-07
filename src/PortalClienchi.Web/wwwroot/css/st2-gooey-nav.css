@@ -1,4 +1,33 @@
-/* Burst de partículas en pestañas — sin filtro gooey agresivo (evita manchas rojas). */
+/* GooeyNav: pastilla móvil + partículas. Sin fill naranja en el botón activo. */
+
+:root {
+  --st2-gooey-ease: linear(
+    0,
+    0.068,
+    0.19 2.7%,
+    0.804 8.1%,
+    1.037,
+    1.199 13.2%,
+    1.245,
+    1.27 15.8%,
+    1.274,
+    1.272 17.4%,
+    1.249 19.1%,
+    0.996 28%,
+    0.949,
+    0.928 33.3%,
+    0.926,
+    0.933 36.8%,
+    1.001 45.6%,
+    1.013,
+    1.019 50.8%,
+    1.018 54.4%,
+    1 63.1%,
+    0.995 68%,
+    1.001 85%,
+    1
+  );
+}
 
 .st2-gooey-host {
   position: relative;
@@ -7,12 +36,54 @@
   --st2-gooey-color-2: #f97316;
   --st2-gooey-color-3: #fb923c;
   --st2-gooey-color-4: #fdba74;
+  --st2-gooey-pill: #fff7ed;
+  --st2-gooey-pill-text: #9a3412;
+}
+
+html.st2-theme-dark .st2-gooey-host {
+  --st2-gooey-pill: #fff7ed;
+  --st2-gooey-pill-text: #9a3412;
 }
 
 .tab-bar.st2-gooey-host .tab-btn,
 .st2-context-seg.st2-gooey-host .st2-context-btn {
   position: relative;
   z-index: 5;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.tab-bar.st2-gooey-host .tab-btn:hover:not(.active),
+.st2-context-seg.st2-gooey-host .st2-context-btn:hover:not(.active) {
+  background: rgba(249, 115, 22, 0.08) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Selección = pastilla gooey; el botón solo cambia tipografía */
+.tab-bar.st2-gooey-host .tab-btn.active,
+.tab-bar.st2-gooey-host .tab-btn.active:hover,
+.st2-context-seg.st2-gooey-host .st2-context-btn.active,
+.st2-context-seg.st2-gooey-host .st2-context-btn.active:hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--st2-gooey-pill-text) !important;
+  box-shadow: none !important;
+  text-shadow: none;
+}
+
+.tab-bar.st2-gooey-host .tab-btn-admin:not(.active),
+.tab-bar.st2-gooey-host .tab-btn-admin:not(.active):hover {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.tab-bar.st2-gooey-host .tab-btn-admin.active,
+.tab-bar.st2-gooey-host .tab-btn-admin.active:hover {
+  background: transparent !important;
+  color: var(--st2-gooey-pill-text) !important;
+  box-shadow: none !important;
 }
 
 .st2-gooey-effect {
@@ -25,13 +96,31 @@
   pointer-events: none;
   display: grid;
   place-items: center;
-  z-index: 4;
+  z-index: 1;
   overflow: visible;
+  transition:
+    left 0.35s var(--st2-gooey-ease),
+    top 0.35s var(--st2-gooey-ease),
+    width 0.35s var(--st2-gooey-ease),
+    height 0.35s var(--st2-gooey-ease);
 }
 
-/* Sin blur/contrast ni capa negra: eso chocaba con LightRays y generaba blobs rojos */
+.st2-gooey-text {
+  z-index: 2;
+  color: transparent;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 0; /* la tipografía viva queda en el botón; la pastilla es el efecto */
+  pointer-events: none;
+}
+
+/* Pastilla: sin contrast extremo (evita manchas con LightRays) */
 .st2-gooey-filter {
-  overflow: visible;
+  z-index: 1;
+  filter: blur(0.2px);
 }
 
 .st2-gooey-filter::after {
@@ -39,27 +128,36 @@
   position: absolute;
   inset: 0;
   border-radius: 100vw;
-  background: radial-gradient(circle at center, rgba(249, 115, 22, 0.35) 0%, transparent 70%);
-  transform: scale(0.6);
+  background: var(--st2-gooey-pill);
+  box-shadow:
+    0 2px 10px rgba(234, 88, 12, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  transform: scale(0.92);
   opacity: 0;
   z-index: -1;
+  transition:
+    transform 0.3s var(--st2-gooey-ease),
+    opacity 0.3s ease;
 }
 
 .st2-gooey-filter.is-active::after {
-  animation: st2-gooey-pulse 0.45s ease-out both;
+  transform: scale(1);
+  opacity: 1;
+  animation: st2-gooey-pill 0.45s var(--st2-gooey-ease) both;
 }
 
-@keyframes st2-gooey-pulse {
+@keyframes st2-gooey-pill {
   0% {
     transform: scale(0.55);
-    opacity: 0;
+    opacity: 0.2;
   }
-  40% {
-    opacity: 0.7;
+  60% {
+    transform: scale(1.06);
+    opacity: 1;
   }
   100% {
-    transform: scale(1.35);
-    opacity: 0;
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -67,8 +165,8 @@
 .st2-gooey-point {
   display: block;
   opacity: 0;
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 100%;
   transform-origin: center;
 }
@@ -76,16 +174,16 @@
 .st2-gooey-particle {
   --time: 5s;
   position: absolute;
-  top: calc(50% - 5px);
-  left: calc(50% - 5px);
-  animation: st2-gooey-particle calc(var(--time)) ease 1 -200ms;
+  top: calc(50% - 7px);
+  left: calc(50% - 7px);
+  animation: st2-gooey-particle calc(var(--time)) ease 1 -350ms;
 }
 
 .st2-gooey-point {
   background: var(--color);
   opacity: 1;
-  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--color) 55%, transparent);
-  animation: st2-gooey-point calc(var(--time)) ease 1 -200ms;
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--color) 50%, transparent);
+  animation: st2-gooey-point calc(var(--time)) ease 1 -350ms;
 }
 
 @keyframes st2-gooey-particle {
@@ -95,12 +193,16 @@
     animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
   70% {
-    transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.05), calc(var(--end-y) * 1.05));
+    transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.2), calc(var(--end-y) * 1.2));
     opacity: 1;
     animation-timing-function: ease;
   }
+  85% {
+    transform: rotate(calc(var(--rotate) * 0.66)) translate(var(--end-x), var(--end-y));
+    opacity: 1;
+  }
   100% {
-    transform: rotate(calc(var(--rotate) * 0.9)) translate(calc(var(--end-x) * 0.55), calc(var(--end-y) * 0.55));
+    transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5));
     opacity: 0;
   }
 }
@@ -111,13 +213,20 @@
     opacity: 0;
     animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
   }
-  30% {
-    transform: scale(calc(var(--scale) * 0.55));
+  25% {
+    transform: scale(calc(var(--scale) * 0.25));
+  }
+  38% {
     opacity: 1;
   }
-  70% {
+  65% {
     transform: scale(var(--scale));
-    opacity: 0.95;
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  85% {
+    transform: scale(var(--scale));
+    opacity: 1;
   }
   100% {
     transform: scale(0);
@@ -127,6 +236,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .st2-gooey-effect {
+    transition: none;
+  }
+  .st2-gooey-filter.is-active::after {
+    animation: none;
+  }
+  .st2-gooey-particle,
+  .st2-gooey-point {
     display: none !important;
   }
 }

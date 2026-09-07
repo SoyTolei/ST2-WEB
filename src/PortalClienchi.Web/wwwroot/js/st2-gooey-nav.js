@@ -1,16 +1,19 @@
 /**
- * Gooey burst para pestañas / cambio de sistema.
- * No reemplaza el nav: solo dispara partículas al cambiar de activo.
+ * GooeyNav (vanilla): pastilla móvil + partículas.
+ * La selección visual es el efecto; el botón activo no lleva fill naranja.
  */
 
 const DEFAULTS = {
-  particleCount: 14,
-  particleDistances: [42, 8],
-  particleR: 120,
-  animationTime: 480,
-  timeVariance: 220,
+  particleCount: 18,
+  particleDistances: [90, 10],
+  particleR: 200,
+  animationTime: 600,
+  timeVariance: 400,
   colors: [1, 2, 3, 1, 2, 3, 1, 4],
 };
+
+/** @type {WeakMap<HTMLElement, { filter: HTMLElement, text: HTMLElement, ro?: ResizeObserver }>} */
+const hosts = new WeakMap();
 
 const noise = (n = 1) => n / 2 - Math.random() * n;
 
@@ -34,6 +37,10 @@ function createParticle(i, t, d, r, colors, particleCount) {
 function ensureHost(container) {
   if (!container) return null;
   container.classList.add("st2-gooey-host");
+
+  let entry = hosts.get(container);
+  if (entry) return entry;
+
   let filter = container.querySelector(":scope > .st2-gooey-filter");
   if (!filter) {
     filter = document.createElement("span");
@@ -41,18 +48,68 @@ function ensureHost(container) {
     filter.setAttribute("aria-hidden", "true");
     container.appendChild(filter);
   }
-  return filter;
+
+  let text = container.querySelector(":scope > .st2-gooey-text");
+  if (!text) {
+    text = document.createElement("span");
+    text.className = "st2-gooey-effect st2-gooey-text";
+    text.setAttribute("aria-hidden", "true");
+    container.appendChild(text);
+  }
+
+  entry = { filter, text };
+  hosts.set(container, entry);
+
+  if (typeof ResizeObserver !== "undefined") {
+    entry.ro = new ResizeObserver(() => {
+      const active = findActiveIn(container);
+      if (active) updateEffectPosition(container, active, { burst: false });
+    });
+    entry.ro.observe(container);
+  }
+
+  return entry;
 }
 
-function positionFilter(filter, host, target) {
+function findActiveIn(container) {
+  return (
+    container.querySelector(".tab-btn.active")
+    || container.querySelector(".st2-context-btn.active")
+    || null
+  );
+}
+
+function updateEffectPosition(host, target, { burst = false } = {}) {
+  const entry = ensureHost(host);
+  if (!entry || !target) return;
+
   const hostRect = host.getBoundingClientRect();
   const pos = target.getBoundingClientRect();
-  Object.assign(filter.style, {
+  const styles = {
     left: `${pos.left - hostRect.left}px`,
     top: `${pos.top - hostRect.top}px`,
     width: `${pos.width}px`,
     height: `${pos.height}px`,
-  });
+  };
+  Object.assign(entry.filter.style, styles);
+  Object.assign(entry.text.style, styles);
+
+  // Solo texto (sin SVG) para el overlay fluido.
+  const label = target.innerText?.replace(/\s+/g, " ").trim() || "";
+  entry.text.textContent = label;
+
+  if (burst) {
+    entry.text.classList.remove("is-active");
+    void entry.text.offsetWidth;
+    entry.text.classList.add("is-active");
+
+    entry.filter.classList.remove("is-active");
+    void entry.filter.offsetWidth;
+    entry.filter.classList.add("is-active");
+  } else {
+    entry.filter.classList.add("is-active");
+    entry.text.classList.add("is-active");
+  }
 }
 
 function clearParticles(filter) {
@@ -64,7 +121,6 @@ function makeParticles(filter, opts) {
   const r = opts.particleR;
   const bubbleTime = opts.animationTime * 2 + opts.timeVariance;
   filter.style.setProperty("--time", `${bubbleTime}ms`);
-  filter.classList.remove("is-active");
 
   for (let i = 0; i < opts.particleCount; i += 1) {
     const t = opts.animationTime * 2 + noise(opts.timeVariance * 2);
@@ -87,10 +143,6 @@ function makeParticles(filter, opts) {
       particle.appendChild(point);
       filter.appendChild(particle);
 
-      requestAnimationFrame(() => {
-        filter.classList.add("is-active");
-      });
-
       setTimeout(() => {
         particle.remove();
       }, t);
@@ -108,38 +160,59 @@ function findHostFor(target) {
 }
 
 /**
- * Dispara el burst gooey sobre el botón activo recién seleccionado.
+ * Dispara el efecto gooey sobre el botón activo recién seleccionado.
  * @param {HTMLElement | null} target
  * @param {Partial<typeof DEFAULTS>} [options]
  */
 export function playGooeyNav(target, options = {}) {
   if (!target || !(target instanceof HTMLElement)) return;
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+    const host = findHostFor(target);
+    if (host) updateEffectPosition(host, target, { burst: false });
+    return;
+  }
 
   const host = findHostFor(target);
   if (!host) return;
 
-  const filter = ensureHost(host);
-  if (!filter) return;
+  const entry = ensureHost(host);
+  if (!entry) return;
 
   const opts = { ...DEFAULTS, ...options };
-  clearParticles(filter);
-  positionFilter(filter, host, target);
-  makeParticles(filter, opts);
+  clearParticles(entry.filter);
+  updateEffectPosition(host, target, { burst: true });
+  makeParticles(entry.filter, opts);
+}
+
+/** Alinea la pastilla al activo actual (sin burst). */
+export function syncGooeyNav(container) {
+  const host = container || document.querySelector(".tab-bar");
+  if (!host) return;
+  ensureHost(host);
+  const active = findActiveIn(host);
+  if (active) updateEffectPosition(host, active, { burst: false });
 }
 
 /** Prepara hosts principales (tab bar + selectores de sistema). */
 export function initGooeyNav() {
   const tabBar = document.querySelector(".tab-bar");
-  if (tabBar) ensureHost(tabBar);
+  if (tabBar) {
+    ensureHost(tabBar);
+    syncGooeyNav(tabBar);
+  }
 
-  document.querySelectorAll(".st2-context-seg").forEach((seg) => ensureHost(seg));
+  document.querySelectorAll(".st2-context-seg").forEach((seg) => {
+    ensureHost(seg);
+    syncGooeyNav(seg);
+  });
 
-  // Portal pills se regeneran: observar el contenedor.
   const portalPills = document.getElementById("portalSistemaPills");
   if (portalPills) {
     ensureHost(portalPills);
-    const mo = new MutationObserver(() => ensureHost(portalPills));
+    const mo = new MutationObserver(() => {
+      ensureHost(portalPills);
+      syncGooeyNav(portalPills);
+    });
     mo.observe(portalPills, { childList: true });
   }
 }

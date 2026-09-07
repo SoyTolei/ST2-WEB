@@ -1,7 +1,8 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ac";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ad";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
-import { initGooeyNav, playGooeyNav } from "./st2-gooey-nav.js?v=20260906f";
+import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907b";
+import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907a";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
@@ -69,6 +70,7 @@ function applyTheme(dark) {
   syncThemeToggle();
   syncSonnerTheme();
   syncSonnerPlacement();
+  document.dispatchEvent(new CustomEvent("st2:theme-changed", { detail: { dark: !!dark } }));
 }
 
 /** Oscuro por defecto; solo "light" explícito deja el tema claro. */
@@ -5066,6 +5068,8 @@ function switchTab(tabId) {
   if (prevTab !== tabId) {
     const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
     if (activeBtn) playGooeyNav(activeBtn);
+  } else {
+    syncGooeyNav(document.querySelector(".tab-bar"));
   }
 
   document.querySelectorAll(".tab-panel").forEach((panel) => {
@@ -5236,6 +5240,7 @@ async function bootstrapApp() {
   initSt2Sonner();
   await ensureAppAccess();
   initGooeyNav();
+  initBorderGlowCards();
   initSpotlightCards();
   if (isPrimarySuperAdmin()) startAccessAdminClientWatch();
   syncAdminTabVisibility();

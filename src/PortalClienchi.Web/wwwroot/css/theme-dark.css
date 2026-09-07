@@ -306,6 +306,16 @@ html.st2-theme-dark .st2-update-modal-secondary:hover {
   border-color: #64748b;
 }
 
+html.st2-theme-dark .st2-access-card.border-glow-card,
+html.st2-theme-dark .st2-update-modal-card.border-glow-card {
+  background: var(--card-bg, #1a1a1a);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    var(--st2-suite-glow, 0 0 0 transparent),
+    0 0 0 1px rgba(214, 64, 0, 0.16),
+    0 28px 64px rgba(0, 0, 0, 0.55);
+}
+
 html.st2-theme-dark .st2-access-admin-dialog {
   background: linear-gradient(180deg, #242424 0%, #1c1c1c 100%);
   color: var(--dark);
