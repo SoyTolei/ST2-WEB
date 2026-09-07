@@ -241,42 +241,17 @@ function themeBackground() {
 
 /** Login + modal de actualización. */
 export function initBorderGlowCards() {
-  const access = document.querySelector("#st2-access-gate .st2-access-card");
-  if (access) {
-    enhanceBorderGlow(access, {
-      backgroundColor: themeBackground(),
-      borderRadius: 22,
-      glowRadius: 40,
-      glowIntensity: 1.05,
-      animated: true,
-      colors: ["#fb923c", "#f97316", "#38bdf8"],
-    });
-  }
+  enhanceAccessCardGlow({ animated: false });
+  enhanceUpdateCardGlow({ animated: false });
 
-  const updateCard = document.querySelector(".st2-update-modal-card");
-  if (updateCard) {
-    enhanceBorderGlow(updateCard, {
-      backgroundColor: themeBackground(),
-      borderRadius: 22,
-      glowRadius: 36,
-      glowIntensity: 1,
-      animated: false,
-      colors: ["#fb923c", "#ea580c", "#38bdf8"],
-    });
-  }
+  document.addEventListener("st2:access-gate-shown", () => {
+    enhanceAccessCardGlow({ animated: true });
+  });
 
   // Al abrir el modal de update, re-disparar sweep.
   document.addEventListener("st2:update-ui-changed", (ev) => {
     const mode = ev?.detail?.mode;
-    const card = document.querySelector(".st2-update-modal-card");
-    if (mode === "modal" && card) {
-      enhanceBorderGlow(card, {
-        backgroundColor: themeBackground(),
-        animated: true,
-        colors: ["#fb923c", "#ea580c", "#38bdf8"],
-      });
-      playSweep(card);
-    }
+    if (mode === "modal") enhanceUpdateCardGlow({ animated: true });
   });
 
   // Tema: actualizar fondo de cards glow.
@@ -287,6 +262,34 @@ export function initBorderGlowCards() {
       el.classList.toggle("border-glow-card--light", isLightColor(bg));
     });
   });
+}
+
+function enhanceAccessCardGlow({ animated = false } = {}) {
+  const access = document.querySelector("#st2-access-gate .st2-access-card");
+  if (!access) return;
+  enhanceBorderGlow(access, {
+    backgroundColor: themeBackground(),
+    borderRadius: 22,
+    glowRadius: 40,
+    glowIntensity: 1.15,
+    animated,
+    colors: ["#fb923c", "#f97316", "#38bdf8"],
+  });
+  if (animated) playSweep(access);
+}
+
+function enhanceUpdateCardGlow({ animated = false } = {}) {
+  const updateCard = document.querySelector(".st2-update-modal-card");
+  if (!updateCard) return;
+  enhanceBorderGlow(updateCard, {
+    backgroundColor: themeBackground(),
+    borderRadius: 22,
+    glowRadius: 36,
+    glowIntensity: 1,
+    animated,
+    colors: ["#fb923c", "#ea580c", "#38bdf8"],
+  });
+  if (animated) playSweep(updateCard);
 }
 
 export { playSweep };

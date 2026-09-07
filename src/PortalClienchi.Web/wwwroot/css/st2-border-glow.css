@@ -57,6 +57,19 @@
   transition: opacity 0.75s ease-in-out;
 }
 
+/* Login: glow idle suave siempre visible (además del sweep / hover). */
+.st2-access-card.border-glow-card:not(:hover):not(.sweep-active)::before,
+.st2-access-card.border-glow-card:not(:hover):not(.sweep-active)::after,
+.st2-access-card.border-glow-card:not(:hover):not(.sweep-active) > .edge-light {
+  opacity: 0.42;
+  transition: opacity 0.45s ease-out;
+}
+
+.st2-access-card.border-glow-card:not(:hover):not(.sweep-active) {
+  --edge-proximity: 72;
+  --cursor-angle: 210deg;
+}
+
 .border-glow-card::before {
   border: 1px solid transparent;
   background:

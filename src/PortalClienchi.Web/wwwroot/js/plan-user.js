@@ -246,6 +246,7 @@ function unlockAppShell() {
   document.body.classList.remove("st2-access-pending", "st2-access-restoring");
   document.body.classList.add("st2-access-ok");
   document.getElementById("st2-access-gate")?.classList.add("hidden");
+  document.dispatchEvent(new CustomEvent("st2:access-gate-hidden"));
   document.dispatchEvent(new CustomEvent("st2:session-changed"));
 }
 
@@ -254,6 +255,7 @@ function lockAppShell() {
   document.body.classList.add("st2-access-pending");
   document.body.classList.remove("st2-access-ok", "st2-access-restoring");
   document.getElementById("st2-access-gate")?.classList.remove("hidden");
+  document.dispatchEvent(new CustomEvent("st2:access-gate-shown"));
 }
 
 function waitForAccessGate() {

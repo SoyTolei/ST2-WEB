@@ -1,8 +1,9 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ae";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907af";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
-import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907a";
+import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907b";
+import { initLoginTopography } from "./st2-topography.js?v=20260907a";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
@@ -5238,9 +5239,10 @@ async function bootstrapApp() {
     saturation: 1.3,
   });
   initSt2Sonner();
+  initBorderGlowCards();
+  initLoginTopography();
   await ensureAppAccess();
   initGooeyNav();
-  initBorderGlowCards();
   initSpotlightCards();
   if (isPrimarySuperAdmin()) startAccessAdminClientWatch();
   syncAdminTabVisibility();

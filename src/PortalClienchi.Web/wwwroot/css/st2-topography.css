@@ -1,0 +1,36 @@
+/* Topography wallpaper detrás del login. */
+
+.st2-login-topo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0b0b0f;
+}
+
+.st2-login-topo-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.st2-login-topo.is-fallback {
+  background:
+    radial-gradient(ellipse 80% 70% at 15% 20%, rgba(255, 159, 252, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 85% 15%, rgba(249, 115, 22, 0.28) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 50% 90%, rgba(6, 182, 212, 0.2) 0%, transparent 55%),
+    #0b0b0f;
+}
+
+.st2-access-gate {
+  background: transparent !important;
+}
+
+.st2-access-gate > .st2-access-card,
+.st2-access-gate > .border-glow-card,
+.st2-access-gate .st2-access-card {
+  position: relative;
+  z-index: 2;
+}
