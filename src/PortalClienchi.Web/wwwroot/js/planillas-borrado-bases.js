@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js";
+import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907k";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -192,6 +192,9 @@ export function initBorradoBasesModule() {
   });
   document.getElementById("borrado-listo-overlay")?.addEventListener("click", (e) => {
     if (e.target === e.currentTarget) hideListoModal();
+  });
+  document.getElementById("borrado-listo-has-note")?.addEventListener("change", () => {
+    syncListoNoteVisibility({ focus: true });
   });
 
   const ctx = document.getElementById("borrado-ctx");
@@ -935,11 +938,13 @@ function renderTable(filtered) {
 function buildRow(item) {
   const row = document.createElement("tr");
   if (selectedId === item.id) row.classList.add("selected");
+  const incorrecto = isIncorrecto(item.aclaracion);
   const { nota } = parseAclaracion(item.aclaracion);
-  const hasNota = !!String(nota || "").trim();
-  const hasAclaracion = !!String(item.aclaracion || "").trim();
+  const hasNota = !incorrecto && !!String(nota || "").trim();
+  const hasAclaracion = !incorrecto && !!String(item.aclaracion || "").trim();
   const partial = !!(item.listo && item.aclaracion && /✗/.test(String(item.aclaracion)));
-  if (partial) row.classList.add("borrado-row-partial");
+  if (incorrecto) row.classList.add("borrado-row-incorrecto");
+  else if (partial) row.classList.add("borrado-row-partial");
   else if (item.listo && hasNota) row.classList.add("borrado-row-listo-nota");
   else if (item.listo) row.classList.add("borrado-row-listo");
   else if (hasAclaracion) row.classList.add("borrado-row-aclaracion");
@@ -996,6 +1001,12 @@ function buildRow(item) {
       e.preventDefault();
       e.stopPropagation();
       selectedId = item.id;
+      // Observación: Ver abre el editor (si podés confirmar) para ver/completar el texto.
+      if (pill.classList.contains("borrado-aclaracion-pill") && canConfirm) {
+        hideBasePop();
+        openNoteModal(item);
+        return;
+      }
       showBasePop(
         pill,
         pill.getAttribute("data-borrado-base-label") || "",
@@ -1074,6 +1085,8 @@ function openListoModal(item) {
   const chkSj = document.getElementById("borrado-listo-sueldos");
   const chkCg = document.getElementById("borrado-listo-contabilidad");
   const sf = isDetalleSalesforce(item);
+  const { nota } = parseAclaracion(isIncorrecto(item.aclaracion) ? "" : item.aclaracion);
+  const hasNota = !!String(nota || "").trim();
 
   wrapIva?.classList.toggle("hidden", !sf && !item.iva);
   wrapSj?.classList.toggle("hidden", !sf && !item.sueldos);
@@ -1084,10 +1097,24 @@ function openListoModal(item) {
 
   document.getElementById("borrado-listo-hint")?.classList.toggle("hidden", sf);
   document.getElementById("borrado-listo-salesforce-hint")?.classList.toggle("hidden", !sf);
+  document.getElementById("borrado-listo-note-block")?.classList.toggle("hidden", sf);
+  const hasNoteChk = document.getElementById("borrado-listo-has-note");
+  const noteText = document.getElementById("borrado-listo-note");
+  if (hasNoteChk) hasNoteChk.checked = !sf && hasNota;
+  if (noteText) noteText.value = sf ? "" : (nota || "");
+  syncListoNoteVisibility();
+
   overlay?.classList.toggle("is-salesforce", sf);
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   document.getElementById("borrado-listo-confirm")?.focus();
+}
+
+function syncListoNoteVisibility({ focus = false } = {}) {
+  const hasNote = !!document.getElementById("borrado-listo-has-note")?.checked;
+  const wrap = document.getElementById("borrado-listo-note-wrap");
+  wrap?.classList.toggle("hidden", !hasNote);
+  if (focus && hasNote) document.getElementById("borrado-listo-note")?.focus();
 }
 
 function hideListoModal() {
@@ -1098,6 +1125,12 @@ function hideListoModal() {
   overlay?.setAttribute("aria-hidden", "true");
   document.getElementById("borrado-listo-hint")?.classList.remove("hidden");
   document.getElementById("borrado-listo-salesforce-hint")?.classList.add("hidden");
+  document.getElementById("borrado-listo-note-block")?.classList.remove("hidden");
+  const hasNoteChk = document.getElementById("borrado-listo-has-note");
+  const noteText = document.getElementById("borrado-listo-note");
+  if (hasNoteChk) hasNoteChk.checked = false;
+  if (noteText) noteText.value = "";
+  document.getElementById("borrado-listo-note-wrap")?.classList.add("hidden");
 }
 
 async function confirmListoModal() {
@@ -1121,8 +1154,9 @@ async function confirmListoModal() {
       contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
     };
   const summary = sf ? buildListoSummarySalesforce(done) : buildListoSummary(item, done);
-  const { nota } = parseAclaracion(item.aclaracion);
-  const notaFinal = sf ? DETALLE_SALESFORCE_NOMBRE : nota;
+  const wantNote = !sf && !!document.getElementById("borrado-listo-has-note")?.checked;
+  const noteFromUi = String(document.getElementById("borrado-listo-note")?.value || "").trim();
+  const notaFinal = sf ? DETALLE_SALESFORCE_NOMBRE : (wantNote ? noteFromUi : "");
   const aclaracion = composeAclaracion(summary, notaFinal);
 
   try {
@@ -1160,6 +1194,12 @@ function buildListoSummary(item, done) {
 }
 
 const ACLARACION_SEP = "\n---\n";
+const INCORRECTO_LABEL = "Incorrecto";
+
+/** Solicitud con datos erróneos / no corresponde procesar (análogo a “No registrado” en blanqueo). */
+function isIncorrecto(value) {
+  return String(value || "").trim().toLowerCase() === "incorrecto";
+}
 
 function isResultadoAclaracion(text) {
   const t = String(text || "").trim();
@@ -1170,6 +1210,7 @@ function isResultadoAclaracion(text) {
 function parseAclaracion(raw) {
   const text = String(raw || "").trim();
   if (!text) return { resultado: "", nota: "" };
+  if (isIncorrecto(text)) return { resultado: "", nota: "" };
 
   if (text.includes(ACLARACION_SEP.trim()) || text.includes("\n---\n")) {
     const idx = text.indexOf("---");
@@ -1234,6 +1275,9 @@ function formatGestionadoPorCell(item) {
 }
 
 function formatEstadoCell(item) {
+  if (isIncorrecto(item.aclaracion)) {
+    return '<span class="borrado-pill bad" title="Solicitud o datos incorrectos (no se procesa)">Incorrecto</span>';
+  }
   const { resultado, nota } = parseAclaracion(item.aclaracion);
   if (item.listo) {
     if (isPartialListo(item)) {
@@ -1277,10 +1321,11 @@ function formatAclaracionNotaPill(label, detail) {
   const text = String(detail || "").trim();
   if (!text) return "";
   const tip = text.length > 80 ? `${text.slice(0, 80)}…` : text;
-  return `<span class="borrado-base-cg"><button type="button" class="borrado-base-pill has-detail borrado-aclaracion-pill" title="${escapeAttr(tip)}" aria-label="Ver ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(text)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">ver</span></button></span>`;
+  return `<span class="borrado-base-cg"><button type="button" class="borrado-base-pill has-detail borrado-aclaracion-pill" title="${escapeAttr(tip)}" aria-label="Ver ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(text)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">Ver</span></button></span>`;
 }
 
 function formatAclaracionCell(text) {
+  if (isIncorrecto(text)) return "—";
   const { resultado, nota } = parseAclaracion(text);
   if (!resultado && !nota) return "—";
   const parts = [];
@@ -1305,7 +1350,7 @@ function showCtx(x, y, item) {
     const action = btn.getAttribute("data-borrado-ctx");
     let show = false;
     if (action === "editar" || action === "eliminar") show = confirm || canOwnerMutate(item);
-    else if (["listo", "unlisto", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
+    else if (["listo", "unlisto", "aclaracion-incorrecto"].includes(action || "")) {
       show = confirm;
     }
     btn.classList.toggle("hidden", !show);
@@ -1353,13 +1398,8 @@ async function handleCtxAction(action) {
       return;
     } else if (action === "unlisto") {
       await unsetListo(item);
-    } else if (action === "aclaracion-manual") {
-      openNoteModal(item);
-      return;
-    } else if (action === "clear-aclaracion") {
-      const { resultado } = parseAclaracion(item.aclaracion);
-      if (resultado) await patchItem(selectedId, { aclaracion: resultado });
-      else await patchItem(selectedId, { clearAclaracion: true });
+    } else if (action === "aclaracion-incorrecto") {
+      await patchItem(selectedId, { listo: false, aclaracion: INCORRECTO_LABEL });
     } else if (action === "eliminar") {
       if (!canConfirm && !canOwnerMutate(item)) {
         setStatus("Solo se puede eliminar en estado pendiente.", true);
@@ -1530,8 +1570,20 @@ function hideNoteModal() {
 async function saveNoteModal() {
   if (!selectedId) return;
   const item = items.find((x) => x.id === selectedId);
-  const { resultado } = parseAclaracion(item?.aclaracion);
+  const { resultado } = parseAclaracion(isIncorrecto(item?.aclaracion) ? "" : item?.aclaracion);
   const nota = String(document.getElementById("borrado-note-text")?.value || "").trim();
+  if (isIncorrecto(nota)) {
+    try {
+      await patchItem(selectedId, { listo: false, aclaracion: INCORRECTO_LABEL });
+      hideNoteModal();
+      setStatus("Marcado como incorrecto.");
+      await reloadList();
+      notifyBorradoChanged();
+    } catch (err) {
+      setStatus(err?.message || "No se pudo guardar la observación.", true);
+    }
+    return;
+  }
   const aclaracion = composeAclaracion(resultado, nota);
   try {
     if (!aclaracion) {

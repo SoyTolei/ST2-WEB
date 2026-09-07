@@ -4,7 +4,7 @@ import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20260905i";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
-import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260907k";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { getPlanUserEmail } from "./plan-user.js";
@@ -15,7 +15,7 @@ import {
 import {
   startBorradoAlertsPolling,
   renderBorradoAlertUi,
-} from "./borrado-alerts.js";
+} from "./borrado-alerts.js?v=20260907k";
 import {
   startAccessAlertsPolling,
   renderAccessAlertUi,

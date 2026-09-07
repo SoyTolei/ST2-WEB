@@ -1491,7 +1491,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex: 1 1 220px;
 }
 
-.plan-modulo-alert-badge {
+.plan-modulo-btn .plan-modulo-alert-badge {
   position: absolute;
   top: 8px;
   right: 10px;
@@ -1508,7 +1508,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   text-align: center;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
 }
 
 .plan-modulo-alert-badge.hidden {

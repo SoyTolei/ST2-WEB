@@ -60,15 +60,15 @@
     }
   </style>
   <link rel="stylesheet" href="/css/styles.css?v=20260907f"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20260907f"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20260907k"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260907f"/>
-  <link rel="stylesheet" href="/css/borrado-bases.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907f"/>
+  <link rel="stylesheet" href="/css/borrado-bases.css?v=20260907k"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907k"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907b"/>
+  <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907k"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907j"/>
 </head>
 <body class="st2-access-pending">
@@ -874,8 +874,7 @@
                 <button type="button" class="borrado-ctx-listo" data-borrado-ctx="listo">Marcar listo</button>
                 <button type="button" data-borrado-ctx="unlisto">Quitar listo</button>
                 <hr/>
-                <button type="button" data-borrado-ctx="aclaracion-manual">Agregar observación</button>
-                <button type="button" data-borrado-ctx="clear-aclaracion">Quitar observación</button>
+                <button type="button" data-borrado-ctx="aclaracion-incorrecto">Incorrecto</button>
                 <hr/>
                 <button type="button" data-borrado-ctx="editar">Editar</button>
                 <button type="button" data-borrado-ctx="eliminar">Eliminar</button>
@@ -2131,7 +2130,7 @@
   <div id="borrado-note-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-note-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
       <h3 id="borrado-note-title">Observación</h3>
-      <p class="plan-user-hint">Texto libre, aparte del resultado IVA/SJ/CG. Se muestra debajo de los checks en la columna Aclaración.</p>
+      <p class="plan-user-hint">Texto libre, aparte del resultado IVA/SJ/CG. También podés completarla al confirmar listo con “¿Hay observación?”.</p>
       <label class="plan-user-label" for="borrado-note-text">Detalle</label>
       <textarea id="borrado-note-text" class="borrado-note-textarea" rows="4" maxlength="280" placeholder="Ej. falta autorización del cliente…"></textarea>
       <div class="plan-user-actions">
@@ -2150,6 +2149,13 @@
         <label id="borrado-listo-iva-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-iva" type="checkbox"/> IVA</label>
         <label id="borrado-listo-sueldos-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-sueldos" type="checkbox"/> SJ</label>
         <label id="borrado-listo-contabilidad-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-contabilidad" type="checkbox"/> CG</label>
+      </div>
+      <div id="borrado-listo-note-block" class="borrado-listo-note-block">
+        <label class="borrado-check borrado-listo-has-note"><input id="borrado-listo-has-note" type="checkbox"/> ¿Hay observación?</label>
+        <div id="borrado-listo-note-wrap" class="borrado-listo-note-wrap hidden">
+          <label class="plan-user-label" for="borrado-listo-note">Detalle</label>
+          <textarea id="borrado-listo-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. falta autorización del cliente…"></textarea>
+        </div>
       </div>
       <div class="plan-user-actions">
         <button type="button" id="borrado-listo-cancel" class="plan-gestor-btn-tool">Cancelar</button>
@@ -2572,6 +2578,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260907j" type="module"></script>
+  <script src="/js/app.js?v=20260907k" type="module"></script>
 </body>
 </html>

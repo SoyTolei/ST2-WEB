@@ -134,9 +134,18 @@ public sealed class BorradoBasesRepository
         else if (req.Aclaracion is not null)
             aclaracion = string.IsNullOrWhiteSpace(req.Aclaracion) ? null : req.Aclaracion.Trim();
 
-        // Listo y aclaración pueden convivir (misma lógica que Blanqueo sin "No registrado").
+        // "Incorrecto" y "Listo" se anulan (como No registrado en Blanqueo).
         if (req.Listo == true)
+        {
             listo = true;
+            if (BorradoAlertKinds.IsIncorrecto(aclaracion))
+                aclaracion = null;
+        }
+        else if (BorradoAlertKinds.IsIncorrecto(aclaracion))
+        {
+            listo = false;
+            aclaracion = "Incorrecto";
+        }
 
         var wasListo = current.Listo;
         var prevAclaracion = current.Aclaracion;
@@ -289,6 +298,8 @@ public sealed class BorradoBasesRepository
             kind = BorradoAlertKinds.IsPartialListo(item.Aclaracion)
                 ? BorradoAlertKinds.Partial
                 : BorradoAlertKinds.Ready;
+        else if (BorradoAlertKinds.IsIncorrecto(item.Aclaracion))
+            kind = BorradoAlertKinds.Incorrecto;
         else if (!string.IsNullOrWhiteSpace(item.Aclaracion))
             kind = BorradoAlertKinds.Note;
 

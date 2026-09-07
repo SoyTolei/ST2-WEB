@@ -907,6 +907,22 @@ button.borrado-aclaracion-pill:focus-visible {
   display: none !important;
 }
 
+.borrado-listo-note-block {
+  margin: 0.15rem 0 0.85rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.borrado-listo-note-block.hidden,
+.borrado-listo-note-wrap.hidden {
+  display: none !important;
+}
+
+.borrado-listo-note-wrap {
+  display: grid;
+  gap: 0.35rem;
+}
+
 .borrado-estado-pending {
   display: inline-flex;
   align-items: center;
@@ -939,7 +955,7 @@ button.borrado-aclaracion-pill:focus-visible {
   box-shadow: inset 5px 0 0 #047857;
 }
 
-.borrado-row-aclaracion:not(.borrado-row-listo):not(.borrado-row-listo-nota):not(.borrado-row-partial) td {
+.borrado-row-aclaracion:not(.borrado-row-listo):not(.borrado-row-listo-nota):not(.borrado-row-partial):not(.borrado-row-incorrecto) td {
   background: rgba(245, 158, 11, 0.1);
 }
 
@@ -949,6 +965,15 @@ button.borrado-aclaracion-pill:focus-visible {
 }
 
 .borrado-row-partial td:first-child {
+  box-shadow: inset 5px 0 0 #b91c1c;
+}
+
+.borrado-row-incorrecto td {
+  background: rgba(239, 68, 68, 0.18);
+  color: #7f1d1d;
+}
+
+.borrado-row-incorrecto td:first-child {
   box-shadow: inset 5px 0 0 #b91c1c;
 }
 

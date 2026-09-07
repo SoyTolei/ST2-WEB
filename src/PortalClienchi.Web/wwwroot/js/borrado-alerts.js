@@ -27,6 +27,7 @@ const KIND_READY = "ready";
 const KIND_NOTE = "note";
 const KIND_PARTIAL = "partial";
 const KIND_PENDING = "pending";
+const KIND_INCORRECTO = "incorrecto";
 
 export function getBorradoAlertCount() {
   return cachedAlerts.length;
@@ -151,6 +152,7 @@ function normalizeAlert(raw) {
   let kind = KIND_READY;
   if (kindRaw === KIND_PENDING || kindRaw === "review") kind = KIND_PENDING;
   else if (kindRaw === KIND_PARTIAL || kindRaw === "parcial") kind = KIND_PARTIAL;
+  else if (kindRaw === KIND_INCORRECTO) kind = KIND_INCORRECTO;
   else if (kindRaw === KIND_NOTE || kindRaw === "aclaracion" || kindRaw === "observacion") kind = KIND_NOTE;
 
   return {
@@ -206,10 +208,11 @@ function summarizeAlerts(alerts) {
     };
   }
 
-  const counts = { ready: 0, note: 0, partial: 0 };
+  const counts = { ready: 0, note: 0, partial: 0, incorrecto: 0 };
   for (const a of alerts) {
     if (a.kind === KIND_PARTIAL) counts.partial += 1;
     else if (a.kind === KIND_NOTE) counts.note += 1;
+    else if (a.kind === KIND_INCORRECTO) counts.incorrecto += 1;
     else counts.ready += 1;
   }
 
@@ -224,13 +227,18 @@ function summarizeAlerts(alerts) {
       ? "una solicitud de borrado parcialmente realizada (revisá las aclaraciones)"
       : `${counts.partial} solicitudes de borrado parcialmente realizadas (revisá las aclaraciones)`);
   }
+  if (counts.incorrecto > 0) {
+    parts.push(counts.incorrecto === 1
+      ? "una solicitud de borrado marcada como incorrecta"
+      : `${counts.incorrecto} solicitudes de borrado marcadas como incorrectas`);
+  }
   if (counts.note > 0) {
     parts.push(counts.note === 1
       ? "una observación nueva en borrado de bases"
       : `${counts.note} observaciones nuevas en borrado de bases`);
   }
 
-  const tone = (counts.partial > 0 || counts.note > 0) ? "warn" : "ok";
+  const tone = (counts.partial > 0 || counts.note > 0 || counts.incorrecto > 0) ? "warn" : "ok";
   const text = parts.length
     ? `Tenés ${parts.join(" y ")}`
     : "Tenés novedades en borrado de bases";

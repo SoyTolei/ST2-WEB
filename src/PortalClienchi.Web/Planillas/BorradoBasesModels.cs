@@ -74,6 +74,10 @@ public static class BorradoAlertKinds
     public const string Note = "note";
     public const string Partial = "partial";
     public const string Pending = "pending";
+    public const string Incorrecto = "incorrecto";
+
+    public static bool IsIncorrecto(string? aclaracion) =>
+        string.Equals((aclaracion ?? "").Trim(), "Incorrecto", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Confirmación con alguna base marcada ✗ (no hecha).</summary>
     public static bool IsPartialListo(string? aclaracion)

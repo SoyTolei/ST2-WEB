@@ -43,9 +43,14 @@ html.st2-theme-dark .plan-modulo-btn.st2-card-spotlight:active:not(:disabled) {
   filter: brightness(0.97);
 }
 
-.plan-modulo-btn.st2-card-spotlight > * {
+.plan-modulo-btn.st2-card-spotlight > *:not(.plan-modulo-alert-badge) {
   position: relative;
   z-index: 2;
+}
+
+.plan-modulo-btn.st2-card-spotlight > .plan-modulo-alert-badge {
+  position: absolute;
+  z-index: 3;
 }
 
 /* Tinte claro por tarjeta (blanco + matiz del color propio). */
