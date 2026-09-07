@@ -32,8 +32,24 @@ const TOASTER_ID = "st2-sonner";
 const registry = new Map();
 
 let inited = false;
-/** Evita que onDismiss dispare markSeen cuando nosotros cerramos el toast. */
+/**
+ * Evita que onDismiss dispare markSeen cuando nosotros cerramos el toast.
+ * Sonner llama onDismiss ~200ms después del dismiss (animación); no usar
+ * queueMicrotask o el flag ya no está y se “ven” alertas que no tocó el usuario.
+ */
 const dismissingLocally = new Set();
+const DISMISS_GUARD_MS = 400;
+
+function dismissProgrammatically(id) {
+  if (!id) return;
+  dismissingLocally.add(id);
+  try {
+    toast.dismiss(id);
+  } catch {
+    /* ignore */
+  }
+  window.setTimeout(() => dismissingLocally.delete(id), DISMISS_GUARD_MS);
+}
 
 function toneToMethod(tone) {
   if (tone === "bad" || tone === "error") return "error";
@@ -138,6 +154,8 @@ export function initSt2Sonner() {
   toaster.setAttribute("rich-colors", "");
   toaster.setAttribute("close-button", "");
   toaster.setAttribute("visible-toasts", "5");
+  // Persistentes por defecto (Sonner default = 4s).
+  toaster.setAttribute("duration", "Infinity");
   toaster.setAttribute("container-aria-label", "Notificaciones");
   toaster.setAttribute("theme", currentTheme());
   // Evitar que el attr offset pise el ancla dinámico
@@ -220,12 +238,7 @@ export function setSt2AguaToast({ body, onAction }) {
 export function clearSt2AlertToast(id) {
   if (!id) return;
   const had = registry.delete(id);
-  dismissingLocally.add(id);
-  try {
-    toast.dismiss(id);
-  } finally {
-    queueMicrotask(() => dismissingLocally.delete(id));
-  }
+  dismissProgrammatically(id);
   if (had && GREET_STACK.includes(id)) paintGreetStack();
 }
 
@@ -244,14 +257,7 @@ function paintGreetStack() {
   // (Importante: un solo módulo st2-sonner.js; si hay ?v= distinto, se duplica el registry
   // y un paintGreetStack se come los toasts del otro.)
   for (const id of GREET_STACK) {
-    if (!registry.has(id)) {
-      dismissingLocally.add(id);
-      try {
-        toast.dismiss(id);
-      } finally {
-        queueMicrotask(() => dismissingLocally.delete(id));
-      }
-    }
+    if (!registry.has(id)) dismissProgrammatically(id);
   }
 }
 
@@ -272,12 +278,10 @@ function makeActionButton(id, entry, tone) {
   btn.textContent = entry.actionLabel || "Ver";
   btn.addEventListener("click", () => {
     entry.onAction?.();
-    // Mismo comportamiento que el action nativo de Sonner: cierra al clickear.
-    try {
-      toast.dismiss(id);
-    } catch {
-      /* ignore */
-    }
+    // onAction ya marca “visto”; no volver a disparar onDismiss→markSeen.
+    dismissProgrammatically(id);
+    registry.delete(id);
+    if (GREET_STACK.includes(id)) paintGreetStack();
   });
   return btn;
 }
@@ -291,7 +295,7 @@ function paintOne(id, title, tone) {
   const opts = {
     id,
     toasterId: TOASTER_ID,
-    duration: Infinity,
+    duration: Number.POSITIVE_INFINITY,
     richColors: true,
     closeButton: true,
     dismissible: true,

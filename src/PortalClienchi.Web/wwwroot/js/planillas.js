@@ -3,7 +3,7 @@ import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notify
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20260905i";
-import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260907p";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260907r";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
@@ -11,11 +11,11 @@ import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
   renderBlanqueoAlertUi,
-} from "./blanqueo-alerts.js?v=20260907p";
+} from "./blanqueo-alerts.js";
 import {
   startBorradoAlertsPolling,
   renderBorradoAlertUi,
-} from "./borrado-alerts.js?v=20260907p";
+} from "./borrado-alerts.js";
 import {
   startAccessAlertsPolling,
   renderAccessAlertUi,

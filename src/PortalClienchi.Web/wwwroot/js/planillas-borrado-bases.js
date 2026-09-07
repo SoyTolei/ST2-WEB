@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907p";
+import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
