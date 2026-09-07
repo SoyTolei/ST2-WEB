@@ -1,7 +1,7 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ad";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ae";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
-import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907b";
+import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907a";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";

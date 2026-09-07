@@ -4,11 +4,11 @@
  */
 
 const DEFAULTS = {
-  particleCount: 18,
-  particleDistances: [90, 10],
-  particleR: 200,
-  animationTime: 600,
-  timeVariance: 400,
+  particleCount: 10,
+  particleDistances: [48, 8],
+  particleR: 90,
+  animationTime: 520,
+  timeVariance: 160,
   colors: [1, 2, 3, 1, 2, 3, 1, 4],
 };
 
@@ -18,19 +18,19 @@ const hosts = new WeakMap();
 const noise = (n = 1) => n / 2 - Math.random() * n;
 
 function getXY(distance, pointIndex, totalPoints) {
-  const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
+  const angle = ((360 + noise(3)) / totalPoints) * pointIndex * (Math.PI / 180);
   return [distance * Math.cos(angle), distance * Math.sin(angle)];
 }
 
 function createParticle(i, t, d, r, colors, particleCount) {
-  const rotate = noise(r / 10);
+  const rotate = noise(r / 16);
   return {
     start: getXY(d[0], particleCount - i, particleCount),
-    end: getXY(d[1] + noise(7), particleCount - i, particleCount),
+    end: getXY(d[1] + noise(3), particleCount - i, particleCount),
     time: t,
-    scale: 1 + noise(0.2),
+    scale: 1 + noise(0.1),
     color: colors[Math.floor(Math.random() * colors.length)],
-    rotate: rotate > 0 ? (rotate + r / 20) * 10 : (rotate - r / 20) * 10,
+    rotate: rotate > 0 ? (rotate + r / 28) * 6 : (rotate - r / 28) * 6,
   };
 }
 
@@ -98,17 +98,16 @@ function updateEffectPosition(host, target, { burst = false } = {}) {
   const label = target.innerText?.replace(/\s+/g, " ").trim() || "";
   entry.text.textContent = label;
 
-  if (burst) {
-    entry.text.classList.remove("is-active");
-    void entry.text.offsetWidth;
-    entry.text.classList.add("is-active");
+  entry.filter.classList.add("is-active");
+  entry.text.classList.add("is-active");
 
-    entry.filter.classList.remove("is-active");
+  if (burst) {
+    entry.filter.classList.remove("is-bursting");
     void entry.filter.offsetWidth;
-    entry.filter.classList.add("is-active");
-  } else {
-    entry.filter.classList.add("is-active");
-    entry.text.classList.add("is-active");
+    entry.filter.classList.add("is-bursting");
+    window.setTimeout(() => {
+      entry.filter.classList.remove("is-bursting");
+    }, 420);
   }
 }
 

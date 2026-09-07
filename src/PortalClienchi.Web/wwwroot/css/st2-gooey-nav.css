@@ -1,32 +1,8 @@
 /* GooeyNav: pastilla móvil + partículas. Sin fill naranja en el botón activo. */
 
 :root {
-  --st2-gooey-ease: linear(
-    0,
-    0.068,
-    0.19 2.7%,
-    0.804 8.1%,
-    1.037,
-    1.199 13.2%,
-    1.245,
-    1.27 15.8%,
-    1.274,
-    1.272 17.4%,
-    1.249 19.1%,
-    0.996 28%,
-    0.949,
-    0.928 33.3%,
-    0.926,
-    0.933 36.8%,
-    1.001 45.6%,
-    1.013,
-    1.019 50.8%,
-    1.018 54.4%,
-    1 63.1%,
-    0.995 68%,
-    1.001 85%,
-    1
-  );
+  /* Ease suave sin overshoot (el linear elástico hacía temblar la pastilla). */
+  --st2-gooey-ease: cubic-bezier(0.22, 0.9, 0.28, 1);
 }
 
 .st2-gooey-host {
@@ -99,10 +75,10 @@ html.st2-theme-dark .st2-gooey-host {
   z-index: 1;
   overflow: visible;
   transition:
-    left 0.35s var(--st2-gooey-ease),
-    top 0.35s var(--st2-gooey-ease),
-    width 0.35s var(--st2-gooey-ease),
-    height 0.35s var(--st2-gooey-ease);
+    left 0.42s var(--st2-gooey-ease),
+    top 0.42s var(--st2-gooey-ease),
+    width 0.42s var(--st2-gooey-ease),
+    height 0.42s var(--st2-gooey-ease);
 }
 
 .st2-gooey-text {
@@ -132,28 +108,28 @@ html.st2-theme-dark .st2-gooey-host {
   box-shadow:
     0 2px 10px rgba(234, 88, 12, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  transform: scale(0.92);
+  transform: scale(1);
   opacity: 0;
   z-index: -1;
   transition:
-    transform 0.3s var(--st2-gooey-ease),
-    opacity 0.3s ease;
+    transform 0.28s var(--st2-gooey-ease),
+    opacity 0.28s ease;
 }
 
 .st2-gooey-filter.is-active::after {
   transform: scale(1);
   opacity: 1;
-  animation: st2-gooey-pill 0.45s var(--st2-gooey-ease) both;
+  animation: none;
+}
+
+.st2-gooey-filter.is-bursting::after {
+  animation: st2-gooey-pill 0.38s var(--st2-gooey-ease) both;
 }
 
 @keyframes st2-gooey-pill {
   0% {
-    transform: scale(0.55);
-    opacity: 0.2;
-  }
-  60% {
-    transform: scale(1.06);
-    opacity: 1;
+    transform: scale(0.94);
+    opacity: 0.85;
   }
   100% {
     transform: scale(1);
@@ -165,8 +141,8 @@ html.st2-theme-dark .st2-gooey-host {
 .st2-gooey-point {
   display: block;
   opacity: 0;
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
   border-radius: 100%;
   transform-origin: center;
 }
@@ -174,9 +150,9 @@ html.st2-theme-dark .st2-gooey-host {
 .st2-gooey-particle {
   --time: 5s;
   position: absolute;
-  top: calc(50% - 7px);
-  left: calc(50% - 7px);
-  animation: st2-gooey-particle calc(var(--time)) ease 1 -350ms;
+  top: calc(50% - 5px);
+  left: calc(50% - 5px);
+  animation: st2-gooey-particle calc(var(--time)) ease 1 -200ms;
 }
 
 .st2-gooey-point {
@@ -189,20 +165,16 @@ html.st2-theme-dark .st2-gooey-host {
 @keyframes st2-gooey-particle {
   0% {
     transform: rotate(0deg) translate(var(--start-x), var(--start-y));
-    opacity: 1;
-    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+    opacity: 0.9;
+    animation-timing-function: cubic-bezier(0.45, 0, 0.85, 0.45);
   }
   70% {
-    transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.2), calc(var(--end-y) * 1.2));
-    opacity: 1;
+    transform: rotate(calc(var(--rotate) * 0.35)) translate(calc(var(--end-x) * 1.05), calc(var(--end-y) * 1.05));
+    opacity: 0.85;
     animation-timing-function: ease;
   }
-  85% {
-    transform: rotate(calc(var(--rotate) * 0.66)) translate(var(--end-x), var(--end-y));
-    opacity: 1;
-  }
   100% {
-    transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5));
+    transform: rotate(calc(var(--rotate) * 0.55)) translate(calc(var(--end-x) * 0.6), calc(var(--end-y) * 0.6));
     opacity: 0;
   }
 }
