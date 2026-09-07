@@ -421,6 +421,15 @@ export function initLightRays(options = {}) {
   }
 
   document.addEventListener("visibilitychange", onVisibility);
+
+  // Al pasar de login → app el alto del wallpaper cambia (top: 64px).
+  if (typeof MutationObserver !== "undefined") {
+    const bodyObs = new MutationObserver(() => {
+      requestAnimationFrame(updatePlacement);
+    });
+    bodyObs.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  }
+
   return true;
 }
 

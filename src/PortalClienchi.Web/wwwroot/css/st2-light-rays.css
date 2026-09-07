@@ -1,14 +1,24 @@
-/* LightRays: wallpaper detrás de pestañas y panel principal */
+/* LightRays: wallpaper detrás de login, pestañas y panel principal */
 .st2-light-rays {
   position: fixed;
-  top: 64px;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
   opacity: 0.95;
+}
+
+/* En la app queda bajo el header */
+body.st2-access-ok .st2-light-rays {
+  top: 64px;
+  z-index: 0;
+}
+
+/* En el login / restoring: pantalla completa detrás del gate/splash */
+body.st2-access-pending .st2-light-rays,
+body.st2-access-restoring .st2-light-rays {
+  top: 0;
+  z-index: 2400;
 }
 
 .st2-light-rays[hidden] {
