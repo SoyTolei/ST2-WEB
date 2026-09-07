@@ -11,7 +11,10 @@ import {
 export const ST2_TOAST = {
   tools: "st2-toast-tools",
   blanqueo: "st2-toast-blanqueo",
+  /** Avisos personales del solicitante cuando además es confirmador. */
+  blanqueoMine: "st2-toast-blanqueo-mine",
   borrado: "st2-toast-borrado",
+  borradoMine: "st2-toast-borrado-mine",
   access: "st2-toast-access",
   accessOwner: "st2-toast-access-owner",
   agua: "st2-toast-agua",
@@ -21,7 +24,9 @@ export const ST2_TOAST = {
 const GREET_STACK = [
   ST2_TOAST.tools,
   ST2_TOAST.blanqueo,
+  ST2_TOAST.blanqueoMine,
   ST2_TOAST.borrado,
+  ST2_TOAST.borradoMine,
   ST2_TOAST.access,
   ST2_TOAST.accessOwner,
 ];

@@ -21,7 +21,10 @@ const DISMISS_KEYS_LEGACY = [
 let pollTimer = null;
 let retryTimer = null;
 let retryCount = 0;
+/** Cola pendiente (confirm) o avisos personales (requester). */
 let cachedAlerts = [];
+/** Avisos personales del solicitante cuando además es confirmador. */
+let cachedPersonal = [];
 let alertMode = "requester"; // "confirm" | "requester"
 let refreshInFlight = null;
 let lastRefreshAt = 0;
@@ -41,7 +44,7 @@ const KIND_PENDING = "pending";
 const KIND_INCORRECTO = "incorrecto";
 
 export function getBorradoAlertCount() {
-  return cachedAlerts.length;
+  return cachedAlerts.length + cachedPersonal.length;
 }
 
 export function getBorradoAlerts() {
@@ -76,6 +79,7 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
       // Vista previa de perfil: simular alertas como las vería esa persona.
       if (isViewingAsProfile() && !canConfirmBorradoBasesModule()) {
         cachedAlerts = [];
+        cachedPersonal = [];
         alertMode = "requester";
         lastRefreshAt = Date.now();
         renderBorradoAlertUi();
@@ -95,6 +99,9 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
       const data = await res.json().catch(() => ({}));
       alertMode = String(data.mode || "").toLowerCase() === "confirm" ? "confirm" : "requester";
       cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
+      cachedPersonal = alertMode === "confirm"
+        ? (Array.isArray(data.personal) ? data.personal : []).map(normalizeAlert)
+        : [];
       if (alertMode === "confirm") {
         notifyBorradoDesktop(cachedAlerts.length, pendingSignature(cachedAlerts));
       }
@@ -150,10 +157,16 @@ function normalizeAlert(raw) {
   };
 }
 
-export async function markBorradoAlertsSeen(ids = null) {
-  if (alertMode === "confirm") return;
+function personalAlerts() {
+  return alertMode === "confirm" ? cachedPersonal : cachedAlerts;
+}
 
-  if (!cachedAlerts.length && !ids?.length) return;
+export async function markBorradoAlertsSeen(ids = null) {
+  // Confirm/pendientes: no hay “visto” de la cola. Solo IDs de avisos personales.
+  if (alertMode === "confirm" && !ids?.length) return;
+
+  const personal = personalAlerts();
+  if (!personal.length && !ids?.length) return;
   try {
     await planUserFetch("/api/planillas/borrado-bases/alerts/seen", {
       method: "POST",
@@ -164,22 +177,26 @@ export async function markBorradoAlertsSeen(ids = null) {
     // ignore
   }
   if (!ids?.length) {
-    cachedAlerts = [];
+    if (alertMode === "confirm") cachedPersonal = [];
+    else cachedAlerts = [];
   } else {
     const drop = new Set(ids);
-    cachedAlerts = cachedAlerts.filter((a) => !drop.has(a.id));
+    if (alertMode === "confirm") {
+      cachedPersonal = cachedPersonal.filter((a) => !drop.has(a.id));
+    } else {
+      cachedAlerts = cachedAlerts.filter((a) => !drop.has(a.id));
+    }
   }
   renderBorradoAlertUi();
 }
 
 /**
  * Al entrar al módulo:
- * - confirm/pendientes: no tocar el toast.
- * - solicitante: solo “eliminada/listo” sin observación; el resto espera a abrirla.
+ * - confirm/pendientes: no tocar el toast de cola.
+ * - solicitante (o personal del confirmador): solo “eliminada/listo” sin observación.
  */
 export async function markBorradoAlertsSeenOnEnter() {
-  if (alertMode === "confirm") return;
-  const readyIds = cachedAlerts
+  const readyIds = personalAlerts()
     .filter((a) => a.kind === KIND_READY)
     .map((a) => a.id)
     .filter((id) => id > 0);
@@ -189,10 +206,9 @@ export async function markBorradoAlertsSeenOnEnter() {
 
 /** Al abrir/ver una observación o resultado con nota (pop / modal). */
 export async function markBorradoObservationOpened(solicitudId) {
-  if (alertMode === "confirm") return;
   const sid = Number(solicitudId) || 0;
   if (!sid) return;
-  const ids = cachedAlerts
+  const ids = personalAlerts()
     .filter((a) => (a.solicitudId || a.id) === sid)
     .filter((a) => a.kind === KIND_NOTE || a.kind === KIND_PARTIAL || a.kind === KIND_INCORRECTO)
     .map((a) => a.id)
@@ -201,19 +217,15 @@ export async function markBorradoObservationOpened(solicitudId) {
   await markBorradoAlertsSeen(ids);
 }
 
-function summarizeAlerts(alerts) {
-  if (alertMode === "confirm") {
-    const n = alerts.length;
-    const text = n === 1
-      ? "Tenés 1 borrado de bases pendiente para confirmar"
-      : `Tenés ${n} borrados de bases pendientes para confirmar`;
-    return {
-      tone: "warn",
-      text,
-      counts: { pending: n },
-    };
-  }
+function summarizePending(alerts) {
+  const n = alerts.length;
+  const text = n === 1
+    ? "Tenés 1 borrado de bases pendiente para confirmar"
+    : `Tenés ${n} borrados de bases pendientes para confirmar`;
+  return { tone: "warn", text, counts: { pending: n } };
+}
 
+function summarizePersonal(alerts) {
   const counts = { ready: 0, note: 0, partial: 0, incorrecto: 0 };
   for (const a of alerts) {
     if (a.kind === KIND_PARTIAL) counts.partial += 1;
@@ -252,43 +264,85 @@ function summarizeAlerts(alerts) {
   return { tone, text, counts };
 }
 
+function openBorradoFromAlert() {
+  document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
+  document.dispatchEvent(new CustomEvent("st2:open-borrado-from-alert"));
+}
+
 export function renderBorradoAlertUi({ forceHide = false } = {}) {
-  const count = cachedAlerts.length;
-  const label = count > 99 ? "99+" : String(count);
-  const summary = count ? summarizeAlerts(cachedAlerts) : null;
+  const personal = personalAlerts();
+  const pendingCount = alertMode === "confirm" ? cachedAlerts.length : 0;
+  const personalCount = personal.length;
+  const totalCount = pendingCount + personalCount;
+  const label = totalCount > 99 ? "99+" : String(totalCount);
   const sistema = document.body.dataset.planSistema;
   const hideForSistema = forceHide || sistema === "Legal" || sistema === "Chile";
 
-  const tabHidden = count === 0 || hideForSistema;
+  const pendingSummary = pendingCount ? summarizePending(cachedAlerts) : null;
+  const personalSummary = personalCount ? summarizePersonal(personal) : null;
+  const titleParts = [pendingSummary?.text, personalSummary?.text].filter(Boolean);
+
+  const tabHidden = totalCount === 0 || hideForSistema;
   setPlanillasTabAlertPart("borrado", {
-    count: hideForSistema ? 0 : count,
-    title: summary?.text || "",
+    count: hideForSistema ? 0 : totalCount,
+    title: titleParts.join(" · "),
     hidden: tabHidden,
   });
 
   const modBadge = document.getElementById("plan-modulo-borrado-badge");
   if (modBadge) {
     modBadge.textContent = label;
-    modBadge.classList.toggle("hidden", count === 0 || hideForSistema);
-    modBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
+    modBadge.classList.toggle("hidden", totalCount === 0 || hideForSistema);
+    modBadge.setAttribute("aria-hidden", totalCount && !hideForSistema ? "false" : "true");
   }
 
-  if (count === 0 || !summary || hideForSistema) {
+  if (hideForSistema) {
     clearSt2AlertToast(ST2_TOAST.borrado);
-  } else {
-    const openBorrado = () => {
-      document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
-      document.dispatchEvent(new CustomEvent("st2:open-borrado-from-alert"));
-    };
+    clearSt2AlertToast(ST2_TOAST.borradoMine);
+    return;
+  }
+
+  if (alertMode === "confirm") {
+    if (pendingSummary) {
+      setSt2AlertToast({
+        id: ST2_TOAST.borrado,
+        body: pendingSummary.text,
+        tone: pendingSummary.tone,
+        actionLabel: "Ver",
+        sticky: true,
+        onAction: openBorradoFromAlert,
+      });
+    } else {
+      clearSt2AlertToast(ST2_TOAST.borrado);
+    }
+
+    if (personalSummary) {
+      setSt2AlertToast({
+        id: ST2_TOAST.borradoMine,
+        body: personalSummary.text,
+        tone: personalSummary.tone,
+        actionLabel: "Ver",
+        sticky: true,
+        onAction: openBorradoFromAlert,
+      });
+    } else {
+      clearSt2AlertToast(ST2_TOAST.borradoMine);
+    }
+    return;
+  }
+
+  clearSt2AlertToast(ST2_TOAST.borradoMine);
+  if (personalSummary) {
     setSt2AlertToast({
       id: ST2_TOAST.borrado,
-      body: summary.text,
-      // eliminada → ok (verde); pendientes / obs / parcial / incorrecto → warn
-      tone: summary.tone,
+      body: personalSummary.text,
+      tone: personalSummary.tone,
       actionLabel: "Ver",
       sticky: true,
-      onAction: openBorrado,
+      onAction: openBorradoFromAlert,
     });
+  } else {
+    clearSt2AlertToast(ST2_TOAST.borrado);
   }
 }
 

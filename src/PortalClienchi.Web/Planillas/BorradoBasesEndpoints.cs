@@ -129,16 +129,18 @@ public static class BorradoBasesEndpoints
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
-            // Quien confirma ve solo la cola pendiente (sin listo / sin aclaración).
-            // Los avisos personales (listo / observación / incorrecto) son para el solicitante.
+            // Confirmador: cola pendiente + avisos personales (si también solicitó).
             if (flags.BorradoBasesConfirm)
             {
                 var pending = repo.ListPendingForConfirm();
+                var personal = repo.ListUnseenAlerts(email!);
                 return Results.Ok(new
                 {
                     mode = "confirm",
                     count = pending.Count,
                     items = pending,
+                    personalCount = personal.Count,
+                    personal,
                 });
             }
 
@@ -148,6 +150,8 @@ public static class BorradoBasesEndpoints
                 mode = "requester",
                 count = alerts.Count,
                 items = alerts,
+                personalCount = 0,
+                personal = Array.Empty<BorradoAlertDto>(),
             });
         });
 
@@ -155,9 +159,6 @@ public static class BorradoBasesEndpoints
         {
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
-
-            if (flags.BorradoBasesConfirm)
-                return Results.Ok(new { ok = true, marked = 0, mode = "confirm" });
 
             int[]? ids = null;
             try
@@ -170,8 +171,14 @@ public static class BorradoBasesEndpoints
                 // body opcional
             }
 
+            // Solo afecta borrado_alerts (avisos del solicitante). La cola pendiente no se marca vista.
             var marked = repo.MarkAlertsSeen(email!, ids);
-            return Results.Ok(new { ok = true, marked, mode = "requester" });
+            return Results.Ok(new
+            {
+                ok = true,
+                marked,
+                mode = flags.BorradoBasesConfirm ? "confirm" : "requester",
+            });
         });
 
         app.MapDelete("/api/planillas/borrado-bases/{id:int}", (

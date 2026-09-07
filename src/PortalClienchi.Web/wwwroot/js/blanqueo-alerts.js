@@ -23,7 +23,10 @@ const DISMISS_KEYS_LEGACY = [
 let pollTimer = null;
 let retryTimer = null;
 let retryCount = 0;
+/** Cola pendiente (confirm) o avisos personales (requester). */
 let cachedAlerts = [];
+/** Avisos personales del solicitante cuando además es confirmador. */
+let cachedPersonal = [];
 let alertMode = "requester"; // "confirm" | "requester"
 let refreshInFlight = null;
 let lastRefreshAt = 0;
@@ -42,7 +45,7 @@ const KIND_NO_REG = "no_registrado";
 const KIND_PENDING = "pending";
 
 export function getBlanqueoAlertCount() {
-  return cachedAlerts.length;
+  return cachedAlerts.length + cachedPersonal.length;
 }
 
 export function getBlanqueoAlerts() {
@@ -76,13 +79,14 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
     try {
       if (isViewingAsProfile() && !canConfirmBlanqueoModule()) {
         cachedAlerts = [];
+        cachedPersonal = [];
         alertMode = "requester";
         lastRefreshAt = Date.now();
         renderBlanqueoAlertUi();
         return cachedAlerts;
       }
 
-      // Confirmador: siempre cola pendiente. Vista previa / ver como: ?mode=confirm.
+      // Confirmador: cola pendiente. Vista previa / ver como: ?mode=confirm.
       const alertsUrl = isViewingAsProfile() && canConfirmBlanqueoModule()
         ? "/api/planillas/blanqueo/alerts?mode=confirm"
         : "/api/planillas/blanqueo/alerts";
@@ -94,6 +98,9 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
       const data = await res.json().catch(() => ({}));
       alertMode = String(data.mode || "").toLowerCase() === "confirm" ? "confirm" : "requester";
       cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
+      cachedPersonal = alertMode === "confirm"
+        ? (Array.isArray(data.personal) ? data.personal : []).map(normalizeAlert)
+        : [];
       if (alertMode === "confirm") {
         notifyBlanqueoDesktop(cachedAlerts.length, pendingSignature(cachedAlerts));
       }
@@ -148,11 +155,16 @@ function normalizeAlert(raw) {
   };
 }
 
-export async function markBlanqueoAlertsSeen(ids = null) {
-  // Confirm/pendientes: el toast vive mientras haya cola; no hay “visto” por UI.
-  if (alertMode === "confirm") return;
+function personalAlerts() {
+  return alertMode === "confirm" ? cachedPersonal : cachedAlerts;
+}
 
-  if (!cachedAlerts.length && !ids?.length) return;
+export async function markBlanqueoAlertsSeen(ids = null) {
+  // Confirm/pendientes: no hay “visto” de la cola. Solo IDs de avisos personales.
+  if (alertMode === "confirm" && !ids?.length) return;
+
+  const personal = personalAlerts();
+  if (!personal.length && !ids?.length) return;
   try {
     await planUserFetch("/api/planillas/blanqueo/alerts/seen", {
       method: "POST",
@@ -163,22 +175,26 @@ export async function markBlanqueoAlertsSeen(ids = null) {
     // ignore
   }
   if (!ids?.length) {
-    cachedAlerts = [];
+    if (alertMode === "confirm") cachedPersonal = [];
+    else cachedAlerts = [];
   } else {
     const drop = new Set(ids);
-    cachedAlerts = cachedAlerts.filter((a) => !drop.has(a.id));
+    if (alertMode === "confirm") {
+      cachedPersonal = cachedPersonal.filter((a) => !drop.has(a.id));
+    } else {
+      cachedAlerts = cachedAlerts.filter((a) => !drop.has(a.id));
+    }
   }
   renderBlanqueoAlertUi();
 }
 
 /**
  * Al entrar al módulo:
- * - confirm/pendientes: no tocar el toast (sigue hasta que confirmen/denieguen).
- * - solicitante: solo marca “listo sin observación”; notas / no registrado esperan a abrirlas.
+ * - confirm/pendientes: no tocar el toast de cola.
+ * - solicitante (o personal del confirmador): solo marca “listo sin observación”.
  */
 export async function markBlanqueoAlertsSeenOnEnter() {
-  if (alertMode === "confirm") return;
-  const readyIds = cachedAlerts
+  const readyIds = personalAlerts()
     .filter((a) => a.kind === KIND_READY)
     .map((a) => a.id)
     .filter((id) => id > 0);
@@ -188,10 +204,9 @@ export async function markBlanqueoAlertsSeenOnEnter() {
 
 /** Al abrir/ver una observación (pop o modal) del solicitante. */
 export async function markBlanqueoObservationOpened(solicitudId) {
-  if (alertMode === "confirm") return;
   const sid = Number(solicitudId) || 0;
   if (!sid) return;
-  const ids = cachedAlerts
+  const ids = personalAlerts()
     .filter((a) => (a.solicitudId || a.id) === sid)
     .filter((a) => a.kind === KIND_NOTE || a.kind === KIND_NO_REG)
     .map((a) => a.id)
@@ -200,19 +215,15 @@ export async function markBlanqueoObservationOpened(solicitudId) {
   await markBlanqueoAlertsSeen(ids);
 }
 
-function summarizeAlerts(alerts) {
-  if (alertMode === "confirm") {
-    const n = alerts.length;
-    const text = n === 1
-      ? "Tenés 1 blanqueo pendiente para confirmar"
-      : `Tenés ${n} blanqueos pendientes para confirmar`;
-    return {
-      tone: "warn",
-      text,
-      counts: { pending: n },
-    };
-  }
+function summarizePending(alerts) {
+  const n = alerts.length;
+  const text = n === 1
+    ? "Tenés 1 blanqueo pendiente para confirmar"
+    : `Tenés ${n} blanqueos pendientes para confirmar`;
+  return { tone: "warn", text, counts: { pending: n } };
+}
 
+function summarizePersonal(alerts) {
   const counts = { ready: 0, note: 0, no_registrado: 0 };
   for (const a of alerts) {
     if (a.kind === KIND_NO_REG) counts.no_registrado += 1;
@@ -242,43 +253,85 @@ function summarizeAlerts(alerts) {
   return { tone, text, counts };
 }
 
+function openBlanqueoFromAlert() {
+  document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
+  document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
+}
+
 export function renderBlanqueoAlertUi({ forceHide = false } = {}) {
-  const count = cachedAlerts.length;
-  const label = count > 99 ? "99+" : String(count);
-  const summary = count ? summarizeAlerts(cachedAlerts) : null;
+  const personal = personalAlerts();
+  const pendingCount = alertMode === "confirm" ? cachedAlerts.length : 0;
+  const personalCount = personal.length;
+  const totalCount = pendingCount + personalCount;
+  const label = totalCount > 99 ? "99+" : String(totalCount);
   const sistema = document.body.dataset.planSistema;
   const hideForSistema = forceHide || sistema === "Legal" || sistema === "Chile";
 
-  const tabHidden = count === 0 || hideForSistema;
+  const pendingSummary = pendingCount ? summarizePending(cachedAlerts) : null;
+  const personalSummary = personalCount ? summarizePersonal(personal) : null;
+  const titleParts = [pendingSummary?.text, personalSummary?.text].filter(Boolean);
+
+  const tabHidden = totalCount === 0 || hideForSistema;
   setPlanillasTabAlertPart("blanqueo", {
-    count: hideForSistema ? 0 : count,
-    title: summary?.text || "",
+    count: hideForSistema ? 0 : totalCount,
+    title: titleParts.join(" · "),
     hidden: tabHidden,
   });
 
   const modBadge = document.getElementById("plan-modulo-blanqueo-badge");
   if (modBadge) {
     modBadge.textContent = label;
-    modBadge.classList.toggle("hidden", count === 0 || hideForSistema);
-    modBadge.setAttribute("aria-hidden", count && !hideForSistema ? "false" : "true");
+    modBadge.classList.toggle("hidden", totalCount === 0 || hideForSistema);
+    modBadge.setAttribute("aria-hidden", totalCount && !hideForSistema ? "false" : "true");
   }
 
-  if (count === 0 || !summary || hideForSistema) {
+  if (hideForSistema) {
     clearSt2AlertToast(ST2_TOAST.blanqueo);
-  } else {
-    const openBlanqueo = () => {
-      document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
-      document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
-    };
+    clearSt2AlertToast(ST2_TOAST.blanqueoMine);
+    return;
+  }
+
+  if (alertMode === "confirm") {
+    if (pendingSummary) {
+      setSt2AlertToast({
+        id: ST2_TOAST.blanqueo,
+        body: pendingSummary.text,
+        tone: pendingSummary.tone,
+        actionLabel: "Ver",
+        sticky: true,
+        onAction: openBlanqueoFromAlert,
+      });
+    } else {
+      clearSt2AlertToast(ST2_TOAST.blanqueo);
+    }
+
+    if (personalSummary) {
+      setSt2AlertToast({
+        id: ST2_TOAST.blanqueoMine,
+        body: personalSummary.text,
+        tone: personalSummary.tone,
+        actionLabel: "Ver",
+        sticky: true,
+        onAction: openBlanqueoFromAlert,
+      });
+    } else {
+      clearSt2AlertToast(ST2_TOAST.blanqueoMine);
+    }
+    return;
+  }
+
+  clearSt2AlertToast(ST2_TOAST.blanqueoMine);
+  if (personalSummary) {
     setSt2AlertToast({
       id: ST2_TOAST.blanqueo,
-      body: summary.text,
-      // confirmado → ok (verde); observación → warn; no registrado → bad
-      tone: summary.tone,
+      body: personalSummary.text,
+      tone: personalSummary.tone,
       actionLabel: "Ver",
       sticky: true,
-      onAction: openBlanqueo,
+      onAction: openBlanqueoFromAlert,
     });
+  } else {
+    clearSt2AlertToast(ST2_TOAST.blanqueo);
   }
 }
 

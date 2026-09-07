@@ -124,17 +124,19 @@ public static class BlanqueoEndpoints
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
-            // Quien confirma ve solo la cola pendiente (sin listo / sin aclaración).
-            // ?mode=confirm en “ver como” fuerza esa cola. Los avisos personales
-            // (listo / no registrado / nota) son para el solicitante, no para el confirmador.
+            // Confirmador: cola pendiente + avisos personales (si también solicitó y le confirmaron).
+            // ?mode=confirm en “ver como” fuerza esa cola. La cola no vive en blanqueo_alerts.
             if (flags.BlanqueoConfirm)
             {
                 var pending = repo.ListPendingForConfirm();
+                var personal = repo.ListUnseenAlerts(email!);
                 return Results.Ok(new
                 {
                     mode = "confirm",
                     count = pending.Count,
                     items = pending,
+                    personalCount = personal.Count,
+                    personal,
                     claveBlanqueo = BlanqueoClave.Actual,
                 });
             }
@@ -145,6 +147,8 @@ public static class BlanqueoEndpoints
                 mode = "requester",
                 count = alerts.Count,
                 items = alerts,
+                personalCount = 0,
+                personal = Array.Empty<BlanqueoAlertDto>(),
                 claveBlanqueo = BlanqueoClave.Actual,
             });
         });
@@ -154,10 +158,6 @@ public static class BlanqueoEndpoints
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
-            // Para confirmadores el "visto" es solo UI (toast); la cola sigue en badge hasta marcar listo.
-            if (flags.BlanqueoConfirm)
-                return Results.Ok(new { ok = true, marked = 0, mode = "confirm" });
-
             int[]? ids = null;
             try
             {
@@ -166,11 +166,17 @@ public static class BlanqueoEndpoints
             }
             catch
             {
-                // body opcional: sin ids marca todas
+                // body opcional: sin ids marca todas las personales
             }
 
+            // Solo afecta blanqueo_alerts (avisos del solicitante). La cola pendiente no se “marca vista”.
             var marked = repo.MarkAlertsSeen(email!, ids);
-            return Results.Ok(new { ok = true, marked, mode = "requester" });
+            return Results.Ok(new
+            {
+                ok = true,
+                marked,
+                mode = flags.BlanqueoConfirm ? "confirm" : "requester",
+            });
         });
 
         app.MapPost("/api/planillas/blanqueo", (
