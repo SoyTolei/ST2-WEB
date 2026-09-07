@@ -1,4 +1,4 @@
-﻿import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
+import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import {
   canSeeBorradoBasesModule as canSeeFromAccess,
   canConfirmBorradoBasesModule as canConfirmFromAccess,
@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907m";
+import { notifyBorradoChanged, markBorradoAlertsSeen } from "./borrado-alerts.js?v=20260907o";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -158,8 +158,8 @@ export function initBorradoBasesModule() {
     } catch { /* ignore */ }
     syncLoadFormVisibility();
     setStatus(on
-      ? "Vista confirmador: solo listado (ocultÃ¡ el formulario)."
-      : "Formulario de carga visible. MarcÃ¡ â€œVista confirmadorâ€ para volver al listado.");
+      ? "Vista confirmador: solo listado (ocultá el formulario)."
+      : "Formulario de carga visible. Marcá "Vista confirmador" para volver al listado.");
   });
   document.getElementById("borrado-th-fecha")?.addEventListener("click", () => {
     fechaSortDir = fechaSortDir === "desc" ? "asc" : "desc";
@@ -275,7 +275,7 @@ export async function openBorradoBasesModule() {
   syncLoadFormVisibility();
   clearForm();
   monthFilterTouched = false;
-  setStatus("Cargando solicitudesâ€¦");
+  setStatus("Cargando solicitudes…");
   await reloadList();
   liveList.start();
 }
@@ -523,7 +523,7 @@ function isOwner(item) {
   return String(item.solicitadoPorEmail || "").trim().toLowerCase() === currentEmail();
 }
 
-/** Pendiente = sin listo y sin aclaraciÃ³n. AhÃ­ el solicitante puede editar/eliminar. */
+/** Pendiente = sin listo y sin aclaración. Ahí el solicitante puede editar/eliminar. */
 function isPendingSolicitud(item) {
   return !item?.listo && !String(item?.aclaracion || "").trim();
 }
@@ -534,7 +534,7 @@ function canOwnerMutate(item) {
 
 async function createSolicitud() {
   if (!effectiveCanLoad()) {
-    setStatus("Tu perfil es solo listado: no podÃ©s cargar solicitudes.", true);
+    setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
     return;
   }
   const detalleEnSalesforce = isSalesforceFormMode();
@@ -542,7 +542,7 @@ async function createSolicitud() {
   const nroCliente = document.getElementById("borrado-cliente")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente) {
-    setStatus("CompletÃ¡ caso y cliente.", true);
+    setStatus("Completá caso y cliente.", true);
     return;
   }
 
@@ -557,15 +557,15 @@ async function createSolicitud() {
     const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
 
     if (!nroEmpresa || !nombreEmpresa) {
-      setStatus("CompletÃ¡ cÃ³digo y nombre de empresa.", true);
+      setStatus("Completá código y nombre de empresa.", true);
       return;
     }
     if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
-      setStatus("MarcÃ¡ al menos una base a borrar.", true);
+      setStatus("Marcá al menos una base a borrar.", true);
       return;
     }
     if (bases.contabilidad && !ejerciciosDetalle) {
-      setStatus("Si marcÃ¡s CG, pegÃ¡ los ejercicios a borrar.", true);
+      setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
       return;
     }
 
@@ -581,7 +581,7 @@ async function createSolicitud() {
     };
   }
 
-  setStatus("Guardandoâ€¦");
+  setStatus("Guardando…");
   try {
     const res = await planUserFetch("/api/planillas/borrado-bases", {
       method: "POST",
@@ -759,9 +759,9 @@ function syncFechaSortHeader() {
   const desc = fechaSortDir === "desc";
   th.setAttribute("aria-sort", desc ? "descending" : "ascending");
   th.title = desc
-    ? "Lo mÃ¡s nuevo arriba â€” clic para invertir"
-    : "Lo mÃ¡s antiguo arriba â€” clic para invertir";
-  if (mark) mark.textContent = desc ? "â†“" : "â†‘";
+    ? "Lo más nuevo arriba — clic para invertir"
+    : "Lo más antiguo arriba — clic para invertir";
+  if (mark) mark.textContent = desc ? "↓" : "↑";
 }
 
 function applyFilters() {
@@ -777,7 +777,7 @@ function applyFilters() {
 
 async function exportExcel() {
   if (!canConfirm) return;
-  setStatus("Generando Excelâ€¦");
+  setStatus("Generando Excel…");
   try {
     const res = await planUserFetch("/api/planillas/borrado-bases/export");
     if (!res.ok) {
@@ -805,7 +805,7 @@ function basesLabel(item) {
   if (item.iva) parts.push("IVA");
   if (item.sueldos) parts.push("SJ");
   if (item.contabilidad) parts.push("CG");
-  return parts.join(", ") || "â€”";
+  return parts.join(", ") || "—";
 }
 
 function formatBasesPills(item) {
@@ -825,10 +825,10 @@ function formatBasesPills(item) {
     const count = splitEjercicios(detail).length || 1;
     pills.push(basePillHtml("CG", display, true, count));
   }
-  return pills.length ? pills.join(" ") : "â€”";
+  return pills.length ? pills.join(" ") : "—";
 }
 
-/** Separa varios ejercicios (saltos de lÃ­nea, â€œyâ€, comas, etc.). */
+/** Separa varios ejercicios (saltos de línea, "y", comas, etc.). */
 function splitEjercicios(raw) {
   const text = String(raw || "").trim();
   if (!text) return [];
@@ -837,12 +837,12 @@ function splitEjercicios(raw) {
   const parts = [];
 
   for (const line of lines) {
-    // "Ejercicio 2023, y Ejercicio 2024" | "Ejercicio 2025, ejercicio 2023" | "â€¦ ; â€¦"
+    // "Ejercicio 2023, y Ejercicio 2024" | "Ejercicio 2025, ejercicio 2023" | "… ; …"
     const chunks = line
       .split(
-        /\s*(?:,\s*y\s+|\s+y\s+|,\s*|;|\||\s+[-â€“â€”]\s+)\s*(?=(?:ejercicio|ej\.?)\b)/i
+        /\s*(?:,\s*y\s+|\s+y\s+|,\s*|;|\||\s+[-–—]\s+)\s*(?=(?:ejercicio|ej\.?)\b)/i
       )
-      .map((s) => s.trim().replace(/^[-â€“â€”]\s*/, "").replace(/^,\s*/, "").replace(/^y\s+/i, ""))
+      .map((s) => s.trim().replace(/^[-–—]\s*/, "").replace(/^,\s*/, "").replace(/^y\s+/i, ""))
       .filter(Boolean);
 
     if (chunks.length > 1) {
@@ -850,21 +850,21 @@ function splitEjercicios(raw) {
       continue;
     }
 
-    // Solo aÃ±os: "2025, 2023 y 2024"
+    // Solo años: "2025, 2023 y 2024"
     const years = line.match(/\b20\d{2}\b/g);
     if (years && years.length > 1 && /^(?:ejercicio|ej\.?)?\s*20\d{2}(?:\s*[,;y&]\s*(?:ejercicio|ej\.?)?\s*20\d{2})+$/i.test(line.replace(/\s+/g, " ").trim())) {
       parts.push(...years.map((y) => `Ejercicio ${y}`));
       continue;
     }
 
-    parts.push(line.replace(/^[-â€“â€”]\s*/, ""));
+    parts.push(line.replace(/^[-–—]\s*/, ""));
   }
 
   return parts;
 }
 
 function formatEjercicioLabel(part) {
-  const cleaned = String(part || "").trim().replace(/^[-â€“â€”]\s*/, "");
+  const cleaned = String(part || "").trim().replace(/^[-–—]\s*/, "");
   if (!cleaned) return "";
   const m = cleaned.match(/^(?:ejercicio|ej\.?)\s*(20\d{2})\b/i);
   if (m) return `Ejercicio ${m[1]}`;
@@ -876,7 +876,7 @@ function formatEjercicioLabel(part) {
 function formatEjerciciosSeparated(raw) {
   const parts = splitEjercicios(raw).map(formatEjercicioLabel).filter(Boolean);
   if (parts.length === 0) return "Sin ejercicios";
-  // Una lÃ­nea por ejercicio: "- Ejercicio 2025"
+  // Una línea por ejercicio: "- Ejercicio 2025"
   return parts.map((p) => `- ${p}`).join("\n");
 }
 
@@ -911,7 +911,7 @@ function showBasePop(anchor, label, detail) {
     const raw = String(label || "").trim();
     title.textContent = raw === "CG" ? "Contabilidad General" : (raw || "Base");
   }
-  if (text) text.textContent = detail || "â€”";
+  if (text) text.textContent = detail || "—";
   if (copyBtn) {
     copyBtn.classList.remove("is-copied");
     copyBtn.setAttribute("data-copy-hint", "Copiar");
@@ -1011,7 +1011,7 @@ function buildRow(item) {
   const { nota } = parseAclaracion(item.aclaracion);
   const hasNota = !incorrecto && !!String(nota || "").trim();
   const hasAclaracion = !incorrecto && !!String(item.aclaracion || "").trim();
-  const partial = !!(item.listo && item.aclaracion && /âœ—/.test(String(item.aclaracion)));
+  const partial = !!(item.listo && item.aclaracion && /✗/.test(String(item.aclaracion)));
   if (incorrecto) row.classList.add("borrado-row-incorrecto");
   else if (partial) row.classList.add("borrado-row-partial");
   else if (item.listo && hasNota) row.classList.add("borrado-row-listo-nota");
@@ -1025,19 +1025,19 @@ function buildRow(item) {
   const cliente = String(item.nroCliente || "").trim();
   const caso = String(item.nroCaso || "").trim();
   const aclaracion = String(item.aclaracion || "").trim();
-  const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "â€”"));
+  const empresaLabel = nro && nombre ? `[${nro}] ${nombre}` : (nro ? `[${nro}]` : (nombre || "—"));
   const copyBtn = (value, kind) => {
-    if (!value || !canConfirm) return escapeHtml(value || "â€”");
+    if (!value || !canConfirm) return escapeHtml(value || "—");
     const label = kind === "caso" ? "caso" : "cliente";
-    return `<button type="button" class="borrado-cliente-copy" data-borrado-copy-value="${escapeHtml(value)}" data-borrado-copy-kind="${label}" title="Clic para copiar NÂ° de ${label}">
-            <span class="borrado-cliente-copy-icon" aria-hidden="true">ðŸ“‹</span>
+    return `<button type="button" class="borrado-cliente-copy" data-borrado-copy-value="${escapeHtml(value)}" data-borrado-copy-kind="${label}" title="Clic para copiar N° de ${label}">
+            <span class="borrado-cliente-copy-icon" aria-hidden="true">📋</span>
             <span class="borrado-cliente-copy-text">${escapeHtml(value)}</span>
             <span class="borrado-cliente-copy-hint" aria-hidden="true">copiar</span>
           </button>`;
   };
   const allowCopy = isDetalleSalesforce(item) || canConfirm;
-  const casoCell = !caso ? "â€”" : allowCopy ? copyBtn(caso, "caso") : escapeHtml(caso);
-  const clienteCell = !cliente ? "â€”" : allowCopy ? copyBtn(cliente, "cliente") : escapeHtml(cliente);
+  const casoCell = !caso ? "—" : allowCopy ? copyBtn(caso, "caso") : escapeHtml(caso);
+  const clienteCell = !cliente ? "—" : allowCopy ? copyBtn(cliente, "cliente") : escapeHtml(cliente);
   row.innerHTML = `
     <td class="borrado-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="borrado-col-caso" title="${escapeHtml(caso)}">${casoCell}</td>
@@ -1070,7 +1070,7 @@ function buildRow(item) {
       e.preventDefault();
       e.stopPropagation();
       selectedId = item.id;
-      // ObservaciÃ³n: Ver abre el editor (si podÃ©s confirmar) para ver/completar el texto.
+      // Observación: Ver abre el editor (si podés confirmar) para ver/completar el texto.
       if (pill.classList.contains("borrado-aclaracion-pill") && canConfirm) {
         hideBasePop();
         openNoteModal(item);
@@ -1101,8 +1101,8 @@ function buildRow(item) {
   });
 
   row.title = canConfirm
-    ? "Doble clic: marcar / quitar listo Â· Clic derecho: menÃº"
-    : "Clic derecho: menÃº (si sos el solicitante)";
+    ? "Doble clic: marcar / quitar listo · Clic derecho: menú"
+    : "Clic derecho: menú (si sos el solicitante)";
 
   row.addEventListener("contextmenu", (e) => {
     e.preventDefault();
@@ -1132,7 +1132,7 @@ async function toggleListoByDoubleClick(item) {
   try {
     if (item.listo) {
       await unsetListo(item);
-      setStatus("Se quitÃ³ el listo.");
+      setStatus("Se quitó el listo.");
       await reloadList();
       notifyBorradoChanged();
       return;
@@ -1284,7 +1284,7 @@ async function confirmIncorrectoModal() {
     const anyBase = !!(item.iva || item.sueldos || item.contabilidad);
     const anyMarked = !!(marked.iva || marked.sueldos || marked.contabilidad);
     if (anyBase && !anyMarked) {
-      setStatus("MarcÃ¡ al menos una base incorrecta.", true);
+      setStatus("Marcá al menos una base incorrecta.", true);
       return;
     }
   }
@@ -1294,7 +1294,7 @@ async function confirmIncorrectoModal() {
   const noteFromUi = String(document.getElementById("borrado-incorrecto-note")?.value || "").trim();
   const notaFinal = wantNote ? noteFromUi : "";
   if (wantNote && !notaFinal) {
-    setStatus("EscribÃ­ la observaciÃ³n o desmarcÃ¡ â€œÂ¿Hay observaciÃ³n?â€.", true);
+    setStatus("Escribí la observación o desmarcá "¿Hay observación?".", true);
     return;
   }
   const aclaracion = composeAclaracion(summary, notaFinal);
@@ -1357,7 +1357,7 @@ async function confirmListoModal() {
   }
 }
 
-/** Resumen al confirmar solicitudes Salesforce: solo las bases marcadas (el detalle estÃ¡ en Salesforce). */
+/** Resumen al confirmar solicitudes Salesforce: solo las bases marcadas (el detalle está en Salesforce). */
 function buildListoSummarySalesforce(done) {
   const parts = [];
   if (done.iva) parts.push("IVA");
@@ -1367,7 +1367,7 @@ function buildListoSummarySalesforce(done) {
   return `Listo ${parts.join(", ")}`;
 }
 
-/** Resumen al confirmar: "Listo IVA, SJ, CG" o "âœ“ IVA Â· âœ— SJ Â· âœ“ CG". */
+/** Resumen al confirmar: "Listo IVA, SJ, CG" o "✓ IVA · ✗ SJ · ✓ CG". */
 function buildListoSummary(item, done) {
   const parts = [];
   if (item.iva) parts.push({ label: "IVA", ok: !!done.iva });
@@ -1377,7 +1377,7 @@ function buildListoSummary(item, done) {
 
   const allOk = parts.every((p) => p.ok);
   if (allOk) return `Listo ${parts.map((p) => p.label).join(", ")}`;
-  return parts.map((p) => `${p.ok ? "âœ“" : "âœ—"} ${p.label}`).join(" Â· ");
+  return parts.map((p) => `${p.ok ? "✓" : "✗"} ${p.label}`).join(" · ");
 }
 
 const ACLARACION_SEP = "\n---\n";
@@ -1387,7 +1387,7 @@ function isIncorrectoResultado(text) {
   return /^Incorrecto\b/i.test(String(text || "").trim());
 }
 
-/** Solicitud con datos errÃ³neos / no corresponde procesar (anÃ¡logo a â€œNo registradoâ€ en blanqueo). */
+/** Solicitud con datos erróneos / no corresponde procesar (análogo a "No registrado" en blanqueo). */
 function isIncorrecto(value) {
   const text = String(value || "").trim();
   if (!text) return false;
@@ -1400,10 +1400,10 @@ function isIncorrecto(value) {
 
 function isResultadoAclaracion(text) {
   const t = String(text || "").trim();
-  return /^Listo\b/i.test(t) || isIncorrectoResultado(t) || /[âœ“âœ—]/.test(t);
+  return /^Listo\b/i.test(t) || isIncorrectoResultado(t) || /[✓✗]/.test(t);
 }
 
-/** Separa resultado de bases (checks) y observaciÃ³n libre. */
+/** Separa resultado de bases (checks) y observación libre. */
 function parseAclaracion(raw) {
   const text = String(raw || "").trim();
   if (!text) return { resultado: "", nota: "" };
@@ -1438,7 +1438,7 @@ function composeAclaracion(resultado, nota) {
 function formatFecha(iso) {
   const raw = String(iso || "").trim();
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
-  if (!m) return raw || "â€”";
+  if (!m) return raw || "—";
   const day = Number(m[3]);
   const month = MONTHS[Number(m[2]) - 1] || m[2];
   const year = Number(m[1]);
@@ -1449,25 +1449,25 @@ function formatFecha(iso) {
 
 function formatCuit(raw) {
   const digits = String(raw || "").replace(/\D/g, "");
-  if (!digits) return "â€”";
+  if (!digits) return "—";
   if (digits.length === 11) {
     return `${digits.slice(0, 2)}-${digits.slice(2, 10)}-${digits.slice(10)}`;
   }
-  return String(raw || "").trim() || "â€”";
+  return String(raw || "").trim() || "—";
 }
 
 function isPartialListo(item) {
   if (!item?.listo) return false;
   if (isDetalleSalesforce(item)) return false;
   const { resultado } = parseAclaracion(item.aclaracion);
-  return /âœ—/.test(String(resultado || ""));
+  return /✗/.test(String(resultado || ""));
 }
 
 function formatGestionadoPorCell(item) {
   const nombre = String(item.confirmadoPorNombre || "").trim();
   const gestionado = !!item?.listo || !!String(item?.aclaracion || "").trim();
-  if (!gestionado) return "â€”";
-  return escapeHtml(nombre || "â€”");
+  if (!gestionado) return "—";
+  return escapeHtml(nombre || "—");
 }
 
 function formatEstadoCell(item) {
@@ -1480,23 +1480,23 @@ function formatEstadoCell(item) {
       return '<span class="borrado-pill partial" title="Algunas bases quedaron pendientes">Parcial</span>';
     }
     if (String(nota || "").trim()) {
-      return '<span class="borrado-pill ok-note" title="Eliminada con observaciÃ³n">Eliminada Â· nota</span>';
+      return '<span class="borrado-pill ok-note" title="Eliminada con observación">Eliminada · nota</span>';
     }
     return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada</span>';
   }
   if (!resultado && !nota) {
-    return '<span class="borrado-estado-pending" title="Pendiente de confirmaciÃ³n">Pendiente</span>';
+    return '<span class="borrado-estado-pending" title="Pendiente de confirmación">Pendiente</span>';
   }
-  return '<span class="borrado-pill note" title="Con observaciÃ³n">Nota</span>';
+  return '<span class="borrado-pill note" title="Con observación">Nota</span>';
 }
 
 function formatResultadoHtml(resultado) {
   const raw = String(resultado || "").trim();
   if (!raw) return "";
-  if (/[âœ“âœ—]/.test(raw)) {
+  if (/[✓✗]/.test(raw)) {
     const html = escapeHtml(raw)
-      .replace(/âœ“/g, '<span class="borrado-mark-ok" aria-hidden="true">âœ“</span>')
-      .replace(/âœ—/g, '<span class="borrado-mark-no" aria-hidden="true">âœ—</span>');
+      .replace(/✓/g, '<span class="borrado-mark-ok" aria-hidden="true">✓</span>')
+      .replace(/✗/g, '<span class="borrado-mark-no" aria-hidden="true">✗</span>');
     return `<span class="borrado-aclaracion-full borrado-aclaracion-marks">${html}</span>`;
   }
   if (/^Listo\b/i.test(raw)) {
@@ -1511,7 +1511,7 @@ function formatResultadoHtml(resultado) {
 function shouldAclaracionUsePill(text) {
   const raw = String(text || "").trim();
   if (!raw) return false;
-  if (/[âœ“âœ—]/.test(raw)) return false;
+  if (/[✓✗]/.test(raw)) return false;
   if (/^Listo\b/i.test(raw) && raw.length < 60) return false;
   if (/^Incorrecto\b/i.test(raw) && raw.length < 60) return false;
   return raw.length > 36 || raw.includes("\n");
@@ -1520,22 +1520,22 @@ function shouldAclaracionUsePill(text) {
 function formatAclaracionNotaPill(label, detail) {
   const text = String(detail || "").trim();
   if (!text) return "";
-  const tip = text.length > 80 ? `${text.slice(0, 80)}â€¦` : text;
+  const tip = text.length > 80 ? `${text.slice(0, 80)}…` : text;
   return `<span class="borrado-base-cg"><button type="button" class="borrado-base-pill has-detail borrado-aclaracion-pill" title="${escapeAttr(tip)}" aria-label="Ver ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(text)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">Ver</span></button></span>`;
 }
 
 function formatAclaracionCell(text) {
   const { resultado, nota } = parseAclaracion(text);
-  if (!resultado && !nota) return "â€”";
+  if (!resultado && !nota) return "—";
   const parts = [];
   if (resultado) {
     if (shouldAclaracionUsePill(resultado)) {
-      parts.push(formatAclaracionNotaPill("AclaraciÃ³n", resultado));
+      parts.push(formatAclaracionNotaPill("Aclaración", resultado));
     } else {
       parts.push(formatResultadoHtml(resultado));
     }
   }
-  if (nota) parts.push(formatAclaracionNotaPill("ObservaciÃ³n", nota));
+  if (nota) parts.push(formatAclaracionNotaPill("Observación", nota));
   return `<div class="borrado-aclaracion-stack">${parts.join("")}</div>`;
 }
 
@@ -1660,7 +1660,7 @@ async function saveEdit() {
   const nroCliente = document.getElementById("borrado-edit-cliente")?.value.trim() || "";
 
   if (!nroCaso || !nroCliente) {
-    setStatus("CompletÃ¡ caso y cliente.", true);
+    setStatus("Completá caso y cliente.", true);
     return;
   }
 
@@ -1675,15 +1675,15 @@ async function saveEdit() {
     const ejerciciosDetalle = document.getElementById("borrado-edit-ejercicios")?.value.trim() || "";
 
     if (!nroEmpresa || !nombreEmpresa) {
-      setStatus("CompletÃ¡ cÃ³digo y nombre de empresa.", true);
+      setStatus("Completá código y nombre de empresa.", true);
       return;
     }
     if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
-      setStatus("MarcÃ¡ al menos una base a borrar.", true);
+      setStatus("Marcá al menos una base a borrar.", true);
       return;
     }
     if (bases.contabilidad && !ejerciciosDetalle) {
-      setStatus("Si marcÃ¡s CG, pegÃ¡ los ejercicios a borrar.", true);
+      setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
       return;
     }
 
@@ -1721,7 +1721,7 @@ function openDeleteModal(item) {
   const overlay = document.getElementById("borrado-delete-overlay");
   const desc = document.getElementById("borrado-delete-desc");
   if (desc) {
-    desc.textContent = `${item.nroCaso || "â€”"} Â· ${item.cuit || "â€”"} Â· ${item.nombreEmpresa || "â€”"}`;
+    desc.textContent = `${item.nroCaso || "—"} · ${item.cuit || "—"} · ${item.nombreEmpresa || "—"}`;
   }
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
@@ -1773,7 +1773,7 @@ async function saveNoteModal() {
   const item = items.find((x) => x.id === selectedId);
   const { resultado } = parseAclaracion(item?.aclaracion);
   const nota = String(document.getElementById("borrado-note-text")?.value || "").trim();
-  // Si el usuario escribe solo "Incorrecto", abrir flujo completo vÃ­a modal no aplica acÃ¡:
+  // Si el usuario escribe solo "Incorrecto", abrir flujo completo vía modal no aplica acá:
   // normalizamos a etiqueta base sin bases.
   if (!resultado && isIncorrecto(nota)) {
     try {
@@ -1783,7 +1783,7 @@ async function saveNoteModal() {
       await reloadList();
       notifyBorradoChanged();
     } catch (err) {
-      setStatus(err?.message || "No se pudo guardar la observaciÃ³n.", true);
+      setStatus(err?.message || "No se pudo guardar la observación.", true);
     }
     return;
   }
@@ -1797,11 +1797,11 @@ async function saveNoteModal() {
       await patchItem(selectedId, body);
     }
     hideNoteModal();
-    setStatus("ObservaciÃ³n guardada.");
+    setStatus("Observación guardada.");
     await reloadList();
     notifyBorradoChanged();
   } catch (err) {
-    setStatus(err?.message || "No se pudo guardar la observaciÃ³n.", true);
+    setStatus(err?.message || "No se pudo guardar la observación.", true);
   }
 }
 

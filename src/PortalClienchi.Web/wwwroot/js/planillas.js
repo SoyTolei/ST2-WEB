@@ -1,10 +1,10 @@
-﻿import { injectModuleHeaders } from "./planillas-icons.js";
+import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20260905i";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
-import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260907m";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260907o";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { getPlanUserEmail } from "./plan-user.js";
@@ -15,7 +15,7 @@ import {
 import {
   startBorradoAlertsPolling,
   renderBorradoAlertUi,
-} from "./borrado-alerts.js?v=20260907m";
+} from "./borrado-alerts.js?v=20260907o";
 import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
@@ -32,7 +32,7 @@ import {
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
 const MESA_LABELS = {
-  TECNICO: "TÃ‰CNICO",
+  TECNICO: "TÉCNICO",
   FLEX: "FLEX",
   FUNCIONAL: "FUNCIONAL",
   SAAS: "SaaS",
@@ -40,14 +40,14 @@ const MESA_LABELS = {
 };
 
 const DEFAULT_STANDARD_MESAS = [
-  { id: "TECNICO", label: "TÃ‰CNICO" },
+  { id: "TECNICO", label: "TÉCNICO" },
   { id: "FLEX", label: "FLEX" },
   { id: "SAAS", label: "SaaS" },
   { id: "SUELDOS", label: "SUELDOS" },
 ];
 
 const FALLBACK_CHILE_MESAS = [
-  { id: "TECNICO", label: "TÃ‰CNICO" },
+  { id: "TECNICO", label: "TÉCNICO" },
   { id: "FUNCIONAL", label: "FUNCIONAL" },
 ];
 
@@ -66,8 +66,8 @@ const SISTEMA_INDEX = {
 };
 
 const LEGAL_MESA_LABELS = {
-  N1: "AtenciÃ³n N1",
-  N2: "TÃ©cnico N2",
+  N1: "Atención N1",
+  N2: "Técnico N2",
   API: "API / Integraciones",
   FINANCEIRO: "Financiero / NF-e",
   ONEPASS: "Infra / OnePass",
@@ -79,7 +79,7 @@ function sistemaDisplayLabel(id) {
 
 function sistemaBadgeLabel(id = sistemaActual) {
   const label = sistemaDisplayLabel(id);
-  return isSistemaBeta(id) ? `${label} Â· beta` : label;
+  return isSistemaBeta(id) ? `${label} · beta` : label;
 }
 
 function isLegalSistema(id) {
@@ -419,21 +419,21 @@ function syncReferralModuleLabels(sistema = sistemaActual) {
   if (menuLabel) menuLabel.textContent = label;
   if (menuSub) menuSub.textContent = sub;
   if (moduleTitle) moduleTitle.textContent = label;
-  if (loadingText) loadingText.textContent = `Cargando ${label}â€¦`;
+  if (loadingText) loadingText.textContent = `Cargando ${label}…`;
 }
 
 function titleForView(name) {
   switch (name) {
-    case "transferencia": return "STÂ² Â· Transferencia";
-    case "referral": return isLegal() ? "STÂ² Â· Escalamiento N2/N3" : "STÂ² Â· Referral I+D";
+    case "transferencia": return "ST² · Transferencia";
+    case "referral": return isLegal() ? "ST² · Escalamiento N2/N3" : "ST² · Referral I+D";
     case "oportunidadMenu":
     case "oportunidadCargar":
-    case "oportunidadGestor": return "STÂ² Â· Oportunidad";
-    case "pdfPortal": return "STÂ² Â· Generador PDF";
-    case "blanqueo": return "STÂ² Â· Blanqueo";
-    case "borradoBases": return "STÂ² Â· Borrado de Bases Web";
-    case "chileEmbed": return chileEmbedTitle ? `STÂ² Â· ${chileEmbedTitle}` : "STÂ² Â· Sitio embebido";
-    default: return "STÂ² Â· Suite Web";
+    case "oportunidadGestor": return "ST² · Oportunidad";
+    case "pdfPortal": return "ST² · Generador PDF";
+    case "blanqueo": return "ST² · Blanqueo";
+    case "borradoBases": return "ST² · Borrado de Bases Web";
+    case "chileEmbed": return chileEmbedTitle ? `ST² · ${chileEmbedTitle}` : "ST² · Sitio embebido";
+    default: return "ST² · Suite Web";
   }
 }
 
@@ -690,7 +690,7 @@ function styleTicketCard(selected) {
   const mark = document.getElementById("plan-ticket-mark");
   card?.classList.toggle("selected", selected);
   if (mark) {
-    mark.textContent = selected ? "âœ“" : "â—‹";
+    mark.textContent = selected ? "✓" : "○";
     mark.style.color = selected ? "#16a34a" : "#94a3b8";
   }
 }
@@ -743,7 +743,7 @@ function styleCapturasCard(selected) {
   const mark = card?.querySelector(".plan-capturas-mark");
   if (!card || !mark) return;
   card.classList.toggle("selected", selected);
-  mark.textContent = selected ? "âœ“" : "â—‹";
+  mark.textContent = selected ? "✓" : "○";
 }
 
 function revokeCapturaThumbUrls(container) {
@@ -841,7 +841,7 @@ function refreshCapturasUi() {
     btn.type = "button";
     btn.className = "plan-captura-thumb-remove";
     btn.setAttribute("aria-label", `Quitar ${f.name}`);
-    btn.textContent = "Ã—";
+    btn.textContent = "×";
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -870,7 +870,7 @@ function refreshCapturasUi() {
       if (txts > 0) parts.push(`${txts} TXT`);
       if (excels > 0) parts.push(`${excels} Excel`);
       if (xmls > 0) parts.push(`${xmls} XML`);
-      estado.textContent = `${parts.join(" Â· ")} listo(s) para subir al generar el texto.`;
+      estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
     }
   }
 
@@ -937,19 +937,19 @@ function addCapturaFiles(fileList) {
     }
   }
   if (rejectedHeavy) {
-    alert("Ese video pesa mÃ¡s de 100 MB. Recomendamos subirlo en los comentarios del caso.");
+    alert("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedPdfHeavy) {
-    alert("Ese PDF pesa mÃ¡s de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    alert("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedTxtHeavy) {
-    alert("Ese TXT pesa mÃ¡s de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    alert("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedExcelHeavy) {
-    alert("Ese Excel pesa mÃ¡s de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    alert("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedXmlHeavy) {
-    alert("Ese XML pesa mÃ¡s de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    alert("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
     alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imÃ¡genes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
+    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
   }
   if (added > 0) {
     const check = els.capturasCheck();
@@ -1071,51 +1071,51 @@ function getDescripcionPlain() {
 function validarCampos() {
   if (isLegal()) {
     if (!document.getElementById("plan-legal-chave")?.value.trim()) {
-      alert("CompletÃ¡ la clave de registro.");
+      alert("Completá la clave de registro.");
       document.getElementById("plan-legal-chave")?.focus();
       return false;
     }
     if (!legalProdutoSel) {
-      alert("SeleccionÃ¡ el producto Legal One.");
+      alert("Seleccioná el producto Legal One.");
       return false;
     }
     if (!legalModuloSel) {
-      alert("SeleccionÃ¡ el mÃ³dulo.");
+      alert("Seleccioná el módulo.");
       return false;
     }
     if (!legalAmbienteSel) {
-      alert("SeleccionÃ¡ el ambiente.");
+      alert("Seleccioná el ambiente.");
       return false;
     }
     if (!mesaActual) {
-      alert("ElegÃ­ la mesa de destino.");
+      alert("Elegí la mesa de destino.");
       return false;
     }
     if (!document.getElementById("plan-legal-usuario")?.value.trim()) {
-      alert("CompletÃ¡ el usuario OnePass.");
+      alert("Completá el usuario OnePass.");
       document.getElementById("plan-legal-usuario")?.focus();
       return false;
     }
     if (!document.getElementById("plan-legal-escritorio")?.value.trim()) {
-      alert("CompletÃ¡ el estudio / empresa.");
+      alert("Completá el estudio / empresa.");
       document.getElementById("plan-legal-escritorio")?.focus();
       return false;
     }
   } else {
     if (!els.numeroCliente().value.trim()) {
-      alert("CompletÃ¡ el NÂ° de Cliente.");
+      alert("Completá el N° de Cliente.");
       els.numeroCliente().focus();
       return false;
     }
     if (!mesaActual) {
       alert(isChile()
-        ? "ElegÃ­ la mesa de destino (TÃ©cnico o Funcional)."
-        : "ElegÃ­ la mesa de destino (TÃ©cnico, Flex, SaaS o Sueldos).");
+        ? "Elegí la mesa de destino (Técnico o Funcional)."
+        : "Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).");
       return false;
     }
   }
   if (!els.asunto().value.trim()) {
-    alert("CompletÃ¡ el campo Asunto y/o Error.");
+    alert("Completá el campo Asunto y/o Error.");
     els.asunto().focus();
     return false;
   }
@@ -1124,7 +1124,7 @@ function validarCampos() {
 
 function preguntarTicketLegal() {
   if (!isLegal() || els.ticketCheck().checked) return true;
-  if (confirm("Â¿Se solicitÃ³ ticket de servicio?")) {
+  if (confirm("¿Se solicitó ticket de servicio?")) {
     els.ticketCheck().checked = true;
     onTicketToggle();
     els.ticketNumero().focus();
@@ -1138,7 +1138,7 @@ function preguntarTicketSiSaasSueldos() {
     return true;
   if (els.ticketCheck().checked) return true;
 
-  if (confirm("Â¿Se solicitÃ³ ticket de servicio?")) {
+  if (confirm("¿Se solicitó ticket de servicio?")) {
     els.ticketCheck().checked = true;
     onTicketToggle();
     els.ticketNumero().focus();
@@ -1194,7 +1194,7 @@ async function generarTexto() {
     capturaFiles.forEach((f) => form.append("capturas", f, f.name));
   }
 
-  setPlanStatus("Generando planillaâ€¦");
+  setPlanStatus("Generando planilla…");
 
   const response = await fetch("/api/planillas/transferencia/generar", {
     method: "POST",
@@ -1238,7 +1238,7 @@ async function onVerPlanilla() {
     const texto = data.texto;
     limpiarTransferencia();
     showPlanTextPreview("plan-text-preview", texto);
-    setPlanStatus("Planilla lista. PodÃ©s copiar desde el panel de vista previa.");
+    setPlanStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
     alert(ex.message);
@@ -1251,10 +1251,10 @@ function openPlaceholder(moduleTitle) {
   els.placeholderTitle().textContent = moduleTitle;
   els.placeholderText().textContent =
     sistemaActual === "Chile"
-      ? "Chile estÃ¡ en versiÃ³n beta y estarÃ¡ disponible en una prÃ³xima versiÃ³n."
+      ? "Chile está en versión beta y estará disponible en una próxima versión."
       : sistemaActual === "Legal"
-        ? "El mÃ³dulo LEGAL estarÃ¡ disponible en una prÃ³xima versiÃ³n."
-        : `${moduleTitle} se migrarÃ¡ en una prÃ³xima fase. Por ahora usÃ¡ Transferencia de Casos.`;
+        ? "El módulo LEGAL estará disponible en una próxima versión."
+        : `${moduleTitle} se migrará en una próxima fase. Por ahora usá Transferencia de Casos.`;
   showView("placeholder");
 }
 
@@ -1266,7 +1266,7 @@ function setModuleLoading(overlayId, active) {
 }
 
 function readChileEmbedSession() {
-  return readEmbedSession(CHILE_EMBED_STORAGE_KEY, "Soporte tÃ©cnico Chile");
+  return readEmbedSession(CHILE_EMBED_STORAGE_KEY, "Soporte técnico Chile");
 }
 
 function readEmbedSession(key, defaultTitle) {
@@ -1377,7 +1377,7 @@ function reloadChileEmbed() {
 function openChileEmbed(url, title) {
   chileEmbedUrl = String(url || "").trim();
   if (!chileEmbedUrl) return;
-  chileEmbedTitle = title || "Soporte tÃ©cnico Chile";
+  chileEmbedTitle = title || "Soporte técnico Chile";
   writeChileEmbedSession(chileEmbedUrl, chileEmbedTitle);
   selectSistema("Chile");
   const titleEl = document.getElementById("plan-chile-embed-title");
@@ -1394,7 +1394,7 @@ function bindChileEmbedUi() {
     btn.addEventListener("click", () => {
       if (!canSeeChileEmbedButton(btn)) return;
       const url = btn.getAttribute("data-plan-embed-url");
-      const title = btn.querySelector(".plan-modulo-label")?.textContent?.trim() || "Soporte tÃ©cnico Chile";
+      const title = btn.querySelector(".plan-modulo-label")?.textContent?.trim() || "Soporte técnico Chile";
       openChileEmbed(url, title);
     });
   });
@@ -1445,8 +1445,8 @@ function openReferralShell(historyMode = "push") {
 function goBackToPlanillasMenu() {
   closeChileEmbed();
   document.dispatchEvent(new CustomEvent("st2:planillas-home"));
-  // Nunca history.back(): con varias vistas/pestaÃ±as ST2 en el stack (THOM, AI, otro mÃ³dulo)
-  // el atrÃ¡s del navegador te puede tirar a otra pestaÃ±a o a un refresh raro.
+  // Nunca history.back(): con varias vistas/pestañas ST2 en el stack (THOM, AI, otro módulo)
+  // el atrás del navegador te puede tirar a otra pestaña o a un refresh raro.
   showView("menu", { history: "replace" });
   void refreshModuleFlags().then(() => updateSistemaUi());
 }
@@ -1570,8 +1570,8 @@ async function revealView(name, historyMode = "push") {
     selectSistema("Chile");
     const titleEl = document.getElementById("plan-chile-embed-title");
     const frame = document.getElementById("planChileEmbedFrame");
-    if (titleEl) titleEl.textContent = chileEmbedTitle || "Soporte tÃ©cnico Chile";
-    if (frame) frame.title = chileEmbedTitle || "Soporte tÃ©cnico Chile";
+    if (titleEl) titleEl.textContent = chileEmbedTitle || "Soporte técnico Chile";
+    if (frame) frame.title = chileEmbedTitle || "Soporte técnico Chile";
     showView("chileEmbed", { history: historyMode });
     if (!frame?.getAttribute("src")) reloadChileEmbed();
   }
@@ -1591,7 +1591,7 @@ async function applyEntryRoute() {
     return;
   }
 
-  // Deja el menÃº debajo en el historial: atrÃ¡s del navegador no sale de ST2.
+  // Deja el menú debajo en el historial: atrás del navegador no sale de ST2.
   window.history.replaceState({ st2: "menu", sistema: sistemaActual }, "", "/");
   if (route.view === "oportunidadCargar" || route.view === "oportunidadGestor") {
     await revealView("oportunidadMenu", "push");
