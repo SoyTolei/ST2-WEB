@@ -21,6 +21,55 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/s/sora/v17/xMQOuFFYT72X5wkB_18qmnndmSfSmU-NKQI.woff2"/>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet"/>
   <style>
+    /* Anti-FOUC: tema oscuro (default) antes de que lleguen los CSS. */
+    html.st2-theme-dark {
+      color-scheme: dark;
+      background: #0f0f0f;
+      --panel: #0f0f0f;
+      --dark: #ececec;
+      --border: #333333;
+      --white: #1a1a1a;
+      --text-muted: #d1d5db;
+      --nav-well: #161616;
+      --header-top: #222222;
+      --header-bottom: #161616;
+      --header-line: rgba(255, 255, 255, 0.06);
+      --st2-suite-surface: #1a1a1a;
+      --st2-suite-border: rgba(234, 88, 12, 0.32);
+      --st2-suite-glow: none;
+    }
+    html.st2-theme-dark body {
+      background: #0f0f0f;
+      color: #ececec;
+    }
+    html.st2-theme-dark .app-header,
+    html.st2-theme-dark .tab-bar,
+    html.st2-theme-dark .planillas-card,
+    html.st2-theme-dark .main-shell,
+    html.st2-theme-dark .st2-context-bar,
+    html.st2-theme-dark .st2-access-card,
+    html.st2-theme-dark .st2-update-modal-card,
+    html.st2-theme-dark .border-glow-card {
+      border-color: #333333 !important;
+      background-color: #1a1a1a;
+    }
+    html.st2-theme-dark .tab-bar {
+      background: linear-gradient(180deg, #222222 0%, #161616 100%);
+    }
+    html.st2-theme-dark .app-header {
+      background: linear-gradient(180deg, #222222 0%, #161616 100%);
+      border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+    }
+    html.st2-theme-dark .tab-btn,
+    html.st2-theme-dark .st2-context-btn,
+    html.st2-theme-dark .brand-home-btn,
+    html.st2-theme-dark .about-btn,
+    html.st2-theme-dark .tour-header-btn {
+      border-color: transparent;
+      background-color: transparent;
+      color: #c5c5c5;
+    }
+
     /* Métricas finales del login antes de que cargue styles.css (evita salto del branding). */
     #st2-access-gate .st2-access-brand-head {
       display: inline-flex;
@@ -60,11 +109,11 @@
     }
   </style>
   <link rel="stylesheet" href="/css/styles.css?v=20260907g"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907t"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260907f"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20260907s"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907s"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907c"/>
