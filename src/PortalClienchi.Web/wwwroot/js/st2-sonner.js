@@ -123,6 +123,13 @@ export function initSt2Sonner() {
       ro.observe(header);
     }
   }
+
+  // Al entrar/salir de “ver como”, rearmar el saludo con el nombre correcto.
+  const refreshGreet = () => {
+    syncStackedToastGreetings();
+  };
+  document.addEventListener("st2:view-as-changed", refreshGreet);
+  document.addEventListener("st2:session-changed", refreshGreet);
 }
 
 /**
@@ -208,6 +215,33 @@ function paintGreetStack() {
   }
 }
 
+function makeActionButton(id, entry, tone) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  const toneKey =
+    tone === "bad" || tone === "error"
+      ? "bad"
+      : tone === "warn" || tone === "warning"
+        ? "warn"
+        : tone === "agua"
+          ? "agua"
+          : tone === "tools" || tone === "info"
+            ? "tools"
+            : "ok";
+  btn.className = `st2-sonner-action st2-sonner-action--${toneKey}`;
+  btn.textContent = entry.actionLabel || "Ver";
+  btn.addEventListener("click", () => {
+    entry.onAction?.();
+    // Mismo comportamiento que el action nativo de Sonner: cierra al clickear.
+    try {
+      toast.dismiss(id);
+    } catch {
+      /* ignore */
+    }
+  });
+  return btn;
+}
+
 function paintOne(id, title, tone) {
   const entry = registry.get(id);
   if (!entry) return;
@@ -220,14 +254,7 @@ function paintOne(id, title, tone) {
     closeButton: true,
     dismissible: true,
     className: `st2-sonner-toast ${toneClass(tone)}`,
-    action: entry.onAction
-      ? {
-          label: entry.actionLabel || "Ver",
-          onClick: () => {
-            entry.onAction?.();
-          },
-        }
-      : undefined,
+    action: entry.onAction ? makeActionButton(id, entry, tone) : undefined,
     onDismiss: () => {
       if (dismissingLocally.has(id)) return;
       registry.delete(id);
