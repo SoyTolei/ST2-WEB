@@ -1,9 +1,7 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907af";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ag";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
-import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907b";
-import { initLoginTopography } from "./st2-topography.js?v=20260907a";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
@@ -5239,8 +5237,7 @@ async function bootstrapApp() {
     saturation: 1.3,
   });
   initSt2Sonner();
-  initBorderGlowCards();
-  initLoginTopography();
+  // BorderGlow + Topography ya arrancan en st2-login-boot.js (antes de app.js).
   await ensureAppAccess();
   initGooeyNav();
   initSpotlightCards();

@@ -6,7 +6,12 @@
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: #0b0b0f;
+  /* Fallback visible YA (antes del WebGL) */
+  background:
+    radial-gradient(ellipse 80% 70% at 15% 20%, rgba(255, 159, 252, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 85% 15%, rgba(249, 115, 22, 0.34) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 50% 90%, rgba(6, 182, 212, 0.24) 0%, transparent 55%),
+    #0b0b0f;
 }
 
 .st2-login-topo-canvas {
@@ -14,6 +19,12 @@
   width: 100%;
   height: 100%;
   pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.st2-login-topo.is-ready .st2-login-topo-canvas {
+  opacity: 1;
 }
 
 .st2-login-topo.is-fallback {

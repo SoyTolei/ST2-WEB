@@ -217,7 +217,7 @@ const ctrlD = new Float32Array(4);
 
 function setSize() {
   if (!container || !canvas || !gl) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
   const wCss = Math.max(1, container.clientWidth || window.innerWidth);
   const hCss = Math.max(1, container.clientHeight || window.innerHeight);
   const bw = Math.max(1, Math.floor(wCss * dpr));
@@ -432,8 +432,12 @@ function initGl(host) {
   canvas.addEventListener("mousemove", onMouseMove);
   canvas.addEventListener("mouseleave", onMouseLeave);
   document.addEventListener("visibilitychange", onVisibility);
-  t0 = performance.now();
+  t0 = performance.now() - 1800; // arranca el morph ya “formado”, sin espera vacía
   startLoop();
+  // Primera pintura lista → fade-in del canvas
+  requestAnimationFrame(() => {
+    host.classList.add("is-ready");
+  });
   return true;
 }
 
