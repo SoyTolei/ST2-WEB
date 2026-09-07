@@ -581,6 +581,49 @@ public sealed class BlanqueoRepository
         BackfillConfirmadoHistoricoAlexis(conn);
         BackfillNoRegistradoAlexis(conn);
         EnsureAlertsTable(conn);
+        ClearStaleNoRegistradoAlerts(conn);
+    }
+
+    /// <summary>
+    /// Una sola vez: avisos “no registrado” que quedaron unseen (p. ej. confirmadores
+    /// que nunca pudieron marcarlos vistos) dejan de spamear el toast.
+    /// </summary>
+    private void ClearStaleNoRegistradoAlerts(SqliteConnection conn)
+    {
+        using (var meta = conn.CreateCommand())
+        {
+            meta.CommandText = """
+                CREATE TABLE IF NOT EXISTS blanqueo_meta (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+                """;
+            meta.ExecuteNonQuery();
+        }
+
+        using (var check = conn.CreateCommand())
+        {
+            check.CommandText = "SELECT value FROM blanqueo_meta WHERE key = 'clear_unseen_noreg_alerts_v1'";
+            if (check.ExecuteScalar() is not null)
+                return;
+        }
+
+        using (var upd = conn.CreateCommand())
+        {
+            upd.CommandText = """
+                UPDATE blanqueo_alerts
+                SET seen = 1
+                WHERE seen = 0 AND lower(trim(kind)) = 'no_registrado'
+                """;
+            var n = upd.ExecuteNonQuery();
+            _logger.LogInformation("Marqué como vistos {Count} avisos blanqueo no_registrado históricos", n);
+        }
+
+        using var mark = conn.CreateCommand();
+        mark.CommandText = """
+            INSERT INTO blanqueo_meta (key, value) VALUES ('clear_unseen_noreg_alerts_v1', '1')
+            """;
+        mark.ExecuteNonQuery();
     }
 
     private static void EnsureConfirmadoColumn(SqliteConnection conn)

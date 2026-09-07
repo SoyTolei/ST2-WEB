@@ -191,11 +191,12 @@ export async function markBlanqueoAlertsSeen(ids = null) {
 /**
  * Al entrar al módulo:
  * - confirm/pendientes: no tocar el toast de cola.
- * - solicitante (o personal del confirmador): solo marca “listo sin observación”.
+ * - solicitante (o personal del confirmador): listo + no registrado.
+ *   Las observaciones (note) siguen hasta abrirlas.
  */
 export async function markBlanqueoAlertsSeenOnEnter() {
   const readyIds = personalAlerts()
-    .filter((a) => a.kind === KIND_READY)
+    .filter((a) => a.kind === KIND_READY || a.kind === KIND_NO_REG)
     .map((a) => a.id)
     .filter((id) => id > 0);
   if (!readyIds.length) return;
@@ -254,6 +255,12 @@ function summarizePersonal(alerts) {
 }
 
 function openBlanqueoFromAlert() {
+  // “Ver” debe cerrar listo / no registrado al instante (no solo al montar el módulo).
+  const ids = personalAlerts()
+    .filter((a) => a.kind === KIND_READY || a.kind === KIND_NO_REG)
+    .map((a) => a.id)
+    .filter((id) => id > 0);
+  if (ids.length) void markBlanqueoAlertsSeen(ids);
   document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
   document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
 }
