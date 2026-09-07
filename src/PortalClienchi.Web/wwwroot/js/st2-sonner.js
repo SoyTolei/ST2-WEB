@@ -240,7 +240,9 @@ function paintGreetStack() {
     paintOne(id, title, entry.tone);
   });
 
-  // Quitar del DOM los del stack que ya no están en registry
+  // Solo dismiss de IDs del stack que ya no están en ESTE registry.
+  // (Importante: un solo módulo st2-sonner.js; si hay ?v= distinto, se duplica el registry
+  // y un paintGreetStack se come los toasts del otro.)
   for (const id of GREET_STACK) {
     if (!registry.has(id)) {
       dismissingLocally.add(id);
