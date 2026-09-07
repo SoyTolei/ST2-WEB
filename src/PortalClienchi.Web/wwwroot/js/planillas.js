@@ -466,6 +466,7 @@ function showView(name, { history = "push" } = {}) {
   syncHistory(name, history);
   if (name === "menu") {
     renderBlanqueoAlertUi();
+    renderBorradoAlertUi();
   }
   syncAguaEgg();
   currentPlanillasView = name;

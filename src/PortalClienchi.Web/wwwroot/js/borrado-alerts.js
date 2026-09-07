@@ -57,9 +57,8 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
   const email = getPlanUserEmail();
   const canSee = canSeeBorradoBasesModule() || canConfirmBorradoBasesModule();
   if (!email || !canSee) {
-    cachedAlerts = [];
-    alertMode = "requester";
-    renderBorradoAlertUi();
+    // No vaciar cache por flicker de permisos: solo ocultar UI.
+    renderBorradoAlertUi({ forceHide: true });
     if (!email) scheduleAlertsRetry();
     return cachedAlerts;
   }
@@ -83,19 +82,17 @@ export async function refreshBorradoAlerts({ force = false } = {}) {
         return cachedAlerts;
       }
 
+      // Confirmador: cola pendiente. Vista previa / ver como: ?mode=confirm.
       const alertsUrl = isViewingAsProfile() && canConfirmBorradoBasesModule()
         ? "/api/planillas/borrado-bases/alerts?mode=confirm"
         : "/api/planillas/borrado-bases/alerts";
       const res = await planUserFetch(alertsUrl);
       if (res.status === 401 || res.status === 403) {
-        cachedAlerts = [];
-        alertMode = "requester";
+        // No vaciar cache por un 403 momentáneo de flags.
         renderBorradoAlertUi();
         return cachedAlerts;
       }
       const data = await res.json().catch(() => ({}));
-      // Respetar el mode del API (si hay avisos personales, vienen como requester
-      // aunque el usuario también pueda confirmar).
       alertMode = String(data.mode || "").toLowerCase() === "confirm" ? "confirm" : "requester";
       cachedAlerts = (Array.isArray(data.items) ? data.items : []).map(normalizeAlert);
       if (alertMode === "confirm") {
@@ -208,8 +205,8 @@ function summarizeAlerts(alerts) {
   if (alertMode === "confirm") {
     const n = alerts.length;
     const text = n === 1
-      ? "Tenés 1 borrado de bases para confirmar o revisar"
-      : `Tenés ${n} borrados de bases para confirmar o revisar`;
+      ? "Tenés 1 borrado de bases pendiente para confirmar"
+      : `Tenés ${n} borrados de bases pendientes para confirmar`;
     return {
       tone: "warn",
       text,
@@ -255,16 +252,16 @@ function summarizeAlerts(alerts) {
   return { tone, text, counts };
 }
 
-export function renderBorradoAlertUi() {
+export function renderBorradoAlertUi({ forceHide = false } = {}) {
   const count = cachedAlerts.length;
   const label = count > 99 ? "99+" : String(count);
   const summary = count ? summarizeAlerts(cachedAlerts) : null;
   const sistema = document.body.dataset.planSistema;
-  const hideForSistema = sistema === "Legal" || sistema === "Chile";
+  const hideForSistema = forceHide || sistema === "Legal" || sistema === "Chile";
 
   const tabHidden = count === 0 || hideForSistema;
   setPlanillasTabAlertPart("borrado", {
-    count,
+    count: hideForSistema ? 0 : count,
     title: summary?.text || "",
     hidden: tabHidden,
   });

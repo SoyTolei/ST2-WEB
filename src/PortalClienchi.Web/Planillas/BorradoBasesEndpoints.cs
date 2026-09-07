@@ -129,26 +129,10 @@ public static class BorradoBasesEndpoints
             if (!TryAuthorize(ctx, modules, requireConfirm: false, out var email, out var flags, out var error))
                 return error!;
 
+            // Quien confirma ve solo la cola pendiente (sin listo / sin aclaración).
+            // Los avisos personales (listo / observación / incorrecto) son para el solicitante.
             if (flags.BorradoBasesConfirm)
             {
-                var forceConfirmQueue = string.Equals(
-                    ctx.Request.Query["mode"].ToString(),
-                    "confirm",
-                    StringComparison.OrdinalIgnoreCase);
-
-                // Si hay avisos personales (su solicitud quedó eliminada/parcial/con nota),
-                // priorizarlos — salvo que pidan explícitamente la cola de confirmación (vista previa).
-                var personal = repo.ListUnseenAlerts(email!);
-                if (!forceConfirmQueue && personal.Count > 0)
-                {
-                    return Results.Ok(new
-                    {
-                        mode = "requester",
-                        count = personal.Count,
-                        items = personal,
-                    });
-                }
-
                 var pending = repo.ListPendingForConfirm();
                 return Results.Ok(new
                 {

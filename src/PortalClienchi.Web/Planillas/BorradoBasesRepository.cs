@@ -199,6 +199,7 @@ public sealed class BorradoBasesRepository
             FROM borrado_bases_solicitudes
             WHERE listo = 0
               AND (aclaracion IS NULL OR trim(aclaracion) = '')
+              AND (deleted_at IS NULL OR trim(deleted_at) = '')
             ORDER BY datetime(coalesce(fecha_creacion, fecha_solicitud)) DESC, id DESC
             """;
         using var r = cmd.ExecuteReader();
