@@ -5297,13 +5297,24 @@ async function bootstrapApp() {
 void bootstrapApp();
 
 const UPDATE_CHECK_MS = 45000;
+/** Hace falta ver el mismo build nuevo N veces seguidas (anti ping-pong de réplicas). */
+const UPDATE_CONFIRM_NEEDED = 2;
 const UPDATE_DEFER_KEY = "st2-update-deferred-signal";
+const UPDATE_HANDLED_KEY = "st2-update-handled-builds";
+const UPDATE_RELOAD_TARGET_KEY = "st2-update-reload-target";
+/** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
+const UPDATE_HANDLED_TTL_MS = 6 * 60 * 60 * 1000;
+
 let lastLiveBuild = "";
+let pendingLiveBuild = "";
+let pendingLiveHits = 0;
 let updateCheckerStarted = false;
 /** Banner forzado por permisos nuevos (no lo apaga el check de build). */
 let reloadBannerForced = false;
 /** "hidden" | "modal" | "banner" */
 let updateUiMode = "hidden";
+/** Fallback si localStorage/sessionStorage fallan. */
+let memoryDeferredSignal = "";
 
 function loadedAppBuild() {
   const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
@@ -5315,34 +5326,138 @@ function normalizeBuild(value) {
   return String(value || "").trim().toLowerCase();
 }
 
+function buildKey(value) {
+  return normalizeBuild(value).slice(0, 7);
+}
+
 function buildsDiffer(loaded, live) {
-  const a = normalizeBuild(loaded);
-  const b = normalizeBuild(live);
+  const a = buildKey(loaded);
+  const b = buildKey(live);
   if (!a || !b) return false;
-  if (a === b) return false;
-  return a.slice(0, 7) !== b.slice(0, 7);
+  return a !== b;
 }
 
 function currentUpdateSignal() {
   if (buildsDiffer(loadedAppBuild(), lastLiveBuild)) {
-    return `build:${normalizeBuild(lastLiveBuild)}`;
+    return `build:${buildKey(lastLiveBuild)}`;
   }
   if (reloadBannerForced) return "forced:modules";
   return "";
 }
 
-function readDeferredUpdateSignal() {
+function storageGet(key) {
   try {
-    return sessionStorage.getItem(UPDATE_DEFER_KEY) || "";
+    return localStorage.getItem(key) || sessionStorage.getItem(key) || "";
   } catch {
     return "";
   }
 }
 
-function writeDeferredUpdateSignal(signal) {
+function storageSet(key, value) {
   try {
-    if (signal) sessionStorage.setItem(UPDATE_DEFER_KEY, signal);
-    else sessionStorage.removeItem(UPDATE_DEFER_KEY);
+    if (value) {
+      localStorage.setItem(key, value);
+      sessionStorage.setItem(key, value);
+    } else {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function readDeferredUpdateSignal() {
+  return storageGet(UPDATE_DEFER_KEY) || memoryDeferredSignal || "";
+}
+
+function writeDeferredUpdateSignal(signal) {
+  memoryDeferredSignal = signal || "";
+  storageSet(UPDATE_DEFER_KEY, signal || "");
+}
+
+function readHandledBuilds() {
+  try {
+    const raw = storageGet(UPDATE_HANDLED_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeHandledBuilds(map) {
+  try {
+    const clean = {};
+    const now = Date.now();
+    for (const [k, ts] of Object.entries(map || {})) {
+      if (!k || !ts) continue;
+      if (now - Number(ts) > UPDATE_HANDLED_TTL_MS) continue;
+      clean[k] = Number(ts);
+    }
+    storageSet(UPDATE_HANDLED_KEY, Object.keys(clean).length ? JSON.stringify(clean) : "");
+  } catch {
+    // ignore
+  }
+}
+
+function markBuildHandled(build) {
+  const key = buildKey(build);
+  if (!key) return;
+  const map = readHandledBuilds();
+  map[key] = Date.now();
+  writeHandledBuilds(map);
+}
+
+function wasBuildHandled(build) {
+  const key = buildKey(build);
+  if (!key) return false;
+  const map = readHandledBuilds();
+  const ts = Number(map[key] || 0);
+  if (!ts) return false;
+  if (Date.now() - ts > UPDATE_HANDLED_TTL_MS) {
+    delete map[key];
+    writeHandledBuilds(map);
+    return false;
+  }
+  return true;
+}
+
+/** Si el defer era de un build que ya tenemos cargado, lo limpia. No borra por un match momentáneo de otra réplica. */
+function clearDeferredIfSatisfied(loaded) {
+  const deferred = readDeferredUpdateSignal();
+  if (!deferred.startsWith("build:")) return;
+  const target = deferred.slice("build:".length);
+  if (buildKey(loaded) && buildKey(loaded) === buildKey(target)) {
+    writeDeferredUpdateSignal("");
+  }
+}
+
+function reconcileReloadTarget() {
+  let raw = "";
+  try {
+    raw = localStorage.getItem(UPDATE_RELOAD_TARGET_KEY) || "";
+  } catch {
+    return;
+  }
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    const target = buildKey(data?.build);
+    const loaded = buildKey(loadedAppBuild());
+    const at = Number(data?.at || 0);
+    if (target && loaded && target === loaded) {
+      markBuildHandled(loaded);
+      localStorage.removeItem(UPDATE_RELOAD_TARGET_KEY);
+      return;
+    }
+    // Recargaron hace poco pero el HTML sigue distinto (caché / otra réplica): no reabrir modal.
+    if (target && at && Date.now() - at < 10 * 60 * 1000) {
+      markBuildHandled(target);
+      writeDeferredUpdateSignal(`build:${target}`);
+    }
   } catch {
     // ignore
   }
@@ -5392,13 +5507,46 @@ function showUpdatePrompt() {
     setUpdateUiMode("banner");
     return;
   }
+  // Ya recargaron/pospusieron este build: solo barra, no modal otra vez.
+  if (signal.startsWith("build:") && wasBuildHandled(signal.slice("build:".length))) {
+    writeDeferredUpdateSignal(signal);
+    setUpdateUiMode("banner");
+    return;
+  }
   setUpdateUiMode("modal");
 }
 
 function deferUpdatePrompt() {
   const signal = currentUpdateSignal();
-  if (signal) writeDeferredUpdateSignal(signal);
+  if (signal) {
+    writeDeferredUpdateSignal(signal);
+    if (signal.startsWith("build:")) markBuildHandled(signal.slice("build:".length));
+    else markBuildHandled(signal);
+  }
   setUpdateUiMode("banner");
+}
+
+function reloadForUpdate() {
+  const target = buildKey(lastLiveBuild || pendingLiveBuild || "");
+  try {
+    if (target) {
+      localStorage.setItem(
+        UPDATE_RELOAD_TARGET_KEY,
+        JSON.stringify({ build: target, at: Date.now() }),
+      );
+      markBuildHandled(target);
+      writeDeferredUpdateSignal(`build:${target}`);
+    }
+  } catch {
+    // ignore
+  }
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set("_st2", String(Date.now()));
+    window.location.replace(url.toString());
+  } catch {
+    window.location.reload();
+  }
 }
 
 /** Cartel único de "recargá" (versión web o permisos nuevos). */
@@ -5414,16 +5562,31 @@ document.addEventListener("st2:request-reload-banner", () => {
 function applyLiveBuild(liveBuild) {
   const live = String(liveBuild || "").trim();
   if (!live) return;
-  lastLiveBuild = live;
-  if (!buildsDiffer(loadedAppBuild(), live)) {
+  const loaded = loadedAppBuild();
+  const liveNorm = normalizeBuild(live);
+
+  if (!buildsDiffer(loaded, live)) {
+    pendingLiveBuild = "";
+    pendingLiveHits = 0;
+    lastLiveBuild = live;
+    clearDeferredIfSatisfied(loaded);
     if (!reloadBannerForced) {
-      writeDeferredUpdateSignal("");
       setUpdateUiMode("hidden");
     } else {
       showUpdatePrompt();
     }
     return;
   }
+
+  // Build distinto: exigir N lecturas seguidas del mismo SHA (anti flip-flop de réplicas).
+  if (liveNorm === pendingLiveBuild) pendingLiveHits += 1;
+  else {
+    pendingLiveBuild = liveNorm;
+    pendingLiveHits = 1;
+  }
+  if (pendingLiveHits < UPDATE_CONFIRM_NEEDED) return;
+
+  lastLiveBuild = live;
   showUpdatePrompt();
   notifyWebUpdateDesktop(live);
 }
@@ -5442,11 +5605,9 @@ async function checkAppVersion() {
 function startUpdateChecker() {
   if (updateCheckerStarted) return;
   updateCheckerStarted = true;
-  const reload = () => {
-    window.location.reload();
-  };
-  document.getElementById("st2-update-reload")?.addEventListener("click", reload);
-  document.getElementById("st2-update-reload-now")?.addEventListener("click", reload);
+  reconcileReloadTarget();
+  document.getElementById("st2-update-reload")?.addEventListener("click", reloadForUpdate);
+  document.getElementById("st2-update-reload-now")?.addEventListener("click", reloadForUpdate);
   document.getElementById("st2-update-later")?.addEventListener("click", () => {
     deferUpdatePrompt();
   });
@@ -5456,6 +5617,7 @@ function startUpdateChecker() {
   tick();
   setInterval(tick, UPDATE_CHECK_MS);
   document.addEventListener("visibilitychange", () => {
+    // Solo chequea; no fuerza modal sin las confirmaciones del applyLiveBuild.
     if (document.visibilityState === "visible") tick();
   });
 }
@@ -5475,6 +5637,7 @@ function startSessionHeartbeat() {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
+        // Mismo contador de confirmación que /api/version (anti flip-flop).
         if (data?.webBuild) applyLiveBuild(data.webBuild);
       })
       .catch(() => {});
