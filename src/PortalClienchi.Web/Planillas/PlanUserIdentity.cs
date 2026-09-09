@@ -232,3 +232,10 @@ public sealed class PlanUserHeartbeatRequest
     [JsonPropertyName("deviceId")]
     public string? DeviceId { get; set; }
 }
+
+public sealed class PlanUsageRequest
+{
+    /// <summary>Clave del módulo/opción que se abrió (p. ej. "transferencia").</summary>
+    [JsonPropertyName("module")]
+    public string? Module { get; set; }
+}

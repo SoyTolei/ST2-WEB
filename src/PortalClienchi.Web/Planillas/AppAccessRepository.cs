@@ -917,6 +917,30 @@ public sealed class AppAccessRepository
                 """;
             auditIdx.ExecuteNonQuery();
         }
+        using (var usage = conn.CreateCommand())
+        {
+            usage.CommandText = """
+                CREATE TABLE IF NOT EXISTS app_access_usage (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    day_ar TEXT NOT NULL,
+                    email TEXT NOT NULL,
+                    module TEXT NOT NULL,
+                    hits INTEGER NOT NULL DEFAULT 1,
+                    first_at TEXT NOT NULL,
+                    last_at TEXT NOT NULL,
+                    UNIQUE(day_ar, email, module)
+                )
+                """;
+            usage.ExecuteNonQuery();
+        }
+        using (var usageIdx = conn.CreateCommand())
+        {
+            usageIdx.CommandText = """
+                CREATE INDEX IF NOT EXISTS idx_app_access_usage_day
+                ON app_access_usage (day_ar, last_at DESC)
+                """;
+            usageIdx.ExecuteNonQuery();
+        }
         using (var backfill = conn.CreateCommand())
         {
             backfill.CommandText = """
@@ -926,6 +950,83 @@ public sealed class AppAccessRepository
                 """;
             backfill.ExecuteNonQuery();
         }
+    }
+
+    /// <summary>Día calendario argentino, para agrupar el uso diario.</summary>
+    private static string ArgentinaDayKey() =>
+        TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone)
+            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    /// <summary>Suma una apertura de módulo al contador del día (no guarda historial por clic).</summary>
+    public void RecordModuleUsage(string email, string module)
+    {
+        if (!StorageReady) return;
+        var mail = PlanUserIdentity.ValidateAndNormalize(email);
+        var mod = (module ?? "").Trim().ToLowerInvariant();
+        if (mail is null || mod.Length == 0 || mod.Length > 60) return;
+
+        var now = UtcNowIso();
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO app_access_usage (day_ar, email, module, hits, first_at, last_at)
+            VALUES ($day, $email, $module, 1, $now, $now)
+            ON CONFLICT(day_ar, email, module) DO UPDATE SET
+                hits = hits + 1,
+                last_at = $now
+            """;
+        cmd.Parameters.AddWithValue("$day", ArgentinaDayKey());
+        cmd.Parameters.AddWithValue("$email", mail);
+        cmd.Parameters.AddWithValue("$module", mod);
+        cmd.Parameters.AddWithValue("$now", now);
+        cmd.ExecuteNonQuery();
+
+        PurgeOldUsage(conn);
+    }
+
+    /// <summary>Mantiene solo los últimos 30 días de uso.</summary>
+    private static void PurgeOldUsage(SqliteConnection conn)
+    {
+        var cutoff = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone)
+            .Date.AddDays(-30)
+            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM app_access_usage WHERE day_ar < $cutoff";
+        cmd.Parameters.AddWithValue("$cutoff", cutoff);
+        cmd.ExecuteNonQuery();
+    }
+
+    public IReadOnlyList<AppAccessUsageDto> ListUsageToday(int limit = 200)
+    {
+        if (!StorageReady) return Array.Empty<AppAccessUsageDto>();
+        var take = Math.Clamp(limit, 1, 500);
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT email, module, hits, first_at, last_at
+            FROM app_access_usage
+            WHERE day_ar = $day
+            ORDER BY last_at DESC
+            LIMIT $limit
+            """;
+        cmd.Parameters.AddWithValue("$day", ArgentinaDayKey());
+        cmd.Parameters.AddWithValue("$limit", take);
+
+        var list = new List<AppAccessUsageDto>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new AppAccessUsageDto
+            {
+                Email = reader.IsDBNull(0) ? "" : reader.GetString(0),
+                Module = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                Hits = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
+                FirstAt = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                LastAt = reader.IsDBNull(4) ? "" : reader.GetString(4),
+            });
+        }
+
+        return list;
     }
 
     public void AddOwnerNotice(string kind, string targetEmail, string actorEmail, string? message = null)
@@ -1160,6 +1261,15 @@ public sealed class AppAccessAuditDto
     public string Action { get; init; } = "";
     public string TargetEmail { get; init; } = "";
     public string? Detail { get; init; }
+}
+
+public sealed class AppAccessUsageDto
+{
+    public string Email { get; init; } = "";
+    public string Module { get; init; } = "";
+    public int Hits { get; init; }
+    public string FirstAt { get; init; } = "";
+    public string LastAt { get; init; } = "";
 }
 
 public sealed class AccessSummaryDto

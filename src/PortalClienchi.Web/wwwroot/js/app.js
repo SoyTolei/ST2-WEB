@@ -9,6 +9,7 @@ import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsPr
 import { notifyAccessChanged } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
+import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -186,6 +187,10 @@ const accessAdminKpiToday = document.getElementById("st2-access-admin-kpi-today"
 const accessAdminKpiConcurrent = document.getElementById("st2-access-admin-kpi-concurrent");
 const accessAdminKpiAttention = document.getElementById("st2-access-admin-kpi-attention");
 const accessAdminDaySummary = document.getElementById("st2-access-admin-day-summary");
+const accessAdminUsage = document.getElementById("st2-access-admin-usage");
+const accessAdminUsageCount = document.getElementById("st2-access-admin-usage-count");
+const accessAdminUsageModules = document.getElementById("st2-access-admin-usage-modules");
+const accessAdminUsagePeople = document.getElementById("st2-access-admin-usage-people");
 const accessAdminAudit = document.getElementById("st2-access-admin-audit");
 const accessAdminAuditCount = document.getElementById("st2-access-admin-audit-count");
 const accessAdminAuditList = document.getElementById("st2-access-admin-audit-list");
@@ -741,6 +746,7 @@ let accessAdminClientWatchTimer = null;
 let accessAdminClientChangedEmails = new Set();
 let accessAdminClientWatchBusy = false;
 let accessAdminAuditToday = [];
+let accessAdminUsageToday = [];
 let accessAdminConcurrentCount = 0;
 let accessAdminAuditShowAll = false;
 let accessAdminAuditDetailEmail = "";
@@ -1287,6 +1293,7 @@ function resetAccessAdminSnapshot() {
   accessAdminListFilter = "";
   accessAdminModFilters = new Set();
   accessAdminAuditToday = [];
+  accessAdminUsageToday = [];
   accessAdminConcurrentCount = 0;
   accessAdminAuditShowAll = false;
   accessAdminAuditDetailEmail = "";
@@ -1387,6 +1394,7 @@ function updateAccessAdminSummaryLine() {
   if (accessAdminKpiPending) accessAdminKpiPending.textContent = String(pending);
   if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
   renderAccessAdminDaySummary({ total, pending, today, activeCount });
+  renderAccessAdminUsage();
   renderAccessAdminAudit();
   updateAdminTabBadge();
   renderAccessAdminInbox();
@@ -1536,6 +1544,85 @@ function openAccessAdminAuditDetail(email, { toggle = true } = {}) {
     btn.classList.toggle("is-open", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
   });
+}
+
+const USAGE_MODULE_LABELS = {
+  transferencia: "Transferencia",
+  referral: "Referral I+D",
+  oportunidad: "Oportunidad",
+  blanqueo: "Blanqueo",
+  borradobases: "Borrado de Bases",
+  chileembed: "Chile (sitio)",
+  "tab:thom": "THOM",
+  "tab:ai": "AI Platform",
+  "tab:portal": "Portal Cliente",
+  "tab:admin": "ADMIN",
+};
+
+function formatUsageModule(module) {
+  const key = String(module || "").trim().toLowerCase();
+  return USAGE_MODULE_LABELS[key] || key || "—";
+}
+
+function renderAccessAdminUsage() {
+  if (!accessAdminUsage) return;
+  const rows = Array.isArray(accessAdminUsageToday) ? accessAdminUsageToday : [];
+  if (!rows.length) {
+    accessAdminUsage.classList.add("hidden");
+    accessAdminUsage.hidden = true;
+    if (accessAdminUsageModules) accessAdminUsageModules.innerHTML = "";
+    if (accessAdminUsagePeople) accessAdminUsagePeople.innerHTML = "";
+    if (accessAdminUsageCount) accessAdminUsageCount.textContent = "";
+    return;
+  }
+
+  accessAdminUsage.classList.remove("hidden");
+  accessAdminUsage.hidden = false;
+
+  const byModule = new Map();
+  const byPerson = new Map();
+  for (const row of rows) {
+    if (!row.module) continue;
+    byModule.set(row.module, (byModule.get(row.module) || 0) + row.hits);
+    if (!row.email) continue;
+    const list = byPerson.get(row.email) || [];
+    list.push(row);
+    byPerson.set(row.email, list);
+  }
+
+  if (accessAdminUsageCount) {
+    const people = byPerson.size;
+    accessAdminUsageCount.textContent = people === 1 ? "1 persona" : `${people} personas`;
+  }
+
+  if (accessAdminUsageModules) {
+    const modules = [...byModule.entries()].sort((a, b) => b[1] - a[1]);
+    accessAdminUsageModules.innerHTML = modules
+      .map(([mod, hits]) =>
+        `<li>${escapeHtml(formatUsageModule(mod))} <span class="st2-access-admin-usage-n">${escapeHtml(String(hits))}</span></li>`)
+      .join("");
+  }
+
+  if (accessAdminUsagePeople) {
+    const people = [...byPerson.entries()]
+      .map(([email, list]) => {
+        const item = accessAdminItemsCache.find((i) => i.email === email);
+        const name = formatAccessDisplayName(email, item?.displayNameOverride);
+        const lastAt = list.reduce((acc, r) => (r.lastAt > acc ? r.lastAt : acc), "");
+        const mods = [...list]
+          .sort((a, b) => b.hits - a.hits)
+          .map((r) => `${formatUsageModule(r.module)} (${r.hits})`)
+          .join(" · ");
+        return { name, mods, lastAt };
+      })
+      .sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));
+
+    accessAdminUsagePeople.innerHTML = people
+      .map((p) =>
+        `<li><strong>${escapeHtml(p.name)}</strong>`
+        + `<span class="st2-access-admin-usage-mods">${escapeHtml(p.mods)}</span></li>`)
+      .join("");
+  }
 }
 
 function renderAccessAdminAudit() {
@@ -2187,6 +2274,14 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
         action: row.action || "",
         targetEmail: row.targetEmail || "",
         detail: row.detail || null,
+      }))
+      : [];
+    accessAdminUsageToday = Array.isArray(data.usageToday)
+      ? data.usageToday.map((row) => ({
+        email: row.email || "",
+        module: row.module || "",
+        hits: Number(row.hits ?? 0) || 0,
+        lastAt: row.lastAt || "",
       }))
       : [];
 
@@ -5023,19 +5118,16 @@ function navigateTab(tabId, { history = "push" } = {}) {
     navigateTab("planillas", { history: "replace" });
     return;
   }
-  const currentTab = document.querySelector(".tab-btn.active")?.dataset?.tab;
   if (tabId === "planillas") {
     switchTab("planillas");
-    if (currentTab && currentTab !== "planillas") {
-      // Al volver desde THOM/AI/Portal, reemplazar la URL actual por el menú
-      // (si hacemos push, "Volver al menú" + historial podía reabrir esa pestaña).
-      goPlanillasHome({ history: "replace" });
-    }
+    // Siempre al menú: tocar la pestaña equivale al logo, incluso ya estando en Planillas.
+    goPlanillasHome({ history: "replace" });
     return;
   }
 
   switchTab(tabId);
   document.title = titleForTab(tabId);
+  trackUsage(`tab:${tabId}`);
   if (tabId === "thom") {
     const fromPath = thomPortalFromPath(window.location.pathname);
     if (fromPath && fromPath !== thomPortalId) setThomPortalId(fromPath);
@@ -5252,6 +5344,7 @@ async function bootstrapApp() {
     saturation: 1.3,
   });
   initSt2Sonner();
+  initUsageTracking();
   // BorderGlow + Topography ya arrancan en st2-login-boot.js (antes de app.js).
   await ensureAppAccess();
   initGooeyNav();

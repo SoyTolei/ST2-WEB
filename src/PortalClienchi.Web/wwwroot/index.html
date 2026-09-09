@@ -45,13 +45,17 @@
     html.st2-theme-dark .app-header,
     html.st2-theme-dark .tab-bar,
     html.st2-theme-dark .planillas-card,
-    html.st2-theme-dark .main-shell,
     html.st2-theme-dark .st2-context-bar,
     html.st2-theme-dark .st2-access-card,
     html.st2-theme-dark .st2-update-modal-card,
     html.st2-theme-dark .border-glow-card {
       border-color: #333333 !important;
       background-color: #1a1a1a;
+    }
+    /* main-shell va transparente: encima están las LightRays del fondo. */
+    html.st2-theme-dark .main-shell {
+      border-color: #333333 !important;
+      background-color: transparent;
     }
     html.st2-theme-dark .tab-bar {
       background: linear-gradient(180deg, #222222 0%, #161616 100%);
@@ -115,8 +119,8 @@
       background: #1a0a04;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260907i"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260907t"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260909a"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260909a"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260907f"/>
@@ -1809,6 +1813,15 @@
               </div>
             </div>
             <div id="st2-access-admin-day-summary" class="st2-access-admin-day-summary st2-access-admin-owner-only hidden" aria-live="polite" hidden></div>
+            <div id="st2-access-admin-usage" class="st2-access-admin-usage hidden" hidden>
+              <div class="st2-access-admin-usage-head">
+                <strong>Uso de hoy</strong>
+                <span id="st2-access-admin-usage-count"></span>
+              </div>
+              <ul id="st2-access-admin-usage-modules" class="st2-access-admin-usage-modules"></ul>
+              <p class="st2-access-admin-usage-label">Quién entró</p>
+              <ul id="st2-access-admin-usage-people" class="st2-access-admin-usage-people"></ul>
+            </div>
           </div>
           <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>
           <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
@@ -2676,6 +2689,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260909a" type="module"></script>
+  <script src="/js/app.js?v=20260909b" type="module"></script>
 </body>
 </html>

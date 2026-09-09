@@ -548,6 +548,34 @@ public static class PlanillasEndpoints
             return Results.Ok(new { ok = true, webBuild = St2WebBuild.GetBuild() });
         });
 
+        // Uso por módulo: solo cuenta aperturas del día (sin historial por clic).
+        app.MapPost("/api/planillas/usage", async (
+            HttpContext ctx,
+            AppAccessRepository accessRepo,
+            CancellationToken ct) =>
+        {
+            var email = PlanUserIdentity.GetFromRequest(ctx);
+            if (email is null)
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+
+            string? module = null;
+            try
+            {
+                var body = await ctx.Request.ReadFromJsonAsync<PlanUsageRequest>(cancellationToken: ct).ConfigureAwait(false);
+                module = body?.Module;
+            }
+            catch
+            {
+                /* cuerpo inválido: se ignora */
+            }
+
+            if (string.IsNullOrWhiteSpace(module))
+                return Results.BadRequest(new { error = "Falta el módulo." });
+
+            accessRepo.RecordModuleUsage(email, module);
+            return Results.Ok(new { ok = true });
+        });
+
         app.MapPost("/api/planillas/session", (
             HttpContext ctx,
             PlanUserSessionRequest body,
@@ -694,6 +722,7 @@ public static class PlanillasEndpoints
                 var auditToday = isPrimaryOwner
                     ? accessRepo.ListRecentAudit(limit: 40, todayOnly: true)
                     : Array.Empty<AppAccessAuditDto>();
+                var usageToday = accessRepo.ListUsageToday(limit: 300);
                 var mapped = items.Select(item =>
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);
@@ -782,6 +811,14 @@ public static class PlanillasEndpoints
                             detail = a.Detail,
                         }).ToList()
                         : new List<object>(),
+                    usageToday = usageToday.Select(u => (object)new
+                    {
+                        email = u.Email,
+                        module = u.Module,
+                        hits = u.Hits,
+                        firstAt = u.FirstAt,
+                        lastAt = u.LastAt,
+                    }).ToList(),
                 });
             }
             catch (Exception ex)

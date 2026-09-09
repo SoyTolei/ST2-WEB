@@ -3640,6 +3640,112 @@ body.portal-tab-active .brand-icon {
   padding: 8px 10px;
 }
 
+/* ── Uso de hoy (qué módulos abren los usuarios) ── */
+.st2-access-admin-usage {
+  margin: 0 0 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.st2-access-admin-usage.hidden {
+  display: none !important;
+}
+
+.st2-access-admin-usage-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.78rem;
+  color: #0f172a;
+}
+
+.st2-access-admin-usage-head strong {
+  font-weight: 800;
+}
+
+.st2-access-admin-usage-head span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.st2-access-admin-usage-label {
+  margin: 10px 0 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.st2-access-admin-usage-modules {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.st2-access-admin-usage-modules li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.st2-access-admin-usage-modules .st2-access-admin-usage-n {
+  font-weight: 800;
+  color: #d64000;
+}
+
+.st2-access-admin-usage-people {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 8.5rem;
+  overflow: auto;
+}
+
+.st2-access-admin-usage-people li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 0.75rem;
+  color: #334155;
+  border-bottom: 1px dashed #eef2f7;
+}
+
+.st2-access-admin-usage-people li:last-child {
+  border-bottom: 0;
+}
+
+.st2-access-admin-usage-people strong {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.st2-access-admin-usage-mods {
+  color: #64748b;
+}
+
+.st2-access-admin-usage-empty {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #64748b;
+}
+
 .st2-access-admin-audit.hidden {
   display: none !important;
 }

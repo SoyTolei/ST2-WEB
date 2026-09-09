@@ -1831,6 +1831,39 @@ html.st2-theme-dark .st2-access-admin-table td {
   border-color: #3d4b61 !important;
 }
 
+html.st2-theme-dark .st2-access-admin-usage {
+  background: var(--st2-suite-surface-soft) !important;
+  border-color: var(--st2-suite-border) !important;
+}
+
+html.st2-theme-dark .st2-access-admin-usage-head,
+html.st2-theme-dark .st2-access-admin-usage-head strong,
+html.st2-theme-dark .st2-access-admin-usage-people strong {
+  color: #f1f5f9;
+}
+
+html.st2-theme-dark .st2-access-admin-usage-head span,
+html.st2-theme-dark .st2-access-admin-usage-label,
+html.st2-theme-dark .st2-access-admin-usage-mods,
+html.st2-theme-dark .st2-access-admin-usage-empty {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-access-admin-usage-modules li {
+  background: #1f1f1f;
+  border-color: #333333;
+  color: #e5e5e5;
+}
+
+html.st2-theme-dark .st2-access-admin-usage-modules .st2-access-admin-usage-n {
+  color: #fb923c;
+}
+
+html.st2-theme-dark .st2-access-admin-usage-people li {
+  color: #cbd5e1;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
 html.st2-theme-dark .st2-access-admin-audit-head,
 html.st2-theme-dark .st2-access-admin-audit-head strong,
 html.st2-theme-dark .st2-access-admin-audit-list li strong,
