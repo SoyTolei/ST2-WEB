@@ -724,10 +724,8 @@ public static class PlanillasEndpoints
                 var clientHistory = showClientMeta
                     ? accessRepo.ListClientHistoryByEmail(items.Select(i => i.Email), 5)
                     : new Dictionary<string, IReadOnlyList<AppAccessClientHistoryDto>>(StringComparer.OrdinalIgnoreCase);
-                // Uso por módulo: sensible, solo para el dueño (ADMIN WEB no lo ve).
-                var usageToday = isPrimaryOwner
-                    ? accessRepo.ListUsageToday(limit: 300)
-                    : Array.Empty<AppAccessUsageDto>();
+                // El uso por módulo va en /api/access/usage: se pide al abrir la
+                // sub-pestaña, no en cada poll de la lista.
                 var mapped = items.Select(item =>
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);
@@ -805,20 +803,36 @@ public static class PlanillasEndpoints
                     loggedInTodayCount = summary.LoggedInTodayCount,
                     concurrentCount = isPrimaryOwner ? concurrentEmails.Count : 0,
                     activeWindowMinutes = summary.ActiveWindowMinutes,
-                    usageToday = usageToday.Select(u => (object)new
-                    {
-                        email = u.Email,
-                        module = u.Module,
-                        hits = u.Hits,
-                        firstAt = u.FirstAt,
-                        lastAt = u.LastAt,
-                    }).ToList(),
                 });
             }
             catch (Exception ex)
             {
                 return Results.Json(new { error = "No se pudo cargar la lista de accesos.", detail = ex.Message }, statusCode: StatusCodes.Status500InternalServerError);
             }
+        });
+
+        app.MapGet("/api/access/usage", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo, int? days) =>
+        {
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied, ownerOnly: true))
+                return denied!;
+
+            var span = AppAccessRepository.NormalizeUsageDays(days ?? 1);
+            var rows = accessRepo.ListUsage(span);
+            var activeDays = accessRepo.ListUsageActiveDays(span)
+                .Select(kv => new { email = kv.Key, days = kv.Value });
+
+            return Results.Ok(new
+            {
+                days = span,
+                items = rows.Select(r => new
+                {
+                    email = r.Email,
+                    module = r.Module,
+                    hits = r.Hits,
+                    lastAt = r.LastAt,
+                }),
+                activeDays,
+            });
         });
 
         app.MapDelete("/api/access/registrations", (

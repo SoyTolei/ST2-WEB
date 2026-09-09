@@ -1017,20 +1017,45 @@ public sealed class AppAccessRepository
         cmd.ExecuteNonQuery();
     }
 
-    public IReadOnlyList<AppAccessUsageDto> ListUsageToday(int limit = 200)
+    /// <summary>Días de retención del uso; los rangos del panel no pueden pedir más.</summary>
+    public const int UsageMaxDays = 30;
+
+    /// <summary>Rangos del panel: hoy, 3, 7, 15 y 30 días calendario AR.</summary>
+    public static readonly int[] UsageRangeDays = [1, 3, 7, 15, 30];
+
+    /// <summary>Acepta solo los chips del panel; cualquier otro valor cae a hoy.</summary>
+    public static int NormalizeUsageDays(int days) =>
+        Array.IndexOf(UsageRangeDays, days) >= 0 ? days : 1;
+
+    /// <summary>Primer día (calendario argentino) incluido en una ventana de N días.</summary>
+    private static string UsageCutoffDay(int days)
+    {
+        var span = NormalizeUsageDays(days);
+        return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone)
+            .Date.AddDays(-(span - 1))
+            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Uso agregado por persona y módulo en los últimos N días. Se agrupa en la
+    /// consulta para que el payload no crezca con el rango.
+    /// </summary>
+    public IReadOnlyList<AppAccessUsageDto> ListUsage(int days, int limit = 400)
     {
         if (!StorageReady) return Array.Empty<AppAccessUsageDto>();
-        var take = Math.Clamp(limit, 1, 500);
+        var take = Math.Clamp(limit, 1, 1000);
         using var conn = Open();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
-            SELECT email, module, hits, first_at, last_at
+            SELECT email, module, SUM(hits) AS hits, MIN(first_at) AS first_at, MAX(last_at) AS last_at
             FROM app_access_usage
-            WHERE day_ar = $day
-            ORDER BY last_at DESC
+            WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
+            GROUP BY email, module
+            ORDER BY MAX(last_at) DESC
             LIMIT $limit
             """;
-        cmd.Parameters.AddWithValue("$day", ArgentinaDayKey());
+        cmd.Parameters.AddWithValue("$cutoff", UsageCutoffDay(days));
+        cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
         cmd.Parameters.AddWithValue("$limit", take);
 
         var list = new List<AppAccessUsageDto>();
@@ -1048,6 +1073,35 @@ public sealed class AppAccessRepository
         }
 
         return list;
+    }
+
+    /// <summary>
+    /// Días distintos con actividad por persona en la ventana. Sin esto, un rango
+    /// de 30 días no distingue a quien entró todos los días de quien entró una vez.
+    /// </summary>
+    public IReadOnlyDictionary<string, int> ListUsageActiveDays(int days)
+    {
+        var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        if (!StorageReady) return map;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT email, COUNT(DISTINCT day_ar)
+            FROM app_access_usage
+            WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
+            GROUP BY email
+            """;
+        cmd.Parameters.AddWithValue("$cutoff", UsageCutoffDay(days));
+        cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            if (reader.IsDBNull(0)) continue;
+            map[reader.GetString(0)] = reader.IsDBNull(1) ? 0 : reader.GetInt32(1);
+        }
+
+        return map;
     }
 
     public void AddOwnerNotice(string kind, string targetEmail, string actorEmail, string? message = null)

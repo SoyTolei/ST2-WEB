@@ -119,8 +119,8 @@
       background: #1a0a04;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260909c"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260909c"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260909d"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260909d"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260907f"/>
@@ -1825,12 +1825,21 @@
           <div class="st2-admin-usage-view hidden" data-admin-sub="uso" hidden>
             <div class="st2-admin-usage-head">
               <div>
-                <h4 class="st2-admin-usage-title">Uso de hoy</h4>
+                <h4 id="st2-admin-usage-title" class="st2-admin-usage-title">Uso de hoy</h4>
                 <p id="st2-admin-usage-sub" class="st2-admin-usage-sub"></p>
               </div>
-              <div class="st2-admin-usage-ranges" role="group" aria-label="Ordenar personas">
-                <button type="button" class="st2-admin-usage-sort is-on" data-usage-sort="recent">Más reciente</button>
-                <button type="button" class="st2-admin-usage-sort" data-usage-sort="hits">Más uso</button>
+              <div class="st2-admin-usage-tools">
+                <div class="st2-admin-usage-ranges" role="group" aria-label="Período">
+                  <button type="button" class="st2-admin-usage-sort is-on" data-usage-days="1">Hoy</button>
+                  <button type="button" class="st2-admin-usage-sort" data-usage-days="3">3d</button>
+                  <button type="button" class="st2-admin-usage-sort" data-usage-days="7">7d</button>
+                  <button type="button" class="st2-admin-usage-sort" data-usage-days="15">15d</button>
+                  <button type="button" class="st2-admin-usage-sort" data-usage-days="30">30d</button>
+                </div>
+                <div class="st2-admin-usage-ranges" role="group" aria-label="Ordenar personas">
+                  <button type="button" class="st2-admin-usage-sort is-on" data-usage-sort="recent">Más reciente</button>
+                  <button type="button" class="st2-admin-usage-sort" data-usage-sort="hits">Más uso</button>
+                </div>
               </div>
             </div>
             <p id="st2-admin-usage-empty" class="st2-admin-usage-empty hidden" hidden>Todavía no hay actividad registrada hoy.</p>
@@ -2714,6 +2723,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260909e" type="module"></script>
+  <script src="/js/app.js?v=20260909f" type="module"></script>
 </body>
 </html>

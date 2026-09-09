@@ -1862,6 +1862,10 @@ html.st2-theme-dark .st2-admin-usage-sort {
   color: #94a3b8;
 }
 
+html.st2-theme-dark .st2-admin-usage-days {
+  color: #64748b;
+}
+
 /* Uso de hoy */
 html.st2-theme-dark .st2-admin-usage-title,
 html.st2-theme-dark .st2-admin-usage-mod,

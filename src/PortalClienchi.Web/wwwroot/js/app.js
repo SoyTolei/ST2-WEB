@@ -189,11 +189,13 @@ const accessAdminKpiAttention = document.getElementById("st2-access-admin-kpi-at
 const accessAdminDaySummary = document.getElementById("st2-access-admin-day-summary");
 const adminSubnav = document.getElementById("st2-admin-subnav");
 const adminSubtabButtons = Array.from(document.querySelectorAll("[data-admin-subtab]"));
+const adminUsageTitle = document.getElementById("st2-admin-usage-title");
 const adminUsageSub = document.getElementById("st2-admin-usage-sub");
 const adminUsageEmpty = document.getElementById("st2-admin-usage-empty");
 const adminUsageBody = document.getElementById("st2-admin-usage-body");
 const adminUsageModulesBody = document.getElementById("st2-admin-usage-modules-body");
 const adminUsagePeopleBody = document.getElementById("st2-admin-usage-people-body");
+const adminUsageDaysButtons = Array.from(document.querySelectorAll("[data-usage-days]"));
 const adminUsageSortButtons = Array.from(document.querySelectorAll("[data-usage-sort]"));
 const accessAdminExportBtn = document.getElementById("st2-access-admin-export");
 const accessAdminQuickFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-quick-filter"));
@@ -740,11 +742,31 @@ let accessAdminClientWatchReady = false;
 let accessAdminClientWatchTimer = null;
 let accessAdminClientChangedEmails = new Set();
 let accessAdminClientWatchBusy = false;
-let accessAdminUsageToday = [];
+let accessAdminUsageRows = [];
+let accessAdminUsageActiveDays = new Map();
+let adminUsageLoadSeq = 0;
+let adminUsageLoadError = false;
 /** "accesos" | "uso" — sub-pestaña del panel ADMIN. */
 let adminSubtab = "accesos";
+/** 1 | 3 | 7 | 15 | 30 — días calendario AR. */
+let adminUsageDays = 1;
 /** "recent" | "hits" — orden de la tabla por persona. */
 let adminUsageSort = "recent";
+const USAGE_RANGE_DAYS = [1, 3, 7, 15, 30];
+const USAGE_RANGE_TITLES = {
+  1: "Uso de hoy",
+  3: "Uso · 3 días",
+  7: "Uso · 7 días",
+  15: "Uso · 15 días",
+  30: "Uso · 30 días",
+};
+const USAGE_RANGE_EMPTY = {
+  1: "Todavía no hay actividad registrada hoy.",
+  3: "No hay actividad en los últimos 3 días.",
+  7: "No hay actividad en los últimos 7 días.",
+  15: "No hay actividad en los últimos 15 días.",
+  30: "No hay actividad en los últimos 30 días.",
+};
 let accessAdminConcurrentCount = 0;
 
 function resolveAccessDeviceShort(item) {
@@ -1288,8 +1310,12 @@ function resetAccessAdminSnapshot() {
   accessAdminQuery = "";
   accessAdminListFilter = "";
   accessAdminModFilters = new Set();
-  accessAdminUsageToday = [];
+  accessAdminUsageRows = [];
+  accessAdminUsageActiveDays = new Map();
+  adminUsageLoadError = false;
   adminSubtab = "accesos";
+  adminUsageDays = 1;
+  syncAdminUsageRangeUi();
   syncAdminSubnav();
   accessAdminConcurrentCount = 0;
   if (accessAdminSearch) accessAdminSearch.value = "";
@@ -1470,20 +1496,85 @@ function setAdminSubtab(tab) {
   const next = tab === "uso" && isPrimarySuperAdmin() ? "uso" : "accesos";
   adminSubtab = next;
   syncAdminSubnav();
-  if (next === "uso") renderAccessAdminUsage();
+  if (next === "uso") void loadAccessAdminUsage();
+}
+
+function normalizeUsageDays(days) {
+  const n = Number(days) || 1;
+  return USAGE_RANGE_DAYS.includes(n) ? n : 1;
+}
+
+function syncAdminUsageRangeUi() {
+  const current = normalizeUsageDays(adminUsageDays);
+  for (const btn of adminUsageDaysButtons) {
+    const on = Number(btn.dataset.usageDays) === current;
+    btn.classList.toggle("is-on", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+}
+
+function setAdminUsageDays(days) {
+  adminUsageDays = normalizeUsageDays(days);
+  syncAdminUsageRangeUi();
+  if (adminUsageTitle) adminUsageTitle.textContent = USAGE_RANGE_TITLES[adminUsageDays] || "Uso";
+  if (adminUsageSub) adminUsageSub.textContent = "Cargando…";
+  void loadAccessAdminUsage();
+}
+
+async function loadAccessAdminUsage({ silent = false } = {}) {
+  if (!isPrimarySuperAdmin()) return;
+  const seq = ++adminUsageLoadSeq;
+  const days = normalizeUsageDays(adminUsageDays);
+  try {
+    const data = await apiGet(`/api/access/usage?days=${days}`);
+    if (seq !== adminUsageLoadSeq) return;
+    accessAdminUsageRows = Array.isArray(data.items)
+      ? data.items.map((row) => ({
+        email: row.email || "",
+        module: row.module || "",
+        hits: Number(row.hits ?? 0) || 0,
+        lastAt: row.lastAt || "",
+      }))
+      : [];
+    const map = new Map();
+    for (const row of Array.isArray(data.activeDays) ? data.activeDays : []) {
+      const email = String(row?.email || "").trim().toLowerCase();
+      if (!email) continue;
+      map.set(email, Number(row.days) || 0);
+    }
+    accessAdminUsageActiveDays = map;
+    adminUsageDays = normalizeUsageDays(data.days ?? days);
+    adminUsageLoadError = false;
+    syncAdminUsageRangeUi();
+    renderAccessAdminUsage();
+  } catch {
+    if (seq !== adminUsageLoadSeq) return;
+    adminUsageLoadError = true;
+    if (!silent) {
+      accessAdminUsageRows = [];
+      accessAdminUsageActiveDays = new Map();
+      renderAccessAdminUsage();
+    }
+  }
 }
 
 function renderAccessAdminUsage() {
   syncAdminSubnav();
   if (!adminUsageBody || !isPrimarySuperAdmin()) return;
 
-  const rows = (Array.isArray(accessAdminUsageToday) ? accessAdminUsageToday : [])
+  const days = normalizeUsageDays(adminUsageDays);
+  if (adminUsageTitle) adminUsageTitle.textContent = USAGE_RANGE_TITLES[days] || "Uso";
+
+  const rows = (Array.isArray(accessAdminUsageRows) ? accessAdminUsageRows : [])
     .filter((row) => row.module && row.email);
 
   const showEmpty = rows.length === 0;
   adminUsageBody.classList.toggle("hidden", showEmpty);
   adminUsageBody.hidden = showEmpty;
   if (adminUsageEmpty) {
+    adminUsageEmpty.textContent = adminUsageLoadError
+      ? "No se pudo cargar el uso."
+      : (USAGE_RANGE_EMPTY[days] || USAGE_RANGE_EMPTY[1]);
     adminUsageEmpty.classList.toggle("hidden", !showEmpty);
     adminUsageEmpty.hidden = !showEmpty;
   }
@@ -1543,6 +1634,7 @@ function renderAccessAdminUsage() {
         email,
         hits: info.hits,
         lastAt: info.lastAt,
+        activeDays: accessAdminUsageActiveDays.get(String(email).toLowerCase()) || 0,
         mods: [...info.mods].sort((a, b) => b.hits - a.hits),
       };
     });
@@ -1558,8 +1650,11 @@ function renderAccessAdminUsage() {
             `<span class="st2-admin-usage-chip">${escapeHtml(formatUsageModule(m.module))}`
             + `<span class="st2-admin-usage-chip-n">${escapeHtml(String(m.hits))}</span></span>`)
           .join("");
+        const daysHint = days > 1 && p.activeDays > 0
+          ? `<span class="st2-admin-usage-days">${escapeHtml(String(p.activeDays))} ${p.activeDays === 1 ? "día" : "días"}</span>`
+          : "";
         return `<tr>
-          <td><span class="st2-admin-usage-person" title="${escapeHtml(p.email)}">${escapeHtml(p.name)}</span></td>
+          <td><span class="st2-admin-usage-person" title="${escapeHtml(p.email)}">${escapeHtml(p.name)}</span>${daysHint}</td>
           <td><div class="st2-admin-usage-chips">${chips}</div></td>
           <td class="st2-admin-usage-num">${escapeHtml(formatAccessRelative(p.lastAt))}</td>
         </tr>`;
@@ -2114,6 +2209,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     const clientChanges = applyAccessAdminClientWatch(items, { notify: true, showHint: false });
 
     if (auto && !force && snapshot === accessAdminLastSnapshot && !clientChanges.length) {
+      if (adminSubtab === "uso") void loadAccessAdminUsage({ silent: true });
       return;
     }
 
@@ -2126,14 +2222,6 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
       activeWindowMinutes: data.activeWindowMinutes ?? 5,
     };
     accessAdminConcurrentCount = Number(data.concurrentCount ?? 0) || 0;
-    accessAdminUsageToday = Array.isArray(data.usageToday)
-      ? data.usageToday.map((row) => ({
-        email: row.email || "",
-        module: row.module || "",
-        hits: Number(row.hits ?? 0) || 0,
-        lastAt: row.lastAt || "",
-      }))
-      : [];
 
     updateAccessAdminSummaryLine();
 
@@ -2158,6 +2246,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     }
 
     renderAccessAdminTable();
+    if (adminSubtab === "uso") void loadAccessAdminUsage({ silent: true });
   } catch {
     if (!silent) accessAdminStatus.textContent = "No se pudo contactar al servidor.";
   } finally {
@@ -3248,6 +3337,11 @@ accessAdminQuickFilterButtons.forEach((btn) => {
 adminSubtabButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     setAdminSubtab(btn.dataset.adminSubtab || "accesos");
+  });
+});
+adminUsageDaysButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setAdminUsageDays(btn.dataset.usageDays);
   });
 });
 adminUsageSortButtons.forEach((btn) => {
