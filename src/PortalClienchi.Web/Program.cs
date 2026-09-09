@@ -139,13 +139,9 @@ app.Use(async (ctx, next) =>
         var env = ctx.RequestServices.GetRequiredService<IWebHostEnvironment>();
         var html = await St2IndexHtml.LoadAsync(env, ctx.RequestAborted).ConfigureAwait(false);
         ctx.Response.ContentType = "text/html; charset=utf-8";
-        ctx.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
-        ctx.Response.Headers.Pragma = "no-cache";
-        ctx.Response.Headers.Expires = "0";
         // El shell lleva el build inyectado: si un CDN/proxy lo cachea, el cliente
         // queda con HTML viejo y cree que hay update para siempre.
-        ctx.Response.Headers["CDN-Cache-Control"] = "no-store";
-        ctx.Response.Headers["Cloudflare-CDN-Cache-Control"] = "no-store";
+        St2HttpCache.NoStore(ctx);
         await ctx.Response.WriteAsync(html, ctx.RequestAborted).ConfigureAwait(false);
         return;
     }
@@ -191,7 +187,7 @@ app.MapGet("/api/live", () => Results.Ok(new { ok = true, service = "st2-web" })
 
 app.MapGet("/api/version", (HttpContext ctx) =>
 {
-    ctx.Response.Headers.CacheControl = "no-store, no-cache, must-revalidate";
+    St2HttpCache.NoStore(ctx);
     return Results.Ok(new
     {
         build = St2WebBuild.GetBuild(),
@@ -256,7 +252,10 @@ app.MapGet("/api/health", async (PortalRegistry registry, string? portal, Cancel
     return Results.Ok(new { portals = statuses });
 });
 
-app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, ThomEmbedConfig thomEmbed) => Results.Ok(new
+app.MapGet("/api/app-config", (HttpContext ctx, AppSettings settings, PortalRegistry registry, ThomEmbedConfig thomEmbed) =>
+{
+    St2HttpCache.NoStore(ctx);
+    return Results.Ok(new
 {
     settings.ThomTapUrl,
     settings.ThomLegalUrl,
@@ -286,7 +285,8 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
     webBuildAt = St2WebBuild.GetBuildStamp(),
     webVersionLabel = St2WebBuild.GetVersionLabel(),
     webUpdatedLabel = St2WebBuild.GetUpdatedLabel(),
-}));
+    });
+});
 
 app.MapGet("/api/types", () =>
     Enum.GetValues<KnowledgeType>()

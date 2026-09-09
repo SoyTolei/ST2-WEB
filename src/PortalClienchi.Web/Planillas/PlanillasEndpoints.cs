@@ -1,5 +1,6 @@
 using System.Text.Json;
 using PortalClienchi.Core.Configuration;
+using PortalClienchi.Web;
 
 namespace PortalClienchi.Web.Planillas;
 
@@ -545,6 +546,7 @@ public static class PlanillasEndpoints
             accessRepo.TouchActivity(email);
             accessRepo.UpdateClientPresence(email, ctx, clientHint, deviceId);
             blanqueoRepo.AssociatePendingRequester(email);
+            St2HttpCache.NoStore(ctx);
             return Results.Ok(new
             {
                 ok = true,

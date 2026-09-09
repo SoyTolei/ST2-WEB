@@ -5360,6 +5360,8 @@ const UPDATE_HANDLED_KEY = "st2-update-handled-builds";
 const UPDATE_RELOAD_TARGET_KEY = "st2-update-reload-target";
 /** Build que ya intentamos recargar sin éxito: no se avisa más por él. */
 const UPDATE_STUCK_KEY = "st2-update-stuck-build";
+/** SHA del HTML de esta pestaña; si F5 no lo cambia, no tiene sentido insistir. */
+const UPDATE_HTML_BUILD_KEY = "st2-update-html-build";
 /** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
 const UPDATE_HANDLED_TTL_MS = 6 * 60 * 60 * 1000;
 
@@ -5373,6 +5375,8 @@ let reloadBannerForced = false;
 let updateUiMode = "hidden";
 /** Fallback si localStorage/sessionStorage fallan. */
 let memoryDeferredSignal = "";
+/** True si esta carga es un F5/Ctrl+F5 y el HTML no cambió. */
+let htmlDidNotChangeOnReload = false;
 
 function loadedAppBuild() {
   const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
@@ -5545,6 +5549,30 @@ function reconcileReloadTarget() {
   }
 }
 
+/** F5 / Ctrl+F5 / Recargar: si el HTML sigue igual, el usuario ya hizo lo que podía. */
+function noteHtmlReload() {
+  const cur = buildKey(loadedAppBuild());
+  let prev = "";
+  try {
+    prev = sessionStorage.getItem(UPDATE_HTML_BUILD_KEY) || "";
+  } catch {
+    prev = "";
+  }
+  try {
+    if (cur) sessionStorage.setItem(UPDATE_HTML_BUILD_KEY, cur);
+  } catch {
+    // ignore
+  }
+  htmlDidNotChangeOnReload = !!(prev && cur && prev === cur);
+}
+
+function silenceUnreachableLive(live) {
+  markBuildHandled(live);
+  markBuildStuck(live);
+  const key = buildKey(live);
+  if (key) writeDeferredUpdateSignal(`build:${key}`);
+}
+
 function setUpdateBannerVisible(show) {
   const banner = document.getElementById("st2-update-banner");
   if (!banner) return;
@@ -5646,16 +5674,15 @@ document.addEventListener("st2:request-reload-banner", () => {
   requestUnifiedReloadBanner();
 });
 
-let staleReplicaLogged = "";
+let skipUpdateLogged = "";
 
 /** Diagnóstico: deja rastro en consola sin molestar al usuario con carteles. */
-function logStaleReplicaOnce(loaded, live) {
-  const pair = `${buildKey(loaded)}<-${buildKey(live)}`;
-  if (staleReplicaLogged === pair) return;
-  staleReplicaLogged = pair;
+function logSkipUpdateOnce(reason, loaded, live) {
+  const pair = `${reason}:${buildKey(loaded)}<-${buildKey(live)}`;
+  if (skipUpdateLogged === pair) return;
+  skipUpdateLogged = pair;
   console.info(
-    `[ST2] /api/version respondió un build más viejo (${buildKey(live)}) que el cargado (${buildKey(loaded)}). `
-    + "Probable réplica vieja todavía viva: no se avisa de actualización.",
+    `[ST2] No se avisa de actualización (${reason}): HTML ${buildKey(loaded) || "?"} vs API ${buildKey(live) || "?"}.`,
   );
 }
 
@@ -5683,13 +5710,17 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
     return;
   }
 
-  // Distinto SHA no significa "más nuevo": puede ser una réplica vieja que
-  // todavía responde. Solo avisamos si el deploy del server es posterior.
-  // Ante empate de fechas seguimos el camino normal: mejor avisar de más que ocultar un update real.
+  // Distinto SHA no es "más nuevo": réplica vieja, API cacheada, o falta fecha.
+  // Solo avisamos si las dos fechas existen y la del server es posterior.
   const loadedAt = loadedBuildTime();
   const liveAt = Date.parse(String(liveBuildAt || ""));
-  if (loadedAt !== null && Number.isFinite(liveAt) && liveAt < loadedAt) {
-    logStaleReplicaOnce(loaded, live);
+  if (loadedAt === null || !Number.isFinite(liveAt)) {
+    logSkipUpdateOnce("sin-fecha", loaded, live);
+    stopWatching();
+    return;
+  }
+  if (liveAt <= loadedAt) {
+    logSkipUpdateOnce(liveAt < loadedAt ? "api-mas-vieja" : "misma-fecha", loaded, live);
     stopWatching();
     return;
   }
@@ -5703,13 +5734,22 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
   if (pendingLiveHits < UPDATE_CONFIRM_NEEDED) return;
 
   lastLiveBuild = live;
+
+  // Recargaron (F5 o botón) y el HTML no se movió: insistir no sirve.
+  if (htmlDidNotChangeOnReload) {
+    silenceUnreachableLive(live);
+    logSkipUpdateOnce("reload-sin-cambio", loaded, live);
+    stopWatching();
+    return;
+  }
+
   showUpdatePrompt();
   if (updateUiMode !== "hidden") notifyWebUpdateDesktop(live);
 }
 
 async function checkAppVersion() {
   try {
-    const res = await fetch("/api/version", { cache: "no-store" });
+    const res = await fetch(`/api/version?_=${Date.now()}`, { cache: "no-store" });
     if (!res.ok) return;
     const data = await res.json();
     applyLiveBuild(data.build || data.shortBuild || "", data.buildAt);
@@ -5721,6 +5761,7 @@ async function checkAppVersion() {
 function startUpdateChecker() {
   if (updateCheckerStarted) return;
   updateCheckerStarted = true;
+  noteHtmlReload();
   reconcileReloadTarget();
   document.getElementById("st2-update-reload")?.addEventListener("click", reloadForUpdate);
   document.getElementById("st2-update-reload-now")?.addEventListener("click", reloadForUpdate);
