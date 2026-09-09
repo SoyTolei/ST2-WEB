@@ -48,6 +48,18 @@ public static class St2WebBuild
         return null;
     }
 
+    /// <summary>
+    /// Fecha del deploy en ISO 8601 (o vacío si no se pudo resolver). El cliente la usa
+    /// para no avisar "hay versión nueva" cuando le contesta una réplica vieja.
+    /// </summary>
+    public static string GetBuildStamp()
+    {
+        var updated = GetBuildUpdatedUtc();
+        return updated is null
+            ? ""
+            : DateTime.SpecifyKind(updated.Value, DateTimeKind.Utc).ToString("O", CultureInfo.InvariantCulture);
+    }
+
     public static string GetVersionLabel() => "Esta web";
 
     public static string GetUpdatedLabel()

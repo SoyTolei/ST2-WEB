@@ -5264,6 +5264,8 @@ const UPDATE_CONFIRM_NEEDED = 2;
 const UPDATE_DEFER_KEY = "st2-update-deferred-signal";
 const UPDATE_HANDLED_KEY = "st2-update-handled-builds";
 const UPDATE_RELOAD_TARGET_KEY = "st2-update-reload-target";
+/** Build que ya intentamos recargar sin éxito: no se avisa más por él. */
+const UPDATE_STUCK_KEY = "st2-update-stuck-build";
 /** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
 const UPDATE_HANDLED_TTL_MS = 6 * 60 * 60 * 1000;
 
@@ -5282,6 +5284,14 @@ function loadedAppBuild() {
   const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
   if (meta) return meta;
   return String(appConfig?.webBuild || "").trim();
+}
+
+/** Fecha de deploy del build que tenemos cargado (ISO), si el server la informó. */
+function loadedBuildTime() {
+  const meta = document.querySelector('meta[name="st2-build-at"]')?.content?.trim();
+  const raw = meta || String(appConfig?.webBuildAt || "").trim();
+  const ms = Date.parse(raw);
+  return Number.isFinite(ms) ? ms : null;
 }
 
 function normalizeBuild(value) {
@@ -5387,6 +5397,19 @@ function wasBuildHandled(build) {
   return true;
 }
 
+function readStuckBuild() {
+  return buildKey(storageGet(UPDATE_STUCK_KEY));
+}
+
+/**
+ * Marca un build como inalcanzable: ya recargamos apuntando a él y el HTML
+ * siguió siendo el viejo (caché intermedia o réplica pegada). Insistir no sirve.
+ */
+function markBuildStuck(build) {
+  const key = buildKey(build);
+  if (key) storageSet(UPDATE_STUCK_KEY, key);
+}
+
 /** Si el defer era de un build que ya tenemos cargado, lo limpia. No borra por un match momentáneo de otra réplica. */
 function clearDeferredIfSatisfied(loaded) {
   const deferred = readDeferredUpdateSignal();
@@ -5413,12 +5436,15 @@ function reconcileReloadTarget() {
     if (target && loaded && target === loaded) {
       markBuildHandled(loaded);
       localStorage.removeItem(UPDATE_RELOAD_TARGET_KEY);
+      storageSet(UPDATE_STUCK_KEY, "");
       return;
     }
-    // Recargaron hace poco pero el HTML sigue distinto (caché / otra réplica): no reabrir modal.
+    // Recargamos apuntando a ese build y el HTML no cambió: dejar de avisar por él.
     if (target && at && Date.now() - at < 10 * 60 * 1000) {
       markBuildHandled(target);
+      markBuildStuck(target);
       writeDeferredUpdateSignal(`build:${target}`);
+      localStorage.removeItem(UPDATE_RELOAD_TARGET_KEY);
     }
   } catch {
     // ignore
@@ -5462,6 +5488,11 @@ function setUpdateUiMode(mode) {
 function showUpdatePrompt() {
   const signal = currentUpdateSignal();
   if (!signal) {
+    setUpdateUiMode("hidden");
+    return;
+  }
+  // Ya recargamos por este build y no sirvió: silencio total, el usuario no puede hacer nada.
+  if (signal.startsWith("build:") && readStuckBuild() === signal.slice("build:".length)) {
     setUpdateUiMode("hidden");
     return;
   }
@@ -5521,26 +5552,55 @@ document.addEventListener("st2:request-reload-banner", () => {
   requestUnifiedReloadBanner();
 });
 
-function applyLiveBuild(liveBuild) {
+let staleReplicaLogged = "";
+
+/** Diagnóstico: deja rastro en consola sin molestar al usuario con carteles. */
+function logStaleReplicaOnce(loaded, live) {
+  const pair = `${buildKey(loaded)}<-${buildKey(live)}`;
+  if (staleReplicaLogged === pair) return;
+  staleReplicaLogged = pair;
+  console.info(
+    `[ST2] /api/version respondió un build más viejo (${buildKey(live)}) que el cargado (${buildKey(loaded)}). `
+    + "Probable réplica vieja todavía viva: no se avisa de actualización.",
+  );
+}
+
+/**
+ * @param {string} liveBuild SHA que reporta el server.
+ * @param {string} [liveBuildAt] Fecha de deploy de ese SHA (ISO).
+ */
+function applyLiveBuild(liveBuild, liveBuildAt) {
   const live = String(liveBuild || "").trim();
   if (!live) return;
   const loaded = loadedAppBuild();
   const liveNorm = normalizeBuild(live);
 
-  if (!buildsDiffer(loaded, live)) {
+  const stopWatching = () => {
     pendingLiveBuild = "";
     pendingLiveHits = 0;
+    if (!reloadBannerForced) setUpdateUiMode("hidden");
+    else showUpdatePrompt();
+  };
+
+  if (!buildsDiffer(loaded, live)) {
     lastLiveBuild = live;
     clearDeferredIfSatisfied(loaded);
-    if (!reloadBannerForced) {
-      setUpdateUiMode("hidden");
-    } else {
-      showUpdatePrompt();
-    }
+    stopWatching();
     return;
   }
 
-  // Build distinto: exigir N lecturas seguidas del mismo SHA (anti flip-flop de réplicas).
+  // Distinto SHA no significa "más nuevo": puede ser una réplica vieja que
+  // todavía responde. Solo avisamos si el deploy del server es posterior.
+  // Ante empate de fechas seguimos el camino normal: mejor avisar de más que ocultar un update real.
+  const loadedAt = loadedBuildTime();
+  const liveAt = Date.parse(String(liveBuildAt || ""));
+  if (loadedAt !== null && Number.isFinite(liveAt) && liveAt < loadedAt) {
+    logStaleReplicaOnce(loaded, live);
+    stopWatching();
+    return;
+  }
+
+  // Exigir N lecturas seguidas del mismo SHA (anti flip-flop entre réplicas).
   if (liveNorm === pendingLiveBuild) pendingLiveHits += 1;
   else {
     pendingLiveBuild = liveNorm;
@@ -5550,7 +5610,7 @@ function applyLiveBuild(liveBuild) {
 
   lastLiveBuild = live;
   showUpdatePrompt();
-  notifyWebUpdateDesktop(live);
+  if (updateUiMode !== "hidden") notifyWebUpdateDesktop(live);
 }
 
 async function checkAppVersion() {
@@ -5558,7 +5618,7 @@ async function checkAppVersion() {
     const res = await fetch("/api/version", { cache: "no-store" });
     if (!res.ok) return;
     const data = await res.json();
-    applyLiveBuild(data.build || data.shortBuild || "");
+    applyLiveBuild(data.build || data.shortBuild || "", data.buildAt);
   } catch {
     // ignore
   }
@@ -5600,7 +5660,7 @@ function startSessionHeartbeat() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         // Mismo contador de confirmación que /api/version (anti flip-flop).
-        if (data?.webBuild) applyLiveBuild(data.webBuild);
+        if (data?.webBuild) applyLiveBuild(data.webBuild, data.webBuildAt);
       })
       .catch(() => {});
   };

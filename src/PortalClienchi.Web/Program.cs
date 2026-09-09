@@ -142,6 +142,10 @@ app.Use(async (ctx, next) =>
         ctx.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
         ctx.Response.Headers.Pragma = "no-cache";
         ctx.Response.Headers.Expires = "0";
+        // El shell lleva el build inyectado: si un CDN/proxy lo cachea, el cliente
+        // queda con HTML viejo y cree que hay update para siempre.
+        ctx.Response.Headers["CDN-Cache-Control"] = "no-store";
+        ctx.Response.Headers["Cloudflare-CDN-Cache-Control"] = "no-store";
         await ctx.Response.WriteAsync(html, ctx.RequestAborted).ConfigureAwait(false);
         return;
     }
@@ -192,6 +196,7 @@ app.MapGet("/api/version", (HttpContext ctx) =>
     {
         build = St2WebBuild.GetBuild(),
         shortBuild = St2WebBuild.GetShortBuild(),
+        buildAt = St2WebBuild.GetBuildStamp(),
         updatedLabel = St2WebBuild.GetUpdatedLabel(),
     });
 });
@@ -278,6 +283,7 @@ app.MapGet("/api/app-config", (AppSettings settings, PortalRegistry registry, Th
     thomFrameUrl = thomEmbed.FrameUrl,
     thomProxyReachable = thomEmbed.ProxyReachable,
     webBuild = St2WebBuild.GetBuild(),
+    webBuildAt = St2WebBuild.GetBuildStamp(),
     webVersionLabel = St2WebBuild.GetVersionLabel(),
     webUpdatedLabel = St2WebBuild.GetUpdatedLabel(),
 }));

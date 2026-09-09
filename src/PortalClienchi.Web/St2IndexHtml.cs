@@ -62,6 +62,7 @@ public static class St2IndexHtml
         sb.AppendLine("}");
         sb.AppendLine("</script>");
         sb.AppendLine($"<meta name=\"st2-build\" content=\"{WebUtility.HtmlEncode(build)}\"/>");
+        sb.AppendLine($"<meta name=\"st2-build-at\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetBuildStamp())}\"/>");
         var icoV = GetIconVersion(env, v);
         sb.AppendLine($"<meta name=\"st2-icon\" content=\"/st2.ico?v={WebUtility.HtmlEncode(icoV)}\"/>");
         sb.AppendLine($"<meta name=\"st2-version-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetVersionLabel())}\"/>");

@@ -545,7 +545,12 @@ public static class PlanillasEndpoints
             accessRepo.TouchActivity(email);
             accessRepo.UpdateClientPresence(email, ctx, clientHint, deviceId);
             blanqueoRepo.AssociatePendingRequester(email);
-            return Results.Ok(new { ok = true, webBuild = St2WebBuild.GetBuild() });
+            return Results.Ok(new
+            {
+                ok = true,
+                webBuild = St2WebBuild.GetBuild(),
+                webBuildAt = St2WebBuild.GetBuildStamp(),
+            });
         });
 
         // Uso por módulo: solo cuenta aperturas del día (sin historial por clic).
