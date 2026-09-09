@@ -18,6 +18,7 @@ public sealed class AppAccessRepository
         EnsureWritable(st2Dir);
         EnsureSchema();
         PurgeInvalidEmails();
+        PurgeOwnerUsage();
         _logger.LogInformation("Accesos ST2 SQLite en {DbPath}", _dbPath);
     }
 
@@ -984,6 +985,24 @@ public sealed class AppAccessRepository
         cmd.ExecuteNonQuery();
 
         PurgeOldUsage(conn);
+    }
+
+    /// <summary>
+    /// Borra el uso del dueño. Se registró antes de excluirlo, y mezclado
+    /// con el resto ensucia el panel.
+    /// </summary>
+    public int PurgeOwnerUsage()
+    {
+        if (!StorageReady) return 0;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "DELETE FROM app_access_usage WHERE lower(email) = lower($email)";
+        cmd.Parameters.AddWithValue("$email", St2SuperAdmin.PrimaryEmail);
+        var removed = cmd.ExecuteNonQuery();
+        if (removed > 0)
+            _logger.LogInformation("Uso del dueño purgado: {Count} fila(s)", removed);
+        return removed;
     }
 
     /// <summary>Mantiene solo los últimos 30 días de uso.</summary>

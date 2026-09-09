@@ -39,5 +39,6 @@ src/PortalClienchi.Web/Fonts/
 
 # Artefactos temporales / checks locales
 tmp/
+_img_backup/
 
 
