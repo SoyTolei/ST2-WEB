@@ -974,11 +974,11 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
 function formatAccessClientChangeHint(changes) {
   if (!changes?.length) return "";
-  if (changes.length > 1) return `âš  ${changes.length} posibles equipos distintos`;
+  if (changes.length > 1) return `⚠  ${changes.length} posibles equipos distintos`;
   const first = changes[0];
   const prefix = first.sameBrowser
-    ? `âš  Mismo navegador, otro equipo: ${first.displayName}`
-    : `âš  Equipo distinto: ${first.displayName}`;
+    ? `⚠  Mismo navegador, otro equipo: ${first.displayName}`
+    : `⚠  Equipo distinto: ${first.displayName}`;
   const trail = first.previousLabel && first.nextLabel
     ? ` · ${first.previousLabel} → ${first.nextLabel}`
     : first.nextLabel
@@ -1047,7 +1047,7 @@ function syncAdminClientAttentionUi() {
   if (thAttn) {
     thAttn.classList.toggle("hidden", n === 0);
     thAttn.setAttribute("aria-hidden", n === 0 ? "true" : "false");
-    thAttn.textContent = n > 0 ? "âš " : "";
+    thAttn.textContent = n > 0 ? "⚠ " : "";
   }
   if (accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(n);
 }
@@ -1378,24 +1378,15 @@ function toggleAccessAdminPermsFilterPop() {
 
 function updateAccessAdminSummaryLine() {
   syncAccessAdminOwnerOnlyUi();
-  const ownerOnly = isPrimarySuperAdmin();
   const total = accessAdminItemsCache.filter((item) => !item.isRejected).length;
   const pending = accessAdminItemsCache.filter((item) => item.isPending).length;
   const today = accessAdminItemsCache.filter((item) => item.loggedInToday).length;
-  const concurrent = ownerOnly
-    ? accessAdminItemsCache.filter((item) => item.hasConcurrentSessions).length
-    : 0;
-  const attention = ownerOnly ? accessAdminClientChangedEmails.size : 0;
   const { activeCount } = accessAdminMeta;
   if (accessAdminKpiTotal) accessAdminKpiTotal.textContent = String(total);
   if (accessAdminKpiActive) accessAdminKpiActive.textContent = String(activeCount);
   if (accessAdminKpiPending) accessAdminKpiPending.textContent = String(pending);
   if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
-  if (ownerOnly && accessAdminKpiConcurrent) {
-    accessAdminKpiConcurrent.textContent = String(concurrent || accessAdminConcurrentCount || 0);
-  }
-  if (ownerOnly && accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(attention);
-  renderAccessAdminDaySummary({ total, pending, today, concurrent: concurrent || accessAdminConcurrentCount || 0, attention, activeCount });
+  renderAccessAdminDaySummary({ total, pending, today, activeCount });
   renderAccessAdminAudit();
   updateAdminTabBadge();
   renderAccessAdminInbox();
@@ -1409,7 +1400,7 @@ function syncAccessAdminOwnerOnlyUi() {
     if (!show) el.classList.add("hidden");
   });
   document.getElementById("st2-access-admin-kpis")?.classList.toggle("is-owner-extra", show);
-  if (!show && (accessAdminListFilter === "attention" || accessAdminListFilter === "concurrent")) {
+  if (accessAdminListFilter === "attention" || accessAdminListFilter === "concurrent") {
     accessAdminListFilter = "";
     syncAccessAdminQuickFilters();
   }
@@ -1433,7 +1424,7 @@ function shortAccessActor(email) {
   return at > 0 ? raw.slice(0, at) : raw;
 }
 
-function renderAccessAdminDaySummary({ total, pending, today, concurrent, attention, activeCount }) {
+function renderAccessAdminDaySummary({ total, pending, today, activeCount }) {
   if (!accessAdminDaySummary) return;
   if (!isPrimarySuperAdmin()) {
     accessAdminDaySummary.classList.add("hidden");
@@ -1446,8 +1437,6 @@ function renderAccessAdminDaySummary({ total, pending, today, concurrent, attent
     `${today} ingresaron hoy`,
   ];
   if (pending) parts.push(`${pending} pendientes`);
-  if (concurrent) parts.push(`${concurrent} con sesiones concurrentes`);
-  if (attention) parts.push(`${attention} con aviso de equipo`);
   accessAdminDaySummary.textContent = `Hoy · ${parts.join(" · ")} · ${total} en lista`;
   accessAdminDaySummary.classList.remove("hidden");
   accessAdminDaySummary.hidden = false;
@@ -1702,7 +1691,7 @@ function renderAccessAdminInbox() {
           <p class="st2-access-admin-inbox-mail">${escapeHtml(item.email)}</p>
         </div>
         <div class="st2-access-admin-inbox-actions">
-          <button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}">Aprobar</button>
+          <button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}">Definir permisos</button>
           <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}">Rechazar</button>
         </div>
       </div>`;
@@ -1824,7 +1813,7 @@ function renderAccessAdminTable() {
       .map((h) => `${h.label || "—"}${h.lastSeenAt ? ` (${formatAccessRelative(h.lastSeenAt)})` : ""}`);
     const showOwnerSignals = isPrimarySuperAdmin();
     const hostTitle = [
-      showOwnerSignals && item.hasConcurrentSessions ? `âš  Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
+      showOwnerSignals && item.hasConcurrentSessions ? `⚠  Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
       browserLabel ? `Navegador: ${browserLabel}` : "",
       deviceShort ? `Dispositivo: ${deviceShort}` : "",
       entornoHint ? `Entorno: ${entornoHint}` : "",
@@ -1854,7 +1843,7 @@ function renderAccessAdminTable() {
     const ownerActions = isPrimarySuperAdmin();
     const canPreview = isSt2SuperAdmin();
     const extraActions = item.isPending
-      ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Aprobar acceso">Aprobar</button>
+      ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Definir permisos y aprobar">Definir permisos</button>
              <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
       : `${canPreview ? `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>` : ""}
         <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-modules-email="${escapeHtml(item.email)}" title="Editar perfil y módulos" aria-label="Editar perfil y módulos de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
@@ -1956,6 +1945,13 @@ async function decideAccessAdminEmail(email, action) {
   if (!email) return;
   const current = accessAdminItemsCache.find((item) => item.email === email);
   const name = formatAccessDisplayName(email, current?.displayNameOverride);
+
+  // Aprobar: primero permisos; el status queda pending hasta Guardar y aprobar.
+  if (action === "approve") {
+    openAccessModulesModal(email, { afterApprove: true });
+    return;
+  }
+
   if (action === "reject") {
     const ok = await confirmSt2({
       title: "Rechazar acceso",
@@ -1982,11 +1978,8 @@ async function decideAccessAdminEmail(email, action) {
       return;
     }
     await loadAccessAdminRegistrations({ silent: true, force: true });
-    setAccessAdminUpdatedHint(action === "approve" ? `Aprobado: ${name}` : `Rechazado: ${name}`);
+    setAccessAdminUpdatedHint(`Rechazado: ${name}`);
     notifyAccessChanged();
-    if (action === "approve") {
-      openAccessModulesModal(email, { afterApprove: true });
-    }
   } catch {
     setAccessAdminUpdatedHint("No se pudo contactar al servidor.");
   }
@@ -3307,9 +3300,6 @@ accessAdminQuickFilterButtons.forEach((btn) => {
     setAccessAdminListFilter(btn.dataset.listFilter || "");
   });
 });
-accessAdminExportBtn?.addEventListener("click", () => {
-  exportAccessAdminCsv();
-});
 accessAdminAuditActors?.addEventListener("click", (e) => {
   if (!isPrimarySuperAdmin()) return;
   const target = e.target;
@@ -3579,7 +3569,7 @@ function showAccessModulesError(message) {
 
 function accessModulesSaveLabel() {
   if (accessModulesPresetMode) return "Crear un perfil nuevo";
-  if (accessModulesAfterApprove) return "Listo";
+  if (accessModulesAfterApprove) return "Guardar y aprobar";
   return "Guardar";
 }
 
@@ -3851,10 +3841,12 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   accessModulesAfterApprove = !!afterApprove;
   const displayName = formatAccessDisplayName(email, current?.displayNameOverride);
   if (accessModulesTitle) {
-    accessModulesTitle.textContent = afterApprove ? "¿Qué módulos ve?" : "Módulos habilitados";
+    accessModulesTitle.textContent = afterApprove
+      ? "Definí permisos para aprobar"
+      : "Módulos habilitados";
   }
-  if (accessModulesSave) accessModulesSave.textContent = afterApprove ? "Listo" : "Guardar";
-  if (accessModulesCancel) accessModulesCancel.textContent = afterApprove ? "Después" : "Cancelar";
+  if (accessModulesSave) accessModulesSave.textContent = accessModulesSaveLabel();
+  if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
   if (accessModulesName) accessModulesName.value = displayName;
   if (accessModulesBirthday) {
     accessModulesBirthday.value = current?.birthdayDisplay || "";
@@ -3995,7 +3987,9 @@ async function saveAccessModules() {
   accessModulesSaving = true;
   if (accessModulesSave) {
     accessModulesSave.disabled = true;
-    accessModulesSave.textContent = accessModulesPresetMode ? "Creando…" : "Guardando…";
+    accessModulesSave.textContent = accessModulesPresetMode
+      ? "Creando…"
+      : (accessModulesAfterApprove ? "Guardando permisos…" : "Guardando…");
   }
   if (accessModulesCancel) accessModulesCancel.disabled = true;
   if (accessModulesError) accessModulesError.textContent = "";
@@ -4081,9 +4075,30 @@ async function saveAccessModules() {
         : item
     );
     const fromApprove = accessModulesAfterApprove;
+    const savedEmail = accessModulesEmailValue;
+    if (accessModulesSave) {
+      accessModulesSave.textContent = fromApprove ? "Aprobando…" : "Guardando…";
+    }
+    if (fromApprove) {
+      const decideRes = await fetch("/api/access/registrations/decision", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: savedEmail, action: "approve" }),
+      });
+      const decideData = await decideRes.json().catch(() => ({}));
+      if (!decideRes.ok) {
+        throw new Error(decideData.error || "Se guardaron los módulos, pero no se pudo aprobar el acceso.");
+      }
+    }
     closeAccessModulesModal();
-    renderAccessAdminTable();
-    if (fromApprove) setAccessAdminUpdatedHint("Aprobado. Módulos guardados.");
+    await loadAccessAdminRegistrations({ silent: true, force: true });
+    notifyAccessChanged();
+    setAccessAdminUpdatedHint(
+      fromApprove
+        ? `Aprobado con permisos: ${savedEmail}`
+        : "Módulos guardados.",
+    );
   } catch (err) {
     showAccessModulesError(err?.message || "No se pudo guardar.");
   } finally {
