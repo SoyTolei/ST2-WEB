@@ -11,6 +11,7 @@ import {
 } from "./planillas-referral-chile.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
+import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
 const REF_DESC_PH = "Detalle y/o descripción del caso";
 const REF_PASO_PH = "Detalle paso a paso del proceso realizado por el usuario";
@@ -766,19 +767,19 @@ function addReferralCapturaFiles(fileList, targetList) {
   }
 
   if (rejectedHeavy) {
-    alert("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedPdfHeavy) {
-    alert("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedTxtHeavy) {
-    alert("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedExcelHeavy) {
-    alert("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedXmlHeavy) {
-    alert("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
-    alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
+    void alertSt2("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
+    void alertSt2("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
   }
   if (added > 0) setReferralPantallasUi(true);
   return added;
@@ -925,7 +926,7 @@ function setupTraza() {
   document.getElementById("ref-traza-input")?.addEventListener("change", (e) => {
     const added = addTrazaFiles(e.target.files || []);
     if (added === 0 && e.target.files?.length > 0) {
-      alert("Solo se admiten archivos .trc, .csv o .txt.");
+      void alertSt2("Solo se admiten archivos .trc, .csv o .txt.");
     }
     refreshTrazaChips();
     e.target.value = "";
@@ -1141,7 +1142,10 @@ async function generarReferral(copiar) {
 
   // LEGAL: si marcó capturas tiene que subirlas. Bejerman/Onvio permiten generar sin subir (van en comentarios).
   if (isLegal() && quierePantallas && files.length === 0) {
-    alert("Marcaste capturas pero no hay archivos. Usá «Examinar imágenes, video, PDF o TXT».");
+    void alertSt2(
+      "Marcaste capturas pero no hay archivos. Usá «Examinar imágenes, video, PDF o TXT».",
+      { title: "Falta completar" },
+    );
     status.textContent = "Faltan capturas para adjuntar.";
     return;
   }
@@ -1178,12 +1182,15 @@ async function generarReferral(copiar) {
       if (data.code === "ticket_confirm") {
         const ticketId = isLegal() ? "ref-legal-ticket" : "ref-onvio-ticket";
         const panelId = isLegal() ? "ref-legal-ticket-panel" : "ref-onvio-ticket-panel";
-        if (confirm("¿Se solicitó ticket de servicio?")) {
+        if (await askSt2("¿Se solicitó ticket de servicio?", { title: "Ticket de servicio" })) {
           document.getElementById(ticketId).checked = true;
           document.getElementById(panelId)?.classList.remove("hidden");
-          alert("Completá los datos del ticket y volvé a generar.");
+          await alertSt2("Completá los datos del ticket y volvé a generar.");
         } else {
-          alert("Es probable que I+D solicite un ticket de servicio para el análisis del caso.");
+          await alertSt2(
+            "Es probable que I+D solicite un ticket de servicio para el análisis del caso.",
+            { title: "Aviso" },
+          );
           ticketAvisoOmitido = true;
         }
         status.textContent = "";
@@ -1212,7 +1219,7 @@ async function generarReferral(copiar) {
     }
   } catch (ex) {
     status.textContent = ex.message || "Error";
-    alert(status.textContent);
+    void errorSt2(status.textContent);
   } finally {
     if (btnCopiar) btnCopiar.disabled = false;
     if (btnVer) btnVer.disabled = false;
@@ -1243,7 +1250,7 @@ async function mejorarReferralIa() {
         status.textContent = msg;
         status.classList.add("is-error");
       }
-      alert(msg);
+      void errorSt2(msg);
       return;
     }
 
@@ -1268,7 +1275,7 @@ async function mejorarReferralIa() {
         status.textContent = msg;
         status.classList.add("is-error");
       }
-      alert(msg);
+      void errorSt2(msg);
       return;
     }
 
@@ -1284,7 +1291,7 @@ async function mejorarReferralIa() {
       status.textContent = msg;
       status.classList.add("is-error");
     }
-    alert(msg);
+    void errorSt2(msg);
   } finally {
     if (btn) btn.disabled = false;
   }

@@ -6,6 +6,7 @@ import { syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { normalizeOnedriveUrl, setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { autoTour, syncHeaderTourButton } from "./st2-tour-init.js";
+import { errorSt2 } from "./st2-dialog.js?v=20260909a";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -739,7 +740,7 @@ async function mejorarLegalReferralIa() {
       legalIaUndo?.clearSnapshot();
       const msg = data.detail || data.title || data.error || `Error ${response.status}`;
       setStatus(msg, true);
-      alert(msg);
+      void errorSt2(msg);
       return;
     }
 
@@ -762,7 +763,7 @@ async function mejorarLegalReferralIa() {
       legalIaUndo?.clearSnapshot();
       const msg = "La IA respondió pero no se pudieron aplicar cambios en los campos.";
       setStatus(msg, true);
-      alert(msg);
+      void errorSt2(msg);
       return;
     }
 
@@ -772,7 +773,7 @@ async function mejorarLegalReferralIa() {
     legalIaUndo?.clearSnapshot();
     const msg = ex?.message || "Error al mejorar con IA";
     setStatus(msg, true);
-    alert(msg);
+    void errorSt2(msg);
   } finally {
     if (btn) btn.disabled = false;
   }

@@ -2956,6 +2956,53 @@ body.portal-tab-active .brand-icon {
   display: none;
 }
 
+/* ── Avisos con estilo ST2 (reemplazan alert/confirm del navegador) ── */
+.st2-notice-dialog {
+  max-width: 30rem;
+}
+
+.st2-notice-dialog #st2-notice-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#st2-notice-overlay.is-warn .st2-notice-dialog {
+  border-top: 3px solid #d64000;
+}
+
+#st2-notice-overlay.is-warn #st2-notice-title::before {
+  content: "!";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: #d64000;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+.st2-notice-detail {
+  margin: -6px 0 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed #fdba74;
+  background: #fff7ed;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #9a3412;
+  word-break: break-word;
+}
+
+.st2-notice-detail.hidden {
+  display: none;
+}
+
 .about-btn {
   position: relative;
   display: inline-flex;

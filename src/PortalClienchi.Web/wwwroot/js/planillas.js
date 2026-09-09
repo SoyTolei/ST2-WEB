@@ -28,6 +28,7 @@ import {
   autoTour,
   syncHeaderTourButton,
 } from "./st2-tour-init.js";
+import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
@@ -938,19 +939,19 @@ function addCapturaFiles(fileList) {
     }
   }
   if (rejectedHeavy) {
-    alert("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese video pesa más de 100 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedPdfHeavy) {
-    alert("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedTxtHeavy) {
-    alert("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedExcelHeavy) {
-    alert("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedXmlHeavy) {
-    alert("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+    void alertSt2("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
-    alert("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
+    void alertSt2("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    alert("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
+    void alertSt2("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
   }
   if (added > 0) {
     const check = els.capturasCheck();
@@ -988,7 +989,7 @@ function initTransferenciaIaUi() {
 }
 
 async function mejorarTransferenciaIa() {
-  if (!validarCampos()) return;
+  if (!(await validarCampos())) return;
 
   transferIaUndo?.saveSnapshot();
   const btn = document.getElementById("plan-btn-ia");
@@ -1018,7 +1019,7 @@ async function mejorarTransferenciaIa() {
     notifyIaUndoHint("plan-btn-ia-undo");
   } catch (ex) {
     setPlanStatus(ex.message, true);
-    alert(ex.message);
+    void errorSt2(ex.message);
   } finally {
     if (btn) btn.disabled = false;
   }
@@ -1069,63 +1070,55 @@ function getDescripcionPlain() {
   return els.descripcion().value.trim();
 }
 
-function validarCampos() {
+/** Aviso de dato faltante: enfoca el campo y devuelve false para cortar el flujo. */
+async function faltaDato(mensaje, campo) {
+  await alertSt2(mensaje, { title: "Falta completar" });
+  campo?.focus();
+  return false;
+}
+
+async function validarCampos() {
   if (isLegal()) {
     if (!document.getElementById("plan-legal-chave")?.value.trim()) {
-      alert("Completá la clave de registro.");
-      document.getElementById("plan-legal-chave")?.focus();
-      return false;
+      return faltaDato("Completá la clave de registro.", document.getElementById("plan-legal-chave"));
     }
     if (!legalProdutoSel) {
-      alert("Seleccioná el producto Legal One.");
-      return false;
+      return faltaDato("Seleccioná el producto Legal One.");
     }
     if (!legalModuloSel) {
-      alert("Seleccioná el módulo.");
-      return false;
+      return faltaDato("Seleccioná el módulo.");
     }
     if (!legalAmbienteSel) {
-      alert("Seleccioná el ambiente.");
-      return false;
+      return faltaDato("Seleccioná el ambiente.");
     }
     if (!mesaActual) {
-      alert("Elegí la mesa de destino.");
-      return false;
+      return faltaDato("Elegí la mesa de destino.");
     }
     if (!document.getElementById("plan-legal-usuario")?.value.trim()) {
-      alert("Completá el usuario OnePass.");
-      document.getElementById("plan-legal-usuario")?.focus();
-      return false;
+      return faltaDato("Completá el usuario OnePass.", document.getElementById("plan-legal-usuario"));
     }
     if (!document.getElementById("plan-legal-escritorio")?.value.trim()) {
-      alert("Completá el estudio / empresa.");
-      document.getElementById("plan-legal-escritorio")?.focus();
-      return false;
+      return faltaDato("Completá el estudio / empresa.", document.getElementById("plan-legal-escritorio"));
     }
   } else {
     if (!els.numeroCliente().value.trim()) {
-      alert("Completá el N° de Cliente.");
-      els.numeroCliente().focus();
-      return false;
+      return faltaDato("Completá el N° de Cliente.", els.numeroCliente());
     }
     if (!mesaActual) {
-      alert(isChile()
+      return faltaDato(isChile()
         ? "Elegí la mesa de destino (Técnico o Funcional)."
         : "Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).");
-      return false;
     }
   }
   if (!els.asunto().value.trim()) {
-    alert("Completá el campo Asunto y/o Error.");
-    els.asunto().focus();
-    return false;
+    return faltaDato("Completá el campo Asunto y/o Error.", els.asunto());
   }
   return true;
 }
 
-function preguntarTicketLegal() {
+async function preguntarTicketLegal() {
   if (!isLegal() || els.ticketCheck().checked) return true;
-  if (confirm("¿Se solicitó ticket de servicio?")) {
+  if (await askSt2("¿Se solicitó ticket de servicio?", { title: "Ticket de servicio" })) {
     els.ticketCheck().checked = true;
     onTicketToggle();
     els.ticketNumero().focus();
@@ -1134,12 +1127,12 @@ function preguntarTicketLegal() {
   return true;
 }
 
-function preguntarTicketSiSaasSueldos() {
+async function preguntarTicketSiSaasSueldos() {
   if (sistemaActual !== "BejermanSql" || (mesaActual !== "SAAS" && mesaActual !== "SUELDOS"))
     return true;
   if (els.ticketCheck().checked) return true;
 
-  if (confirm("¿Se solicitó ticket de servicio?")) {
+  if (await askSt2("¿Se solicitó ticket de servicio?", { title: "Ticket de servicio" })) {
     els.ticketCheck().checked = true;
     onTicketToggle();
     els.ticketNumero().focus();
@@ -1183,8 +1176,9 @@ function setPlanStatus(text, isError = false) {
 }
 
 async function generarTexto() {
-  if (!validarCampos()) return null;
-  if (!preguntarTicketLegal() || !preguntarTicketSiSaasSueldos()) return null;
+  if (!(await validarCampos())) return null;
+  if (!(await preguntarTicketLegal())) return null;
+  if (!(await preguntarTicketSiSaasSueldos())) return null;
 
   const payload = buildPayload();
 
@@ -1223,7 +1217,7 @@ async function onCopiarAlPortapapeles() {
     setPlanStatus("Texto copiado al portapapeles.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
-    alert(ex.message);
+    void errorSt2(ex.message);
   } finally {
     btn.disabled = false;
   }
@@ -1242,7 +1236,7 @@ async function onVerPlanilla() {
     setPlanStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
-    alert(ex.message);
+    void errorSt2(ex.message);
   } finally {
     btn.disabled = false;
   }

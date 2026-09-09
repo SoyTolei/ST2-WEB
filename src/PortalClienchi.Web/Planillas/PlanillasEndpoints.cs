@@ -719,9 +719,6 @@ public static class PlanillasEndpoints
                 var clientHistory = showClientMeta
                     ? accessRepo.ListClientHistoryByEmail(items.Select(i => i.Email), 5)
                     : new Dictionary<string, IReadOnlyList<AppAccessClientHistoryDto>>(StringComparer.OrdinalIgnoreCase);
-                var auditToday = isPrimaryOwner
-                    ? accessRepo.ListRecentAudit(limit: 40, todayOnly: true)
-                    : Array.Empty<AppAccessAuditDto>();
                 // Uso por módulo: sensible, solo para el dueño (ADMIN WEB no lo ve).
                 var usageToday = isPrimaryOwner
                     ? accessRepo.ListUsageToday(limit: 300)
@@ -803,17 +800,6 @@ public static class PlanillasEndpoints
                     loggedInTodayCount = summary.LoggedInTodayCount,
                     concurrentCount = isPrimaryOwner ? concurrentEmails.Count : 0,
                     activeWindowMinutes = summary.ActiveWindowMinutes,
-                    auditToday = isPrimaryOwner
-                        ? auditToday.Select(a => (object)new
-                        {
-                            id = a.Id,
-                            createdAt = a.CreatedAt,
-                            actorEmail = a.ActorEmail,
-                            action = a.Action,
-                            targetEmail = a.TargetEmail,
-                            detail = a.Detail,
-                        }).ToList()
-                        : new List<object>(),
                     usageToday = usageToday.Select(u => (object)new
                     {
                         email = u.Email,

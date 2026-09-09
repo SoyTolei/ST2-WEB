@@ -167,10 +167,15 @@ html.st2-theme-dark .st2-tool-url-btn--ghost {
   color: var(--text-muted);
 }
 
-html.st2-theme-dark .st2-confirm-detail {
+html.st2-theme-dark .st2-confirm-detail,
+html.st2-theme-dark .st2-notice-detail {
   background: #3a1d12;
   border-color: #c2410c;
   color: #fdba74;
+}
+
+html.st2-theme-dark #st2-notice-overlay.is-warn #st2-notice-title::before {
+  background: #ea580c;
 }
 
 html.st2-theme-dark .st2-about-notice {

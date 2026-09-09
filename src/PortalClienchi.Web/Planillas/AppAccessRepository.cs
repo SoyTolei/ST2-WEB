@@ -964,6 +964,8 @@ public sealed class AppAccessRepository
         var mail = PlanUserIdentity.ValidateAndNormalize(email);
         var mod = (module ?? "").Trim().ToLowerInvariant();
         if (mail is null || mod.Length == 0 || mod.Length > 60) return;
+        // El dueño no se cuenta a sí mismo en el panel de uso.
+        if (St2SuperAdmin.Is(mail)) return;
 
         var now = UtcNowIso();
         using var conn = Open();

@@ -195,15 +195,6 @@ const adminUsageBody = document.getElementById("st2-admin-usage-body");
 const adminUsageModulesBody = document.getElementById("st2-admin-usage-modules-body");
 const adminUsagePeopleBody = document.getElementById("st2-admin-usage-people-body");
 const adminUsageSortButtons = Array.from(document.querySelectorAll("[data-usage-sort]"));
-const accessAdminAudit = document.getElementById("st2-access-admin-audit");
-const accessAdminAuditCount = document.getElementById("st2-access-admin-audit-count");
-const accessAdminAuditList = document.getElementById("st2-access-admin-audit-list");
-const accessAdminAuditActors = document.getElementById("st2-access-admin-audit-actors");
-const accessAdminAuditDetail = document.getElementById("st2-access-admin-audit-detail");
-const accessAdminAuditDetailTitle = document.getElementById("st2-access-admin-audit-detail-title");
-const accessAdminAuditDetailList = document.getElementById("st2-access-admin-audit-detail-list");
-const accessAdminAuditDetailClose = document.getElementById("st2-access-admin-audit-detail-close");
-const accessAdminAuditMore = document.getElementById("st2-access-admin-audit-more");
 const accessAdminExportBtn = document.getElementById("st2-access-admin-export");
 const accessAdminQuickFilterButtons = Array.from(document.querySelectorAll(".st2-access-admin-quick-filter"));
 const accessAdminInbox = document.getElementById("st2-access-admin-inbox");
@@ -749,15 +740,12 @@ let accessAdminClientWatchReady = false;
 let accessAdminClientWatchTimer = null;
 let accessAdminClientChangedEmails = new Set();
 let accessAdminClientWatchBusy = false;
-let accessAdminAuditToday = [];
 let accessAdminUsageToday = [];
 /** "accesos" | "uso" — sub-pestaña del panel ADMIN. */
 let adminSubtab = "accesos";
 /** "recent" | "hits" — orden de la tabla por persona. */
 let adminUsageSort = "recent";
 let accessAdminConcurrentCount = 0;
-let accessAdminAuditShowAll = false;
-let accessAdminAuditDetailEmail = "";
 
 function resolveAccessDeviceShort(item) {
   const raw = String(item?.lastClientDevice || "").trim().toLowerCase();
@@ -1300,13 +1288,10 @@ function resetAccessAdminSnapshot() {
   accessAdminQuery = "";
   accessAdminListFilter = "";
   accessAdminModFilters = new Set();
-  accessAdminAuditToday = [];
   accessAdminUsageToday = [];
   adminSubtab = "accesos";
   syncAdminSubnav();
   accessAdminConcurrentCount = 0;
-  accessAdminAuditShowAll = false;
-  accessAdminAuditDetailEmail = "";
   if (accessAdminSearch) accessAdminSearch.value = "";
   closeAccessAdminPermsFilterPop();
   syncAccessAdminModFilterUi();
@@ -1405,7 +1390,6 @@ function updateAccessAdminSummaryLine() {
   if (accessAdminKpiToday) accessAdminKpiToday.textContent = String(today);
   renderAccessAdminDaySummary({ total, pending, today, activeCount });
   renderAccessAdminUsage();
-  renderAccessAdminAudit();
   updateAdminTabBadge();
   renderAccessAdminInbox();
 }
@@ -1424,24 +1408,6 @@ function syncAccessAdminOwnerOnlyUi() {
   }
 }
 
-function formatAccessAuditAction(action) {
-  switch (String(action || "").toLowerCase()) {
-    case "approve": return "aprobó";
-    case "reject": return "rechazó";
-    case "modules": return "cambió módulos de";
-    case "view_as": return "vio como";
-    case "preset": return "creó perfil";
-    default: return action || "actuó sobre";
-  }
-}
-
-function shortAccessActor(email) {
-  const raw = String(email || "").trim();
-  if (!raw) return "admin";
-  const at = raw.indexOf("@");
-  return at > 0 ? raw.slice(0, at) : raw;
-}
-
 function renderAccessAdminDaySummary({ total, pending, today, activeCount }) {
   if (!accessAdminDaySummary) return;
   if (!isPrimarySuperAdmin()) {
@@ -1458,102 +1424,6 @@ function renderAccessAdminDaySummary({ total, pending, today, activeCount }) {
   accessAdminDaySummary.textContent = `Hoy · ${parts.join(" · ")} · ${total} en lista`;
   accessAdminDaySummary.classList.remove("hidden");
   accessAdminDaySummary.hidden = false;
-}
-
-function formatAccessAuditLine(row) {
-  const when = formatAccessRelative(row.createdAt);
-  const actor = shortAccessActor(row.actorEmail);
-  const target = shortAccessActor(row.targetEmail);
-  const verb = formatAccessAuditAction(row.action);
-  return {
-    when,
-    actor,
-    target,
-    verb,
-    html: `${escapeHtml(when)} · <strong>${escapeHtml(actor)}</strong> ${escapeHtml(verb)} <strong>${escapeHtml(target)}</strong>`,
-    title: `${row.actorEmail || ""} → ${row.targetEmail || ""}`,
-  };
-}
-
-function isAccessAuditAdminWebActor(email) {
-  const e = String(email || "").trim().toLowerCase();
-  if (!e || e === PRIMARY_ADMIN_EMAIL) return false;
-  const item = accessAdminItemsCache.find((row) => String(row.email || "").toLowerCase() === e);
-  if (item) return !!item.isSt2Admin;
-  // Actuó en el panel y no sos vos: lo mostramos igual (p. ej. cookie admin / ex-admin).
-  return true;
-}
-
-function buildAccessAuditActorSummaries(rows) {
-  const byActor = new Map();
-  for (const row of rows) {
-    const email = String(row.actorEmail || "").trim().toLowerCase();
-    if (!isAccessAuditAdminWebActor(email)) continue;
-    if (!byActor.has(email)) byActor.set(email, []);
-    byActor.get(email).push(row);
-  }
-  return [...byActor.entries()]
-    .map(([email, actions]) => {
-      const sorted = [...actions].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-      const latest = sorted[0];
-      const line = formatAccessAuditLine(latest);
-      return {
-        email,
-        count: sorted.length,
-        latest,
-        latestLabel: `${line.verb} ${line.target}`,
-        when: line.when,
-        actions: sorted,
-      };
-    })
-    .sort((a, b) => String(b.latest?.createdAt || "").localeCompare(String(a.latest?.createdAt || "")));
-}
-
-function closeAccessAdminAuditDetail() {
-  accessAdminAuditDetailEmail = "";
-  if (accessAdminAuditDetail) {
-    accessAdminAuditDetail.classList.add("hidden");
-    accessAdminAuditDetail.hidden = true;
-  }
-  if (accessAdminAuditDetailList) accessAdminAuditDetailList.innerHTML = "";
-  if (accessAdminAuditDetailTitle) accessAdminAuditDetailTitle.textContent = "Detalle";
-  accessAdminAuditActors?.querySelectorAll("[data-audit-actor]").forEach((btn) => {
-    btn.classList.remove("is-open");
-    btn.setAttribute("aria-expanded", "false");
-  });
-}
-
-function openAccessAdminAuditDetail(email, { toggle = true } = {}) {
-  if (!isPrimarySuperAdmin()) return;
-  const target = String(email || "").trim().toLowerCase();
-  if (!target) return;
-  if (toggle && accessAdminAuditDetailEmail === target) {
-    closeAccessAdminAuditDetail();
-    return;
-  }
-  const rows = (accessAdminAuditToday || [])
-    .filter((row) => String(row.actorEmail || "").toLowerCase() === target)
-    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
-    .slice(0, 10);
-  accessAdminAuditDetailEmail = target;
-  if (accessAdminAuditDetailTitle) {
-    accessAdminAuditDetailTitle.textContent = `${shortAccessActor(target)} · ${rows.length} acción${rows.length === 1 ? "" : "es"}`;
-  }
-  if (accessAdminAuditDetailList) {
-    accessAdminAuditDetailList.innerHTML = rows.map((row) => {
-      const line = formatAccessAuditLine(row);
-      return `<li title="${escapeHtml(line.title)}">${line.html}</li>`;
-    }).join("");
-  }
-  if (accessAdminAuditDetail) {
-    accessAdminAuditDetail.classList.remove("hidden");
-    accessAdminAuditDetail.hidden = false;
-  }
-  accessAdminAuditActors?.querySelectorAll("[data-audit-actor]").forEach((btn) => {
-    const open = String(btn.dataset.auditActor || "").toLowerCase() === target;
-    btn.classList.toggle("is-open", open);
-    btn.setAttribute("aria-expanded", open ? "true" : "false");
-  });
 }
 
 const USAGE_MODULE_LABELS = {
@@ -1695,89 +1565,6 @@ function renderAccessAdminUsage() {
         </tr>`;
       })
       .join("");
-  }
-}
-
-function renderAccessAdminAudit() {
-  if (!accessAdminAudit || !accessAdminAuditList) return;
-  if (!isPrimarySuperAdmin()) {
-    accessAdminAudit.classList.add("hidden");
-    accessAdminAudit.hidden = true;
-    accessAdminAuditList.innerHTML = "";
-    if (accessAdminAuditActors) {
-      accessAdminAuditActors.innerHTML = "";
-      accessAdminAuditActors.hidden = true;
-    }
-    closeAccessAdminAuditDetail();
-    if (accessAdminAuditMore) {
-      accessAdminAuditMore.classList.add("hidden");
-      accessAdminAuditMore.hidden = true;
-    }
-    if (accessAdminAuditCount) accessAdminAuditCount.textContent = "";
-    return;
-  }
-  const rows = Array.isArray(accessAdminAuditToday) ? accessAdminAuditToday : [];
-  if (!rows.length) {
-    accessAdminAudit.classList.add("hidden");
-    accessAdminAuditList.innerHTML = "";
-    if (accessAdminAuditActors) {
-      accessAdminAuditActors.innerHTML = "";
-      accessAdminAuditActors.hidden = true;
-    }
-    closeAccessAdminAuditDetail();
-    if (accessAdminAuditMore) {
-      accessAdminAuditMore.classList.add("hidden");
-      accessAdminAuditMore.hidden = true;
-    }
-    if (accessAdminAuditCount) accessAdminAuditCount.textContent = "";
-    return;
-  }
-  accessAdminAudit.classList.remove("hidden");
-  accessAdminAudit.hidden = false;
-  if (accessAdminAuditCount) {
-    accessAdminAuditCount.textContent = rows.length === 1 ? "1 acción" : `${rows.length} acciones`;
-  }
-
-  const summaries = buildAccessAuditActorSummaries(rows);
-  if (accessAdminAuditActors) {
-    if (!summaries.length) {
-      accessAdminAuditActors.innerHTML = "";
-      accessAdminAuditActors.hidden = true;
-      closeAccessAdminAuditDetail();
-    } else {
-      accessAdminAuditActors.hidden = false;
-      accessAdminAuditActors.innerHTML = summaries.map((sum) => {
-        const open = accessAdminAuditDetailEmail === sum.email;
-        const countLabel = sum.count === 1 ? "1 acción" : `${sum.count} acciones`;
-        return `<li>
-          <button type="button" class="st2-access-admin-audit-actor${open ? " is-open" : ""}" data-audit-actor="${escapeHtml(sum.email)}" aria-expanded="${open ? "true" : "false"}" title="Ver detalle de ${escapeHtml(sum.email)}">
-            <span class="st2-access-admin-audit-actor-main"><strong>${escapeHtml(shortAccessActor(sum.email))}</strong> · ${escapeHtml(countLabel)}</span>
-            <span class="st2-access-admin-audit-actor-last">última: ${escapeHtml(sum.latestLabel)} · ${escapeHtml(sum.when)}</span>
-          </button>
-        </li>`;
-      }).join("");
-      if (accessAdminAuditDetailEmail && !summaries.some((s) => s.email === accessAdminAuditDetailEmail)) {
-        closeAccessAdminAuditDetail();
-      } else if (accessAdminAuditDetailEmail) {
-        openAccessAdminAuditDetail(accessAdminAuditDetailEmail, { toggle: false });
-      }
-    }
-  }
-
-  const limit = accessAdminAuditShowAll ? 40 : 5;
-  const recent = [...rows]
-    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
-    .slice(0, limit);
-  accessAdminAuditList.innerHTML = recent.map((row) => {
-    const line = formatAccessAuditLine(row);
-    return `<li title="${escapeHtml(line.title)}">${line.html}</li>`;
-  }).join("");
-
-  if (accessAdminAuditMore) {
-    const canMore = rows.length > 5;
-    accessAdminAuditMore.hidden = !canMore;
-    accessAdminAuditMore.classList.toggle("hidden", !canMore);
-    accessAdminAuditMore.textContent = accessAdminAuditShowAll ? "Ver menos" : `Ver más (${rows.length - 5})`;
   }
 }
 
@@ -2339,16 +2126,6 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
       activeWindowMinutes: data.activeWindowMinutes ?? 5,
     };
     accessAdminConcurrentCount = Number(data.concurrentCount ?? 0) || 0;
-    accessAdminAuditToday = Array.isArray(data.auditToday)
-      ? data.auditToday.map((row) => ({
-        id: row.id,
-        createdAt: row.createdAt || "",
-        actorEmail: row.actorEmail || "",
-        action: row.action || "",
-        targetEmail: row.targetEmail || "",
-        detail: row.detail || null,
-      }))
-      : [];
     accessAdminUsageToday = Array.isArray(data.usageToday)
       ? data.usageToday.map((row) => ({
         email: row.email || "",
@@ -3481,22 +3258,6 @@ adminUsageSortButtons.forEach((btn) => {
     }
     renderAccessAdminUsage();
   });
-});
-accessAdminAuditActors?.addEventListener("click", (e) => {
-  if (!isPrimarySuperAdmin()) return;
-  const target = e.target;
-  if (!(target instanceof Element)) return;
-  const btn = target.closest("[data-audit-actor]");
-  if (!(btn instanceof HTMLElement)) return;
-  openAccessAdminAuditDetail(btn.dataset.auditActor || "");
-});
-accessAdminAuditDetailClose?.addEventListener("click", () => {
-  closeAccessAdminAuditDetail();
-});
-accessAdminAuditMore?.addEventListener("click", () => {
-  if (!isPrimarySuperAdmin()) return;
-  accessAdminAuditShowAll = !accessAdminAuditShowAll;
-  renderAccessAdminAudit();
 });
 syncAccessAdminQuickFilters();
 accessAdminPermsFilterBtn?.addEventListener("click", (e) => {
@@ -5206,7 +4967,13 @@ function navigateTab(tabId, { history = "push" } = {}) {
     return;
   }
   if (tabId === "planillas") {
+    const alreadyHere = document.querySelector(".tab-btn.active")?.dataset?.tab === "planillas";
     switchTab("planillas");
+    // Ya estando en Planillas, switchTab no reanima: disparamos la pastilla a mano.
+    if (alreadyHere) {
+      const btn = document.querySelector('.tab-btn[data-tab="planillas"]');
+      if (btn) playGooeyNav(btn);
+    }
     // Siempre al menú: tocar la pestaña equivale al logo, incluso ya estando en Planillas.
     goPlanillasHome({ history: "replace" });
     return;

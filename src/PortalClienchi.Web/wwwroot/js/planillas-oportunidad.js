@@ -6,6 +6,7 @@ import {
   syncPlanUserSession,
 } from "./plan-user.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
+import { alertSt2, errorSt2 } from "./st2-dialog.js?v=20260909a";
 
 let ctx = null;
 let metodoContacto = null;
@@ -190,7 +191,7 @@ async function generarPdf() {
     const data = await response.json().catch(() => ({}));
     const msg = data.errors?.join("\n") || data.detail || "Error al generar PDF";
     status.textContent = msg;
-    alert(msg);
+    void errorSt2(msg);
     return;
   }
 
@@ -847,7 +848,7 @@ function hideGestorContextMenu() {
 function abrirLinkGestor(id = gestorSelectedId) {
   const item = getGestorItem(id);
   if (!item?.link) {
-    alert("Seleccioná una oportunidad con link.");
+    void alertSt2("Seleccioná una oportunidad con link.");
     return;
   }
   window.open(item.link, "_blank", "noopener,noreferrer");
@@ -863,7 +864,7 @@ async function agregarGestor() {
   const desc = document.getElementById("op-gestor-desc")?.value.trim() || "";
   const link = getGestorLinkValue();
   if (!desc || !link) {
-    alert("Completá la descripción y el link para continuar.");
+    void alertSt2("Completá la descripción y el link para continuar.");
     return;
   }
 
@@ -888,7 +889,7 @@ async function agregarGestor() {
 
     if (!response.ok) {
       const msg = data.detail || data.error || data.title || "No se pudo agregar la oportunidad.";
-      alert(msg);
+      void errorSt2(msg);
       if (status) {
         status.textContent = msg;
         status.classList.remove("hidden");
@@ -937,7 +938,7 @@ async function agregarGestor() {
 async function confirmarGestorSeleccionado(id = gestorSelectedId) {
   const item = getGestorItem(id);
   if (!item) {
-    alert("Seleccioná una oportunidad para confirmar.");
+    void alertSt2("Seleccioná una oportunidad para confirmar.");
     return;
   }
 
@@ -1051,7 +1052,7 @@ function bindEditModal() {
 async function editarGestorSeleccionado(id = gestorSelectedId) {
   const item = getGestorItem(id);
   if (!item) {
-    alert("Seleccioná una oportunidad para editar.");
+    void alertSt2("Seleccioná una oportunidad para editar.");
     return;
   }
   openEditModal(item);
@@ -1109,7 +1110,7 @@ function bindDeleteModal() {
 async function eliminarGestorSeleccionado(id = gestorSelectedId) {
   const item = getGestorItem(id);
   if (!item) {
-    alert("Seleccioná una oportunidad para eliminar.");
+    void alertSt2("Seleccioná una oportunidad para eliminar.");
     return;
   }
   openDeleteModal(item);
