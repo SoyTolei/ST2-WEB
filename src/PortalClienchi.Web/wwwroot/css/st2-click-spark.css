@@ -1,0 +1,15 @@
+/* ClickSpark: canvas global de chispas al hacer clic. */
+.st2-click-spark {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-click-spark {
+    display: none !important;
+  }
+}

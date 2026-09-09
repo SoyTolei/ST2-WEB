@@ -119,8 +119,8 @@
       background: #1a0a04;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260909a"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260909a"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260909b"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260909b"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260907f"/>
@@ -133,6 +133,7 @@
   <link rel="stylesheet" href="/css/st2-lightfall.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-glitch-text.css?v=20260907d"/>
   <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260907c"/>
+  <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260909a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907o"/>
   <link rel="modulepreload" href="/js/st2-topography.js?v=20260907b"/>
@@ -140,7 +141,8 @@
   <link rel="modulepreload" href="/js/st2-lightfall.js?v=20260907b"/>
   <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907d"/>
   <link rel="modulepreload" href="/js/st2-decrypted-text.js?v=20260907c"/>
-  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260907g"/>
+  <link rel="modulepreload" href="/js/st2-click-spark.js?v=20260909a"/>
+  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260909a"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -150,7 +152,7 @@
     }
   } catch (e) { /* ignore */ }
 </script>
-  <script type="module" src="/js/st2-login-boot.js?v=20260907g"></script>
+  <script type="module" src="/js/st2-login-boot.js?v=20260909a"></script>
   <div id="st2-light-rays" class="st2-light-rays" aria-hidden="true"></div>
   <sonner-toaster id="st2-sonner" position="top-right" rich-colors close-button visible-toasts="5" container-aria-label="Notificaciones"></sonner-toaster>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">
@@ -1794,35 +1796,74 @@
                 <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
               </div>
             </div>
-            <div class="st2-access-admin-kpis" id="st2-access-admin-kpis">
-              <div class="st2-access-admin-kpi">
-                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-total">—</span>
-                <span class="st2-access-admin-kpi-l">Registrados</span>
-              </div>
-              <div class="st2-access-admin-kpi">
-                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-active">—</span>
-                <span class="st2-access-admin-kpi-l">Activos</span>
-              </div>
-              <div class="st2-access-admin-kpi is-pending">
-                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-pending">—</span>
-                <span class="st2-access-admin-kpi-l">Pendientes</span>
-              </div>
-              <div class="st2-access-admin-kpi">
-                <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-today">—</span>
-                <span class="st2-access-admin-kpi-l">Ingresaron hoy</span>
-              </div>
+            <div id="st2-admin-subnav" class="st2-admin-subnav hidden" role="tablist" aria-label="Secciones de administración" hidden>
+              <button type="button" class="st2-admin-subtab is-on" data-admin-subtab="accesos" role="tab" aria-selected="true">Accesos</button>
+              <button type="button" class="st2-admin-subtab" data-admin-subtab="uso" role="tab" aria-selected="false">Uso</button>
             </div>
-            <div id="st2-access-admin-day-summary" class="st2-access-admin-day-summary st2-access-admin-owner-only hidden" aria-live="polite" hidden></div>
-            <div id="st2-access-admin-usage" class="st2-access-admin-usage hidden" hidden>
-              <div class="st2-access-admin-usage-head">
-                <strong>Uso de hoy</strong>
-                <span id="st2-access-admin-usage-count"></span>
+            <div data-admin-sub="accesos">
+              <div class="st2-access-admin-kpis" id="st2-access-admin-kpis">
+                <div class="st2-access-admin-kpi">
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-total">—</span>
+                  <span class="st2-access-admin-kpi-l">Registrados</span>
+                </div>
+                <div class="st2-access-admin-kpi">
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-active">—</span>
+                  <span class="st2-access-admin-kpi-l">Activos</span>
+                </div>
+                <div class="st2-access-admin-kpi is-pending">
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-pending">—</span>
+                  <span class="st2-access-admin-kpi-l">Pendientes</span>
+                </div>
+                <div class="st2-access-admin-kpi">
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-today">—</span>
+                  <span class="st2-access-admin-kpi-l">Ingresaron hoy</span>
+                </div>
               </div>
-              <ul id="st2-access-admin-usage-modules" class="st2-access-admin-usage-modules"></ul>
-              <p class="st2-access-admin-usage-label">Quién entró</p>
-              <ul id="st2-access-admin-usage-people" class="st2-access-admin-usage-people"></ul>
+              <div id="st2-access-admin-day-summary" class="st2-access-admin-day-summary st2-access-admin-owner-only hidden" aria-live="polite" hidden></div>
             </div>
           </div>
+          <div class="st2-admin-usage-view hidden" data-admin-sub="uso" hidden>
+            <div class="st2-admin-usage-head">
+              <div>
+                <h4 class="st2-admin-usage-title">Uso de hoy</h4>
+                <p id="st2-admin-usage-sub" class="st2-admin-usage-sub"></p>
+              </div>
+              <div class="st2-admin-usage-ranges" role="group" aria-label="Ordenar personas">
+                <button type="button" class="st2-admin-usage-sort is-on" data-usage-sort="recent">Más reciente</button>
+                <button type="button" class="st2-admin-usage-sort" data-usage-sort="hits">Más uso</button>
+              </div>
+            </div>
+            <p id="st2-admin-usage-empty" class="st2-admin-usage-empty hidden" hidden>Todavía no hay actividad registrada hoy.</p>
+            <div id="st2-admin-usage-body" class="st2-admin-usage-body">
+              <section class="st2-admin-usage-block">
+                <h5 class="st2-admin-usage-block-title">Por módulo</h5>
+                <table class="st2-admin-usage-table">
+                  <thead>
+                    <tr>
+                      <th>Módulo</th>
+                      <th class="st2-admin-usage-num">Aperturas</th>
+                      <th class="st2-admin-usage-num">Personas</th>
+                    </tr>
+                  </thead>
+                  <tbody id="st2-admin-usage-modules-body"></tbody>
+                </table>
+              </section>
+              <section class="st2-admin-usage-block">
+                <h5 class="st2-admin-usage-block-title">Por persona</h5>
+                <table class="st2-admin-usage-table">
+                  <thead>
+                    <tr>
+                      <th>Persona</th>
+                      <th>Qué usó</th>
+                      <th class="st2-admin-usage-num">Última vez</th>
+                    </tr>
+                  </thead>
+                  <tbody id="st2-admin-usage-people-body"></tbody>
+                </table>
+              </section>
+            </div>
+          </div>
+          <div data-admin-sub="accesos">
           <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>
           <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
           <div id="st2-access-admin-toolbar" class="st2-access-admin-toolbar hidden">
@@ -1883,6 +1924,7 @@
             <p class="st2-access-admin-audit-recent-label">Aprobaciones, módulos y perfiles</p>
             <ul id="st2-access-admin-audit-list" class="st2-access-admin-audit-list"></ul>
             <button type="button" id="st2-access-admin-audit-more" class="st2-access-admin-audit-more hidden" hidden>Ver más</button>
+          </div>
           </div>
         </div>
       </div>
@@ -2689,6 +2731,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260909b" type="module"></script>
+  <script src="/js/app.js?v=20260909c" type="module"></script>
 </body>
 </html>

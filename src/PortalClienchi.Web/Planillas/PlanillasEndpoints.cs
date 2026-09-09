@@ -722,7 +722,10 @@ public static class PlanillasEndpoints
                 var auditToday = isPrimaryOwner
                     ? accessRepo.ListRecentAudit(limit: 40, todayOnly: true)
                     : Array.Empty<AppAccessAuditDto>();
-                var usageToday = accessRepo.ListUsageToday(limit: 300);
+                // Uso por módulo: sensible, solo para el dueño (ADMIN WEB no lo ve).
+                var usageToday = isPrimaryOwner
+                    ? accessRepo.ListUsageToday(limit: 300)
+                    : Array.Empty<AppAccessUsageDto>();
                 var mapped = items.Select(item =>
                 {
                     flagsMap.TryGetValue(item.Email, out var flags);

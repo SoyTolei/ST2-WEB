@@ -1831,37 +1831,69 @@ html.st2-theme-dark .st2-access-admin-table td {
   border-color: #3d4b61 !important;
 }
 
-html.st2-theme-dark .st2-access-admin-usage {
+/* Sub-pestañas del panel ADMIN */
+html.st2-theme-dark .st2-admin-subnav,
+html.st2-theme-dark .st2-admin-usage-ranges {
+  background: #161616;
+  border-color: #333333;
+}
+
+html.st2-theme-dark .st2-admin-subtab {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-admin-subtab:hover {
+  color: #f1f5f9;
+}
+
+html.st2-theme-dark .st2-admin-subtab.is-on,
+html.st2-theme-dark .st2-admin-usage-sort.is-on {
+  background: #242424;
+  color: #fb923c;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+html.st2-theme-dark .st2-admin-usage-sort {
+  color: #94a3b8;
+}
+
+/* Uso de hoy */
+html.st2-theme-dark .st2-admin-usage-title,
+html.st2-theme-dark .st2-admin-usage-mod,
+html.st2-theme-dark .st2-admin-usage-person {
+  color: #f1f5f9;
+}
+
+html.st2-theme-dark .st2-admin-usage-sub,
+html.st2-theme-dark .st2-admin-usage-empty,
+html.st2-theme-dark .st2-admin-usage-block-title {
+  color: #94a3b8;
+}
+
+html.st2-theme-dark .st2-admin-usage-block {
   background: var(--st2-suite-surface-soft) !important;
   border-color: var(--st2-suite-border) !important;
 }
 
-html.st2-theme-dark .st2-access-admin-usage-head,
-html.st2-theme-dark .st2-access-admin-usage-head strong,
-html.st2-theme-dark .st2-access-admin-usage-people strong {
-  color: #f1f5f9;
-}
-
-html.st2-theme-dark .st2-access-admin-usage-head span,
-html.st2-theme-dark .st2-access-admin-usage-label,
-html.st2-theme-dark .st2-access-admin-usage-mods,
-html.st2-theme-dark .st2-access-admin-usage-empty {
+html.st2-theme-dark .st2-admin-usage-table th {
   color: #94a3b8;
+  border-bottom-color: #333333;
 }
 
-html.st2-theme-dark .st2-access-admin-usage-modules li {
-  background: #1f1f1f;
-  border-color: #333333;
-  color: #e5e5e5;
+html.st2-theme-dark .st2-admin-usage-table td {
+  color: #cbd5e1;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
-html.st2-theme-dark .st2-access-admin-usage-modules .st2-access-admin-usage-n {
+html.st2-theme-dark .st2-admin-usage-hits,
+html.st2-theme-dark .st2-admin-usage-chip-n {
   color: #fb923c;
 }
 
-html.st2-theme-dark .st2-access-admin-usage-people li {
-  color: #cbd5e1;
-  border-bottom-color: rgba(255, 255, 255, 0.06);
+html.st2-theme-dark .st2-admin-usage-chip {
+  background: #1f1f1f;
+  border-color: #333333;
+  color: #e5e5e5;
 }
 
 html.st2-theme-dark .st2-access-admin-audit-head,

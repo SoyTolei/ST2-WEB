@@ -6,12 +6,22 @@ import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907c";
 import { initSplashLightfall, startSplashLightfall, stopSplashLightfall } from "./st2-lightfall.js?v=20260907b";
 import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907d";
 import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260907c";
+import { initClickSpark } from "./st2-click-spark.js?v=20260909a";
 
 const restoring = document.body.classList.contains("st2-access-restoring");
 
 initBorderGlowCards();
 initLoginTopography();
 initSuiteGlitchText();
+initClickSpark({
+  sparkColor: "auto",
+  sparkSize: 11,
+  sparkRadius: 17,
+  sparkCount: 8,
+  duration: 420,
+  easing: "ease-out",
+  extraScale: 1,
+});
 initSplashLightfall({
   colors: ["#FF9FFC", "#F97316", "#F97316"],
   backgroundColor: "#ce6319",

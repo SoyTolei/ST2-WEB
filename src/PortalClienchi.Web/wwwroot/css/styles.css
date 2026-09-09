@@ -3640,110 +3640,229 @@ body.portal-tab-active .brand-icon {
   padding: 8px 10px;
 }
 
-/* ── Uso de hoy (qué módulos abren los usuarios) ── */
-.st2-access-admin-usage {
-  margin: 0 0 10px;
+/* ── Sub-pestañas del panel ADMIN ── */
+.st2-admin-subnav {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 3px;
   border: 1px solid #e2e8f0;
-  background: #fff;
   border-radius: 10px;
-  padding: 8px 10px;
+  background: #f8fafc;
+  width: fit-content;
 }
 
-.st2-access-admin-usage.hidden {
+.st2-admin-subnav.hidden {
   display: none !important;
 }
 
-.st2-access-admin-usage-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 0.78rem;
+.st2-admin-subtab {
+  border: 0;
+  border-radius: 8px;
+  padding: 5px 14px;
+  background: transparent;
+  font: 700 0.76rem/1.2 inherit;
+  letter-spacing: 0.02em;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.st2-admin-subtab:hover {
   color: #0f172a;
 }
 
-.st2-access-admin-usage-head strong {
+.st2-admin-subtab.is-on {
+  background: #fff;
+  color: #d64000;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+[data-admin-sub].hidden {
+  display: none !important;
+}
+
+/* ── Uso de hoy (qué módulos abren los usuarios) ── */
+.st2-admin-usage-view.hidden {
+  display: none !important;
+}
+
+.st2-admin-usage-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.st2-admin-usage-title {
+  margin: 0;
+  font-size: 1.02rem;
   font-weight: 800;
+  color: #0f172a;
 }
 
-.st2-access-admin-usage-head span {
+.st2-admin-usage-sub {
+  margin: 3px 0 0;
+  font-size: 0.76rem;
   color: #64748b;
-  font-weight: 600;
 }
 
-.st2-access-admin-usage-label {
-  margin: 10px 0 5px;
-  font-size: 0.7rem;
+.st2-admin-usage-ranges {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+}
+
+.st2-admin-usage-sort {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: transparent;
+  font: 600 0.72rem/1.2 inherit;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.st2-admin-usage-sort.is-on {
+  background: #fff;
+  color: #d64000;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+}
+
+.st2-admin-usage-empty {
+  margin: 0;
+  padding: 18px 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.st2-admin-usage-empty.hidden {
+  display: none !important;
+}
+
+.st2-admin-usage-body {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.st2-admin-usage-body.hidden {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .st2-admin-usage-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.st2-admin-usage-block {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px 12px 4px;
+  min-width: 0;
+}
+
+.st2-admin-usage-block-title {
+  margin: 0 0 6px;
+  font-size: 0.7rem
+;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #64748b;
 }
 
-.st2-access-admin-usage-modules {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
+.st2-admin-usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
 }
 
-.st2-access-admin-usage-modules li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 9px;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  background: #f8fafc;
-  font-size: 0.74rem;
-  font-weight: 600;
-  color: #0f172a;
+.st2-admin-usage-table th {
+  text-align: left;
+  padding: 5px 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
 }
 
-.st2-access-admin-usage-modules .st2-access-admin-usage-n {
-  font-weight: 800;
-  color: #d64000;
-}
-
-.st2-access-admin-usage-people {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 8.5rem;
-  overflow: auto;
-}
-
-.st2-access-admin-usage-people li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 3px 0;
-  font-size: 0.75rem;
+.st2-admin-usage-table td {
+  padding: 6px;
   color: #334155;
-  border-bottom: 1px dashed #eef2f7;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
 }
 
-.st2-access-admin-usage-people li:last-child {
+.st2-admin-usage-table tr:last-child td {
   border-bottom: 0;
 }
 
-.st2-access-admin-usage-people strong {
-  flex: 0 0 auto;
+.st2-admin-usage-table .st2-admin-usage-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.st2-admin-usage-mod {
   font-weight: 700;
   color: #0f172a;
 }
 
-.st2-access-admin-usage-mods {
-  color: #64748b;
+.st2-admin-usage-person {
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
 }
 
-.st2-access-admin-usage-empty {
-  margin: 0;
-  font-size: 0.74rem;
-  color: #64748b;
+.st2-admin-usage-hits {
+  font-weight: 800;
+  color: #d64000;
+}
+
+.st2-admin-usage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.st2-admin-usage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.st2-admin-usage-chip-n {
+  font-weight: 800;
+  color: #d64000;
+}
+
+.st2-admin-usage-bar {
+  display: block;
+  height: 3px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #d64000, #fb923c);
+  opacity: 0.75;
 }
 
 .st2-access-admin-audit.hidden {

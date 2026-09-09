@@ -187,10 +187,14 @@ const accessAdminKpiToday = document.getElementById("st2-access-admin-kpi-today"
 const accessAdminKpiConcurrent = document.getElementById("st2-access-admin-kpi-concurrent");
 const accessAdminKpiAttention = document.getElementById("st2-access-admin-kpi-attention");
 const accessAdminDaySummary = document.getElementById("st2-access-admin-day-summary");
-const accessAdminUsage = document.getElementById("st2-access-admin-usage");
-const accessAdminUsageCount = document.getElementById("st2-access-admin-usage-count");
-const accessAdminUsageModules = document.getElementById("st2-access-admin-usage-modules");
-const accessAdminUsagePeople = document.getElementById("st2-access-admin-usage-people");
+const adminSubnav = document.getElementById("st2-admin-subnav");
+const adminSubtabButtons = Array.from(document.querySelectorAll("[data-admin-subtab]"));
+const adminUsageSub = document.getElementById("st2-admin-usage-sub");
+const adminUsageEmpty = document.getElementById("st2-admin-usage-empty");
+const adminUsageBody = document.getElementById("st2-admin-usage-body");
+const adminUsageModulesBody = document.getElementById("st2-admin-usage-modules-body");
+const adminUsagePeopleBody = document.getElementById("st2-admin-usage-people-body");
+const adminUsageSortButtons = Array.from(document.querySelectorAll("[data-usage-sort]"));
 const accessAdminAudit = document.getElementById("st2-access-admin-audit");
 const accessAdminAuditCount = document.getElementById("st2-access-admin-audit-count");
 const accessAdminAuditList = document.getElementById("st2-access-admin-audit-list");
@@ -747,6 +751,10 @@ let accessAdminClientChangedEmails = new Set();
 let accessAdminClientWatchBusy = false;
 let accessAdminAuditToday = [];
 let accessAdminUsageToday = [];
+/** "accesos" | "uso" — sub-pestaña del panel ADMIN. */
+let adminSubtab = "accesos";
+/** "recent" | "hits" — orden de la tabla por persona. */
+let adminUsageSort = "recent";
 let accessAdminConcurrentCount = 0;
 let accessAdminAuditShowAll = false;
 let accessAdminAuditDetailEmail = "";
@@ -1294,6 +1302,8 @@ function resetAccessAdminSnapshot() {
   accessAdminModFilters = new Set();
   accessAdminAuditToday = [];
   accessAdminUsageToday = [];
+  adminSubtab = "accesos";
+  syncAdminSubnav();
   accessAdminConcurrentCount = 0;
   accessAdminAuditShowAll = false;
   accessAdminAuditDetailEmail = "";
@@ -1564,63 +1574,126 @@ function formatUsageModule(module) {
   return USAGE_MODULE_LABELS[key] || key || "—";
 }
 
+/** La sub-pestaña Uso es solo del dueño; el resto no la ve ni la puede abrir. */
+function syncAdminSubnav() {
+  const canSeeUsage = isPrimarySuperAdmin();
+  if (adminSubnav) {
+    adminSubnav.classList.toggle("hidden", !canSeeUsage);
+    adminSubnav.hidden = !canSeeUsage;
+  }
+  if (!canSeeUsage && adminSubtab !== "accesos") adminSubtab = "accesos";
+
+  for (const btn of adminSubtabButtons) {
+    const on = btn.dataset.adminSubtab === adminSubtab;
+    btn.classList.toggle("is-on", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+  }
+  document.querySelectorAll("[data-admin-sub]").forEach((el) => {
+    if (!(el instanceof HTMLElement)) return;
+    const show = el.dataset.adminSub === adminSubtab;
+    el.classList.toggle("hidden", !show);
+    el.hidden = !show;
+  });
+}
+
+function setAdminSubtab(tab) {
+  const next = tab === "uso" && isPrimarySuperAdmin() ? "uso" : "accesos";
+  adminSubtab = next;
+  syncAdminSubnav();
+  if (next === "uso") renderAccessAdminUsage();
+}
+
 function renderAccessAdminUsage() {
-  if (!accessAdminUsage) return;
-  const rows = Array.isArray(accessAdminUsageToday) ? accessAdminUsageToday : [];
-  if (!rows.length) {
-    accessAdminUsage.classList.add("hidden");
-    accessAdminUsage.hidden = true;
-    if (accessAdminUsageModules) accessAdminUsageModules.innerHTML = "";
-    if (accessAdminUsagePeople) accessAdminUsagePeople.innerHTML = "";
-    if (accessAdminUsageCount) accessAdminUsageCount.textContent = "";
+  syncAdminSubnav();
+  if (!adminUsageBody || !isPrimarySuperAdmin()) return;
+
+  const rows = (Array.isArray(accessAdminUsageToday) ? accessAdminUsageToday : [])
+    .filter((row) => row.module && row.email);
+
+  const showEmpty = rows.length === 0;
+  adminUsageBody.classList.toggle("hidden", showEmpty);
+  adminUsageBody.hidden = showEmpty;
+  if (adminUsageEmpty) {
+    adminUsageEmpty.classList.toggle("hidden", !showEmpty);
+    adminUsageEmpty.hidden = !showEmpty;
+  }
+  if (showEmpty) {
+    if (adminUsageSub) adminUsageSub.textContent = "";
+    if (adminUsageModulesBody) adminUsageModulesBody.innerHTML = "";
+    if (adminUsagePeopleBody) adminUsagePeopleBody.innerHTML = "";
     return;
   }
 
-  accessAdminUsage.classList.remove("hidden");
-  accessAdminUsage.hidden = false;
-
   const byModule = new Map();
   const byPerson = new Map();
+  let totalHits = 0;
   for (const row of rows) {
-    if (!row.module) continue;
-    byModule.set(row.module, (byModule.get(row.module) || 0) + row.hits);
-    if (!row.email) continue;
-    const list = byPerson.get(row.email) || [];
-    list.push(row);
-    byPerson.set(row.email, list);
+    totalHits += row.hits;
+    const mod = byModule.get(row.module) || { hits: 0, people: new Set() };
+    mod.hits += row.hits;
+    mod.people.add(row.email);
+    byModule.set(row.module, mod);
+
+    const person = byPerson.get(row.email) || { hits: 0, mods: [], lastAt: "" };
+    person.hits += row.hits;
+    person.mods.push(row);
+    if (row.lastAt > person.lastAt) person.lastAt = row.lastAt;
+    byPerson.set(row.email, person);
   }
 
-  if (accessAdminUsageCount) {
+  if (adminUsageSub) {
     const people = byPerson.size;
-    accessAdminUsageCount.textContent = people === 1 ? "1 persona" : `${people} personas`;
+    adminUsageSub.textContent =
+      `${people} ${people === 1 ? "persona" : "personas"} · ${totalHits} ${totalHits === 1 ? "apertura" : "aperturas"}`;
   }
 
-  if (accessAdminUsageModules) {
-    const modules = [...byModule.entries()].sort((a, b) => b[1] - a[1]);
-    accessAdminUsageModules.innerHTML = modules
-      .map(([mod, hits]) =>
-        `<li>${escapeHtml(formatUsageModule(mod))} <span class="st2-access-admin-usage-n">${escapeHtml(String(hits))}</span></li>`)
+  if (adminUsageModulesBody) {
+    const modules = [...byModule.entries()].sort((a, b) => b[1].hits - a[1].hits);
+    const top = modules[0]?.[1]?.hits || 1;
+    adminUsageModulesBody.innerHTML = modules
+      .map(([mod, info]) => {
+        const width = Math.max(6, Math.round((info.hits / top) * 100));
+        return `<tr>
+          <td>
+            <span class="st2-admin-usage-mod">${escapeHtml(formatUsageModule(mod))}</span>
+            <span class="st2-admin-usage-bar" style="width:${width}%" aria-hidden="true"></span>
+          </td>
+          <td class="st2-admin-usage-num"><span class="st2-admin-usage-hits">${escapeHtml(String(info.hits))}</span></td>
+          <td class="st2-admin-usage-num">${escapeHtml(String(info.people.size))}</td>
+        </tr>`;
+      })
       .join("");
   }
 
-  if (accessAdminUsagePeople) {
-    const people = [...byPerson.entries()]
-      .map(([email, list]) => {
-        const item = accessAdminItemsCache.find((i) => i.email === email);
-        const name = formatAccessDisplayName(email, item?.displayNameOverride);
-        const lastAt = list.reduce((acc, r) => (r.lastAt > acc ? r.lastAt : acc), "");
-        const mods = [...list]
-          .sort((a, b) => b.hits - a.hits)
-          .map((r) => `${formatUsageModule(r.module)} (${r.hits})`)
-          .join(" · ");
-        return { name, mods, lastAt };
-      })
-      .sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));
+  if (adminUsagePeopleBody) {
+    const people = [...byPerson.entries()].map(([email, info]) => {
+      const item = accessAdminItemsCache.find((i) => i.email === email);
+      return {
+        name: formatAccessDisplayName(email, item?.displayNameOverride),
+        email,
+        hits: info.hits,
+        lastAt: info.lastAt,
+        mods: [...info.mods].sort((a, b) => b.hits - a.hits),
+      };
+    });
 
-    accessAdminUsagePeople.innerHTML = people
-      .map((p) =>
-        `<li><strong>${escapeHtml(p.name)}</strong>`
-        + `<span class="st2-access-admin-usage-mods">${escapeHtml(p.mods)}</span></li>`)
+    people.sort((a, b) => (adminUsageSort === "hits"
+      ? b.hits - a.hits
+      : (a.lastAt < b.lastAt ? 1 : a.lastAt > b.lastAt ? -1 : 0)));
+
+    adminUsagePeopleBody.innerHTML = people
+      .map((p) => {
+        const chips = p.mods
+          .map((m) =>
+            `<span class="st2-admin-usage-chip">${escapeHtml(formatUsageModule(m.module))}`
+            + `<span class="st2-admin-usage-chip-n">${escapeHtml(String(m.hits))}</span></span>`)
+          .join("");
+        return `<tr>
+          <td><span class="st2-admin-usage-person" title="${escapeHtml(p.email)}">${escapeHtml(p.name)}</span></td>
+          <td><div class="st2-admin-usage-chips">${chips}</div></td>
+          <td class="st2-admin-usage-num">${escapeHtml(formatAccessRelative(p.lastAt))}</td>
+        </tr>`;
+      })
       .join("");
   }
 }
@@ -3393,6 +3466,20 @@ accessAdminSearch?.addEventListener("input", () => {
 accessAdminQuickFilterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     setAccessAdminListFilter(btn.dataset.listFilter || "");
+  });
+});
+adminSubtabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setAdminSubtab(btn.dataset.adminSubtab || "accesos");
+  });
+});
+adminUsageSortButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    adminUsageSort = btn.dataset.usageSort === "hits" ? "hits" : "recent";
+    for (const other of adminUsageSortButtons) {
+      other.classList.toggle("is-on", other === btn);
+    }
+    renderAccessAdminUsage();
   });
 });
 accessAdminAuditActors?.addEventListener("click", (e) => {
