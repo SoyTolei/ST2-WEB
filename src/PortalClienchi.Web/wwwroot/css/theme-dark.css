@@ -641,28 +641,27 @@ html.st2-theme-dark .btn-secondary {
 }
 
 html.st2-theme-dark .planillas-back {
-  background: linear-gradient(180deg, #2a2118 0%, #1c1510 100%) !important;
-  border: 1px solid #9a3412 !important;
-  color: #fdba74 !important;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 4px rgba(0, 0, 0, 0.35) !important;
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  box-shadow: none !important;
 }
 
 html.st2-theme-dark .planillas-back-icon {
-  background: #161616 !important;
-  border-color: #ea580c !important;
+  background: transparent !important;
+  border-color: #3d4b61 !important;
   color: #fb923c !important;
   box-shadow: none !important;
 }
 
 html.st2-theme-dark .planillas-back:hover {
-  background: linear-gradient(180deg, #3d2814 0%, #2a1a0d 100%) !important;
-  border-color: #ea580c !important;
-  color: #fed7aa !important;
+  background: rgba(249, 115, 22, 0.1) !important;
+  color: #fdba74 !important;
 }
 
 html.st2-theme-dark .planillas-back:hover .planillas-back-icon {
-  background: linear-gradient(180deg, #3d2814 0%, #2a1a0d 100%) !important;
-  border-color: #f97316 !important;
+  background: rgba(249, 115, 22, 0.12) !important;
+  border-color: #ea580c !important;
   color: #fdba74 !important;
 }
 

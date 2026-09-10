@@ -1589,24 +1589,21 @@ body.st2-chile-embed-active #panel-planillas.active {
 .planillas-back {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  border: 1px solid #fdba74;
-  background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
-  border-radius: 999px;
-  padding: 7px 16px 7px 7px;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  border-radius: 10px;
+  padding: 8px 12px 8px 8px;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1;
   cursor: pointer;
-  color: #9a3412;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset, 0 1px 3px rgba(194, 65, 12, 0.12);
+  color: #64748b;
   transition:
     color 0.15s ease,
     background 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
     transform 0.15s ease;
 }
 
@@ -1614,14 +1611,14 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
-  border-radius: 999px;
-  background: #fff;
-  border: 1px solid #fb923c;
-  color: #ea580c;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  color: #d64000;
+  box-shadow: none;
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
@@ -1630,8 +1627,8 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .planillas-back-icon svg {
-  width: 17px;
-  height: 17px;
+  width: 16px;
+  height: 16px;
   display: block;
 }
 
@@ -1640,22 +1637,20 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .planillas-back:hover {
-  color: #7c2d12;
-  background: linear-gradient(180deg, #ffedd5 0%, #fed7aa 100%);
-  border-color: #fb923c;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 2px 8px rgba(194, 65, 12, 0.16);
+  color: #d64000;
+  background: rgba(214, 64, 0, 0.06);
 }
 
 .planillas-back:hover .planillas-back-icon {
-  background: linear-gradient(180deg, #ffedd5 0%, #fdba74 100%);
-  border-color: #f97316;
-  color: #9a3412;
+  background: rgba(214, 64, 0, 0.08);
+  border-color: #fdba74;
+  color: #c2410c;
   transform: translateX(-2px);
 }
 
 .planillas-back:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.22);
+  box-shadow: 0 0 0 3px rgba(214, 64, 0, 0.18);
 }
 
 .planillas-back:active {
@@ -1754,18 +1749,18 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-module-sticky-head .planillas-back {
-  padding: 6px 14px 6px 6px;
+  padding: 7px 11px 7px 7px;
   font-size: 0.88rem;
 }
 
 .plan-module-sticky-head .planillas-back-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
 }
 
 .plan-module-sticky-head .planillas-back-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
 .plan-module-sticky-head .plan-sistema-badge {
