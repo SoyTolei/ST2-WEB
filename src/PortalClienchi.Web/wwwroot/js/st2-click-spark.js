@@ -111,8 +111,21 @@ function spawn(x, y) {
 function onPointerDown(e) {
   if (e.button !== undefined && e.button !== 0) return;
   if (!canvas) return;
-  // Los iframes (THOM/Portal) no propagan clics: no hay nada que dibujar ahí.
+  if (isTextEntryEvent(e)) return;
   spawn(e.clientX, e.clientY);
+}
+
+function isTextEntryEvent(e) {
+  const raw = e.target;
+  const el = raw instanceof Element ? raw : raw?.parentElement;
+  if (!el) return false;
+  const hit = el.closest("input, textarea, select, option, [contenteditable]:not([contenteditable='false'])");
+  if (!hit) return false;
+  if (hit instanceof HTMLInputElement) {
+    const type = (hit.type || "text").toLowerCase();
+    if (["button", "submit", "reset", "image", "hidden"].includes(type)) return false;
+  }
+  return true;
 }
 
 export function initClickSpark(options = {}) {

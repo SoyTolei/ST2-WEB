@@ -321,6 +321,16 @@ public sealed class BlanqueoRepository
             listo = true;
             if (BlanqueoAlertKinds.IsNoRegistrado(aclaracion))
                 aclaracion = null;
+            if (BlanqueoNotas.IsPortalActivacion(current.Portal, current.TipoSolicitud)
+                && (string.IsNullOrWhiteSpace(aclaracion) || BlanqueoNotas.IsActivacionCorreoNota(aclaracion)))
+            {
+                aclaracion = BlanqueoNotas.ActivacionCorreo;
+            }
+        }
+        else if (req.Listo == false && BlanqueoNotas.IsActivacionCorreoNota(aclaracion))
+        {
+            listo = false;
+            aclaracion = null;
         }
         else if (BlanqueoAlertKinds.IsNoRegistrado(aclaracion))
         {

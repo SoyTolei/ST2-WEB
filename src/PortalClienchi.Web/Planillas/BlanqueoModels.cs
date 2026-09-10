@@ -154,3 +154,21 @@ public static class BlanqueoClave
     /// <summary>Clave temporal vigente (puede cambiarse a mano cuando se actualice el proceso).</summary>
     public const string Actual = "Sueldo.2026";
 }
+
+public static class BlanqueoNotas
+{
+    public const string ActivacionCorreo =
+        "El usuario deberá terminar de activar la cuenta desde su correo";
+
+    public static bool IsPortalActivacion(string? portal, string? tipo)
+    {
+        if (!string.Equals(portal?.Trim(), "PortalCliente", StringComparison.OrdinalIgnoreCase))
+            return false;
+        var t = (tipo ?? "").Trim();
+        return t.Equals("Activación", StringComparison.OrdinalIgnoreCase)
+            || t.Equals("Activacion", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsActivacionCorreoNota(string? aclaracion) =>
+        string.Equals((aclaracion ?? "").Trim(), ActivacionCorreo, StringComparison.Ordinal);
+}

@@ -668,11 +668,11 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-clave-hint {
   margin: 0 0 12px;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 8px;
   border: 1px dashed #93c5fd;
   background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   font-weight: 650;
   color: #1e3a5f;
   display: flex;
@@ -680,7 +680,8 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 6px 8px;
+  gap: 4px 6px;
+  line-height: 1.35;
 }
 
 .blanqueo-clave-hint-label {
@@ -934,9 +935,17 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-table .blanqueo-th-cliente,
 .blanqueo-table .blanqueo-col-cliente {
-  width: 72px;
+  width: 88px;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+.blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy,
+.blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy-text {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .blanqueo-table .blanqueo-th-correo,

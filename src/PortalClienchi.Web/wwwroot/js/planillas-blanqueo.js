@@ -1110,7 +1110,7 @@ function buildRow(item) {
   const hasAclaracion = !!String(item.aclaracion || "").trim();
   const noReg = isNoRegistrado(item.aclaracion) && !item.listo;
   if (noReg) row.classList.add("blanqueo-row-noreg");
-  else if (item.listo && hasAclaracion) row.classList.add("blanqueo-row-listo-nota");
+  else if (item.listo && hasAclaracion && !isActivacionAutoNote(item.aclaracion)) row.classList.add("blanqueo-row-listo-nota");
   else if (item.listo) row.classList.add("blanqueo-row-listo");
   else if (hasAclaracion) row.classList.add("blanqueo-row-aclaracion");
 
@@ -1124,6 +1124,15 @@ function buildRow(item) {
       </td>`
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
 
+  const clienteCell = (canConfirm && isPortalCliente(item.portal) && String(item.nroCliente || "").trim())
+    ? `<td class="blanqueo-col-cliente">
+        <button type="button" class="blanqueo-mail-copy" data-blanqueo-copy-cliente="${escapeHtml(item.nroCliente)}" title="Clic para copiar el n° de cliente">
+          <span class="blanqueo-mail-copy-text">${escapeHtml(item.nroCliente)}</span>
+          <span class="blanqueo-mail-copy-hint" aria-hidden="true">copiar</span>
+        </button>
+      </td>`
+    : `<td class="blanqueo-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>`;
+
   const estadoAclaracionCells = `<td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
     <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>`;
 
@@ -1131,7 +1140,7 @@ function buildRow(item) {
     <td class="blanqueo-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
     <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">${escapeHtml(portalShort(item.portal))}</td>
     <td class="blanqueo-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
-    <td class="blanqueo-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>
+    ${clienteCell}
     ${mailCell}
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
@@ -1169,6 +1178,19 @@ function buildRow(item) {
     showAclaracionPop(pill, detail);
   });
 
+  row.querySelector("[data-blanqueo-copy-cliente]")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const cliente = btn.getAttribute("data-blanqueo-copy-cliente") || item.nroCliente;
+    void copyText(cliente, {
+      el: btn,
+      hintSelector: ".blanqueo-mail-copy-hint",
+      copiedText: "copiado",
+      restoreText: "copiar",
+    });
+  });
+
   row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1199,14 +1221,14 @@ function buildRow(item) {
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
     selectedId = item.id;
     applyFilters();
   });
 
   row.addEventListener("dblclick", (e) => {
     e.preventDefault();
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
+    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
     selectedId = item.id;
     applyFilters();
     if (!canConfirm) return;
@@ -1242,6 +1264,16 @@ function portalLabel(portal) {
   if (portal === "OnBalance") return "On Balance";
   if (portal === "Onvio") return "ONVIO";
   return "Portal Cliente";
+}
+
+function isPortalCliente(portal) {
+  return String(portal || "") === "PortalCliente";
+}
+
+const ACTIVACION_CORREO_NOTA = "El usuario deberá terminar de activar la cuenta desde su correo";
+
+function isActivacionAutoNote(text) {
+  return String(text || "").trim() === ACTIVACION_CORREO_NOTA;
 }
 
 function portalShort(portal) {
@@ -1330,7 +1362,7 @@ function formatGestionadoPorCell(item) {
 function formatEstadoCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (item.listo) {
-    if (aclaracion) {
+    if (aclaracion && !isActivacionAutoNote(aclaracion)) {
       return '<span class="blanqueo-pill ok-note" title="Listo con aclaración">Listo · nota</span>';
     }
     return '<span class="blanqueo-pill ok">Listo</span>';

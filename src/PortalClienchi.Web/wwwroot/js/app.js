@@ -1,4 +1,4 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260907ah";
+﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260910a";
 import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
@@ -5364,6 +5364,8 @@ const UPDATE_STUCK_KEY = "st2-update-stuck-build";
 const UPDATE_HTML_BUILD_KEY = "st2-update-html-build";
 /** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
 const UPDATE_HANDLED_TTL_MS = 6 * 60 * 60 * 1000;
+/** Recién abrieron o recargaron: el HTML que tienen ES el que el server les dio. */
+const UPDATE_LOAD_GRACE_MS = 3 * 60 * 1000;
 
 let lastLiveBuild = "";
 let pendingLiveBuild = "";
@@ -5377,6 +5379,7 @@ let updateUiMode = "hidden";
 let memoryDeferredSignal = "";
 /** True si esta carga es un F5/Ctrl+F5 y el HTML no cambió. */
 let htmlDidNotChangeOnReload = false;
+const pageLoadedAt = Date.now();
 
 function loadedAppBuild() {
   const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
@@ -5549,20 +5552,11 @@ function reconcileReloadTarget() {
   }
 }
 
-/** F5 / Ctrl+F5 / Recargar: si el HTML sigue igual, el usuario ya hizo lo que podía. */
+/** F5 / Ctrl+F5 / Recargar / nueva pestaña: si el HTML sigue igual, ya hicieron lo que podían. */
 function noteHtmlReload() {
   const cur = buildKey(loadedAppBuild());
-  let prev = "";
-  try {
-    prev = sessionStorage.getItem(UPDATE_HTML_BUILD_KEY) || "";
-  } catch {
-    prev = "";
-  }
-  try {
-    if (cur) sessionStorage.setItem(UPDATE_HTML_BUILD_KEY, cur);
-  } catch {
-    // ignore
-  }
+  const prev = buildKey(storageGet(UPDATE_HTML_BUILD_KEY));
+  if (cur) storageSet(UPDATE_HTML_BUILD_KEY, cur);
   htmlDidNotChangeOnReload = !!(prev && cur && prev === cur);
 }
 
@@ -5735,7 +5729,14 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
 
   lastLiveBuild = live;
 
-  // Recargaron (F5 o botón) y el HTML no se movió: insistir no sirve.
+  // Recién cargaron esta página: no tiene sentido pedir otro reload.
+  if (Date.now() - pageLoadedAt < UPDATE_LOAD_GRACE_MS) {
+    logSkipUpdateOnce("pagina-recien-cargada", loaded, live);
+    stopWatching();
+    return;
+  }
+
+  // Recargaron y el HTML no se movió (misma pestaña o una nueva con el mismo HTML).
   if (htmlDidNotChangeOnReload) {
     silenceUnreachableLive(live);
     logSkipUpdateOnce("reload-sin-cambio", loaded, live);
