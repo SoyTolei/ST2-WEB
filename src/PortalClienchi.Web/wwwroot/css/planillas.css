@@ -1680,11 +1680,15 @@ body.st2-chile-embed-active #panel-planillas.active {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   margin: calc(-1 * var(--plan-card-pad-top)) calc(-1 * var(--plan-card-pad-x)) 14px;
-  padding: calc(8px + var(--plan-view-pad-y, 12px)) var(--plan-card-pad-x) 4px;
+  padding: calc(8px + var(--plan-view-pad-y, 12px)) var(--plan-card-pad-x) 0;
+  border-bottom: none;
+  box-shadow: 0 10px 18px -12px rgba(15, 18, 28, 0.28);
+}
+
+/* Sin barra de color: un borde fino alcanza; con accent, esa línea cierra la barra. */
+.plan-module-sticky-head:not(:has(.plan-accent-bar)) {
   border-bottom: 1px solid var(--border);
-  box-shadow:
-    0 10px 0 0 var(--white),
-    0 12px 16px -8px rgba(15, 18, 28, 0.2);
+  padding-bottom: 6px;
 }
 
 .plan-module-sticky-head:has(.planillas-corner-easter:not(.is-hidden)) {
@@ -1772,8 +1776,9 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-module-sticky-head .plan-accent-bar {
-  margin-bottom: 2px;
-  height: 2px;
+  margin: 8px 0 0;
+  height: 3px;
+  border-radius: 0;
 }
 
 .plan-module-sticky-head .planillas-toolbar {
@@ -1872,6 +1877,8 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-accent-bar.transfer { background: #15803d; }
 .plan-accent-bar.referral { background: #c2410c; }
 .plan-accent-bar.oportunidad { background: #a21caf; }
+.plan-accent-bar.blanqueo { background: #1d4ed8; }
+.plan-accent-bar.borrado-bases { background: #be123c; }
 
 .plan-form-grid {
   display: grid;
