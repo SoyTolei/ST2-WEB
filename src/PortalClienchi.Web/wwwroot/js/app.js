@@ -1,5 +1,4 @@
-﻿import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260910a";
-import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260905i";
+﻿import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260910b";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
@@ -10,6 +9,7 @@ import { notifyAccessChanged } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260910b";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -5359,13 +5359,9 @@ const UPDATE_DEFER_KEY = "st2-update-deferred-signal";
 const UPDATE_HANDLED_KEY = "st2-update-handled-builds";
 const UPDATE_RELOAD_TARGET_KEY = "st2-update-reload-target";
 /** Build que ya intentamos recargar sin éxito: no se avisa más por él. */
-const UPDATE_STUCK_KEY = "st2-update-stuck-build";
-/** SHA del HTML de esta pestaña; si F5 no lo cambia, no tiene sentido insistir. */
-const UPDATE_HTML_BUILD_KEY = "st2-update-html-build";
+const UPDATE_STUCK_KEY = "st2-update-stuck-build-v2";
 /** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
 const UPDATE_HANDLED_TTL_MS = 6 * 60 * 60 * 1000;
-/** Recién abrieron o recargaron: el HTML que tienen ES el que el server les dio. */
-const UPDATE_LOAD_GRACE_MS = 3 * 60 * 1000;
 
 let lastLiveBuild = "";
 let pendingLiveBuild = "";
@@ -5377,9 +5373,6 @@ let reloadBannerForced = false;
 let updateUiMode = "hidden";
 /** Fallback si localStorage/sessionStorage fallan. */
 let memoryDeferredSignal = "";
-/** True si esta carga es un F5/Ctrl+F5 y el HTML no cambió. */
-let htmlDidNotChangeOnReload = false;
-const pageLoadedAt = Date.now();
 
 function loadedAppBuild() {
   const meta = document.querySelector('meta[name="st2-build"]')?.content?.trim();
@@ -5552,21 +5545,6 @@ function reconcileReloadTarget() {
   }
 }
 
-/** F5 / Ctrl+F5 / Recargar / nueva pestaña: si el HTML sigue igual, ya hicieron lo que podían. */
-function noteHtmlReload() {
-  const cur = buildKey(loadedAppBuild());
-  const prev = buildKey(storageGet(UPDATE_HTML_BUILD_KEY));
-  if (cur) storageSet(UPDATE_HTML_BUILD_KEY, cur);
-  htmlDidNotChangeOnReload = !!(prev && cur && prev === cur);
-}
-
-function silenceUnreachableLive(live) {
-  markBuildHandled(live);
-  markBuildStuck(live);
-  const key = buildKey(live);
-  if (key) writeDeferredUpdateSignal(`build:${key}`);
-}
-
 function setUpdateBannerVisible(show) {
   const banner = document.getElementById("st2-update-banner");
   if (!banner) return;
@@ -5704,17 +5682,19 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
     return;
   }
 
-  // Distinto SHA no es "más nuevo": réplica vieja, API cacheada, o falta fecha.
-  // Solo avisamos si las dos fechas existen y la del server es posterior.
+  // Distinto SHA no es "más nuevo": puede ser réplica vieja o edge cacheado.
+  // Si hay fechas, solo avisamos cuando el server es claramente posterior.
+  // Si faltan fechas, igual avisamos (Railway casi siempre manda buildAt).
   const loadedAt = loadedBuildTime();
   const liveAt = Date.parse(String(liveBuildAt || ""));
-  if (loadedAt === null || !Number.isFinite(liveAt)) {
-    logSkipUpdateOnce("sin-fecha", loaded, live);
+  const haveDates = loadedAt !== null && Number.isFinite(liveAt);
+  if (haveDates && liveAt < loadedAt) {
+    logSkipUpdateOnce("api-mas-vieja", loaded, live);
     stopWatching();
     return;
   }
-  if (liveAt <= loadedAt) {
-    logSkipUpdateOnce(liveAt < loadedAt ? "api-mas-vieja" : "misma-fecha", loaded, live);
+  if (haveDates && liveAt === loadedAt) {
+    logSkipUpdateOnce("misma-fecha", loaded, live);
     stopWatching();
     return;
   }
@@ -5728,22 +5708,6 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
   if (pendingLiveHits < UPDATE_CONFIRM_NEEDED) return;
 
   lastLiveBuild = live;
-
-  // Recién cargaron esta página: no tiene sentido pedir otro reload.
-  if (Date.now() - pageLoadedAt < UPDATE_LOAD_GRACE_MS) {
-    logSkipUpdateOnce("pagina-recien-cargada", loaded, live);
-    stopWatching();
-    return;
-  }
-
-  // Recargaron y el HTML no se movió (misma pestaña o una nueva con el mismo HTML).
-  if (htmlDidNotChangeOnReload) {
-    silenceUnreachableLive(live);
-    logSkipUpdateOnce("reload-sin-cambio", loaded, live);
-    stopWatching();
-    return;
-  }
-
   showUpdatePrompt();
   if (updateUiMode !== "hidden") notifyWebUpdateDesktop(live);
 }
@@ -5762,7 +5726,6 @@ async function checkAppVersion() {
 function startUpdateChecker() {
   if (updateCheckerStarted) return;
   updateCheckerStarted = true;
-  noteHtmlReload();
   reconcileReloadTarget();
   document.getElementById("st2-update-reload")?.addEventListener("click", reloadForUpdate);
   document.getElementById("st2-update-reload-now")?.addEventListener("click", reloadForUpdate);

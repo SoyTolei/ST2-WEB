@@ -991,7 +991,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .planillas-hero-st2-mark {
   display: inline-flex;
   align-items: flex-start;
-  font-size: 1.42rem;
+  font-size: 1.78rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   color: var(--dark);
@@ -1025,7 +1025,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .planillas-hero-title-main {
-  font-size: 1.65rem;
+  font-size: 1.52rem;
   font-weight: 700;
   color: var(--dark);
   line-height: 1.15;
@@ -1589,21 +1589,23 @@ body.st2-chile-embed-active #panel-planillas.active {
 .planillas-back {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  border: none;
-  background: transparent;
+  gap: 10px;
+  border: 1px solid #fdba74;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
   border-radius: 999px;
-  padding: 5px 12px 5px 5px;
+  padding: 7px 16px 7px 7px;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1;
   cursor: pointer;
-  color: #64748b;
+  color: #9a3412;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset, 0 1px 3px rgba(194, 65, 12, 0.12);
   transition:
     color 0.15s ease,
     background 0.15s ease,
+    border-color 0.15s ease,
     box-shadow 0.15s ease,
     transform 0.15s ease;
 }
@@ -1612,12 +1614,12 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   flex-shrink: 0;
   border-radius: 999px;
-  background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
-  border: 1px solid #fdba74;
+  background: #fff;
+  border: 1px solid #fb923c;
   color: #ea580c;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
   transition:
@@ -1628,8 +1630,8 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .planillas-back-icon svg {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
   display: block;
 }
 
@@ -1638,15 +1640,17 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .planillas-back:hover {
-  color: #c2410c;
-  background: rgba(255, 247, 237, 0.72);
+  color: #7c2d12;
+  background: linear-gradient(180deg, #ffedd5 0%, #fed7aa 100%);
+  border-color: #fb923c;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 2px 8px rgba(194, 65, 12, 0.16);
 }
 
 .planillas-back:hover .planillas-back-icon {
   background: linear-gradient(180deg, #ffedd5 0%, #fdba74 100%);
-  border-color: #fb923c;
+  border-color: #f97316;
   color: #9a3412;
-  transform: translateX(-1px);
+  transform: translateX(-2px);
 }
 
 .planillas-back:focus-visible {
@@ -1750,18 +1754,18 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-module-sticky-head .planillas-back {
-  padding: 4px 10px 4px 4px;
-  font-size: 0.76rem;
+  padding: 6px 14px 6px 6px;
+  font-size: 0.88rem;
 }
 
 .plan-module-sticky-head .planillas-back-icon {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
 }
 
 .plan-module-sticky-head .planillas-back-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 
 .plan-module-sticky-head .plan-sistema-badge {

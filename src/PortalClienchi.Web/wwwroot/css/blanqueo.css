@@ -1081,6 +1081,19 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   font-weight: 600;
 }
 
+/* Misma estética que Sueldo.20261 (crema + borde punteado ámbar). */
+.blanqueo-pill.blanqueo-pill-clave-style {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px dashed #f59e0b;
+  border-radius: 4px;
+  text-align: left;
+  font-weight: 700;
+  white-space: normal;
+  max-width: 16rem;
+  line-height: 1.35;
+}
+
 .blanqueo-pill.bad {
   background: #dc2626;
   color: #fff;

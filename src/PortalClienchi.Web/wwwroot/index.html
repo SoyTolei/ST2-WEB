@@ -120,10 +120,10 @@
     }
   </style>
   <link rel="stylesheet" href="/css/styles.css?v=20260909d"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260909d"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20260907m"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260910b"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20260910b"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20260910a"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20260910b"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20260907s"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
@@ -132,7 +132,7 @@
   <link rel="stylesheet" href="/css/st2-topography.css?v=20260907b"/>
   <link rel="stylesheet" href="/css/st2-lightfall.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-glitch-text.css?v=20260907d"/>
-  <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260907c"/>
+  <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260910b"/>
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907o"/>
@@ -140,9 +140,9 @@
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260907c"/>
   <link rel="modulepreload" href="/js/st2-lightfall.js?v=20260907b"/>
   <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907d"/>
-  <link rel="modulepreload" href="/js/st2-decrypted-text.js?v=20260907c"/>
+  <link rel="modulepreload" href="/js/st2-decrypted-text.js?v=20260910b"/>
   <link rel="modulepreload" href="/js/st2-click-spark.js?v=20260910a"/>
-  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260910a"/>
+  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260910b"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -152,7 +152,7 @@
     }
   } catch (e) { /* ignore */ }
 </script>
-  <script type="module" src="/js/st2-login-boot.js?v=20260910a"></script>
+  <script type="module" src="/js/st2-login-boot.js?v=20260910b"></script>
   <div id="st2-light-rays" class="st2-light-rays" aria-hidden="true"></div>
   <sonner-toaster id="st2-sonner" position="top-right" rich-colors close-button visible-toasts="5" container-aria-label="Notificaciones"></sonner-toaster>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">
@@ -656,7 +656,7 @@
                   <span class="plan-module-icon-badge blanqueo" data-plan-icon="blanqueo"></span>
                   <h2 class="plan-module-title">Blanqueo ONVIO, On Balance y Portal Cliente</h2>
                 </div>
-                <span id="blanqueo-user-badge" class="plan-gestor-user-badge hidden"></span>
+                <span id="blanqueo-user-badge" class="plan-gestor-user-badge hidden" hidden aria-hidden="true"></span>
               </div>
             </div>
 
@@ -836,7 +836,7 @@
                   <span class="plan-module-icon-badge borrado-bases" data-plan-icon="borrado-bases"></span>
                   <h2 class="plan-module-title">Borrado de Bases Web</h2>
                 </div>
-                <span id="borrado-user-badge" class="plan-gestor-user-badge hidden"></span>
+                <span id="borrado-user-badge" class="plan-gestor-user-badge hidden" hidden aria-hidden="true"></span>
               </div>
             </div>
 
@@ -2662,8 +2662,8 @@
             <div class="pdf-portal-preview-wrap">
               <div class="pdf-portal-preview-label-row">
                 <span class="pdf-portal-label">Vista previa</span>
-                <button type="button" id="pdf-portal-sheet-toggle" class="pdf-portal-sheet-badge pdf-portal-sheet-badge-btn" title="Cambiar fondo PDF">
-                  <span id="pdf-portal-sheet-badge-text">Cambiar fondo PDF a blanco ☀️ 🖨️</span>
+                <button type="button" id="pdf-portal-sheet-toggle" class="pdf-portal-sheet-badge pdf-portal-sheet-badge-btn" title="Cambiar el fondo del PDF">
+                  <span id="pdf-portal-sheet-badge-text">Cambiar el fondo del PDF a OSCURO 🌙</span>
                 </button>
               </div>
               <div id="pdf-portal-preview" class="pdf-portal-preview" aria-live="polite">
@@ -2723,6 +2723,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260910a" type="module"></script>
+  <script src="/js/app.js?v=20260910b" type="module"></script>
 </body>
 </html>

@@ -29,14 +29,16 @@ export function syncSheetThemeUi() {
   }
   if (badgeText) {
     badgeText.textContent = isDark
-      ? "Cambiar fondo PDF a blanco ☀️ 🖨️"
-      : "Cambiar fondo PDF a Oscuro 🌙";
+      ? "Cambiar el fondo del PDF a BLANCO ☀️"
+      : "Cambiar el fondo del PDF a OSCURO 🌙";
   }
   if (toggleBtn) {
     toggleBtn.setAttribute("title", isDark
-      ? "Vista previa y PDF en hoja oscura. Clic para cambiar fondo PDF a blanco para imprimir."
-      : "Vista previa y PDF en hoja blanca. Clic para cambiar fondo PDF a oscuro.");
-    toggleBtn.setAttribute("aria-label", isDark ? "Cambiar fondo PDF a blanco" : "Cambiar fondo PDF a Oscuro");
+      ? "Ahora el PDF está en fondo oscuro. Clic para pasarlo a blanco."
+      : "Ahora el PDF está en fondo blanco. Clic para pasarlo a oscuro.");
+    toggleBtn.setAttribute("aria-label", isDark
+      ? "Cambiar el fondo del PDF a BLANCO"
+      : "Cambiar el fondo del PDF a OSCURO");
   }
 
   const previewLogo = document.getElementById("pdf-portal-preview-logo");

@@ -195,30 +195,47 @@ export function mountDecryptedText(el, opts = {}) {
 
 export function initSplashDecryptedText() {
   const status = document.querySelector(".st2-boot-splash-status");
-  if (!status) return;
+  if (status) {
+    let target = status.querySelector("[data-st2-decrypt-target]");
+    if (!target) {
+      const dots = status.querySelector(".st2-boot-splash-dots");
+      target = document.createElement("span");
+      target.dataset.st2DecryptTarget = "1";
+      target.textContent = "Cargando";
+      status.textContent = "";
+      status.appendChild(target);
+      if (dots) status.appendChild(dots);
+    }
 
-  let target = status.querySelector("[data-st2-decrypt-target]");
-  if (!target) {
-    const dots = status.querySelector(".st2-boot-splash-dots");
-    target = document.createElement("span");
-    target.dataset.st2DecryptTarget = "1";
-    target.textContent = "Cargando";
-    status.textContent = "";
-    status.appendChild(target);
-    if (dots) status.appendChild(dots);
+    mountDecryptedText(target, {
+      text: "Cargando",
+      speed: 42,
+      maxIterations: 12,
+      sequential: true,
+      revealDirection: "start",
+      animateOn: "view",
+      loop: true,
+      loopPause: 380,
+      characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$",
+      encryptedClassName: "st2-decrypt-encrypted",
+      className: "st2-decrypt-revealed",
+    });
   }
 
-  mountDecryptedText(target, {
-    text: "Cargando",
-    speed: 42,
-    maxIterations: 12,
-    sequential: true,
-    revealDirection: "start",
-    animateOn: "view",
-    loop: true,
-    loopPause: 380,
-    characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$",
-    encryptedClassName: "st2-decrypt-encrypted",
-    className: "st2-decrypt-revealed",
-  });
+  const suite = document.querySelector(".st2-boot-splash-suite");
+  if (suite) {
+    mountDecryptedText(suite, {
+      text: "Suite Web",
+      speed: 48,
+      maxIterations: 11,
+      sequential: true,
+      revealDirection: "start",
+      animateOn: "view",
+      loop: true,
+      loopPause: 900,
+      characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$",
+      encryptedClassName: "st2-decrypt-encrypted",
+      className: "st2-decrypt-revealed",
+    });
+  }
 }

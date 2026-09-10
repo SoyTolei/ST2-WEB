@@ -336,16 +336,11 @@ function syncLoadFormVisibility() {
 
 function syncSolicitanteBadge() {
   const badge = document.getElementById("borrado-user-badge");
-  const viewAs = getViewAsProfile();
-  const email = viewAs?.email || getPlanUserEmail();
   if (!badge) return;
-  if (!email) {
-    badge.classList.add("hidden");
-    badge.textContent = "";
-    return;
-  }
-  badge.textContent = viewAs?.displayName || displayNameFromEmail(email);
-  badge.classList.remove("hidden");
+  badge.classList.add("hidden");
+  badge.hidden = true;
+  badge.setAttribute("aria-hidden", "true");
+  badge.textContent = "";
 }
 
 function syncMineFilterVisibility() {

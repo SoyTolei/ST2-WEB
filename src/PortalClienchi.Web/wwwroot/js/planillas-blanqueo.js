@@ -354,16 +354,11 @@ function syncLoadFormVisibility() {
 
 function syncSolicitanteBadge() {
   const badge = document.getElementById("blanqueo-user-badge");
-  const viewAs = getViewAsProfile();
-  const email = viewAs?.email || getPlanUserEmail();
   if (!badge) return;
-  if (!email) {
-    badge.classList.add("hidden");
-    badge.textContent = "";
-    return;
-  }
-  badge.textContent = viewAs?.displayName || displayNameFromEmail(email);
-  badge.classList.remove("hidden");
+  badge.classList.add("hidden");
+  badge.hidden = true;
+  badge.setAttribute("aria-hidden", "true");
+  badge.textContent = "";
 }
 
 function syncMineFilterVisibility() {
@@ -1344,6 +1339,9 @@ function formatAclaracionCell(item) {
     const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
     // "No registrado" va en Estado; acá queda vacío.
     if (cls === "bad") return "—";
+    if (isActivacionAutoNote(aclaracion)) {
+      return `<span class="blanqueo-pill blanqueo-pill-clave-style" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
+    }
     return `<span class="blanqueo-pill ${cls}" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
   }
   if (item?.listo && isBlanqueoConClave(item)) {
