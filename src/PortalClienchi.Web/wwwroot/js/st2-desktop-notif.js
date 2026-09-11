@@ -236,11 +236,12 @@ export function notifyBorradoDesktop(count, signature) {
   });
 }
 
-/** Aviso de versión nueva de la web (una vez por build). */
+/** Aviso de versión nueva de la web (una vez por build). Solo si la pestaña no está visible: con la app abierta alcanza la barra naranja. */
 export function notifyWebUpdateDesktop(build) {
   const stamp = String(build || "").trim().toLowerCase().slice(0, 12);
   if (!stamp || stamp === lastWebUpdateBuild) return;
   lastWebUpdateBuild = stamp;
+  if (typeof document !== "undefined" && document.visibilityState === "visible") return;
   void ensureDesktopNotifPermission().then((ok) => {
     if (!ok) return;
     showDesktopNotif(
@@ -248,7 +249,7 @@ export function notifyWebUpdateDesktop(build) {
       "Hay una versión nueva. Tocá para recargar.",
       `web-update-${stamp}`,
       {
-        allowWhileVisible: true,
+        allowWhileVisible: false,
         onClick: () => {
           try { window.location.reload(); } catch { /* ignore */ }
         },

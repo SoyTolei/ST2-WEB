@@ -166,8 +166,7 @@
 }
 
 /* Compat: cards ST2 dejan de pelear con ::before/::after propios */
-.st2-access-card.border-glow-card,
-.st2-update-modal-card.border-glow-card {
+.st2-access-card.border-glow-card {
   padding: 0;
   inset: auto;
   width: min(500px, 96vw);
@@ -182,17 +181,7 @@
   padding: 38px 36px 30px;
 }
 
-.st2-update-modal-card.border-glow-card {
-  width: min(440px, 96vw);
-  text-align: center;
-}
-
-.st2-update-modal-card.border-glow-card > .border-glow-inner {
-  padding: 34px 32px 28px;
-}
-
-.st2-access-card.border-glow-card::before,
-.st2-update-modal-card.border-glow-card::before {
+.st2-access-card.border-glow-card::before {
   /* BorderGlow usa ::before; anula el radial legacy del access-card */
   inset: 0;
   z-index: -1;

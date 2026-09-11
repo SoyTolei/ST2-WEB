@@ -5649,30 +5649,24 @@ function setUpdateBannerVisible(show) {
   document.body.classList.toggle("st2-has-update", !!show);
 }
 
-function setUpdateModalVisible(show) {
-  const modal = document.getElementById("st2-update-modal");
-  if (!modal) return;
-  modal.classList.toggle("hidden", !show);
-  modal.toggleAttribute("hidden", !show);
-  document.body.classList.toggle("st2-update-modal-open", !!show);
-}
-
 /**
- * @param {"hidden"|"modal"|"banner"} mode
+ * Solo barra superior (sin modal a pantalla completa).
+ * @param {"hidden"|"banner"} mode
  */
 function setUpdateUiMode(mode) {
-  updateUiMode = mode;
-  if (mode === "modal") {
-    setUpdateBannerVisible(false);
-    setUpdateModalVisible(true);
-  } else if (mode === "banner") {
-    setUpdateModalVisible(false);
-    setUpdateBannerVisible(true);
+  updateUiMode = mode === "banner" ? "banner" : "hidden";
+  setUpdateBannerVisible(updateUiMode === "banner");
+  document.dispatchEvent(new CustomEvent("st2:update-ui-changed", { detail: { mode: updateUiMode } }));
+}
+
+function syncUpdateBannerCopy(signal) {
+  const text = document.getElementById("st2-update-banner-text");
+  if (!text) return;
+  if (signal === "forced:modules") {
+    text.textContent = "Tenés módulos nuevos habilitados. Recargá para verlos; podés seguir trabajando mientras tanto.";
   } else {
-    setUpdateModalVisible(false);
-    setUpdateBannerVisible(false);
+    text.textContent = "Hay una versión nueva. Podés seguir trabajando; cuando puedas, recargá.";
   }
-  document.dispatchEvent(new CustomEvent("st2:update-ui-changed", { detail: { mode } }));
 }
 
 function showUpdatePrompt() {
@@ -5681,48 +5675,33 @@ function showUpdatePrompt() {
     setUpdateUiMode("hidden");
     return;
   }
-  // Stuck: HTML no pudo alcanzar ese SHA (caché/réplica). Silencio total para ese build.
+  // Stuck: HTML no pudo alcanzar ese SHA. No molestar más por él.
   if (signal.startsWith("build:") && readStuckBuild() === signal.slice("build:".length)) {
     setUpdateUiMode("hidden");
     return;
   }
-  if (readDeferredUpdateSignal() === signal) {
-    setUpdateUiMode("banner");
-    return;
-  }
-  if (signal.startsWith("build:") && wasBuildHandled(signal.slice("build:".length))) {
-    writeDeferredUpdateSignal(signal);
-    enterUpdateSoftMode();
-    setUpdateUiMode("banner");
-    return;
-  }
-  if (signal.startsWith("build:") && isUpdateSoftMode()) {
-    writeDeferredUpdateSignal(signal);
-    setUpdateUiMode("banner");
-    return;
-  }
-  // Permisos nuevos: una sola vez modal; después barra (no re-spamear).
-  if (signal === "forced:modules" && isUpdateSoftMode()) {
-    setUpdateUiMode("banner");
-    return;
-  }
-  if (signal.startsWith("build:") || signal === "forced:modules") enterUpdateSoftMode();
-  setUpdateUiMode("modal");
-}
 
-function deferUpdatePrompt() {
-  const signal = currentUpdateSignal();
-  if (signal) {
-    writeDeferredUpdateSignal(signal);
+  const wasHidden = updateUiMode === "hidden";
+  writeDeferredUpdateSignal(signal);
+  if (signal.startsWith("build:")) {
+    markBuildHandled(signal.slice("build:".length));
     enterUpdateSoftMode();
-    if (signal.startsWith("build:")) markBuildHandled(signal.slice("build:".length));
-    else markBuildHandled(signal);
+  } else {
+    enterUpdateSoftMode();
   }
+  syncUpdateBannerCopy(signal);
   setUpdateUiMode("banner");
+
+  // Noti desktop 1 vez por build (útil si la pestaña está en segundo plano).
+  if (wasHidden && signal.startsWith("build:")) {
+    notifyWebUpdateDesktop(signal.slice("build:".length));
+  } else if (wasHidden && signal === "forced:modules") {
+    notifyWebUpdateDesktop("modules");
+  }
 }
 
 function reloadForUpdate() {
-  const target = buildKey(lastLiveBuild || pendingLiveBuild || "");
+  const target = buildKey(lastLiveBuild || pendingLiveBuild || readNewestLive().build || "");
   try {
     if (target) {
       localStorage.setItem(
@@ -5835,12 +5814,10 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
   if (pendingLiveHits < UPDATE_CONFIRM_NEEDED) return;
 
   lastLiveBuild = live;
-  const prevMode = updateUiMode;
   console.info(
     `[ST2] Update check: HTML=${buildKey(loaded) || "?"} API=${buildKey(live) || "?"} newest=${newest.build || "?"} soft=${isUpdateSoftMode() ? "1" : "0"} stuck=${readStuckBuild() || "-"}`,
   );
   showUpdatePrompt();
-  if (updateUiMode === "modal" && prevMode !== "modal") notifyWebUpdateDesktop(live);
 }
 
 async function checkAppVersion() {
@@ -5859,10 +5836,6 @@ function startUpdateChecker() {
   updateCheckerStarted = true;
   reconcileReloadTarget();
   document.getElementById("st2-update-reload")?.addEventListener("click", reloadForUpdate);
-  document.getElementById("st2-update-reload-now")?.addEventListener("click", reloadForUpdate);
-  document.getElementById("st2-update-later")?.addEventListener("click", () => {
-    deferUpdatePrompt();
-  });
   const tick = () => {
     void checkAppVersion();
   };

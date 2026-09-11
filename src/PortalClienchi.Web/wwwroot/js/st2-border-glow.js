@@ -239,19 +239,12 @@ function themeBackground() {
   return document.documentElement.classList.contains("st2-theme-dark") ? "#1a1a1a" : "#ffffff";
 }
 
-/** Login + modal de actualización. */
+/** Login. */
 export function initBorderGlowCards() {
   enhanceAccessCardGlow({ animated: false });
-  enhanceUpdateCardGlow({ animated: false });
 
   document.addEventListener("st2:access-gate-shown", () => {
     enhanceAccessCardGlow({ animated: true });
-  });
-
-  // Al abrir el modal de update, re-disparar sweep.
-  document.addEventListener("st2:update-ui-changed", (ev) => {
-    const mode = ev?.detail?.mode;
-    if (mode === "modal") enhanceUpdateCardGlow({ animated: true });
   });
 
   // Tema: actualizar fondo de cards glow.
@@ -276,20 +269,6 @@ function enhanceAccessCardGlow({ animated = false } = {}) {
     colors: ["#fb923c", "#f97316", "#38bdf8"],
   });
   if (animated) playSweep(access);
-}
-
-function enhanceUpdateCardGlow({ animated = false } = {}) {
-  const updateCard = document.querySelector(".st2-update-modal-card");
-  if (!updateCard) return;
-  enhanceBorderGlow(updateCard, {
-    backgroundColor: themeBackground(),
-    borderRadius: 22,
-    glowRadius: 36,
-    glowIntensity: 1,
-    animated,
-    colors: ["#fb923c", "#ea580c", "#38bdf8"],
-  });
-  if (animated) playSweep(updateCard);
 }
 
 export { playSweep };

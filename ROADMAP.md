@@ -22,16 +22,18 @@ Ideas y pendientes sin fecha fija. Lo marcado como **después** no se implementa
 - [ ] Rol “admin” para más de un correo
 - [ ] Auditoría de aprobaciones / rechazos de acceso
 
-## Nota — aviso “hay versión nueva” (Yohana / Franco)
+## Nota — aviso de actualización (sin modal)
 
-No era (solo) el “Actualizar luego”. El loop fuerte era:
+**Decisión:** se eliminó el cartel modal del centro. Solo queda la **barra naranja fija arriba** + **noti de escritorio** si la pestaña está en segundo plano.
 
-1. Tocan **Recargar ahora** → a veces el HTML sigue viniendo de una **réplica vieja** (o el API alterna entre réplicas).
-2. Un match momentáneo HTML==API (réplica vieja) **borraba** stuck/soft.
-3. Minutos después el API cae en la réplica nueva → **el modal volvía**.
+Flujo para usuarios activos durante un deploy:
+1. El cliente consulta `/api/version` ~cada 45s (+ heartbeat de sesión).
+2. Si el HTML cargado es más viejo que el build vivo (con anti flip-flop de réplicas), aparece la barra.
+3. Pueden seguir trabajando; “Recargar ahora” cuando les quede cómodo.
+4. Si la pestaña está oculta y tienen permisos de notificación, llega un aviso del SO una vez por build.
 
-Mitigación: se recuerda el build más nuevo visto (`st2-update-newest-live-v1`) y solo se considera “al día” cuando el HTML alcanza ese build — no basta coincidir con una réplica vieja. Soft mode + stuck siguen evitando re-modal.  
-Permisos nuevos usan el mismo cartel, pero dejan rastro en consola (`Permisos nuevos detectados`); si nadie toca el admin, no debería ser esa la causa.
+Se mantiene la lógica de “newest / stuck / soft” para no spamear si una réplica vieja contesta mal.  
+Teams / webhooks siguen en roadmap (otro canal, no reemplazo de esto).
 
 ## Hecho recientemente (referencia)
 
