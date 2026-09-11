@@ -5360,6 +5360,12 @@ const UPDATE_HANDLED_KEY = "st2-update-handled-builds";
 const UPDATE_RELOAD_TARGET_KEY = "st2-update-reload-target";
 /** Build que ya intentamos recargar sin éxito: no se avisa más por él. */
 const UPDATE_STUCK_KEY = "st2-update-stuck-build-v2";
+/**
+ * Tras el primer modal / “luego” / recarga: no reabrir modal por cada deploy nuevo.
+ * Solo barra hasta que el HTML cargado coincida con el build vivo.
+ * (Evita spam en pestañas abiertas muchas horas con deploys seguidos.)
+ */
+const UPDATE_SOFT_KEY = "st2-update-soft-mode-v1";
 /** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
 const UPDATE_HANDLED_TTL_MS = 6 * 60 * 60 * 1000;
 
@@ -5495,13 +5501,28 @@ function readStuckBuild() {
   return buildKey(storageGet(UPDATE_STUCK_KEY));
 }
 
+function isUpdateSoftMode() {
+  return storageGet(UPDATE_SOFT_KEY) === "1";
+}
+
+function enterUpdateSoftMode() {
+  storageSet(UPDATE_SOFT_KEY, "1");
+}
+
+function clearUpdateSoftMode() {
+  storageSet(UPDATE_SOFT_KEY, "");
+}
+
 /**
  * Marca un build como inalcanzable: ya recargamos apuntando a él y el HTML
  * siguió siendo el viejo (caché intermedia o réplica pegada). Insistir no sirve.
  */
 function markBuildStuck(build) {
   const key = buildKey(build);
-  if (key) storageSet(UPDATE_STUCK_KEY, key);
+  if (key) {
+    storageSet(UPDATE_STUCK_KEY, key);
+    enterUpdateSoftMode();
+  }
 }
 
 /** Si el defer era de un build que ya tenemos cargado, lo limpia. No borra por un match momentáneo de otra réplica. */
@@ -5531,6 +5552,7 @@ function reconcileReloadTarget() {
       markBuildHandled(loaded);
       localStorage.removeItem(UPDATE_RELOAD_TARGET_KEY);
       storageSet(UPDATE_STUCK_KEY, "");
+      clearUpdateSoftMode();
       return;
     }
     // Recargamos apuntando a ese build y el HTML no cambió: dejar de avisar por él.
@@ -5597,9 +5619,17 @@ function showUpdatePrompt() {
   // Ya recargaron/pospusieron este build: solo barra, no modal otra vez.
   if (signal.startsWith("build:") && wasBuildHandled(signal.slice("build:".length))) {
     writeDeferredUpdateSignal(signal);
+    enterUpdateSoftMode();
     setUpdateUiMode("banner");
     return;
   }
+  // Soft mode: ya vieron el aviso (u otro SHA) — no re-modalear por cada deploy.
+  if (signal.startsWith("build:") && isUpdateSoftMode()) {
+    writeDeferredUpdateSignal(signal);
+    setUpdateUiMode("banner");
+    return;
+  }
+  if (signal.startsWith("build:")) enterUpdateSoftMode();
   setUpdateUiMode("modal");
 }
 
@@ -5607,6 +5637,7 @@ function deferUpdatePrompt() {
   const signal = currentUpdateSignal();
   if (signal) {
     writeDeferredUpdateSignal(signal);
+    enterUpdateSoftMode();
     if (signal.startsWith("build:")) markBuildHandled(signal.slice("build:".length));
     else markBuildHandled(signal);
   }
@@ -5622,6 +5653,7 @@ function reloadForUpdate() {
         JSON.stringify({ build: target, at: Date.now() }),
       );
       markBuildHandled(target);
+      enterUpdateSoftMode();
       writeDeferredUpdateSignal(`build:${target}`);
     }
   } catch {
@@ -5678,6 +5710,8 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
   if (!buildsDiffer(loaded, live)) {
     lastLiveBuild = live;
     clearDeferredIfSatisfied(loaded);
+    clearUpdateSoftMode();
+    storageSet(UPDATE_STUCK_KEY, "");
     stopWatching();
     return;
   }
@@ -5708,8 +5742,10 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
   if (pendingLiveHits < UPDATE_CONFIRM_NEEDED) return;
 
   lastLiveBuild = live;
+  const prevMode = updateUiMode;
   showUpdatePrompt();
-  if (updateUiMode !== "hidden") notifyWebUpdateDesktop(live);
+  // Noti desktop solo en el primer modal; no spamear en cada deploy si ya están en barra.
+  if (updateUiMode === "modal" && prevMode !== "modal") notifyWebUpdateDesktop(live);
 }
 
 async function checkAppVersion() {
