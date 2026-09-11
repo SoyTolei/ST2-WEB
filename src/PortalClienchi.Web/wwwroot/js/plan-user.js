@@ -1,5 +1,5 @@
 import { setSessionBirthdayMmDd } from "./planillas-easter-eggs.js";
-import { blobatarUri } from "./vendor/blobatar-uri.js";
+import { mountSessionBlobatar } from "./st2-blobatar.js";
 
 let cachedEmail = null;
 let cachedDisplayName = null;
@@ -192,32 +192,6 @@ function displayNameFromEmail(email) {
     .join(" ");
 }
 
-/** Semilla estable del blobatar: parte local del mail (nombre.apellido…). */
-function blobatarSeedFromEmail(email) {
-  const local = String(email || "").split("@")[0].trim().toLowerCase();
-  return local || "st2";
-}
-
-function updateSessionAvatar(email) {
-  const avatar = document.getElementById("st2-session-avatar");
-  if (!avatar) return;
-  if (!email) {
-    avatar.removeAttribute("src");
-    avatar.setAttribute("hidden", "");
-    avatar.alt = "";
-    return;
-  }
-  try {
-    const seed = blobatarSeedFromEmail(email);
-    avatar.src = blobatarUri(seed, { size: 72, background: "circle" });
-    avatar.alt = "";
-    avatar.removeAttribute("hidden");
-  } catch {
-    avatar.removeAttribute("src");
-    avatar.setAttribute("hidden", "");
-  }
-}
-
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
   const nameEl = document.getElementById("st2-session-name");
@@ -230,14 +204,14 @@ function updateSessionEmailDisplay() {
     if (!nameEl && !mailEl) el.textContent = cachedEmail;
     el.title = cachedEmail;
     el.classList.remove("hidden");
-    updateSessionAvatar(cachedEmail);
+    mountSessionBlobatar(cachedEmail);
   } else {
     if (nameEl) nameEl.textContent = "";
     if (mailEl) mailEl.textContent = "";
     if (!nameEl && !mailEl) el.textContent = "";
     el.removeAttribute("title");
     el.classList.add("hidden");
-    updateSessionAvatar("");
+    mountSessionBlobatar("");
   }
 }
 

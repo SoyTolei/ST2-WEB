@@ -93,6 +93,8 @@ public static class St2IndexHtml
         html = html.Replace("/css/borrado-bases.css", $"/css/borrado-bases.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/pdf-portal.css", $"/css/pdf-portal.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/theme-dark.css", $"/css/theme-dark.css?v={v}", StringComparison.Ordinal);
+        html = html.Replace("/css/vendor/blobatar-motion.css", $"/css/vendor/blobatar-motion.css?v={v}", StringComparison.Ordinal);
+        html = html.Replace("/css/vendor/blobatar-gaze.css", $"/css/vendor/blobatar-gaze.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);
         html = html.Replace("/st2.ico", $"/st2.ico?v={icoV}", StringComparison.Ordinal);
         if (!string.IsNullOrWhiteSpace(sqlLabel))

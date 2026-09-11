@@ -261,19 +261,26 @@ html, body {
   line-height: 1.15;
 }
 
-.st2-session-avatar {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+.st2-session-avatar-host {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-  display: block;
-  object-fit: cover;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  overflow: visible;
+  background: transparent;
 }
 
-.st2-session-avatar[hidden] {
+.st2-session-avatar-host[hidden] {
   display: none !important;
+}
+
+.st2-session-blobatar {
+  width: 40px;
+  height: 40px;
+  display: block;
+  overflow: visible;
 }
 
 .st2-session-text {
