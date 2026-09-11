@@ -2356,6 +2356,36 @@ html.st2-theme-dark .borrado-table tbody tr.borrado-row-incorrecto td:first-chil
   box-shadow: inset 5px 0 0 #f87171 !important;
 }
 
+html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip {
+  color: #bfdbfe;
+  background: rgba(59, 130, 246, 0.22);
+  border-color: rgba(96, 165, 250, 0.4);
+}
+
+html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip {
+  color: #ddd6fe;
+  background: rgba(139, 92, 246, 0.22);
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip {
+  color: #fed7aa;
+  background: rgba(249, 115, 22, 0.22);
+  border-color: rgba(251, 146, 60, 0.4);
+}
+
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-portal-onbalance:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td:first-child {
+  box-shadow: inset 4px 0 0 #60a5fa !important;
+}
+
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-portal-onvio:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td:first-child {
+  box-shadow: inset 4px 0 0 #a78bfa !important;
+}
+
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-portal-cliente:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td:first-child {
+  box-shadow: inset 4px 0 0 #fb923c !important;
+}
+
 html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td,
 html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td,
 html.st2-theme-dark .plan-gestor-table tbody tr.borrado-row-aclaracion:not(.borrado-row-listo):not(.borrado-row-listo-nota):not(.borrado-row-partial):not(.borrado-row-incorrecto) td,

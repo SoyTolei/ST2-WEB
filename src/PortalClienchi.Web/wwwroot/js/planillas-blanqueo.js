@@ -1102,6 +1102,7 @@ function renderTable(filtered) {
 function buildRow(item) {
   const row = document.createElement("tr");
   if (selectedId === item.id) row.classList.add("selected");
+  row.classList.add(portalRowClass(item.portal));
   const hasAclaracion = !!String(item.aclaracion || "").trim();
   const noReg = isNoRegistrado(item.aclaracion) && !item.listo;
   if (noReg) row.classList.add("blanqueo-row-noreg");
@@ -1133,7 +1134,9 @@ function buildRow(item) {
 
   row.innerHTML = `
     <td class="blanqueo-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
-    <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">${escapeHtml(portalShort(item.portal))}</td>
+    <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">
+      <span class="blanqueo-portal-chip">${escapeHtml(portalShort(item.portal))}</span>
+    </td>
     <td class="blanqueo-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
     ${clienteCell}
     ${mailCell}
@@ -1261,6 +1264,12 @@ function portalLabel(portal) {
   return "Portal Cliente";
 }
 
+function portalRowClass(portal) {
+  if (portal === "OnBalance") return "blanqueo-portal-onbalance";
+  if (portal === "Onvio") return "blanqueo-portal-onvio";
+  return "blanqueo-portal-cliente";
+}
+
 function isPortalCliente(portal) {
   return String(portal || "") === "PortalCliente";
 }
@@ -1272,7 +1281,7 @@ function isActivacionAutoNote(text) {
 }
 
 function portalShort(portal) {
-  if (portal === "OnBalance") return "OB";
+  if (portal === "OnBalance") return "On Bal.";
   if (portal === "Onvio") return "ONVIO";
   return "Portal";
 }
