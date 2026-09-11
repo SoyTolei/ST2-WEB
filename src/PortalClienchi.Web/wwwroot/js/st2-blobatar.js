@@ -59,6 +59,7 @@ let flashName = null;
 let appContext = "menu";
 let lastExprName = "";
 let pdfPortalOpen = false;
+let birthdayFlashedFor = "";
 
 /** Semilla estable: parte local del mail (nombre.apellido…). */
 export function blobatarSeedFromEmail(email) {
@@ -83,6 +84,7 @@ export function mountSessionBlobatar(email) {
     lastSeed = "";
     currentEmail = "";
     lastExprName = "";
+    birthdayFlashedFor = "";
     return;
   }
 
@@ -141,7 +143,8 @@ export function mountSessionBlobatar(email) {
 
   startHourTicker();
 
-  if (isBirthdayGreetingForEmail(email)) {
+  if (isBirthdayGreetingForEmail(email) && birthdayFlashedFor !== email) {
+    birthdayFlashedFor = email;
     flashBlobatarExpression("love", 4500);
   }
 }
