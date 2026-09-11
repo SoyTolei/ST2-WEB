@@ -433,6 +433,7 @@ export async function openPdfPortalModal(initialData = null) {
   syncSheetThemeUi();
   modal.classList.remove("hidden");
   modal.setAttribute("aria-hidden", "false");
+  document.dispatchEvent(new CustomEvent("st2:pdf-portal-open"));
 
   const brand = document.getElementById("pdf-portal-brand");
   const editor = document.getElementById("pdf-portal-editor");
@@ -505,6 +506,7 @@ export function closePdfPortalModal() {
   modal.classList.add("hidden");
   modal.setAttribute("aria-hidden", "true");
   clearPdfPortalState();
+  document.dispatchEvent(new CustomEvent("st2:pdf-portal-close"));
   if (window.location.pathname === "/pdfportal" || window.location.pathname === "/pdf-portal") {
     try {
       window.history.replaceState({}, "", "/planillas");

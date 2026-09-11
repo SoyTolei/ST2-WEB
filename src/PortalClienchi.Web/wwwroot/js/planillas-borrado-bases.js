@@ -1376,8 +1376,14 @@ async function confirmListoModal() {
     setStatus(`Confirmado: ${summary}`);
     await reloadList();
     notifyBorradoChanged();
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: "happy", ms: 2800 },
+    }));
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: "mad", ms: 3200 },
+    }));
   }
 }
 

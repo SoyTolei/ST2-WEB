@@ -5170,6 +5170,7 @@ function switchTab(tabId) {
   });
   syncHeaderTourButton();
   syncSonnerHomeVisibility();
+  document.dispatchEvent(new CustomEvent("st2:tab-changed", { detail: { tab: tabId } }));
 }
 
 function initEmbedReminders() {

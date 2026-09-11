@@ -1256,8 +1256,14 @@ async function toggleListoByDoubleClick(item) {
     setStatus(nextListo ? "Marcado como listo." : "Se quitó el listo.");
     await reloadList();
     notifyBlanqueoChanged();
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: nextListo ? "happy" : "thinking", ms: 2800 },
+    }));
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: "mad", ms: 3200 },
+    }));
   }
 }
 
@@ -1456,10 +1462,19 @@ async function handleCtxAction(action) {
       const body = { listo: true };
       if (isNoRegistrado(item.aclaracion)) body.clearAclaracion = true;
       await patchItem(selectedId, body);
+      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+        detail: { expression: "happy", ms: 2800 },
+      }));
     } else if (action === "unlisto") {
       await patchItem(selectedId, { listo: false });
+      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+        detail: { expression: "thinking", ms: 2400 },
+      }));
     } else if (action === "aclaracion-no-registrado") {
       await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
+      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+        detail: { expression: "mad", ms: 3200 },
+      }));
     } else if (action === "aclaracion-manual") {
       openNoteModal(item);
       return;
@@ -1478,6 +1493,9 @@ async function handleCtxAction(action) {
     notifyBlanqueoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: "mad", ms: 3200 },
+    }));
   }
 }
 
