@@ -1,5 +1,6 @@
 import { _parts } from "./vendor/blobatar-internal.js";
 import { gaze } from "./vendor/blobatar-gaze.js";
+import { surprised } from "./vendor/blobatar-expression.js";
 
 let gazeHandle = null;
 let lastSeed = "";
@@ -13,6 +14,7 @@ export function blobatarSeedFromEmail(email) {
 /**
  * Monta el blobatar animado (idle + ojos siguiendo el mouse) en el header.
  * Sin fondo blanco: solo la figura sobre la pastilla oscura.
+ * Expression fija en surprised (ojos más legibles a 40px); después puede variar por estado.
  */
 export function mountSessionBlobatar(email) {
   const host = document.getElementById("st2-session-avatar-host");
@@ -37,6 +39,7 @@ export function mountSessionBlobatar(email) {
       animate: "always",
       background: false,
       size: 80,
+      expression: surprised,
     });
   } catch {
     host.replaceChildren();
