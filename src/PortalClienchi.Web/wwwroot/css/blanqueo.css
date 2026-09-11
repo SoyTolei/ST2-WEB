@@ -921,78 +921,82 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-table .blanqueo-th-portal,
 .blanqueo-table .blanqueo-col-portal {
-  width: 118px;
+  width: 138px;
+  min-width: 138px;
   white-space: nowrap;
+  overflow: visible;
   font-weight: 600;
 }
 
 /*
-  Plataforma: chip sólido + marca (OB/OV/PC) + forma distinta.
-  Sin riel en la fila: el semáforo de estado sigue dueño del borde izquierdo.
+  Plataforma: chip suave (no neón) + marca OB/OV/PC.
+  Misma silueta; el color y la marca diferencian sin pelear con el dark theme.
 */
 .blanqueo-portal-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  max-width: 100%;
-  padding: 2px 8px 2px 3px;
-  font-size: 0.7rem;
-  font-weight: 750;
+  gap: 6px;
+  max-width: none;
+  padding: 3px 9px 3px 3px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
   letter-spacing: 0.01em;
-  line-height: 1.3;
-  color: #fff;
+  line-height: 1.25;
   border: 1px solid transparent;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .blanqueo-portal-chip-mark {
   display: inline-grid;
   place-items: center;
   min-width: 1.55rem;
-  height: 1.2rem;
-  padding: 0 3px;
-  font-size: 0.62rem;
+  height: 1.25rem;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 0.6rem;
   font-weight: 800;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   line-height: 1;
-  background: rgba(0, 0, 0, 0.22);
   color: #fff;
 }
 
 .blanqueo-portal-chip-label {
   white-space: nowrap;
+  padding-right: 1px;
 }
 
-/* On Balance: azul, esquinas cuadradas */
+/* On Balance — azul */
 .blanqueo-portal-onbalance .blanqueo-portal-chip {
-  background: #1d4ed8;
-  border-color: #1e40af;
-  border-radius: 4px;
+  color: #1e3a8a;
+  background: rgba(37, 99, 235, 0.12);
+  border-color: rgba(37, 99, 235, 0.32);
 }
 
 .blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
-  border-radius: 3px;
+  background: #2563eb;
 }
 
-/* ONVIO: violeta, píldora */
+/* ONVIO — violeta */
 .blanqueo-portal-onvio .blanqueo-portal-chip {
-  background: #6d28d9;
-  border-color: #5b21b6;
-  border-radius: 999px;
+  color: #5b21b6;
+  background: rgba(109, 40, 217, 0.12);
+  border-color: rgba(109, 40, 217, 0.32);
 }
 
 .blanqueo-portal-onvio .blanqueo-portal-chip-mark {
-  border-radius: 999px;
+  background: #7c3aed;
 }
 
-/* Portal Cliente: naranja, redondeado medio */
+/* Portal Cliente — naranja (alineado al acento ST2) */
 .blanqueo-portal-cliente .blanqueo-portal-chip {
-  background: #c2410c;
-  border-color: #9a3412;
-  border-radius: 8px;
+  color: #9a3412;
+  background: rgba(234, 88, 12, 0.12);
+  border-color: rgba(234, 88, 12, 0.32);
 }
 
 .blanqueo-portal-cliente .blanqueo-portal-chip-mark {
-  border-radius: 5px;
+  background: #ea580c;
 }
 
 .blanqueo-table .blanqueo-th-caso,

@@ -2356,27 +2356,41 @@ html.st2-theme-dark .borrado-table tbody tr.borrado-row-incorrecto td:first-chil
   box-shadow: inset 5px 0 0 #f87171 !important;
 }
 
+html.st2-theme-dark .blanqueo-portal-chip {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip {
-  background: #2563eb;
-  border-color: #3b82f6;
-  color: #eff6ff;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.16);
+  border-color: rgba(96, 165, 250, 0.38);
+}
+
+html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
+  background: #3b82f6;
+  color: #0b1220;
 }
 
 html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip {
-  background: #7c3aed;
-  border-color: #a78bfa;
-  color: #f5f3ff;
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.16);
+  border-color: rgba(167, 139, 250, 0.38);
+}
+
+html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip-mark {
+  background: #8b5cf6;
+  color: #12081f;
 }
 
 html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip {
-  background: #ea580c;
-  border-color: #fb923c;
-  color: #fff7ed;
+  color: #fdba74;
+  background: rgba(249, 115, 22, 0.14);
+  border-color: rgba(251, 146, 60, 0.4);
 }
 
-html.st2-theme-dark .blanqueo-portal-chip-mark {
-  background: rgba(0, 0, 0, 0.28);
-  color: #fff;
+html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip-mark {
+  background: #f97316;
+  color: #1a0a04;
 }
 
 html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td,
