@@ -1134,13 +1134,16 @@ function buildRow(item) {
 
   row.innerHTML = `
     <td class="blanqueo-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
-    <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">
-      <span class="blanqueo-portal-chip">${escapeHtml(portalShort(item.portal))}</span>
-    </td>
     <td class="blanqueo-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
     ${clienteCell}
     ${mailCell}
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
+    <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">
+      <span class="blanqueo-portal-chip" data-portal="${escapeAttr(portalKey(item.portal))}">
+        <span class="blanqueo-portal-chip-mark" aria-hidden="true">${escapeHtml(portalMark(item.portal))}</span>
+        <span class="blanqueo-portal-chip-label">${escapeHtml(portalShort(item.portal))}</span>
+      </span>
+    </td>
     <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
     ${estadoAclaracionCells}
     <td class="blanqueo-col-confirmado" title="${escapeAttr(item.confirmadoPorNombre || "")}">${formatGestionadoPorCell(item)}</td>
@@ -1264,6 +1267,12 @@ function portalLabel(portal) {
   return "Portal Cliente";
 }
 
+function portalKey(portal) {
+  if (portal === "OnBalance") return "onbalance";
+  if (portal === "Onvio") return "onvio";
+  return "cliente";
+}
+
 function portalRowClass(portal) {
   if (portal === "OnBalance") return "blanqueo-portal-onbalance";
   if (portal === "Onvio") return "blanqueo-portal-onvio";
@@ -1280,8 +1289,15 @@ function isActivacionAutoNote(text) {
   return String(text || "").trim() === ACTIVACION_CORREO_NOTA;
 }
 
+/** Marca corta dentro del chip (forma/lectura distinta entre productos). */
+function portalMark(portal) {
+  if (portal === "OnBalance") return "OB";
+  if (portal === "Onvio") return "OV";
+  return "PC";
+}
+
 function portalShort(portal) {
-  if (portal === "OnBalance") return "On Bal.";
+  if (portal === "OnBalance") return "On Balance";
   if (portal === "Onvio") return "ONVIO";
   return "Portal";
 }

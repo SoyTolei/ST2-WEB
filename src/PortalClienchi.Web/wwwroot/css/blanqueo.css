@@ -921,54 +921,78 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-table .blanqueo-th-portal,
 .blanqueo-table .blanqueo-col-portal {
-  width: 78px;
+  width: 118px;
   white-space: nowrap;
   font-weight: 600;
 }
 
-/* Plataforma: chip + riel (colores fuera del semáforo verde/amarillo/rojo de estado). */
+/*
+  Plataforma: chip sólido + marca (OB/OV/PC) + forma distinta.
+  Sin riel en la fila: el semáforo de estado sigue dueño del borde izquierdo.
+*/
 .blanqueo-portal-chip {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   max-width: 100%;
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-size: 0.68rem;
+  padding: 2px 8px 2px 3px;
+  font-size: 0.7rem;
   font-weight: 750;
   letter-spacing: 0.01em;
-  line-height: 1.35;
+  line-height: 1.3;
+  color: #fff;
   border: 1px solid transparent;
 }
 
+.blanqueo-portal-chip-mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.55rem;
+  height: 1.2rem;
+  padding: 0 3px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  background: rgba(0, 0, 0, 0.22);
+  color: #fff;
+}
+
+.blanqueo-portal-chip-label {
+  white-space: nowrap;
+}
+
+/* On Balance: azul, esquinas cuadradas */
 .blanqueo-portal-onbalance .blanqueo-portal-chip {
-  color: #1e3a8a;
-  background: rgba(37, 99, 235, 0.16);
-  border-color: rgba(37, 99, 235, 0.35);
+  background: #1d4ed8;
+  border-color: #1e40af;
+  border-radius: 4px;
 }
 
+.blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
+  border-radius: 3px;
+}
+
+/* ONVIO: violeta, píldora */
 .blanqueo-portal-onvio .blanqueo-portal-chip {
-  color: #4c1d95;
-  background: rgba(124, 58, 237, 0.14);
-  border-color: rgba(124, 58, 237, 0.35);
+  background: #6d28d9;
+  border-color: #5b21b6;
+  border-radius: 999px;
 }
 
+.blanqueo-portal-onvio .blanqueo-portal-chip-mark {
+  border-radius: 999px;
+}
+
+/* Portal Cliente: naranja, redondeado medio */
 .blanqueo-portal-cliente .blanqueo-portal-chip {
-  color: #9a3412;
-  background: rgba(234, 88, 12, 0.14);
-  border-color: rgba(234, 88, 12, 0.35);
+  background: #c2410c;
+  border-color: #9a3412;
+  border-radius: 8px;
 }
 
-/* Riel de plataforma solo si no hay riel de estado (listo / no registrado). */
-.blanqueo-table tbody tr.blanqueo-portal-onbalance:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td:first-child {
-  box-shadow: inset 4px 0 0 #2563eb;
-}
-
-.blanqueo-table tbody tr.blanqueo-portal-onvio:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td:first-child {
-  box-shadow: inset 4px 0 0 #7c3aed;
-}
-
-.blanqueo-table tbody tr.blanqueo-portal-cliente:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota):not(.blanqueo-row-noreg) td:first-child {
-  box-shadow: inset 4px 0 0 #ea580c;
+.blanqueo-portal-cliente .blanqueo-portal-chip-mark {
+  border-radius: 5px;
 }
 
 .blanqueo-table .blanqueo-th-caso,
