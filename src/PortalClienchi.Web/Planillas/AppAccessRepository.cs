@@ -18,6 +18,7 @@ public sealed class AppAccessRepository
         EnsureWritable(st2Dir);
         EnsureSchema();
         PurgeInvalidEmails();
+        MergeCaseDuplicateEmails();
         PurgeOwnerUsage();
         _logger.LogInformation("Accesos ST2 SQLite en {DbPath}", _dbPath);
     }
@@ -64,6 +65,99 @@ public sealed class AppAccessRepository
 
         return removed;
     }
+
+    /// <summary>
+    /// SQLite trata el PRIMARY KEY de email como case-sensitive: pueden coexistir
+    /// "Yohana.Orellana@…" y "yohana.orellana@…". Mergea dejando el perfil más fuerte.
+    /// </summary>
+    public int MergeCaseDuplicateEmails()
+    {
+        if (!StorageReady)
+            return 0;
+
+        var removed = 0;
+        using var conn = Open();
+        var rows = new List<(string Email, string Status, int LoginCount, string LastSeenAt)>();
+        using (var list = conn.CreateCommand())
+        {
+            list.CommandText = """
+                SELECT email, IFNULL(status, 'approved'), IFNULL(login_count, 0), IFNULL(last_seen_at, '')
+                FROM app_access
+                """;
+            using var reader = list.ExecuteReader();
+            while (reader.Read())
+            {
+                rows.Add((
+                    reader.GetString(0),
+                    reader.GetString(1).Trim().ToLowerInvariant(),
+                    reader.GetInt32(2),
+                    reader.IsDBNull(3) ? "" : reader.GetString(3)));
+            }
+        }
+
+        foreach (var group in rows.GroupBy(r => r.Email.Trim().ToLowerInvariant(), StringComparer.Ordinal))
+        {
+            if (group.Count() < 2)
+                continue;
+
+            var ranked = group
+                .OrderByDescending(r => StatusRank(r.Status))
+                .ThenByDescending(r => r.LoginCount)
+                .ThenByDescending(r => r.LastSeenAt, StringComparer.Ordinal)
+                .ToList();
+            var keeper = ranked[0];
+            var canonical = PlanUserIdentity.ValidateAndNormalize(keeper.Email) ?? keeper.Email.Trim().ToLowerInvariant();
+
+            // Renombrar el keeper a minúsculas si hace falta (y no choca con otro).
+            if (!string.Equals(keeper.Email, canonical, StringComparison.Ordinal))
+            {
+                var clash = rows.Any(r =>
+                    string.Equals(r.Email, canonical, StringComparison.Ordinal)
+                    && !string.Equals(r.Email, keeper.Email, StringComparison.Ordinal));
+                if (!clash)
+                {
+                    using var rename = conn.CreateCommand();
+                    rename.CommandText = """
+                        UPDATE app_access SET email = $next WHERE email = $prev
+                        """;
+                    rename.Parameters.AddWithValue("$next", canonical);
+                    rename.Parameters.AddWithValue("$prev", keeper.Email);
+                    rename.ExecuteNonQuery();
+                    keeper = (canonical, keeper.Status, keeper.LoginCount, keeper.LastSeenAt);
+                }
+            }
+
+            foreach (var dup in ranked.Skip(1))
+            {
+                using (var hist = conn.CreateCommand())
+                {
+                    hist.CommandText = "DELETE FROM app_access_client_history WHERE email = $email";
+                    hist.Parameters.AddWithValue("$email", dup.Email);
+                    hist.ExecuteNonQuery();
+                }
+
+                using (var del = conn.CreateCommand())
+                {
+                    del.CommandText = "DELETE FROM app_access WHERE email = $email";
+                    del.Parameters.AddWithValue("$email", dup.Email);
+                    removed += del.ExecuteNonQuery();
+                }
+            }
+        }
+
+        if (removed > 0)
+            _logger.LogWarning("Merge de emails duplicados por casing: {Count} fila(s) eliminada(s)", removed);
+
+        return removed;
+    }
+
+    private static int StatusRank(string status) => status switch
+    {
+        StatusApproved => 3,
+        StatusPending => 2,
+        StatusRejected => 1,
+        _ => 0,
+    };
 
     public int DeleteByEmail(string email)
     {
