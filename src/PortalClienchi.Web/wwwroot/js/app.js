@@ -5380,7 +5380,7 @@ let pendingLiveHits = 0;
 let updateCheckerStarted = false;
 /** Banner forzado por permisos nuevos (no lo apaga el check de build). */
 let reloadBannerForced = false;
-/** "hidden" | "modal" | "banner" */
+/** "hidden" | "banner" — el modal de centro se eliminó. */
 let updateUiMode = "hidden";
 /** Fallback si localStorage/sessionStorage fallan. */
 let memoryDeferredSignal = "";
