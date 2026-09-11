@@ -24,8 +24,14 @@ Ideas y pendientes sin fecha fija. Lo marcado como **después** no se implementa
 
 ## Nota — aviso “hay versión nueva” (Yohana / Franco)
 
-Causa probable (no es por usuario en el server): dejan la pestaña abierta muchas horas mientras hay deploys seguidos. El cliente comparaba HTML viejo vs `/api/version` y **cada SHA nuevo reabría el modal**, aunque ya hubieran tocado “Actualizar luego”.  
-Mitigación en cliente: tras el primer aviso / posponer / recargar fallida, solo barra hasta que el HTML alcance el build vivo (sin re-modal ni noti desktop por cada deploy).
+No era (solo) el “Actualizar luego”. El loop fuerte era:
+
+1. Tocan **Recargar ahora** → a veces el HTML sigue viniendo de una **réplica vieja** (o el API alterna entre réplicas).
+2. Un match momentáneo HTML==API (réplica vieja) **borraba** stuck/soft.
+3. Minutos después el API cae en la réplica nueva → **el modal volvía**.
+
+Mitigación: se recuerda el build más nuevo visto (`st2-update-newest-live-v1`) y solo se considera “al día” cuando el HTML alcanza ese build — no basta coincidir con una réplica vieja. Soft mode + stuck siguen evitando re-modal.  
+Permisos nuevos usan el mismo cartel, pero dejan rastro en consola (`Permisos nuevos detectados`); si nadie toca el admin, no debería ser esa la causa.
 
 ## Hecho recientemente (referencia)
 

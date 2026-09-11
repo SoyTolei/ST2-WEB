@@ -5363,9 +5363,14 @@ const UPDATE_STUCK_KEY = "st2-update-stuck-build-v2";
 /**
  * Tras el primer modal / “luego” / recarga: no reabrir modal por cada deploy nuevo.
  * Solo barra hasta que el HTML cargado coincida con el build vivo.
- * (Evita spam en pestañas abiertas muchas horas con deploys seguidos.)
  */
 const UPDATE_SOFT_KEY = "st2-update-soft-mode-v1";
+/**
+ * El build “más nuevo” visto en /api/version (persiste entre reloads).
+ * Sin esto, un match momentáneo con una réplica vieja borraba stuck/soft y
+ * el cartel volvía a los pocos minutos aunque hubieran tocado Recargar.
+ */
+const UPDATE_NEWEST_KEY = "st2-update-newest-live-v1";
 /** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
 const UPDATE_HANDLED_TTL_MS = 6 * 60 * 60 * 1000;
 
@@ -5409,9 +5414,73 @@ function buildsDiffer(loaded, live) {
   return a !== b;
 }
 
+function readNewestLive() {
+  try {
+    const raw = storageGet(UPDATE_NEWEST_KEY);
+    if (!raw) return { build: "", at: 0 };
+    const parsed = JSON.parse(raw);
+    return {
+      build: buildKey(parsed?.build),
+      at: Number(parsed?.at) || 0,
+    };
+  } catch {
+    return { build: "", at: 0 };
+  }
+}
+
+function writeNewestLive(build, atMs) {
+  const key = buildKey(build);
+  if (!key) return readNewestLive();
+  const at = Number.isFinite(atMs) && atMs > 0 ? atMs : 0;
+  storageSet(UPDATE_NEWEST_KEY, JSON.stringify({ build: key, at }));
+  return { build: key, at };
+}
+
+/** Registra un live build si es más nuevo (por fecha) o el primero que vimos. */
+function noteNewestLive(live, liveAtMs) {
+  const key = buildKey(live);
+  if (!key) return readNewestLive();
+  const cur = readNewestLive();
+  const at = Number.isFinite(liveAtMs) && liveAtMs > 0 ? liveAtMs : 0;
+  if (!cur.build) return writeNewestLive(key, at || Date.now());
+  if (at && cur.at && at > cur.at) return writeNewestLive(key, at);
+  if (at && !cur.at) return writeNewestLive(key, at);
+  if (!at && !cur.at && key !== cur.build) {
+    // Sin fechas y SHA distinto: nos quedamos con el último confirmado vía pending hits.
+    return writeNewestLive(key, Date.now());
+  }
+  return cur;
+}
+
+function clearNewestLive() {
+  storageSet(UPDATE_NEWEST_KEY, "");
+}
+
+/** HTML alcanzado = el más nuevo que vimos (no alcanza matchear una réplica vieja). */
+function htmlCaughtUpToNewest(loaded) {
+  const newest = readNewestLive();
+  const loadedKey = buildKey(loaded);
+  if (!loadedKey) return false;
+  if (newest.build && loadedKey === newest.build) return true;
+  const loadedAt = loadedBuildTime();
+  if (loadedAt !== null && newest.at && loadedAt >= newest.at) return true;
+  if (!newest.build) return true;
+  return false;
+}
+
+function clearUpdateSilenceState() {
+  clearUpdateSoftMode();
+  storageSet(UPDATE_STUCK_KEY, "");
+  clearNewestLive();
+  writeDeferredUpdateSignal("");
+}
+
 function currentUpdateSignal() {
-  if (buildsDiffer(loadedAppBuild(), lastLiveBuild)) {
-    return `build:${buildKey(lastLiveBuild)}`;
+  const loaded = loadedAppBuild();
+  const newest = readNewestLive();
+  const target = buildKey(lastLiveBuild) || newest.build;
+  if (target && buildsDiffer(loaded, target)) {
+    return `build:${target}`;
   }
   if (reloadBannerForced) return "forced:modules";
   return "";
@@ -5548,19 +5617,24 @@ function reconcileReloadTarget() {
     const target = buildKey(data?.build);
     const loaded = buildKey(loadedAppBuild());
     const at = Number(data?.at || 0);
-    if (target && loaded && target === loaded) {
+    if (target && loaded && target === loaded && htmlCaughtUpToNewest(loaded)) {
       markBuildHandled(loaded);
       localStorage.removeItem(UPDATE_RELOAD_TARGET_KEY);
-      storageSet(UPDATE_STUCK_KEY, "");
-      clearUpdateSoftMode();
+      clearUpdateSilenceState();
       return;
     }
-    // Recargamos apuntando a ese build y el HTML no cambió: dejar de avisar por él.
+    // Recargamos apuntando a ese build y el HTML no cambió: silenciar ese SHA.
+    // No borramos el “newest”: si otra réplica más nueva aparece, seguimos sabiendo cuál es.
     if (target && at && Date.now() - at < 10 * 60 * 1000) {
       markBuildHandled(target);
       markBuildStuck(target);
+      noteNewestLive(target, at);
       writeDeferredUpdateSignal(`build:${target}`);
+      enterUpdateSoftMode();
       localStorage.removeItem(UPDATE_RELOAD_TARGET_KEY);
+      console.info(
+        `[ST2] Recarga no alcanzó el build ${target} (HTML=${loaded || "?"}). Se silencia el modal; barra suave si sigue el desfase.`,
+      );
     }
   } catch {
     // ignore
@@ -5607,7 +5681,7 @@ function showUpdatePrompt() {
     setUpdateUiMode("hidden");
     return;
   }
-  // Ya recargamos por este build y no sirvió: silencio total, el usuario no puede hacer nada.
+  // Stuck: HTML no pudo alcanzar ese SHA (caché/réplica). Silencio total para ese build.
   if (signal.startsWith("build:") && readStuckBuild() === signal.slice("build:".length)) {
     setUpdateUiMode("hidden");
     return;
@@ -5616,20 +5690,23 @@ function showUpdatePrompt() {
     setUpdateUiMode("banner");
     return;
   }
-  // Ya recargaron/pospusieron este build: solo barra, no modal otra vez.
   if (signal.startsWith("build:") && wasBuildHandled(signal.slice("build:".length))) {
     writeDeferredUpdateSignal(signal);
     enterUpdateSoftMode();
     setUpdateUiMode("banner");
     return;
   }
-  // Soft mode: ya vieron el aviso (u otro SHA) — no re-modalear por cada deploy.
   if (signal.startsWith("build:") && isUpdateSoftMode()) {
     writeDeferredUpdateSignal(signal);
     setUpdateUiMode("banner");
     return;
   }
-  if (signal.startsWith("build:")) enterUpdateSoftMode();
+  // Permisos nuevos: una sola vez modal; después barra (no re-spamear).
+  if (signal === "forced:modules" && isUpdateSoftMode()) {
+    setUpdateUiMode("banner");
+    return;
+  }
+  if (signal.startsWith("build:") || signal === "forced:modules") enterUpdateSoftMode();
   setUpdateUiMode("modal");
 }
 
@@ -5699,6 +5776,8 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
   if (!live) return;
   const loaded = loadedAppBuild();
   const liveNorm = normalizeBuild(live);
+  const liveAt = Date.parse(String(liveBuildAt || ""));
+  const liveAtMs = Number.isFinite(liveAt) ? liveAt : 0;
 
   const stopWatching = () => {
     pendingLiveBuild = "";
@@ -5707,29 +5786,43 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
     else showUpdatePrompt();
   };
 
-  if (!buildsDiffer(loaded, live)) {
-    lastLiveBuild = live;
-    clearDeferredIfSatisfied(loaded);
-    clearUpdateSoftMode();
-    storageSet(UPDATE_STUCK_KEY, "");
-    stopWatching();
+  // Réplica más vieja que el HTML: ignorar, no es update.
+  const loadedAt = loadedBuildTime();
+  const haveDates = loadedAt !== null && liveAtMs > 0;
+  if (haveDates && liveAtMs < loadedAt) {
+    logSkipUpdateOnce("api-mas-vieja", loaded, live);
+    // No limpiar silencio: puede ser flip-flop hacia una réplica vieja.
+    pendingLiveBuild = "";
+    pendingLiveHits = 0;
     return;
   }
 
-  // Distinto SHA no es "más nuevo": puede ser réplica vieja o edge cacheado.
-  // Si hay fechas, solo avisamos cuando el server es claramente posterior.
-  // Si faltan fechas, igual avisamos (Railway casi siempre manda buildAt).
-  const loadedAt = loadedBuildTime();
-  const liveAt = Date.parse(String(liveBuildAt || ""));
-  const haveDates = loadedAt !== null && Number.isFinite(liveAt);
-  if (haveDates && liveAt < loadedAt) {
-    logSkipUpdateOnce("api-mas-vieja", loaded, live);
-    stopWatching();
+  // Actualizar “newest” solo si este live no es más viejo que el HTML.
+  const newest = noteNewestLive(live, liveAtMs || undefined);
+
+  // Match con ESTA respuesta: solo es “al día” si el HTML alcanzó el newest global.
+  if (!buildsDiffer(loaded, live)) {
+    lastLiveBuild = live;
+    if (htmlCaughtUpToNewest(loaded)) {
+      clearDeferredIfSatisfied(loaded);
+      clearUpdateSilenceState();
+      if (reloadBannerForced) showUpdatePrompt();
+      else stopWatching();
+      return;
+    }
+    // Falsa calma: esta réplica coincide con el HTML, pero ya vimos un build más nuevo.
+    logSkipUpdateOnce("match-replica-vieja", loaded, newest.build || live);
+    lastLiveBuild = newest.build || live;
+    pendingLiveBuild = "";
+    pendingLiveHits = 0;
+    showUpdatePrompt();
     return;
   }
-  if (haveDates && liveAt === loadedAt) {
+
+  if (haveDates && liveAtMs === loadedAt) {
     logSkipUpdateOnce("misma-fecha", loaded, live);
-    stopWatching();
+    pendingLiveBuild = "";
+    pendingLiveHits = 0;
     return;
   }
 
@@ -5743,8 +5836,10 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
 
   lastLiveBuild = live;
   const prevMode = updateUiMode;
+  console.info(
+    `[ST2] Update check: HTML=${buildKey(loaded) || "?"} API=${buildKey(live) || "?"} newest=${newest.build || "?"} soft=${isUpdateSoftMode() ? "1" : "0"} stuck=${readStuckBuild() || "-"}`,
+  );
   showUpdatePrompt();
-  // Noti desktop solo en el primer modal; no spamear en cada deploy si ya están en barra.
   if (updateUiMode === "modal" && prevMode !== "modal") notifyWebUpdateDesktop(live);
 }
 

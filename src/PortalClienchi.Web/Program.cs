@@ -551,6 +551,19 @@ app.MapGet("/api/capturas/status", (LocalCapturaStore store) =>
     }
 });
 
-app.MapFallbackToFile("index.html");
+// Fallback SPA: mismo HTML inyectado (nunca el index crudo sin meta st2-build).
+app.MapFallback(async (HttpContext ctx, IWebHostEnvironment env) =>
+{
+    if (!HttpMethods.IsGet(ctx.Request.Method) && !HttpMethods.IsHead(ctx.Request.Method))
+    {
+        ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+        return;
+    }
+
+    var html = await St2IndexHtml.LoadAsync(env, ctx.RequestAborted).ConfigureAwait(false);
+    ctx.Response.ContentType = "text/html; charset=utf-8";
+    St2HttpCache.NoStore(ctx);
+    await ctx.Response.WriteAsync(html, ctx.RequestAborted).ConfigureAwait(false);
+});
 
 app.Run();

@@ -271,6 +271,7 @@ export async function refreshModuleFlags({ force = false, baseline = false, dete
       } else if (detectNew && prevKnown) {
         const gained = newlyEnabledKeys(prevKnown, next);
         if (gained.length) {
+          console.info(`[ST2] Permisos nuevos detectados: ${gained.join(", ")}`);
           setModulesBannerVisible(true);
           document.dispatchEvent(new CustomEvent("st2:modules-access-changed", {
             detail: { gained, flags: cloneFlags(next) },
