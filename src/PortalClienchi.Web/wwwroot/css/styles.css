@@ -3636,42 +3636,170 @@ body.portal-tab-active .brand-icon {
   padding: 8px 10px;
 }
 
-/* ── Sub-pestañas del panel ADMIN ── */
+/* ── Consultas ADMIN: Accesos + Uso ── */
 .st2-admin-subnav {
   display: flex;
-  gap: 4px;
-  margin: 0 0 12px;
-  padding: 3px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background: #f8fafc;
-  width: fit-content;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 0 18px;
+  padding: 12px 12px 14px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.72) 100%);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .st2-admin-subnav.hidden {
   display: none !important;
 }
 
-.st2-admin-subtab {
-  border: 0;
-  border-radius: 8px;
-  padding: 5px 14px;
-  background: transparent;
-  font: 700 0.76rem/1.2 inherit;
-  letter-spacing: 0.02em;
+.st2-admin-subnav-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px;
+}
+
+.st2-admin-subnav-label {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: #64748b;
+}
+
+.st2-admin-subnav-hint {
+  font-size: 0.7rem;
+  font-weight: 550;
+  color: #94a3b8;
+}
+
+.st2-admin-subnav-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.st2-admin-subtab {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(203, 213, 225, 0.95);
+  border-radius: 14px;
+  padding: 13px 14px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  font: inherit;
+  color: #334155;
   cursor: pointer;
-  transition: background 0.16s ease, color 0.16s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .st2-admin-subtab:hover {
+  border-color: rgba(249, 115, 22, 0.42);
   color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+
+.st2-admin-subtab:focus-visible {
+  outline: 2px solid rgba(249, 115, 22, 0.55);
+  outline-offset: 2px;
 }
 
 .st2-admin-subtab.is-on {
-  background: #fff;
-  color: #d64000;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  background:
+    linear-gradient(155deg, rgba(255, 247, 237, 0.98) 0%, rgba(255, 237, 213, 0.55) 100%);
+  border-color: rgba(249, 115, 22, 0.55);
+  color: #9a3412;
+  box-shadow:
+    0 0 0 1px rgba(249, 115, 22, 0.12),
+    0 8px 18px rgba(234, 88, 12, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.st2-admin-subtab-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.05);
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.st2-admin-subtab-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.st2-admin-subtab.is-on .st2-admin-subtab-icon {
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.28);
+}
+
+.st2-admin-subtab-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.st2-admin-subtab-eyebrow {
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+.st2-admin-subtab.is-on .st2-admin-subtab-eyebrow {
+  color: rgba(194, 65, 12, 0.78);
+}
+
+.st2-admin-subtab-title {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+
+.st2-admin-subtab-sub {
+  font-size: 0.72rem;
+  font-weight: 550;
+  line-height: 1.35;
+  color: #64748b;
+}
+
+.st2-admin-subtab.is-on .st2-admin-subtab-sub {
+  color: rgba(154, 52, 18, 0.78);
+}
+
+@media (max-width: 720px) {
+  .st2-admin-subnav-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .st2-admin-subnav-hint {
+    display: none;
+  }
 }
 
 [data-admin-sub].hidden {

@@ -815,7 +815,8 @@ public static class PlanillasEndpoints
 
         app.MapGet("/api/access/usage", (HttpContext ctx, IConfiguration config, AppAccessRepository accessRepo, int? days) =>
         {
-            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied, ownerOnly: true))
+            // Dueño y ADMIN WEB: panel de uso (solo lectura de actividad).
+            if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
                 return denied!;
 
             var span = AppAccessRepository.NormalizeUsageDays(days ?? 1);

@@ -1861,30 +1861,90 @@ html.st2-theme-dark .st2-access-admin-table td {
   border-color: #3d4b61 !important;
 }
 
-/* Sub-pestañas del panel ADMIN */
-html.st2-theme-dark .st2-admin-subnav,
+/* Consultas ADMIN: Accesos + Uso */
+html.st2-theme-dark .st2-admin-subnav {
+  background:
+    linear-gradient(165deg, rgba(28, 20, 14, 0.72) 0%, rgba(14, 10, 8, 0.88) 100%);
+  border-color: rgba(251, 146, 60, 0.2);
+  box-shadow: inset 0 1px 0 rgba(251, 146, 60, 0.06);
+}
+
+html.st2-theme-dark .st2-admin-subnav-label {
+  color: rgba(253, 186, 116, 0.72);
+}
+
+html.st2-theme-dark .st2-admin-subnav-hint {
+  color: rgba(253, 186, 116, 0.42);
+}
+
+html.st2-theme-dark .st2-admin-subtab {
+  background:
+    linear-gradient(165deg, rgba(28, 20, 14, 0.96) 0%, rgba(16, 12, 10, 0.98) 100%);
+  border-color: rgba(251, 146, 60, 0.22);
+  color: #ffedd5;
+  box-shadow:
+    inset 0 1px 0 rgba(251, 146, 60, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+html.st2-theme-dark .st2-admin-subtab:hover {
+  border-color: rgba(251, 146, 60, 0.48);
+  color: #fff7ed;
+  background:
+    linear-gradient(165deg, rgba(42, 28, 18, 0.98) 0%, rgba(22, 14, 10, 0.98) 100%);
+}
+
+html.st2-theme-dark .st2-admin-subtab.is-on {
+  background:
+    linear-gradient(155deg, rgba(249, 115, 22, 0.22) 0%, rgba(28, 16, 10, 0.96) 55%, rgba(16, 10, 8, 0.98) 100%);
+  border-color: rgba(251, 146, 60, 0.58);
+  color: #ffedd5;
+  box-shadow:
+    0 0 0 1px rgba(249, 115, 22, 0.14),
+    0 10px 22px rgba(234, 88, 12, 0.16),
+    inset 0 1px 0 rgba(251, 146, 60, 0.16);
+}
+
+html.st2-theme-dark .st2-admin-subtab-icon {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fdba74;
+}
+
+html.st2-theme-dark .st2-admin-subtab.is-on .st2-admin-subtab-icon {
+  background: linear-gradient(135deg, #c2410c 0%, #f97316 100%);
+  color: #fff7ed;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+}
+
+html.st2-theme-dark .st2-admin-subtab-eyebrow {
+  color: rgba(253, 186, 116, 0.48);
+}
+
+html.st2-theme-dark .st2-admin-subtab.is-on .st2-admin-subtab-eyebrow {
+  color: rgba(254, 215, 170, 0.78);
+}
+
+html.st2-theme-dark .st2-admin-subtab-sub {
+  color: rgba(253, 186, 116, 0.62);
+}
+
+html.st2-theme-dark .st2-admin-subtab.is-on .st2-admin-subtab-sub {
+  color: rgba(254, 215, 170, 0.82);
+}
+
 html.st2-theme-dark .st2-admin-usage-ranges {
   background: #161616;
   border-color: #333333;
 }
 
-html.st2-theme-dark .st2-admin-subtab {
+html.st2-theme-dark .st2-admin-usage-sort {
   color: #94a3b8;
 }
 
-html.st2-theme-dark .st2-admin-subtab:hover {
-  color: #f1f5f9;
-}
-
-html.st2-theme-dark .st2-admin-subtab.is-on,
 html.st2-theme-dark .st2-admin-usage-sort.is-on {
   background: #242424;
   color: #fb923c;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-}
-
-html.st2-theme-dark .st2-admin-usage-sort {
-  color: #94a3b8;
 }
 
 html.st2-theme-dark .st2-admin-usage-days {

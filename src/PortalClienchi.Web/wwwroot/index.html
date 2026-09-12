@@ -118,10 +118,10 @@
       background: #1a0a04;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260909d"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260912a"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260910e"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260912a"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260910e"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260910b"/>
@@ -1782,9 +1782,33 @@
                 <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
               </div>
             </div>
-            <div id="st2-admin-subnav" class="st2-admin-subnav hidden" role="tablist" aria-label="Secciones de administración" hidden>
-              <button type="button" class="st2-admin-subtab is-on" data-admin-subtab="accesos" role="tab" aria-selected="true">Accesos</button>
-              <button type="button" class="st2-admin-subtab" data-admin-subtab="uso" role="tab" aria-selected="false">Uso</button>
+            <div id="st2-admin-subnav" class="st2-admin-subnav hidden" role="tablist" aria-label="Consultas de administración" hidden>
+              <div class="st2-admin-subnav-head">
+                <p class="st2-admin-subnav-label">Consultas de datos</p>
+                <span class="st2-admin-subnav-hint">Elegí qué mirar</span>
+              </div>
+              <div class="st2-admin-subnav-cards">
+                <button type="button" class="st2-admin-subtab is-on" data-admin-subtab="accesos" role="tab" aria-selected="true">
+                  <span class="st2-admin-subtab-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  </span>
+                  <span class="st2-admin-subtab-copy">
+                    <span class="st2-admin-subtab-eyebrow">Personas</span>
+                    <span class="st2-admin-subtab-title">Accesos</span>
+                    <span class="st2-admin-subtab-sub">Quién entra, permisos y pendientes</span>
+                  </span>
+                </button>
+                <button type="button" class="st2-admin-subtab" data-admin-subtab="uso" role="tab" aria-selected="false">
+                  <span class="st2-admin-subtab-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/></svg>
+                  </span>
+                  <span class="st2-admin-subtab-copy">
+                    <span class="st2-admin-subtab-eyebrow">Actividad</span>
+                    <span class="st2-admin-subtab-title">Uso</span>
+                    <span class="st2-admin-subtab-sub">Qué módulos abren y con qué frecuencia</span>
+                  </span>
+                </button>
+              </div>
             </div>
             <div data-admin-sub="accesos">
               <div class="st2-access-admin-kpis" id="st2-access-admin-kpis">
@@ -2705,6 +2729,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260910b" type="module"></script>
+  <script src="/js/app.js?v=20260912a" type="module"></script>
 </body>
 </html>

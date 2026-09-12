@@ -1468,14 +1468,18 @@ function formatUsageModule(module) {
   return USAGE_MODULE_LABELS[key] || key || "—";
 }
 
-/** La sub-pestaña Uso es solo del dueño; el resto no la ve ni la puede abrir. */
+/** Accesos + Uso: visibles para dueño y ADMIN WEB. */
+function canSeeAdminUsage() {
+  return isSt2SuperAdmin();
+}
+
 function syncAdminSubnav() {
-  const canSeeUsage = isPrimarySuperAdmin();
+  const canAdmin = isSt2SuperAdmin();
   if (adminSubnav) {
-    adminSubnav.classList.toggle("hidden", !canSeeUsage);
-    adminSubnav.hidden = !canSeeUsage;
+    adminSubnav.classList.toggle("hidden", !canAdmin);
+    adminSubnav.hidden = !canAdmin;
   }
-  if (!canSeeUsage && adminSubtab !== "accesos") adminSubtab = "accesos";
+  if (!canAdmin && adminSubtab !== "accesos") adminSubtab = "accesos";
 
   for (const btn of adminSubtabButtons) {
     const on = btn.dataset.adminSubtab === adminSubtab;
@@ -1488,10 +1492,26 @@ function syncAdminSubnav() {
     el.classList.toggle("hidden", !show);
     el.hidden = !show;
   });
+
+  const onUsage = adminSubtab === "uso";
+  accessAdminPresetBtn?.classList.toggle("hidden", onUsage || !isSt2SuperAdmin());
+  if (accessAdminRefresh) {
+    accessAdminRefresh.title = onUsage ? "Actualizar uso" : "Actualizar lista";
+    accessAdminRefresh.setAttribute("aria-label", onUsage ? "Actualizar uso" : "Actualizar lista");
+  }
+
+  const titles = document.querySelector("#st2-access-admin-panel .st2-access-admin-panel-titles .st2-access-admin-title");
+  const kicker = document.querySelector("#st2-access-admin-panel .st2-access-admin-panel-titles .st2-access-admin-kicker");
+  if (titles) {
+    titles.textContent = onUsage ? "Uso de la plataforma" : "Control de accesos";
+  }
+  if (kicker) {
+    kicker.textContent = onUsage ? "Consulta · actividad" : "Consulta · personas";
+  }
 }
 
 function setAdminSubtab(tab) {
-  const next = tab === "uso" && isPrimarySuperAdmin() ? "uso" : "accesos";
+  const next = tab === "uso" && canSeeAdminUsage() ? "uso" : "accesos";
   adminSubtab = next;
   syncAdminSubnav();
   if (next === "uso") void loadAccessAdminUsage();
@@ -1520,7 +1540,7 @@ function setAdminUsageDays(days) {
 }
 
 async function loadAccessAdminUsage({ silent = false } = {}) {
-  if (!isPrimarySuperAdmin()) return;
+  if (!canSeeAdminUsage()) return;
   const seq = ++adminUsageLoadSeq;
   const days = normalizeUsageDays(adminUsageDays);
   try {
@@ -1558,7 +1578,7 @@ async function loadAccessAdminUsage({ silent = false } = {}) {
 
 function renderAccessAdminUsage() {
   syncAdminSubnav();
-  if (!adminUsageBody || !isPrimarySuperAdmin()) return;
+  if (!adminUsageBody || !canSeeAdminUsage()) return;
 
   const days = normalizeUsageDays(adminUsageDays);
   if (adminUsageTitle) adminUsageTitle.textContent = USAGE_RANGE_TITLES[days] || "Uso";
@@ -1755,7 +1775,7 @@ function canSeeAccessAdminOwnerColumns() {
 }
 
 function syncAccessAdminHostColumn() {
-  accessAdminPresetBtn?.classList.toggle("hidden", !isSt2SuperAdmin());
+  accessAdminPresetBtn?.classList.toggle("hidden", adminSubtab === "uso" || !isSt2SuperAdmin());
   const showOwnerCols = canSeeAccessAdminOwnerColumns();
   accessAdminThHost?.classList.toggle("hidden", !showOwnerCols);
   accessAdminThLast?.classList.toggle("hidden", !showOwnerCols);
@@ -2105,7 +2125,9 @@ async function activateAdminTab() {
   showAccessAdminPanel();
   syncAccessAdminHostColumn();
   syncAccessAdminOwnerOnlyUi();
-  void loadAccessAdminRegistrations();
+  syncAdminSubnav();
+  if (adminSubtab === "uso") void loadAccessAdminUsage();
+  else void loadAccessAdminRegistrations();
   startAccessAdminPolling();
 }
 
@@ -3309,7 +3331,8 @@ viewAsExitBtn?.addEventListener("click", () => {
 });
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
-  void loadAccessAdminRegistrations({ silent: true, force: true });
+  if (adminSubtab === "uso") void loadAccessAdminUsage();
+  else void loadAccessAdminRegistrations({ silent: true, force: true });
 });
 accessAdminPresetBtn?.addEventListener("click", () => {
   openAccessPresetModal();
