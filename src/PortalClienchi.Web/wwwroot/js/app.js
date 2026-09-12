@@ -4,7 +4,7 @@ import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=2
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
-import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeePdfPortalModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
@@ -135,7 +135,6 @@ const accessModulesClose = document.getElementById("st2-access-modules-close");
 const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
 const accessModulesSave = document.getElementById("st2-access-modules-save");
 const accessModOportunidad = document.getElementById("st2-mod-oportunidad");
-const accessModPdf = document.getElementById("st2-mod-pdf");
 const accessModBlanqueo = document.getElementById("st2-mod-blanqueo");
 const accessModBlanqueoConfirm = document.getElementById("st2-mod-blanqueo-confirm");
 const accessModBlanqueoLoad = document.getElementById("st2-mod-blanqueo-load");
@@ -858,7 +857,6 @@ function buildAccessAdminExtraModules(item) {
   const mods = item.modules || {};
   const extras = [];
   if (mods.oportunidad) extras.push("Oportunidad");
-  if (mods.pdfPortal) extras.push("PDF Portal");
   if (mods.blanqueoConfirm && mods.blanqueoLoad) extras.push("Blanqueo (confirma y carga)");
   else if (mods.blanqueoConfirm) extras.push("Blanqueo (solo confirma)");
   else if (mods.blanqueoLoad || mods.blanqueo) extras.push("Blanqueo");
@@ -2507,7 +2505,6 @@ function buildAboutPlanillasDetail() {
     if (canSeePlanillasTransferencia()) mods.push("Transferencia de Casos");
     if (canSeePlanillasReferral()) mods.push("Referral I+D");
     if (canSeeOportunidadModule()) mods.push("Oportunidad de Venta");
-    if (canSeePdfPortalModule()) mods.push("Generador de PDFs");
     if (canSeeBlanqueoModule()) mods.push("Blanqueo de accesos");
     if (canSeeBorradoBasesModule()) mods.push("Borrado de Bases Web");
     blocks.push(
@@ -3617,7 +3614,8 @@ function accessModDefault(mods, key) {
 function readAccessModuleChecksFromForm() {
   return {
     oportunidad: !!accessModOportunidad?.checked,
-    pdfPortal: !!accessModPdf?.checked,
+    // Siempre disponible desde Portal Cliente; no se gestiona por perfil.
+    pdfPortal: true,
     blanqueo: !!accessModBlanqueo?.checked,
     blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
     blanqueoLoad: !!accessModBlanqueoLoad?.checked,
@@ -3646,7 +3644,6 @@ function readAccessModuleChecksFromForm() {
 function setAccessModuleChecks(mods, { presetDefaults = false } = {}) {
   const def = (key) => (presetDefaults ? true : accessModDefault(mods, key));
   if (accessModOportunidad) accessModOportunidad.checked = presetDefaults ? false : !!mods.oportunidad;
-  if (accessModPdf) accessModPdf.checked = presetDefaults ? false : !!mods.pdfPortal;
   if (accessModPlanillasSqlOnvio) accessModPlanillasSqlOnvio.checked = def("planillasSqlOnvio");
   if (accessModPlanillasTransferencia) accessModPlanillasTransferencia.checked = def("planillasTransferencia");
   if (accessModPlanillasReferral) accessModPlanillasReferral.checked = def("planillasReferral");
@@ -3689,7 +3686,6 @@ function resetSqlSystemModules(enabled) {
     accessModPlanillasTransferencia,
     accessModPlanillasReferral,
     accessModOportunidad,
-    accessModPdf,
     accessModBlanqueo,
     accessModBlanqueoConfirm,
     accessModBlanqueoLoad,
@@ -3703,7 +3699,6 @@ function resetSqlSystemModules(enabled) {
     accessModPlanillasTransferencia,
     accessModPlanillasReferral,
     accessModOportunidad,
-    accessModPdf,
     accessModBlanqueo,
     accessModBorradoBases,
   ].forEach((el) => { if (el) el.checked = true; });

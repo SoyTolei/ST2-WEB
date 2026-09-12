@@ -382,7 +382,7 @@ function syncChileSoporteVisibility() {
 function canOpenRoute(route) {
   if (!route?.requires) return true;
   if (route.requires === "oportunidad") return canSeeOportunidadModule() && !hidesCommercialModules();
-  if (route.requires === "pdf") return canSeePdfPortalModule() && !hidesCommercialModules();
+  if (route.requires === "pdf") return true;
   if (route.requires === "blanqueo") return canSeeBlanqueoModule() && !hidesCommercialModules();
   if (route.requires === "borrado-bases") return canSeeBorradoBasesModule() && !hidesCommercialModules();
   const sys = route.sistema || sistemaActual;
@@ -1521,10 +1521,7 @@ async function revealView(name, historyMode = "push") {
   }
 
   if (name === "pdfPortal") {
-    if (!canSeePdfPortalModule() || hidesCommercialModules()) {
-      showView("menu", { history: "replace" });
-      return;
-    }
+    // Deep-link legacy: el generador ya no es opción de menú; abre el modal directo.
     showView("menu", { history: historyMode });
     openPdfPortalModal();
     return;
@@ -1656,10 +1653,6 @@ function bindEvents() {
 
   document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", () => {
     void revealView("oportunidadMenu");
-  });
-
-  document.querySelector('[data-plan-modulo="pdf-portal"]')?.addEventListener("click", () => {
-    void revealView("pdfPortal");
   });
 
   document.querySelector('[data-plan-modulo="blanqueo"]')?.addEventListener("click", () => {

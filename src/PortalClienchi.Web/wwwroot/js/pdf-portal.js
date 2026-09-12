@@ -1,11 +1,7 @@
-import { getPlanUserEmail } from "./plan-user.js";
-import { canSeePdfPortalModule as canSeeFromAccess } from "./module-access.js";
-
 /**
- * Override de prueba: localStorage.setItem("st2-pdf-portal-force", "1")
- * o localStorage.setItem("st2-modules-force-all", "1")
+ * Generador de PDFs para Portal Cliente (extra del tab Portal).
+ * Ya no es opción de menú Planillas ni flag de perfil.
  */
-const FORCE_KEY = "st2-pdf-portal-force";
 const DEFAULT_EDITOR_COLOR = "#0f172a";
 const DEFAULT_PREVIEW_COLOR = "#1e293b";
 
@@ -51,26 +47,16 @@ export function syncSheetThemeUi() {
 
 let pdfPortalInited = false;
 
-export function canSeePdfPortalModule(email = getPlanUserEmail()) {
-  try {
-    if (localStorage.getItem(FORCE_KEY) === "1") return true;
-  } catch { /* ignore */ }
-
-  if (!String(email || "").trim()) return false;
-  return canSeeFromAccess();
-}
-
-function sistemaHidesCommercialModules() {
-  const sistema = document.body.dataset.planSistema;
-  return sistema === "Legal" || sistema === "Chile";
+export function canSeePdfPortalModule() {
+  // Disponible desde Portal Cliente para todos (no se gestiona por perfil).
+  return true;
 }
 
 export function syncPdfPortalModuleVisibility() {
   const btn = document.getElementById("plan-modulo-pdf-portal");
   if (!btn) return;
-  const allowed = canSeePdfPortalModule() && !sistemaHidesCommercialModules();
-  btn.classList.toggle("hidden", !allowed);
-  btn.setAttribute("aria-hidden", allowed ? "false" : "true");
+  btn.classList.add("hidden");
+  btn.setAttribute("aria-hidden", "true");
 }
 
 let lastRecordedSelection = null;

@@ -8,7 +8,6 @@ const MODULES_POLL_MS = 20000;
 
 const MODULE_LABELS = {
   oportunidad: "Oportunidad de Venta",
-  pdfPortal: "Generador PDF-Portal",
   blanqueo: "Blanqueo Claves",
   blanqueoConfirm: "puede confirmar blanqueo",
   blanqueoLoad: "puede cargar blanqueo",
@@ -318,7 +317,8 @@ export function canSeeOportunidadModule() {
 }
 
 export function canSeePdfPortalModule() {
-  return !!getCachedModuleFlags().pdfPortal;
+  // Ya no es módulo de perfil: el generador vive como extra de Portal Cliente.
+  return true;
 }
 
 export function canSeeBlanqueoModule() {

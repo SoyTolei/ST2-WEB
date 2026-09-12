@@ -305,15 +305,6 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     });
   }
 
-  if (visible("#plan-modulo-pdf-portal")) {
-    steps.push({
-      selector: "#plan-modulo-pdf-portal",
-      title: "Generador de PDFs",
-      body: MENU_MODULO_COPY.pdfPortal[sistema] || MENU_MODULO_COPY.pdfPortal.OnvioWeb,
-      placement: "top",
-    });
-  }
-
   if (visible("#plan-modulo-blanqueo")) {
     steps.push({
       selector: "#plan-modulo-blanqueo",
