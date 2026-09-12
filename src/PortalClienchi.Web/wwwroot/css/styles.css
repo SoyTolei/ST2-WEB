@@ -723,11 +723,11 @@ body.st2-has-update .main-shell {
 }
 
 body.embed-active.st2-has-update .main-shell {
-  height: calc(100vh - 44px - 62px);
+  height: calc(100vh - 64px - 62px);
 }
 
 body.portal-tab-active.st2-has-update .main-shell {
-  height: calc(100vh - 44px - 62px);
+  height: calc(100vh - 64px - 62px);
 }
 
 body.st2-has-modules-update .main-shell {
@@ -739,19 +739,19 @@ body.st2-has-update.st2-has-modules-update .main-shell {
 }
 
 body.embed-active.st2-has-modules-update .main-shell {
-  height: calc(100vh - 44px - 62px);
+  height: calc(100vh - 64px - 62px);
 }
 
 body.embed-active.st2-has-update.st2-has-modules-update .main-shell {
-  height: calc(100vh - 44px - 124px);
+  height: calc(100vh - 64px - 124px);
 }
 
 body.portal-tab-active.st2-has-modules-update .main-shell {
-  height: calc(100vh - 44px - 62px);
+  height: calc(100vh - 64px - 62px);
 }
 
 body.portal-tab-active.st2-has-update.st2-has-modules-update .main-shell {
-  height: calc(100vh - 44px - 124px);
+  height: calc(100vh - 64px - 124px);
 }
 
 body.st2-has-tools-update .main-shell {
@@ -768,29 +768,29 @@ body.st2-has-update.st2-has-modules-update.st2-has-tools-update .main-shell {
 }
 
 body.embed-active.st2-has-tools-update .main-shell {
-  height: calc(100vh - 44px - 62px);
+  height: calc(100vh - 64px - 62px);
 }
 
 body.embed-active.st2-has-update.st2-has-tools-update .main-shell,
 body.embed-active.st2-has-modules-update.st2-has-tools-update .main-shell {
-  height: calc(100vh - 44px - 124px);
+  height: calc(100vh - 64px - 124px);
 }
 
 body.embed-active.st2-has-update.st2-has-modules-update.st2-has-tools-update .main-shell {
-  height: calc(100vh - 44px - 186px);
+  height: calc(100vh - 64px - 186px);
 }
 
 body.portal-tab-active.st2-has-tools-update .main-shell {
-  height: calc(100vh - 44px - 62px);
+  height: calc(100vh - 64px - 62px);
 }
 
 body.portal-tab-active.st2-has-update.st2-has-tools-update .main-shell,
 body.portal-tab-active.st2-has-modules-update.st2-has-tools-update .main-shell {
-  height: calc(100vh - 44px - 124px);
+  height: calc(100vh - 64px - 124px);
 }
 
 body.portal-tab-active.st2-has-update.st2-has-modules-update.st2-has-tools-update .main-shell {
-  height: calc(100vh - 44px - 186px);
+  height: calc(100vh - 64px - 186px);
 }
 
 .main-shell {
@@ -2087,32 +2087,16 @@ body.embed-active.thom-tab-active.thom-context-active .tab-bar {
 
 body.embed-active .main-shell {
   padding: 2px 6px 2px;
-  height: calc(100vh - 44px);
+  height: calc(100vh - 64px);
 }
 
 body.portal-tab-active .main-shell {
   padding: 4px 10px 4px;
-  height: calc(100vh - 44px);
+  height: calc(100vh - 64px);
 }
 
-body.embed-active .app-header,
-body.portal-tab-active .app-header {
-  height: 44px;
-  padding: 0 12px;
-}
-
-body.embed-active .brand-home-btn,
-body.portal-tab-active .brand-home-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-}
-
-body.embed-active .brand-icon,
-body.portal-tab-active .brand-icon {
-  width: 30px;
-  height: 30px;
-}
+/* Embeds (AI / THOM / Portal): misma altura de barra que el resto.
+   Antes se bajaba a 44px y rompía blobatar + pastilla de sesión. */
 
 .status-bar {
   height: 36px;
