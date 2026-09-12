@@ -269,7 +269,7 @@ html, body {
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-/* Acento superior tipo card del tutorial */
+/* Acento superior: en light usa tour; dark lo pisa a naranja ST2 */
 .st2-session-email::before {
   content: "";
   position: absolute;
@@ -278,7 +278,7 @@ html, body {
   right: 10px;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #c084fc 0%, #f472b6 45%, #38bdf8 100%);
+  background: linear-gradient(90deg, #c2410c 0%, #f97316 48%, #fdba74 100%);
   opacity: 0.9;
   pointer-events: none;
   z-index: 1;
