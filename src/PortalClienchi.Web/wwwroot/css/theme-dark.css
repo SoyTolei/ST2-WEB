@@ -7,10 +7,10 @@ html.st2-theme-dark {
   --text-muted: #d1d5db;
   --nav-well: #161616;
   --nav-hover: #2a2a2a;
-  --header-top: #222222;
-  --header-bottom: #161616;
-  --header-line: rgba(255, 255, 255, 0.06);
-  --header-accent: rgba(249, 115, 22, 0.62);
+  --header-top: #1a1624;
+  --header-bottom: #120f17;
+  --header-line: rgba(255, 255, 255, 0.12);
+  --header-accent: rgba(192, 132, 252, 0.55);
   --portal-sub: #e5e7eb;
   --portal-sub-hover: #f3f4f6;
   --portal-sub-glow: rgba(0, 0, 0, 0.35);
@@ -28,20 +28,39 @@ html.st2-theme-dark body {
 
 html.st2-theme-dark .app-header {
   background:
-    radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.22) 0%, transparent 58%),
-    radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
+    radial-gradient(ellipse 80% 120% at 8% 0%, rgba(192, 132, 252, 0.1) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 110% at 96% 0%, rgba(249, 115, 22, 0.12) 0%, transparent 52%),
     linear-gradient(180deg, var(--header-top) 0%, var(--header-bottom) 100%);
   border-bottom-color: var(--header-line);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Acento inferior alineado al card del tutorial (más suave que el naranja solo). */
+html.st2-theme-dark .app-header::after {
+  height: 2px;
+  opacity: 0.72;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(192, 132, 252, 0.55) 18%,
+    rgba(244, 114, 182, 0.65) 48%,
+    rgba(56, 189, 248, 0.5) 72%,
+    transparent 100%
+  );
 }
 
 html.st2-theme-dark .app-header-left .theme-switch {
-  border-left-color: rgba(255, 255, 255, 0.08);
+  border-left-color: rgba(255, 255, 255, 0.1);
 }
 
 html.st2-theme-dark .brand-home-btn {
-  border-color: rgba(148, 163, 184, 0.22);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: rgb(255 255 255 / 14%);
+  background: rgba(12, 10, 16, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 html.st2-theme-dark .brand-home-btn:hover {
@@ -52,16 +71,18 @@ html.st2-theme-dark .brand-home-btn:hover {
     0 10px 22px rgba(234, 88, 12, 0.22);
 }
 
+/* Perfil: misma familia visual, pero más “card” y un toque más hundida/elevada que la barra. */
 html.st2-theme-dark .st2-session-email {
-  --st2-session-card-bg: #120f17;
+  --st2-session-card-bg: #0c0a12;
   background: var(--st2-session-card-bg);
-  border-color: rgb(255 255 255 / 15%);
+  border-color: rgb(255 255 255 / 18%);
   color: rgba(248, 250, 252, 0.92);
   box-shadow:
-    rgba(0, 0, 0, 0.22) 0 1px 2px,
-    rgba(0, 0, 0, 0.2) 0 2px 4px,
-    rgba(0, 0, 0, 0.18) 0 8px 16px,
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    rgba(0, 0, 0, 0.35) 0 1px 2px,
+    rgba(0, 0, 0, 0.28) 0 4px 10px,
+    rgba(0, 0, 0, 0.22) 0 10px 20px,
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 0 0 1px rgba(192, 132, 252, 0.08);
 }
 
 html.st2-theme-dark .st2-session-name {
@@ -78,9 +99,25 @@ html.st2-theme-dark .st2-session-avatar-host {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
+html.st2-theme-dark .st2-tour-header-btn,
+html.st2-theme-dark .about-btn {
+  background: rgba(12, 10, 16, 0.9);
+  border-color: rgb(255 255 255 / 14%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+html.st2-theme-dark .st2-tour-header-btn:hover,
+html.st2-theme-dark .about-btn:hover {
+  background: rgba(48, 32, 22, 0.96);
+  border-color: rgba(251, 146, 60, 0.55);
+}
+
 html.st2-theme-dark .tab-bar {
-  background: linear-gradient(180deg, #222222 0%, #161616 100%);
+  background: linear-gradient(180deg, #1a1624 0%, #120f17 100%);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 html.st2-theme-dark .tab-btn:not(.active) {
