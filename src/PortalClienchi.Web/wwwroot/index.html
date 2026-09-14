@@ -118,10 +118,10 @@
       background: #1a0a04;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260912b"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260914a"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260912a"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260914a"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260910e"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260910b"/>
@@ -130,20 +130,20 @@
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-border-glow.css?v=20260907c"/>
-  <link rel="stylesheet" href="/css/st2-topography.css?v=20260907b"/>
+  <link rel="stylesheet" href="/css/st2-silk.css?v=20260914a"/>
   <link rel="stylesheet" href="/css/st2-lightfall.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-glitch-text.css?v=20260907d"/>
   <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260910b"/>
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907o"/>
-  <link rel="modulepreload" href="/js/st2-topography.js?v=20260907b"/>
+  <link rel="modulepreload" href="/js/st2-silk.js?v=20260914a"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260907c"/>
   <link rel="modulepreload" href="/js/st2-lightfall.js?v=20260907b"/>
   <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907d"/>
   <link rel="modulepreload" href="/js/st2-decrypted-text.js?v=20260910b"/>
   <link rel="modulepreload" href="/js/st2-click-spark.js?v=20260910a"/>
-  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260910b"/>
+  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260914a"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -153,7 +153,7 @@
     }
   } catch (e) { /* ignore */ }
 </script>
-  <script type="module" src="/js/st2-login-boot.js?v=20260910b"></script>
+  <script type="module" src="/js/st2-login-boot.js?v=20260914a"></script>
   <div id="st2-light-rays" class="st2-light-rays" aria-hidden="true"></div>
   <sonner-toaster id="st2-sonner" position="top-right" rich-colors close-button visible-toasts="5" container-aria-label="Notificaciones"></sonner-toaster>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">
@@ -1835,12 +1835,13 @@
           <div class="st2-admin-usage-view hidden" data-admin-sub="uso" hidden>
             <div class="st2-admin-usage-head">
               <div>
-                <h4 id="st2-admin-usage-title" class="st2-admin-usage-title">Uso de hoy</h4>
+                <h4 id="st2-admin-usage-title" class="st2-admin-usage-title">Historial de uso</h4>
                 <p id="st2-admin-usage-sub" class="st2-admin-usage-sub"></p>
               </div>
               <div class="st2-admin-usage-tools">
                 <div class="st2-admin-usage-ranges" role="group" aria-label="Período">
-                  <button type="button" class="st2-admin-usage-sort is-on" data-usage-days="1">Hoy</button>
+                  <button type="button" class="st2-admin-usage-sort is-on" data-usage-days="0">Todo</button>
+                  <button type="button" class="st2-admin-usage-sort" data-usage-days="1">Hoy</button>
                   <button type="button" class="st2-admin-usage-sort" data-usage-days="3">3d</button>
                   <button type="button" class="st2-admin-usage-sort" data-usage-days="7">7d</button>
                   <button type="button" class="st2-admin-usage-sort" data-usage-days="15">15d</button>
@@ -1852,7 +1853,7 @@
                 </div>
               </div>
             </div>
-            <p id="st2-admin-usage-empty" class="st2-admin-usage-empty hidden" hidden>Todavía no hay actividad registrada hoy.</p>
+            <p id="st2-admin-usage-empty" class="st2-admin-usage-empty hidden" hidden>Todavía no hay actividad registrada.</p>
             <div id="st2-admin-usage-body" class="st2-admin-usage-body">
               <section class="st2-admin-usage-block">
                 <h5 class="st2-admin-usage-block-title">Por módulo</h5>
@@ -1879,6 +1880,10 @@
                   </thead>
                   <tbody id="st2-admin-usage-people-body"></tbody>
                 </table>
+              </section>
+              <section id="st2-admin-usage-months" class="st2-admin-usage-months hidden" hidden>
+                <h5 class="st2-admin-usage-block-title">Por mes</h5>
+                <div id="st2-admin-usage-months-body" class="st2-admin-usage-months-body"></div>
               </section>
             </div>
           </div>
@@ -2687,7 +2692,7 @@
   </div>
 
   <div id="st2-access-gate" class="st2-access-gate" role="dialog" aria-labelledby="st2-access-title" aria-modal="true">
-    <div id="st2-login-topo" class="st2-login-topo" aria-hidden="true"></div>
+    <div id="st2-login-silk" class="st2-login-silk" aria-hidden="true"></div>
     <div class="st2-access-card">
       <div class="st2-access-brand">
         <div class="st2-access-brand-head">
@@ -2729,6 +2734,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260912a" type="module"></script>
+  <script src="/js/app.js?v=20260914a" type="module"></script>
 </body>
 </html>

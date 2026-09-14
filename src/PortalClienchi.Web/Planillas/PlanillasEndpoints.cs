@@ -819,10 +819,17 @@ public static class PlanillasEndpoints
             if (!AccessPanelGate.TryAuthorize(ctx, config, accessRepo, out _, out var denied))
                 return denied!;
 
-            var span = AppAccessRepository.NormalizeUsageDays(days ?? 1);
+            var span = AppAccessRepository.NormalizeUsageDays(days ?? AppAccessRepository.UsageAllDays);
             var rows = accessRepo.ListUsage(span);
             var activeDays = accessRepo.ListUsageActiveDays(span)
                 .Select(kv => new { email = kv.Key, days = kv.Value });
+            var months = accessRepo.ListUsageByMonth(span);
+            var monthModules = accessRepo.ListUsageModulesByMonth(span)
+                .GroupBy(m => m.Month, StringComparer.Ordinal)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => new { module = x.Module, hits = x.Hits, people = x.People }).ToList(),
+                    StringComparer.Ordinal);
 
             return Results.Ok(new
             {
@@ -835,6 +842,14 @@ public static class PlanillasEndpoints
                     lastAt = r.LastAt,
                 }),
                 activeDays,
+                months = months.Select(m => new
+                {
+                    month = m.Month,
+                    hits = m.Hits,
+                    people = m.People,
+                    modules = m.Modules,
+                    breakdown = monthModules.TryGetValue(m.Month, out var b) ? b : [],
+                }),
             });
         });
 

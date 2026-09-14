@@ -1990,6 +1990,20 @@ html.st2-theme-dark .st2-admin-usage-chip {
   color: #e5e5e5;
 }
 
+html.st2-theme-dark .st2-admin-usage-month {
+  background: linear-gradient(165deg, rgba(28, 20, 14, 0.96) 0%, rgba(16, 12, 10, 0.98) 100%);
+  border-color: rgba(251, 146, 60, 0.22);
+}
+
+html.st2-theme-dark .st2-admin-usage-month-title {
+  color: #ffedd5;
+}
+
+html.st2-theme-dark .st2-admin-usage-month-meta,
+html.st2-theme-dark .st2-admin-usage-month-empty {
+  color: rgba(253, 186, 116, 0.62);
+}
+
 html.st2-theme-dark .st2-access-admin-audit-head,
 html.st2-theme-dark .st2-access-admin-audit-head strong,
 html.st2-theme-dark .st2-access-admin-audit-list li strong,

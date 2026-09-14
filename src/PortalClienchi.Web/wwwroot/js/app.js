@@ -194,6 +194,8 @@ const adminUsageEmpty = document.getElementById("st2-admin-usage-empty");
 const adminUsageBody = document.getElementById("st2-admin-usage-body");
 const adminUsageModulesBody = document.getElementById("st2-admin-usage-modules-body");
 const adminUsagePeopleBody = document.getElementById("st2-admin-usage-people-body");
+const adminUsageMonths = document.getElementById("st2-admin-usage-months");
+const adminUsageMonthsBody = document.getElementById("st2-admin-usage-months-body");
 const adminUsageDaysButtons = Array.from(document.querySelectorAll("[data-usage-days]"));
 const adminUsageSortButtons = Array.from(document.querySelectorAll("[data-usage-sort]"));
 const accessAdminExportBtn = document.getElementById("st2-access-admin-export");
@@ -747,12 +749,14 @@ let adminUsageLoadSeq = 0;
 let adminUsageLoadError = false;
 /** "accesos" | "uso" — sub-pestaña del panel ADMIN. */
 let adminSubtab = "accesos";
-/** 1 | 3 | 7 | 15 | 30 — días calendario AR. */
-let adminUsageDays = 1;
+/** 0 = todo el historial | 1 | 3 | 7 | 15 | 30 — días calendario AR. */
+let adminUsageDays = 0;
 /** "recent" | "hits" — orden de la tabla por persona. */
 let adminUsageSort = "recent";
-const USAGE_RANGE_DAYS = [1, 3, 7, 15, 30];
+let accessAdminUsageMonths = [];
+const USAGE_RANGE_DAYS = [0, 1, 3, 7, 15, 30];
 const USAGE_RANGE_TITLES = {
+  0: "Historial de uso",
   1: "Uso de hoy",
   3: "Uso · 3 días",
   7: "Uso · 7 días",
@@ -760,12 +764,17 @@ const USAGE_RANGE_TITLES = {
   30: "Uso · 30 días",
 };
 const USAGE_RANGE_EMPTY = {
+  0: "Todavía no hay actividad registrada.",
   1: "Todavía no hay actividad registrada hoy.",
   3: "No hay actividad en los últimos 3 días.",
   7: "No hay actividad en los últimos 7 días.",
   15: "No hay actividad en los últimos 15 días.",
   30: "No hay actividad en los últimos 30 días.",
 };
+const USAGE_MONTH_LABELS = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
 let accessAdminConcurrentCount = 0;
 
 function resolveAccessDeviceShort(item) {
@@ -1310,9 +1319,10 @@ function resetAccessAdminSnapshot() {
   accessAdminModFilters = new Set();
   accessAdminUsageRows = [];
   accessAdminUsageActiveDays = new Map();
+  accessAdminUsageMonths = [];
   adminUsageLoadError = false;
   adminSubtab = "accesos";
-  adminUsageDays = 1;
+  adminUsageDays = 0;
   syncAdminUsageRangeUi();
   syncAdminSubnav();
   accessAdminConcurrentCount = 0;
@@ -1518,8 +1528,18 @@ function setAdminSubtab(tab) {
 }
 
 function normalizeUsageDays(days) {
-  const n = Number(days) || 1;
-  return USAGE_RANGE_DAYS.includes(n) ? n : 1;
+  const n = Number(days);
+  if (!Number.isFinite(n)) return 0;
+  return USAGE_RANGE_DAYS.includes(n) ? n : 0;
+}
+
+function formatUsageMonthLabel(monthKey) {
+  const m = String(monthKey || "").match(/^(\d{4})-(\d{2})$/);
+  if (!m) return monthKey || "—";
+  const year = m[1];
+  const idx = Number(m[2]) - 1;
+  const name = USAGE_MONTH_LABELS[idx] || m[2];
+  return `${name} ${year}`;
 }
 
 function syncAdminUsageRangeUi() {
@@ -1561,6 +1581,21 @@ async function loadAccessAdminUsage({ silent = false } = {}) {
       map.set(email, Number(row.days) || 0);
     }
     accessAdminUsageActiveDays = map;
+    accessAdminUsageMonths = Array.isArray(data.months)
+      ? data.months.map((m) => ({
+        month: m.month || "",
+        hits: Number(m.hits ?? 0) || 0,
+        people: Number(m.people ?? 0) || 0,
+        modules: Number(m.modules ?? 0) || 0,
+        breakdown: Array.isArray(m.breakdown)
+          ? m.breakdown.map((b) => ({
+            module: b.module || "",
+            hits: Number(b.hits ?? 0) || 0,
+            people: Number(b.people ?? 0) || 0,
+          }))
+          : [],
+      }))
+      : [];
     adminUsageDays = normalizeUsageDays(data.days ?? days);
     adminUsageLoadError = false;
     syncAdminUsageRangeUi();
@@ -1571,6 +1606,7 @@ async function loadAccessAdminUsage({ silent = false } = {}) {
     if (!silent) {
       accessAdminUsageRows = [];
       accessAdminUsageActiveDays = new Map();
+      accessAdminUsageMonths = [];
       renderAccessAdminUsage();
     }
   }
@@ -1592,7 +1628,7 @@ function renderAccessAdminUsage() {
   if (adminUsageEmpty) {
     adminUsageEmpty.textContent = adminUsageLoadError
       ? "No se pudo cargar el uso."
-      : (USAGE_RANGE_EMPTY[days] || USAGE_RANGE_EMPTY[1]);
+      : (USAGE_RANGE_EMPTY[days] || USAGE_RANGE_EMPTY[0]);
     adminUsageEmpty.classList.toggle("hidden", !showEmpty);
     adminUsageEmpty.hidden = !showEmpty;
   }
@@ -1600,6 +1636,11 @@ function renderAccessAdminUsage() {
     if (adminUsageSub) adminUsageSub.textContent = "";
     if (adminUsageModulesBody) adminUsageModulesBody.innerHTML = "";
     if (adminUsagePeopleBody) adminUsagePeopleBody.innerHTML = "";
+    if (adminUsageMonthsBody) adminUsageMonthsBody.innerHTML = "";
+    if (adminUsageMonths) {
+      adminUsageMonths.classList.add("hidden");
+      adminUsageMonths.hidden = true;
+    }
     return;
   }
 
@@ -1622,8 +1663,12 @@ function renderAccessAdminUsage() {
 
   if (adminUsageSub) {
     const people = byPerson.size;
+    const monthN = accessAdminUsageMonths.length;
+    const monthHint = days === 0 && monthN > 0
+      ? ` · ${monthN} ${monthN === 1 ? "mes" : "meses"}`
+      : "";
     adminUsageSub.textContent =
-      `${people} ${people === 1 ? "persona" : "personas"} · ${totalHits} ${totalHits === 1 ? "apertura" : "aperturas"}`;
+      `${people} ${people === 1 ? "persona" : "personas"} · ${totalHits} ${totalHits === 1 ? "apertura" : "aperturas"}${monthHint}`;
   }
 
   if (adminUsageModulesBody) {
@@ -1668,7 +1713,7 @@ function renderAccessAdminUsage() {
             `<span class="st2-admin-usage-chip">${escapeHtml(formatUsageModule(m.module))}`
             + `<span class="st2-admin-usage-chip-n">${escapeHtml(String(m.hits))}</span></span>`)
           .join("");
-        const daysHint = days > 1 && p.activeDays > 0
+        const daysHint = (days === 0 || days > 1) && p.activeDays > 0
           ? `<span class="st2-admin-usage-days">${escapeHtml(String(p.activeDays))} ${p.activeDays === 1 ? "día" : "días"}</span>`
           : "";
         return `<tr>
@@ -1678,6 +1723,32 @@ function renderAccessAdminUsage() {
         </tr>`;
       })
       .join("");
+  }
+
+  const months = Array.isArray(accessAdminUsageMonths) ? accessAdminUsageMonths : [];
+  const showMonths = months.length > 0 && (days === 0 || days >= 15);
+  if (adminUsageMonths && adminUsageMonthsBody) {
+    adminUsageMonths.classList.toggle("hidden", !showMonths);
+    adminUsageMonths.hidden = !showMonths;
+    if (!showMonths) {
+      adminUsageMonthsBody.innerHTML = "";
+    } else {
+      adminUsageMonthsBody.innerHTML = months.map((m) => {
+        const chips = (m.breakdown || [])
+          .slice(0, 8)
+          .map((b) =>
+            `<span class="st2-admin-usage-chip">${escapeHtml(formatUsageModule(b.module))}`
+            + `<span class="st2-admin-usage-chip-n">${escapeHtml(String(b.hits))}</span></span>`)
+          .join("");
+        return `<article class="st2-admin-usage-month">
+          <div class="st2-admin-usage-month-head">
+            <strong class="st2-admin-usage-month-title">${escapeHtml(formatUsageMonthLabel(m.month))}</strong>
+            <span class="st2-admin-usage-month-meta">${escapeHtml(String(m.hits))} apert. · ${escapeHtml(String(m.people))} pers. · ${escapeHtml(String(m.modules))} mód.</span>
+          </div>
+          <div class="st2-admin-usage-chips">${chips || "<span class=\"st2-admin-usage-month-empty\">Sin detalle</span>"}</div>
+        </article>`;
+      }).join("");
+    }
   }
 }
 

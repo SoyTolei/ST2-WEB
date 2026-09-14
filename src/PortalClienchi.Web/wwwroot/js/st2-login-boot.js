@@ -1,7 +1,7 @@
 /**
- * Boot temprano: wallpaper de login + Lightfall del splash (no espera a app.js).
+ * Boot temprano: wallpaper Silk del login + Lightfall del splash (no espera a app.js).
  */
-import { startLoginTopography, stopLoginTopography, initLoginTopography } from "./st2-topography.js?v=20260907b";
+import { startLoginSilk, stopLoginSilk, initLoginSilk } from "./st2-silk.js?v=20260914a";
 import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907c";
 import { initSplashLightfall, startSplashLightfall, stopSplashLightfall } from "./st2-lightfall.js?v=20260907b";
 import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907d";
@@ -11,7 +11,13 @@ import { initClickSpark } from "./st2-click-spark.js?v=20260910a";
 const restoring = document.body.classList.contains("st2-access-restoring");
 
 initBorderGlowCards();
-initLoginTopography();
+initLoginSilk({
+  speed: 9.2,
+  scale: 1.2,
+  color: "#dc6d20",
+  noiseIntensity: 1.5,
+  rotation: 0.27,
+});
 initSuiteGlitchText();
 initClickSpark({
   sparkColor: "auto",
@@ -42,10 +48,10 @@ initSplashLightfall({
 
 if (!restoring) {
   stopSplashLightfall();
-  startLoginTopography();
+  startLoginSilk();
   document.dispatchEvent(new CustomEvent("st2:access-gate-shown"));
 } else {
-  stopLoginTopography();
+  stopLoginSilk();
   startSplashLightfall();
   initSplashDecryptedText();
 }

@@ -1077,8 +1077,7 @@ public sealed class AppAccessRepository
         cmd.Parameters.AddWithValue("$module", mod);
         cmd.Parameters.AddWithValue("$now", now);
         cmd.ExecuteNonQuery();
-
-        PurgeOldUsage(conn);
+        // Sin purge: el historial de uso se conserva para comparar meses / años.
     }
 
     /// <summary>
@@ -1099,56 +1098,55 @@ public sealed class AppAccessRepository
         return removed;
     }
 
-    /// <summary>Mantiene solo los últimos 30 días de uso.</summary>
-    private static void PurgeOldUsage(SqliteConnection conn)
-    {
-        var cutoff = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone)
-            .Date.AddDays(-30)
-            .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM app_access_usage WHERE day_ar < $cutoff";
-        cmd.Parameters.AddWithValue("$cutoff", cutoff);
-        cmd.ExecuteNonQuery();
-    }
+    /// <summary>0 = todo el historial; 1/3/7/15/30 = ventana corta.</summary>
+    public const int UsageAllDays = 0;
 
-    /// <summary>Días de retención del uso; los rangos del panel no pueden pedir más.</summary>
-    public const int UsageMaxDays = 30;
+    /// <summary>Rangos del panel: todo + hoy, 3, 7, 15 y 30 días calendario AR.</summary>
+    public static readonly int[] UsageRangeDays = [0, 1, 3, 7, 15, 30];
 
-    /// <summary>Rangos del panel: hoy, 3, 7, 15 y 30 días calendario AR.</summary>
-    public static readonly int[] UsageRangeDays = [1, 3, 7, 15, 30];
-
-    /// <summary>Acepta solo los chips del panel; cualquier otro valor cae a hoy.</summary>
+    /// <summary>Acepta solo los chips del panel; cualquier otro valor cae a todo.</summary>
     public static int NormalizeUsageDays(int days) =>
-        Array.IndexOf(UsageRangeDays, days) >= 0 ? days : 1;
+        Array.IndexOf(UsageRangeDays, days) >= 0 ? days : UsageAllDays;
 
-    /// <summary>Primer día (calendario argentino) incluido en una ventana de N días.</summary>
-    private static string UsageCutoffDay(int days)
+    /// <summary>Primer día incluido; null = sin corte (todo el historial).</summary>
+    private static string? UsageCutoffDay(int days)
     {
         var span = NormalizeUsageDays(days);
+        if (span == UsageAllDays) return null;
         return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ArgentinaTimeZone)
             .Date.AddDays(-(span - 1))
             .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
     /// <summary>
-    /// Uso agregado por persona y módulo en los últimos N días. Se agrupa en la
-    /// consulta para que el payload no crezca con el rango.
+    /// Uso agregado por persona y módulo. days=0 → historial completo.
     /// </summary>
-    public IReadOnlyList<AppAccessUsageDto> ListUsage(int days, int limit = 400)
+    public IReadOnlyList<AppAccessUsageDto> ListUsage(int days, int limit = 800)
     {
         if (!StorageReady) return Array.Empty<AppAccessUsageDto>();
-        var take = Math.Clamp(limit, 1, 1000);
+        var take = Math.Clamp(limit, 1, 2000);
+        var cutoff = UsageCutoffDay(days);
         using var conn = Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            SELECT email, module, SUM(hits) AS hits, MIN(first_at) AS first_at, MAX(last_at) AS last_at
-            FROM app_access_usage
-            WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
-            GROUP BY email, module
-            ORDER BY MAX(last_at) DESC
-            LIMIT $limit
-            """;
-        cmd.Parameters.AddWithValue("$cutoff", UsageCutoffDay(days));
+        cmd.CommandText = cutoff is null
+            ? """
+                SELECT email, module, SUM(hits) AS hits, MIN(first_at) AS first_at, MAX(last_at) AS last_at
+                FROM app_access_usage
+                WHERE lower(email) <> lower($owner)
+                GROUP BY email, module
+                ORDER BY MAX(last_at) DESC
+                LIMIT $limit
+                """
+            : """
+                SELECT email, module, SUM(hits) AS hits, MIN(first_at) AS first_at, MAX(last_at) AS last_at
+                FROM app_access_usage
+                WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
+                GROUP BY email, module
+                ORDER BY MAX(last_at) DESC
+                LIMIT $limit
+                """;
+        if (cutoff is not null)
+            cmd.Parameters.AddWithValue("$cutoff", cutoff);
         cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
         cmd.Parameters.AddWithValue("$limit", take);
 
@@ -1170,23 +1168,31 @@ public sealed class AppAccessRepository
     }
 
     /// <summary>
-    /// Días distintos con actividad por persona en la ventana. Sin esto, un rango
-    /// de 30 días no distingue a quien entró todos los días de quien entró una vez.
+    /// Días distintos con actividad por persona en la ventana.
     /// </summary>
     public IReadOnlyDictionary<string, int> ListUsageActiveDays(int days)
     {
         var map = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         if (!StorageReady) return map;
 
+        var cutoff = UsageCutoffDay(days);
         using var conn = Open();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            SELECT email, COUNT(DISTINCT day_ar)
-            FROM app_access_usage
-            WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
-            GROUP BY email
-            """;
-        cmd.Parameters.AddWithValue("$cutoff", UsageCutoffDay(days));
+        cmd.CommandText = cutoff is null
+            ? """
+                SELECT email, COUNT(DISTINCT day_ar)
+                FROM app_access_usage
+                WHERE lower(email) <> lower($owner)
+                GROUP BY email
+                """
+            : """
+                SELECT email, COUNT(DISTINCT day_ar)
+                FROM app_access_usage
+                WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
+                GROUP BY email
+                """;
+        if (cutoff is not null)
+            cmd.Parameters.AddWithValue("$cutoff", cutoff);
         cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -1196,6 +1202,96 @@ public sealed class AppAccessRepository
         }
 
         return map;
+    }
+
+    /// <summary>Totales por mes calendario AR (yyyy-MM), más reciente primero.</summary>
+    public IReadOnlyList<AppAccessUsageMonthDto> ListUsageByMonth(int days = 0)
+    {
+        if (!StorageReady) return Array.Empty<AppAccessUsageMonthDto>();
+        var cutoff = UsageCutoffDay(days);
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = cutoff is null
+            ? """
+                SELECT substr(day_ar, 1, 7) AS month,
+                       SUM(hits) AS hits,
+                       COUNT(DISTINCT email) AS people,
+                       COUNT(DISTINCT module) AS modules
+                FROM app_access_usage
+                WHERE lower(email) <> lower($owner)
+                GROUP BY substr(day_ar, 1, 7)
+                ORDER BY month DESC
+                """
+            : """
+                SELECT substr(day_ar, 1, 7) AS month,
+                       SUM(hits) AS hits,
+                       COUNT(DISTINCT email) AS people,
+                       COUNT(DISTINCT module) AS modules
+                FROM app_access_usage
+                WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
+                GROUP BY substr(day_ar, 1, 7)
+                ORDER BY month DESC
+                """;
+        if (cutoff is not null)
+            cmd.Parameters.AddWithValue("$cutoff", cutoff);
+        cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
+
+        var list = new List<AppAccessUsageMonthDto>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new AppAccessUsageMonthDto
+            {
+                Month = reader.IsDBNull(0) ? "" : reader.GetString(0),
+                Hits = reader.IsDBNull(1) ? 0 : reader.GetInt32(1),
+                People = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
+                Modules = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+            });
+        }
+
+        return list;
+    }
+
+    /// <summary>Detalle módulo×mes para el desglose del historial.</summary>
+    public IReadOnlyList<AppAccessUsageMonthModuleDto> ListUsageModulesByMonth(int days = 0)
+    {
+        if (!StorageReady) return Array.Empty<AppAccessUsageMonthModuleDto>();
+        var cutoff = UsageCutoffDay(days);
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = cutoff is null
+            ? """
+                SELECT substr(day_ar, 1, 7) AS month, module, SUM(hits) AS hits, COUNT(DISTINCT email) AS people
+                FROM app_access_usage
+                WHERE lower(email) <> lower($owner)
+                GROUP BY substr(day_ar, 1, 7), module
+                ORDER BY month DESC, hits DESC
+                """
+            : """
+                SELECT substr(day_ar, 1, 7) AS month, module, SUM(hits) AS hits, COUNT(DISTINCT email) AS people
+                FROM app_access_usage
+                WHERE day_ar >= $cutoff AND lower(email) <> lower($owner)
+                GROUP BY substr(day_ar, 1, 7), module
+                ORDER BY month DESC, hits DESC
+                """;
+        if (cutoff is not null)
+            cmd.Parameters.AddWithValue("$cutoff", cutoff);
+        cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
+
+        var list = new List<AppAccessUsageMonthModuleDto>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new AppAccessUsageMonthModuleDto
+            {
+                Month = reader.IsDBNull(0) ? "" : reader.GetString(0),
+                Module = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                Hits = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
+                People = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+            });
+        }
+
+        return list;
     }
 
     public void AddOwnerNotice(string kind, string targetEmail, string actorEmail, string? message = null)
@@ -1439,6 +1535,22 @@ public sealed class AppAccessUsageDto
     public int Hits { get; init; }
     public string FirstAt { get; init; } = "";
     public string LastAt { get; init; } = "";
+}
+
+public sealed class AppAccessUsageMonthDto
+{
+    public string Month { get; init; } = "";
+    public int Hits { get; init; }
+    public int People { get; init; }
+    public int Modules { get; init; }
+}
+
+public sealed class AppAccessUsageMonthModuleDto
+{
+    public string Month { get; init; } = "";
+    public string Module { get; init; } = "";
+    public int Hits { get; init; }
+    public int People { get; init; }
 }
 
 public sealed class AccessSummaryDto
