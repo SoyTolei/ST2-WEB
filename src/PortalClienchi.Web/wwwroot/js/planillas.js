@@ -2042,6 +2042,9 @@ export function initPlanillas() {
   document.addEventListener("st2:view-as-changed", syncPlanillasHeroEaster);
   document.addEventListener("st2:session-changed", syncAguaEgg);
   document.addEventListener("st2:view-as-changed", syncAguaEgg);
+  document.addEventListener("st2:view-as-changed", () => {
+    updateSistemaUi();
+  });
   showView("menu", { history: "none" });
 
   return Promise.all([refreshModuleFlags({ baseline: true }), loadConfig()]).then(async () => {

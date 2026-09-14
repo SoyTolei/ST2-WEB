@@ -3904,14 +3904,30 @@ function startAccessProfilePreview(email, modulesOverride = null) {
   if (!current || current.isPending) return;
   const displayName = formatAccessDisplayName(current.email, current.displayNameOverride);
   const run = () => {
+    // Sin reload: el hash #/planillas + reload dejaba /admin#/planillas,
+    // el primer boot se rompía y el banner recién aparecía tras un F5.
     startViewAsProfile({
       email: current.email,
       displayName,
       modules: modulesOverride || current.modules || {},
       st2Admin: !!current.isSt2Admin,
     });
-    window.location.hash = "#/planillas";
-    window.location.reload();
+    closeAccessModulesModal();
+    try {
+      if (window.location.hash) {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `${window.location.pathname}${window.location.search}`,
+        );
+      }
+    } catch { /* ignore */ }
+    syncViewAsBanner();
+    syncAdminTabVisibility();
+    syncStackedToastGreetings();
+    document.dispatchEvent(new CustomEvent("st2:session-changed"));
+    navigateTab("planillas", { history: "replace" });
+    goPlanillasHome({ history: "none" });
   };
   // Auditoría best-effort; la vista previa no depende del POST.
   fetch("/api/access/view-as", {
@@ -5180,6 +5196,15 @@ function navigateTab(tabId, { history = "push" } = {}) {
 
 function applyTopTabEntry() {
   if (applyAboutFromPath()) return;
+
+  // Si hay vista previa sin ADMIN WEB, no reabrir /admin (p. ej. F5 con URL vieja).
+  if (getViewAsProfile() && !isSt2SuperAdmin()) {
+    const path = normalizeShellPath(window.location.pathname);
+    if (path === ADMIN_PATH || path === "/tolei") {
+      navigateTab("planillas", { history: "replace" });
+      return;
+    }
+  }
 
   const tab = tabFromPath(window.location.pathname);
   if (tab === "planillas") return;
