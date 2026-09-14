@@ -12,8 +12,7 @@ let src = fs.readFileSync(srcPath, "utf8");
 // Drop React + CSS imports
 src = src.replace(/^import \{ useEffect, useRef, useState \} from 'react';\r?\n/, "");
 src = src.replace(/^import \{ draw, effect, frame, init, sampler, surface, target, uniforms \} from 'vgpu';\r?\n/, "");
-src = src.replace(/^import ['\"]\.\/AeroShards\.css['\"];\r?\n+/m, "");
-src = src.replace(/^import ['\"]\.\/AeroShards\.css['\"];\r?\n+/gm, "");
+src = src.replace(/^import '\.\/AeroShards\.css';\r?\n\r?\n/, "");
 
 const header = `/**
  * AeroShards (vanilla) — fondo WebGPU del splash ST2.
