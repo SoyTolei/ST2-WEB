@@ -4,9 +4,6 @@
  */
 import { draw, effect, frame, init, sampler, surface, target, uniforms } from "./vendor/vgpu.js?v=0.4.1";
 
-
-import './AeroShards.css';
-
 const PLACEMENTS = { right: 0, left: 1, center: 2, full: 3 };
 const MATERIALS = { pearl: 0, chrome: 1, satin: 2 };
 const INTERACTIONS = { none: 0, repel: 1, attract: 2 };

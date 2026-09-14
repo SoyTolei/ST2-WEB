@@ -1,10 +1,8 @@
 /**
  * Splash AeroShards — arranca/para según restauración de sesión.
+ * Import dinámico: si WebGPU/vgpu falla, no tumba el boot del login.
  */
-import { mountAeroShards, DEFAULT_PROPS } from "./st2-aero-shards-core.js?v=20260914a";
-
 const SPLASH_PROPS = {
-  ...DEFAULT_PROPS,
   backgroundColor: "#000000",
   shardColor: "#F97316",
   accentColor: "#EF4444",
@@ -38,6 +36,8 @@ const SPLASH_PROPS = {
 
 let handle = null;
 let opts = { ...SPLASH_PROPS };
+let fallbackTimer = 0;
+let starting = false;
 
 function prefersReducedMotion() {
   try {
@@ -51,49 +51,91 @@ function webGpuAvailable() {
   return typeof navigator !== "undefined" && !!navigator.gpu;
 }
 
-export function startSplashAero(options = {}) {
-  opts = { ...SPLASH_PROPS, ...options };
-  const host = document.getElementById("st2-splash-aero");
+function hostEl() {
+  return document.getElementById("st2-splash-aero");
+}
+
+function showFallback(host, reason) {
   if (!host) return;
+  if (reason) console.warn("[st2-aero-shards]", reason);
+  host.classList.add("is-fallback");
+  host.classList.add("is-ready");
+}
 
-  if (prefersReducedMotion() || !webGpuAvailable()) {
-    host.classList.add("is-fallback");
-    host.classList.add("is-ready");
-    return;
+function clearFallbackTimer() {
+  if (fallbackTimer) {
+    clearTimeout(fallbackTimer);
+    fallbackTimer = 0;
   }
+}
 
+export async function startSplashAero(options = {}) {
+  opts = { ...SPLASH_PROPS, ...options };
+  const host = hostEl();
+  if (!host || starting) return;
   if (handle) {
     handle.update(opts);
     return;
   }
 
-  host.classList.remove("is-fallback");
-  handle = mountAeroShards(host, {
-    ...opts,
-    onError: (err) => {
-      console.warn("[st2-aero-shards]", err);
-      host.classList.add("is-fallback");
-      host.classList.add("is-ready");
-      try {
-        handle?.destroy();
-      } catch {
-        /* ignore */
-      }
-      handle = null;
-    },
-  });
+  if (prefersReducedMotion() || !webGpuAvailable()) {
+    showFallback(host, !webGpuAvailable() ? "WebGPU no disponible" : "reduced-motion");
+    return;
+  }
+
+  starting = true;
+  // Mientras carga el GPU, el fallback naranja evita pantalla negra.
+  host.classList.add("is-fallback");
   host.classList.add("is-ready");
+  clearFallbackTimer();
+  fallbackTimer = window.setTimeout(() => {
+    if (!handle) showFallback(host, "timeout arranque AeroShards");
+  }, 2500);
+
+  try {
+    const mod = await import("./st2-aero-shards-core.js?v=20260914b");
+    if (!document.body.classList.contains("st2-access-restoring")) {
+      clearFallbackTimer();
+      starting = false;
+      return;
+    }
+    handle = mod.mountAeroShards(host, {
+      ...opts,
+      onError: (err) => {
+        showFallback(host, err);
+        try { handle?.destroy(); } catch { /* ignore */ }
+        handle = null;
+      },
+    });
+    // Cuando el canvas pinta, sacamos el fallback sólido.
+    const watchReady = () => {
+      const root = handle?.root;
+      if (!root) return;
+      if (root.dataset.ready === "true") {
+        clearFallbackTimer();
+        host.classList.remove("is-fallback");
+        return;
+      }
+      requestAnimationFrame(watchReady);
+    };
+    requestAnimationFrame(watchReady);
+  } catch (err) {
+    showFallback(host, err);
+    handle = null;
+  } finally {
+    starting = false;
+  }
 }
 
 export function stopSplashAero() {
+  clearFallbackTimer();
+  starting = false;
   if (handle) {
-    try {
-      handle.destroy();
-    } catch {
-      /* ignore */
-    }
+    try { handle.destroy(); } catch { /* ignore */ }
     handle = null;
   }
+  const host = hostEl();
+  host?.classList.remove("is-fallback", "is-ready");
 }
 
 export function initSplashAero(options = {}) {
@@ -101,7 +143,7 @@ export function initSplashAero(options = {}) {
 
   const sync = () => {
     if (document.body.classList.contains("st2-access-restoring")) {
-      startSplashAero(opts);
+      void startSplashAero(opts);
     } else {
       stopSplashAero();
     }
@@ -112,6 +154,6 @@ export function initSplashAero(options = {}) {
     if (!document.body.classList.contains("st2-access-restoring")) stopSplashAero();
   });
   if (document.body.classList.contains("st2-access-restoring")) {
-    startSplashAero(opts);
+    void startSplashAero(opts);
   }
 }

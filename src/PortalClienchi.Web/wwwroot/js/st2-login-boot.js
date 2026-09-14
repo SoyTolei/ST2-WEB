@@ -3,7 +3,7 @@
  */
 import { startLoginSilk, stopLoginSilk, initLoginSilk } from "./st2-silk.js?v=20260914a";
 import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907c";
-import { initSplashAero, startSplashAero, stopSplashAero } from "./st2-splash-aero.js?v=20260914a";
+import { initSplashAero, startSplashAero, stopSplashAero } from "./st2-splash-aero.js?v=20260914b";
 import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907d";
 import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260910b";
 import { initClickSpark } from "./st2-click-spark.js?v=20260910a";

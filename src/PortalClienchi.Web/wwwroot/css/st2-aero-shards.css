@@ -40,8 +40,9 @@
 
 .st2-splash-aero.is-fallback {
   background:
-    radial-gradient(ellipse 70% 55% at 50% 40%, rgba(249, 115, 22, 0.38) 0%, transparent 58%),
-    radial-gradient(ellipse 50% 40% at 70% 70%, rgba(239, 68, 68, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 55% at 50% 40%, rgba(249, 115, 22, 0.55) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 40% at 70% 70%, rgba(239, 68, 68, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 35% at 25% 75%, rgba(249, 115, 22, 0.2) 0%, transparent 50%),
     #000000;
 }
 
