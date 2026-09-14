@@ -231,27 +231,12 @@ export async function ensureAppAccess() {
       document.getElementById("st2-access-gate")?.classList.add("hidden");
     }
 
-    // Anticolgado: si la restauración no termina (p. ej. efecto pesado en splash),
-    // no dejar “Ver como” / reload eternos en Cargando.
-    let stuckTimer = 0;
-    if (hasHint) {
-      stuckTimer = window.setTimeout(() => {
-        if (!document.body.classList.contains("st2-access-restoring")) return;
-        console.warn("[st2] Restauración demorada: liberando splash.");
-        document.body.classList.remove("st2-access-restoring");
-      }, 8000);
+    const synced = await syncPlanUserSession();
+    if (synced) {
+      unlockAppShell();
+      return synced;
     }
-
-    try {
-      const synced = await syncPlanUserSession();
-      if (synced) {
-        unlockAppShell();
-        return synced;
-      }
-      return waitForAccessGate();
-    } finally {
-      if (stuckTimer) window.clearTimeout(stuckTimer);
-    }
+    return waitForAccessGate();
   })().finally(() => {
     accessPromise = null;
   });

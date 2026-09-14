@@ -110,15 +110,15 @@
       font: 700 2.55rem/1.1 "Segoe UI", system-ui, sans-serif;
       white-space: nowrap;
     }
-    /* Splash: sin flash naranja antes de Lightfall */
+    /* Splash: sin flash antes de AeroShards */
     body.st2-access-restoring .st2-boot-splash {
-      background: #1a0a04 !important;
+      background: #000000 !important;
     }
-    #st2-splash-lightfall {
-      background: #1a0a04;
+    #st2-splash-aero {
+      background: #000000;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260914d"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260914c"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20260914a"/>
@@ -130,20 +130,22 @@
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-border-glow.css?v=20260907c"/>
-  <link rel="stylesheet" href="/css/st2-lightfall.css?v=20260914d"/>
+  <link rel="stylesheet" href="/css/st2-aero-shards.css?v=20260914b"/>
   <link rel="stylesheet" href="/css/st2-silk.css?v=20260914a"/>
   <link rel="stylesheet" href="/css/st2-glitch-text.css?v=20260907d"/>
   <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260910b"/>
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260907o"/>
+  <link rel="modulepreload" href="/js/vendor/vgpu.js?v=0.4.1"/>
+  <link rel="modulepreload" href="/js/st2-aero-shards-core.js?v=20260914b"/>
+  <link rel="modulepreload" href="/js/st2-splash-aero.js?v=20260914b"/>
   <link rel="modulepreload" href="/js/st2-silk.js?v=20260914a"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260907c"/>
-  <link rel="modulepreload" href="/js/st2-lightfall.js?v=20260914d"/>
   <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907d"/>
   <link rel="modulepreload" href="/js/st2-decrypted-text.js?v=20260910b"/>
   <link rel="modulepreload" href="/js/st2-click-spark.js?v=20260910a"/>
-  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260914d"/>
+  <link rel="modulepreload" href="/js/st2-login-boot.js?v=20260914c"/>
 </head>
 <body class="st2-access-pending">
 <script>
@@ -153,11 +155,11 @@
     }
   } catch (e) { /* ignore */ }
 </script>
-  <script type="module" src="/js/st2-login-boot.js?v=20260914d"></script>
+  <script type="module" src="/js/st2-login-boot.js?v=20260914c"></script>
   <div id="st2-light-rays" class="st2-light-rays" aria-hidden="true"></div>
   <sonner-toaster id="st2-sonner" position="top-right" rich-colors close-button visible-toasts="5" container-aria-label="Notificaciones"></sonner-toaster>
   <div id="st2-boot-splash" class="st2-boot-splash" aria-hidden="true">
-    <div id="st2-splash-lightfall" class="st2-splash-lightfall" aria-hidden="true"></div>
+    <div id="st2-splash-aero" class="st2-splash-aero" aria-hidden="true"></div>
     <div class="st2-boot-splash-brand">
       <span class="st2-boot-splash-st2-mark" aria-hidden="true">
         <span class="st2-boot-splash-st">ST</span><sup class="st2-boot-splash-sup">2</sup>
@@ -2734,6 +2736,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260914d" type="module"></script>
+  <script src="/js/app.js?v=20260914a" type="module"></script>
 </body>
 </html>
