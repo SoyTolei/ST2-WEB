@@ -804,13 +804,15 @@ body.portal-tab-active.st2-has-update.st2-has-modules-update.st2-has-tools-updat
 .tab-bar {
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 4px;
-  padding: 8px;
+  gap: 6px;
+  padding: 10px 12px;
+  min-height: 58px;
   margin: 0 auto 14px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 18px;
   box-shadow:
     0 1px 2px rgba(26, 31, 46, 0.04),
     0 8px 24px rgba(26, 31, 46, 0.05);
@@ -844,9 +846,10 @@ body.portal-tab-active.portal-context-active .tab-bar {
   font-size: 13.5px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  padding: 9px 16px;
+  padding: 11px 18px;
+  min-height: 42px;
   margin: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition:
     background 0.18s ease,
@@ -5993,9 +5996,9 @@ body.st2-access-restoring .st2-boot-splash {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 22px;
+  gap: 24px;
   flex-wrap: nowrap;
-  min-height: 6.2rem;
+  min-height: 7rem;
 }
 
 .st2-access-brand-head {
@@ -6011,7 +6014,7 @@ body.st2-access-restoring .st2-boot-splash {
   display: inline-flex;
   align-items: flex-start;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 5.55rem;
+  font-size: 6.45rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -6067,7 +6070,7 @@ body.st2-access-restoring .st2-boot-splash {
 .st2-boot-splash-suite {
   margin: 0;
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 5rem;
+  font-size: 5.85rem;
   font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1.1;
@@ -6150,11 +6153,11 @@ body.st2-access-restoring .st2-boot-splash {
   }
 
   .st2-boot-splash-st2-mark {
-    font-size: 3.85rem;
+    font-size: 4.35rem;
   }
 
   .st2-boot-splash-suite {
-    font-size: 3.45rem;
+    font-size: 3.9rem;
   }
 
   .st2-boot-splash-status {

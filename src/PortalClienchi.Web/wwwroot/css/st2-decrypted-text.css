@@ -32,3 +32,11 @@
   letter-spacing: inherit;
   text-transform: inherit;
 }
+
+.st2-boot-splash-suite.st2-decrypt .st2-decrypt-revealed {
+  opacity: 1;
+}
+
+.st2-boot-splash-suite.st2-decrypt .st2-decrypt-char.is-encrypted {
+  opacity: 0.55;
+}

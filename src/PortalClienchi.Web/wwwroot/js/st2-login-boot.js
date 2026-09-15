@@ -4,7 +4,7 @@
 import { startLoginSilk, stopLoginSilk, startSplashSilk, stopSplashSilk, initLoginSilk } from "./st2-silk.js?v=20260915a";
 import { initBorderGlowCards } from "./st2-border-glow.js?v=20260907c";
 import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907d";
-import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260915a";
+import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260915b";
 import { initClickSpark } from "./st2-click-spark.js?v=20260910a";
 
 const restoring = document.body.classList.contains("st2-access-restoring");

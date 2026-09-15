@@ -224,17 +224,17 @@ export function initSplashDecryptedText() {
 
   const suite = document.querySelector(".st2-boot-splash-suite");
   if (suite) {
-    // Toda la palabra scramblea junta (sin revelar la S al primer tick).
+    // Scramble corto + pausa larga: se lee “Suite Web” la mayor parte del tiempo.
     mountDecryptedText(suite, {
       text: "Suite Web",
-      speed: 58,
-      maxIterations: 22,
+      speed: 34,
+      maxIterations: 8,
       sequential: false,
       revealDirection: "start",
       animateOn: "view",
       loop: true,
-      loopPause: 1100,
-      characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$",
+      loopPause: 2600,
+      characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
       encryptedClassName: "st2-decrypt-encrypted",
       className: "st2-decrypt-revealed",
     });
