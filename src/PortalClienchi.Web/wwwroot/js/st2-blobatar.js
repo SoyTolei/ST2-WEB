@@ -102,7 +102,7 @@ export function mountSessionBlobatar(email) {
       parts = _parts(seed, {
         animate: "always",
         background: false,
-        size: 80,
+        size: 96,
         expression,
       });
     } catch {
@@ -113,12 +113,12 @@ export function mountSessionBlobatar(email) {
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 100 100");
-    svg.setAttribute("width", "40");
-    svg.setAttribute("height", "40");
+    svg.setAttribute("width", "48");
+    svg.setAttribute("height", "48");
     svg.setAttribute("aria-hidden", "true");
     svg.classList.add("st2-session-blobatar");
     applyPartsToSvg(svg, parts);
-    svg.style.setProperty("--mo-track-travel", "4.2px");
+    svg.style.setProperty("--mo-track-travel", "4.8px");
 
     const root = document.createElementNS("http://www.w3.org/2000/svg", "g");
     if (parts.cls) root.setAttribute("class", parts.cls);

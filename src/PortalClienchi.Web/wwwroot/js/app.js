@@ -2727,14 +2727,14 @@ function syncAboutToolsBadge() {
   syncAboutToolsVisibility();
   if (!userCanSeeDesktopToolDownloads()) return;
 
-  const newer = listNewTools();
-  const hasNew = newer.length > 0;
+  // Solo toast/notificación: sin badge "Nuevo" en el botón Acerca de.
   if (aboutToolsBadge) {
-    aboutToolsBadge.classList.toggle("hidden", !hasNew);
-    aboutToolsBadge.setAttribute("aria-hidden", hasNew ? "false" : "true");
-    aboutToolsBadge.title = hasNew ? "Nueva versión de Herramientas SQL para descargar" : "";
+    aboutToolsBadge.classList.add("hidden");
+    aboutToolsBadge.setAttribute("aria-hidden", "true");
+    aboutToolsBadge.title = "";
   }
 
+  const newer = listNewTools();
   const msg = toolsUpdateMessage(newer);
   hideToolsTopBanner();
   renderToolsToast(newer, msg);

@@ -195,25 +195,42 @@ function displayNameFromEmail(email) {
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
   const nameEl = document.getElementById("st2-session-name");
-  const mailEl = document.getElementById("st2-session-mail");
+  const logoutBtn = document.getElementById("st2-session-logout");
   if (!el) return;
   if (cachedEmail) {
     const pretty = (cachedDisplayName || "").trim() || displayNameFromEmail(cachedEmail);
     if (nameEl) nameEl.textContent = pretty || cachedEmail;
-    if (mailEl) mailEl.textContent = cachedEmail;
-    if (!nameEl && !mailEl) el.textContent = cachedEmail;
     el.title = cachedEmail;
     el.classList.remove("hidden");
+    if (logoutBtn) {
+      logoutBtn.hidden = false;
+      logoutBtn.removeAttribute("hidden");
+    }
     mountSessionBlobatar(cachedEmail);
   } else {
     if (nameEl) nameEl.textContent = "";
-    if (mailEl) mailEl.textContent = "";
-    if (!nameEl && !mailEl) el.textContent = "";
     el.removeAttribute("title");
     el.classList.add("hidden");
+    if (logoutBtn) {
+      logoutBtn.hidden = true;
+      logoutBtn.setAttribute("hidden", "");
+    }
     mountSessionBlobatar("");
   }
 }
+
+function bindSessionLogout() {
+  const logoutBtn = document.getElementById("st2-session-logout");
+  if (!logoutBtn || logoutBtn.dataset.bound === "1") return;
+  logoutBtn.dataset.bound = "1";
+  logoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    void clearPlanUserSession();
+  });
+}
+
+bindSessionLogout();
 
 export function isAppAccessGranted() {
   return appUnlocked && !!cachedEmail;
@@ -529,12 +546,27 @@ export async function ensurePlanUser({ forcePrompt = false } = {}) {
 }
 
 export async function clearPlanUserSession() {
-  await fetch("/api/planillas/session", { method: "DELETE", ...SESSION_OPTS });
+  try {
+    await fetch("/api/planillas/session", { method: "DELETE", ...SESSION_OPTS });
+  } catch {
+    /* ignore */
+  }
   cachedEmail = null;
   cachedDisplayName = null;
   setSessionBirthdayMmDd("");
+  try {
+    localStorage.removeItem("st2_plan_user_hint");
+  } catch {
+    /* ignore */
+  }
+  try {
+    sessionStorage.removeItem("st2-view-as-profile-v1");
+  } catch {
+    /* ignore */
+  }
   updatePlanUserBadge();
   lockAppShell();
+  document.dispatchEvent(new CustomEvent("st2:session-changed"));
   return ensureAppAccess();
 }
 
