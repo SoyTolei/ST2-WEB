@@ -94,12 +94,18 @@ html.st2-theme-dark .st2-session-name {
   color: #ffedd5;
 }
 
-html.st2-theme-dark .st2-session-logout {
-  color: rgba(251, 146, 60, 0.9);
+html.st2-theme-dark .st2-session-menu {
+  background: #0a0705;
+  border-color: rgba(251, 146, 60, 0.34);
 }
 
-html.st2-theme-dark .st2-session-logout:hover {
-  color: #fdba74;
+html.st2-theme-dark .st2-session-menu-item {
+  color: #ffedd5;
+}
+
+html.st2-theme-dark .st2-session-menu-item:hover {
+  background: rgba(249, 115, 22, 0.18);
+  color: #fff7ed;
 }
 
 html.st2-theme-dark .st2-session-avatar-host {

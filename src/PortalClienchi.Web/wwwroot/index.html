@@ -118,10 +118,10 @@
       background: #1a0e06;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260915e"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260915f"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260915c"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260915d"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260910e"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260910b"/>
@@ -181,8 +181,10 @@
       <span id="st2-session-email" class="st2-session-email hidden" aria-label="Usuario conectado">
         <span id="st2-session-avatar-host" class="st2-session-avatar-host" hidden aria-hidden="true"></span>
         <span class="st2-session-text">
-          <span id="st2-session-name" class="st2-session-name"></span>
-          <button type="button" id="st2-session-logout" class="st2-session-logout" hidden>Cerrar sesión</button>
+          <button type="button" id="st2-session-name" class="st2-session-name" aria-haspopup="menu" aria-expanded="false" aria-controls="st2-session-menu"></button>
+          <div id="st2-session-menu" class="st2-session-menu hidden" role="menu" hidden>
+            <button type="button" id="st2-session-logout" class="st2-session-menu-item" role="menuitem">Cerrar sesión</button>
+          </div>
         </span>
       </span>
     </div>

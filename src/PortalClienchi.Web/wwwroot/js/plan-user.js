@@ -195,38 +195,74 @@ function displayNameFromEmail(email) {
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
   const nameEl = document.getElementById("st2-session-name");
-  const logoutBtn = document.getElementById("st2-session-logout");
   if (!el) return;
+  closeSessionMenu();
   if (cachedEmail) {
     const pretty = (cachedDisplayName || "").trim() || displayNameFromEmail(cachedEmail);
     if (nameEl) nameEl.textContent = pretty || cachedEmail;
     el.title = cachedEmail;
     el.classList.remove("hidden");
-    if (logoutBtn) {
-      logoutBtn.hidden = false;
-      logoutBtn.removeAttribute("hidden");
-    }
     mountSessionBlobatar(cachedEmail);
   } else {
     if (nameEl) nameEl.textContent = "";
     el.removeAttribute("title");
     el.classList.add("hidden");
-    if (logoutBtn) {
-      logoutBtn.hidden = true;
-      logoutBtn.setAttribute("hidden", "");
-    }
     mountSessionBlobatar("");
   }
 }
 
+function closeSessionMenu() {
+  const menu = document.getElementById("st2-session-menu");
+  const nameEl = document.getElementById("st2-session-name");
+  if (menu) {
+    menu.classList.add("hidden");
+    menu.setAttribute("hidden", "");
+  }
+  if (nameEl) nameEl.setAttribute("aria-expanded", "false");
+}
+
+function openSessionMenu() {
+  const menu = document.getElementById("st2-session-menu");
+  const nameEl = document.getElementById("st2-session-name");
+  if (!menu || !cachedEmail) return;
+  menu.classList.remove("hidden");
+  menu.removeAttribute("hidden");
+  if (nameEl) nameEl.setAttribute("aria-expanded", "true");
+}
+
+function toggleSessionMenu() {
+  const menu = document.getElementById("st2-session-menu");
+  if (!menu) return;
+  if (menu.classList.contains("hidden") || menu.hasAttribute("hidden")) openSessionMenu();
+  else closeSessionMenu();
+}
+
 function bindSessionLogout() {
+  const nameEl = document.getElementById("st2-session-name");
   const logoutBtn = document.getElementById("st2-session-logout");
-  if (!logoutBtn || logoutBtn.dataset.bound === "1") return;
-  logoutBtn.dataset.bound = "1";
-  logoutBtn.addEventListener("click", (e) => {
+  const card = document.getElementById("st2-session-email");
+  if (!nameEl || nameEl.dataset.bound === "1") return;
+  nameEl.dataset.bound = "1";
+
+  nameEl.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
+    toggleSessionMenu();
+  });
+
+  logoutBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeSessionMenu();
     void clearPlanUserSession();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!card?.contains(e.target)) closeSessionMenu();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeSessionMenu();
   });
 }
 
