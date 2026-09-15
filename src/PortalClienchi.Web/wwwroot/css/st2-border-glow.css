@@ -181,6 +181,41 @@
   padding: 38px 36px 30px;
 }
 
+/* Tab bar: BorderGlow en el bloque entero (no por pestaña). */
+.tab-bar.border-glow-card {
+  display: block;
+  background: var(--card-bg, #1a1410);
+  border: 1px solid rgba(251, 146, 60, 0.22);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.36);
+  padding: 10px 12px;
+  overflow: visible;
+}
+
+.tab-bar.border-glow-card.border-glow-card--light {
+  border-color: var(--border, #e2e6ef);
+  box-shadow:
+    0 1px 2px rgba(26, 31, 46, 0.04),
+    0 8px 24px rgba(26, 31, 46, 0.05);
+}
+
+.tab-bar.border-glow-card > .border-glow-inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 38px;
+  overflow: visible;
+  padding: 0;
+}
+
+/* Gooey filter/text viven como hermanos del inner (después de init). */
+.tab-bar.border-glow-card > .st2-gooey-effect {
+  z-index: 1;
+}
+
 .st2-access-card.border-glow-card::before {
   /* BorderGlow usa ::before; anula el radial legacy del access-card */
   inset: 0;

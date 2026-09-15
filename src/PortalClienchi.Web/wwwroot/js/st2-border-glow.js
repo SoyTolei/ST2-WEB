@@ -242,6 +242,7 @@ function themeBackground() {
 /** Login. */
 export function initBorderGlowCards() {
   enhanceAccessCardGlow({ animated: false });
+  enhanceTabBarGlow();
 
   document.addEventListener("st2:access-gate-shown", () => {
     enhanceAccessCardGlow({ animated: true });
@@ -250,10 +251,31 @@ export function initBorderGlowCards() {
   // Tema: actualizar fondo de cards glow.
   document.addEventListener("st2:theme-changed", () => {
     document.querySelectorAll(".border-glow-card[data-border-glow-ready='1']").forEach((el) => {
-      const bg = themeBackground();
+      const bg = el.classList.contains("tab-bar") ? tabBarBackground() : themeBackground();
       el.style.setProperty("--card-bg", bg);
       el.classList.toggle("border-glow-card--light", isLightColor(bg));
     });
+  });
+}
+
+function tabBarBackground() {
+  return document.documentElement.classList.contains("st2-theme-dark") ? "#1a1410" : "#ffffff";
+}
+
+function enhanceTabBarGlow() {
+  const tabBar = document.querySelector(".tab-bar");
+  if (!tabBar) return;
+  enhanceBorderGlow(tabBar, {
+    backgroundColor: tabBarBackground(),
+    borderRadius: 18,
+    glowRadius: 28,
+    glowIntensity: 1.05,
+    edgeSensitivity: 22,
+    coneSpread: 22,
+    fillOpacity: 0.4,
+    animated: false,
+    colors: ["#fb923c", "#f97316", "#fdba74"],
+    glowColor: "24 95 58",
   });
 }
 
