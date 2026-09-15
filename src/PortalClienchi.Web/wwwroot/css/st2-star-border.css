@@ -1,0 +1,79 @@
+/* StarBorder (vanilla) — borde animado naranja ST2 para pestañas. */
+
+.tab-btn.st2-star-border {
+  --st2-star-color: #f97316;
+  --st2-star-speed: 5.5s;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  z-index: 5;
+}
+
+.tab-btn.st2-star-border::before,
+.tab-btn.st2-star-border::after {
+  content: "";
+  position: absolute;
+  width: 300%;
+  height: 55%;
+  border-radius: 50%;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle, var(--st2-star-color), transparent 12%);
+}
+
+.tab-btn.st2-star-border::before {
+  bottom: -14px;
+  right: -250%;
+  animation: st2-star-movement-bottom var(--st2-star-speed) linear infinite alternate;
+}
+
+.tab-btn.st2-star-border::after {
+  top: -14px;
+  left: -250%;
+  animation: st2-star-movement-top var(--st2-star-speed) linear infinite alternate;
+}
+
+.tab-btn.st2-star-border > * {
+  position: relative;
+  z-index: 1;
+}
+
+.tab-btn.st2-star-border.active {
+  --st2-star-color: #fb923c;
+}
+
+.tab-btn.st2-star-border.active::before,
+.tab-btn.st2-star-border.active::after {
+  opacity: 0.85;
+}
+
+@keyframes st2-star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes st2-star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-btn.st2-star-border::before,
+  .tab-btn.st2-star-border::after {
+    animation: none;
+    opacity: 0;
+  }
+}

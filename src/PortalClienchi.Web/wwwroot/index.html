@@ -118,10 +118,10 @@
       background: #1a0e06;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20260915c"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20260915d"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260915a"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260915b"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20260910e"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20260910b"/>
@@ -129,6 +129,7 @@
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260915b"/>
+  <link rel="stylesheet" href="/css/st2-star-border.css?v=20260915a"/>
   <link rel="stylesheet" href="/css/st2-border-glow.css?v=20260907c"/>
   <link rel="stylesheet" href="/css/st2-silk.css?v=20260915a"/>
   <link rel="stylesheet" href="/css/st2-glitch-text.css?v=20260907d"/>
@@ -241,7 +242,7 @@
 
   <div class="main-shell">
     <nav class="tab-bar" role="tablist" aria-label="Módulos ST2">
-      <button type="button" class="tab-btn active" data-tab="planillas" role="tab" aria-selected="true">
+      <button type="button" class="tab-btn st2-star-border active" data-tab="planillas" role="tab" aria-selected="true">
         <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
         Sistema de Planillas
         <span class="tab-reminder-slot">
@@ -249,7 +250,7 @@
         </span>
       </button>
       <div class="tab-portal-wrap">
-        <button type="button" class="tab-btn" data-tab="thom" role="tab">
+        <button type="button" class="tab-btn st2-star-border" data-tab="thom" role="tab">
           <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 9V7c0-1.1-.9-2-2-2h-3c0-1.66-1.34-3-3-3S9 3.34 9 5H6c-1.1 0-2 .9-2 2v2c-1.66 0-3 1.34-3 3s1.34 3 3 3v4c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4c1.66 0 3-1.34 3-3s-1.34-3-3-3zM7.5 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5zM16 13c-.83 0-1.5-.67-1.5-1.5S15.17 10 16 10s1.5.67 1.5 1.5S16.83 13 16 13z"/></svg>
           THOM
           <span class="tab-reminder-badge tab-reminder-badge--hint hidden" data-reminder="thom" aria-hidden="true">!</span>
@@ -262,13 +263,13 @@
           </div>
         </div>
       </div>
-      <button type="button" class="tab-btn" data-tab="ai" role="tab">
+      <button type="button" class="tab-btn st2-star-border" data-tab="ai" role="tab">
         <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>
         AI Platform
         <span class="tab-reminder-badge tab-reminder-badge--hint hidden" data-reminder="ai" aria-hidden="true">!</span>
       </button>
       <div class="tab-portal-wrap">
-        <button type="button" class="tab-btn" data-tab="portal" role="tab" id="tabPortalBtn" aria-label="Portal Cliente">
+        <button type="button" class="tab-btn st2-star-border" data-tab="portal" role="tab" id="tabPortalBtn" aria-label="Portal Cliente">
           <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
           <span id="tabPortalBtnLabel">Portal Cliente</span>
         </button>
@@ -276,7 +277,7 @@
           <div id="portalSistemaPills" class="st2-context-seg" role="tablist" aria-label="Portal Cliente"></div>
         </div>
       </div>
-      <button type="button" class="tab-btn tab-btn-admin hidden" data-tab="admin" role="tab" id="tabAdminBtn" aria-hidden="true" title="Panel de administración de accesos">
+      <button type="button" class="tab-btn st2-star-border tab-btn-admin hidden" data-tab="admin" role="tab" id="tabAdminBtn" aria-hidden="true" title="Panel de administración de accesos">
         <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-1 6h2v2h-2V7zm0 4h2v6h-2v-6z"/></svg>
         ADMIN
         <span class="tab-reminder-badge hidden" id="st2-admin-tab-badge" aria-hidden="true">1</span>
@@ -1956,7 +1957,7 @@
               </ul>
               <p class="st2-about-notice-aside">No constituye un producto oficial ni licenciado por Thomson Reuters.</p>
               <section class="st2-about-suggest" aria-label="Sugerencias para la web">
-                <h4 class="st2-about-suggest-title">¿Viste algún error o tenés una sugerencia? 👀</h4>
+                <h4 class="st2-about-suggest-title">¿Tenés alguna sugerencia y/o viste algún error? 👀</h4>
                 <a
                   class="st2-about-suggest-btn st2-about-suggest-btn--teams"
                   href="https://teams.microsoft.com/l/chat/0/0?users=leonel.gallo@thomsonreuters.com"
@@ -1984,9 +1985,9 @@
           </div>
         </section>
 
-        <section id="st2-about-tools" class="st2-about-tools" aria-label="Herramientas de la suite">
+        <section id="st2-about-tools" class="st2-about-tools" aria-label="Descargas de la suite">
           <div class="st2-about-tools-head">
-            <h3 class="st2-about-tools-title">Herramientas</h3>
+            <h3 class="st2-about-tools-title">Descargas</h3>
           </div>
           <p id="st2-about-tools-clave-hint" class="st2-about-tools-hint">
             Para abrir <strong>Herramientas SQL</strong> (.exe) y <strong>ST2.BAT</strong>, la clave es
@@ -1997,10 +1998,8 @@
               <div class="st2-about-tool-main">
                 <span class="st2-about-tool-name">ST2 - Herramientas SQL</span>
                 <span class="st2-about-tool-desc" data-tool-desc>Aplicativo para realizar backups, restaurar bases, correr scripts y queries dentro de Bejerman.</span>
-                <span class="st2-about-tool-date" data-tool-date="sql" hidden></span>
               </div>
               <div class="st2-about-tool-actions">
-                <span class="st2-about-tool-new" data-tool-new="sql" hidden>Nueva</span>
                 <span class="st2-about-tool-size" data-tool-size="sql" hidden></span>
                 <button type="button" class="st2-about-tool-dl" data-tool-download="sql" disabled>
                   <span class="st2-about-tool-dl-icon" aria-hidden="true">
@@ -2008,16 +2007,15 @@
                   </span>
                   <span data-tool-dl-label>Pronto</span>
                 </button>
+                <span class="st2-about-tool-date" data-tool-date="sql" hidden></span>
               </div>
             </article>
             <article class="st2-about-tool" id="st2-about-tool-bat" data-tool="bat">
               <div class="st2-about-tool-main">
                 <span class="st2-about-tool-name">ST2.BAT <span class="st2-about-tool-tag">herramienta usada por la mesa de ayuda técnica</span></span>
                 <span class="st2-about-tool-desc" data-tool-desc>Consola de automatización de procesos, habilitación, solución de incidencias, verificación de permisos y registro de archivos.</span>
-                <span class="st2-about-tool-date" data-tool-date="bat" hidden></span>
               </div>
               <div class="st2-about-tool-actions">
-                <span class="st2-about-tool-new" data-tool-new="bat" hidden>Nueva</span>
                 <span class="st2-about-tool-size" data-tool-size="bat" hidden></span>
                 <button type="button" class="st2-about-tool-dl" data-tool-download="bat" disabled>
                   <span class="st2-about-tool-dl-icon" aria-hidden="true">
@@ -2025,14 +2023,8 @@
                   </span>
                   <span data-tool-dl-label>Pronto</span>
                 </button>
+                <span class="st2-about-tool-date" data-tool-date="bat" hidden></span>
               </div>
-            </article>
-            <article class="st2-about-tool is-current">
-              <div class="st2-about-tool-main">
-                <span class="st2-about-tool-name">ST2.WEB</span>
-                <span class="st2-about-tool-desc">La suite web de planillas automáticas y otras herramientas para mesa de ayuda.</span>
-              </div>
-              <span class="st2-about-tool-meta st2-about-tool-meta-web" id="st2-about-web-meta" title="Estás usando esta aplicación web">Esta web</span>
             </article>
           </div>
           <p id="st2-about-tools-status" class="st2-about-tools-status hidden" aria-live="polite"></p>

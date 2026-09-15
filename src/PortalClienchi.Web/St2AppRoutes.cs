@@ -28,6 +28,7 @@ public static class St2AppRoutes
             or "/tolei"
             or "/portal"
             or "/about"
+            or "/acercade"
             or "/herramientas"
             || p.StartsWith("/oportunidad/", StringComparison.OrdinalIgnoreCase)
             || p.StartsWith("/transferencia/", StringComparison.OrdinalIgnoreCase)

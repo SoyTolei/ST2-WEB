@@ -2439,16 +2439,6 @@ function paintToolDatesFromMeta() {
   }
 }
 
-function uploadedLabelFor(id, tool) {
-  const raw = String(tool?.uploadedLabel || "").trim();
-  if (raw) return raw.startsWith("Subido") ? raw : `Subido ${raw}`;
-  const when = formatToolUpdatedAt(tool);
-  if (when) return `Subido ${when}`;
-  const meta = metaToolLabel(id);
-  if (meta) return meta.startsWith("Subido") ? meta : `Subido ${meta}`;
-  return "";
-}
-
 function listNewTools() {
   const seen = readSeenToolVersions();
   // Avisos home: solo SQL. BAT queda en Acerca de (mesa técnica).
@@ -2472,15 +2462,16 @@ function isToolVersionNew(id) {
   return !!stamp && seen[id] !== stamp;
 }
 
-function formatDateTimeAr(d) {
+function formatDateShortAr(d) {
   if (!(d instanceof Date) || Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString("es-AR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
+}
+
+function formatDateTimeAr(d) {
+  return formatDateShortAr(d);
 }
 
 function parseToolUpdatedAt(tool) {
@@ -2503,7 +2494,41 @@ function parseToolUpdatedAt(tool) {
 }
 
 function formatToolUpdatedAt(tool) {
-  return formatDateTimeAr(parseToolUpdatedAt(tool));
+  return formatDateShortAr(parseToolUpdatedAt(tool));
+}
+
+function compactUploadedLabel(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return "";
+  // "Subido 15 sep 2026, 14:30" / ISO / ya compacto → dd/mm/aa
+  const iso = text.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1].slice(-2)}`;
+  const dmy = text.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if (dmy) {
+    const dd = dmy[1].padStart(2, "0");
+    const mm = dmy[2].padStart(2, "0");
+    const yy = dmy[3].length === 4 ? dmy[3].slice(-2) : dmy[3].padStart(2, "0");
+    return `${dd}/${mm}/${yy}`;
+  }
+  const parsed = Date.parse(text.replace(/^Subido\s+/i, ""));
+  if (!Number.isNaN(parsed)) return formatDateShortAr(new Date(parsed));
+  return text.replace(/^Subido\s+/i, "").replace(/,\s*\d{1,2}:\d{2}.*$/, "").trim();
+}
+
+function uploadedLabelFor(id, tool) {
+  const raw = String(tool?.uploadedLabel || "").trim();
+  if (raw) {
+    const compact = compactUploadedLabel(raw);
+    return compact ? `Subido ${compact}` : "";
+  }
+  const when = formatToolUpdatedAt(tool);
+  if (when) return `Subido ${when}`;
+  const meta = metaToolLabel(id);
+  if (meta) {
+    const compact = compactUploadedLabel(meta);
+    return compact ? `Subido ${compact}` : "";
+  }
+  return "";
 }
 
 function toolDisplayName(id) {
@@ -2755,13 +2780,11 @@ function renderAboutTools() {
     const tool = (cachedTools || []).find((t) => t.id === id);
     const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
     const sizeEl = card?.querySelector(`[data-tool-size="${id}"]`);
-    const newEl = card?.querySelector(`[data-tool-new="${id}"]`);
     const dateEl = card?.querySelector(`[data-tool-date="${id}"]`);
     const btn = card?.querySelector(`[data-tool-download="${id}"]`);
     const meta = copy[id];
 
     if (!tool?.available) {
-      if (newEl) newEl.hidden = true;
       const fallbackDate = uploadedLabelFor(id, tool);
       if (dateEl) {
         dateEl.hidden = !fallbackDate;
@@ -2781,7 +2804,6 @@ function renderAboutTools() {
     }
 
     const label = tool.fileName || meta.file;
-    if (newEl) newEl.hidden = !isToolVersionNew(id);
     const when = uploadedLabelFor(id, tool);
     if (dateEl) {
       dateEl.hidden = !when;
@@ -3297,11 +3319,6 @@ function bindAboutToolsUi() {
 
 function showAbout({ history = "push" } = {}) {
   aboutRouteOpen = true;
-  const webMeta = document.getElementById("st2-about-web-meta");
-  if (webMeta) {
-    webMeta.textContent = getAboutVersionLabel();
-    webMeta.title = "Estás usando esta aplicación web";
-  }
   applyAboutUpdated();
   syncAboutToolsVisibility();
   bindAboutToolsUi();
@@ -3349,7 +3366,7 @@ function hideAbout({ history = "restore" } = {}) {
 
 function isHerramientasPath(pathname) {
   const p = normalizeShellPath(pathname);
-  return p === "/about" || p === "/herramientas";
+  return p === "/about" || p === "/acercade" || p === "/herramientas";
 }
 
 function syncAboutHistory(mode = "push") {
@@ -3361,7 +3378,7 @@ function syncAboutHistory(mode = "push") {
     portalId: activePortalId,
     about: true,
   };
-  const dest = current === "/about" ? "/about" : "/herramientas";
+  const dest = "/about";
   if (mode === "replace" || isHerramientasPath(current)) {
     window.history.replaceState(state, "", dest);
   } else {

@@ -246,9 +246,12 @@ html.st2-theme-dark .st2-about-tool-desc,
 html.st2-theme-dark .st2-about-tools-hint,
 html.st2-theme-dark .st2-about-tool-tag,
 html.st2-theme-dark .st2-about-tool-size,
-html.st2-theme-dark .st2-about-tool-date,
 html.st2-theme-dark .st2-about-updated {
   color: var(--text-muted);
+}
+
+html.st2-theme-dark .st2-about-tool-date {
+  color: #f8fafc;
 }
 
 html.st2-theme-dark .st2-about-tool-tag {
