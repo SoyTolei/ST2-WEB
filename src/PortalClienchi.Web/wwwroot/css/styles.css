@@ -56,7 +56,7 @@ html, body {
 .app-header-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
   min-width: 0;
   flex: 1 1 auto;
 }
@@ -243,8 +243,8 @@ html, body {
   z-index: 2;
   flex: 0 0 auto;
   max-width: none;
-  margin-left: 8px;
-  padding-left: 6px;
+  margin-left: 0;
+  padding-left: 4px;
   border-left: none;
 }
 
@@ -270,8 +270,8 @@ html, body {
   font-size: 0.78rem;
   font-weight: 500;
   color: rgba(248, 250, 252, 0.9);
-  padding: 3px 14px 3px 4px;
-  margin: 5px 0;
+  padding: 2px 14px 2px 4px;
+  margin: 0;
   border-radius: 14px;
   isolation: isolate;
   position: relative;

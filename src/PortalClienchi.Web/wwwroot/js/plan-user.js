@@ -192,20 +192,44 @@ function displayNameFromEmail(email) {
     .join(" ");
 }
 
+const VIEW_AS_STORAGE_KEY = "st2-view-as-profile-v1";
+
+/** Perfil de “ver como” (sessionStorage); evita import circular con module-access. */
+function readViewAsIdentity() {
+  try {
+    const raw = sessionStorage.getItem(VIEW_AS_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    const email = String(data?.email || "").trim().toLowerCase();
+    if (!email) return null;
+    return {
+      email,
+      displayName: String(data?.displayName || "").trim(),
+    };
+  } catch {
+    return null;
+  }
+}
+
 function updateSessionEmailDisplay() {
   const el = document.getElementById("st2-session-email");
   const nameEl = document.getElementById("st2-session-name");
   if (!el) return;
   closeSessionMenu();
-  if (cachedEmail) {
-    const pretty = (cachedDisplayName || "").trim() || displayNameFromEmail(cachedEmail);
-    if (nameEl) nameEl.textContent = pretty || cachedEmail;
-    el.title = cachedEmail;
+  const viewAs = readViewAsIdentity();
+  const email = viewAs?.email || cachedEmail;
+  if (email) {
+    const pretty =
+      (viewAs?.displayName || cachedDisplayName || "").trim() || displayNameFromEmail(email);
+    if (nameEl) nameEl.textContent = pretty || email;
+    el.title = viewAs ? `Vista previa · ${email}` : email;
+    el.classList.toggle("st2-session-email--view-as", !!viewAs);
     el.classList.remove("hidden");
-    mountSessionBlobatar(cachedEmail);
+    mountSessionBlobatar(email);
   } else {
     if (nameEl) nameEl.textContent = "";
     el.removeAttribute("title");
+    el.classList.remove("st2-session-email--view-as");
     el.classList.add("hidden");
     mountSessionBlobatar("");
   }
@@ -242,7 +266,7 @@ function syncSessionThemeMenuLabel() {
   const themeBtn = document.getElementById("st2-session-theme");
   if (!themeBtn) return;
   const dark = document.documentElement.classList.contains("st2-theme-dark");
-  themeBtn.textContent = dark ? "Modo claro" : "Modo oscuro";
+  themeBtn.textContent = dark ? "☀️ Modo claro" : "🌙 Modo oscuro";
 }
 
 function bindSessionLogout() {
@@ -252,6 +276,7 @@ function bindSessionLogout() {
   const card = document.getElementById("st2-session-email");
   if (!menuBtn || menuBtn.dataset.bound === "1") return;
   menuBtn.dataset.bound = "1";
+  if (logoutBtn) logoutBtn.textContent = "🚪 Cerrar sesión";
 
   menuBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -289,6 +314,13 @@ function bindSessionLogout() {
 }
 
 bindSessionLogout();
+
+document.addEventListener("st2:view-as-changed", () => {
+  updateSessionEmailDisplay();
+});
+document.addEventListener("st2:session-changed", () => {
+  updateSessionEmailDisplay();
+});
 
 export function isAppAccessGranted() {
   return appUnlocked && !!cachedEmail;
