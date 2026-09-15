@@ -238,11 +238,11 @@ export function buildWelcomeTour(ctx) {
     id: "welcome",
     steps: [
       {
-        selector: "#themeToggleBtn",
-        title: "Tema claro u oscuro",
-        body: "Cambiá el modo visual cuando quieras. La preferencia queda guardada en este navegador.",
+        selector: "#st2-session-menu-btn",
+        title: "Tu perfil",
+        body: "Tocá el avatar para abrir el menú: ahí está el modo claro/oscuro y también podés cerrar sesión.",
         placement: "bottom",
-        when: () => visible("#themeToggleBtn"),
+        when: () => visible("#st2-session-menu-btn"),
       },
       ...buildTopNavTabSteps(ctx),
       {
@@ -260,11 +260,11 @@ export function buildPlanillasMenuTour(ctx, sistema) {
   const label = sistemaLabel(sistema);
   const steps = [
     {
-      selector: "#themeToggleBtn",
-      title: "Tema claro u oscuro",
-      body: "Cambiá el modo visual cuando quieras. La preferencia queda guardada en este navegador.",
+      selector: "#st2-session-menu-btn",
+      title: "Tu perfil",
+      body: "Tocá el avatar para abrir el menú: ahí está el modo claro/oscuro y también podés cerrar sesión.",
       placement: "bottom",
-      when: () => visible("#themeToggleBtn"),
+      when: () => visible("#st2-session-menu-btn"),
     },
     ...buildTopNavTabSteps(ctx),
   ];

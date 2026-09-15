@@ -67,6 +67,19 @@ html, body {
   border-left: 1px solid rgba(255, 255, 255, 0.12);
 }
 
+/* Toggle de tema vive en el menú del blobatar; se deja en DOM para tours/API. */
+.st2-theme-switch-sr {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
 .app-header::after {
   content: "";
   position: absolute;
@@ -257,10 +270,12 @@ html, body {
   font-size: 0.78rem;
   font-weight: 500;
   color: rgba(248, 250, 252, 0.9);
-  padding: 4px 14px 4px 5px;
+  padding: 3px 14px 3px 4px;
+  margin: 5px 0;
   border-radius: 14px;
   isolation: isolate;
   position: relative;
+  align-self: center;
   background: var(--st2-session-card-bg);
   border: 1px solid rgb(255 255 255 / 15%);
   line-height: 1.15;
@@ -286,6 +301,24 @@ html, body {
   z-index: 1;
 }
 
+.st2-session-avatar-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+.st2-session-avatar-btn:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.55);
+  outline-offset: 2px;
+}
+
 .st2-session-avatar-host {
   width: 48px;
   height: 48px;
@@ -299,6 +332,7 @@ html, body {
   box-shadow:
     inset 0 0 0 1px rgba(251, 146, 60, 0.28),
     0 0 0 1px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 }
 
 .st2-session-avatar-host[hidden] {
@@ -319,33 +353,16 @@ html, body {
   justify-content: center;
   gap: 0;
   min-width: 0;
-  position: relative;
 }
 
 .st2-session-name {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  font: inherit;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: #ffedd5;
-  cursor: pointer;
-  text-align: left;
   line-height: 1.2;
-}
-
-.st2-session-name:hover,
-.st2-session-name[aria-expanded="true"] {
-  color: #fff7ed;
-}
-
-.st2-session-name:focus-visible {
-  outline: 1px solid rgba(251, 146, 60, 0.55);
-  outline-offset: 2px;
-  border-radius: 4px;
+  cursor: default;
+  user-select: none;
 }
 
 .st2-session-mail {
@@ -357,7 +374,7 @@ html, body {
   top: calc(100% + 8px);
   left: 0;
   z-index: 90;
-  min-width: 148px;
+  min-width: 158px;
   padding: 5px;
   border: 1px solid rgba(251, 146, 60, 0.28);
   border-radius: 10px;

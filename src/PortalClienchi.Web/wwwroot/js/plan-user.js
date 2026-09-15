@@ -213,21 +213,22 @@ function updateSessionEmailDisplay() {
 
 function closeSessionMenu() {
   const menu = document.getElementById("st2-session-menu");
-  const nameEl = document.getElementById("st2-session-name");
+  const menuBtn = document.getElementById("st2-session-menu-btn");
   if (menu) {
     menu.classList.add("hidden");
     menu.setAttribute("hidden", "");
   }
-  if (nameEl) nameEl.setAttribute("aria-expanded", "false");
+  if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
 }
 
 function openSessionMenu() {
   const menu = document.getElementById("st2-session-menu");
-  const nameEl = document.getElementById("st2-session-name");
+  const menuBtn = document.getElementById("st2-session-menu-btn");
   if (!menu || !cachedEmail) return;
+  syncSessionThemeMenuLabel();
   menu.classList.remove("hidden");
   menu.removeAttribute("hidden");
-  if (nameEl) nameEl.setAttribute("aria-expanded", "true");
+  if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
 }
 
 function toggleSessionMenu() {
@@ -237,17 +238,32 @@ function toggleSessionMenu() {
   else closeSessionMenu();
 }
 
-function bindSessionLogout() {
-  const nameEl = document.getElementById("st2-session-name");
-  const logoutBtn = document.getElementById("st2-session-logout");
-  const card = document.getElementById("st2-session-email");
-  if (!nameEl || nameEl.dataset.bound === "1") return;
-  nameEl.dataset.bound = "1";
+function syncSessionThemeMenuLabel() {
+  const themeBtn = document.getElementById("st2-session-theme");
+  if (!themeBtn) return;
+  const dark = document.documentElement.classList.contains("st2-theme-dark");
+  themeBtn.textContent = dark ? "Modo claro" : "Modo oscuro";
+}
 
-  nameEl.addEventListener("click", (e) => {
+function bindSessionLogout() {
+  const menuBtn = document.getElementById("st2-session-menu-btn");
+  const logoutBtn = document.getElementById("st2-session-logout");
+  const themeBtn = document.getElementById("st2-session-theme");
+  const card = document.getElementById("st2-session-email");
+  if (!menuBtn || menuBtn.dataset.bound === "1") return;
+  menuBtn.dataset.bound = "1";
+
+  menuBtn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     toggleSessionMenu();
+  });
+
+  themeBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById("themeToggleBtn")?.click();
+    syncSessionThemeMenuLabel();
   });
 
   logoutBtn?.addEventListener("click", (e) => {
@@ -264,6 +280,12 @@ function bindSessionLogout() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeSessionMenu();
   });
+
+  document.addEventListener("st2:theme-changed", () => {
+    syncSessionThemeMenuLabel();
+  });
+
+  syncSessionThemeMenuLabel();
 }
 
 bindSessionLogout();
