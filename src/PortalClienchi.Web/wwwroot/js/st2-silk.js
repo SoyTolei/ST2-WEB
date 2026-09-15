@@ -194,13 +194,35 @@ function destroyGl() {
   container = null;
 }
 
+function silkShouldRun() {
+  if (!container || container.closest?.(".hidden")) return false;
+  if (container.id === "st2-splash-silk") {
+    return document.body.classList.contains("st2-access-restoring");
+  }
+  const gate = document.getElementById("st2-access-gate");
+  return !!gate
+    && !gate.classList.contains("hidden")
+    && document.body.classList.contains("st2-access-pending")
+    && !document.body.classList.contains("st2-access-restoring");
+}
+
 function onVisibility() {
   if (document.hidden) stopLoop();
-  else if (
-    container
-    && !container.closest(".hidden")
-    && !document.getElementById("st2-access-gate")?.classList.contains("hidden")
-  ) {
+  else if (silkShouldRun()) startLoop();
+}
+
+function startSilkOn(hostId, options = {}) {
+  opts = { ...DEFAULTS, ...options };
+  const host = document.getElementById(hostId);
+  if (!host) return;
+  if (prefersReducedMotion()) {
+    host.classList.add("is-fallback");
+    return;
+  }
+  if (!gl || container !== host) initGl(host);
+  else {
+    syncUniforms();
+    setSize();
     startLoop();
   }
 }
@@ -275,22 +297,18 @@ function initGl(host) {
 }
 
 export function startLoginSilk(options = {}) {
-  opts = { ...DEFAULTS, ...options };
-  const host = document.getElementById("st2-login-silk");
-  if (!host) return;
-  if (prefersReducedMotion()) {
-    host.classList.add("is-fallback");
-    return;
-  }
-  if (!gl || container !== host) initGl(host);
-  else {
-    syncUniforms();
-    setSize();
-    startLoop();
-  }
+  startSilkOn("st2-login-silk", options);
+}
+
+export function startSplashSilk(options = {}) {
+  startSilkOn("st2-splash-silk", options);
 }
 
 export function stopLoginSilk() {
+  stopLoop();
+}
+
+export function stopSplashSilk() {
   stopLoop();
 }
 
@@ -302,16 +320,22 @@ export function initLoginSilk(options = {}) {
   opts = { ...DEFAULTS, ...options };
 
   const sync = () => {
+    if (document.body.classList.contains("st2-access-restoring")) {
+      startSplashSilk(opts);
+      return;
+    }
     const gate = document.getElementById("st2-access-gate");
     const visible = !!gate && !gate.classList.contains("hidden")
-      && document.body.classList.contains("st2-access-pending")
-      && !document.body.classList.contains("st2-access-restoring");
+      && document.body.classList.contains("st2-access-pending");
     if (visible) startLoginSilk(opts);
     else stopLoginSilk();
   };
 
   document.addEventListener("st2:access-gate-shown", () => startLoginSilk(opts));
-  document.addEventListener("st2:access-gate-hidden", () => stopLoginSilk());
+  document.addEventListener("st2:access-gate-hidden", () => {
+    stopLoginSilk();
+    stopSplashSilk();
+  });
   document.addEventListener("st2:session-changed", sync);
   requestAnimationFrame(sync);
 }

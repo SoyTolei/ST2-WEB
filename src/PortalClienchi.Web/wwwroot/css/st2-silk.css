@@ -1,6 +1,7 @@
-/* Silk wallpaper detrás del login. */
+/* Silk wallpaper detrás del login y del splash de carga. */
 
-.st2-login-silk {
+.st2-login-silk,
+.st2-splash-silk {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -12,6 +13,11 @@
     #1a0e06;
 }
 
+.st2-splash-silk {
+  width: 100%;
+  height: 100%;
+}
+
 .st2-login-silk-canvas {
   display: block;
   width: 100%;
@@ -21,11 +27,13 @@
   transition: opacity 0.4s ease;
 }
 
-.st2-login-silk.is-ready .st2-login-silk-canvas {
+.st2-login-silk.is-ready .st2-login-silk-canvas,
+.st2-splash-silk.is-ready .st2-login-silk-canvas {
   opacity: 1;
 }
 
-.st2-login-silk.is-fallback {
+.st2-login-silk.is-fallback,
+.st2-splash-silk.is-fallback {
   background:
     radial-gradient(ellipse 70% 60% at 20% 30%, rgba(220, 109, 32, 0.5) 0%, transparent 55%),
     radial-gradient(ellipse 60% 50% at 80% 70%, rgba(154, 52, 18, 0.4) 0%, transparent 50%),
@@ -41,4 +49,22 @@
 .st2-access-gate .st2-access-card {
   position: relative;
   z-index: 2;
+}
+
+/* Splash: fondo oscuro hasta el primer frame + texto encima del canvas */
+body.st2-access-restoring .st2-boot-splash {
+  overflow: hidden;
+  background: #1a0e06 !important;
+}
+
+.st2-boot-splash-brand,
+.st2-boot-splash-status {
+  position: relative;
+  z-index: 2;
+}
+
+.st2-boot-splash-status {
+  color: #fff7ed !important;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+  font-weight: 650;
 }
