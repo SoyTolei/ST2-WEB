@@ -806,7 +806,7 @@ body.portal-tab-active.st2-has-update.st2-has-modules-update.st2-has-tools-updat
   justify-content: center;
   flex-wrap: wrap;
   gap: 4px;
-  padding: 8px 8px 6px;
+  padding: 8px;
   margin: 0 auto 14px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--border);
@@ -5995,7 +5995,7 @@ body.st2-access-restoring .st2-boot-splash {
   justify-content: center;
   gap: 22px;
   flex-wrap: nowrap;
-  min-height: 5.4rem;
+  min-height: 6.2rem;
 }
 
 .st2-access-brand-head {
@@ -6011,7 +6011,7 @@ body.st2-access-restoring .st2-boot-splash {
   display: inline-flex;
   align-items: flex-start;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 4.65rem;
+  font-size: 5.55rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -6067,7 +6067,7 @@ body.st2-access-restoring .st2-boot-splash {
 .st2-boot-splash-suite {
   margin: 0;
   font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 4.15rem;
+  font-size: 5rem;
   font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1.1;
@@ -6150,11 +6150,11 @@ body.st2-access-restoring .st2-boot-splash {
   }
 
   .st2-boot-splash-st2-mark {
-    font-size: 3.25rem;
+    font-size: 3.85rem;
   }
 
   .st2-boot-splash-suite {
-    font-size: 2.95rem;
+    font-size: 3.45rem;
   }
 
   .st2-boot-splash-status {

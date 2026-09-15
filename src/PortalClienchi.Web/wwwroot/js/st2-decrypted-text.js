@@ -224,15 +224,16 @@ export function initSplashDecryptedText() {
 
   const suite = document.querySelector(".st2-boot-splash-suite");
   if (suite) {
+    // Toda la palabra scramblea junta (sin revelar la S al primer tick).
     mountDecryptedText(suite, {
       text: "Suite Web",
-      speed: 48,
-      maxIterations: 11,
-      sequential: true,
+      speed: 58,
+      maxIterations: 22,
+      sequential: false,
       revealDirection: "start",
       animateOn: "view",
       loop: true,
-      loopPause: 900,
+      loopPause: 1100,
       characters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$",
       encryptedClassName: "st2-decrypt-encrypted",
       className: "st2-decrypt-revealed",

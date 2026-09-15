@@ -12,13 +12,15 @@
   --st2-gooey-color-2: #f97316;
   --st2-gooey-color-3: #fb923c;
   --st2-gooey-color-4: #fdba74;
-  --st2-gooey-pill: #fff7ed;
+  --st2-gooey-pill: rgba(249, 115, 22, 0.16);
+  --st2-gooey-pill-border: rgba(249, 115, 22, 0.78);
   --st2-gooey-pill-text: #9a3412;
 }
 
 html.st2-theme-dark .st2-gooey-host {
-  --st2-gooey-pill: #fff7ed;
-  --st2-gooey-pill-text: #9a3412;
+  --st2-gooey-pill: rgba(249, 115, 22, 0.18);
+  --st2-gooey-pill-border: rgba(251, 146, 60, 0.85);
+  --st2-gooey-pill-text: #ffedd5;
 }
 
 .tab-bar.st2-gooey-host .tab-btn,
@@ -105,9 +107,10 @@ html.st2-theme-dark .st2-gooey-host {
   inset: 0;
   border-radius: 100vw;
   background: var(--st2-gooey-pill);
+  border: 1.5px solid var(--st2-gooey-pill-border);
   box-shadow:
-    0 2px 10px rgba(234, 88, 12, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    0 2px 12px rgba(234, 88, 12, 0.28),
+    inset 0 1px 0 rgba(255, 247, 237, 0.18);
   transform: scale(1);
   opacity: 0;
   z-index: -1;
