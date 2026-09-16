@@ -88,7 +88,7 @@ function toneClass(tone) {
   return "st2-sonner-ok";
 }
 
-/** Ancla el stack a la izquierda, bajo el blobatar (o el ícono ST2). */
+/** Ancla el stack a la izquierda, justo bajo el blobatar (o el ícono ST2). */
 export function syncSonnerPlacement() {
   const toaster = document.getElementById(TOASTER_ID);
   if (!toaster) return;
@@ -103,30 +103,35 @@ export function syncSonnerPlacement() {
   const anchor = sessionVisible ? session : brand;
 
   if (!anchor) {
-    toaster.style.setProperty("--offset-top", "72px");
+    toaster.style.setProperty("--offset-top", "68px");
     toaster.style.setProperty("--offset-left", "22px");
-    toaster.style.setProperty("--mobile-offset-top", "72px");
+    toaster.style.setProperty("--width", "268px");
+    toaster.style.setProperty("--mobile-offset-top", "68px");
     toaster.style.setProperty("--mobile-offset-left", "12px");
     return;
   }
 
   const rect = anchor.getBoundingClientRect();
-  let top = Math.max(56, Math.round(rect.bottom + 10));
-  const left = Math.max(12, Math.round(rect.left));
+  const top = Math.max(52, Math.round(rect.bottom + 6));
+  const left = Math.max(10, Math.round(rect.left));
 
-  // Bajo la tab bar para no tapar Planillas / resto de tabs.
-  const tabBar = document.querySelector(".main-shell > .tab-bar") || document.querySelector(".tab-bar");
-  if (tabBar) {
-    const tr = tabBar.getBoundingClientRect();
-    if (tr.height > 0 && tr.bottom > 0) {
-      top = Math.max(top, Math.round(tr.bottom + 10));
+  // En 14"/17" no chocar con "Sistema de Planillas": achicar al hueco libre.
+  let width = 268;
+  const firstTab =
+    document.querySelector('.tab-bar .tab-btn[data-tab="planillas"]') ||
+    document.querySelector(".tab-bar .tab-btn");
+  if (firstTab) {
+    const tr = firstTab.getBoundingClientRect();
+    if (tr.left > left) {
+      width = Math.max(200, Math.min(268, Math.round(tr.left - left - 14)));
     }
   }
 
   toaster.style.setProperty("--offset-top", `${top}px`);
   toaster.style.setProperty("--offset-left", `${left}px`);
+  toaster.style.setProperty("--width", `${width}px`);
   toaster.style.setProperty("--mobile-offset-top", `${top}px`);
-  toaster.style.setProperty("--mobile-offset-left", `${Math.max(8, Math.min(left, 16))}px`);
+  toaster.style.setProperty("--mobile-offset-left", `${Math.max(8, Math.min(left, 14))}px`);
 }
 
 /** Solo home de Planillas (menú principal), no otras pestañas ni módulos. */

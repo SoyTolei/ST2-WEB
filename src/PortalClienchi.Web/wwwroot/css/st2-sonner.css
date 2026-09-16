@@ -2,11 +2,11 @@
 
 #st2-sonner {
   z-index: 3200;
-  --border-radius: 18px;
-  --width: 360px;
-  --gap: 12px;
+  --border-radius: 14px;
+  --width: 268px;
+  --gap: 8px;
   /* Defaults; JS los pisa según blobatar / brand */
-  --offset-top: 72px;
+  --offset-top: 68px;
   --offset-right: 16px;
   --offset-bottom: 24px;
   --offset-left: 22px;
@@ -25,9 +25,10 @@ body:not(.st2-sonner-home) #st2-sonner {
  * El host sonner-toast es el box visible; el interior sigue en shadow DOM.
  */
 sonner-toast.st2-sonner-toast {
-  border-radius: 18px !important;
+  border-radius: 14px !important;
   overflow: visible;
   isolation: isolate;
+  font-size: 0.78rem !important;
 }
 
 sonner-toast.st2-sonner-toast.st2-sonner-ok {
@@ -122,7 +123,7 @@ html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-agua {
 
 @media (max-width: 600px) {
   #st2-sonner {
-    --width: min(356px, calc(100vw - 24px));
+    --width: min(268px, calc(100vw - 24px));
   }
 }
 

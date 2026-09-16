@@ -273,10 +273,12 @@ function bindSessionLogout() {
   const menuBtn = document.getElementById("st2-session-menu-btn");
   const logoutBtn = document.getElementById("st2-session-logout");
   const themeBtn = document.getElementById("st2-session-theme");
+  const aboutBtn = document.getElementById("st2-session-about");
   const card = document.getElementById("st2-session-email");
   if (!menuBtn || menuBtn.dataset.bound === "1") return;
   menuBtn.dataset.bound = "1";
   if (logoutBtn) logoutBtn.textContent = "🚪 Cerrar sesión";
+  if (aboutBtn) aboutBtn.textContent = "ℹ️ Acerca de";
 
   menuBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -289,6 +291,13 @@ function bindSessionLogout() {
     e.stopPropagation();
     document.getElementById("themeToggleBtn")?.click();
     syncSessionThemeMenuLabel();
+  });
+
+  aboutBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeSessionMenu();
+    document.getElementById("aboutBtn")?.click();
   });
 
   logoutBtn?.addEventListener("click", (e) => {
