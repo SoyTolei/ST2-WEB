@@ -293,7 +293,8 @@ function bindSessionLogout() {
   themeBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    document.getElementById("themeToggleBtn")?.click();
+    // Sin .click() en #themeToggleBtn: ese click sintético burbujea y cerraba el menú.
+    document.dispatchEvent(new CustomEvent("st2:toggle-theme"));
     syncSessionThemeMenuLabel();
   });
 

@@ -85,6 +85,7 @@ function initThemeFromStorage() {
 }
 
 themeToggleBtn?.addEventListener("click", () => applyTheme(!isDarkTheme()));
+document.addEventListener("st2:toggle-theme", () => applyTheme(!isDarkTheme()));
 initThemeFromStorage();
 const homeBtn = document.getElementById("homeBtn");
 const aboutOverlay = document.getElementById("st2-about-overlay");
