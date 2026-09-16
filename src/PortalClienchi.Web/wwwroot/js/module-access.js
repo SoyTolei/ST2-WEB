@@ -112,7 +112,7 @@ function setModulesBannerVisible(show) {
 function bindModulesBanner() {
   if (modulesBannerBound) return;
   modulesBannerBound = true;
-  // El reload vive en el cartel unificado (#st2-update-reload).
+  // El reload unificado vive en el toast Sonner (ST2_TOAST.update).
 }
 
 function readViewAs() {

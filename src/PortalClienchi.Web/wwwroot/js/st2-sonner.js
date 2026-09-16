@@ -9,6 +9,8 @@ import {
 } from "./st2-toast-greet.js";
 
 export const ST2_TOAST = {
+  /** Versión web / módulos nuevos: siempre arriba del stack. */
+  update: "st2-toast-update",
   tools: "st2-toast-tools",
   blanqueo: "st2-toast-blanqueo",
   /** Avisos personales del solicitante cuando además es confirmador. */
@@ -22,6 +24,7 @@ export const ST2_TOAST = {
 
 /** Orden del stack (saludo solo en el primero). Agua queda afuera. */
 const GREET_STACK = [
+  ST2_TOAST.update,
   ST2_TOAST.tools,
   ST2_TOAST.blanqueo,
   ST2_TOAST.blanqueoMine,
@@ -85,7 +88,7 @@ function toneClass(tone) {
   return "st2-sonner-ok";
 }
 
-/** Ancla el stack justo debajo de Tutorial / Acerca de (y bajo la barra de update si hay). */
+/** Ancla el stack justo debajo de Tutorial / Acerca de. */
 export function syncSonnerPlacement() {
   const toaster = document.getElementById(TOASTER_ID);
   const anchor =
@@ -101,14 +104,7 @@ export function syncSonnerPlacement() {
   }
 
   const rect = anchor.getBoundingClientRect();
-  let top = Math.max(56, Math.round(rect.bottom + 10));
-  if (document.body.classList.contains("st2-has-update")) {
-    const banner = document.getElementById("st2-update-banner");
-    if (banner && !banner.classList.contains("hidden") && !banner.hasAttribute("hidden")) {
-      const br = banner.getBoundingClientRect();
-      if (br.height > 0) top = Math.max(top, Math.round(br.bottom + 12));
-    }
-  }
+  const top = Math.max(56, Math.round(rect.bottom + 10));
   const right = Math.max(10, Math.round(window.innerWidth - rect.right));
   toaster.style.setProperty("--offset-top", `${top}px`);
   toaster.style.setProperty("--offset-right", `${right}px`);
@@ -208,13 +204,6 @@ export function initSt2Sonner() {
     syncSonnerPlacement();
     syncSonnerHomeVisibility();
   });
-  if (typeof ResizeObserver !== "undefined") {
-    const banner = document.getElementById("st2-update-banner");
-    if (banner) {
-      const bro = new ResizeObserver(() => syncSonnerPlacement());
-      bro.observe(banner);
-    }
-  }
 }
 
 /**

@@ -5512,7 +5512,7 @@ let pendingLiveHits = 0;
 let updateCheckerStarted = false;
 /** Banner forzado por permisos nuevos (no lo apaga el check de build). */
 let reloadBannerForced = false;
-/** "hidden" | "banner" — el modal de centro se eliminó. */
+/** "hidden" | "toast" — el banner superior se reemplazó por Sonner. */
 let updateUiMode = "hidden";
 /** Fallback si localStorage/sessionStorage fallan. */
 let memoryDeferredSignal = "";
@@ -5773,32 +5773,37 @@ function reconcileReloadTarget() {
   }
 }
 
-function setUpdateBannerVisible(show) {
-  const banner = document.getElementById("st2-update-banner");
-  if (!banner) return;
-  banner.classList.toggle("hidden", !show);
-  banner.toggleAttribute("hidden", !show);
-  document.body.classList.toggle("st2-has-update", !!show);
+function setUpdateToastVisible(show, signal = "") {
+  document.body.classList.remove("st2-has-update");
+  if (!show) {
+    clearSt2AlertToast(ST2_TOAST.update);
+    return;
+  }
+  const body =
+    signal === "forced:modules"
+      ? "Tenés módulos nuevos habilitados. Recargá para verlos; podés seguir trabajando mientras tanto."
+      : "Hay una versión nueva. Podés seguir trabajando; cuando puedas, recargá.";
+  setSt2AlertToast({
+    id: ST2_TOAST.update,
+    body,
+    tone: "warn",
+    actionLabel: "Recargar",
+    sticky: true,
+    onAction: () => {
+      reloadForUpdate();
+    },
+  });
 }
 
 /**
- * Solo barra superior (sin modal a pantalla completa).
- * @param {"hidden"|"banner"} mode
+ * Notificación sticky en el stack de Sonner (sin barra superior).
+ * @param {"hidden"|"toast"|"banner"} mode
  */
 function setUpdateUiMode(mode) {
-  updateUiMode = mode === "banner" ? "banner" : "hidden";
-  setUpdateBannerVisible(updateUiMode === "banner");
+  updateUiMode = mode === "toast" || mode === "banner" ? "toast" : "hidden";
+  const signal = updateUiMode === "toast" ? currentUpdateSignal() : "";
+  setUpdateToastVisible(updateUiMode === "toast", signal);
   document.dispatchEvent(new CustomEvent("st2:update-ui-changed", { detail: { mode: updateUiMode } }));
-}
-
-function syncUpdateBannerCopy(signal) {
-  const text = document.getElementById("st2-update-banner-text");
-  if (!text) return;
-  if (signal === "forced:modules") {
-    text.textContent = "Tenés módulos nuevos habilitados. Recargá para verlos; podés seguir trabajando mientras tanto.";
-  } else {
-    text.textContent = "Hay una versión nueva. Podés seguir trabajando; cuando puedas, recargá.";
-  }
 }
 
 function showUpdatePrompt() {
@@ -5821,8 +5826,7 @@ function showUpdatePrompt() {
   } else {
     enterUpdateSoftMode();
   }
-  syncUpdateBannerCopy(signal);
-  setUpdateUiMode("banner");
+  setUpdateUiMode("toast");
 
   // Noti desktop 1 vez por build (útil si la pestaña está en segundo plano).
   if (wasHidden && signal.startsWith("build:")) {
@@ -5967,7 +5971,6 @@ function startUpdateChecker() {
   if (updateCheckerStarted) return;
   updateCheckerStarted = true;
   reconcileReloadTarget();
-  document.getElementById("st2-update-reload")?.addEventListener("click", reloadForUpdate);
   const tick = () => {
     void checkAppVersion();
   };
