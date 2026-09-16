@@ -2551,17 +2551,17 @@ function toolsUpdateMessage(newer) {
   const hasSql = list.some((t) => t.id === "sql");
   const hasBat = list.some((t) => t.id === "bat");
   if (hasSql && !hasBat) {
-    return 'hay una nueva versión para descargar del aplicativo para realizar backups "Herramientas SQL"';
+    return "hay una nueva versión de Herramientas SQL para descargar.";
   }
   if (hasBat && !hasSql) {
-    return "hay una nueva versión de ST2.BAT disponible para descargar.";
+    return "hay una nueva versión de ST2.BAT para descargar.";
   }
   const names = list.map((t) => toolPackageLabel(t.id));
   if (names.length === 1) {
-    return `hay una nueva versión de ${names[0]} disponible para descargar.`;
+    return `hay una nueva versión de ${names[0]} para descargar.`;
   }
   const last = names.pop();
-  return `hay nuevas versiones de ${names.join(", ")} y de ${last} disponibles para descargar.`;
+  return `hay nuevas versiones de ${names.join(", ")} y ${last} para descargar.`;
 }
 
 function hideToolsTopBanner() {

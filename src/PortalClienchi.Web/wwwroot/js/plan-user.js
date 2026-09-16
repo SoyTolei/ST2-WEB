@@ -243,6 +243,7 @@ function closeSessionMenu() {
     menu.setAttribute("hidden", "");
   }
   if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("st2-session-menu-open");
 }
 
 function openSessionMenu() {
@@ -253,6 +254,7 @@ function openSessionMenu() {
   menu.classList.remove("hidden");
   menu.removeAttribute("hidden");
   if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
+  document.body.classList.add("st2-session-menu-open");
 }
 
 function toggleSessionMenu() {

@@ -3,13 +3,21 @@
 #st2-sonner {
   z-index: 3200;
   --border-radius: 14px;
-  --width: 268px;
+  --width: 300px;
   --gap: 8px;
   /* Defaults; JS los pisa según blobatar / brand */
   --offset-top: 68px;
   --offset-right: 16px;
   --offset-bottom: 24px;
   --offset-left: 22px;
+}
+
+/* Menú del blobatar abierto: Sonner vive en top-layer (popover) y tapaba el menú. */
+body.st2-session-menu-open #st2-sonner {
+  opacity: 0.18;
+  pointer-events: none;
+  filter: saturate(0.7);
+  transition: opacity 0.18s ease, filter 0.18s ease;
 }
 
 body.st2-access-pending #st2-sonner,
@@ -26,9 +34,40 @@ body:not(.st2-sonner-home) #st2-sonner {
  */
 sonner-toast.st2-sonner-toast {
   border-radius: 14px !important;
-  overflow: visible;
+  overflow: visible !important;
   isolation: isolate;
-  font-size: 0.78rem !important;
+  font-size: 0.8rem !important;
+  /* Cortas = compactas; largas = hasta --width (evita el “vacío” de blanqueo). */
+  width: max-content !important;
+  max-width: var(--width) !important;
+  min-width: 210px !important;
+  height: auto !important;
+}
+
+sonner-toast.st2-sonner-toast::part(frame) {
+  padding: 12px 14px;
+  gap: 8px;
+  align-items: center;
+  overflow-wrap: break-word;
+  line-height: 1.35;
+}
+
+sonner-toast.st2-sonner-toast::part(content) {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+sonner-toast.st2-sonner-toast::part(title) {
+  font-size: 0.8rem;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+sonner-toast.st2-sonner-toast::part(close-button) {
+  transform: translate(-18%, -18%);
 }
 
 sonner-toast.st2-sonner-toast.st2-sonner-ok {
@@ -123,7 +162,7 @@ html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-agua {
 
 @media (max-width: 600px) {
   #st2-sonner {
-    --width: min(268px, calc(100vw - 24px));
+    --width: min(300px, calc(100vw - 24px));
   }
 }
 
@@ -132,7 +171,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action {
   appearance: none;
   flex-shrink: 0;
   align-self: center;
-  margin: 0 0 0 8px;
+  margin: 0 0 0 6px;
   border: 1px solid transparent;
   border-radius: 999px;
   padding: 6px 12px;

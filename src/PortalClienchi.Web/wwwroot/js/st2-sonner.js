@@ -105,7 +105,7 @@ export function syncSonnerPlacement() {
   if (!anchor) {
     toaster.style.setProperty("--offset-top", "68px");
     toaster.style.setProperty("--offset-left", "22px");
-    toaster.style.setProperty("--width", "268px");
+    toaster.style.setProperty("--width", "300px");
     toaster.style.setProperty("--mobile-offset-top", "68px");
     toaster.style.setProperty("--mobile-offset-left", "12px");
     return;
@@ -116,14 +116,14 @@ export function syncSonnerPlacement() {
   const left = Math.max(10, Math.round(rect.left));
 
   // En 14"/17" no chocar con "Sistema de Planillas": achicar al hueco libre.
-  let width = 268;
+  let width = 300;
   const firstTab =
     document.querySelector('.tab-bar .tab-btn[data-tab="planillas"]') ||
     document.querySelector(".tab-bar .tab-btn");
   if (firstTab) {
     const tr = firstTab.getBoundingClientRect();
     if (tr.left > left) {
-      width = Math.max(200, Math.min(268, Math.round(tr.left - left - 14)));
+      width = Math.max(210, Math.min(300, Math.round(tr.left - left - 14)));
     }
   }
 
