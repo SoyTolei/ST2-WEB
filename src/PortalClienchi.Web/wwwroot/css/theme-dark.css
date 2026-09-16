@@ -882,6 +882,9 @@ html.st2-theme-dark .plan-onvio-card .card-mark {
 
 html.st2-theme-dark .plan-onvio-card.selected {
   background: #2a2a2a !important;
+  box-shadow:
+    0 0 0 3px rgba(249, 115, 22, 0.18),
+    0 10px 24px rgba(0, 0, 0, 0.28) !important;
 }
 
 html.st2-theme-dark .plan-onvio-card.selected .plan-onvio-state,
@@ -889,6 +892,7 @@ html.st2-theme-dark .plan-onvio-card.selected .card-mark {
   background: #16a34a !important;
   color: #fff !important;
   border-color: #22c55e !important;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
 html.st2-theme-dark .plan-inline-icon.slate {
@@ -2514,25 +2518,25 @@ html.st2-theme-dark .blanqueo-portal-chip {
 }
 
 html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip {
-  color: #93c5fd;
-  background: rgba(59, 130, 246, 0.16);
-  border-color: rgba(96, 165, 250, 0.38);
+  color: #5eead4;
+  background: rgba(20, 184, 166, 0.18);
+  border-color: rgba(45, 212, 191, 0.48);
 }
 
 html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
-  background: #3b82f6;
-  color: #0b1220;
+  background: #14b8a6;
+  color: #042f2e;
 }
 
 html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip {
-  color: #c4b5fd;
-  background: rgba(139, 92, 246, 0.16);
-  border-color: rgba(167, 139, 250, 0.38);
+  color: #d8b4fe;
+  background: rgba(139, 92, 246, 0.18);
+  border-color: rgba(167, 139, 250, 0.48);
 }
 
 html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip-mark {
   background: #8b5cf6;
-  color: #12081f;
+  color: #1e0a36;
 }
 
 html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip {

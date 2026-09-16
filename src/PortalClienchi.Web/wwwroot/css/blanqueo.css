@@ -966,22 +966,23 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   padding-right: 1px;
 }
 
-/* On Balance — azul */
+/* On Balance — teal (separa claro de ONVIO violeta y Portal naranja) */
 .blanqueo-portal-onbalance .blanqueo-portal-chip {
-  color: #1e3a8a;
-  background: rgba(37, 99, 235, 0.12);
-  border-color: rgba(37, 99, 235, 0.32);
+  color: #0f766e;
+  background: rgba(20, 184, 166, 0.14);
+  border-color: rgba(13, 148, 136, 0.42);
 }
 
 .blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
-  background: #2563eb;
+  background: #0d9488;
+  color: #ecfdf8;
 }
 
 /* ONVIO — violeta */
 .blanqueo-portal-onvio .blanqueo-portal-chip {
   color: #5b21b6;
   background: rgba(109, 40, 217, 0.12);
-  border-color: rgba(109, 40, 217, 0.32);
+  border-color: rgba(109, 40, 217, 0.38);
 }
 
 .blanqueo-portal-onvio .blanqueo-portal-chip-mark {

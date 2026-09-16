@@ -1962,15 +1962,22 @@ body.st2-chile-embed-active #panel-planillas.active {
   gap: 12px;
   background: var(--st2-suite-surface-soft, #fff);
   transition:
-    border-color 0.15s ease,
-    background 0.15s ease,
-    box-shadow 0.15s ease;
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    padding 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 
 .plan-capturas-card:hover {
   border-color: rgba(214, 64, 0, 0.32);
   background: rgba(255, 247, 237, 0.45);
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.08);
+  transform: translateY(-1px);
+}
+
+.plan-capturas-card:active {
+  transform: translateY(0) scale(0.985);
 }
 
 .plan-capturas-card label {
@@ -1989,7 +1996,10 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: 2px solid var(--primary);
   background: #fff4ed;
   padding: 9px 13px;
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+  box-shadow:
+    0 0 0 3px rgba(234, 88, 12, 0.12),
+    0 10px 22px rgba(214, 64, 0, 0.1);
+  transform: translateY(-1px) scale(1.01);
 }
 
 .plan-capturas-mark {
@@ -1999,10 +2009,14 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex-shrink: 0;
   text-align: center;
   line-height: 1;
+  transition:
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 
 .plan-capturas-card.selected .plan-capturas-mark {
   color: #16a34a;
+  transform: scale(1.12);
 }
 
 .plan-capturas-panel {
@@ -3005,6 +3019,11 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: flex;
   align-items: center;
   gap: 8px;
+  transition:
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 .plan-check-badge {
   display: inline-flex;
@@ -3072,6 +3091,9 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin: 0 4px 0 0;
   width: 1.1em;
   text-align: center;
+  transition:
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 .plan-check-btn {
   order: 1;
@@ -3089,9 +3111,21 @@ body.st2-chile-embed-active #panel-planillas.active {
   row-gap: 1px;
   align-items: center;
   text-align: left;
-  transition: opacity 0.12s;
+  transition:
+    opacity 0.2s ease,
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    filter 0.2s ease;
 }
-.plan-check-btn:hover { opacity: 0.92; }
+.plan-check-btn:hover {
+  opacity: 0.96;
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.16);
+}
+.plan-check-btn:active {
+  transform: translateY(0) scale(0.985);
+}
 .plan-check-btn.planilla { background: #7c3aed; }
 .plan-check-btn.mam { background: #2563eb; }
 .plan-check-btn.sdk { background: #d97706; }
@@ -3199,7 +3233,14 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--dark);
-  transition: border-color 0.12s, background 0.12s;
+  transform: translateZ(0);
+  transition:
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    filter 0.2s ease,
+    padding 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 /* Mismo lenguaje visual que adjuntos Bejerman SQL */
 .plan-onvio-card.tone-slate { border-color: #cbd5e1; background: #f8fafc; }
@@ -3209,31 +3250,55 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-onvio-card.tone-purple { border-color: #c4b5fd; background: #f5f3ff; }
 .plan-onvio-card:hover {
   filter: brightness(0.985);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+.plan-onvio-card:active {
+  transform: translateY(0) scale(0.985);
 }
 .plan-onvio-card.selected {
   border: 2px solid #d64000;
   background: #fff4ed;
   padding: 9px 11px;
+  transform: translateY(-1px) scale(1.01);
+  box-shadow:
+    0 0 0 3px rgba(214, 64, 0, 0.12),
+    0 10px 22px rgba(214, 64, 0, 0.12);
 }
 .plan-onvio-card.tone-slate.selected {
   border-color: #64748b;
   background: #f1f5f9;
+  box-shadow:
+    0 0 0 3px rgba(100, 116, 139, 0.14),
+    0 10px 22px rgba(15, 23, 42, 0.08);
 }
 .plan-onvio-card.tone-green.selected {
   border-color: #059669;
   background: #ecfdf5;
+  box-shadow:
+    0 0 0 3px rgba(5, 150, 105, 0.14),
+    0 10px 22px rgba(5, 150, 105, 0.1);
 }
 .plan-onvio-card.tone-orange.selected {
   border-color: #c2410c;
   background: #ffedd5;
+  box-shadow:
+    0 0 0 3px rgba(194, 65, 12, 0.14),
+    0 10px 22px rgba(194, 65, 12, 0.1);
 }
 .plan-onvio-card.tone-blue.selected {
   border-color: #2563eb;
   background: #dbeafe;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.14),
+    0 10px 22px rgba(37, 99, 235, 0.1);
 }
 .plan-onvio-card.tone-purple.selected {
   border-color: #7c3aed;
   background: #ede9fe;
+  box-shadow:
+    0 0 0 3px rgba(124, 58, 237, 0.14),
+    0 10px 22px rgba(124, 58, 237, 0.1);
 }
 .plan-onvio-body {
   display: flex;
@@ -3265,12 +3330,20 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(148, 163, 184, 0.45);
   line-height: 1.1;
+  transition:
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 .plan-onvio-card.selected .card-mark,
 .plan-onvio-card.selected .plan-onvio-state {
   color: #fff;
   background: #16a34a;
   border-color: #16a34a;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
 }
 
 .plan-ref-actions {
@@ -3392,7 +3465,13 @@ body.st2-chile-embed-active #panel-planillas.active {
   justify-content: space-between;
   gap: 8px;
   color: var(--dark);
-  transition: border-color 0.12s, background 0.12s;
+  transform: translateZ(0);
+  transition:
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    padding 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
 }
 .plan-adj-card .plan-check-badge {
   right: 36px;
@@ -3403,25 +3482,55 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-adj-card.tone-green { border-color: #86efac; background: #f0fdf4; }
 .plan-adj-card.tone-orange { border-color: #fdba74; background: #fff7ed; }
 .plan-adj-card.tone-blue { border-color: #93c5fd; background: #eff6ff; }
-.plan-adj-card .card-mark { font-size: 0.95rem; color: #94a3b8; flex-shrink: 0; }
+.plan-adj-card .card-mark {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition:
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+.plan-adj-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+.plan-adj-card:active {
+  transform: translateY(0) scale(0.985);
+}
 .plan-adj-card.selected {
   border: 2px solid #d64000;
   background: #fff4ed;
   padding: 9px 11px;
+  transform: translateY(-1px) scale(1.01);
+  box-shadow:
+    0 0 0 3px rgba(214, 64, 0, 0.12),
+    0 10px 22px rgba(214, 64, 0, 0.12);
 }
 .plan-adj-card.tone-green.selected {
   border-color: #059669;
   background: #ecfdf5;
+  box-shadow:
+    0 0 0 3px rgba(5, 150, 105, 0.14),
+    0 10px 22px rgba(5, 150, 105, 0.1);
 }
 .plan-adj-card.tone-orange.selected {
   border-color: #c2410c;
   background: #ffedd5;
+  box-shadow:
+    0 0 0 3px rgba(194, 65, 12, 0.14),
+    0 10px 22px rgba(194, 65, 12, 0.1);
 }
 .plan-adj-card.tone-blue.selected {
   border-color: #2563eb;
   background: #dbeafe;
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.14),
+    0 10px 22px rgba(37, 99, 235, 0.1);
 }
-.plan-adj-card.selected .card-mark { color: #16a34a; }
+.plan-adj-card.selected .card-mark {
+  color: #16a34a;
+  transform: scale(1.12);
+}
 
 .plan-adj-backup {
   width: 100%;
@@ -3562,14 +3671,41 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--dark);
+  transform: translateZ(0);
+  transition:
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    padding 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+.plan-backup-base-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+}
+.plan-backup-base-card:active {
+  transform: translateY(0) scale(0.985);
 }
 .plan-backup-base-card.selected {
   border: 2px solid #d64000;
   background: #fff4ed;
   padding: 9px 11px;
+  transform: translateY(-1px) scale(1.01);
+  box-shadow:
+    0 0 0 3px rgba(214, 64, 0, 0.12),
+    0 10px 22px rgba(214, 64, 0, 0.12);
 }
-.plan-backup-base-card .card-mark { font-size: 0.9rem; color: #94a3b8; }
-.plan-backup-base-card.selected .card-mark { color: #16a34a; }
+.plan-backup-base-card .card-mark {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  transition:
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+.plan-backup-base-card.selected .card-mark {
+  color: #16a34a;
+  transform: scale(1.12);
+}
 
 .plan-backup-sql {
   margin: 0 0 14px;
@@ -5398,4 +5534,37 @@ body.st2-chile-embed-active #panel-planillas.active {
 .st2-agua-overlay.has-gif.is-swap .st2-agua-stage-to {
   opacity: 1;
   transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-onvio-card,
+  .plan-adj-card,
+  .plan-backup-base-card,
+  .plan-capturas-card,
+  .plan-check-btn,
+  .plan-check-wrap,
+  .plan-onvio-card .card-mark,
+  .plan-onvio-state,
+  .plan-adj-card .card-mark,
+  .plan-backup-base-card .card-mark,
+  .plan-capturas-mark,
+  .plan-check-mark {
+    transition: none !important;
+  }
+  .plan-onvio-card:hover,
+  .plan-onvio-card:active,
+  .plan-onvio-card.selected,
+  .plan-adj-card:hover,
+  .plan-adj-card:active,
+  .plan-adj-card.selected,
+  .plan-backup-base-card:hover,
+  .plan-backup-base-card:active,
+  .plan-backup-base-card.selected,
+  .plan-capturas-card:hover,
+  .plan-capturas-card:active,
+  .plan-capturas-card.selected,
+  .plan-check-btn:hover,
+  .plan-check-btn:active {
+    transform: none !important;
+  }
 }
