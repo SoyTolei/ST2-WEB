@@ -88,26 +88,33 @@ function toneClass(tone) {
   return "st2-sonner-ok";
 }
 
-/** Ancla el stack bajo Tutorial / Acerca de y debajo de la tab bar (no tapa ADMIN). */
+/** Ancla el stack a la izquierda, bajo el blobatar (o el ícono ST2). */
 export function syncSonnerPlacement() {
   const toaster = document.getElementById(TOASTER_ID);
-  const anchor =
-    document.querySelector(".app-header-actions") ||
-    document.getElementById("aboutBtn") ||
-    document.querySelector(".app-header-right");
   if (!toaster) return;
+
+  const session = document.getElementById("st2-session-email");
+  const sessionVisible =
+    !!session && !session.classList.contains("hidden") && session.getClientRects().length > 0;
+  const brand =
+    document.getElementById("homeBtn") ||
+    document.querySelector(".brand-home-btn") ||
+    document.querySelector(".app-header-left");
+  const anchor = sessionVisible ? session : brand;
 
   if (!anchor) {
     toaster.style.setProperty("--offset-top", "72px");
-    toaster.style.setProperty("--offset-right", "16px");
+    toaster.style.setProperty("--offset-left", "22px");
+    toaster.style.setProperty("--mobile-offset-top", "72px");
+    toaster.style.setProperty("--mobile-offset-left", "12px");
     return;
   }
 
   const rect = anchor.getBoundingClientRect();
   let top = Math.max(56, Math.round(rect.bottom + 10));
-  const right = Math.max(10, Math.round(window.innerWidth - rect.right));
+  const left = Math.max(12, Math.round(rect.left));
 
-  // En home, bajar bajo la tab bar: en 14"/17" el toast tapaba el tab ADMIN (solo admin).
+  // Bajo la tab bar para no tapar Planillas / resto de tabs.
   const tabBar = document.querySelector(".main-shell > .tab-bar") || document.querySelector(".tab-bar");
   if (tabBar) {
     const tr = tabBar.getBoundingClientRect();
@@ -117,9 +124,9 @@ export function syncSonnerPlacement() {
   }
 
   toaster.style.setProperty("--offset-top", `${top}px`);
-  toaster.style.setProperty("--offset-right", `${right}px`);
+  toaster.style.setProperty("--offset-left", `${left}px`);
   toaster.style.setProperty("--mobile-offset-top", `${top}px`);
-  toaster.style.setProperty("--mobile-offset-right", `${Math.max(8, right)}px`);
+  toaster.style.setProperty("--mobile-offset-left", `${Math.max(8, Math.min(left, 16))}px`);
 }
 
 /** Solo home de Planillas (menú principal), no otras pestañas ni módulos. */
@@ -178,7 +185,7 @@ export function initSt2Sonner() {
     document.body.appendChild(toaster);
   }
 
-  toaster.setAttribute("position", "top-right");
+  toaster.setAttribute("position", "top-left");
   toaster.setAttribute("rich-colors", "");
   toaster.setAttribute("close-button", "");
   toaster.setAttribute("visible-toasts", "5");
@@ -202,6 +209,11 @@ export function initSt2Sonner() {
     if (tabBar) {
       const tro = new ResizeObserver(() => syncSonnerPlacement());
       tro.observe(tabBar);
+    }
+    const leftZone = document.querySelector(".app-header-left");
+    if (leftZone) {
+      const lro = new ResizeObserver(() => syncSonnerPlacement());
+      lro.observe(leftZone);
     }
   }
 

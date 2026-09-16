@@ -1,15 +1,15 @@
-/* Sonner ST2: anclado bajo Tutorial / Acerca de + glow suave por tipo. */
+/* Sonner ST2: anclado bajo el blobatar / ícono ST2 + glow suave por tipo. */
 
 #st2-sonner {
   z-index: 3200;
   --border-radius: 18px;
   --width: 360px;
   --gap: 12px;
-  /* Defaults; JS los pisa según .app-header-actions */
+  /* Defaults; JS los pisa según blobatar / brand */
   --offset-top: 72px;
   --offset-right: 16px;
   --offset-bottom: 24px;
-  --offset-left: 24px;
+  --offset-left: 22px;
 }
 
 body.st2-access-pending #st2-sonner,
