@@ -419,10 +419,11 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 }
 
 .blanqueo-inline-fields-submit {
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 10px 12px;
   margin-top: 2px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(148, 163, 184, 0.28);
+  padding-top: 0;
+  border-top: 0;
 }
 
 .blanqueo-inline-fields-submit .blanqueo-field-solicitud {
@@ -431,7 +432,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-inline-fields-submit .blanqueo-field-actions {
   flex: 0 0 auto;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .blanqueo-field-portal {
@@ -945,17 +946,25 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-table .blanqueo-th-portal,
 .blanqueo-table .blanqueo-col-portal {
-  width: 138px;
-  min-width: 138px;
+  width: 220px;
+  min-width: 200px;
   white-space: nowrap;
   overflow: visible;
   font-weight: 600;
 }
 
 /*
-  Plataforma: chip suave (no neón) + marca OB/OV/PC.
-  Misma silueta; el color y la marca diferencian sin pelear con el dark theme.
+  Plataforma: pill con identidad de producto + estado al lado.
+  El estado NO tintea la fila: el color del producto se mantiene legible.
 */
+.blanqueo-portal-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
 .blanqueo-portal-chip {
   display: inline-flex;
   align-items: center;
@@ -968,7 +977,8 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   letter-spacing: 0.01em;
   line-height: 1.25;
   border: 1px solid transparent;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: #f0f0f0;
+  box-shadow: none;
 }
 
 .blanqueo-portal-chip-mark {
@@ -990,11 +1000,60 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   padding-right: 1px;
 }
 
-/* On Balance — celeste claro (aparte de verde listo, rojo no-reg y ONVIO/Portal) */
+.blanqueo-portal-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.blanqueo-portal-status-ico {
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.blanqueo-portal-status.is-aprobado {
+  color: #4caf50;
+}
+
+.blanqueo-portal-status.is-aprobado .blanqueo-portal-status-ico {
+  background: rgba(76, 175, 80, 0.18);
+  color: #2e7d32;
+}
+
+.blanqueo-portal-status.is-rechazado {
+  color: #f44336;
+}
+
+.blanqueo-portal-status.is-rechazado .blanqueo-portal-status-ico {
+  background: rgba(244, 67, 54, 0.16);
+  color: #c62828;
+}
+
+.blanqueo-portal-status.is-espera {
+  color: #757575;
+}
+
+.blanqueo-portal-status.is-espera .blanqueo-portal-status-ico {
+  background: rgba(117, 117, 117, 0.14);
+  color: #616161;
+}
+
+/* On Balance — celeste */
 .blanqueo-portal-onbalance .blanqueo-portal-chip {
-  color: #0369a1;
-  background: rgba(56, 189, 248, 0.14);
-  border-color: rgba(14, 165, 233, 0.42);
+  color: #0284c7;
+  background: #f0f0f0;
+  border-color: #38bdf8;
 }
 
 .blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
@@ -1004,24 +1063,26 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 /* ONVIO — violeta */
 .blanqueo-portal-onvio .blanqueo-portal-chip {
-  color: #5b21b6;
-  background: rgba(109, 40, 217, 0.12);
-  border-color: rgba(109, 40, 217, 0.38);
+  color: #7c3aed;
+  background: #f0f0f0;
+  border-color: #8b5cf6;
 }
 
 .blanqueo-portal-onvio .blanqueo-portal-chip-mark {
   background: #7c3aed;
+  color: #fff;
 }
 
-/* Portal Cliente — naranja (alineado al acento ST2) */
+/* Portal Cliente — naranja */
 .blanqueo-portal-cliente .blanqueo-portal-chip {
-  color: #9a3412;
-  background: rgba(234, 88, 12, 0.12);
-  border-color: rgba(234, 88, 12, 0.32);
+  color: #ea580c;
+  background: #f0f0f0;
+  border-color: #f97316;
 }
 
 .blanqueo-portal-cliente .blanqueo-portal-chip-mark {
   background: #ea580c;
+  color: #fff;
 }
 
 .blanqueo-table .blanqueo-th-caso,
@@ -1116,35 +1177,19 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   padding: 2px 6px;
 }
 
-.blanqueo-row-listo td {
-  background: rgba(16, 185, 129, 0.22);
-  color: #14532d;
-}
-
-.blanqueo-row-listo td:first-child {
-  box-shadow: inset 5px 0 0 #047857;
-}
-
-.blanqueo-row-listo-nota td {
-  background: rgba(16, 185, 129, 0.16);
-  color: #14532d;
-}
-
-.blanqueo-row-listo-nota td:first-child {
-  box-shadow: inset 5px 0 0 #047857;
-}
-
-.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota) td {
-  background: rgba(245, 158, 11, 0.1);
-}
-
+/* Estado: solo en chip/status; la fila queda neutra */
+.blanqueo-row-listo td,
+.blanqueo-row-listo-nota td,
+.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota) td,
 .blanqueo-row-noreg td {
-  background: rgba(239, 68, 68, 0.18);
-  color: #7f1d1d;
+  background: transparent;
+  color: inherit;
 }
 
+.blanqueo-row-listo td:first-child,
+.blanqueo-row-listo-nota td:first-child,
 .blanqueo-row-noreg td:first-child {
-  box-shadow: inset 5px 0 0 #b91c1c;
+  box-shadow: none;
 }
 
 .blanqueo-pill {
