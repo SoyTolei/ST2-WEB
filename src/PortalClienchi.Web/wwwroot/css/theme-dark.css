@@ -2520,6 +2520,11 @@ html.st2-theme-dark .borrado-table tbody tr.borrado-row-incorrecto td:first-chil
   box-shadow: inset 5px 0 0 #f87171 !important;
 }
 
+html.st2-theme-dark .blanqueo-inline-fields-submit,
+html.st2-theme-dark .borrado-actions-detalle.borrado-field-actions {
+  border-top-color: rgba(148, 163, 184, 0.18);
+}
+
 html.st2-theme-dark .blanqueo-portal-chip {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }

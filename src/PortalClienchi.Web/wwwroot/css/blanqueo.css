@@ -26,13 +26,17 @@
 }
 
 .blanqueo-form-panel {
-  margin-bottom: 16px;
+  margin: 0 auto 16px;
   width: fit-content;
-  max-width: 100%;
+  max-width: min(40rem, 100%);
 }
 
 .blanqueo-form-panel.hidden {
   display: none !important;
+}
+
+.blanqueo-form-panel .plan-gestor-panel-title {
+  text-align: center;
 }
 
 .blanqueo-app.blanqueo-list-only .blanqueo-table-wrap {
@@ -389,10 +393,11 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .blanqueo-form-grid {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  width: fit-content;
+  align-items: stretch;
+  gap: 12px;
+  width: min(36rem, 100%);
   max-width: 100%;
+  margin: 0 auto;
 }
 
 .blanqueo-inline-fields-head,
@@ -401,11 +406,23 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 10px 12px;
+  width: 100%;
   max-width: 100%;
 }
 
+.blanqueo-inline-fields-head {
+  justify-content: flex-start;
+}
+
 .blanqueo-field-correos {
-  width: min(28rem, 100%);
+  width: 100%;
+}
+
+.blanqueo-inline-fields-submit {
+  justify-content: space-between;
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
 }
 
 .blanqueo-inline-fields-submit .blanqueo-field-solicitud {
@@ -414,6 +431,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-inline-fields-submit .blanqueo-field-actions {
   flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .blanqueo-field-portal {
@@ -659,11 +677,17 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-field-actions {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
 }
 
 .blanqueo-field-actions .btn {
   min-width: 120px;
+  height: 38px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .blanqueo-clave-hint {
