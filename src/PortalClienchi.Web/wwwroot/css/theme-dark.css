@@ -664,6 +664,9 @@ html.st2-theme-dark .plan-segment-btn {
 html.st2-theme-dark .plan-segment-btn.active {
   background: #c2410c !important;
   color: #fff !important;
+  box-shadow:
+    0 0 0 2px rgba(249, 115, 22, 0.22),
+    0 8px 18px rgba(194, 65, 12, 0.28) !important;
 }
 
 html.st2-theme-dark .plan-bej-config {
@@ -2518,14 +2521,14 @@ html.st2-theme-dark .blanqueo-portal-chip {
 }
 
 html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip {
-  color: #5eead4;
-  background: rgba(20, 184, 166, 0.18);
-  border-color: rgba(45, 212, 191, 0.48);
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.16);
+  border-color: rgba(251, 113, 133, 0.5);
 }
 
 html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
-  background: #14b8a6;
-  color: #042f2e;
+  background: #f43f5e;
+  color: #1f0a10;
 }
 
 html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip {

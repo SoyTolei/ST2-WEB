@@ -1131,10 +1131,11 @@ body.st2-balloons-sides .st2-x-balloon-body {
   color: var(--dark);
   cursor: pointer;
   transition:
-    color 0.2s ease,
-    background 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
   z-index: 1;
   min-height: 42px;
   display: flex;
@@ -1149,15 +1150,18 @@ body.st2-balloons-sides .st2-x-balloon-body {
   background: rgba(214, 64, 0, 0.08);
   border-color: rgba(214, 64, 0, 0.28);
   box-shadow: 0 2px 12px rgba(214, 64, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .plan-pill-btn:active:not(.active) {
   background: rgba(214, 64, 0, 0.14);
   border-color: rgba(214, 64, 0, 0.38);
+  transform: translateY(0) scale(0.985);
 }
 
 .plan-pill-btn.active {
   color: #fff;
+  transform: translateY(-1px) scale(1.01);
 }
 
 .plan-pill-beta {
@@ -2454,8 +2458,26 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-weight: 600;
   color: var(--dark);
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
   user-select: none;
+  transition:
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+.plan-op-radio:hover {
+  background: rgba(124, 58, 237, 0.08);
+  transform: translateY(-1px);
+}
+
+.plan-op-radio:has(input:checked) {
+  background: rgba(124, 58, 237, 0.14);
+  color: #5b21b6;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.18);
+  transform: translateY(-1px) scale(1.02);
 }
 
 .plan-op-radio input[type="radio"] {
@@ -2692,17 +2714,33 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
+  transform: translateZ(0);
+  transition:
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    opacity 0.2s ease;
 }
 
 .plan-segment-btn:hover {
-  opacity: 0.88;
+  opacity: 1;
+  color: #d64000;
+  transform: translateY(-1px);
+}
+
+.plan-segment-btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .plan-segment-btn.active {
   background: #fff;
   color: #d64000;
   font-weight: 700;
-  box-shadow: 0 1px 3px rgba(26, 31, 46, 0.08);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow:
+    0 0 0 2px rgba(214, 64, 0, 0.14),
+    0 6px 14px rgba(214, 64, 0, 0.12);
 }
 
 .plan-bej-toolbar {
@@ -5055,11 +5093,25 @@ body.st2-chile-embed-active #panel-planillas.active {
   min-height: 130px;
   border: 1px solid var(--border);
   box-shadow: 0 2px 10px rgba(26, 31, 46, 0.06);
+  transition:
+    border-color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    transform 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
+    opacity 0.2s ease;
 }
 
 .plan-legal-cards .plan-op-card.plan-legal-pick-card:hover {
   border-color: #d64000;
   opacity: 1;
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 3px rgba(214, 64, 0, 0.1),
+    0 12px 24px rgba(214, 64, 0, 0.12);
+}
+
+.plan-legal-cards .plan-op-card.plan-legal-pick-card:active {
+  transform: translateY(0) scale(0.985);
 }
 
 .plan-legal-cards .plan-op-card.plan-legal-pick-card strong {
@@ -5543,6 +5595,10 @@ body.st2-chile-embed-active #panel-planillas.active {
   .plan-capturas-card,
   .plan-check-btn,
   .plan-check-wrap,
+  .plan-segment-btn,
+  .plan-pill-btn,
+  .plan-op-radio,
+  .plan-legal-cards .plan-op-card.plan-legal-pick-card,
   .plan-onvio-card .card-mark,
   .plan-onvio-state,
   .plan-adj-card .card-mark,
@@ -5564,7 +5620,17 @@ body.st2-chile-embed-active #panel-planillas.active {
   .plan-capturas-card:active,
   .plan-capturas-card.selected,
   .plan-check-btn:hover,
-  .plan-check-btn:active {
+  .plan-check-btn:active,
+  .plan-segment-btn:hover,
+  .plan-segment-btn:active,
+  .plan-segment-btn.active,
+  .plan-pill-btn:hover,
+  .plan-pill-btn:active,
+  .plan-pill-btn.active,
+  .plan-op-radio:hover,
+  .plan-op-radio:has(input:checked),
+  .plan-legal-cards .plan-op-card.plan-legal-pick-card:hover,
+  .plan-legal-cards .plan-op-card.plan-legal-pick-card:active {
     transform: none !important;
   }
 }
