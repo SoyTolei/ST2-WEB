@@ -268,7 +268,11 @@ function syncSessionThemeMenuLabel() {
   const themeBtn = document.getElementById("st2-session-theme");
   if (!themeBtn) return;
   const dark = document.documentElement.classList.contains("st2-theme-dark");
-  themeBtn.textContent = dark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+  const ico = themeBtn.querySelector(".st2-session-menu-ico");
+  const label = themeBtn.querySelector(".st2-session-menu-label");
+  if (ico) ico.textContent = dark ? "☀️" : "🌙";
+  if (label) label.textContent = dark ? "Modo claro" : "Modo oscuro";
+  else themeBtn.textContent = dark ? "☀️ Modo claro" : "🌙 Modo oscuro";
 }
 
 function bindSessionLogout() {
@@ -279,8 +283,6 @@ function bindSessionLogout() {
   const card = document.getElementById("st2-session-email");
   if (!menuBtn || menuBtn.dataset.bound === "1") return;
   menuBtn.dataset.bound = "1";
-  if (logoutBtn) logoutBtn.textContent = "🚪 Cerrar sesión";
-  if (aboutBtn) aboutBtn.textContent = "ℹ️ Acerca de";
 
   menuBtn.addEventListener("click", (e) => {
     e.preventDefault();

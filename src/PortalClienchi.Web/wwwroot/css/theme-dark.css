@@ -95,7 +95,9 @@ html.st2-theme-dark .st2-session-name {
 }
 
 html.st2-theme-dark .st2-session-menu {
-  background: #0a0705;
+  background:
+    radial-gradient(ellipse 90% 70% at 12% 0%, rgba(249, 115, 22, 0.2) 0%, transparent 55%),
+    linear-gradient(165deg, rgba(18, 12, 9, 0.98) 0%, rgba(8, 6, 5, 0.99) 100%);
   border-color: rgba(251, 146, 60, 0.34);
 }
 
@@ -106,6 +108,11 @@ html.st2-theme-dark .st2-session-menu-item {
 html.st2-theme-dark .st2-session-menu-item:hover {
   background: rgba(249, 115, 22, 0.18);
   color: #fff7ed;
+}
+
+html.st2-theme-dark .st2-session-menu-item--soft:hover {
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
 }
 
 html.st2-theme-dark .st2-session-avatar-host {

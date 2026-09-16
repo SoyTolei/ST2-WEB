@@ -3363,7 +3363,7 @@ function hideAbout({ history = "restore" } = {}) {
     const tab = document.querySelector(".tab-btn.active")?.dataset?.tab || "planillas";
     document.title = titleForTab(tab);
   }
-  aboutBtn?.focus();
+  document.getElementById("st2-session-menu-btn")?.focus();
 }
 
 function isHerramientasPath(pathname) {
