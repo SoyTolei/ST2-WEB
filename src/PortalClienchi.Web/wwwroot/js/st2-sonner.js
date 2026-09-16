@@ -88,7 +88,7 @@ function toneClass(tone) {
   return "st2-sonner-ok";
 }
 
-/** Ancla el stack justo debajo de Tutorial / Acerca de. */
+/** Ancla el stack bajo Tutorial / Acerca de y debajo de la tab bar (no tapa ADMIN). */
 export function syncSonnerPlacement() {
   const toaster = document.getElementById(TOASTER_ID);
   const anchor =
@@ -104,8 +104,18 @@ export function syncSonnerPlacement() {
   }
 
   const rect = anchor.getBoundingClientRect();
-  const top = Math.max(56, Math.round(rect.bottom + 10));
+  let top = Math.max(56, Math.round(rect.bottom + 10));
   const right = Math.max(10, Math.round(window.innerWidth - rect.right));
+
+  // En home, bajar bajo la tab bar: en 14"/17" el toast tapaba el tab ADMIN (solo admin).
+  const tabBar = document.querySelector(".main-shell > .tab-bar") || document.querySelector(".tab-bar");
+  if (tabBar) {
+    const tr = tabBar.getBoundingClientRect();
+    if (tr.height > 0 && tr.bottom > 0) {
+      top = Math.max(top, Math.round(tr.bottom + 10));
+    }
+  }
+
   toaster.style.setProperty("--offset-top", `${top}px`);
   toaster.style.setProperty("--offset-right", `${right}px`);
   toaster.style.setProperty("--mobile-offset-top", `${top}px`);
@@ -187,6 +197,11 @@ export function initSt2Sonner() {
     if (header) {
       const ro = new ResizeObserver(() => syncSonnerPlacement());
       ro.observe(header);
+    }
+    const tabBar = document.querySelector(".main-shell > .tab-bar") || document.querySelector(".tab-bar");
+    if (tabBar) {
+      const tro = new ResizeObserver(() => syncSonnerPlacement());
+      tro.observe(tabBar);
     }
   }
 

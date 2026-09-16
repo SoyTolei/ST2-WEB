@@ -1097,6 +1097,8 @@ function syncAdminTabVisibility() {
     navigateTab("planillas", { history: "replace" });
   }
   syncAboutNoticeCopy();
+  // Recalcular toasts: el tab ADMIN cambia el espacio útil a la derecha.
+  requestAnimationFrame(() => syncSonnerPlacement());
 }
 
 function updateAdminTabBadge() {
