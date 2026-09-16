@@ -14,10 +14,10 @@
 
 /* Menú del blobatar abierto: Sonner vive en top-layer (popover) y tapaba el menú. */
 body.st2-session-menu-open #st2-sonner {
-  opacity: 0.18;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  filter: saturate(0.7);
-  transition: opacity 0.18s ease, filter 0.18s ease;
+  transition: opacity 0.18s ease, visibility 0.18s ease;
 }
 
 body.st2-access-pending #st2-sonner,
