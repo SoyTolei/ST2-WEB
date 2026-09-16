@@ -94,6 +94,10 @@ html.st2-theme-dark .st2-session-name {
   color: #ffedd5;
 }
 
+html.st2-theme-dark .st2-session-menu-hint > span {
+  background: rgba(253, 186, 116, 0.7);
+}
+
 html.st2-theme-dark .st2-session-menu {
   background:
     radial-gradient(ellipse 90% 70% at 12% 0%, rgba(249, 115, 22, 0.24) 0%, transparent 55%),
@@ -606,28 +610,24 @@ html.st2-theme-dark .plan-pill-btn:not(.active) {
 }
 
 html.st2-theme-dark .plan-pill-btn:hover:not(.active) {
-  background: rgba(56, 189, 248, 0.14) !important;
-  border-color: rgba(125, 211, 252, 0.45) !important;
-  color: #e0f2fe !important;
+  background: rgba(249, 115, 22, 0.14) !important;
+  border-color: rgba(249, 115, 22, 0.52) !important;
+  color: #fff7ed !important;
   box-shadow:
-    0 2px 14px rgba(14, 165, 233, 0.18),
+    0 2px 14px rgba(234, 88, 12, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 html.st2-theme-dark .plan-pill-btn:active:not(.active) {
-  background: rgba(56, 189, 248, 0.22) !important;
-  border-color: rgba(125, 211, 252, 0.55) !important;
-  color: #f0f9ff !important;
+  background: rgba(249, 115, 22, 0.22) !important;
+  border-color: rgba(249, 115, 22, 0.62) !important;
+  color: #fff !important;
   box-shadow: none;
 }
 
 html.st2-theme-dark .plan-pill-btn.active {
   background: transparent !important;
-  color: #0c4a6e !important;
-}
-
-html.st2-theme-dark .plan-sistema-indicator {
-  background: #7dd3fc !important;
+  color: #fff !important;
 }
 
 html.st2-theme-dark .st2-access-admin-perm-pop {

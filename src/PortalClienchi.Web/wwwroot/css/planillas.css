@@ -1155,20 +1155,20 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-pill-btn:hover:not(.active) {
-  background: rgba(14, 165, 233, 0.1);
-  border-color: rgba(14, 165, 233, 0.32);
-  box-shadow: 0 2px 12px rgba(14, 165, 233, 0.12);
+  background: rgba(214, 64, 0, 0.08);
+  border-color: rgba(214, 64, 0, 0.28);
+  box-shadow: 0 2px 12px rgba(214, 64, 0, 0.1);
   transform: translateY(-1px);
 }
 
 .plan-pill-btn:active:not(.active) {
-  background: rgba(14, 165, 233, 0.16);
-  border-color: rgba(14, 165, 233, 0.42);
+  background: rgba(214, 64, 0, 0.14);
+  border-color: rgba(214, 64, 0, 0.38);
   transform: translateY(0) scale(0.985);
 }
 
 .plan-pill-btn.active {
-  color: #0c4a6e;
+  color: #fff;
   transform: translateY(-1px) scale(1.01);
 }
 
@@ -1204,7 +1204,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   left: 0;
   width: 0;
   max-width: 100%;
-  background: #7dd3fc;
+  background: var(--primary);
   border-radius: 8px;
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
     width 0.32s cubic-bezier(0.4, 0, 0.2, 1);

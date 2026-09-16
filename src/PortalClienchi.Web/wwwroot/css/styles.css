@@ -268,14 +268,14 @@ html, body {
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 0;
   max-width: none;
   overflow: visible;
   white-space: nowrap;
   font-size: 0.78rem;
   font-weight: 500;
   color: rgba(248, 250, 252, 0.9);
-  padding: 2px 14px 2px 4px;
+  padding: 0;
   margin: 0;
   border-radius: 14px;
   isolation: isolate;
@@ -306,22 +306,57 @@ html, body {
   z-index: 1;
 }
 
-.st2-session-avatar-btn {
+.st2-session-card-btn {
   border: 0;
   background: transparent;
-  padding: 0;
+  padding: 2px 10px 2px 4px;
   margin: 0;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
   cursor: pointer;
-  border-radius: 50%;
-  flex: 0 0 auto;
-  line-height: 0;
+  border-radius: 14px;
+  color: inherit;
+  font: inherit;
+  line-height: 1.15;
+  width: 100%;
+  min-width: 0;
 }
 
-.st2-session-avatar-btn:focus-visible {
+.st2-session-card-btn:focus-visible {
   outline: 2px solid rgba(251, 146, 60, 0.55);
   outline-offset: 2px;
+}
+
+.st2-session-card-btn:hover .st2-session-menu-hint {
+  opacity: 0.85;
+}
+
+.st2-session-card-btn[aria-expanded="true"] .st2-session-menu-hint {
+  opacity: 0.95;
+}
+
+.st2-session-menu-hint {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  width: 12px;
+  flex: 0 0 auto;
+  margin-left: 2px;
+  opacity: 0.42;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.st2-session-menu-hint > span {
+  display: block;
+  height: 1.5px;
+  width: 100%;
+  border-radius: 999px;
+  background: rgba(253, 186, 116, 0.85);
 }
 
 .st2-session-avatar-host {
@@ -358,6 +393,7 @@ html, body {
   justify-content: center;
   gap: 0;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .st2-session-name {
@@ -366,7 +402,7 @@ html, body {
   letter-spacing: 0.02em;
   color: #ffedd5;
   line-height: 1.2;
-  cursor: default;
+  cursor: inherit;
   user-select: none;
 }
 
