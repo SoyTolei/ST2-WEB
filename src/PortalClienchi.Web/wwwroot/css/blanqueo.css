@@ -946,25 +946,17 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 
 .blanqueo-table .blanqueo-th-portal,
 .blanqueo-table .blanqueo-col-portal {
-  width: 220px;
-  min-width: 200px;
+  width: 138px;
+  min-width: 138px;
   white-space: nowrap;
   overflow: visible;
   font-weight: 600;
 }
 
 /*
-  Plataforma: pill con identidad de producto + estado al lado.
-  El estado NO tintea la fila: el color del producto se mantiene legible.
+  Plataforma: pill con identidad de producto (fondo claro + borde/marca).
+  El estado vive en la columna Estado; la fila solo lleva un tinte sutil.
 */
-.blanqueo-portal-cell {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  max-width: 100%;
-  flex-wrap: wrap;
-}
-
 .blanqueo-portal-chip {
   display: inline-flex;
   align-items: center;
@@ -998,55 +990,6 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .blanqueo-portal-chip-label {
   white-space: nowrap;
   padding-right: 1px;
-}
-
-.blanqueo-portal-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.72rem;
-  font-weight: 650;
-  letter-spacing: 0.01em;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.blanqueo-portal-status-ico {
-  display: inline-grid;
-  place-items: center;
-  width: 1.15rem;
-  height: 1.15rem;
-  border-radius: 50%;
-  font-size: 0.62rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.blanqueo-portal-status.is-aprobado {
-  color: #4caf50;
-}
-
-.blanqueo-portal-status.is-aprobado .blanqueo-portal-status-ico {
-  background: rgba(76, 175, 80, 0.18);
-  color: #2e7d32;
-}
-
-.blanqueo-portal-status.is-rechazado {
-  color: #f44336;
-}
-
-.blanqueo-portal-status.is-rechazado .blanqueo-portal-status-ico {
-  background: rgba(244, 67, 54, 0.16);
-  color: #c62828;
-}
-
-.blanqueo-portal-status.is-espera {
-  color: #757575;
-}
-
-.blanqueo-portal-status.is-espera .blanqueo-portal-status-ico {
-  background: rgba(117, 117, 117, 0.14);
-  color: #616161;
 }
 
 /* On Balance — celeste */
@@ -1177,19 +1120,33 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   padding: 2px 6px;
 }
 
-/* Estado: solo en chip/status; la fila queda neutra */
-.blanqueo-row-listo td,
-.blanqueo-row-listo-nota td,
-.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota) td,
-.blanqueo-row-noreg td {
-  background: transparent;
-  color: inherit;
+/* Tinte sutil de fila: no tapa las pills de plataforma */
+.blanqueo-row-listo td {
+  background: rgba(16, 185, 129, 0.12);
 }
 
-.blanqueo-row-listo td:first-child,
-.blanqueo-row-listo-nota td:first-child,
+.blanqueo-row-listo td:first-child {
+  box-shadow: inset 4px 0 0 #10b981;
+}
+
+.blanqueo-row-listo-nota td {
+  background: rgba(16, 185, 129, 0.09);
+}
+
+.blanqueo-row-listo-nota td:first-child {
+  box-shadow: inset 4px 0 0 #10b981;
+}
+
+.blanqueo-row-aclaracion:not(.blanqueo-row-listo):not(.blanqueo-row-listo-nota) td {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.blanqueo-row-noreg td {
+  background: rgba(239, 68, 68, 0.1);
+}
+
 .blanqueo-row-noreg td:first-child {
-  box-shadow: none;
+  box-shadow: inset 4px 0 0 #ef4444;
 }
 
 .blanqueo-pill {

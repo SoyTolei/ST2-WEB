@@ -1139,13 +1139,10 @@ function buildRow(item) {
     ${mailCell}
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
     <td class="blanqueo-col-portal" title="${escapeHtml(portalLabel(item.portal))}">
-      <div class="blanqueo-portal-cell">
-        <span class="blanqueo-portal-chip" data-portal="${escapeAttr(portalKey(item.portal))}">
-          <span class="blanqueo-portal-chip-mark" aria-hidden="true">${escapeHtml(portalMark(item.portal))}</span>
-          <span class="blanqueo-portal-chip-label">${escapeHtml(portalShort(item.portal))}</span>
-        </span>
-        ${formatPortalStatus(item)}
-      </div>
+      <span class="blanqueo-portal-chip" data-portal="${escapeAttr(portalKey(item.portal))}">
+        <span class="blanqueo-portal-chip-mark" aria-hidden="true">${escapeHtml(portalMark(item.portal))}</span>
+        <span class="blanqueo-portal-chip-label">${escapeHtml(portalShort(item.portal))}</span>
+      </span>
     </td>
     <td class="blanqueo-col-tipo">${formatTipoCell(item)}</td>
     ${estadoAclaracionCells}
@@ -1391,19 +1388,21 @@ function formatGestionadoPorCell(item) {
   return escapeHtml(nombre || "—");
 }
 
-function formatPortalStatus(item) {
+function formatEstadoCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (item.listo) {
-    return `<span class="blanqueo-portal-status is-aprobado" title="Aprobado"><span class="blanqueo-portal-status-ico" aria-hidden="true">✓</span><span class="blanqueo-portal-status-label">Aprobado</span></span>`;
+    if (aclaracion && !isActivacionAutoNote(aclaracion)) {
+      return '<span class="blanqueo-pill ok-note" title="Listo con aclaración">Listo · nota</span>';
+    }
+    return '<span class="blanqueo-pill ok">Listo</span>';
   }
   if (isNoRegistrado(aclaracion)) {
-    return `<span class="blanqueo-portal-status is-rechazado" title="Rechazado"><span class="blanqueo-portal-status-ico" aria-hidden="true">✕</span><span class="blanqueo-portal-status-label">Rechazado</span></span>`;
+    return '<span class="blanqueo-pill bad" title="No registrado">No registrado</span>';
   }
-  return `<span class="blanqueo-portal-status is-espera" title="En espera"><span class="blanqueo-portal-status-ico" aria-hidden="true">⌛</span><span class="blanqueo-portal-status-label">En espera</span></span>`;
-}
-
-function formatEstadoCell(item) {
-  return formatPortalStatus(item);
+  if (!aclaracion) {
+    return '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
+  }
+  return '<span class="blanqueo-pill note" title="Con aclaración">Nota</span>';
 }
 
 function showCtx(x, y, item) {
