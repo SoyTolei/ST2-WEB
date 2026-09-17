@@ -329,9 +329,7 @@ html, body {
   white-space: normal;
   pointer-events: none;
   transform-origin: 0% 50%;
-  animation:
-    st2-blobatar-greet-in 0.5s var(--st2-greet-ease) both,
-    st2-blobatar-greet-float 3.2s ease-in-out 0.5s infinite;
+  animation: st2-blobatar-greet-in 0.45s var(--st2-greet-ease) both;
 }
 
 .st2-blobatar-greet.hidden {
@@ -370,23 +368,11 @@ html, body {
 @keyframes st2-blobatar-greet-in {
   from {
     opacity: 0;
-    transform: translateX(-8px) scale(0.9);
-    filter: blur(2px);
+    transform: translateX(-6px) scale(0.96);
   }
   to {
     opacity: 1;
     transform: translateX(0) scale(1);
-    filter: blur(0);
-  }
-}
-
-@keyframes st2-blobatar-greet-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-1.5px);
   }
 }
 
@@ -397,9 +383,7 @@ html, body {
 }
 
 .st2-blobatar-greet.st2-blobatar-greet--pop {
-  animation:
-    st2-blobatar-greet-in 0.5s var(--st2-greet-ease) both,
-    st2-blobatar-greet-float 3.2s ease-in-out 0.5s infinite;
+  animation: st2-blobatar-greet-in 0.45s var(--st2-greet-ease) both;
 }
 
 body.st2-session-menu-open .st2-blobatar-greet {
