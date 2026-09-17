@@ -10,7 +10,6 @@ import {
 } from "./module-access.js";
 import { notifyBlanqueoChanged, markBlanqueoAlertsSeenOnEnter, markBlanqueoObservationOpened } from "./blanqueo-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
-import { showSt2FlashToast } from "./st2-sonner.js?v=20260917e";
 
 /**
  * Override: localStorage.setItem("st2-blanqueo-force", "1")
@@ -355,7 +354,10 @@ function syncLoadFormVisibility() {
   ensureConfirmViewDefault();
   const showForm = effectiveCanLoad();
   const formPanel = document.querySelector(".blanqueo-form-panel");
+  const formWrap = document.querySelector("#planillas-blanqueo .st2-form-side-wrap");
   if (formPanel) formPanel.classList.toggle("hidden", !showForm);
+  if (formWrap) formWrap.classList.toggle("hidden", !showForm);
+  if (!showForm) hideFormSideToast();
 
   const app = document.querySelector(".blanqueo-app");
   if (app) app.classList.toggle("blanqueo-list-only", !showForm);
@@ -456,10 +458,41 @@ function markFormFieldInvalid(el) {
   el.setAttribute("aria-invalid", "true");
 }
 
+let formSideToastTimer = 0;
+
+function hideFormSideToast() {
+  const toast = document.getElementById("blanqueo-form-toast");
+  const text = document.getElementById("blanqueo-form-toast-text");
+  if (!toast) return;
+  toast.classList.add("hidden");
+  toast.setAttribute("hidden", "");
+  toast.classList.remove("st2-form-side-toast--warn", "st2-form-side-toast--ok", "st2-form-side-toast--bad");
+  if (text) text.textContent = "";
+}
+
+function showFormSideToast(message, tone = "warn", duration = 5200) {
+  const toast = document.getElementById("blanqueo-form-toast");
+  const text = document.getElementById("blanqueo-form-toast-text");
+  const msg = String(message || "").trim();
+  if (!toast || !text || !msg) return;
+
+  window.clearTimeout(formSideToastTimer);
+  toast.classList.remove("st2-form-side-toast--warn", "st2-form-side-toast--ok", "st2-form-side-toast--bad", "hidden");
+  toast.classList.add(`st2-form-side-toast--${tone === "ok" || tone === "bad" ? tone : "warn"}`);
+  toast.removeAttribute("hidden");
+  text.textContent = msg;
+  // Re-trigger entrada
+  toast.style.animation = "none";
+  void toast.offsetWidth;
+  toast.style.animation = "";
+
+  formSideToastTimer = window.setTimeout(() => hideFormSideToast(), Math.max(2200, Number(duration) || 5200));
+}
+
 function notifyFormIncomplete(message, focusEl) {
   const msg = String(message || "Completá los datos faltantes.").trim();
   setStatus(msg, true);
-  showSt2FlashToast({ body: msg, tone: "warn" });
+  showFormSideToast(msg, "warn");
   if (focusEl && typeof focusEl.focus === "function") {
     try {
       focusEl.focus({ preventScroll: false });
@@ -472,6 +505,7 @@ function notifyFormIncomplete(message, focusEl) {
 
 function clearForm({ keepCaso = false } = {}) {
   clearFormFieldErrors();
+  hideFormSideToast();
   const portal = document.getElementById("blanqueo-portal");
   const caso = document.getElementById("blanqueo-caso");
   const cliente = document.getElementById("blanqueo-cliente");
@@ -840,11 +874,11 @@ async function createSolicitud() {
     // Caso cerrado: limpio todo el formulario para el próximo ingreso.
     clearForm();
     setStatus(ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`);
-    showSt2FlashToast({
-      body: ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`,
-      tone: "ok",
-      duration: 3200,
-    });
+    showFormSideToast(
+      ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`,
+      "ok",
+      3200,
+    );
     scrollListToEndOnce = true;
     await reloadList();
     notifyBlanqueoChanged();
@@ -852,7 +886,7 @@ async function createSolicitud() {
   } catch (err) {
     const msg = err?.message || "No se pudo guardar.";
     setStatus(msg, true);
-    showSt2FlashToast({ body: msg, tone: "bad" });
+    showFormSideToast(msg, "bad");
   }
 }
 

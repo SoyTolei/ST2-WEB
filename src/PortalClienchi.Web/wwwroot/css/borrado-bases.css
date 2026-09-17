@@ -21,7 +21,7 @@
 }
 
 .borrado-form-panel {
-  margin: 0 auto 16px;
+  margin: 0;
   width: fit-content;
   max-width: min(44rem, 100%);
 }

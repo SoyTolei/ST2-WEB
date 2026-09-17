@@ -2393,6 +2393,93 @@ body.st2-chile-embed-active #panel-planillas.active {
   font-weight: 600;
 }
 
+/* Toast de validación al costado de Nueva solicitud (blanqueo / borrado) */
+.st2-form-side-wrap {
+  position: relative;
+  margin: 0 auto 16px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.st2-form-side-toast {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 2.35rem;
+  z-index: 4;
+  box-sizing: border-box;
+  width: min(250px, max(180px, 22vw));
+  padding: 11px 13px;
+  border-radius: 14px;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  animation: st2-form-side-toast-in 0.28s cubic-bezier(0.22, 1.1, 0.36, 1) both;
+}
+
+.st2-form-side-toast.hidden {
+  display: none !important;
+  animation: none;
+}
+
+.st2-form-side-toast-text {
+  display: block;
+}
+
+.st2-form-side-toast--warn {
+  color: hsl(46, 87%, 28%);
+  background: hsl(49, 100%, 97%);
+  border: 1px solid hsl(49, 91%, 84%);
+  box-shadow:
+    0 0 0 1px rgba(234, 206, 122, 0.55),
+    0 0 0 3px rgba(234, 206, 122, 0.18),
+    0 10px 24px rgba(15, 23, 42, 0.18),
+    0 0 22px rgba(234, 206, 122, 0.28);
+}
+
+.st2-form-side-toast--ok {
+  color: hsl(140, 100%, 22%);
+  background: hsl(143, 85%, 96%);
+  border: 1px solid hsl(145, 92%, 87%);
+  box-shadow:
+    0 0 0 1px rgba(132, 204, 22, 0.55),
+    0 0 0 3px rgba(132, 204, 22, 0.18),
+    0 10px 24px rgba(15, 23, 42, 0.18),
+    0 0 22px rgba(132, 204, 22, 0.28);
+}
+
+.st2-form-side-toast--bad {
+  color: hsl(360, 100%, 35%);
+  background: hsl(359, 100%, 97%);
+  border: 1px solid hsl(359, 100%, 94%);
+  box-shadow:
+    0 0 0 1px rgba(244, 63, 94, 0.55),
+    0 0 0 3px rgba(244, 63, 94, 0.18),
+    0 10px 24px rgba(15, 23, 42, 0.18),
+    0 0 22px rgba(244, 63, 94, 0.28);
+}
+
+@keyframes st2-form-side-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@media (max-width: 920px) {
+  .st2-form-side-toast {
+    position: static;
+    width: min(40rem, 100%);
+    margin: 10px auto 0;
+  }
+}
+
 .plan-module-title {
   margin: 0;
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;

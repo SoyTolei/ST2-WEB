@@ -121,11 +121,11 @@
   <link rel="stylesheet" href="/css/styles.css?v=20260917c"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20260917f"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20260916a"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20260917g"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20260917g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20260917f"/>
-  <link rel="stylesheet" href="/css/borrado-bases.css?v=20260917e"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20260917g"/>
+  <link rel="stylesheet" href="/css/borrado-bases.css?v=20260917g"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20260915b"/>
@@ -478,7 +478,7 @@
             <div class="plan-chile-embed-wrap embed-frame-wrap">
               <div id="plan-chile-embed-loading" class="embed-loading" aria-live="polite">
                 <div class="preview-loading-spinner" aria-hidden="true"></div>
-                <p>Cargando sitio…</p>
+                <p>Cargando sitio?</p>
               </div>
               <iframe id="planChileEmbedFrame" class="embed-frame plan-chile-embed-frame" title="Soporte técnico Chile"
                 allow="clipboard-read; clipboard-write; fullscreen"></iframe>
@@ -663,6 +663,7 @@
             </div>
 
             <div class="blanqueo-app">
+              <div class="st2-form-side-wrap">
               <div class="plan-gestor-panel blanqueo-form-panel">
                 <div class="plan-gestor-panel-accent blanqueo-accent-form"></div>
                 <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
@@ -718,6 +719,10 @@
                   </div>
                 </div>
               </div>
+              <aside id="blanqueo-form-toast" class="st2-form-side-toast hidden" role="status" aria-live="polite" hidden>
+                <span id="blanqueo-form-toast-text" class="st2-form-side-toast-text"></span>
+              </aside>
+              </div>
 
               <div class="plan-gestor-panel plan-gestor-panel-list">
                 <div class="plan-gestor-panel-accent blanqueo-accent-list"></div>
@@ -747,7 +752,7 @@
                   </label>
                   <label class="blanqueo-filter-search">
                     Buscar correo
-                    <input id="blanqueo-search" type="search" placeholder="correo, caso, cliente…" autocomplete="off" spellcheck="false"/>
+                    <input id="blanqueo-search" type="search" placeholder="correo, caso, cliente?" autocomplete="off" spellcheck="false"/>
                   </label>
                   <label id="blanqueo-filter-mine-wrap" class="blanqueo-filter-mine hidden">
                     <input id="blanqueo-filter-mine" type="checkbox"/>
@@ -762,7 +767,7 @@
                   <table class="plan-gestor-table blanqueo-table">
                     <thead>
                       <tr>
-                        <th id="blanqueo-th-fecha" class="blanqueo-th-fecha" scope="col" title="Lo más nuevo arriba — clic para invertir" aria-sort="descending">
+                        <th id="blanqueo-th-fecha" class="blanqueo-th-fecha" scope="col" title="Lo más nuevo arriba ? clic para invertir" aria-sort="descending">
                           Fecha <span class="blanqueo-sort-mark" aria-hidden="true">?</span>
                         </th>
                         <th class="blanqueo-th-caso">N° caso</th>
@@ -844,13 +849,14 @@
             </div>
 
             <div class="borrado-app">
+              <div class="st2-form-side-wrap">
               <div class="plan-gestor-panel borrado-form-panel">
                 <div class="plan-gestor-panel-accent borrado-accent-form"></div>
                 <h3 class="plan-gestor-panel-title">Nueva solicitud</h3>
                 <div id="borrado-form-grid" class="borrado-form-grid">
                   <label class="borrado-salesforce-toggle" for="borrado-salesforce">
                     <input id="borrado-salesforce" type="checkbox"/>
-                    <span>Varias bases — detalle en Salesforce</span>
+                    <span>Varias bases ? detalle en Salesforce</span>
                   </label>
                   <p id="borrado-salesforce-hint" class="borrado-salesforce-hint hidden" aria-live="polite">
                     Solo se registra N° de caso y cliente. El detalle completo está en Salesforce.
@@ -895,13 +901,17 @@
                     </div>
                     <div id="borrado-ejercicios-field" class="borrado-field borrado-field-ejercicios hidden" aria-hidden="true">
                       <label for="borrado-ejercicios">Ejercicios a borrar</label>
-                      <textarea id="borrado-ejercicios" rows="4" placeholder="Pegá el detalle del mail con los ejercicios a borrar…" spellcheck="false"></textarea>
+                      <textarea id="borrado-ejercicios" rows="4" placeholder="Pegá el detalle del mail con los ejercicios a borrar?" spellcheck="false"></textarea>
                     </div>
                     <div class="borrado-field borrado-field-actions borrado-actions-detalle">
                       <button type="button" id="borrado-add-detalle" class="btn btn-primary">Agregar</button>
                     </div>
                   </div>
                 </div>
+              </div>
+              <aside id="borrado-form-toast" class="st2-form-side-toast hidden" role="status" aria-live="polite" hidden>
+                <span id="borrado-form-toast-text" class="st2-form-side-toast-text"></span>
+              </aside>
               </div>
 
               <div class="plan-gestor-panel plan-gestor-panel-list">
@@ -918,7 +928,7 @@
                   </label>
                   <label class="borrado-filter-search">
                     Buscar
-                    <input id="borrado-search" type="search" placeholder="caso, cliente, empresa, CUIT…" autocomplete="off" spellcheck="false"/>
+                    <input id="borrado-search" type="search" placeholder="caso, cliente, empresa, CUIT?" autocomplete="off" spellcheck="false"/>
                   </label>
                   <label id="borrado-filter-mine-wrap" class="borrado-filter-mine hidden">
                     <input id="borrado-filter-mine" type="checkbox"/>
@@ -933,7 +943,7 @@
                   <table class="plan-gestor-table borrado-table">
                     <thead>
                       <tr>
-                        <th id="borrado-th-fecha" class="borrado-th-fecha" scope="col" title="Lo más nuevo arriba — clic para invertir" aria-sort="descending">
+                        <th id="borrado-th-fecha" class="borrado-th-fecha" scope="col" title="Lo más nuevo arriba ? clic para invertir" aria-sort="descending">
                           Fecha <span class="borrado-sort-mark" aria-hidden="true">?</span>
                         </th>
                         <th class="borrado-th-caso">N° caso</th>
@@ -1003,7 +1013,7 @@
           <div class="planillas-card plan-referral-card">
             <div id="plan-referral-loading" class="plan-module-loading hidden" aria-live="polite" aria-busy="false">
               <div class="plan-module-loading-spinner" aria-hidden="true"></div>
-              <p id="plan-referral-loading-text">Cargando Referral I+D…</p>
+              <p id="plan-referral-loading-text">Cargando Referral I+D?</p>
             </div>
             <div class="plan-module-sticky-head">
               <div class="plan-module-header-bar">
@@ -1616,7 +1626,7 @@
             <div class="plan-gestor-panel plan-gestor-panel-new">
               <div id="op-gestor-add-loading" class="plan-gestor-add-loading hidden" aria-live="polite" aria-busy="false">
                 <div class="plan-gestor-add-spinner" aria-hidden="true"></div>
-                <p>Guardando oportunidad…</p>
+                <p>Guardando oportunidad?</p>
               </div>
               <div class="plan-gestor-panel-accent purple"></div>
               <h3 class="plan-gestor-panel-title">Nueva oportunidad</h3>
@@ -1746,7 +1756,7 @@
         </div>
         <div id="thomEmbedLoading" class="embed-loading hidden" aria-live="polite">
           <div class="preview-loading-spinner" aria-hidden="true"></div>
-          <p id="thomEmbedLoadingText">Cargando THOM…</p>
+          <p id="thomEmbedLoadingText">Cargando THOM?</p>
         </div>
         <iframe id="thomFrame" class="embed-frame" name="thomEmbedFrame" title="THOM"
           allow="clipboard-read; clipboard-write; fullscreen; autoplay"></iframe>
@@ -1830,19 +1840,19 @@
             <div data-admin-sub="accesos">
               <div class="st2-access-admin-kpis" id="st2-access-admin-kpis">
                 <div class="st2-access-admin-kpi">
-                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-total">—</span>
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-total">?</span>
                   <span class="st2-access-admin-kpi-l">Registrados</span>
                 </div>
                 <div class="st2-access-admin-kpi">
-                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-active">—</span>
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-active">?</span>
                   <span class="st2-access-admin-kpi-l">Activos</span>
                 </div>
                 <div class="st2-access-admin-kpi is-pending">
-                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-pending">—</span>
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-pending">?</span>
                   <span class="st2-access-admin-kpi-l">Pendientes</span>
                 </div>
                 <div class="st2-access-admin-kpi">
-                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-today">—</span>
+                  <span class="st2-access-admin-kpi-n" id="st2-access-admin-kpi-today">?</span>
                   <span class="st2-access-admin-kpi-l">Ingresaron hoy</span>
                 </div>
               </div>
@@ -1906,9 +1916,9 @@
           </div>
           <div data-admin-sub="accesos">
           <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>
-          <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando…</p>
+          <p id="st2-access-admin-status" class="st2-access-admin-status">Cargando?</p>
           <div id="st2-access-admin-toolbar" class="st2-access-admin-toolbar hidden">
-            <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar correo o nombre…" autocomplete="off" spellcheck="false"/>
+            <input id="st2-access-admin-search" type="search" class="st2-access-admin-search" placeholder="Buscar correo o nombre?" autocomplete="off" spellcheck="false"/>
             <div class="st2-access-admin-quick-filters" role="group" aria-label="Filtros rápidos">
               <button type="button" class="st2-access-admin-quick-filter is-on" data-list-filter="" title="Todos">Todos</button>
               <button type="button" class="st2-access-admin-quick-filter" data-list-filter="active" title="Solo activos ahora">Activos</button>
@@ -1970,8 +1980,8 @@
             <div class="st2-about-notice-copy">
               <p id="st2-about-notice-lead" class="st2-about-notice-lead">Suite interna para mesa de ayuda</p>
               <ul id="st2-about-tabs-list" class="st2-about-tabs-list" aria-label="Pestañas de ST2 según tu perfil">
-                <li><strong>Sistema de Planillas</strong> — Según tu perfil.</li>
-                <li><strong>AI Platform</strong> — Plataforma de inteligencia artificial integrada en el navegador.</li>
+                <li><strong>Sistema de Planillas</strong> ? Según tu perfil.</li>
+                <li><strong>AI Platform</strong> ? Plataforma de inteligencia artificial integrada en el navegador.</li>
               </ul>
               <p class="st2-about-notice-aside">No constituye un producto oficial ni licenciado por Thomson Reuters.</p>
               <section class="st2-about-suggest" aria-label="Sugerencias para la web">
@@ -2049,13 +2059,13 @@
         </section>
 
         <div class="st2-about-foot">
-          <p id="st2-about-updated" class="st2-about-updated" aria-live="polite">Último update de la web: —</p>
+          <p id="st2-about-updated" class="st2-about-updated" aria-live="polite">Último update de la web: ?</p>
         </div>
       </div>
       <div id="st2-about-busy" class="st2-about-busy hidden" aria-hidden="true">
         <div class="st2-about-busy-card" role="status" aria-live="polite">
           <span class="st2-about-busy-spinner" aria-hidden="true"></span>
-          <p id="st2-about-busy-text" class="st2-about-busy-text">Subiendo…</p>
+          <p id="st2-about-busy-text" class="st2-about-busy-text">Subiendo?</p>
           <div class="st2-about-busy-bar" aria-hidden="true"><span id="st2-about-busy-bar-fill"></span></div>
         </div>
       </div>
@@ -2067,7 +2077,7 @@
       <h3 id="st2-tool-url-title">Publicar herramienta</h3>
       <p id="st2-tool-url-lead" class="st2-tool-url-lead">Pegá el link de descarga y el nombre del archivo.</p>
       <label class="st2-tool-url-label" for="st2-tool-url-input">Link del archivo</label>
-      <input id="st2-tool-url-input" class="st2-tool-url-input" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://…"/>
+      <input id="st2-tool-url-input" class="st2-tool-url-input" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://?"/>
       <label class="st2-tool-url-label" for="st2-tool-url-name">Nombre con extensión</label>
       <input id="st2-tool-url-name" class="st2-tool-url-input" type="text" autocomplete="off" spellcheck="false" placeholder="ej. st2ps.bat o paquete.zip"/>
       <p id="st2-tool-url-error" class="st2-tool-url-error hidden" role="alert"></p>
@@ -2204,7 +2214,7 @@
       <h3 id="blanqueo-note-title">Observación</h3>
       <p class="plan-user-hint">Dejá un comentario breve sobre esta solicitud (por ejemplo, por qué no se pudo completar).</p>
       <label class="plan-user-label" for="blanqueo-note-text">Detalle</label>
-      <textarea id="blanqueo-note-text" class="blanqueo-note-textarea" rows="4" maxlength="280" placeholder="Ej. el correo no figura en el cliente…"></textarea>
+      <textarea id="blanqueo-note-text" class="blanqueo-note-textarea" rows="4" maxlength="280" placeholder="Ej. el correo no figura en el cliente?"></textarea>
       <div class="plan-user-actions">
         <button type="button" id="blanqueo-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="blanqueo-note-save" class="plan-gestor-btn-add">Guardar</button>
@@ -2219,7 +2229,7 @@
       <div class="borrado-edit-grid">
         <label class="borrado-salesforce-toggle borrado-edit-salesforce-toggle" for="borrado-edit-salesforce">
           <input id="borrado-edit-salesforce" type="checkbox"/>
-          <span>Varias bases — detalle en Salesforce</span>
+          <span>Varias bases ? detalle en Salesforce</span>
         </label>
         <p id="borrado-edit-salesforce-hint" class="borrado-salesforce-hint hidden">Solo caso y cliente; el detalle está en Salesforce.</p>
         <label class="plan-user-label" for="borrado-edit-caso">N° de caso</label>
@@ -2275,7 +2285,7 @@
       <h3 id="borrado-note-title">Observación</h3>
       <p class="plan-user-hint">Texto libre, aparte del resultado IVA/SJ/CG. También podés completarla al confirmar listo con "¿Hay observación?".</p>
       <label class="plan-user-label" for="borrado-note-text">Detalle</label>
-      <textarea id="borrado-note-text" class="borrado-note-textarea" rows="4" maxlength="280" placeholder="Ej. falta autorización del cliente…"></textarea>
+      <textarea id="borrado-note-text" class="borrado-note-textarea" rows="4" maxlength="280" placeholder="Ej. falta autorización del cliente?"></textarea>
       <div class="plan-user-actions">
         <button type="button" id="borrado-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="borrado-note-save" class="plan-gestor-btn-add">Guardar</button>
@@ -2297,7 +2307,7 @@
         <label class="borrado-check borrado-listo-has-note"><input id="borrado-listo-has-note" type="checkbox"/> ¿Hay observación?</label>
         <div id="borrado-listo-note-wrap" class="borrado-listo-note-wrap hidden">
           <label class="plan-user-label" for="borrado-listo-note">Detalle</label>
-          <textarea id="borrado-listo-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. falta autorización del cliente…"></textarea>
+          <textarea id="borrado-listo-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. falta autorización del cliente?"></textarea>
         </div>
       </div>
       <div class="plan-user-actions">
@@ -2321,7 +2331,7 @@
         <label class="borrado-check"><input id="borrado-incorrecto-has-note" type="checkbox"/> ¿Hay observación?</label>
         <div id="borrado-incorrecto-note-wrap" class="borrado-listo-note-wrap hidden">
           <label class="plan-user-label" for="borrado-incorrecto-note">Detalle</label>
-          <textarea id="borrado-incorrecto-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. CUIT erróneo, cliente equivocado…"></textarea>
+          <textarea id="borrado-incorrecto-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. CUIT erróneo, cliente equivocado?"></textarea>
         </div>
       </div>
       <div class="plan-user-actions">
@@ -2413,9 +2423,9 @@
         </div>
         <div id="st2-access-modules-birthday-picker" class="st2-birthday-picker hidden" role="dialog" aria-label="Elegir cumpleaños">
           <div class="st2-birthday-picker-head">
-            <button type="button" class="st2-birthday-picker-nav" data-bday-nav="prev" aria-label="Mes anterior">‹</button>
+            <button type="button" class="st2-birthday-picker-nav" data-bday-nav="prev" aria-label="Mes anterior">?</button>
             <span class="st2-birthday-picker-month" data-bday-month-label>Enero</span>
-            <button type="button" class="st2-birthday-picker-nav" data-bday-nav="next" aria-label="Mes siguiente">›</button>
+            <button type="button" class="st2-birthday-picker-nav" data-bday-nav="next" aria-label="Mes siguiente">?</button>
           </div>
           <div class="st2-birthday-picker-grid" data-bday-days></div>
           <button type="button" class="st2-birthday-picker-clear">Quitar fecha</button>
@@ -2538,7 +2548,7 @@
         <p class="st2-access-modules-group-subtitle">Soporte técnico CHILE</p>
         <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-chile-mod">
           <input id="st2-mod-chile-saad" type="checkbox"/>
-          <span>SAAD — Facturación</span>
+          <span>SAAD ? Facturación</span>
         </label>
         <label class="st2-access-modules-check st2-access-modules-check-main st2-access-modules-check-chile-mod">
           <input id="st2-mod-chile-hr" type="checkbox"/>
@@ -2595,9 +2605,9 @@
             <div class="pdf-portal-editor">
               <div class="pdf-portal-label-row">
                 <label class="pdf-portal-label" for="pdf-portal-brand">Título / Marca superior</label>
-                <span class="pdf-portal-label-hint">Opcional — si lo dejás vacío se genera sin caja</span>
+                <span class="pdf-portal-label-hint">Opcional ? si lo dejás vacío se genera sin caja</span>
               </div>
-              <input id="pdf-portal-brand" type="text" class="pdf-portal-input" placeholder="Ej. FACTURA ELECTRÓNICA — CONFIGURACIÓN" autocomplete="off" spellcheck="false"/>
+              <input id="pdf-portal-brand" type="text" class="pdf-portal-input" placeholder="Ej. FACTURA ELECTRÓNICA ? CONFIGURACIÓN" autocomplete="off" spellcheck="false"/>
 
               <div class="pdf-portal-formatbar" role="toolbar" aria-label="Formato de texto">
                 <button type="button" class="pdf-fmt-btn" data-cmd="bold" title="Negrita (Ctrl+B)">
@@ -2623,7 +2633,7 @@
                 <label class="pdf-fmt-field" title="Tamaño de texto">
                   <span>Tam.</span>
                   <select id="pdf-portal-font-size" aria-label="Tamaño de fuente">
-                    <option value="">—</option>
+                    <option value="">?</option>
                     <option value="2">Pequeño</option>
                     <option value="3" selected>Normal</option>
                     <option value="4">Mediano</option>
@@ -2659,7 +2669,7 @@
                 <span class="pdf-portal-label-hint">Podés seleccionar texto en el portal, copiar (Ctrl+C) y pegar acá</span>
               </div>
               <div class="pdf-portal-editor-shell">
-                <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="?? Seleccioná texto en el portal, copiá con Ctrl+C y pegá acá (o tocá 'Pegar portapapeles')…"></div>
+                <div id="pdf-portal-editor" class="pdf-portal-rich" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="?? Seleccioná texto en el portal, copiá con Ctrl+C y pegá acá (o tocá 'Pegar portapapeles')?"></div>
                 <span class="pdf-portal-editor-resize-hint" title="Arrastrá la esquina para agrandar" aria-hidden="true"></span>
               </div>
 
@@ -2707,7 +2717,7 @@
           <h2 id="st2-access-title" class="st2-access-title st2-access-title-mark" aria-label="ST² - Suite Web">
             <span class="st2-access-title-st">ST</span><sup class="st2-access-title-sup">2</sup>
           </h2>
-          <span class="st2-access-suite-sep" aria-hidden="true">–</span>
+          <span class="st2-access-suite-sep" aria-hidden="true">?</span>
           <p class="st2-access-suite">Suite Web</p>
         </div>
       </div>
@@ -2742,6 +2752,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20260917e" type="module"></script>
+  <script src="/js/app.js?v=20260917g" type="module"></script>
 </body>
 </html>

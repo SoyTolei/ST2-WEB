@@ -1,4 +1,4 @@
-Ôªøimport { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260910b";
+import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260910b";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
@@ -9,7 +9,7 @@ import { notifyAccessChanged } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js?v=20260917e";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260917e";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260917g";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -73,7 +73,7 @@ function applyTheme(dark) {
   document.dispatchEvent(new CustomEvent("st2:theme-changed", { detail: { dark: !!dark } }));
 }
 
-/** Oscuro por defecto; solo "light" expl√≠cito deja el tema claro. */
+/** Oscuro por defecto; solo "light" explÌcito deja el tema claro. */
 function initThemeFromStorage() {
   let dark = true;
   try {
@@ -326,7 +326,7 @@ function syncPortalFrameTitle() {
   const cfg = getActivePortalConfig();
   const portalLabel = getPortalClientTabLabel();
   const label = portalPickerLabel(activePortalId, cfg?.label) || activePortalId || portalLabel;
-  if (portalFrame) portalFrame.title = `${portalLabel} ¬∑ ${label}`;
+  if (portalFrame) portalFrame.title = `${portalLabel} ∑ ${label}`;
 }
 
 function switchPortal(portalId, { history = "push" } = {}) {
@@ -434,7 +434,7 @@ function getAboutUpdatedLabel() {
   if (fromConfig) return fromConfig;
   const meta = document.querySelector('meta[name="st2-updated-label"]');
   if (meta?.content?.trim()) return meta.content.trim();
-  return "√öltimo update de la web: ‚Äî";
+  return "⁄ltimo update de la web: ó";
 }
 
 function applyAboutUpdated() {
@@ -444,8 +444,8 @@ function applyAboutUpdated() {
 }
 
 /**
- * Parte tokens pegados sin separador: vanesageorgina ‚Üí vanesa + georgina,
- * velasquezmunoz ‚Üí velasquez + munoz.
+ * Parte tokens pegados sin separador: vanesageorgina ? vanesa + georgina,
+ * velasquezmunoz ? velasquez + munoz.
  * Acepta corte si ambos son conocidos, o si uno es conocido y el otro parece nombre.
  */
 function splitGluedAccessNamePart(raw, depth = 0) {
@@ -547,7 +547,7 @@ function parseAccessNameFromEmail(email) {
   const rawParts = tokenizeAccessEmailLocal(local);
   const parts = rawParts.map(titleAccessNameToken).filter(Boolean);
   if (!parts.length) {
-    return { firstName: "", secondName: "", lastName: "", secondLastName: "", display: email || "‚Äî" };
+    return { firstName: "", secondName: "", lastName: "", secondLastName: "", display: email || "ó" };
   }
 
   let firstName = "";
@@ -612,7 +612,7 @@ function parseAccessNameFromEmail(email) {
     secondName,
     lastName,
     secondLastName,
-    display: merged.join(" ").replace(/\s+/g, " ").trim() || email || "‚Äî",
+    display: merged.join(" ").replace(/\s+/g, " ").trim() || email || "ó",
   };
 }
 
@@ -623,7 +623,7 @@ function formatAccessDisplayName(email, override) {
 }
 
 function formatAccessDate(iso) {
-  if (!iso) return "‚Äî";
+  if (!iso) return "ó";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleString("es-AR", {
@@ -636,7 +636,7 @@ function formatAccessDate(iso) {
 }
 
 function formatAccessRelative(iso) {
-  if (!iso) return "‚Äî";
+  if (!iso) return "ó";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
@@ -651,7 +651,7 @@ function formatAccessRelative(iso) {
 }
 
 function formatAccessDateCompact(iso) {
-  if (!iso) return "‚Äî";
+  if (!iso) return "ó";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   const now = new Date();
@@ -705,7 +705,7 @@ function syncAccessAdminSortHeaders() {
     if (active) {
       const desc = accessAdminSortDir === "desc";
       th.setAttribute("aria-sort", desc ? "descending" : "ascending");
-      if (mark) mark.textContent = desc ? "‚Üì" : "‚Üë";
+      if (mark) mark.textContent = desc ? "?" : "?";
     } else {
       th.setAttribute("aria-sort", "none");
       if (mark) mark.textContent = "";
@@ -748,29 +748,29 @@ let accessAdminUsageRows = [];
 let accessAdminUsageActiveDays = new Map();
 let adminUsageLoadSeq = 0;
 let adminUsageLoadError = false;
-/** "accesos" | "uso" ‚Äî sub-pesta√±a del panel ADMIN. */
+/** "accesos" | "uso" ó sub-pestaÒa del panel ADMIN. */
 let adminSubtab = "accesos";
-/** 0 = todo el historial | 1 | 3 | 7 | 15 | 30 ‚Äî d√≠as calendario AR. */
+/** 0 = todo el historial | 1 | 3 | 7 | 15 | 30 ó dÌas calendario AR. */
 let adminUsageDays = 0;
-/** "recent" | "hits" ‚Äî orden de la tabla por persona. */
+/** "recent" | "hits" ó orden de la tabla por persona. */
 let adminUsageSort = "recent";
 let accessAdminUsageMonths = [];
 const USAGE_RANGE_DAYS = [0, 1, 3, 7, 15, 30];
 const USAGE_RANGE_TITLES = {
   0: "Historial de uso",
   1: "Uso de hoy",
-  3: "Uso ¬∑ 3 d√≠as",
-  7: "Uso ¬∑ 7 d√≠as",
-  15: "Uso ¬∑ 15 d√≠as",
-  30: "Uso ¬∑ 30 d√≠as",
+  3: "Uso ∑ 3 dÌas",
+  7: "Uso ∑ 7 dÌas",
+  15: "Uso ∑ 15 dÌas",
+  30: "Uso ∑ 30 dÌas",
 };
 const USAGE_RANGE_EMPTY = {
-  0: "Todav√≠a no hay actividad registrada.",
-  1: "Todav√≠a no hay actividad registrada hoy.",
-  3: "No hay actividad en los √∫ltimos 3 d√≠as.",
-  7: "No hay actividad en los √∫ltimos 7 d√≠as.",
-  15: "No hay actividad en los √∫ltimos 15 d√≠as.",
-  30: "No hay actividad en los √∫ltimos 30 d√≠as.",
+  0: "TodavÌa no hay actividad registrada.",
+  1: "TodavÌa no hay actividad registrada hoy.",
+  3: "No hay actividad en los ˙ltimos 3 dÌas.",
+  7: "No hay actividad en los ˙ltimos 7 dÌas.",
+  15: "No hay actividad en los ˙ltimos 15 dÌas.",
+  30: "No hay actividad en los ˙ltimos 30 dÌas.",
 };
 const USAGE_MONTH_LABELS = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -801,7 +801,7 @@ function resolveAccessBrowserLabel(item) {
 function formatAccessClientLabel(item) {
   const browser = resolveAccessBrowserLabel(item);
   const device = resolveAccessDeviceShort(item);
-  if (browser && device) return `${browser} ¬∑ ${device}`;
+  if (browser && device) return `${browser} ∑ ${device}`;
   if (device) return `id ${device}`;
   if (browser) return browser;
   return item?.lastClientLabel
@@ -835,7 +835,7 @@ function normalizeAccessBrowserFamily(label) {
   return b;
 }
 
-/** Edge ‚Üî Chrome en el mismo usuario es habitual; no alertar. */
+/** Edge ? Chrome en el mismo usuario es habitual; no alertar. */
 function isBenignCrossBrowserSwap(prevBrowser, nextBrowser) {
   const a = normalizeAccessBrowserFamily(prevBrowser);
   const b = normalizeAccessBrowserFamily(nextBrowser);
@@ -848,7 +848,7 @@ function isBenignClientKeyMigration(prevKey, nextKey) {
   if (!prevKey || !nextKey || prevKey === nextKey) return false;
   // Primera vez que aparece device id tras el deploy: no alertar.
   if (nextKey.startsWith("d:") && !prevKey.startsWith("d:")) return true;
-  // Formato viejo host|ip|hint ‚Üí nuevo sin IP.
+  // Formato viejo host|ip|hint ? nuevo sin IP.
   if (prevKey.includes("|") && !nextKey.includes("|")) return true;
   return false;
 }
@@ -885,14 +885,14 @@ function buildAccessAdminPermsCell(item) {
   if (item.isSt2Admin) systems.push({ key: "adm", label: "ADM", title: "Administrador web (ADMIN)" });
   const extras = buildAccessAdminExtraModules(item);
   if (!systems.length && !extras.length) {
-    return '<span class="st2-access-admin-perm-empty">‚Äî</span>';
+    return '<span class="st2-access-admin-perm-empty">ó</span>';
   }
   const sysHtml = systems.map((sys) => (
     `<span class="st2-access-admin-perm-sys st2-access-admin-perm-sys--${sys.key} is-on" title="${escapeHtml(sys.title)}">${escapeHtml(sys.label)}</span>`
   )).join("");
   const extrasHtml = extras.length
     ? `<details class="st2-access-admin-perm-detail">
-        <summary class="st2-access-admin-perm-more-btn" aria-label="Ver ${extras.length} m√≥dulo${extras.length === 1 ? "" : "s"} extra">+</summary>
+        <summary class="st2-access-admin-perm-more-btn" aria-label="Ver ${extras.length} mÛdulo${extras.length === 1 ? "" : "s"} extra">+</summary>
         <div class="st2-access-admin-perm-pop" role="list">
           ${extras.map((label) => `<span class="st2-access-admin-perm-pop-item" role="listitem">${escapeHtml(label)}</span>`).join("")}
         </div>
@@ -989,13 +989,13 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
   if (!notify || !changes.length) return changes;
 
-  // Acumular atenci√≥n en panel (‚ö† en Equipo / pesta√±a ADMIN). Sin push de escritorio.
+  // Acumular atenciÛn en panel (? en Equipo / pestaÒa ADMIN). Sin push de escritorio.
   for (const c of changes) accessAdminClientChangedEmails.add(c.email);
   syncAdminClientAttentionUi();
 
   if (showHint) {
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-    setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} ¬∑ ${nowLabel}`);
+    setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} ∑ ${nowLabel}`);
   }
 
   return changes;
@@ -1006,15 +1006,15 @@ function applyAccessAdminClientWatch(items, { notify = true, showHint = true } =
 
 function formatAccessClientChangeHint(changes) {
   if (!changes?.length) return "";
-  if (changes.length > 1) return `‚ö†  ${changes.length} posibles equipos distintos`;
+  if (changes.length > 1) return `?  ${changes.length} posibles equipos distintos`;
   const first = changes[0];
   const prefix = first.sameBrowser
-    ? `‚ö†  Mismo navegador, otro equipo: ${first.displayName}`
-    : `‚ö†  Equipo distinto: ${first.displayName}`;
+    ? `?  Mismo navegador, otro equipo: ${first.displayName}`
+    : `?  Equipo distinto: ${first.displayName}`;
   const trail = first.previousLabel && first.nextLabel
-    ? ` ¬∑ ${first.previousLabel} ‚Üí ${first.nextLabel}`
+    ? ` ∑ ${first.previousLabel} ? ${first.nextLabel}`
     : first.nextLabel
-      ? ` ¬∑ ${first.nextLabel}`
+      ? ` ∑ ${first.nextLabel}`
       : "";
   return `${prefix}${trail}`;
 }
@@ -1043,7 +1043,7 @@ async function pollAccessAdminClientWatch() {
         renderAccessAdminTable();
       }
       const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} ¬∑ ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(changes)} ∑ ${nowLabel}`);
     }
   } catch {
     /* ignore */
@@ -1064,22 +1064,22 @@ function stopAccessAdminClientWatch() {
   accessAdminClientWatchTimer = null;
 }
 
-/** Cartelito ‚ö† en pesta√±a ADMIN / columna Equipo cuando alguien cambi√≥ de terminal. */
+/** Cartelito ? en pestaÒa ADMIN / columna Equipo cuando alguien cambiÛ de terminal. */
 function syncAdminClientAttentionUi() {
   const n = accessAdminClientChangedEmails.size;
   tabAdminBtn?.classList.toggle("has-client-attention", n > 0 && isPrimarySuperAdmin());
   if (n > 0) {
     tabAdminBtn?.setAttribute("title", n === 1
-      ? "Un usuario cambi√≥ de equipo"
+      ? "Un usuario cambiÛ de equipo"
       : `${n} usuarios cambiaron de equipo`);
-  } else if (tabAdminBtn && !tabAdminBtn.title?.includes("administraci√≥n")) {
-    tabAdminBtn.title = "Panel de administraci√≥n de accesos";
+  } else if (tabAdminBtn && !tabAdminBtn.title?.includes("administraciÛn")) {
+    tabAdminBtn.title = "Panel de administraciÛn de accesos";
   }
   const thAttn = document.getElementById("st2-access-admin-host-attention");
   if (thAttn) {
     thAttn.classList.toggle("hidden", n === 0);
     thAttn.setAttribute("aria-hidden", n === 0 ? "true" : "false");
-    thAttn.textContent = n > 0 ? "‚ö† " : "";
+    thAttn.textContent = n > 0 ? "? " : "";
   }
   if (accessAdminKpiAttention) accessAdminKpiAttention.textContent = String(n);
 }
@@ -1361,7 +1361,7 @@ function syncAccessAdminModFilterUi() {
       accessAdminPermsFilterMark.classList.add("hidden");
     } else {
       const labels = { sql: "SQL", leg: "LEG", cl: "CL", adm: "ADM" };
-      accessAdminPermsFilterMark.textContent = [...accessAdminModFilters].map((key) => labels[key] || key).join(" ¬∑ ");
+      accessAdminPermsFilterMark.textContent = [...accessAdminModFilters].map((key) => labels[key] || key).join(" ∑ ");
       accessAdminPermsFilterMark.classList.remove("hidden");
     }
   }
@@ -1458,7 +1458,7 @@ function renderAccessAdminDaySummary({ total, pending, today, activeCount }) {
     `${today} ingresaron hoy`,
   ];
   if (pending) parts.push(`${pending} pendientes`);
-  accessAdminDaySummary.textContent = `Hoy ¬∑ ${parts.join(" ¬∑ ")} ¬∑ ${total} en lista`;
+  accessAdminDaySummary.textContent = `Hoy ∑ ${parts.join(" ∑ ")} ∑ ${total} en lista`;
   accessAdminDaySummary.classList.remove("hidden");
   accessAdminDaySummary.hidden = false;
 }
@@ -1478,10 +1478,10 @@ const USAGE_MODULE_LABELS = {
 
 function formatUsageModule(module) {
   const key = String(module || "").trim().toLowerCase();
-  return USAGE_MODULE_LABELS[key] || key || "‚Äî";
+  return USAGE_MODULE_LABELS[key] || key || "ó";
 }
 
-/** Accesos + Uso: visibles para due√±o y ADMIN WEB. */
+/** Accesos + Uso: visibles para dueÒo y ADMIN WEB. */
 function canSeeAdminUsage() {
   return isSt2SuperAdmin();
 }
@@ -1519,7 +1519,7 @@ function syncAdminSubnav() {
     titles.textContent = onUsage ? "Uso de la plataforma" : "Control de accesos";
   }
   if (kicker) {
-    kicker.textContent = onUsage ? "Consulta ¬∑ actividad" : "Consulta ¬∑ personas";
+    kicker.textContent = onUsage ? "Consulta ∑ actividad" : "Consulta ∑ personas";
   }
 }
 
@@ -1538,7 +1538,7 @@ function normalizeUsageDays(days) {
 
 function formatUsageMonthLabel(monthKey) {
   const m = String(monthKey || "").match(/^(\d{4})-(\d{2})$/);
-  if (!m) return monthKey || "‚Äî";
+  if (!m) return monthKey || "ó";
   const year = m[1];
   const idx = Number(m[2]) - 1;
   const name = USAGE_MONTH_LABELS[idx] || m[2];
@@ -1558,7 +1558,7 @@ function setAdminUsageDays(days) {
   adminUsageDays = normalizeUsageDays(days);
   syncAdminUsageRangeUi();
   if (adminUsageTitle) adminUsageTitle.textContent = USAGE_RANGE_TITLES[adminUsageDays] || "Uso";
-  if (adminUsageSub) adminUsageSub.textContent = "Cargando‚Ä¶";
+  if (adminUsageSub) adminUsageSub.textContent = "CargandoÖ";
   void loadAccessAdminUsage();
 }
 
@@ -1668,10 +1668,10 @@ function renderAccessAdminUsage() {
     const people = byPerson.size;
     const monthN = accessAdminUsageMonths.length;
     const monthHint = days === 0 && monthN > 0
-      ? ` ¬∑ ${monthN} ${monthN === 1 ? "mes" : "meses"}`
+      ? ` ∑ ${monthN} ${monthN === 1 ? "mes" : "meses"}`
       : "";
     adminUsageSub.textContent =
-      `${people} ${people === 1 ? "persona" : "personas"} ¬∑ ${totalHits} ${totalHits === 1 ? "apertura" : "aperturas"}${monthHint}`;
+      `${people} ${people === 1 ? "persona" : "personas"} ∑ ${totalHits} ${totalHits === 1 ? "apertura" : "aperturas"}${monthHint}`;
   }
 
   if (adminUsageModulesBody) {
@@ -1717,7 +1717,7 @@ function renderAccessAdminUsage() {
             + `<span class="st2-admin-usage-chip-n">${escapeHtml(String(m.hits))}</span></span>`)
           .join("");
         const daysHint = (days === 0 || days > 1) && p.activeDays > 0
-          ? `<span class="st2-admin-usage-days">${escapeHtml(String(p.activeDays))} ${p.activeDays === 1 ? "d√≠a" : "d√≠as"}</span>`
+          ? `<span class="st2-admin-usage-days">${escapeHtml(String(p.activeDays))} ${p.activeDays === 1 ? "dÌa" : "dÌas"}</span>`
           : "";
         return `<tr>
           <td><span class="st2-admin-usage-person" title="${escapeHtml(p.email)}">${escapeHtml(p.name)}</span>${daysHint}</td>
@@ -1746,7 +1746,7 @@ function renderAccessAdminUsage() {
         return `<article class="st2-admin-usage-month">
           <div class="st2-admin-usage-month-head">
             <strong class="st2-admin-usage-month-title">${escapeHtml(formatUsageMonthLabel(m.month))}</strong>
-            <span class="st2-admin-usage-month-meta">${escapeHtml(String(m.hits))} apert. ¬∑ ${escapeHtml(String(m.people))} pers. ¬∑ ${escapeHtml(String(m.modules))} m√≥d.</span>
+            <span class="st2-admin-usage-month-meta">${escapeHtml(String(m.hits))} apert. ∑ ${escapeHtml(String(m.people))} pers. ∑ ${escapeHtml(String(m.modules))} mÛd.</span>
           </div>
           <div class="st2-admin-usage-chips">${chips || "<span class=\"st2-admin-usage-month-empty\">Sin detalle</span>"}</div>
         </article>`;
@@ -1770,7 +1770,7 @@ function setAccessAdminListFilter(key) {
 
 function exportAccessAdminCsv() {
   const items = getFilteredAccessAdminItems();
-  const headers = ["Nombre", "Email", "Permisos", "Equipo", "√öltimo acceso", "Ingresos", "Activo", "Concurrente"];
+  const headers = ["Nombre", "Email", "Permisos", "Equipo", "⁄ltimo acceso", "Ingresos", "Activo", "Concurrente"];
   const lines = [headers.join(",")];
   for (const item of items) {
     const name = formatAccessDisplayName(item.email, item.displayNameOverride);
@@ -1788,8 +1788,8 @@ function exportAccessAdminCsv() {
       formatAccessClientLabel(item) || "",
       formatAccessDate(item.lastSeenAt),
       String(item.loginCount ?? 0),
-      item.isActive ? "s√≠" : "no",
-      item.hasConcurrentSessions ? "s√≠" : "no",
+      item.isActive ? "sÌ" : "no",
+      item.hasConcurrentSessions ? "sÌ" : "no",
     ].map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`);
     lines.push(row.join(","));
   }
@@ -1843,7 +1843,7 @@ function setAccessAdminUpdatedHint(text) {
   accessAdminUpdated.classList.remove("hidden");
 }
 
-/** Admin web y owner: Nombre, Permisos, Equipo, √öltimo acceso, Ingresos. */
+/** Admin web y owner: Nombre, Permisos, Equipo, ⁄ltimo acceso, Ingresos. */
 function canSeeAccessAdminOwnerColumns() {
   return isSt2SuperAdmin();
 }
@@ -1882,7 +1882,7 @@ function renderAccessAdminTable() {
   if (!accessAdminBody) return;
 
   if (!accessAdminItemsCache.length) {
-    accessAdminStatus.textContent = "Todav√≠a no hay accesos registrados.";
+    accessAdminStatus.textContent = "TodavÌa no hay accesos registrados.";
     accessAdminToolbar?.classList.add("hidden");
     accessAdminTableWrap?.classList.add("hidden");
     accessAdminBody.innerHTML = "";
@@ -1893,7 +1893,7 @@ function renderAccessAdminTable() {
 
   if (!items.length) {
     accessAdminStatus.textContent = accessAdminQuery.trim()
-      ? "Sin resultados para esa b√∫squeda."
+      ? "Sin resultados para esa b˙squeda."
       : accessAdminListFilter === "active"
         ? "Nadie activo ahora."
         : accessAdminListFilter === "attention"
@@ -1912,7 +1912,7 @@ function renderAccessAdminTable() {
   accessAdminBody.innerHTML = items.map((item) => {
     const badges = [];
     if (item.isPending) {
-      badges.push('<span class="st2-access-admin-pending-tag" title="Esperando aprobaci√≥n">Pendiente</span>');
+      badges.push('<span class="st2-access-admin-pending-tag" title="Esperando aprobaciÛn">Pendiente</span>');
     }
     if (item.isUnseenNew) {
       badges.push('<span class="st2-access-admin-new-user" title="Primer ingreso hoy">Nuevo</span>');
@@ -1932,22 +1932,22 @@ function renderAccessAdminTable() {
     ].filter(Boolean).join(" ");
     const displayName = formatAccessDisplayName(item.email, item.displayNameOverride);
     const permsHtml = buildAccessAdminPermsCell(item);
-    const hostLabel = formatAccessClientLabel(item) || "‚Äî";
+    const hostLabel = formatAccessClientLabel(item) || "ó";
     const deviceShort = resolveAccessDeviceShort(item);
     const browserLabel = resolveAccessBrowserLabel(item);
     const entornoHint = String(item.lastClientHint || "")
-      .replace(/\s*¬∑\s*id:[a-z0-9-]{6,32}\b/gi, "")
+      .replace(/\s*∑\s*id:[a-z0-9-]{6,32}\b/gi, "")
       .replace(/\bid:[a-z0-9-]{6,32}\b/gi, "")
-      .replace(/\s*¬∑\s*(Edge|Chrome|Firefox|Safari|Opera)\b/gi, "")
+      .replace(/\s*∑\s*(Edge|Chrome|Firefox|Safari|Opera)\b/gi, "")
       .replace(/\s{2,}/g, " ")
-      .replace(/^[¬∑\s]+|[¬∑\s]+$/g, "")
+      .replace(/^[∑\s]+|[∑\s]+$/g, "")
       .trim();
     const historyLines = (item.clientHistory || [])
       .slice(0, 5)
-      .map((h) => `${h.label || "‚Äî"}${h.lastSeenAt ? ` (${formatAccessRelative(h.lastSeenAt)})` : ""}`);
+      .map((h) => `${h.label || "ó"}${h.lastSeenAt ? ` (${formatAccessRelative(h.lastSeenAt)})` : ""}`);
     const showOwnerSignals = isPrimarySuperAdmin();
     const hostTitle = [
-      showOwnerSignals && item.hasConcurrentSessions ? `‚ö†  Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
+      showOwnerSignals && item.hasConcurrentSessions ? `?  Sesiones concurrentes (${item.activeDeviceCount || 2}+ equipos)` : "",
       browserLabel ? `Navegador: ${browserLabel}` : "",
       deviceShort ? `Dispositivo: ${deviceShort}` : "",
       entornoHint ? `Entorno: ${entornoHint}` : "",
@@ -1959,12 +1959,12 @@ function renderAccessAdminTable() {
       ? `<span class="st2-access-admin-host-meta">${escapeHtml(historyLines.length)} equipos recientes</span>`
       : "";
     const concurrentHint = showOwnerSignals && item.hasConcurrentSessions
-      ? `<span class="st2-access-admin-host-meta st2-access-admin-host-concurrent">concurrente √ó${escapeHtml(String(item.activeDeviceCount || 2))}</span>`
+      ? `<span class="st2-access-admin-host-meta st2-access-admin-host-concurrent">concurrente ◊${escapeHtml(String(item.activeDeviceCount || 2))}</span>`
       : "";
     const hostCell = showOwnerCols
       ? `<td class="st2-access-admin-host${accessAdminClientChangedEmails.has(item.email) ? " is-client-attn" : ""}" title="${escapeHtml(hostTitle)}">${
           accessAdminClientChangedEmails.has(item.email)
-            ? `<span class="st2-access-admin-host-attn" title="Cambi√≥ de equipo">‚ö†</span> `
+            ? `<span class="st2-access-admin-host-attn" title="CambiÛ de equipo">?</span> `
             : ""
         }${escapeHtml(hostLabel)}${concurrentHint}${historyHint}</td>`
       : "";
@@ -1972,7 +1972,7 @@ function renderAccessAdminTable() {
       ? `<td class="st2-access-admin-date" title="${escapeHtml(formatAccessDate(item.lastSeenAt))}">${escapeHtml(formatAccessRelative(item.lastSeenAt))}</td>`
       : "";
     const loginsCell = showOwnerCols
-      ? `<td class="st2-access-admin-num" title="D√≠as distintos que abri√≥ ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>`
+      ? `<td class="st2-access-admin-num" title="DÌas distintos que abriÛ ST2: ${escapeHtml(String(item.loginCount))}">${escapeHtml(String(item.loginCount))}</td>`
       : "";
     const ownerActions = isPrimarySuperAdmin();
     const canPreview = isSt2SuperAdmin();
@@ -1980,8 +1980,8 @@ function renderAccessAdminTable() {
       ? `<button type="button" class="st2-access-admin-approve" data-approve-email="${escapeHtml(item.email)}" title="Definir permisos y aprobar">Definir permisos</button>
              <button type="button" class="st2-access-admin-reject" data-reject-email="${escapeHtml(item.email)}" title="Rechazar solicitud">Rechazar</button>`
       : `${canPreview ? `<button type="button" class="st2-access-admin-preview" data-preview-email="${escapeHtml(item.email)}" title="Ver como ve este perfil" aria-label="Vista previa del perfil de ${escapeHtml(displayName)}"><svg class="st2-access-admin-preview-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9.27 3.11-11 7 1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor"/></svg></button>` : ""}
-        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-modules-email="${escapeHtml(item.email)}" title="Editar perfil y m√≥dulos" aria-label="Editar perfil y m√≥dulos de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
-        ${ownerActions ? `<button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">√ó</button>` : ""}`;
+        <button type="button" class="st2-access-admin-edit${item.displayNameOverride ? " is-custom" : ""}" data-modules-email="${escapeHtml(item.email)}" title="Editar perfil y mÛdulos" aria-label="Editar perfil y mÛdulos de ${escapeHtml(displayName)}"><svg class="st2-access-admin-edit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4.5L19 9.5 14.5 5 4 15.5V20z" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/><path d="M13.2 6.3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/></svg></button>
+        ${ownerActions ? `<button type="button" class="st2-access-admin-delete" data-delete-email="${escapeHtml(item.email)}" title="Eliminar acceso" aria-label="Eliminar ${escapeHtml(displayName)}">◊</button>` : ""}`;
     return `<tr class="${rowClass}" data-email="${escapeHtml(item.email)}">
       <td class="st2-access-admin-email-cell">
         <div class="st2-access-admin-email-row">
@@ -2047,7 +2047,7 @@ async function saveAccessNameEdit(displayName) {
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
       closeAccessNameEditModal();
-      setAccessAdminUpdatedHint("No ten√©s permiso para editar el nombre.");
+      setAccessAdminUpdatedHint("No tenÈs permiso para editar el nombre.");
       return;
     }
     if (!response.ok) {
@@ -2062,7 +2062,7 @@ async function saveAccessNameEdit(displayName) {
     accessAdminLastSnapshot = buildAccessAdminSnapshot(accessAdminItemsCache, accessAdminMeta.activeCount);
     renderAccessAdminTable();
     closeAccessNameEditModal();
-    setAccessAdminUpdatedHint(value ? `Nombre guardado: ${value}` : "Nombre autom√°tico restaurado.");
+    setAccessAdminUpdatedHint(value ? `Nombre guardado: ${value}` : "Nombre autom·tico restaurado.");
   } catch {
     if (accessNameEditError) accessNameEditError.textContent = "No se pudo contactar al servidor.";
   } finally {
@@ -2089,7 +2089,7 @@ async function decideAccessAdminEmail(email, action) {
   if (action === "reject") {
     const ok = await confirmSt2({
       title: "Rechazar acceso",
-      body: `¬øRechazar el acceso de ${name}?`,
+      body: `øRechazar el acceso de ${name}?`,
       detail: email,
       confirmLabel: "Rechazar",
     });
@@ -2104,7 +2104,7 @@ async function decideAccessAdminEmail(email, action) {
     });
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      setAccessAdminUpdatedHint("No ten√©s permiso para esa acci√≥n.");
+      setAccessAdminUpdatedHint("No tenÈs permiso para esa acciÛn.");
       return;
     }
     if (!response.ok) {
@@ -2125,7 +2125,7 @@ async function deleteAccessAdminEmail(email) {
   const name = formatAccessDisplayName(email, current?.displayNameOverride);
   const ok = await confirmSt2({
     title: "Eliminar acceso",
-    body: `¬øEliminar el acceso de ${name}? Esta acci√≥n no se puede deshacer.`,
+    body: `øEliminar el acceso de ${name}? Esta acciÛn no se puede deshacer.`,
     detail: email,
     confirmLabel: "Eliminar",
   });
@@ -2138,7 +2138,7 @@ async function deleteAccessAdminEmail(email) {
     });
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      setAccessAdminUpdatedHint("Solo el due√±o de ST2 puede quitar un acceso.");
+      setAccessAdminUpdatedHint("Solo el dueÒo de ST2 puede quitar un acceso.");
       return;
     }
     if (!response.ok) {
@@ -2216,7 +2216,7 @@ async function submitAccessAdminLogin() {
   const password = accessAdminPass?.value || "";
   if (accessAdminError) accessAdminError.textContent = "";
   if (!username || !password) {
-    if (accessAdminError) accessAdminError.textContent = "Complet√° usuario y contrase√±a.";
+    if (accessAdminError) accessAdminError.textContent = "Complet· usuario y contraseÒa.";
     return;
   }
 
@@ -2237,7 +2237,7 @@ async function submitAccessAdminLogin() {
         if (accessAdminError) {
           accessAdminError.textContent = response.status === 404
             ? "Panel no configurado en el servidor (faltan variables de admin)."
-            : `Respuesta inv√°lida del servidor (${response.status}).`;
+            : `Respuesta inv·lida del servidor (${response.status}).`;
         }
         return;
       }
@@ -2251,7 +2251,7 @@ async function submitAccessAdminLogin() {
     }
     if (!response.ok) {
       if (accessAdminError) {
-        accessAdminError.textContent = data.error || "Usuario o contrase√±a incorrectos.";
+        accessAdminError.textContent = data.error || "Usuario o contraseÒa incorrectos.";
       }
       return;
     }
@@ -2271,7 +2271,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
   accessAdminRefresh?.classList.toggle("is-loading", force || !silent);
 
   if (!silent) {
-    accessAdminStatus.textContent = "Cargando‚Ä¶";
+    accessAdminStatus.textContent = "CargandoÖ";
     accessAdminTableWrap?.classList.add("hidden");
     accessAdminToolbar?.classList.add("hidden");
   }
@@ -2284,7 +2284,7 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     }
     const data = await response.json().catch(() => ({}));
     if (response.status === 401 || response.status === 403) {
-      accessAdminStatus.textContent = "No ten√©s permiso para ver este panel.";
+      accessAdminStatus.textContent = "No tenÈs permiso para ver este panel.";
       return;
     }
     if (!response.ok) {
@@ -2322,19 +2322,19 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
     const nowLabel = new Date().toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
     const newPending = items.filter((item) => item.isPending && newRegistrationEmails.includes(item.email));
     if (clientChanges.length > 0) {
-      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(clientChanges)} ¬∑ ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${formatAccessClientChangeHint(clientChanges)} ∑ ${nowLabel}`);
     } else if (newPending.length > 0) {
       const label = newPending.length === 1
         ? `Nueva solicitud: ${newPending[0].email}`
         : `${newPending.length} solicitudes nuevas`;
-      setAccessAdminUpdatedHint(`${label} ¬∑ ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${label} ∑ ${nowLabel}`);
     } else if (newRegistrationEmails.length > 0) {
       const label = newRegistrationEmails.length === 1
         ? `Nuevo registro: ${newRegistrationEmails[0]}`
         : `${newRegistrationEmails.length} registros nuevos`;
-      setAccessAdminUpdatedHint(`${label} ¬∑ ${nowLabel}`);
+      setAccessAdminUpdatedHint(`${label} ∑ ${nowLabel}`);
     } else if (newActiveEmails.length > 0) {
-      setAccessAdminUpdatedHint(`Nuevo activo ¬∑ ${nowLabel}`);
+      setAccessAdminUpdatedHint(`Nuevo activo ∑ ${nowLabel}`);
     } else if (!silent || force) {
       setAccessAdminUpdatedHint(`Actualizado ${nowLabel}`);
     }
@@ -2444,7 +2444,7 @@ function paintToolDatesFromMeta() {
 
 function listNewTools() {
   const seen = readSeenToolVersions();
-  // Avisos home: solo SQL. BAT queda en Acerca de (mesa t√©cnica).
+  // Avisos home: solo SQL. BAT queda en Acerca de (mesa tÈcnica).
   return toolsForNotice().filter((t) => {
     if (!t?.available || t.id === "bat") return false;
     const stamp = toolIdentity(t);
@@ -2503,7 +2503,7 @@ function formatToolUpdatedAt(tool) {
 function compactUploadedLabel(raw) {
   const text = String(raw || "").trim();
   if (!text) return "";
-  // "Subido 15 sep 2026, 14:30" / ISO / ya compacto ‚Üí dd/mm/aa
+  // "Subido 15 sep 2026, 14:30" / ISO / ya compacto ? dd/mm/aa
   const iso = text.match(/(\d{4})-(\d{2})-(\d{2})/);
   if (iso) return `${iso[3]}/${iso[2]}/${iso[1].slice(-2)}`;
   const dmy = text.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
@@ -2552,14 +2552,14 @@ function toolsUpdateMessage(newer) {
   const hasSql = list.some((t) => t.id === "sql");
   const hasBat = list.some((t) => t.id === "bat");
   if (hasSql && !hasBat) {
-    return "hay una nueva versi√≥n de Herramientas SQL para descargar.";
+    return "hay una nueva versiÛn de Herramientas SQL para descargar.";
   }
   if (hasBat && !hasSql) {
-    return "hay una nueva versi√≥n de ST2.BAT para descargar.";
+    return "hay una nueva versiÛn de ST2.BAT para descargar.";
   }
   const names = list.map((t) => toolPackageLabel(t.id));
   if (names.length === 1) {
-    return `hay una nueva versi√≥n de ${names[0]} para descargar.`;
+    return `hay una nueva versiÛn de ${names[0]} para descargar.`;
   }
   const last = names.pop();
   return `hay nuevas versiones de ${names.join(", ")} y ${last} para descargar.`;
@@ -2648,7 +2648,7 @@ function buildAboutPlanillasDetail() {
     const mods = [];
     if (canSeeChileTransferencia()) mods.push("Transferencia de Casos");
     if (canSeeChileReferral()) mods.push("Referral I+D");
-    if (canSeeChileSaad()) mods.push("SAAD - Facturaci√≥n");
+    if (canSeeChileSaad()) mods.push("SAAD - FacturaciÛn");
     if (canSeeChileHr()) mods.push("HR Consola Intranet");
     if (canSeeChileWiki()) mods.push("Wiki errores comunes");
     if (canSeeChileLp()) mods.push("Servicios LP Contabilidad");
@@ -2656,7 +2656,7 @@ function buildAboutPlanillasDetail() {
     blocks.push(mods.length ? `CHILE: ${joinAboutItems(mods)}` : "CHILE");
   }
 
-  return blocks.length ? blocks.join(" ¬∑ ") : "Sin m√≥dulos de planillas en tu perfil.";
+  return blocks.length ? blocks.join(" ∑ ") : "Sin mÛdulos de planillas en tu perfil.";
 }
 
 function syncAboutTabsList() {
@@ -2694,21 +2694,21 @@ function syncAboutTabsList() {
       title: portalTab,
       body: onlyChile && portalTab === "Centro de Soluciones"
         ? "Acceso al Centro de Soluciones de Thomson Reuters Chile."
-        : `B√∫squeda y acceso: ${joinAboutItems(portals)}.`,
+        : `B˙squeda y acceso: ${joinAboutItems(portals)}.`,
     });
   }
 
   if (isSt2SuperAdmin()) {
     items.push({
       title: "ADMIN",
-      body: "Panel de administraci√≥n de accesos.",
+      body: "Panel de administraciÛn de accesos.",
     });
   }
 
   list.innerHTML = items
     .map(
       (item) =>
-        `<li><strong>${escapeHtml(item.title)}</strong> ‚Äî ${escapeHtml(item.body)}</li>`,
+        `<li><strong>${escapeHtml(item.title)}</strong> ó ${escapeHtml(item.body)}</li>`,
     )
     .join("");
 }
@@ -2730,7 +2730,7 @@ function syncAboutToolsBadge() {
   syncAboutToolsVisibility();
   if (!userCanSeeDesktopToolDownloads()) return;
 
-  // Solo toast/notificaci√≥n: sin badge "Nuevo" en el bot√≥n Acerca de.
+  // Solo toast/notificaciÛn: sin badge "Nuevo" en el botÛn Acerca de.
   if (aboutToolsBadge) {
     aboutToolsBadge.classList.add("hidden");
     aboutToolsBadge.setAttribute("aria-hidden", "true");
@@ -2801,7 +2801,7 @@ function renderAboutTools() {
       if (btn) {
         btn.disabled = true;
         setToolDownloadLabel(btn, "Pronto");
-        btn.title = "Todav√≠a no hay un paquete publicado";
+        btn.title = "TodavÌa no hay un paquete publicado";
       }
       continue;
     }
@@ -2868,7 +2868,7 @@ async function uploadTool(toolId, file) {
   // Archivos grandes: pedir URL en el modal de ST2 (no el prompt de Chrome).
   if (file.size > 8 * 1024 * 1024) {
     openToolUrlDialog(toolId, {
-      lead: `"${file.name}" pesa ${formatToolSize(file.size)}. Peg√° un link de descarga directa.`,
+      lead: `"${file.name}" pesa ${formatToolSize(file.size)}. Peg· un link de descarga directa.`,
       fileName: file.name,
     });
     return;
@@ -2895,22 +2895,22 @@ async function uploadTool(toolId, file) {
   const version = new Date().toISOString().slice(0, 10).replace(/-/g, ".");
   const originalName = file.name || `st2-${toolId}.bin`;
   let stage = "inicio";
-  showBusy(`Preparando ${originalName}‚Ä¶`, 4);
-  setAboutToolsStatus(`Subiendo ${originalName} (${formatToolSize(file.size)})‚Ä¶`);
+  showBusy(`Preparando ${originalName}Ö`, 4);
+  setAboutToolsStatus(`Subiendo ${originalName} (${formatToolSize(file.size)})Ö`);
 
   try {
     stage = "ping";
-    showBusy("Verificando volume‚Ä¶", 8);
+    showBusy("Verificando volumeÖ", 8);
     const ping = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/ping`, null);
     if (!ping?.ok) {
-      throw Object.assign(new Error(ping?.error || "Canario de tools fall√≥."), {
+      throw Object.assign(new Error(ping?.error || "Canario de tools fallÛ."), {
         reached: !!ping?.reached,
         stage,
       });
     }
 
     stage = "encode";
-    showBusy(`Codificando ${originalName}‚Ä¶`, 12);
+    showBusy(`Codificando ${originalName}Ö`, 12);
     const plain = new Uint8Array(await file.arrayBuffer());
     const wired = new Uint8Array(plain.length);
     for (let i = 0; i < plain.length; i++) wired[i] = plain[i] ^ 0xa5;
@@ -2922,7 +2922,7 @@ async function uploadTool(toolId, file) {
       .join("");
 
     stage = "begin";
-    showBusy(`Iniciando subida (${total} partes)‚Ä¶`, 16);
+    showBusy(`Iniciando subida (${total} partes)Ö`, 16);
     await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/begin`, {
       u: uploadId,
       t: total,
@@ -2933,7 +2933,7 @@ async function uploadTool(toolId, file) {
       const slice = wired.subarray(i * chunkSize, Math.min(wired.length, (i + 1) * chunkSize));
       const hex = bytesToHex(slice);
       const pct = 16 + Math.round(((i + 1) / total) * 70);
-      showBusy(`Enviando parte ${i + 1}/${total}‚Ä¶`, pct);
+      showBusy(`Enviando parte ${i + 1}/${total}Ö`, pct);
       setAboutToolsStatus(`Enviando ${originalName}: parte ${i + 1}/${total}`);
       await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/push`, {
         u: uploadId,
@@ -2944,7 +2944,7 @@ async function uploadTool(toolId, file) {
     }
 
     stage = "commit";
-    showBusy("Publicando paquete‚Ä¶", 92);
+    showBusy("Publicando paqueteÖ", 92);
     const data = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/commit`, {
       u: uploadId,
       t: total,
@@ -2959,7 +2959,7 @@ async function uploadTool(toolId, file) {
     markToolsSeen();
   } catch (err) {
     const status = err?.status ? `HTTP ${err.status}` : "sin HTTP";
-    let msg = `Fall√≥ en ${err?.stage || stage} (${status}): ${err?.message || "No se pudo subir."}`;
+    let msg = `FallÛ en ${err?.stage || stage} (${status}): ${err?.message || "No se pudo subir."}`;
     if (err?.cfRay) msg += `\ncf-ray: ${err.cfRay}`;
     try {
       const dig = await fetch("/api/tools", { credentials: "include", cache: "no-store" }).then(async (r) => {
@@ -2969,7 +2969,7 @@ async function uploadTool(toolId, file) {
       if (dig?.body?.lastError) {
         msg += `\n\nDetalle servidor:\n${String(dig.body.lastError).slice(0, 600)}`;
       } else {
-        msg += `\n(dataDir: ${dig?.body?.dataDir || "?"}; lastError vac√≠o)`;
+        msg += `\n(dataDir: ${dig?.body?.dataDir || "?"}; lastError vacÌo)`;
       }
     } catch (e2) {
       msg += `\n(no pude leer /api/tools: ${e2?.message || e2})`;
@@ -3014,8 +3014,8 @@ async function publishToolFromUrl(toolId, url, fileNameHint = "") {
     fileName = toolId === "bat" ? `st2-${toolId}.bat` : `st2-${toolId}.zip`;
   }
 
-  showBusy(`Descargando desde URL‚Ä¶`, 20);
-  setAboutToolsStatus(`Publicando ${fileName} desde URL‚Ä¶`);
+  showBusy(`Descargando desde URLÖ`, 20);
+  setAboutToolsStatus(`Publicando ${fileName} desde URLÖ`);
   try {
     const data = await xhrJson("POST", `/api/planillas/kit/${encodeURIComponent(toolId)}/from-url`, {
       url,
@@ -3080,7 +3080,7 @@ function showToolDownloadNotice(toolId) {
   const fileKind = toolId === "bat" ? "el .bat" : "el .exe";
   showSt2Message(
     "",
-    `Antes de descomprimir, borr√° las versiones anteriores de ${label} para no mezclar archivos viejos con los nuevos. La clave para abrir ${fileKind} es ${ST2_DESKTOP_TOOL_PASSWORD}.`,
+    `Antes de descomprimir, borr· las versiones anteriores de ${label} para no mezclar archivos viejos con los nuevos. La clave para abrir ${fileKind} es ${ST2_DESKTOP_TOOL_PASSWORD}.`,
     { okLabel: "Cerrar", downloadNotice: true },
   );
 }
@@ -3151,7 +3151,7 @@ function openToolUrlDialog(toolId, { lead = "", fileName = "", url = "" } = {}) 
   if (titleEl) titleEl.textContent = `Publicar ${label}`;
   if (leadEl) {
     leadEl.textContent = lead
-      || "Peg√° el link de descarga y el nombre del archivo con su extensi√≥n.";
+      || "Peg· el link de descarga y el nombre del archivo con su extensiÛn.";
   }
   if (urlInput) urlInput.value = url || "";
   if (nameInput) {
@@ -3197,12 +3197,12 @@ function bindToolUrlDialog() {
     };
     if (!toolUrlDialogToolId) return;
     if (!/^https?:\/\//i.test(url)) {
-      showErr("Peg√° un link http/https v√°lido.");
+      showErr("Peg· un link http/https v·lido.");
       document.getElementById("st2-tool-url-input")?.focus();
       return;
     }
     if (!fileName || !fileName.includes(".")) {
-      showErr("Indic√° el nombre con extensi√≥n (ej. st2ps.bat o paquete.zip).");
+      showErr("Indic· el nombre con extensiÛn (ej. st2ps.bat o paquete.zip).");
       document.getElementById("st2-tool-url-name")?.focus();
       return;
     }
@@ -3292,7 +3292,7 @@ async function copySt2DesktopToolPassword(btn) {
       if (btn) btn.title = prevTitle || "Clic para copiar la clave";
     }, 1600);
   } catch {
-    window.prompt("Copi√° la clave:", value);
+    window.prompt("Copi· la clave:", value);
   }
 }
 
@@ -3333,7 +3333,7 @@ function showAbout({ history = "push" } = {}) {
   clearSt2AlertToast(ST2_TOAST.tools);
   aboutOverlay?.classList.remove("hidden");
   aboutOverlay?.setAttribute("aria-hidden", "false");
-  document.title = "ST¬≤ ¬∑ Acerca de";
+  document.title = "ST≤ ∑ Acerca de";
   if (history !== "none") {
     const current = normalizeShellPath(window.location.pathname);
     if (!isHerramientasPath(current)) pathBeforeAbout = current || "/";
@@ -3686,7 +3686,7 @@ function closeAccessModulesModal() {
   accessModulesEmailInput?.classList.add("hidden");
   if (accessModulesEmailInput) accessModulesEmailInput.value = "";
   if (accessModulesError) accessModulesError.textContent = "";
-  if (accessModulesTitle) accessModulesTitle.textContent = "M√≥dulos habilitados";
+  if (accessModulesTitle) accessModulesTitle.textContent = "MÛdulos habilitados";
   if (accessModulesSave) {
     accessModulesSave.disabled = false;
     accessModulesSave.textContent = "Guardar";
@@ -3861,7 +3861,7 @@ function setAccessSysBodyOpen(sys, open) {
     btn.classList.toggle("is-open", open);
     btn.setAttribute("aria-expanded", open ? "true" : "false");
     const icon = btn.querySelector(".st2-access-modules-sys-expand-icon");
-    if (icon) icon.textContent = open ? "‚àí" : "+";
+    if (icon) icon.textContent = open ? "-" : "+";
   }
 }
 
@@ -3925,7 +3925,7 @@ function startAccessProfilePreview(email, modulesOverride = null) {
   const displayName = formatAccessDisplayName(current.email, current.displayNameOverride);
   const run = () => {
     // Sin reload: el hash #/planillas + reload dejaba /admin#/planillas,
-    // el primer boot se romp√≠a y el banner reci√©n aparec√≠a tras un F5.
+    // el primer boot se rompÌa y el banner reciÈn aparecÌa tras un F5.
     startViewAsProfile({
       email: current.email,
       displayName,
@@ -3949,7 +3949,7 @@ function startAccessProfilePreview(email, modulesOverride = null) {
     navigateTab("planillas", { history: "replace" });
     goPlanillasHome({ history: "none" });
   };
-  // Auditor√≠a best-effort; la vista previa no depende del POST.
+  // AuditorÌa best-effort; la vista previa no depende del POST.
   fetch("/api/access/view-as", {
     method: "POST",
     credentials: "include",
@@ -3985,7 +3985,7 @@ function syncViewAsBanner() {
     viewAsBanner.toggleAttribute("hidden", !show);
   }
   if (viewAsBannerText && viewAs) {
-    viewAsBannerText.textContent = `Vista previa: c√≥mo ve ST2 ${viewAs.displayName || viewAs.email} (m√≥dulos, permisos y pantallas)`;
+    viewAsBannerText.textContent = `Vista previa: cÛmo ve ST2 ${viewAs.displayName || viewAs.email} (mÛdulos, permisos y pantallas)`;
   }
   document.body.classList.toggle("st2-viewing-as-profile", show);
 }
@@ -4004,8 +4004,8 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   const displayName = formatAccessDisplayName(email, current?.displayNameOverride);
   if (accessModulesTitle) {
     accessModulesTitle.textContent = afterApprove
-      ? "Defin√≠ permisos para aprobar"
-      : "M√≥dulos habilitados";
+      ? "DefinÌ permisos para aprobar"
+      : "MÛdulos habilitados";
   }
   if (accessModulesSave) accessModulesSave.textContent = accessModulesSaveLabel();
   if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
@@ -4099,7 +4099,7 @@ accessModBlanqueoConfirm?.addEventListener("change", () => {
   if (accessModBlanqueoConfirm.checked && accessModBlanqueo) {
     accessModBlanqueo.checked = true;
   }
-  // Al marcar confirmador, por defecto solo listado (pod√©s reactivar "cargar").
+  // Al marcar confirmador, por defecto solo listado (podÈs reactivar "cargar").
   if (accessModBlanqueoConfirm.checked && accessModBlanqueoLoad && !accessModBlanqueoLoad.dataset.userTouched) {
     accessModBlanqueoLoad.checked = false;
   }
@@ -4150,8 +4150,8 @@ async function saveAccessModules() {
   if (accessModulesSave) {
     accessModulesSave.disabled = true;
     accessModulesSave.textContent = accessModulesPresetMode
-      ? "Creando‚Ä¶"
-      : (accessModulesAfterApprove ? "Guardando permisos‚Ä¶" : "Guardando‚Ä¶");
+      ? "CreandoÖ"
+      : (accessModulesAfterApprove ? "Guardando permisosÖ" : "GuardandoÖ");
   }
   if (accessModulesCancel) accessModulesCancel.disabled = true;
   if (accessModulesError) accessModulesError.textContent = "";
@@ -4167,9 +4167,9 @@ async function saveAccessModules() {
 
     if (accessModulesPresetMode) {
       const email = String(accessModulesEmailInput?.value || "").trim().toLowerCase();
-      if (!email) throw new Error("Ingres√° el correo del perfil.");
+      if (!email) throw new Error("Ingres· el correo del perfil.");
       if (!isValidAccessProfileEmail(email)) {
-        throw new Error("Us√° un correo @thomsonreuters.com con formato nombre.apellido (puede incluir m√°s segmentos).");
+        throw new Error("Us· un correo @thomsonreuters.com con formato nombre.apellido (puede incluir m·s segmentos).");
       }
       const autoName = parseAccessNameFromEmail(email).display;
       const nameOverride = !nameValue || nameValue === autoName ? null : nameValue;
@@ -4239,7 +4239,7 @@ async function saveAccessModules() {
     const fromApprove = accessModulesAfterApprove;
     const savedEmail = accessModulesEmailValue;
     if (accessModulesSave) {
-      accessModulesSave.textContent = fromApprove ? "Aprobando‚Ä¶" : "Guardando‚Ä¶";
+      accessModulesSave.textContent = fromApprove ? "AprobandoÖ" : "GuardandoÖ";
     }
     if (fromApprove) {
       const decideRes = await fetch("/api/access/registrations/decision", {
@@ -4250,7 +4250,7 @@ async function saveAccessModules() {
       });
       const decideData = await decideRes.json().catch(() => ({}));
       if (!decideRes.ok) {
-        throw new Error(decideData.error || "Se guardaron los m√≥dulos, pero no se pudo aprobar el acceso.");
+        throw new Error(decideData.error || "Se guardaron los mÛdulos, pero no se pudo aprobar el acceso.");
       }
     }
     closeAccessModulesModal();
@@ -4259,7 +4259,7 @@ async function saveAccessModules() {
     setAccessAdminUpdatedHint(
       fromApprove
         ? `Aprobado con permisos: ${savedEmail}`
-        : "M√≥dulos guardados.",
+        : "MÛdulos guardados.",
     );
   } catch (err) {
     showAccessModulesError(err?.message || "No se pudo guardar.");
@@ -4333,7 +4333,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 function getEmbedFrameUrl(kind) {
   if (kind === "thom") {
     const tap = getThomExternalUrl();
-    // Solo el portal Bejerman usa el proxy embebido cuando est√° disponible.
+    // Solo el portal Bejerman usa el proxy embebido cuando est· disponible.
     if (thomPortalId === "bejerman" && appConfig?.thomFrameUrl && isThomEmbeddedProxy()) {
       return appConfig.thomFrameUrl;
     }
@@ -4440,10 +4440,10 @@ function syncThomPortalUi() {
     btn.classList.toggle("active", btn.dataset.thomPortal === thomPortalId);
   });
   const title = document.getElementById("thomGateTitle");
-  if (title) title.textContent = `THOM ¬∑ ${meta.label}`;
+  if (title) title.textContent = `THOM ∑ ${meta.label}`;
   const loading = document.getElementById("thomEmbedLoadingText");
-  if (loading) loading.textContent = `Cargando THOM ¬∑ ${meta.label}‚Ä¶`;
-  if (thomFrame) thomFrame.title = `THOM ¬∑ ${meta.label}`;
+  if (loading) loading.textContent = `Cargando THOM ∑ ${meta.label}Ö`;
+  if (thomFrame) thomFrame.title = `THOM ∑ ${meta.label}`;
   updateThomDirectUi();
 }
 
@@ -4486,7 +4486,7 @@ const THOM_TAB_NAME = "st2ThomBrowserTab";
 
 let thomPopup = null;
 let thomBrowserTab = null;
-/** Invalida aperturas programadas con rAF si el usuario ya sali√≥ de THOM. */
+/** Invalida aperturas programadas con rAF si el usuario ya saliÛ de THOM. */
 let thomOpenGeneration = 0;
 let thomPopupResizeTimer = null;
 
@@ -4506,7 +4506,7 @@ function measureThomPopupChrome(popup = thomPopup) {
   return THOM_POPUP_CHROME_WITH_URL;
 }
 
-/** Holgura m√≠nima debajo de las pesta√±as ST2 (el ancla real es el panel). */
+/** Holgura mÌnima debajo de las pestaÒas ST2 (el ancla real es el panel). */
 const THOM_POPUP_TAB_GAP = 4;
 
 function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
@@ -4517,7 +4517,7 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
 
   let viewportTop;
   if (wrapRect && wrapRect.height > 60) {
-    // Encaja en el hueco del panel: deja header + pesta√±as + hint visibles.
+    // Encaja en el hueco del panel: deja header + pestaÒas + hint visibles.
     viewportTop = Math.round(wrapRect.top);
   } else if (tabRect) {
     viewportTop = Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP);
@@ -4525,7 +4525,7 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
     return { top: 160, left: 0, width: 1100, height: 720 };
   }
 
-  // Nunca tapar la barra de pesta√±as ni el selector de portal, que flota debajo.
+  // Nunca tapar la barra de pestaÒas ni el selector de portal, que flota debajo.
   if (tabRect) {
     viewportTop = Math.max(viewportTop, Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP));
   }
@@ -4579,7 +4579,7 @@ function repositionThomPopup() {
     thomPopup.moveTo(rect.left, rect.top);
     thomPopup.resizeTo(rect.width, rect.height);
 
-    // Edge a veces coloca el popup m√°s arriba de lo pedido y tapa las pesta√±as ST2.
+    // Edge a veces coloca el popup m·s arriba de lo pedido y tapa las pestaÒas ST2.
     const actualTop = Number.isFinite(thomPopup.screenTop) ? thomPopup.screenTop : thomPopup.screenY;
     const driftY = rect.top - actualTop;
     if (Number.isFinite(driftY) && Math.abs(driftY) > 2 && Math.abs(driftY) < 220) {
@@ -4602,7 +4602,7 @@ function scheduleThomPopupReposition() {
 
 /**
  * El popup debe comportarse como parte del panel: sigue a la ventana ST2 cuando
- * se mueve o cambia de tama√±o, y el gate vuelve a su estado inicial si el
+ * se mueve o cambia de tamaÒo, y el gate vuelve a su estado inicial si el
  * usuario lo cierra desde la barra del navegador.
  */
 let thomPopupWatchTimer = null;
@@ -4688,7 +4688,7 @@ function requestThomHelpCollapse(targetWindow) {
       return true;
     }
   } catch {
-    // Ventana cross-origin (THOM directo en web p√∫blica).
+    // Ventana cross-origin (THOM directo en web p˙blica).
   }
   try {
     targetWindow.postMessage({ type: "st2-collapse-help" }, "*");
@@ -4718,8 +4718,8 @@ function safeCloseWindow(win) {
   }
 }
 
-/** Solo para pagehide: recuperar ventana hu√©rfana. En home/navegaci√≥n NO usar:
- *  window.open("", name) enfoca otra pesta√±a del navegador o abre una en blanco. */
+/** Solo para pagehide: recuperar ventana huÈrfana. En home/navegaciÛn NO usar:
+ *  window.open("", name) enfoca otra pestaÒa del navegador o abre una en blanco. */
 function reclaimNamedWindow(name) {
   try {
     const win = window.open("", name);
@@ -4756,7 +4756,7 @@ function updateThomDirectUi() {
   const windowMode = isThomWindowMode();
   const embedded = isThomEmbeddedProxy();
   const active = windowMode && !!(thomPopup && !thomPopup.closed);
-  const openLabel = windowMode ? "Abrir en otra pesta√±a del navegador" : "Abrir en navegador";
+  const openLabel = windowMode ? "Abrir en otra pestaÒa del navegador" : "Abrir en navegador";
   const openBtn = document.getElementById("thomOpenBtn");
   const proxyOpenBtn = document.getElementById("thomProxyOpenBtn");
   if (openBtn) openBtn.textContent = openLabel;
@@ -4767,7 +4767,7 @@ function updateThomDirectUi() {
   thomDirectGate?.classList.toggle("embed-panel-active", active);
 
   const gateOpenBtn = document.getElementById("thomGateOpenBtn");
-  if (gateOpenBtn) gateOpenBtn.textContent = active ? "Enfocar THOM" : "Abrir THOM aqu√≠";
+  if (gateOpenBtn) gateOpenBtn.textContent = active ? "Enfocar THOM" : "Abrir THOM aquÌ";
   document.getElementById("thomGateCloseBtn")?.classList.toggle("hidden", !active);
   document.getElementById("thomGateStatus")?.classList.toggle("hidden", !active);
   document.getElementById("thomGateZscaler")?.classList.toggle("hidden", active);
@@ -4808,7 +4808,7 @@ function openThomWindow({ reload = false } = {}) {
       try {
         thomPopup.location.href = url;
       } catch {
-        // Cross-origin: forzar reopen m√°s abajo.
+        // Cross-origin: forzar reopen m·s abajo.
         safeCloseWindow(thomPopup);
         thomPopup = null;
       }
@@ -4840,7 +4840,7 @@ function openThomWindow({ reload = false } = {}) {
   thomPopup = window.open("about:blank", THOM_POPUP_NAME, features);
   if (!thomPopup) {
     thomBrowserTab = window.open(url, THOM_TAB_NAME);
-    setEmbedHint("thom", "Permit√≠ ventanas emergentes para abrir THOM en este espacio.");
+    setEmbedHint("thom", "PermitÌ ventanas emergentes para abrir THOM en este espacio.");
     updateThomDirectUi();
     return null;
   }
@@ -4886,7 +4886,7 @@ function openThomWindow({ reload = false } = {}) {
 
 function openThomBrowserTab() {
   const url = getThomTapUrl();
-  // Misma pesta√±a nombrada: no acumula una nueva cada vez, y ST2 la cierra al salir de THOM.
+  // Misma pestaÒa nombrada: no acumula una nueva cada vez, y ST2 la cierra al salir de THOM.
   if (thomBrowserTab && !thomBrowserTab.closed) {
     try {
       thomBrowserTab.location.href = url;
@@ -4963,14 +4963,14 @@ function isThomAuthPath(path = "") {
     || path.includes("login.microsoftonline.com");
 }
 
-function showThomLoading(message = "Cargando THOM‚Ä¶") {
+function showThomLoading(message = "Cargando THOMÖ") {
   thomEmbedLoading?.classList.remove("hidden");
   const msg = thomEmbedLoading?.querySelector("p");
   if (msg) msg.textContent = message;
   clearTimeout(thomLoadTimer);
   thomLoadTimer = setTimeout(() => {
     if (!thomRendered) {
-      setEmbedHint("thom", "THOM tarda m√°s de lo normal. Verific√° ZScaler.");
+      setEmbedHint("thom", "THOM tarda m·s de lo normal. Verific· ZScaler.");
     }
   }, 20000);
 }
@@ -5002,8 +5002,8 @@ function scheduleThomBlankCheck(delayMs = 12000) {
     try {
       const loc = thomFrame?.contentWindow?.location?.href ?? "";
       if (isThomAuthPath(loc)) {
-        showThomLoading("Iniciando sesi√≥n corporativa‚Ä¶");
-        setEmbedHint("thom", "Iniciando sesi√≥n corporativa‚Ä¶ Complet√° el login si aparece el formulario.");
+        showThomLoading("Iniciando sesiÛn corporativaÖ");
+        setEmbedHint("thom", "Iniciando sesiÛn corporativaÖ Complet· el login si aparece el formulario.");
         scheduleThomBlankCheck(15000);
         return;
       }
@@ -5016,16 +5016,16 @@ function scheduleThomBlankCheck(delayMs = 12000) {
         return;
       }
       if (thomBridgeAlive || thomBlankAttempts < 4) {
-        showThomLoading(thomBridgeAlive ? "Autenticando en THOM‚Ä¶" : "Cargando THOM‚Ä¶");
-        setEmbedHint("thom", "THOM est√° iniciando. Si ped√≠s login corporativo, completalo en el panel.");
+        showThomLoading(thomBridgeAlive ? "Autenticando en THOMÖ" : "Cargando THOMÖ");
+        setEmbedHint("thom", "THOM est· iniciando. Si pedÌs login corporativo, completalo en el panel.");
         scheduleThomBlankCheck(15000);
         return;
       }
-      showThomLoading("THOM no carg√≥ en el panel");
-      setEmbedHint("thom", "No se pudo mostrar THOM ac√°. Verific√° ZScaler o us√° ¬´Abrir en otra pesta√±a del navegador¬ª.");
+      showThomLoading("THOM no cargÛ en el panel");
+      setEmbedHint("thom", "No se pudo mostrar THOM ac·. Verific· ZScaler o us· ´Abrir en otra pestaÒa del navegadorª.");
     } catch {
-      showThomLoading("Iniciando sesi√≥n corporativa‚Ä¶");
-      setEmbedHint("thom", "Autenticando con SSO corporativo‚Ä¶");
+      showThomLoading("Iniciando sesiÛn corporativaÖ");
+      setEmbedHint("thom", "Autenticando con SSO corporativoÖ");
       scheduleThomBlankCheck(15000);
     }
   }, delayMs);
@@ -5049,14 +5049,14 @@ function onThomEmbedMessage(event) {
   }
 
   if (isThomAuthPath(data.path ?? "")) {
-    showThomLoading("Iniciando sesi√≥n corporativa‚Ä¶");
-    setEmbedHint("thom", "Iniciando sesi√≥n corporativa‚Ä¶ Complet√° el login si aparece el formulario.");
+    showThomLoading("Iniciando sesiÛn corporativaÖ");
+    setEmbedHint("thom", "Iniciando sesiÛn corporativaÖ Complet· el login si aparece el formulario.");
     scheduleThomBlankCheck(15000);
     return;
   }
 
   if (!thomRendered) {
-    showThomLoading("Autenticando en THOM‚Ä¶");
+    showThomLoading("Autenticando en THOMÖ");
     scheduleThomBlankCheck(15000);
   }
 }
@@ -5091,7 +5091,7 @@ function setEmbedHint(kind, message) {
   const id = kind === "thom" ? "thomEmbedHint" : kind === "portal" ? "portalEmbedHint" : "aiEmbedHint";
   const el = document.getElementById(id);
   if (!el) return;
-  // Hints de embed ocultos: el toolbar ya tiene ¬´Abrir en navegador¬ª.
+  // Hints de embed ocultos: el toolbar ya tiene ´Abrir en navegadorª.
   el.classList.add("hidden");
   el.setAttribute("aria-hidden", "true");
   el.textContent = "";
@@ -5099,10 +5099,10 @@ function setEmbedHint(kind, message) {
 
 function goHome() {
   hideAbout({ history: "none" });
-  // Sin reclaim: window.open("", "st2Thom‚Ä¶") enfocaba otra pesta√±a del navegador.
+  // Sin reclaim: window.open("", "st2ThomÖ") enfocaba otra pestaÒa del navegador.
   closeThomPopup({ reclaim: false });
   switchTab("planillas");
-  // Siempre replace al men√∫: no depender del historial entre pesta√±as ST2 / m√≥dulos.
+  // Siempre replace al men˙: no depender del historial entre pestaÒas ST2 / mÛdulos.
   goPlanillasHome({ history: "replace" });
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -5150,12 +5150,12 @@ function pathForTab(tabId) {
 }
 
 function titleForTab(tabId) {
-  if (tabId === ADMIN_TAB_ID) return "ST¬≤ ¬∑ ADMIN";
-  if (tabId === "thom") return "ST¬≤ ¬∑ THOM";
-  if (tabId === "ai") return "ST¬≤ ¬∑ AI Platform";
-  if (tabId === "portal") return `ST¬≤ ¬∑ ${getPortalClientTabLabel()}`;
-  if (tabId === "planillas") return "ST¬≤ ¬∑ Suite Web";
-  return "ST¬≤ ¬∑ Suite Web";
+  if (tabId === ADMIN_TAB_ID) return "ST≤ ∑ ADMIN";
+  if (tabId === "thom") return "ST≤ ∑ THOM";
+  if (tabId === "ai") return "ST≤ ∑ AI Platform";
+  if (tabId === "portal") return `ST≤ ∑ ${getPortalClientTabLabel()}`;
+  if (tabId === "planillas") return "ST≤ ∑ Suite Web";
+  return "ST≤ ∑ Suite Web";
 }
 
 let shellRouteSyncing = false;
@@ -5193,7 +5193,7 @@ function navigateTab(tabId, { history = "push" } = {}) {
       const btn = document.querySelector('.tab-btn[data-tab="planillas"]');
       if (btn) playGooeyNav(btn);
     }
-    // Siempre al men√∫: tocar la pesta√±a equivale al logo, incluso ya estando en Planillas.
+    // Siempre al men˙: tocar la pestaÒa equivale al logo, incluso ya estando en Planillas.
     goPlanillasHome({ history: "replace" });
     return;
   }
@@ -5293,7 +5293,7 @@ function switchTab(tabId) {
     startEngagementTimer("portal");
   } else if (tabId === ADMIN_TAB_ID) {
     void activateAdminTab();
-    // Tras ver el panel, limpia el ‚ö† (ya qued√≥ el hint en pantalla).
+    // Tras ver el panel, limpia el ? (ya quedÛ el hint en pantalla).
     window.setTimeout(() => clearAdminClientAttention(), 14000);
   }
 
@@ -5324,7 +5324,7 @@ function initEmbedReminders() {
   });
   window.addEventListener("resize", scheduleThomPopupReposition);
   window.addEventListener("scroll", scheduleThomPopupReposition, { passive: true });
-  // Sin esto quedan ventanas THOM hu√©rfanas al cerrar o recargar ST2.
+  // Sin esto quedan ventanas THOM huÈrfanas al cerrar o recargar ST2.
   window.addEventListener("pagehide", () => closeThomPopup({ reclaim: true }));
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) scheduleThomPopupReposition();
@@ -5488,22 +5488,22 @@ async function bootstrapApp() {
 void bootstrapApp();
 
 const UPDATE_CHECK_MS = 45000;
-/** Hace falta ver el mismo build nuevo N veces seguidas (anti ping-pong de r√©plicas). */
+/** Hace falta ver el mismo build nuevo N veces seguidas (anti ping-pong de rÈplicas). */
 const UPDATE_CONFIRM_NEEDED = 2;
 const UPDATE_DEFER_KEY = "st2-update-deferred-signal";
 const UPDATE_HANDLED_KEY = "st2-update-handled-builds";
 const UPDATE_RELOAD_TARGET_KEY = "st2-update-reload-target";
-/** Build que ya intentamos recargar sin √©xito: no se avisa m√°s por √©l. */
+/** Build que ya intentamos recargar sin Èxito: no se avisa m·s por Èl. */
 const UPDATE_STUCK_KEY = "st2-update-stuck-build-v2";
 /**
- * Tras el primer modal / ‚Äúluego‚Äù / recarga: no reabrir modal por cada deploy nuevo.
+ * Tras el primer modal / ìluegoî / recarga: no reabrir modal por cada deploy nuevo.
  * Solo barra hasta que el HTML cargado coincida con el build vivo.
  */
 const UPDATE_SOFT_KEY = "st2-update-soft-mode-v1";
 /**
- * El build ‚Äúm√°s nuevo‚Äù visto en /api/version (persiste entre reloads).
- * Sin esto, un match moment√°neo con una r√©plica vieja borraba stuck/soft y
- * el cartel volv√≠a a los pocos minutos aunque hubieran tocado Recargar.
+ * El build ìm·s nuevoî visto en /api/version (persiste entre reloads).
+ * Sin esto, un match moment·neo con una rÈplica vieja borraba stuck/soft y
+ * el cartel volvÌa a los pocos minutos aunque hubieran tocado Recargar.
  */
 const UPDATE_NEWEST_KEY = "st2-update-newest-live-v1";
 /** Tras recargar/posponer un build, no reabrir el modal por ese SHA durante 6 h. */
@@ -5515,7 +5515,7 @@ let pendingLiveHits = 0;
 let updateCheckerStarted = false;
 /** Banner forzado por permisos nuevos (no lo apaga el check de build). */
 let reloadBannerForced = false;
-/** "hidden" | "toast" ‚Äî el banner superior se reemplaz√≥ por Sonner. */
+/** "hidden" | "toast" ó el banner superior se reemplazÛ por Sonner. */
 let updateUiMode = "hidden";
 /** Fallback si localStorage/sessionStorage fallan. */
 let memoryDeferredSignal = "";
@@ -5526,7 +5526,7 @@ function loadedAppBuild() {
   return String(appConfig?.webBuild || "").trim();
 }
 
-/** Fecha de deploy del build que tenemos cargado (ISO), si el server la inform√≥. */
+/** Fecha de deploy del build que tenemos cargado (ISO), si el server la informÛ. */
 function loadedBuildTime() {
   const meta = document.querySelector('meta[name="st2-build-at"]')?.content?.trim();
   const raw = meta || String(appConfig?.webBuildAt || "").trim();
@@ -5571,7 +5571,7 @@ function writeNewestLive(build, atMs) {
   return { build: key, at };
 }
 
-/** Registra un live build si es m√°s nuevo (por fecha) o el primero que vimos. */
+/** Registra un live build si es m·s nuevo (por fecha) o el primero que vimos. */
 function noteNewestLive(live, liveAtMs) {
   const key = buildKey(live);
   if (!key) return readNewestLive();
@@ -5581,7 +5581,7 @@ function noteNewestLive(live, liveAtMs) {
   if (at && cur.at && at > cur.at) return writeNewestLive(key, at);
   if (at && !cur.at) return writeNewestLive(key, at);
   if (!at && !cur.at && key !== cur.build) {
-    // Sin fechas y SHA distinto: nos quedamos con el √∫ltimo confirmado v√≠a pending hits.
+    // Sin fechas y SHA distinto: nos quedamos con el ˙ltimo confirmado vÌa pending hits.
     return writeNewestLive(key, Date.now());
   }
   return cur;
@@ -5591,7 +5591,7 @@ function clearNewestLive() {
   storageSet(UPDATE_NEWEST_KEY, "");
 }
 
-/** HTML alcanzado = el m√°s nuevo que vimos (no alcanza matchear una r√©plica vieja). */
+/** HTML alcanzado = el m·s nuevo que vimos (no alcanza matchear una rÈplica vieja). */
 function htmlCaughtUpToNewest(loaded) {
   const newest = readNewestLive();
   const loadedKey = buildKey(loaded);
@@ -5718,8 +5718,8 @@ function clearUpdateSoftMode() {
 }
 
 /**
- * Marca un build como inalcanzable: ya recargamos apuntando a √©l y el HTML
- * sigui√≥ siendo el viejo (cach√© intermedia o r√©plica pegada). Insistir no sirve.
+ * Marca un build como inalcanzable: ya recargamos apuntando a Èl y el HTML
+ * siguiÛ siendo el viejo (cachÈ intermedia o rÈplica pegada). Insistir no sirve.
  */
 function markBuildStuck(build) {
   const key = buildKey(build);
@@ -5729,7 +5729,7 @@ function markBuildStuck(build) {
   }
 }
 
-/** Si el defer era de un build que ya tenemos cargado, lo limpia. No borra por un match moment√°neo de otra r√©plica. */
+/** Si el defer era de un build que ya tenemos cargado, lo limpia. No borra por un match moment·neo de otra rÈplica. */
 function clearDeferredIfSatisfied(loaded) {
   const deferred = readDeferredUpdateSignal();
   if (!deferred.startsWith("build:")) return;
@@ -5758,8 +5758,8 @@ function reconcileReloadTarget() {
       clearUpdateSilenceState();
       return;
     }
-    // Recargamos apuntando a ese build y el HTML no cambi√≥: silenciar ese SHA.
-    // No borramos el ‚Äúnewest‚Äù: si otra r√©plica m√°s nueva aparece, seguimos sabiendo cu√°l es.
+    // Recargamos apuntando a ese build y el HTML no cambiÛ: silenciar ese SHA.
+    // No borramos el ìnewestî: si otra rÈplica m·s nueva aparece, seguimos sabiendo cu·l es.
     if (target && at && Date.now() - at < 10 * 60 * 1000) {
       markBuildHandled(target);
       markBuildStuck(target);
@@ -5768,7 +5768,7 @@ function reconcileReloadTarget() {
       enterUpdateSoftMode();
       localStorage.removeItem(UPDATE_RELOAD_TARGET_KEY);
       console.info(
-        `[ST2] Recarga no alcanz√≥ el build ${target} (HTML=${loaded || "?"}). Se silencia el modal; barra suave si sigue el desfase.`,
+        `[ST2] Recarga no alcanzÛ el build ${target} (HTML=${loaded || "?"}). Se silencia el modal; barra suave si sigue el desfase.`,
       );
     }
   } catch {
@@ -5784,8 +5784,8 @@ function setUpdateToastVisible(show, signal = "") {
   }
   const body =
     signal === "forced:modules"
-      ? "Ten√©s m√≥dulos nuevos habilitados. Recarg√° para verlos; pod√©s seguir trabajando mientras tanto."
-      : "Hay una versi√≥n nueva. Pod√©s seguir trabajando; cuando puedas, recarg√°.";
+      ? "TenÈs mÛdulos nuevos habilitados. Recarg· para verlos; podÈs seguir trabajando mientras tanto."
+      : "Hay una versiÛn nueva. PodÈs seguir trabajando; cuando puedas, recarg·.";
   setSt2AlertToast({
     id: ST2_TOAST.update,
     body,
@@ -5799,7 +5799,7 @@ function setUpdateToastVisible(show, signal = "") {
 }
 
 /**
- * Notificaci√≥n sticky en el stack de Sonner (sin barra superior).
+ * NotificaciÛn sticky en el stack de Sonner (sin barra superior).
  * @param {"hidden"|"toast"|"banner"} mode
  */
 function setUpdateUiMode(mode) {
@@ -5815,7 +5815,7 @@ function showUpdatePrompt() {
     setUpdateUiMode("hidden");
     return;
   }
-  // Stuck: HTML no pudo alcanzar ese SHA. No molestar m√°s por √©l.
+  // Stuck: HTML no pudo alcanzar ese SHA. No molestar m·s por Èl.
   if (signal.startsWith("build:") && readStuckBuild() === signal.slice("build:".length)) {
     setUpdateUiMode("hidden");
     return;
@@ -5831,7 +5831,7 @@ function showUpdatePrompt() {
   }
   setUpdateUiMode("toast");
 
-  // Noti desktop 1 vez por build (√∫til si la pesta√±a est√° en segundo plano).
+  // Noti desktop 1 vez por build (˙til si la pestaÒa est· en segundo plano).
   if (wasHidden && signal.startsWith("build:")) {
     notifyWebUpdateDesktop(signal.slice("build:".length));
   } else if (wasHidden && signal === "forced:modules") {
@@ -5863,7 +5863,7 @@ function reloadForUpdate() {
   }
 }
 
-/** Cartel √∫nico de "recarg√°" (versi√≥n web o permisos nuevos). */
+/** Cartel ˙nico de "recarg·" (versiÛn web o permisos nuevos). */
 function requestUnifiedReloadBanner() {
   reloadBannerForced = true;
   showUpdatePrompt();
@@ -5875,13 +5875,13 @@ document.addEventListener("st2:request-reload-banner", () => {
 
 let skipUpdateLogged = "";
 
-/** Diagn√≥stico: deja rastro en consola sin molestar al usuario con carteles. */
+/** DiagnÛstico: deja rastro en consola sin molestar al usuario con carteles. */
 function logSkipUpdateOnce(reason, loaded, live) {
   const pair = `${reason}:${buildKey(loaded)}<-${buildKey(live)}`;
   if (skipUpdateLogged === pair) return;
   skipUpdateLogged = pair;
   console.info(
-    `[ST2] No se avisa de actualizaci√≥n (${reason}): HTML ${buildKey(loaded) || "?"} vs API ${buildKey(live) || "?"}.`,
+    `[ST2] No se avisa de actualizaciÛn (${reason}): HTML ${buildKey(loaded) || "?"} vs API ${buildKey(live) || "?"}.`,
   );
 }
 
@@ -5904,21 +5904,21 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
     else showUpdatePrompt();
   };
 
-  // R√©plica m√°s vieja que el HTML: ignorar, no es update.
+  // RÈplica m·s vieja que el HTML: ignorar, no es update.
   const loadedAt = loadedBuildTime();
   const haveDates = loadedAt !== null && liveAtMs > 0;
   if (haveDates && liveAtMs < loadedAt) {
     logSkipUpdateOnce("api-mas-vieja", loaded, live);
-    // No limpiar silencio: puede ser flip-flop hacia una r√©plica vieja.
+    // No limpiar silencio: puede ser flip-flop hacia una rÈplica vieja.
     pendingLiveBuild = "";
     pendingLiveHits = 0;
     return;
   }
 
-  // Actualizar ‚Äúnewest‚Äù solo si este live no es m√°s viejo que el HTML.
+  // Actualizar ìnewestî solo si este live no es m·s viejo que el HTML.
   const newest = noteNewestLive(live, liveAtMs || undefined);
 
-  // Match con ESTA respuesta: solo es ‚Äúal d√≠a‚Äù si el HTML alcanz√≥ el newest global.
+  // Match con ESTA respuesta: solo es ìal dÌaî si el HTML alcanzÛ el newest global.
   if (!buildsDiffer(loaded, live)) {
     lastLiveBuild = live;
     if (htmlCaughtUpToNewest(loaded)) {
@@ -5928,7 +5928,7 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
       else stopWatching();
       return;
     }
-    // Falsa calma: esta r√©plica coincide con el HTML, pero ya vimos un build m√°s nuevo.
+    // Falsa calma: esta rÈplica coincide con el HTML, pero ya vimos un build m·s nuevo.
     logSkipUpdateOnce("match-replica-vieja", loaded, newest.build || live);
     lastLiveBuild = newest.build || live;
     pendingLiveBuild = "";
@@ -5944,7 +5944,7 @@ function applyLiveBuild(liveBuild, liveBuildAt) {
     return;
   }
 
-  // Exigir N lecturas seguidas del mismo SHA (anti flip-flop entre r√©plicas).
+  // Exigir N lecturas seguidas del mismo SHA (anti flip-flop entre rÈplicas).
   if (liveNorm === pendingLiveBuild) pendingLiveHits += 1;
   else {
     pendingLiveBuild = liveNorm;
@@ -6000,7 +6000,7 @@ function startSessionHeartbeat() {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        // Mismo contador de confirmaci√≥n que /api/version (anti flip-flop).
+        // Mismo contador de confirmaciÛn que /api/version (anti flip-flop).
         if (data?.webBuild) applyLiveBuild(data.webBuild, data.webBuildAt);
       })
       .catch(() => {});
