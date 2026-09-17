@@ -1,5 +1,5 @@
 import { setSessionBirthdayMmDd } from "./planillas-easter-eggs.js";
-import { mountSessionBlobatar } from "./st2-blobatar.js?v=20260916b";
+import { mountSessionBlobatar } from "./st2-blobatar.js?v=20260916c";
 
 let cachedEmail = null;
 let cachedDisplayName = null;
@@ -225,7 +225,7 @@ function updateSessionEmailDisplay() {
     el.title = viewAs ? `Vista previa · ${email}` : email;
     el.classList.toggle("st2-session-email--view-as", !!viewAs);
     el.classList.remove("hidden");
-    mountSessionBlobatar(email);
+    mountSessionBlobatar(email, pretty);
   } else {
     if (nameEl) nameEl.textContent = "";
     el.removeAttribute("title");

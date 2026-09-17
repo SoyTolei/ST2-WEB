@@ -96,17 +96,16 @@ function argentinaMinutesNow() {
   }
 }
 
-export function greetLine(name) {
-  if (!name) return "";
+export function greetLine(_name) {
   const mins = argentinaMinutesNow();
   const birthday = isBirthdayGreetingForEmail(toastUserEmail());
 
   if (mins >= 19 * 60) {
-    const night = `Buenas noches ${name}? ¿Qué haces a esta hora por acá?`;
+    const night = "Buenas noches? ¿Qué haces a esta hora por acá?";
     return birthday ? `${night} Feliz Cumpleaños! 🎂` : night;
   }
 
-  const hello = mins < 12 * 60 ? `Buenos días ${name}!` : `Buenas tardes ${name}!`;
+  const hello = mins < 12 * 60 ? "Buenos días!" : "Buenas tardes!";
   return birthday ? `${hello} Feliz Cumpleaños! 🎂` : hello;
 }
 
@@ -129,8 +128,7 @@ export function syncSessionGreetBubble() {
     return;
   }
 
-  const name = toastFirstName();
-  const line = greetLine(name);
+  const line = greetLine();
   if (!line) {
     bubble.classList.add("hidden");
     bubble.setAttribute("hidden", "");
@@ -141,7 +139,6 @@ export function syncSessionGreetBubble() {
   if (textEl.textContent !== line) {
     textEl.textContent = line;
     bubble.classList.remove("st2-blobatar-greet--pop");
-    // Reinicia la entrada spring al cambiar franja horaria / nombre.
     void bubble.offsetWidth;
     bubble.classList.add("st2-blobatar-greet--pop");
   }

@@ -65,16 +65,25 @@ let lastExprName = "";
 let pdfPortalOpen = false;
 let birthdayFlashedFor = "";
 
-/** Semilla estable: parte local del mail (nombre.apellido…). */
-export function blobatarSeedFromEmail(email) {
+/** Semilla estable: nombre + apellido (sin puntos del mail). */
+export function blobatarSeedFromEmail(email, displayName = "") {
+  const fromDisplay = String(displayName || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+  if (fromDisplay) return fromDisplay;
+
   const local = String(email || "").split("@")[0].trim().toLowerCase();
-  return local || "st2";
+  // leonel.gallo → "leonel gallo"
+  return local.replace(/[._\-]+/g, " ").replace(/\s+/g, " ").trim() || "st2";
 }
 
 /**
  * Monta el blobatar animado (idle + gaze). Mood: evento > módulo/tab > hora ART.
+ * @param {string} email
+ * @param {string} [displayName]
  */
-export function mountSessionBlobatar(email) {
+export function mountSessionBlobatar(email, displayName = "") {
   ensureListeners();
   const host = document.getElementById("st2-session-avatar-host");
   if (!host) return;
@@ -95,7 +104,7 @@ export function mountSessionBlobatar(email) {
   }
 
   currentEmail = email;
-  const seed = blobatarSeedFromEmail(email);
+  const seed = blobatarSeedFromEmail(email, displayName);
   const needsMount = seed !== lastSeed || !host.querySelector("svg.st2-session-blobatar");
   lastSeed = seed;
 

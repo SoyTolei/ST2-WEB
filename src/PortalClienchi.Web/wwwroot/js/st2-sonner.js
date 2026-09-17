@@ -7,7 +7,7 @@ import {
   foodForToast,
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
-} from "./st2-toast-greet.js?v=20260916c";
+} from "./st2-toast-greet.js?v=20260916d";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -343,12 +343,12 @@ function makeActionButton(id, entry, tone) {
     }
     registry.delete(id);
     dismissProgrammatically(id);
-    if (GREET_STACK.includes(id)) paintGreetStack();
+    // No re-pintar el stack: evita que el resto “rote” / se remonte.
   });
   return btn;
 }
 
-function paintOne(id, title, tone) {
+function paintOne(id, title, tone, { force = false } = {}) {
   const entry = registry.get(id);
   if (!entry) return;
   if (!shouldShowSonnerToasts()) return;
@@ -360,8 +360,9 @@ function paintOne(id, title, tone) {
   } catch {
     existing = null;
   }
-  // Evitar re-crear/actualizar el toast en cada poll si no cambió (glitches de Sonner).
-  if (existing && prev && prev.title === title && prev.tone === tone) return;
+  // Evitar re-crear el toast si el contenido no cambió (glitches / “rotación” de Sonner).
+  if (!force && prev && prev.title === title && prev.tone === tone && existing) return;
+  if (!force && prev && prev.title === title && prev.tone === tone && dismissingLocally.has(id)) return;
 
   const method = toneToMethod(tone);
   const opts = {
@@ -379,7 +380,7 @@ function paintOne(id, title, tone) {
       window.setTimeout(() => {
         dismissingLocally.delete(id);
         if (registry.has(id) && shouldShowSonnerToasts()) {
-          paintGreetStack();
+          paintOne(id, plainTitle(formatToastMessage(registry.get(id)?.body || "")), registry.get(id)?.tone || tone, { force: true });
         }
       }, DISMISS_GUARD_MS);
     },
@@ -387,15 +388,17 @@ function paintOne(id, title, tone) {
       if (dismissingLocally.has(id)) return;
       lastPainted.delete(id);
       if (entry.sticky) {
-        // X / cierre fantasma: no “tragar” el aviso; reponer.
+        // X / cierre fantasma: no “tragar” el aviso; reponer solo este.
         window.setTimeout(() => {
-          if (registry.has(id) && shouldShowSonnerToasts()) paintGreetStack();
+          if (registry.has(id) && shouldShowSonnerToasts()) {
+            const e = registry.get(id);
+            if (e) paintOne(id, plainTitle(formatToastMessage(e.body)), e.tone, { force: true });
+          }
         }, 280);
         return;
       }
       registry.delete(id);
       entry.onDismiss?.();
-      if (GREET_STACK.includes(id)) paintGreetStack();
     },
   };
 
@@ -406,7 +409,7 @@ function paintOne(id, title, tone) {
   else toast.success(title, opts);
 }
 
-/** Re-pinta el stack (p. ej. al cambiar nombre / cumpleaños). */
+/** Re-pinta el stack (p. ej. al volver al home). El saludo va en el globo, no acá. */
 export function syncStackedToastGreetings() {
   syncSessionGreetBubble();
   if (!registry.size) return;
