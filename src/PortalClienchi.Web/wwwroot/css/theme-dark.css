@@ -91,16 +91,17 @@ html.st2-theme-dark .st2-session-email::before {
 }
 
 html.st2-theme-dark .st2-blobatar-greet {
-  background: linear-gradient(165deg, #1a120e 0%, #0a0705 100%);
-  border-color: rgba(251, 146, 60, 0.42);
+  background: linear-gradient(160deg, rgba(249, 115, 22, 0.2) 0%, rgba(20, 14, 10, 0.98) 45%, #0a0705 100%);
+  border-color: rgba(251, 146, 60, 0.48);
 }
 
 html.st2-theme-dark .st2-blobatar-greet-text {
   color: #ffedd5;
 }
 
-html.st2-theme-dark .st2-blobatar-greet::after {
-  border-top-color: #120c09;
+html.st2-theme-dark .st2-blobatar-greet::before {
+  border-left-color: rgba(251, 146, 60, 0.48);
+  border-bottom-color: rgba(251, 146, 60, 0.48);
 }
 
 html.st2-theme-dark .st2-session-menu-hint > span {

@@ -138,7 +138,13 @@ export function syncSessionGreetBubble() {
     return;
   }
 
-  if (textEl.textContent !== line) textEl.textContent = line;
+  if (textEl.textContent !== line) {
+    textEl.textContent = line;
+    bubble.classList.remove("st2-blobatar-greet--pop");
+    // Reinicia la entrada spring al cambiar franja horaria / nombre.
+    void bubble.offsetWidth;
+    bubble.classList.add("st2-blobatar-greet--pop");
+  }
   bubble.classList.remove("hidden");
   bubble.removeAttribute("hidden");
 }
