@@ -96,21 +96,48 @@ function argentinaMinutesNow() {
   }
 }
 
+const TOAST_MERIENDA_EMOJIS = ["🧉", "☕", "🥐", "🍪", "🫖"];
+
+function nextMeriendaEmoji() {
+  return TOAST_MERIENDA_EMOJIS[Math.floor(Math.random() * TOAST_MERIENDA_EMOJIS.length)] || "🧉";
+}
+
+function meriendaForGreet() {
+  const key = "st2-greet-merienda";
+  try {
+    const cached = sessionStorage.getItem(key);
+    if (cached) return cached;
+    const emoji = nextMeriendaEmoji();
+    sessionStorage.setItem(key, emoji);
+    return emoji;
+  } catch {
+    return nextMeriendaEmoji();
+  }
+}
+
 export function greetLine(_name) {
   const mins = argentinaMinutesNow();
   const birthday = isBirthdayGreetingForEmail(toastUserEmail());
+  const bday = birthday ? " Feliz Cumpleaños! 🎂" : "";
 
-  // 19:00–04:59 → Buenas noches (+ mensaje)
-  // 05:00–12:59 → Buenos días
-  // 13:00–18:59 → Buenas tardes
+  // 19:00–04:59 → Buenas noches (+ mensaje corto)
+  // 05:00–11:59 → Buenos días + ☕
+  // 12:00–14:59 → Buenas tardes + comida
+  // 15:00–18:59 → Buenas tardes + merienda
   const isNight = mins >= 19 * 60 || mins < 5 * 60;
   if (isNight) {
-    const night = "Buenas noches? ¿Qué haces a esta hora por acá?";
-    return birthday ? `${night} Feliz Cumpleaños! 🎂` : night;
+    return `Buenas noches… ¿a esta hora?${bday}`;
   }
 
-  const hello = mins < 13 * 60 ? "Buenos días!" : "Buenas tardes!";
-  return birthday ? `${hello} Feliz Cumpleaños! 🎂` : hello;
+  if (mins < 12 * 60) {
+    return `Buenos días! ☕${bday}`;
+  }
+
+  if (mins < 15 * 60) {
+    return `Buenas tardes! ${foodForToast("greet-almuerzo")}${bday}`;
+  }
+
+  return `Buenas tardes! ${meriendaForGreet()}${bday}`;
 }
 
 /** El saludo vive en el globo del blobatar; las notifs solo llevan el aviso. */

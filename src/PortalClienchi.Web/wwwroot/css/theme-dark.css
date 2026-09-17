@@ -91,12 +91,12 @@ html.st2-theme-dark .st2-session-email::before {
 }
 
 html.st2-theme-dark .st2-blobatar-greet {
-  background: linear-gradient(160deg, rgba(249, 115, 22, 0.2) 0%, rgba(20, 14, 10, 0.98) 45%, #0a0705 100%);
-  border-color: rgba(251, 146, 60, 0.48);
+  background: linear-gradient(155deg, rgba(251, 146, 60, 0.2) 0%, rgba(28, 18, 12, 0.97) 42%, #0c0805 100%);
+  border-color: rgba(251, 146, 60, 0.4);
 }
 
 html.st2-theme-dark .st2-blobatar-greet-text {
-  color: #ffedd5;
+  color: #e8a86a;
 }
 
 html.st2-theme-dark .st2-blobatar-greet::before {
