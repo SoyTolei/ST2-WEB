@@ -79,6 +79,7 @@ export function mountSessionBlobatar(email) {
     stopHourTicker();
     clearFlash();
     teardownGaze();
+    host.classList.remove("st2-blobatar-zzz");
     host.replaceChildren();
     host.setAttribute("hidden", "");
     lastSeed = "";
@@ -267,7 +268,7 @@ function resolveMoodName() {
 /**
  * Franjas ART (America/Argentina/Buenos_Aires):
  * 09:00–10:30 happy · 10:30–13:00 surprised · 13:00–14:30 sleepy
- * 14:30–16:30 thinking · 16:30–17:30 smug · 17:30+ y antes de 09 sleepy
+ * 14:30–16:30 thinking · 16:30–18:00 smug · 18:00+ y antes de 09 sleepy (+ zzz)
  */
 function expressionForHourArt() {
   const mins = argentinaMinutesNow();
@@ -275,7 +276,7 @@ function expressionForHourArt() {
   if (mins >= 10 * 60 + 30 && mins < 13 * 60) return "surprised";
   if (mins >= 13 * 60 && mins < 14 * 60 + 30) return "sleepy";
   if (mins >= 14 * 60 + 30 && mins < 16 * 60 + 30) return "thinking";
-  if (mins >= 16 * 60 + 30 && mins < 17 * 60 + 30) return "smug";
+  if (mins >= 16 * 60 + 30 && mins < 18 * 60) return "smug";
   return "sleepy";
 }
 
@@ -320,12 +321,20 @@ function argentinaMinutesNow() {
   }
 }
 
+function syncLateZzz(host) {
+  if (!host) return;
+  const late = argentinaMinutesNow() >= 18 * 60;
+  host.classList.toggle("st2-blobatar-zzz", late);
+}
+
 function applyMood() {
   if (!currentEmail || !lastSeed) return;
   const host = document.getElementById("st2-session-avatar-host");
   const svg = host?.querySelector("svg.st2-session-blobatar");
   const root = svg?.querySelector(":scope > g");
   if (!svg || !root) return;
+
+  syncLateZzz(host);
 
   const exprName = resolveMoodName();
   if (exprName === lastExprName) return;

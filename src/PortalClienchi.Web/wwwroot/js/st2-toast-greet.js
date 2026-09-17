@@ -78,12 +78,36 @@ export function toastUserEmail() {
   return String(getPlanUserEmail() || "").trim().toLowerCase();
 }
 
+function argentinaMinutesNow() {
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(new Date());
+    const hour = Number(parts.find((p) => p.type === "hour")?.value || 0);
+    const minute = Number(parts.find((p) => p.type === "minute")?.value || 0);
+    const h = hour === 24 ? 0 : hour;
+    return h * 60 + minute;
+  } catch {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  }
+}
+
 export function greetLine(name) {
   if (!name) return "";
-  if (isBirthdayGreetingForEmail(toastUserEmail())) {
-    return `Hola ${name}! Feliz Cumpleaños! 🎂`;
+  const mins = argentinaMinutesNow();
+  const birthday = isBirthdayGreetingForEmail(toastUserEmail());
+
+  if (mins >= 19 * 60) {
+    const night = `Buenas noches ${name}? ¿Qué haces a esta hora por acá?`;
+    return birthday ? `${night} Feliz Cumpleaños! 🎂` : night;
   }
-  return `Hola ${name}!`;
+
+  const hello = mins < 12 * 60 ? `Buenos días ${name}!` : `Buenas tardes ${name}!`;
+  return birthday ? `${hello} Feliz Cumpleaños! 🎂` : hello;
 }
 
 export function formatToastMessage(body, { greet = false } = {}) {

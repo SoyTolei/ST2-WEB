@@ -1,5 +1,5 @@
 import { setSessionBirthdayMmDd } from "./planillas-easter-eggs.js";
-import { mountSessionBlobatar } from "./st2-blobatar.js";
+import { mountSessionBlobatar } from "./st2-blobatar.js?v=20260916a";
 
 let cachedEmail = null;
 let cachedDisplayName = null;
