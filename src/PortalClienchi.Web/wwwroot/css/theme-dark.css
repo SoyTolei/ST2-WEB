@@ -2575,22 +2575,22 @@ html.st2-theme-dark .blanqueo-portal-onbalance .blanqueo-portal-chip-mark {
 }
 
 html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip {
-  color: #7c3aed;
-  border-color: #8b5cf6;
-}
-
-html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip-mark {
-  background: #7c3aed;
-  color: #fff;
-}
-
-html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip {
   color: #ea580c;
   border-color: #f97316;
 }
 
-html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip-mark {
+html.st2-theme-dark .blanqueo-portal-onvio .blanqueo-portal-chip-mark {
   background: #ea580c;
+  color: #fff;
+}
+
+html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip {
+  color: #c026d3;
+  border-color: #f0abfc;
+}
+
+html.st2-theme-dark .blanqueo-portal-cliente .blanqueo-portal-chip-mark {
+  background: #e879f9;
   color: #fff;
 }
 

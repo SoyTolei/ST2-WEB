@@ -1004,27 +1004,27 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   color: #0c4a6e;
 }
 
-/* ONVIO — violeta */
+/* ONVIO — naranja (antes Portal) */
 .blanqueo-portal-onvio .blanqueo-portal-chip {
-  color: #7c3aed;
-  background: #f0f0f0;
-  border-color: #8b5cf6;
-}
-
-.blanqueo-portal-onvio .blanqueo-portal-chip-mark {
-  background: #7c3aed;
-  color: #fff;
-}
-
-/* Portal Cliente — naranja */
-.blanqueo-portal-cliente .blanqueo-portal-chip {
   color: #ea580c;
   background: #f0f0f0;
   border-color: #f97316;
 }
 
-.blanqueo-portal-cliente .blanqueo-portal-chip-mark {
+.blanqueo-portal-onvio .blanqueo-portal-chip-mark {
   background: #ea580c;
+  color: #fff;
+}
+
+/* Portal Cliente — violeta rosado claro */
+.blanqueo-portal-cliente .blanqueo-portal-chip {
+  color: #c026d3;
+  background: #f0f0f0;
+  border-color: #f0abfc;
+}
+
+.blanqueo-portal-cliente .blanqueo-portal-chip-mark {
+  background: #e879f9;
   color: #fff;
 }
 
