@@ -1181,3 +1181,20 @@ button.borrado-aclaracion-pill .borrado-base-pill-action {
     width: 100%;
   }
 }
+
+/* Campos incompletos al intentar Agregar */
+.borrado-form-grid .st2-field-invalid,
+.borrado-form-grid input.st2-field-invalid,
+.borrado-form-grid select.st2-field-invalid,
+.borrado-form-grid textarea.st2-field-invalid,
+.borrado-bases-checks.st2-field-invalid,
+.borrado-check.st2-field-invalid {
+  border-color: #eace7a !important;
+  box-shadow: 0 0 0 2px rgba(234, 206, 122, 0.28) !important;
+}
+
+.borrado-bases-checks.st2-field-invalid {
+  border: 1px solid #eace7a;
+  border-radius: 10px;
+  padding: 4px 6px;
+}

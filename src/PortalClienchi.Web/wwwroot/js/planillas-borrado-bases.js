@@ -10,6 +10,7 @@ import {
 } from "./module-access.js";
 import { notifyBorradoChanged, markBorradoAlertsSeenOnEnter, markBorradoObservationOpened } from "./borrado-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
+import { showSt2FlashToast } from "./st2-sonner.js?v=20260917e";
 
 /**
  * Override: localStorage.setItem("st2-borrado-bases-force", "1")
@@ -117,6 +118,29 @@ export function initBorradoBasesModule() {
   });
   document.getElementById("borrado-add-detalle")?.addEventListener("click", () => {
     void createSolicitud();
+  });
+
+  document.getElementById("planillas-borrado-bases")?.addEventListener("input", (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLElement)) return;
+    if (t.classList.contains("st2-field-invalid")) {
+      t.classList.remove("st2-field-invalid");
+      t.removeAttribute("aria-invalid");
+    }
+  });
+  document.getElementById("planillas-borrado-bases")?.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLElement)) return;
+    if (t.classList.contains("st2-field-invalid")) {
+      t.classList.remove("st2-field-invalid");
+      t.removeAttribute("aria-invalid");
+    }
+    if (t.matches?.('input[name="borrado-base"]')) {
+      document.querySelector("#borrado-detalle-fields .borrado-bases-checks")?.classList.remove("st2-field-invalid");
+      document.querySelectorAll("#borrado-detalle-fields .borrado-check.st2-field-invalid").forEach((el) => {
+        el.classList.remove("st2-field-invalid");
+      });
+    }
   });
 
   document.getElementById("borrado-salesforce")?.addEventListener("change", () => syncSalesforceMode());
@@ -427,6 +451,33 @@ function setStatus(msg, isError = false) {
   el.appendChild(document.createTextNode(msg));
 }
 
+function clearFormFieldErrors(root = document.getElementById("planillas-borrado-bases")) {
+  root?.querySelectorAll(".st2-field-invalid").forEach((el) => {
+    el.classList.remove("st2-field-invalid");
+    el.removeAttribute("aria-invalid");
+  });
+}
+
+function markFormFieldInvalid(el) {
+  if (!el) return;
+  el.classList.add("st2-field-invalid");
+  el.setAttribute("aria-invalid", "true");
+}
+
+function notifyFormIncomplete(message, focusEl) {
+  const msg = String(message || "Completá los datos faltantes.").trim();
+  setStatus(msg, true);
+  showSt2FlashToast({ body: msg, tone: "warn" });
+  if (focusEl && typeof focusEl.focus === "function") {
+    try {
+      focusEl.focus({ preventScroll: false });
+    } catch {
+      focusEl.focus();
+    }
+    focusEl.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }
+}
+
 function setStatusWithUndo(msg, undoId) {
   const el = document.getElementById("borrado-status");
   if (!el) return;
@@ -478,6 +529,7 @@ async function restoreDeletedSolicitud() {
 }
 
 function clearForm() {
+  clearFormFieldErrors();
   const caso = document.getElementById("borrado-caso");
   const cliente = document.getElementById("borrado-cliente");
   const empresa = document.getElementById("borrado-empresa");
@@ -537,15 +589,27 @@ function canOwnerMutate(item) {
 
 async function createSolicitud() {
   if (!effectiveCanLoad()) {
-    setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
+    notifyFormIncomplete("Tu perfil es solo listado: no podés cargar solicitudes.");
     return;
   }
+  clearFormFieldErrors();
   const detalleEnSalesforce = isSalesforceFormMode();
-  const nroCaso = document.getElementById("borrado-caso")?.value.trim() || "";
-  const nroCliente = document.getElementById("borrado-cliente")?.value.trim() || "";
+  const casoEl = document.getElementById("borrado-caso");
+  const clienteEl = document.getElementById("borrado-cliente");
+  const nroCaso = casoEl?.value.trim() || "";
+  const nroCliente = clienteEl?.value.trim() || "";
 
-  if (!nroCaso || !nroCliente) {
-    setStatus("Completá caso y cliente.", true);
+  const missingHead = [];
+  if (!nroCaso) {
+    missingHead.push("N° de caso");
+    markFormFieldInvalid(casoEl);
+  }
+  if (!nroCliente) {
+    missingHead.push("N° de cliente");
+    markFormFieldInvalid(clienteEl);
+  }
+  if (missingHead.length) {
+    notifyFormIncomplete(`Falta completar: ${missingHead.join(", ")}.`, !nroCaso ? casoEl : clienteEl);
     return;
   }
 
@@ -553,22 +617,41 @@ async function createSolicitud() {
   if (detalleEnSalesforce) {
     payload = { nroCaso, nroCliente, detalleEnSalesforce: true };
   } else {
-    const nroEmpresa = document.getElementById("borrado-empresa")?.value.trim() || "";
-    const nombreEmpresa = document.getElementById("borrado-nombre-empresa")?.value.trim() || "";
+    const empresaEl = document.getElementById("borrado-empresa");
+    const nombreEl = document.getElementById("borrado-nombre-empresa");
+    const ejerciciosEl = document.getElementById("borrado-ejercicios");
+    const nroEmpresa = empresaEl?.value.trim() || "";
+    const nombreEmpresa = nombreEl?.value.trim() || "";
     const cuit = document.getElementById("borrado-cuit")?.value.trim() || "";
     const bases = readBasesFromForm("borrado-base");
-    const ejerciciosDetalle = document.getElementById("borrado-ejercicios")?.value.trim() || "";
+    const ejerciciosDetalle = ejerciciosEl?.value.trim() || "";
+    const basesWrap = document.querySelector("#borrado-detalle-fields .borrado-bases-checks")
+      || document.getElementById("borrado-base-iva")?.closest(".borrado-field");
 
-    if (!nroEmpresa || !nombreEmpresa) {
-      setStatus("Completá código y nombre de empresa.", true);
-      return;
+    const missingDetalle = [];
+    if (!nroEmpresa) {
+      missingDetalle.push("código de empresa");
+      markFormFieldInvalid(empresaEl);
+    }
+    if (!nombreEmpresa) {
+      missingDetalle.push("nombre de empresa");
+      markFormFieldInvalid(nombreEl);
     }
     if (!bases.iva && !bases.sueldos && !bases.contabilidad) {
-      setStatus("Marcá al menos una base a borrar.", true);
+      missingDetalle.push("al menos una base");
+      markFormFieldInvalid(basesWrap);
+      ["borrado-base-iva", "borrado-base-sueldos", "borrado-base-contabilidad"].forEach((id) => {
+        markFormFieldInvalid(document.getElementById(id)?.closest("label") || document.getElementById(id));
+      });
+    }
+    if (missingDetalle.length) {
+      const focusEl = !nroEmpresa ? empresaEl : !nombreEmpresa ? nombreEl : document.getElementById("borrado-base-iva");
+      notifyFormIncomplete(`Falta completar: ${missingDetalle.join(", ")}.`, focusEl);
       return;
     }
     if (bases.contabilidad && !ejerciciosDetalle) {
-      setStatus("Si marcás CG, pegá los ejercicios a borrar.", true);
+      markFormFieldInvalid(ejerciciosEl);
+      notifyFormIncomplete("Si marcás CG, pegá los ejercicios a borrar.", ejerciciosEl);
       return;
     }
 
@@ -595,12 +678,15 @@ async function createSolicitud() {
     if (!res.ok) throw new Error(data.error || data.detail || `Error ${res.status}`);
     clearForm();
     setStatus("Solicitud agregada.");
+    showSt2FlashToast({ body: "Solicitud agregada.", tone: "ok", duration: 3200 });
     scrollListToEndOnce = true;
     await reloadList();
     notifyBorradoChanged();
     document.getElementById("borrado-caso")?.focus();
   } catch (err) {
-    setStatus(err?.message || "No se pudo guardar.", true);
+    const msg = err?.message || "No se pudo guardar.";
+    setStatus(msg, true);
+    showSt2FlashToast({ body: msg, tone: "bad" });
   }
 }
 

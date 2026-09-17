@@ -296,6 +296,52 @@ export function clearSt2AlertToast(id) {
   if (had && GREET_STACK.includes(id)) paintGreetStack();
 }
 
+const FLASH_TOAST_ID = "st2-toast-flash";
+let flashHideTimer = 0;
+
+/**
+ * Toast efímero (validación / feedback). Visible también fuera del home de Planillas.
+ * No entra al stack sticky de alertas.
+ */
+export function showSt2FlashToast({ body, tone = "warn", duration = 4800 } = {}) {
+  initSt2Sonner();
+  const text = String(body || "").trim();
+  if (!text) return;
+
+  const toaster = document.getElementById(TOASTER_ID);
+  document.body.classList.add("st2-sonner-home");
+  if (toaster) {
+    toaster.removeAttribute("hidden");
+    toaster.setAttribute("aria-hidden", "false");
+  }
+  syncSonnerPlacement();
+
+  const method = toneToMethod(tone);
+  const title = plainTitle(text);
+  const opts = {
+    id: FLASH_TOAST_ID,
+    toasterId: TOASTER_ID,
+    duration: Math.max(1800, Number(duration) || 4800),
+    richColors: true,
+    closeButton: true,
+    dismissible: true,
+    className: `st2-sonner-toast ${toneClass(tone)}`,
+    onDismiss: () => {
+      window.clearTimeout(flashHideTimer);
+      flashHideTimer = window.setTimeout(() => syncSonnerHomeVisibility(), 120);
+    },
+    onAutoClose: () => {
+      window.clearTimeout(flashHideTimer);
+      flashHideTimer = window.setTimeout(() => syncSonnerHomeVisibility(), 120);
+    },
+  };
+
+  if (method === "error") toast.error(title, opts);
+  else if (method === "warning") toast.warning(title, opts);
+  else if (method === "info") toast.info(title, opts);
+  else toast.success(title, opts);
+}
+
 /** @type {Map<string, { title: string, tone: string }>} */
 const lastPainted = new Map();
 

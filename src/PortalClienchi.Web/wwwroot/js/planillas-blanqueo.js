@@ -10,6 +10,7 @@ import {
 } from "./module-access.js";
 import { notifyBlanqueoChanged, markBlanqueoAlertsSeenOnEnter, markBlanqueoObservationOpened } from "./blanqueo-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
+import { showSt2FlashToast } from "./st2-sonner.js?v=20260917e";
 
 /**
  * Override: localStorage.setItem("st2-blanqueo-force", "1")
@@ -114,6 +115,26 @@ export function initBlanqueoModule() {
 
   document.getElementById("blanqueo-add")?.addEventListener("click", () => {
     void createSolicitud();
+  });
+
+  document.getElementById("planillas-blanqueo")?.addEventListener("input", (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLElement)) return;
+    if (t.classList.contains("st2-field-invalid")) {
+      t.classList.remove("st2-field-invalid");
+      t.removeAttribute("aria-invalid");
+    }
+  });
+  document.getElementById("planillas-blanqueo")?.addEventListener("change", (e) => {
+    const t = e.target;
+    if (!(t instanceof HTMLElement)) return;
+    if (t.classList.contains("st2-field-invalid")) {
+      t.classList.remove("st2-field-invalid");
+      t.removeAttribute("aria-invalid");
+    }
+    if (t.matches?.('input[name="blanqueo-modulo"]')) {
+      document.getElementById("blanqueo-modulos-field")?.classList.remove("st2-field-invalid");
+    }
   });
 
   ["blanqueo-caso", "blanqueo-cliente"].forEach((id) => {
@@ -422,7 +443,35 @@ function setStatus(msg, isError = false) {
   el.classList.toggle("is-error", !!isError && !!msg);
 }
 
+function clearFormFieldErrors(root = document.getElementById("planillas-blanqueo")) {
+  root?.querySelectorAll(".st2-field-invalid").forEach((el) => {
+    el.classList.remove("st2-field-invalid");
+    el.removeAttribute("aria-invalid");
+  });
+}
+
+function markFormFieldInvalid(el) {
+  if (!el) return;
+  el.classList.add("st2-field-invalid");
+  el.setAttribute("aria-invalid", "true");
+}
+
+function notifyFormIncomplete(message, focusEl) {
+  const msg = String(message || "Completá los datos faltantes.").trim();
+  setStatus(msg, true);
+  showSt2FlashToast({ body: msg, tone: "warn" });
+  if (focusEl && typeof focusEl.focus === "function") {
+    try {
+      focusEl.focus({ preventScroll: false });
+    } catch {
+      focusEl.focus();
+    }
+    focusEl.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  }
+}
+
 function clearForm({ keepCaso = false } = {}) {
+  clearFormFieldErrors();
   const portal = document.getElementById("blanqueo-portal");
   const caso = document.getElementById("blanqueo-caso");
   const cliente = document.getElementById("blanqueo-cliente");
@@ -722,26 +771,49 @@ async function copyClaveBlanqueo() {
 
 async function createSolicitud() {
   if (!effectiveCanLoad()) {
-    setStatus("Tu perfil es solo listado: no podés cargar solicitudes.", true);
+    notifyFormIncomplete("Tu perfil es solo listado: no podés cargar solicitudes.");
     return;
   }
+  clearFormFieldErrors();
   const portal = getFormPortal();
-  const nroCaso = document.getElementById("blanqueo-caso")?.value.trim() || "";
-  const nroCliente = document.getElementById("blanqueo-cliente")?.value.trim() || "";
+  const casoEl = document.getElementById("blanqueo-caso");
+  const clienteEl = document.getElementById("blanqueo-cliente");
+  const tipoEl = document.getElementById("blanqueo-tipo");
+  const nroCaso = casoEl?.value.trim() || "";
+  const nroCliente = clienteEl?.value.trim() || "";
   const correos = collectCorreos();
-  const tipoSolicitud = document.getElementById("blanqueo-tipo")?.value.trim() || "";
+  const tipoSolicitud = tipoEl?.value.trim() || "";
   const modulos = collectModulos("blanqueo-modulo");
+  const correoInputs = [...document.querySelectorAll("#blanqueo-correos .blanqueo-correo-input")];
 
-  if (!nroCaso || !nroCliente || !correos.length) {
-    setStatus("Completá caso, cliente y al menos un correo.", true);
+  const missing = [];
+  if (!nroCaso) {
+    missing.push("N° de caso");
+    markFormFieldInvalid(casoEl);
+  }
+  if (!nroCliente) {
+    missing.push("N° de cliente");
+    markFormFieldInvalid(clienteEl);
+  }
+  if (!correos.length) {
+    missing.push("correo");
+    (correoInputs.length ? correoInputs : [document.getElementById("blanqueo-correo")]).forEach(markFormFieldInvalid);
+  }
+  if (missing.length) {
+    const focusEl = !nroCaso ? casoEl : !nroCliente ? clienteEl : (correoInputs[0] || document.getElementById("blanqueo-correo"));
+    notifyFormIncomplete(`Falta completar: ${missing.join(", ")}.`, focusEl);
     return;
   }
   if (!tiposForPortal(portal).includes(tipoSolicitud)) {
-    setStatus("Elegí un tipo de solicitud válido para esa plataforma.", true);
+    markFormFieldInvalid(tipoEl);
+    notifyFormIncomplete("Elegí un tipo de solicitud válido para esa plataforma.", tipoEl);
     return;
   }
   if (isHabilitacionTipo(tipoSolicitud) && !modulos.length) {
-    setStatus("Elegí al menos un módulo a habilitar.", true);
+    const modWrap = document.getElementById("blanqueo-modulos-field");
+    markFormFieldInvalid(modWrap);
+    modWrap?.querySelectorAll('input[type="checkbox"]').forEach(markFormFieldInvalid);
+    notifyFormIncomplete("Elegí al menos un módulo a habilitar.", modWrap?.querySelector("input") || modWrap);
     return;
   }
 
@@ -768,12 +840,19 @@ async function createSolicitud() {
     // Caso cerrado: limpio todo el formulario para el próximo ingreso.
     clearForm();
     setStatus(ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`);
+    showSt2FlashToast({
+      body: ok === 1 ? "Solicitud agregada." : `${ok} solicitudes agregadas.`,
+      tone: "ok",
+      duration: 3200,
+    });
     scrollListToEndOnce = true;
     await reloadList();
     notifyBlanqueoChanged();
     document.getElementById("blanqueo-caso")?.focus();
   } catch (err) {
-    setStatus(err?.message || "No se pudo guardar.", true);
+    const msg = err?.message || "No se pudo guardar.";
+    setStatus(msg, true);
+    showSt2FlashToast({ body: msg, tone: "bad" });
   }
 }
 

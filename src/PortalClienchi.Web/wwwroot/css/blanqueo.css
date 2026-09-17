@@ -1309,3 +1309,13 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
 .plan-gestor-ctx hr.hidden {
   display: none !important;
 }
+
+/* Campos incompletos al intentar Agregar */
+.blanqueo-form-grid .st2-field-invalid,
+.blanqueo-form-grid input.st2-field-invalid,
+.blanqueo-form-grid select.st2-field-invalid,
+.blanqueo-form-grid textarea.st2-field-invalid,
+#blanqueo-modulos-field.st2-field-invalid {
+  border-color: #eace7a !important;
+  box-shadow: 0 0 0 2px rgba(234, 206, 122, 0.28) !important;
+}
