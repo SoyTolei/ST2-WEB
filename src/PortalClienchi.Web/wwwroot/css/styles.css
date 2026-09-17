@@ -384,6 +384,11 @@ html, body {
     st2-blobatar-greet-float 3.2s ease-in-out 0.55s infinite;
 }
 
+body.st2-session-menu-open .st2-blobatar-greet {
+  opacity: 0.55;
+  animation-play-state: paused;
+}
+
 /* Acento superior: en light usa tour; dark lo pisa a naranja ST2 */
 .st2-session-email::before {
   content: "";
