@@ -6,7 +6,8 @@ import {
   formatToastMessage,
   foodForToast,
   TOAST_FOOD_MARK,
-} from "./st2-toast-greet.js?v=20260916a";
+  syncSessionGreetBubble,
+} from "./st2-toast-greet.js?v=20260916b";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -304,7 +305,7 @@ function paintGreetStack() {
     const entry = registry.get(id);
     if (!entry) return;
     const title = plainTitle(
-      formatToastMessage(entry.body, { greet: index === 0 }),
+      formatToastMessage(entry.body),
     );
     paintOne(id, title, entry.tone);
   });
@@ -407,6 +408,7 @@ function paintOne(id, title, tone) {
 
 /** Re-pinta el stack (p. ej. al cambiar nombre / cumpleaños). */
 export function syncStackedToastGreetings() {
+  syncSessionGreetBubble();
   if (!registry.size) return;
   paintGreetStack();
   const agua = registry.get(ST2_TOAST.agua);

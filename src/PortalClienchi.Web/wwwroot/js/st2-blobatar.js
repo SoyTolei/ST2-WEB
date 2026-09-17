@@ -15,6 +15,10 @@ import {
 } from "./vendor/blobatar-expression.js";
 import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js";
 
+function requestGreetBubbleSync() {
+  document.dispatchEvent(new CustomEvent("st2:greet-bubble-sync"));
+}
+
 const EXPR = {
   happy,
   surprised,
@@ -86,6 +90,7 @@ export function mountSessionBlobatar(email) {
     currentEmail = "";
     lastExprName = "";
     birthdayFlashedFor = "";
+    requestGreetBubbleSync();
     return;
   }
 
@@ -143,6 +148,7 @@ export function mountSessionBlobatar(email) {
   }
 
   startHourTicker();
+  requestGreetBubbleSync();
 
   if (isBirthdayGreetingForEmail(email) && birthdayFlashedFor !== email) {
     birthdayFlashedFor = email;
@@ -369,7 +375,10 @@ function applyPartsToSvg(svg, parts) {
 
 function startHourTicker() {
   stopHourTicker();
-  hourTimer = window.setInterval(() => applyMood(), HOUR_TICK_MS);
+  hourTimer = window.setInterval(() => {
+    applyMood();
+    requestGreetBubbleSync();
+  }, HOUR_TICK_MS);
 }
 
 function stopHourTicker() {

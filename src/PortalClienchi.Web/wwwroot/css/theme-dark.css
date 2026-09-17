@@ -90,8 +90,17 @@ html.st2-theme-dark .st2-session-email::before {
   opacity: 0.95;
 }
 
-html.st2-theme-dark .st2-session-name {
+html.st2-theme-dark .st2-blobatar-greet {
+  background: linear-gradient(165deg, #1a120e 0%, #0a0705 100%);
+  border-color: rgba(251, 146, 60, 0.42);
+}
+
+html.st2-theme-dark .st2-blobatar-greet-text {
   color: #ffedd5;
+}
+
+html.st2-theme-dark .st2-blobatar-greet::after {
+  border-top-color: #120c09;
 }
 
 html.st2-theme-dark .st2-session-menu-hint > span {

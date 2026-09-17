@@ -291,6 +291,70 @@ html, body {
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+/* Globo de saludo del blobatar */
+.st2-blobatar-greet {
+  position: absolute;
+  left: 4px;
+  bottom: calc(100% + 8px);
+  z-index: 5;
+  max-width: min(240px, 70vw);
+  padding: 7px 10px;
+  border-radius: 12px 12px 12px 4px;
+  background: linear-gradient(165deg, #1c1410 0%, #0c0908 100%);
+  border: 1px solid rgba(251, 146, 60, 0.38);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 237, 213, 0.08);
+  white-space: normal;
+  pointer-events: none;
+  animation: st2-blobatar-greet-in 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.st2-blobatar-greet.hidden {
+  display: none !important;
+}
+
+.st2-blobatar-greet::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 100%;
+  border: 6px solid transparent;
+  border-top-color: #140e0a;
+  filter: drop-shadow(0 1px 0 rgba(251, 146, 60, 0.28));
+}
+
+.st2-blobatar-greet-text {
+  display: block;
+  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  color: #ffedd5;
+}
+
+@keyframes st2-blobatar-greet-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-blobatar-greet {
+    animation: none;
+  }
+}
+
+body.st2-session-menu-open .st2-blobatar-greet {
+  opacity: 0.35;
+}
+
 /* Acento superior: en light usa tour; dark lo pisa a naranja ST2 */
 .st2-session-email::before {
   content: "";

@@ -110,19 +110,40 @@ export function greetLine(name) {
   return birthday ? `${hello} Feliz Cumpleaños! 🎂` : hello;
 }
 
-export function formatToastMessage(body, { greet = false } = {}) {
-  const msg = String(body || "").trim();
-  if (!msg) return msg;
+/** El saludo vive en el globo del blobatar; las notifs solo llevan el aviso. */
+export function formatToastMessage(body, { greet: _greet = false } = {}) {
+  return String(body || "").trim();
+}
 
-  // Solo el primer toast del stack lleva saludo; el resto solo explica el aviso
-  // (con Sonner apilados, “también/además” ya no tiene sentido).
-  if (!greet) return msg;
+export function syncSessionGreetBubble() {
+  const bubble = document.getElementById("st2-blobatar-greet");
+  const textEl = document.getElementById("st2-blobatar-greet-text");
+  const card = document.getElementById("st2-session-email");
+  if (!bubble || !textEl) return;
+
+  const visible = !!card && !card.classList.contains("hidden") && !!toastUserEmail();
+  if (!visible) {
+    bubble.classList.add("hidden");
+    bubble.setAttribute("hidden", "");
+    textEl.textContent = "";
+    return;
+  }
 
   const name = toastFirstName();
-  if (!name) return msg;
-
-  const lowered = msg.charAt(0).toLowerCase() + msg.slice(1);
   const line = greetLine(name);
-  if (isBirthdayGreetingForEmail(toastUserEmail())) return `${line} ${lowered}`;
-  return `${TOAST_FOOD_MARK} ${line} ${lowered}`;
+  if (!line) {
+    bubble.classList.add("hidden");
+    bubble.setAttribute("hidden", "");
+    textEl.textContent = "";
+    return;
+  }
+
+  if (textEl.textContent !== line) textEl.textContent = line;
+  bubble.classList.remove("hidden");
+  bubble.removeAttribute("hidden");
 }
+
+document.addEventListener("st2:greet-bubble-sync", () => syncSessionGreetBubble());
+document.addEventListener("st2:session-changed", () => syncSessionGreetBubble());
+document.addEventListener("st2:view-as-changed", () => syncSessionGreetBubble());
+document.addEventListener("st2:theme-changed", () => syncSessionGreetBubble());
