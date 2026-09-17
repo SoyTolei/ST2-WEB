@@ -282,17 +282,25 @@ function resolveMoodName() {
 
 /**
  * Franjas ART (America/Argentina/Buenos_Aires):
- * 09:00–10:30 happy · 10:30–13:00 surprised · 13:00–14:30 sleepy
- * 14:30–16:30 thinking · 16:30–18:00 smug · 18:00+ y antes de 09 sleepy (+ zzz)
+ * 05:00–09:00 happy · 09:00–10:30 happy · 10:30–13:00 surprised
+ * 13:00–14:30 sleepy (siesta) · 14:30–16:30 thinking · 16:30–19:00 smug
+ * 19:00–05:00 sleepy (+ zzz / buenas noches)
  */
 function expressionForHourArt() {
   const mins = argentinaMinutesNow();
-  if (mins >= 9 * 60 && mins < 10 * 60 + 30) return "happy";
+  // Noche: 19:00 → 04:59
+  if (mins >= 19 * 60 || mins < 5 * 60) return "sleepy";
+  if (mins >= 5 * 60 && mins < 10 * 60 + 30) return "happy";
   if (mins >= 10 * 60 + 30 && mins < 13 * 60) return "surprised";
   if (mins >= 13 * 60 && mins < 14 * 60 + 30) return "sleepy";
   if (mins >= 14 * 60 + 30 && mins < 16 * 60 + 30) return "thinking";
-  if (mins >= 16 * 60 + 30 && mins < 18 * 60) return "smug";
-  return "sleepy";
+  // 16:30–18:59
+  return "smug";
+}
+
+function isNightArtHours() {
+  const mins = argentinaMinutesNow();
+  return mins >= 19 * 60 || mins < 5 * 60;
 }
 
 function expressionForContext(ctx) {
@@ -338,8 +346,7 @@ function argentinaMinutesNow() {
 
 function syncLateZzz(host) {
   if (!host) return;
-  const late = argentinaMinutesNow() >= 18 * 60;
-  host.classList.toggle("st2-blobatar-zzz", late);
+  host.classList.toggle("st2-blobatar-zzz", isNightArtHours());
 }
 
 function applyMood() {

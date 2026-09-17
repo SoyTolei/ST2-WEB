@@ -100,12 +100,16 @@ export function greetLine(_name) {
   const mins = argentinaMinutesNow();
   const birthday = isBirthdayGreetingForEmail(toastUserEmail());
 
-  if (mins >= 19 * 60) {
+  // 19:00–04:59 → Buenas noches (+ mensaje)
+  // 05:00–12:59 → Buenos días
+  // 13:00–18:59 → Buenas tardes
+  const isNight = mins >= 19 * 60 || mins < 5 * 60;
+  if (isNight) {
     const night = "Buenas noches? ¿Qué haces a esta hora por acá?";
     return birthday ? `${night} Feliz Cumpleaños! 🎂` : night;
   }
 
-  const hello = mins < 12 * 60 ? "Buenos días!" : "Buenas tardes!";
+  const hello = mins < 13 * 60 ? "Buenos días!" : "Buenas tardes!";
   return birthday ? `${hello} Feliz Cumpleaños! 🎂` : hello;
 }
 
