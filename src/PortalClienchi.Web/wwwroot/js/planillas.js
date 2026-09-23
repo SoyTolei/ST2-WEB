@@ -1213,7 +1213,6 @@ async function onCopiarAlPortapapeles() {
     const data = await generarTexto();
     if (!data?.texto) return;
     await navigator.clipboard.writeText(data.texto);
-    limpiarTransferencia();
     setPlanStatus("Texto copiado al portapapeles.");
   } catch (ex) {
     setPlanStatus(ex.message, true);
@@ -1231,7 +1230,6 @@ async function onVerPlanilla() {
     const data = await generarTexto();
     if (!data?.texto) return;
     const texto = data.texto;
-    limpiarTransferencia();
     showPlanTextPreview("plan-text-preview", texto);
     setPlanStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
   } catch (ex) {
@@ -1782,7 +1780,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20260923a").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });
@@ -1792,7 +1790,7 @@ function loadReferralModule() {
 
 function loadOportunidadModule() {
   if (!oportunidadModulePromise) {
-    oportunidadModulePromise = import("./planillas-oportunidad.js").then((mod) => {
+    oportunidadModulePromise = import("./planillas-oportunidad.js?v=20260923a").then((mod) => {
       mod.initOportunidadModule(planillasContext);
       return mod;
     });

@@ -9,7 +9,7 @@ import { notifyAccessChanged } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js?v=20260917h";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260917h";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260923a";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,

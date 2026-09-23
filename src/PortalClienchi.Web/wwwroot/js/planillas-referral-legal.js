@@ -877,10 +877,8 @@ function showTemplateForm(product, item, template) {
       if (!text) return "";
       if (copy) {
         await navigator.clipboard.writeText(text);
-        limpiarLegalTemplateForm();
         setStatus("Texto copiado al portapapeles.");
       } else {
-        limpiarLegalTemplateForm();
         showPlanTextPreview("ref-legal-text-preview", text);
         setStatus("Planilla lista. Podés copiar desde el panel de vista previa.");
       }
