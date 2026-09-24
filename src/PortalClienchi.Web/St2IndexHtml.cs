@@ -34,10 +34,13 @@ public static class St2IndexHtml
         var dates = St2BundledToolDates.Load(env);
         dates.TryGetValue("sql", out var sqlPub);
         dates.TryGetValue("bat", out var batPub);
+        dates.TryGetValue("chile", out var chilePub);
         var sqlLabel = string.IsNullOrWhiteSpace(sqlPub.LabelAr) ? "" : sqlPub.LabelAr;
         var batLabel = string.IsNullOrWhiteSpace(batPub.LabelAr) ? "" : batPub.LabelAr;
+        var chileLabel = string.IsNullOrWhiteSpace(chilePub.LabelAr) ? "" : chilePub.LabelAr;
         var sqlStamp = sqlPub.Utc == default ? "" : sqlPub.Utc.ToString("o");
         var batStamp = batPub.Utc == default ? "" : batPub.Utc.ToString("o");
+        var chileStamp = chilePub.Utc == default ? "" : chilePub.Utc.ToString("o");
         var sb = new StringBuilder();
         sb.AppendLine("<script type=\"importmap\">");
         sb.AppendLine("{");
@@ -77,6 +80,11 @@ public static class St2IndexHtml
             sb.AppendLine($"<meta name=\"st2-tool-bat-uploaded\" content=\"{WebUtility.HtmlEncode(batLabel)}\"/>");
             sb.AppendLine($"<meta name=\"st2-tool-bat-stamp\" content=\"{WebUtility.HtmlEncode(batStamp)}\"/>");
         }
+        if (!string.IsNullOrWhiteSpace(chileLabel))
+        {
+            sb.AppendLine($"<meta name=\"st2-tool-chile-uploaded\" content=\"{WebUtility.HtmlEncode(chileLabel)}\"/>");
+            sb.AppendLine($"<meta name=\"st2-tool-chile-stamp\" content=\"{WebUtility.HtmlEncode(chileStamp)}\"/>");
+        }
 
         html = html.Replace("</head>", sb + "</head>", StringComparison.OrdinalIgnoreCase);
         html = html.Replace(
@@ -109,6 +117,13 @@ public static class St2IndexHtml
             html = html.Replace(
                 """<span class="st2-about-tool-date" data-tool-date="bat" hidden></span>""",
                 $"""<span class="st2-about-tool-date" data-tool-date="bat">Subido {WebUtility.HtmlEncode(batLabel)}</span>""",
+                StringComparison.Ordinal);
+        }
+        if (!string.IsNullOrWhiteSpace(chileLabel))
+        {
+            html = html.Replace(
+                """<span class="st2-about-tool-date" data-tool-date="chile" hidden></span>""",
+                $"""<span class="st2-about-tool-date" data-tool-date="chile">Subido {WebUtility.HtmlEncode(chileLabel)}</span>""",
                 StringComparison.Ordinal);
         }
         html = html.Replace("<link rel=\"stylesheet\" href=\"/css/planillas.css", $"<link rel=\"modulepreload\" href=\"/js/planillas.js?v={v}\"/><link rel=\"modulepreload\" href=\"/js/planillas-icons.js?v={v}\"/><link rel=\"stylesheet\" href=\"/css/planillas.css", StringComparison.Ordinal);

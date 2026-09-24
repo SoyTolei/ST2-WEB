@@ -21,12 +21,13 @@ public sealed class St2ToolPackageDto
 /// </summary>
 public sealed class St2ToolsStore
 {
-    public static readonly string[] ToolIds = ["sql", "bat"];
+    public static readonly string[] ToolIds = ["sql", "bat", "chile"];
 
     private static readonly Dictionary<string, string> ToolNames = new(StringComparer.OrdinalIgnoreCase)
     {
         ["sql"] = "ST2.SQL",
         ["bat"] = "ST2.BAT",
+        ["chile"] = "ST2.Chile",
     };
 
     private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -632,6 +633,12 @@ public sealed class St2ToolsStore
             if (ext is ".zip" or ".7z" or ".rar" or ".exe" or ".bat" or ".cmd")
                 return $"ST2-PS{ext}";
             return "ST2-PS.zip";
+        }
+        if (id.Equals("chile", StringComparison.OrdinalIgnoreCase))
+        {
+            if (ext is ".zip" or ".7z" or ".rar" or ".exe" or ".msi")
+                return $"ST2 - Backups Chile{ext}";
+            return "ST2 - Backups Chile.zip";
         }
         return string.IsNullOrWhiteSpace(actualName) ? $"st2-{id}.bin" : Path.GetFileName(actualName);
     }

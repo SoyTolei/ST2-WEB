@@ -2410,7 +2410,7 @@ function metaToolStamp(id) {
 }
 
 function toolsFromMeta() {
-  return ["sql", "bat"]
+  return ["sql", "bat", "chile"]
     .map((id) => {
       const stamp = metaToolStamp(id);
       const uploadedLabel = metaToolLabel(id);
@@ -2432,7 +2432,7 @@ function toolsForNotice() {
 }
 
 function paintToolDatesFromMeta() {
-  for (const id of ["sql", "bat"]) {
+  for (const id of ["sql", "bat", "chile"]) {
     const label = uploadedLabelFor(id, null);
     const el = document.querySelector(`[data-tool-date="${id}"]`);
     if (!el || !label) continue;
@@ -2442,11 +2442,21 @@ function paintToolDatesFromMeta() {
   }
 }
 
+function userCanSeeToolDownload(id) {
+  try {
+    if (id === "chile") return canSeePlanillasChile();
+    if (id === "sql" || id === "bat") return canSeePlanillasSqlOnvio();
+  } catch {
+    /* ignore */
+  }
+  return false;
+}
+
 function listNewTools() {
   const seen = readSeenToolVersions();
-  // Avisos home: solo SQL. BAT queda en Acerca de (mesa técnica).
+  // Avisos home: herramientas visibles para el perfil con versión nueva.
   return toolsForNotice().filter((t) => {
-    if (!t?.available || t.id === "bat") return false;
+    if (!t?.available || !userCanSeeToolDownload(t.id)) return false;
     const stamp = toolIdentity(t);
     return !!stamp && seen[t.id] !== stamp;
   });
@@ -2457,7 +2467,7 @@ function toolIdentity(t) {
 }
 
 function isToolVersionNew(id) {
-  // Badge "Nueva" en Acerca de (incluye BAT). El toast home usa listNewTools() sin BAT.
+  if (!userCanSeeToolDownload(id)) return false;
   const seen = readSeenToolVersions();
   const t = toolsForNotice().find((x) => x.id === id);
   if (!t?.available) return false;
@@ -2537,26 +2547,20 @@ function uploadedLabelFor(id, tool) {
 function toolDisplayName(id) {
   if (id === "sql") return "ST2.SQL";
   if (id === "bat") return "ST2.BAT";
+  if (id === "chile") return "ST2.Chile";
   return id;
 }
 
 function toolPackageLabel(id) {
   if (id === "sql") return "ST2 - Herramientas SQL";
   if (id === "bat") return "ST2.BAT";
+  if (id === "chile") return "ST2 - Backups Chile";
   return toolDisplayName(id);
 }
 
 function toolsUpdateMessage(newer) {
   const list = newer || [];
   if (!list.length) return "";
-  const hasSql = list.some((t) => t.id === "sql");
-  const hasBat = list.some((t) => t.id === "bat");
-  if (hasSql && !hasBat) {
-    return "hay una nueva versión de Herramientas SQL para descargar.";
-  }
-  if (hasBat && !hasSql) {
-    return "hay una nueva versión de ST2.BAT para descargar.";
-  }
   const names = list.map((t) => toolPackageLabel(t.id));
   if (names.length === 1) {
     return `hay una nueva versión de ${names[0]} para descargar.`;
@@ -2592,9 +2596,9 @@ function renderToolsToast(newer, message) {
 }
 
 function userCanSeeDesktopToolDownloads() {
-  // Descargas SQL/BAT: solo perfiles con Bejerman SQL / ONVIO (no Legal/Chile solos).
+  // Descargas: Bejerman SQL/ONVIO ven SQL+BAT; Chile ve Backups Chile.
   try {
-    return canSeePlanillasSqlOnvio();
+    return canSeePlanillasSqlOnvio() || canSeePlanillasChile();
   } catch {
     return false;
   }
@@ -2717,6 +2721,25 @@ function syncAboutToolsVisibility() {
   const show = userCanSeeDesktopToolDownloads();
   aboutToolsSection?.classList.toggle("hidden", !show);
   aboutToolsSection?.toggleAttribute("hidden", !show);
+  const claveHint = document.getElementById("st2-about-tools-clave-hint");
+  if (claveHint) {
+    const showClave = (() => {
+      try {
+        return canSeePlanillasSqlOnvio();
+      } catch {
+        return false;
+      }
+    })();
+    claveHint.classList.toggle("hidden", !showClave);
+    claveHint.toggleAttribute("hidden", !showClave);
+  }
+  for (const id of ["sql", "bat", "chile"]) {
+    const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
+    if (!card) continue;
+    const visible = show && userCanSeeToolDownload(id);
+    card.classList.toggle("hidden", !visible);
+    card.toggleAttribute("hidden", !visible);
+  }
   syncAboutNoticeCopy();
   if (!show) {
     aboutToolsBadge?.classList.add("hidden");
@@ -2772,14 +2795,19 @@ function setToolDownloadLabel(btn, text) {
 function renderAboutTools() {
   const copy = {
     sql: {
-      file: "ST2 - Herramientas SQL.zip",
+      file: "ST2 - Herramientas SQL.7z",
     },
     bat: {
       file: "ST2-PS.7z",
     },
+    chile: {
+      file: "ST2 - Backups Chile.7z",
+    },
   };
 
-  for (const id of ["sql", "bat"]) {
+  syncAboutToolsVisibility();
+
+  for (const id of ["sql", "bat", "chile"]) {
     const tool = (cachedTools || []).find((t) => t.id === id);
     const card = document.querySelector(`.st2-about-tool[data-tool="${id}"]`);
     const sizeEl = card?.querySelector(`[data-tool-size="${id}"]`);
