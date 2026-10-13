@@ -13,7 +13,7 @@ import {
   mad,
   love,
 } from "./vendor/blobatar-expression.js";
-import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js?v=20261013c";
+import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js?v=20261013d";
 
 function requestGreetBubbleSync() {
   document.dispatchEvent(new CustomEvent("st2:greet-bubble-sync"));

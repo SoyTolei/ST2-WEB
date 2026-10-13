@@ -522,29 +522,33 @@ html:not(.st2-theme-dark)
   }
 }
 
-.st2-easter-eggs-toggle {
-  display: inline-flex;
+.st2-profile-egg-toggle {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 4px 10px 4px 8px;
-  border-radius: 999px;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 8px 12px;
+  border-radius: 12px;
   border: 1px solid rgba(251, 146, 60, 0.35);
   background: rgba(28, 20, 16, 0.55);
   color: #f7f1eb;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 650;
-  line-height: 1;
-  white-space: nowrap;
   cursor: pointer;
 }
 
-.st2-easter-eggs-toggle.hidden,
-.st2-easter-eggs-toggle[hidden] {
+.st2-profile-egg-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.st2-profile-egg-toggle.hidden,
+.st2-profile-egg-toggle[hidden] {
   display: none;
 }
 
-html:not(.st2-theme-dark) .st2-easter-eggs-toggle {
+html:not(.st2-theme-dark) .st2-profile-egg-toggle {
   background: #fff;
   color: #44403c;
   border-color: rgba(234, 88, 12, 0.35);

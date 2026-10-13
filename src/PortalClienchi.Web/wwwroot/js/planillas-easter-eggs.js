@@ -75,23 +75,35 @@ function sessionBirthdayEgg(email) {
   };
 }
 
-let easterEggsEnabled = true;
+let funEggByEmail = new Map();
 
-/** El super admin puede apagar los huevos de todos. Devuelve true si cambió. */
-export function setEasterEggsEnabled(on) {
+/** Huevo propio de un perfil. Si no hay dato, queda prendido. Devuelve true si cambió. */
+export function setFunEggEnabled(email, on) {
+  const key = String(email || "").trim().toLowerCase();
+  if (!key) return false;
+  const prev = funEggByEmail.has(key) ? funEggByEmail.get(key) : true;
   const next = on !== false && on !== 0 && on !== "0";
-  if (next === easterEggsEnabled) return false;
-  easterEggsEnabled = next;
-  return true;
+  funEggByEmail.set(key, next);
+  return prev !== next;
 }
 
-export function areEasterEggsEnabled() {
-  return easterEggsEnabled;
+function isFunEggOn(email) {
+  const key = String(email || "").trim().toLowerCase();
+  if (!key || !funEggByEmail.has(key)) return true;
+  return funEggByEmail.get(key) !== false;
+}
+
+/** Hay un huevo visual propio (no el de cumpleaños). */
+export function hasProfileEasterEgg(email) {
+  const key = String(email || "").trim().toLowerCase();
+  if (!key) return false;
+  return PLANILLAS_EASTER_EGGS.some(
+    (item) => item.email === key && !(item.birthdayMonth && item.birthdayDay),
+  );
 }
 
 /** Prioriza banner de cumpleaños en su ventana; si no, el huevo “siempre” (paseo, etc.). */
 export function resolvePlanillasEgg(email) {
-  if (!easterEggsEnabled) return null;
   const key = String(email || "").trim().toLowerCase();
   if (!key) return null;
   const matches = PLANILLAS_EASTER_EGGS.filter((item) => item.email === key);
@@ -99,6 +111,7 @@ export function resolvePlanillasEgg(email) {
   if (birthdayHardcoded) return birthdayHardcoded;
   const sessionBirthday = sessionBirthdayEgg(key);
   if (sessionBirthday) return sessionBirthday;
+  if (!isFunEggOn(key)) return null;
   if (!matches.length) return null;
   const always = matches.find((e) => !e.birthdayMonth || !e.birthdayDay);
   return always || null;
@@ -157,7 +170,6 @@ function isMmDdToday(mmDd) {
 }
 
 export function isBirthdayGreetingForEmail(email) {
-  if (!easterEggsEnabled) return false;
   const key = String(email || "").trim().toLowerCase();
   if (!key) return false;
   const birthdayEgg = PLANILLAS_EASTER_EGGS.find(

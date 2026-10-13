@@ -1,6 +1,6 @@
 import { getPlanUserEmail, getPlanUserDisplayName } from "./plan-user.js";
 import { getViewAsProfile } from "./module-access.js";
-import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js?v=20261013c";
+import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js?v=20261013d";
 
 export const TOAST_FOOD_MARK = "{{toast-food}}";
 const TOAST_FOOD_KEY = "st2-toast-food-pizza-used";

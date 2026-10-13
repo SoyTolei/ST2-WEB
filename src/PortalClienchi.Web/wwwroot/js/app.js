@@ -6,14 +6,14 @@ import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261013c";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261013d";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
-import { setEasterEggsEnabled } from "./planillas-easter-eggs.js?v=20261013c";
+import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261013d";
 import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013c";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013d";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1243,12 +1243,15 @@ function normalizeAccessAdminItems(items) {
     const displayNameOverride = (item.displayName ?? item.DisplayName ?? "").trim() || null;
     const birthdayDisplay = (item.birthdayDisplay ?? item.BirthdayDisplay ?? "").trim() || null;
     const birthdayMmDd = (item.birthdayMmDd ?? item.BirthdayMmDd ?? "").trim() || null;
+    const funEggEnabled = (item.funEggEnabled ?? item.FunEggEnabled) !== false;
+    if (email) setFunEggEnabled(email, funEggEnabled);
     const modules = item.modules || item.Modules || {};
     return {
       email,
       displayNameOverride,
       birthdayDisplay,
       birthdayMmDd,
+      funEggEnabled,
       firstSeenAt: item.firstSeenAt || item.FirstSeenAt || "",
       lastSeenAt: item.lastSeenAt || item.LastSeenAt || "",
       lastLoginAt: item.lastLoginAt || item.LastLoginAt || "",
@@ -1444,65 +1447,21 @@ function syncAccessAdminOwnerOnlyUi() {
     if (!show) el.classList.add("hidden");
   });
   document.getElementById("st2-access-admin-kpis")?.classList.toggle("is-owner-extra", show);
-  const eggWrap = document.getElementById("st2-easter-eggs-toggle");
-  if (eggWrap) {
-    eggWrap.hidden = !show;
-    eggWrap.classList.toggle("hidden", !show);
-  }
-  if (show) void loadEasterEggsToggle();
   if (accessAdminListFilter === "attention" || accessAdminListFilter === "concurrent") {
     accessAdminListFilter = "";
     syncAccessAdminQuickFilters();
   }
 }
 
-let easterEggsToggleBound = false;
-
-async function loadEasterEggsToggle() {
-  const input = document.getElementById("st2-easter-eggs-enabled");
-  if (!input || !isPrimarySuperAdmin()) return;
-  if (!easterEggsToggleBound) {
-    easterEggsToggleBound = true;
-    input.addEventListener("change", () => {
-      void saveEasterEggsToggle(input.checked);
-    });
+function syncProfileEggToggle(email, enabled) {
+  const wrap = document.getElementById("st2-profile-egg-toggle");
+  const input = document.getElementById("st2-profile-egg-enabled");
+  const show = !!email && isPrimarySuperAdmin() && hasProfileEasterEgg(email);
+  if (wrap) {
+    wrap.hidden = !show;
+    wrap.classList.toggle("hidden", !show);
   }
-  try {
-    const res = await fetch("/api/planillas/easter-eggs", { credentials: "include", cache: "no-store" });
-    if (!res.ok) return;
-    const data = await res.json();
-    input.checked = data?.enabled !== false;
-  } catch {
-    /* ignore */
-  }
-}
-
-async function saveEasterEggsToggle(enabled) {
-  const input = document.getElementById("st2-easter-eggs-enabled");
-  try {
-    const res = await fetch("/api/planillas/easter-eggs", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ enabled: !!enabled }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      if (input) input.checked = !enabled;
-      showSt2FlashToast({ body: data?.error || "No se pudo cambiar los easter eggs.", tone: "bad" });
-      return;
-    }
-    const on = data?.enabled !== false;
-    if (input) input.checked = on;
-    if (setEasterEggsEnabled(on)) document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
-    showSt2FlashToast({
-      body: on ? "Easter eggs activados." : "Easter eggs desactivados.",
-      tone: "ok",
-      duration: 2400,
-    });
-  } catch {
-    if (input) input.checked = !enabled;
-  }
+  if (input) input.checked = enabled !== false;
 }
 
 function renderAccessAdminDaySummary({ total, pending, today, activeCount }) {
@@ -4124,6 +4083,7 @@ function openAccessModulesModal(email, { afterApprove = false } = {}) {
   if (accessModulesBirthday) {
     accessModulesBirthday.value = current?.birthdayDisplay || "";
   }
+  syncProfileEggToggle(email, current?.funEggEnabled !== false);
   if (accessModulesEmail) accessModulesEmail.textContent = email;
   if (accessModBlanqueoLoad) delete accessModBlanqueoLoad.dataset.userTouched;
   if (accessModBorradoBasesLoad) delete accessModBorradoBasesLoad.dataset.userTouched;
@@ -4158,6 +4118,7 @@ function openAccessPresetModal() {
   if (accessModulesCancel) accessModulesCancel.textContent = "Cancelar";
   if (accessModulesName) accessModulesName.value = "";
   if (accessModulesBirthday) accessModulesBirthday.value = "";
+  syncProfileEggToggle("", true);
   if (accessModulesEmail) {
     accessModulesEmail.textContent = "";
     accessModulesEmail.classList.add("hidden");
@@ -4275,6 +4236,11 @@ async function saveAccessModules() {
   try {
     const nameValue = String(accessModulesName?.value || "").trim();
     const birthdayRaw = String(accessModulesBirthday?.value || "").trim();
+    const eggWrap = document.getElementById("st2-profile-egg-toggle");
+    const eggOn = document.getElementById("st2-profile-egg-enabled")?.checked !== false;
+    const funEggPatch = eggWrap && !eggWrap.hidden && !eggWrap.classList.contains("hidden")
+      ? { funEggEnabled: eggOn }
+      : {};
 
     if (accessModulesPresetMode) {
       const email = String(accessModulesEmailInput?.value || "").trim().toLowerCase();
@@ -4318,6 +4284,7 @@ async function saveAccessModules() {
         displayName: nameOverride,
         birthdayMmDd: birthdayRaw || null,
         clearBirthday: !birthdayRaw,
+        ...funEggPatch,
       }),
     });
     const nameData = await nameRes.json().catch(() => ({}));
@@ -4342,6 +4309,7 @@ async function saveAccessModules() {
             displayNameOverride: nameOverride,
             birthdayDisplay: nameData.birthdayDisplay || null,
             birthdayMmDd: nameData.birthdayMmDd || null,
+            funEggEnabled: nameData.funEggEnabled !== false,
             isSt2Admin: !!(data.isSt2Admin ?? accessModSt2Admin?.checked),
             modules: normalizeAccessModules(mods),
           }
@@ -4349,6 +4317,9 @@ async function saveAccessModules() {
     );
     const fromApprove = accessModulesAfterApprove;
     const savedEmail = accessModulesEmailValue;
+    if (setFunEggEnabled(savedEmail, nameData.funEggEnabled !== false)) {
+      document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
+    }
     if (accessModulesSave) {
       accessModulesSave.textContent = fromApprove ? "Aprobando…" : "Guardando…";
     }
@@ -6112,8 +6083,11 @@ function startSessionHeartbeat() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.webBuild) applyLiveBuild(data.webBuild, data.webBuildAt);
-        if (data && "easterEggsEnabled" in data && setEasterEggsEnabled(data.easterEggsEnabled !== false)) {
-          document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
+        if (data && "funEggEnabled" in data) {
+          const email = data.email || getPlanUserEmail();
+          if (email && setFunEggEnabled(email, data.funEggEnabled !== false)) {
+            document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
+          }
         }
       })
       .catch(() => {});

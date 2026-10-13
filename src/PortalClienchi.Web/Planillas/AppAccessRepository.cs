@@ -215,6 +215,24 @@ public sealed class AppAccessRepository
         return cmd.ExecuteNonQuery();
     }
 
+    /// <summary>Huevo propio del perfil (no el de cumpleaños). 1 = visible.</summary>
+    public int SetFunEggEnabled(string email, bool enabled)
+    {
+        if (!StorageReady || string.IsNullOrWhiteSpace(email))
+            return 0;
+
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            UPDATE app_access
+            SET fun_egg_enabled = $on
+            WHERE lower(email) = lower($email)
+            """;
+        cmd.Parameters.AddWithValue("$email", email.Trim());
+        cmd.Parameters.AddWithValue("$on", enabled ? 1 : 0);
+        return cmd.ExecuteNonQuery();
+    }
+
     public static string? NormalizeBirthday(string? raw)
     {
         var v = (raw ?? "").Trim();
@@ -278,7 +296,7 @@ public sealed class AppAccessRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
-                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device, fun_egg_enabled
             FROM app_access
             WHERE lower(email) = lower($email)
             LIMIT 1
@@ -871,7 +889,7 @@ public sealed class AppAccessRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
-                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device, fun_egg_enabled
             FROM app_access
             ORDER BY last_seen_at DESC
             """;
@@ -902,7 +920,7 @@ public sealed class AppAccessRepository
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
             SELECT email, first_seen_at, last_seen_at, login_count, display_name, last_login_at, status, birthday_mmdd,
-                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device
+                   last_client_ip, last_client_host, last_client_hint, last_user_agent, last_client_device, fun_egg_enabled
             FROM app_access
             ORDER BY email COLLATE NOCASE
             """;
@@ -935,6 +953,7 @@ public sealed class AppAccessRepository
         EnsureColumn(conn, "app_access", "status", "TEXT NOT NULL DEFAULT 'approved'");
         EnsureColumn(conn, "app_access", "is_st2_admin", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(conn, "app_access", "birthday_mmdd", "TEXT NULL");
+        EnsureColumn(conn, "app_access", "fun_egg_enabled", "INTEGER NOT NULL DEFAULT 1");
         EnsureColumn(conn, "app_access", "last_client_ip", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_client_host", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_client_hint", "TEXT NULL");
@@ -1467,6 +1486,7 @@ public sealed class AppAccessRepository
             LastClientHint = reader.FieldCount > 10 && !reader.IsDBNull(10) ? reader.GetString(10) : null,
             LastUserAgent = reader.FieldCount > 11 && !reader.IsDBNull(11) ? reader.GetString(11) : null,
             LastClientDevice = reader.FieldCount > 12 && !reader.IsDBNull(12) ? reader.GetString(12) : null,
+            FunEggEnabled = reader.FieldCount <= 13 || reader.IsDBNull(13) || reader.GetInt32(13) != 0,
         };
     }
 
@@ -1542,6 +1562,8 @@ public sealed class AppAccessRecordDto
     public string? LastClientHint { get; init; }
     public string? LastUserAgent { get; init; }
     public string? LastClientDevice { get; init; }
+    /// <summary>Huevo visual propio. El de cumpleaños no depende de esto.</summary>
+    public bool FunEggEnabled { get; init; } = true;
 }
 
 public sealed class AppAccessClientHistoryDto
@@ -1651,6 +1673,8 @@ public sealed class AccessDisplayNameRequest
     /// <summary>DD/MM o MM-DD. Enviar vacío + ClearBirthday para borrar.</summary>
     public string? BirthdayMmDd { get; set; }
     public bool ClearBirthday { get; set; }
+    /// <summary>Null = no cambiar. Solo el huevo propio, no el de cumpleaños.</summary>
+    public bool? FunEggEnabled { get; set; }
 }
 
 public sealed class OwnerNoticesSeenRequest

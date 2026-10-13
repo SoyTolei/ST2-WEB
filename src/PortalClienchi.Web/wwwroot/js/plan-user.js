@@ -1,5 +1,5 @@
-import { setSessionBirthdayMmDd, setEasterEggsEnabled } from "./planillas-easter-eggs.js?v=20261013c";
-import { mountSessionBlobatar } from "./st2-blobatar.js?v=20261013c";
+import { setSessionBirthdayMmDd, setFunEggEnabled } from "./planillas-easter-eggs.js?v=20261013d";
+import { mountSessionBlobatar } from "./st2-blobatar.js?v=20261013d";
 import { createBranchedMenu } from "./st2-branched-menu.js?v=20261013a";
 
 let cachedEmail = null;
@@ -600,8 +600,8 @@ function applySessionIdentity(data) {
   const name = String(data?.displayName ?? data?.DisplayName ?? "").trim();
   cachedDisplayName = name || null;
   setSessionBirthdayMmDd(data?.birthdayMmDd || "");
-  const eggs = data?.easterEggsEnabled ?? data?.EasterEggsEnabled;
-  if (eggs !== undefined && setEasterEggsEnabled(eggs !== false)) {
+  const funEgg = data?.funEggEnabled ?? data?.FunEggEnabled;
+  if (data?.email && funEgg !== undefined && setFunEggEnabled(data.email, funEgg !== false)) {
     document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
   }
 }
