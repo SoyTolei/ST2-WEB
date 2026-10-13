@@ -461,7 +461,7 @@
 }
 
 .borrado-table-wrap {
-  overflow-x: auto;
+  overflow-x: hidden;
   overflow-y: auto;
   min-height: min(58vh, 560px);
   max-height: min(82vh, 980px);
@@ -472,7 +472,7 @@
 /* Solo Código/Empresa y Aclaración crecen; el resto queda al ancho del contenido. */
 .borrado-table {
   width: 100%;
-  table-layout: auto;
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.82rem;
@@ -491,7 +491,8 @@
 
 .borrado-table th,
 .borrado-table td {
-  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .borrado-table thead th,
@@ -507,21 +508,25 @@
 }
 
 .borrado-table .borrado-th-fecha,
-.borrado-table .borrado-col-fecha,
+.borrado-table .borrado-col-fecha { width: 6%; }
 .borrado-table .borrado-th-caso,
-.borrado-table .borrado-col-caso,
+.borrado-table .borrado-col-caso { width: 7%; }
 .borrado-table .borrado-th-cliente,
-.borrado-table .borrado-col-cliente,
+.borrado-table .borrado-col-cliente { width: 7%; }
+.borrado-table .borrado-th-empresa,
+.borrado-table .borrado-col-empresa { width: 14%; }
 .borrado-table .borrado-th-cuit,
-.borrado-table .borrado-col-cuit,
+.borrado-table .borrado-col-cuit { width: 9%; }
 .borrado-table .borrado-th-bases,
-.borrado-table .borrado-col-bases,
+.borrado-table .borrado-col-bases { width: 18%; }
 .borrado-table .borrado-th-solicitante,
-.borrado-table .borrado-col-solicitante,
+.borrado-table .borrado-col-solicitante { width: 10%; }
 .borrado-table .borrado-th-listo,
-.borrado-table .borrado-col-listo {
-  width: 1%;
-}
+.borrado-table .borrado-col-listo { width: 8%; }
+.borrado-table .borrado-th-aclaracion,
+.borrado-table .borrado-col-aclaracion { width: 13%; }
+.borrado-table .borrado-th-confirmado,
+.borrado-table .borrado-col-confirmado { width: 8%; }
 
 .borrado-table .borrado-th-fecha,
 .borrado-table .borrado-col-fecha {
@@ -544,19 +549,18 @@
 .borrado-table .borrado-th-empresa,
 .borrado-table .borrado-col-empresa {
   padding-left: 4px;
-  padding-right: 14px;
-  max-width: 22rem;
+  padding-right: 8px;
 }
 
 .borrado-empresa-inline {
-  display: inline-block;
-  max-width: 22rem;
+  display: block;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.84rem;
+  white-space: nowrap;
+  font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.25;
-  vertical-align: middle;
 }
 
 .borrado-table .borrado-th-cuit,
@@ -567,17 +571,18 @@
   letter-spacing: 0.01em;
 }
 
-.borrado-table .borrado-th-bases,
-.borrado-table .borrado-col-bases {
-  padding-left: 6px;
-  padding-right: 18px;
+.borrado-table td.borrado-col-caso,
+.borrado-table td.borrado-col-cliente,
+.borrado-table td.borrado-col-bases,
+.borrado-table td.borrado-col-aclaracion {
+  overflow: visible;
 }
 
 .borrado-table .borrado-th-solicitante,
 .borrado-table .borrado-col-solicitante {
-  max-width: 9rem;
   padding-left: 6px;
-  padding-right: 10px;
+  padding-right: 8px;
+  white-space: nowrap;
 }
 
 .borrado-table .borrado-th-listo,
@@ -589,21 +594,17 @@
 
 .borrado-table .borrado-th-confirmado,
 .borrado-table .borrado-col-confirmado {
-  width: 7.5rem;
-  max-width: 8.5rem;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-size: 0.78rem;
   color: #64748b;
   padding-left: 6px;
   padding-right: 8px;
 }
 
-.borrado-table .borrado-th-aclaracion,
-.borrado-table .borrado-col-aclaracion {
-  width: 100%;
-  min-width: 14rem;
+.borrado-table .borrado-th-bases,
+.borrado-table .borrado-col-bases {
+  padding-left: 6px;
+  padding-right: 8px;
   white-space: normal;
 }
 
