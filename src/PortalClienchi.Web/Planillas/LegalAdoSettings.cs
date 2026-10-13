@@ -11,8 +11,6 @@ public sealed class LegalAdoSettings
     public string Reason { get; set; } = "";
     public string Iteration { get; set; } = "";
     public string CustomerTag { get; set; } = "";
-    /// <summary>A quién se mandan por mail los cambios de template / nombre de link / página de categoría.</summary>
-    public string TemplateChangeContact { get; set; } = "";
     public LegalAdoBacklog Application { get; set; } = new();
     public LegalAdoBacklog Content { get; set; } = new();
     public List<LegalAdoCountry> Countries { get; set; } = [];
@@ -20,7 +18,7 @@ public sealed class LegalAdoSettings
 
 public sealed class LegalAdoBacklog
 {
-    /// <summary>Ej. "Epic" / "Work item".</summary>
+    /// <summary>Tipo del item padre en ADO (Epic, work item…).</summary>
     public string ParentType { get; set; } = "";
     public string ParentId { get; set; } = "";
     public string Area { get; set; } = "";

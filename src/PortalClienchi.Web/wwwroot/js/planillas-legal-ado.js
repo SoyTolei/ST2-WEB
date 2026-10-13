@@ -35,7 +35,7 @@ export const ADO_LABELS = {
     uuids: "UUIDs / URLs",
     query: "Query",
     screenshots: "Screenshots",
-    questions: "Questions for Alex",
+    questions: "Questions",
   },
   es: {
     blockHeading: "ESPAÑOL",
@@ -63,7 +63,7 @@ export const ADO_LABELS = {
     uuids: "UUIDs / URLs",
     query: "Query",
     screenshots: "Capturas de pantalla",
-    questions: "Preguntas para Alex",
+    questions: "Preguntas",
   },
 };
 
@@ -272,7 +272,7 @@ function formHtml(settings) {
 
         <div id="ado-template-warn" class="plan-legal-ado-warn hidden" role="alert">
           Los cambios de template, de nombre de link o de página de categoría <strong>no se cargan en ADO</strong>:
-          se mandan por mail a <strong>${escapeHtml(settings?.templateChangeContact || "Alex Troutman")}</strong>. Para este caso no se genera plantilla.
+          se envían por mail según el proceso. Para este caso no se genera plantilla.
         </div>
 
         <div class="plan-legal-section" data-ado-hide-template>
@@ -283,8 +283,8 @@ function formHtml(settings) {
               <input id="${FIELD_IDS.country}" type="text" list="ado-country-list" autocomplete="off" placeholder="Elegí de la lista o escribí otro"/>
               <datalist id="ado-country-list">${countries}</datalist>
             </div>
-            ${textField("contentType", "Tipo de contenido (opcional)", { placeholder: "Ej. Jurisprudence" })}
-            ${textField("shortDescription", "Descripción corta", { required: true, placeholder: "Ej. The jurisdiction filter is erroring" })}
+            ${textField("contentType", "Tipo de contenido (opcional)")}
+            ${textField("shortDescription", "Descripción corta", { required: true })}
             <div class="plan-field">
               <label class="plan-legal-check"><input id="${FIELD_IDS.isCustomer}" type="checkbox"/> Lo reportó un cliente</label>
               <input id="${FIELD_IDS.customerName}" class="hidden" type="text" autocomplete="off" placeholder="Nombre del cliente *"/>
@@ -317,7 +317,7 @@ function formHtml(settings) {
             ${areaField("uuids", "UUIDs o URLs")}
             ${areaField("query", "Query (problemas de búsqueda o resultados)")}
             ${areaField("screenshots", "Screenshots (texto o referencia)")}
-            ${areaField("questions", "Preguntas para Alex")}
+            ${areaField("questions", "Preguntas")}
           </div>
         </div>
 

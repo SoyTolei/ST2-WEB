@@ -7,7 +7,7 @@ import { normalizeOnedriveUrl, setupOnedrivePasteInput } from "./plan-onedrive-p
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { autoTour, syncHeaderTourButton } from "./st2-tour-init.js";
 import { errorSt2 } from "./st2-dialog.js?v=20260909a";
-import { renderAdoForm } from "./planillas-legal-ado.js?v=20261012b";
+import { renderAdoForm } from "./planillas-legal-ado.js?v=20261012c";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -46,12 +46,13 @@ let legalIaUndo = null;
 let legalIaTemplate = null;
 let legalIaProductLabel = "";
 let navStack = { product: null, item: null, category: null, template: null };
+/** Producto con varias opciones cuyo selector está abierto (para volver atrás desde el formulario). */
+let pickerProductId = null;
 
 const LEGAL_PRODUCT_BTN_CLASS = {
   firm: "legal-one",
   highq: "highq",
   westlaw: "westlaw",
-  "westlaw-ado": "westlaw",
   cocounsel: "cocounsel",
 };
 
@@ -112,14 +113,8 @@ function findCatalogCategory(catalogProductId, categoryId) {
   return product?.categories?.find((c) => c.id === categoryId);
 }
 
-/** Algunos botones (ej. Plantilla ADO) usan el permiso de otro producto Legal. */
-function canSeeHubProduct(productId) {
-  const hubProduct = findHubProduct(productId);
-  return canSeeLegalProduct(hubProduct?.accessProductId || productId);
-}
-
 function visibleLegalCatalog(catalog) {
-  return (catalog || []).filter((product) => canSeeLegalProduct(product.accessProductId || product.id));
+  return (catalog || []).filter((product) => canSeeLegalProduct(product.id));
 }
 
 function renderProductButtons(catalog, attrName) {
@@ -987,7 +982,7 @@ async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
     openedFromMenu = !!fromMenu;
     const hubProduct = findHubProduct(productId);
     const hubItem = hubProduct?.items?.find((i) => i.id === itemId);
-    if (hubProduct?.layout === "form" && hubItem?.id === "ado") {
+    if (hubItem?.id === "ado") {
       showAdoTemplateForm(hubProduct, hubItem);
       return;
     }
@@ -1032,19 +1027,23 @@ function bindHubEvents() {
   document.addEventListener("click", (e) => {
     const menuBtn = e.target.closest("[data-legal-menu-product]");
     if (menuBtn) {
-      if (!canSeeHubProduct(menuBtn.dataset.legalMenuProduct)) return;
+      if (!canSeeLegalProduct(menuBtn.dataset.legalMenuProduct)) return;
       hubCtx?.openLegalProduct?.(menuBtn.dataset.legalMenuProduct);
       return;
     }
     const hubBtn = e.target.closest("[data-legal-product]");
     if (!hubBtn) return;
-    if (!canSeeHubProduct(hubBtn.dataset.legalProduct)) return;
-    const hubProduct = findHubProduct(hubBtn.dataset.legalProduct);
-    const bugItem = hubProduct?.items?.[0];
-    if (bugItem) void onHubItemPick(hubBtn.dataset.legalProduct, bugItem.id);
+    if (!canSeeLegalProduct(hubBtn.dataset.legalProduct)) return;
+    openedFromMenu = false;
+    openHubProductEntry(findHubProduct(hubBtn.dataset.legalProduct));
   });
 
   document.getElementById("ref-legal-templates-root")?.addEventListener("click", async (e) => {
+    const itemCard = e.target.closest("[data-legal-hub-item]");
+    if (itemCard && pickerProductId) {
+      void onHubItemPick(pickerProductId, itemCard.dataset.legalHubItem, { fromMenu: openedFromMenu });
+      return;
+    }
     const card = e.target.closest("[data-legal-template-id]");
     if (!card) return;
     await ensureCatalog();
@@ -1062,6 +1061,24 @@ function bindHubEvents() {
 export function handleLegalReferralBack() {
   const formVisible = !document.getElementById("ref-legal-form")?.classList.contains("hidden");
   const hubVisible = !document.getElementById("ref-legal-hub")?.classList.contains("hidden");
+  const pickerVisible = !document.getElementById("ref-legal-templates")?.classList.contains("hidden");
+
+  // Producto con varias opciones (Westlaw): desde el formulario se vuelve al selector.
+  if (formVisible && pickerProductId) {
+    showHubItemPicker(findHubProduct(pickerProductId));
+    return true;
+  }
+
+  if (pickerVisible && pickerProductId) {
+    pickerProductId = null;
+    if (openedFromMenu) {
+      openedFromMenu = false;
+      hubCtx?.goPlanillasMenu?.();
+      return true;
+    }
+    showHub();
+    return true;
+  }
 
   if (formVisible) {
     if (openedFromMenu) {
@@ -1092,7 +1109,7 @@ export function initLegalReferralHub(context) {
 }
 
 export function openLegalProduct(productId) {
-  if (!canSeeHubProduct(productId)) {
+  if (!canSeeLegalProduct(productId)) {
     openLegalReferralHub();
     showHubStatus("No tenés acceso a este producto LEGAL. Pedí el módulo HighQ en administración.", true);
     return Promise.resolve();
@@ -1100,16 +1117,49 @@ export function openLegalProduct(productId) {
   openedFromMenu = true;
   navStack = { product: null, item: null, category: null, template: null };
   const hubProduct = findHubProduct(productId);
-  const bugItem = hubProduct?.items?.[0];
-  if (!hubProduct || !bugItem) {
+  if (!hubProduct?.items?.length) {
     openLegalReferralHub();
     showHubStatus("No se encontró la configuración del producto LEGAL.", true);
     return Promise.resolve();
   }
-  return onHubItemPick(productId, bugItem.id, { fromMenu: true });
+  return openHubProductEntry(hubProduct);
+}
+
+/** Un solo ítem: directo al formulario. Varios (Westlaw): selector de opciones. */
+function openHubProductEntry(hubProduct) {
+  pickerProductId = null;
+  const items = hubProduct?.items || [];
+  if (!items.length) return Promise.resolve();
+  if (items.length > 1) {
+    showHubItemPicker(hubProduct);
+    return Promise.resolve();
+  }
+  return onHubItemPick(hubProduct.id, items[0].id, { fromMenu: openedFromMenu });
+}
+
+function showHubItemPicker(hubProduct) {
+  if (!hubProduct) return;
+  pickerProductId = hubProduct.id;
+  navStack = { product: { id: hubProduct.id, label: hubProduct.label }, item: null, category: null, template: null };
+  showHubStatus("");
+  showView("ref-legal-templates");
+  const titleEl = document.getElementById("plan-referral-module-title");
+  if (titleEl) titleEl.textContent = hubProduct.label;
+  document.title = `ST² · ${hubProduct.label}`;
+  const crumb = document.getElementById("ref-legal-templates-breadcrumb");
+  if (crumb) crumb.textContent = `${hubProduct.label} › ¿Qué querés armar?`;
+  const root = document.getElementById("ref-legal-templates-root");
+  if (!root) return;
+  root.innerHTML = hubProduct.items.map((item) => `
+    <button type="button" class="plan-adj-card" data-legal-hub-item="${item.id}">
+      <span class="plan-legal-pick-label">${icon(item.icon)}<span>${item.label}</span></span>
+      <span class="card-mark">›</span>
+    </button>
+  `).join("");
 }
 
 export function openLegalReferralHub() {
+  pickerProductId = null;
   navStack = { product: null, item: null, category: null, template: null };
   templatesCatalog = null;
   showHub();
@@ -1118,6 +1168,7 @@ export function openLegalReferralHub() {
 
 export function resetLegalReferralHub() {
   openedFromMenu = false;
+  pickerProductId = null;
   legalHubEvidenciaFiles = [];
   navStack = { product: null, item: null, category: null, template: null };
   hideAllLegalViews();

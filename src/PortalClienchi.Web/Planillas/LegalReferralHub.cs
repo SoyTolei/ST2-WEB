@@ -9,9 +9,7 @@ public sealed record LegalReferralHubProduct(
     string Layout,
     string CatalogProductId,
     IReadOnlyList<LegalReferralHubItem> Items,
-    string? SubLabel = null,
-    // Producto Legal cuyo permiso habilita este botón (ej. "westlaw").
-    string? AccessProductId = null);
+    string? SubLabel = null);
 
 public static class LegalReferralHubCatalog
 {
@@ -43,18 +41,9 @@ public static class LegalReferralHubCatalog
             "westlaw",
             [
                 new("bug", "Escalamiento a N2/N3", "bug", "general"),
-            ]),
-        new(
-            "westlaw-ado",
-            "Westlaw · Plantilla ADO",
-            "ado",
-            "form",
-            "westlaw",
-            [
-                new("ado", "Bug / Story para ADO", "ado"),
+                new("ado", "Plantilla ADO (Bug / Story)", "ado"),
             ],
-            SubLabel: "Bug / Story para el equipo global",
-            AccessProductId: "westlaw"),
+            SubLabel: "Escalamiento a N2/N3 · Plantilla ADO"),
         new(
             "cocounsel",
             "CoCounsel",

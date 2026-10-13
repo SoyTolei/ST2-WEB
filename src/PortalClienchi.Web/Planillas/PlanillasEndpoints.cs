@@ -87,7 +87,6 @@ public static class PlanillasEndpoints
                     layout = p.Layout,
                     catalogProductId = p.CatalogProductId,
                     subLabel = p.SubLabel,
-                    accessProductId = p.AccessProductId,
                     items = p.Items.Select(i => new
                     {
                         id = i.Id,
