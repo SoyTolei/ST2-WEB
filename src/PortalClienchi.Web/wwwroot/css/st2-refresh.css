@@ -1,0 +1,661 @@
+/*
+ * ST2 Refresh — capa visual (oscuro primero). Se carga al final para refinar sin tocar la estructura:
+ * superficies cálidas en escalera, bordes finos, naranja ST2 como único acento y módulos unificados.
+ * Los colores de cada módulo viven en --mod y solo pintan ícono, detalle y glow.
+ */
+
+:root {
+  --r-font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --r-font-display: "Sora", "Inter", "Segoe UI", system-ui, sans-serif;
+  --r-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --r-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --r-radius-sm: 10px;
+  --r-radius: 14px;
+  --r-radius-lg: 20px;
+  --r-accent: #f97316;
+  --r-accent-2: #fb923c;
+  --r-accent-3: #fdba74;
+  --r-accent-deep: #c2410c;
+}
+
+html.st2-theme-dark {
+  --r-bg: #0b0908;
+  --r-surface-0: rgba(19, 15, 13, 0.72);
+  --r-surface-1: #141110;
+  --r-surface-2: #1b1715;
+  --r-surface-3: #241e1b;
+  --r-line: rgba(255, 228, 204, 0.08);
+  --r-line-2: rgba(255, 228, 204, 0.14);
+  --r-line-accent: rgba(251, 146, 60, 0.28);
+  --r-text: #f7f1eb;
+  --r-text-2: #d4c9bf;
+  --r-text-3: #9a8f85;
+  --r-shadow-card:
+    0 1px 0 rgba(255, 245, 235, 0.04) inset,
+    0 24px 48px -28px rgba(0, 0, 0, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.35);
+
+  /* Tokens que ya usa la web: se refinan acá */
+  --panel: var(--r-bg);
+  --st2-suite-surface: linear-gradient(180deg, rgba(28, 23, 20, 0.86) 0%, rgba(18, 15, 13, 0.9) 100%);
+  --st2-suite-surface-soft: rgba(20, 16, 14, 0.7);
+  --st2-suite-border: var(--r-line-2);
+  --st2-suite-glow: var(--r-shadow-card);
+}
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+html.st2-theme-dark body {
+  font-family: var(--r-font-ui);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(249, 115, 22, 0.1), transparent 60%),
+    var(--r-bg);
+}
+
+html.st2-theme-dark ::selection {
+  background: rgba(249, 115, 22, 0.35);
+  color: #fff;
+}
+
+html.st2-theme-dark * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(251, 146, 60, 0.28) transparent;
+}
+
+html.st2-theme-dark ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html.st2-theme-dark ::-webkit-scrollbar-thumb {
+  background: rgba(251, 146, 60, 0.22);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+html.st2-theme-dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(251, 146, 60, 0.4);
+}
+
+html.st2-theme-dark :focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.75);
+  outline-offset: 2px;
+}
+
+/* ── Header y navegación ──────────────────────────────────────────── */
+
+html.st2-theme-dark .app-header {
+  background: linear-gradient(180deg, rgba(20, 15, 12, 0.82) 0%, rgba(12, 9, 8, 0.72) 100%) !important;
+  backdrop-filter: blur(18px) saturate(1.3);
+  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  border-bottom-color: var(--r-line) !important;
+  box-shadow: 0 1px 0 rgba(255, 245, 235, 0.03) inset, 0 12px 32px -18px rgba(0, 0, 0, 0.8);
+}
+
+html.st2-theme-dark .app-header::after {
+  opacity: 0.6;
+}
+
+html.st2-theme-dark .tab-bar {
+  background: rgba(20, 16, 14, 0.62) !important;
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  border: 1px solid var(--r-line-2) !important;
+  border-radius: 18px;
+  box-shadow: var(--r-shadow-card);
+}
+
+html.st2-theme-dark .tab-btn {
+  font-family: var(--r-font-ui);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+html.st2-theme-dark .tab-btn:hover:not(.active) {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: var(--r-line-accent);
+  box-shadow: none;
+}
+
+/* ── Contenedor principal (vidrio cálido sobre los rayos de luz) ─── */
+
+html.st2-theme-dark .planillas-card {
+  background: var(--st2-suite-surface) !important;
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid var(--r-line-2) !important;
+  border-radius: var(--r-radius-lg);
+  box-shadow: var(--r-shadow-card) !important;
+}
+
+html.st2-theme-dark .planillas-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(251, 146, 60, 0.45), transparent);
+  pointer-events: none;
+}
+
+/* ── Hero del home ────────────────────────────────────────────────── */
+
+html.st2-theme-dark .planillas-hero {
+  background:
+    radial-gradient(600px 180px at 50% 0%, rgba(249, 115, 22, 0.14), transparent 70%),
+    linear-gradient(180deg, rgba(30, 24, 21, 0.6), rgba(18, 15, 13, 0.4)) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: var(--r-radius-lg);
+  box-shadow: none !important;
+  padding-top: 26px;
+  padding-bottom: 28px;
+}
+
+html.st2-theme-dark .planillas-hero-title-main {
+  font-family: var(--r-font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(180deg, #ffffff 0%, #f5d9c4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+html.st2-theme-dark .planillas-hero-st2-mark {
+  color: var(--r-text) !important;
+  filter: drop-shadow(0 4px 18px rgba(249, 115, 22, 0.28));
+}
+
+html.st2-theme-dark .planillas-hero-tagline,
+html.st2-theme-dark .planillas-hero p {
+  color: var(--r-text-3);
+  letter-spacing: 0.005em;
+}
+
+html.st2-theme-dark .planillas-hero .accent-bar {
+  width: 96px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--r-accent) 30%, var(--r-accent-3) 70%, transparent);
+  box-shadow: 0 0 18px rgba(249, 115, 22, 0.55);
+}
+
+/* ── Selector de sistema (segmented control) ──────────────────────── */
+
+html.st2-theme-dark .plan-sistema-well {
+  background: rgba(14, 11, 10, 0.6) !important;
+  border: 1px solid var(--r-line-2) !important;
+  border-radius: 999px;
+  padding: 5px;
+  box-shadow: 0 1px 0 rgba(255, 245, 235, 0.03) inset;
+}
+
+html.st2-theme-dark .plan-sistema-indicator {
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 6px 18px -4px rgba(249, 115, 22, 0.6);
+}
+
+html.st2-theme-dark .plan-pill-btn {
+  border-radius: 999px !important;
+  font-family: var(--r-font-ui);
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+}
+
+html.st2-theme-dark .plan-pill-btn:hover:not(.active) {
+  background: rgba(249, 115, 22, 0.08) !important;
+  border-color: transparent !important;
+  box-shadow: none;
+}
+
+/* ── Títulos de sección ───────────────────────────────────────────── */
+
+html.st2-theme-dark #planillas-menu .planillas-section-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--r-font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--r-text-3) !important;
+}
+
+html.st2-theme-dark #planillas-menu .planillas-section-title::before,
+html.st2-theme-dark #planillas-menu .planillas-section-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--r-line-2));
+}
+
+html.st2-theme-dark #planillas-menu .planillas-section-title::after {
+  background: linear-gradient(90deg, var(--r-line-2), transparent);
+}
+
+/* ── Módulos del menú: tarjetas neutras, color solo en ícono y detalle ─ */
+
+.plan-modulo-btn { --mod: #fb923c; }
+.plan-modulo-btn.transfer { --mod: #34d399; }
+.plan-modulo-btn.referral { --mod: #fb923c; }
+.plan-modulo-btn.oportunidad { --mod: #e879f9; }
+.plan-modulo-btn.pdf-portal { --mod: #22d3ee; }
+.plan-modulo-btn.blanqueo { --mod: #60a5fa; }
+.plan-modulo-btn.borrado-bases { --mod: #fb7185; }
+.plan-modulo-btn.chile-saad { --mod: #22d3ee; }
+.plan-modulo-btn.chile-hr { --mod: #a78bfa; }
+.plan-modulo-btn.chile-wiki { --mod: #fbbf24; }
+.plan-modulo-btn.chile-lp { --mod: #34d399; }
+.plan-modulo-btn.chile-powerapps { --mod: #d946ef; }
+.plan-modulo-btn.legal-one { --mod: #818cf8; }
+.plan-modulo-btn.highq { --mod: #2dd4bf; }
+.plan-modulo-btn.westlaw { --mod: #fb923c; }
+.plan-modulo-btn.cocounsel { --mod: #a78bfa; }
+
+html.st2-theme-dark .plan-modulos-well {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding: 4px 0;
+}
+
+html.st2-theme-dark .plan-modulo-btn {
+  background:
+    radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--mod) 9%, transparent) 0%, transparent 60%),
+    linear-gradient(180deg, var(--r-surface-2) 0%, var(--r-surface-1) 100%) !important;
+  border: 1px solid var(--r-line) !important;
+  border-radius: 18px;
+  color: var(--r-text) !important;
+  box-shadow: var(--r-shadow-card) !important;
+  transition:
+    transform 0.28s var(--r-ease),
+    border-color 0.28s var(--r-ease),
+    box-shadow 0.28s var(--r-ease),
+    background 0.28s var(--r-ease);
+}
+
+html.st2-theme-dark .plan-modulo-btn::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 0;
+  height: 2px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, transparent, var(--mod), transparent);
+  opacity: 0.55;
+  transition: opacity 0.28s var(--r-ease), left 0.28s var(--r-ease), right 0.28s var(--r-ease);
+  pointer-events: none;
+  z-index: 2;
+}
+
+html.st2-theme-dark .plan-modulo-btn .plan-modulo-icon {
+  background: color-mix(in srgb, var(--mod) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--mod) 28%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mod) 5%, transparent);
+  transition: transform 0.35s var(--r-ease-spring), box-shadow 0.28s var(--r-ease), background 0.28s var(--r-ease);
+}
+
+html.st2-theme-dark .plan-modulo-btn .plan-modulo-icon svg {
+  stroke: var(--mod);
+  color: var(--mod);
+}
+
+html.st2-theme-dark .plan-modulo-btn .plan-modulo-label {
+  color: var(--r-text);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+html.st2-theme-dark .plan-modulo-btn .plan-modulo-sub {
+  font-family: var(--r-font-ui);
+  color: var(--r-text-3);
+  font-weight: 500;
+}
+
+html.st2-theme-dark .plan-modulo-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  filter: none;
+  border-color: color-mix(in srgb, var(--mod) 42%, transparent) !important;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--mod) 16%, transparent) 0%, transparent 62%),
+    linear-gradient(180deg, var(--r-surface-3) 0%, var(--r-surface-1) 100%) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 245, 235, 0.05) inset,
+    0 26px 50px -26px color-mix(in srgb, var(--mod) 55%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--mod) 18%, transparent) !important;
+}
+
+html.st2-theme-dark .plan-modulo-btn:hover:not(:disabled)::after {
+  opacity: 1;
+  left: 10%;
+  right: 10%;
+}
+
+html.st2-theme-dark .plan-modulo-btn:hover:not(:disabled) .plan-modulo-icon {
+  transform: translateY(-2px) scale(1.06);
+  background: color-mix(in srgb, var(--mod) 22%, transparent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--mod) 8%, transparent), 0 8px 22px -6px color-mix(in srgb, var(--mod) 60%, transparent);
+}
+
+html.st2-theme-dark .plan-modulo-btn:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.985);
+  box-shadow: var(--r-shadow-card) !important;
+}
+
+html.st2-theme-dark .plan-modulo-btn.st2-card-spotlight {
+  --spotlight-color: color-mix(in srgb, var(--mod) 24%, transparent);
+}
+
+html.st2-theme-dark .plan-modulo-btn.st2-card-spotlight::before {
+  mix-blend-mode: normal;
+}
+
+/* ── Paneles, cards y bloques internos ────────────────────────────── */
+
+html.st2-theme-dark .plan-gestor-panel,
+html.st2-theme-dark .plan-user-dialog,
+html.st2-theme-dark .plan-capturas-card,
+html.st2-theme-dark .plan-ticket-card,
+html.st2-theme-dark .plan-onvio-card,
+html.st2-theme-dark .plan-adj-card,
+html.st2-theme-dark .plan-check-card,
+html.st2-theme-dark .plan-op-card,
+html.st2-theme-dark .plan-op-cargar-panel,
+html.st2-theme-dark .blanqueo-form-panel,
+html.st2-theme-dark .borrado-form-panel,
+html.st2-theme-dark .blanqueo-list-panel {
+  background: linear-gradient(180deg, rgba(30, 25, 22, 0.78) 0%, rgba(20, 16, 14, 0.82) 100%) !important;
+  border: 1px solid var(--r-line-2) !important;
+  border-radius: var(--r-radius);
+  box-shadow: var(--r-shadow-card);
+}
+
+html.st2-theme-dark .plan-adj-card,
+html.st2-theme-dark .plan-check-card,
+html.st2-theme-dark .plan-op-card,
+html.st2-theme-dark .plan-onvio-card,
+html.st2-theme-dark .plan-ticket-card {
+  transition: transform 0.24s var(--r-ease), border-color 0.24s var(--r-ease), box-shadow 0.24s var(--r-ease);
+}
+
+html.st2-theme-dark .plan-adj-card:hover,
+html.st2-theme-dark .plan-check-card:hover,
+html.st2-theme-dark .plan-op-card:hover,
+html.st2-theme-dark .plan-onvio-card:hover,
+html.st2-theme-dark .plan-ticket-card:hover {
+  border-color: var(--r-line-accent) !important;
+  transform: translateY(-1px);
+}
+
+html.st2-theme-dark .plan-ref-title,
+html.st2-theme-dark .plan-gestor-panel-title,
+html.st2-theme-dark .plan-module-title {
+  font-family: var(--r-font-display);
+  letter-spacing: -0.015em;
+  color: var(--r-text);
+}
+
+/* ── Campos de formulario ─────────────────────────────────────────── */
+
+html.st2-theme-dark .planillas-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]),
+html.st2-theme-dark .planillas-app textarea,
+html.st2-theme-dark .planillas-app select,
+html.st2-theme-dark .plan-opt-input,
+html.st2-theme-dark .pdf-portal-input,
+html.st2-theme-dark .pdf-portal-rich,
+html.st2-theme-dark .blanqueo-search,
+html.st2-theme-dark .blanqueo-note-textarea {
+  background: rgba(12, 10, 9, 0.72) !important;
+  color: var(--r-text) !important;
+  border: 1px solid var(--r-line-2) !important;
+  border-radius: var(--r-radius-sm);
+  box-shadow: 0 1px 0 rgba(255, 245, 235, 0.02) inset !important;
+  transition: border-color 0.18s var(--r-ease), box-shadow 0.18s var(--r-ease), background 0.18s var(--r-ease);
+}
+
+html.st2-theme-dark .planillas-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):hover,
+html.st2-theme-dark .planillas-app textarea:hover,
+html.st2-theme-dark .planillas-app select:hover {
+  border-color: rgba(255, 228, 204, 0.22) !important;
+}
+
+html.st2-theme-dark .planillas-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]):not([type="color"]):focus,
+html.st2-theme-dark .planillas-app textarea:focus,
+html.st2-theme-dark .planillas-app select:focus,
+html.st2-theme-dark .pdf-portal-rich:focus {
+  outline: none !important;
+  border-color: rgba(251, 146, 60, 0.7) !important;
+  background: rgba(16, 12, 10, 0.9) !important;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.14) !important;
+}
+
+html.st2-theme-dark .planillas-app input::placeholder,
+html.st2-theme-dark .planillas-app textarea::placeholder {
+  color: #6f655d !important;
+  font-style: normal;
+}
+
+html.st2-theme-dark .plan-field label,
+html.st2-theme-dark .blanqueo-field label,
+html.st2-theme-dark .borrado-field label {
+  color: var(--r-text-2);
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+/* ── Botones ──────────────────────────────────────────────────────── */
+
+html.st2-theme-dark .btn-primary {
+  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%) !important;
+  border: 1px solid rgba(255, 190, 140, 0.35) !important;
+  color: #fff !important;
+  border-radius: 12px;
+  font-weight: 650;
+  letter-spacing: 0.005em;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 10px 24px -10px rgba(234, 88, 12, 0.7);
+  transition: transform 0.18s var(--r-ease), box-shadow 0.18s var(--r-ease), filter 0.18s var(--r-ease);
+}
+
+html.st2-theme-dark .btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.32) inset,
+    0 16px 32px -12px rgba(249, 115, 22, 0.85);
+}
+
+html.st2-theme-dark .btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+}
+
+html.st2-theme-dark .plan-action-btn {
+  border-radius: var(--r-radius);
+  transition: transform 0.2s var(--r-ease), box-shadow 0.2s var(--r-ease), border-color 0.2s var(--r-ease);
+}
+
+html.st2-theme-dark .plan-action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+html.st2-theme-dark .planillas-back {
+  border-radius: 999px;
+  transition: background 0.18s var(--r-ease), border-color 0.18s var(--r-ease), transform 0.18s var(--r-ease);
+}
+
+html.st2-theme-dark .planillas-back:hover {
+  transform: translateX(-2px);
+}
+
+/* ── Encabezado fijo de cada módulo ───────────────────────────────── */
+
+html.st2-theme-dark .plan-module-sticky-head {
+  background-color: rgba(20, 16, 14, 0.82) !important;
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  border-color: var(--r-line) !important;
+  box-shadow: 0 14px 28px -20px rgba(0, 0, 0, 0.85);
+}
+
+/* ── Tablas ───────────────────────────────────────────────────────── */
+
+html.st2-theme-dark .plan-gestor-table-wrap,
+html.st2-theme-dark .st2-access-admin-table-wrap {
+  background: rgba(12, 10, 9, 0.55) !important;
+  border: 1px solid var(--r-line-2) !important;
+  border-radius: var(--r-radius);
+}
+
+html.st2-theme-dark .st2-access-admin-table,
+html.st2-theme-dark .st2-access-admin-table td {
+  background: transparent !important;
+}
+
+html.st2-theme-dark .st2-access-admin-table th {
+  background: rgba(24, 19, 17, 0.96) !important;
+}
+
+html.st2-theme-dark .plan-gestor-table thead th,
+html.st2-theme-dark .blanqueo-table thead th,
+html.st2-theme-dark .borrado-table thead th {
+  background: rgba(24, 19, 17, 0.96) !important;
+  color: var(--r-text-3) !important;
+  font-family: var(--r-font-ui);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--r-line-2) !important;
+}
+
+html.st2-theme-dark .plan-gestor-table tbody td,
+html.st2-theme-dark .blanqueo-table tbody td,
+html.st2-theme-dark .borrado-table tbody td {
+  border-bottom-color: var(--r-line) !important;
+}
+
+html.st2-theme-dark .plan-gestor-table tbody tr,
+html.st2-theme-dark .blanqueo-table tbody tr,
+html.st2-theme-dark .borrado-table tbody tr {
+  transition: background-color 0.15s var(--r-ease);
+}
+
+html.st2-theme-dark .plan-gestor-table tbody tr:hover td,
+html.st2-theme-dark .blanqueo-table tbody tr:hover td,
+html.st2-theme-dark .borrado-table tbody tr:hover td {
+  background-color: rgba(249, 115, 22, 0.05);
+}
+
+/* ── Diálogos ─────────────────────────────────────────────────────── */
+
+html.st2-theme-dark .plan-user-overlay:not(.hidden) {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+html.st2-theme-dark .plan-user-overlay:not(.hidden) .plan-user-dialog {
+  border-radius: var(--r-radius-lg);
+  animation: r-dialog-in 0.32s var(--r-ease) both;
+}
+
+@keyframes r-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Entrada de vistas ────────────────────────────────────────────── */
+
+html.st2-theme-dark .planillas-view:not(.hidden) > .planillas-card {
+  animation: r-view-in 0.42s var(--r-ease) both;
+}
+
+html.st2-theme-dark #planillas-menu:not(.hidden) .plan-modulos-grid > .plan-modulo-btn:not(.hidden) {
+  animation: r-tile-in 0.5s var(--r-ease) both;
+}
+
+html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(2) { animation-delay: 0.04s; }
+html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(3) { animation-delay: 0.08s; }
+html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(4) { animation-delay: 0.12s; }
+html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(5) { animation-delay: 0.16s; }
+html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(6) { animation-delay: 0.2s; }
+html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(7) { animation-delay: 0.24s; }
+html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(8) { animation-delay: 0.28s; }
+
+@keyframes r-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes r-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.st2-theme-dark .planillas-view:not(.hidden) > .planillas-card,
+  html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn,
+  html.st2-theme-dark .plan-user-overlay:not(.hidden) .plan-user-dialog {
+    animation: none !important;
+  }
+
+  html.st2-theme-dark .plan-modulo-btn,
+  html.st2-theme-dark .plan-modulo-btn .plan-modulo-icon {
+    transition: none;
+  }
+}
+
+/* ── Modo claro: misma lógica de módulos, sobre superficies blancas ─ */
+
+html:not(.st2-theme-dark) .plan-modulo-btn {
+  background: linear-gradient(180deg, #ffffff 0%, #fbf8f6 100%) !important;
+  border: 1px solid #ece4dd !important;
+  color: #1c1917 !important;
+  box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06), 0 12px 24px -18px rgba(28, 25, 23, 0.3) !important;
+}
+
+html:not(.st2-theme-dark) .plan-modulo-btn .plan-modulo-icon {
+  background: color-mix(in srgb, var(--mod) 14%, #fff);
+}
+
+html:not(.st2-theme-dark) .plan-modulo-btn .plan-modulo-icon svg {
+  stroke: color-mix(in srgb, var(--mod) 70%, #1c1917);
+}
+
+html:not(.st2-theme-dark) .plan-modulo-btn .plan-modulo-sub {
+  color: #78716c;
+}
+
+html:not(.st2-theme-dark) .plan-modulo-btn:hover:not(:disabled) {
+  filter: none;
+  border-color: color-mix(in srgb, var(--mod) 45%, #fff) !important;
+  box-shadow: 0 18px 36px -20px color-mix(in srgb, var(--mod) 60%, transparent) !important;
+}
