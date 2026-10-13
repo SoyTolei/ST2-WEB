@@ -93,6 +93,7 @@ public static class PlanillasEndpoints
                         label = i.Label,
                         icon = i.Icon,
                         catalogCategoryId = i.CatalogCategoryId,
+                        subLabel = i.SubLabel,
                     }),
                 }),
                 templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=legal-ia-highq-onedrive",

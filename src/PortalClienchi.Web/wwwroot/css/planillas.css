@@ -4974,6 +4974,11 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-modulo-btn.westlaw { background: #9a3412; }
 .plan-modulo-btn.cocounsel { background: #6d28d9; }
 
+/* Selector de opciones dentro de un producto (ej. Westlaw): mismos botones que el menú */
+.plan-adj-grid.is-hub-picker {
+  display: block;
+}
+
 .plan-legal-products-well {
   margin-top: 4px;
   padding: 0;

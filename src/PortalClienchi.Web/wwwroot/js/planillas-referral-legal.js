@@ -8,16 +8,7 @@ import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notify
 import { autoTour, syncHeaderTourButton } from "./st2-tour-init.js";
 import { errorSt2 } from "./st2-dialog.js?v=20260909a";
 import { renderAdoForm } from "./planillas-legal-ado.js?v=20261012c";
-
-const LEGAL_ICONS = {
-  briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
-  diagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M12 8v4M8.5 14.5 10 12M15.5 14.5 14 12"/></svg>',
-  scale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3v18M5 7h14M7 7l-2 6h4L7 7zM17 7l-2 6h4L17 7z"/></svg>',
-  sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3l1.2 4.2L17 8.5l-3.8 1.3L12 14l-1.2-4.2L7 8.5l3.8-1.3L12 3z"/><path d="M5 16l.8 2.8L8.5 20l-2.7.9L5 23.5l-.8-2.6L1.5 20l2.7-.9L5 16z"/><path d="M19 14l.8 2.8L22.5 18l-2.7.9L19 21.5l-.8-2.6L15.5 18l2.7-.9L19 14z"/></svg>',
-  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2"/></svg>',
-  bug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M8 8a4 4 0 0 1 8 0M5 12h3M16 12h3M6 16h12"/></svg>',
-  ado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/><path d="M15.5 15.5 17 17l2.5-3"/></svg>',
-};
+import { legalIcon as icon, legalProductBtnClass, legalModuloButtonHtml, renderLegalProductButtons, visibleLegalProducts, syncLegalMenuProducts as paintLegalMenuProducts } from "./planillas-legal-menu.js?v=20261012d";
 
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
 
@@ -49,23 +40,12 @@ let navStack = { product: null, item: null, category: null, template: null };
 /** Producto con varias opciones cuyo selector está abierto (para volver atrás desde el formulario). */
 let pickerProductId = null;
 
-const LEGAL_PRODUCT_BTN_CLASS = {
-  firm: "legal-one",
-  highq: "highq",
-  westlaw: "westlaw",
-  cocounsel: "cocounsel",
-};
-
 const LEGAL_CATALOG_PRODUCT_MAP = {
   firm: "legal-one",
   highq: "highq",
   westlaw: "westlaw",
   cocounsel: "cocounsel",
 };
-
-function icon(name) {
-  return LEGAL_ICONS[name] || LEGAL_ICONS.gear;
-}
 
 function hideAllLegalViews() {
   ["ref-legal-hub", "ref-legal-templates", "ref-legal-form"].forEach((id) => {
@@ -113,35 +93,18 @@ function findCatalogCategory(catalogProductId, categoryId) {
   return product?.categories?.find((c) => c.id === categoryId);
 }
 
-function visibleLegalCatalog(catalog) {
-  return (catalog || []).filter((product) => canSeeLegalProduct(product.id));
-}
-
-function renderProductButtons(catalog, attrName) {
-  return visibleLegalCatalog(catalog).map((product) => `
-    <button type="button" class="plan-modulo-btn plan-legal-product-btn ${LEGAL_PRODUCT_BTN_CLASS[product.id] || "referral"}" ${attrName}="${product.id}">
-      <span class="plan-modulo-icon" aria-hidden="true">${icon(product.icon)}</span>
-      <span class="plan-modulo-copy">
-        <span class="plan-modulo-label">${product.label}</span>
-        <span class="plan-modulo-sub">${product.subLabel || LEGAL_ESCALAMIENTO_LABEL}</span>
-      </span>
-    </button>
-  `).join("");
-}
-
 function renderHub() {
   const root = document.getElementById("ref-legal-hub-root");
   const catalog = hubCtx?.getConfig()?.legal?.referralHub;
   if (!root || !catalog?.length) return;
-  const visible = visibleLegalCatalog(catalog);
-  if (!visible.length) {
+  if (!visibleLegalProducts(catalog).length) {
     root.innerHTML = "";
     return;
   }
   root.innerHTML = `
     <div class="plan-modulos-well plan-legal-products-well">
       <div class="plan-modulos-grid plan-legal-products-grid">
-        ${renderProductButtons(catalog, "data-legal-product")}
+        ${renderLegalProductButtons(catalog, "data-legal-product")}
       </div>
     </div>
   `;
@@ -149,17 +112,7 @@ function renderHub() {
 }
 
 export function syncLegalMenuProducts() {
-  const root = document.getElementById("plan-legal-menu-products");
-  const wrap = document.getElementById("plan-legal-products-wrap");
-  const catalog = hubCtx?.getConfig()?.legal?.referralHub;
-  if (!root || !catalog?.length) return;
-  const visible = visibleLegalCatalog(catalog);
-  root.innerHTML = renderProductButtons(catalog, "data-legal-menu-product");
-  const show = visible.length > 0;
-  wrap?.classList.toggle("hidden", !show);
-  wrap?.toggleAttribute("hidden", !show);
-  wrap?.setAttribute("aria-hidden", show ? "false" : "true");
-  syncPlanModulosGridLayout(root);
+  paintLegalMenuProducts(hubCtx?.getConfig());
 }
 
 function showHub() {
@@ -178,6 +131,7 @@ function showTemplateCards(product, item, category, templates) {
   if (crumb) crumb.textContent = `${product.label} › ${item.label}`;
   const root = document.getElementById("ref-legal-templates-root");
   if (!root) return;
+  root.classList.remove("is-hub-picker");
   root.innerHTML = templates.map((tpl) => `
     <button type="button" class="plan-adj-card" data-legal-template-id="${tpl.id}">
       <span class="plan-legal-pick-label">${icon(item.icon)}<span>${tpl.label}</span></span>
@@ -1024,13 +978,8 @@ function bindHubEvents() {
   if (legalHubEventsBound) return;
   legalHubEventsBound = true;
 
+  // Los botones del menú Planillas ([data-legal-menu-product]) los atiende planillas.js.
   document.addEventListener("click", (e) => {
-    const menuBtn = e.target.closest("[data-legal-menu-product]");
-    if (menuBtn) {
-      if (!canSeeLegalProduct(menuBtn.dataset.legalMenuProduct)) return;
-      hubCtx?.openLegalProduct?.(menuBtn.dataset.legalMenuProduct);
-      return;
-    }
     const hubBtn = e.target.closest("[data-legal-product]");
     if (!hubBtn) return;
     if (!canSeeLegalProduct(hubBtn.dataset.legalProduct)) return;
@@ -1147,15 +1096,25 @@ function showHubItemPicker(hubProduct) {
   if (titleEl) titleEl.textContent = hubProduct.label;
   document.title = `ST² · ${hubProduct.label}`;
   const crumb = document.getElementById("ref-legal-templates-breadcrumb");
-  if (crumb) crumb.textContent = `${hubProduct.label} › ¿Qué querés armar?`;
+  if (crumb) crumb.textContent = hubProduct.label;
   const root = document.getElementById("ref-legal-templates-root");
   if (!root) return;
-  root.innerHTML = hubProduct.items.map((item) => `
-    <button type="button" class="plan-adj-card" data-legal-hub-item="${item.id}">
-      <span class="plan-legal-pick-label">${icon(item.icon)}<span>${item.label}</span></span>
-      <span class="card-mark">›</span>
-    </button>
-  `).join("");
+  root.classList.add("is-hub-picker");
+  root.innerHTML = `
+    <div class="plan-modulos-well plan-legal-products-well">
+      <div class="plan-modulos-grid plan-legal-products-grid">
+        ${hubProduct.items.map((item) => legalModuloButtonHtml({
+          attrName: "data-legal-hub-item",
+          attrValue: item.id,
+          btnClass: legalProductBtnClass(hubProduct.id),
+          iconName: item.icon,
+          label: item.label,
+          sub: item.subLabel || "",
+        })).join("")}
+      </div>
+    </div>
+  `;
+  syncPlanModulosGridLayout(root.querySelector(".plan-legal-products-grid"));
 }
 
 export function openLegalReferralHub() {

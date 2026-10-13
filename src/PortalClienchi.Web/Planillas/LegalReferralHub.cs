@@ -1,6 +1,11 @@
 namespace PortalClienchi.Web.Planillas;
 
-public sealed record LegalReferralHubItem(string Id, string Label, string Icon, string? CatalogCategoryId = null);
+public sealed record LegalReferralHubItem(
+    string Id,
+    string Label,
+    string Icon,
+    string? CatalogCategoryId = null,
+    string? SubLabel = null);
 
 public sealed record LegalReferralHubProduct(
     string Id,
@@ -40,8 +45,8 @@ public static class LegalReferralHubCatalog
             "cards",
             "westlaw",
             [
-                new("bug", "Escalamiento a N2/N3", "bug", "general"),
-                new("ado", "Plantilla ADO (Bug / Story)", "ado"),
+                new("bug", "Escalamiento a N2/N3", "bug", "general", "Formulario para soporte N2/N3"),
+                new("ado", "Plantilla ADO", "ado", SubLabel: "Bug o Story para el equipo global"),
             ],
             SubLabel: "Escalamiento a N2/N3 · Plantilla ADO"),
         new(

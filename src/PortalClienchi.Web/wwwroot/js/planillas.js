@@ -5,8 +5,9 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260917h";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261012b";
-import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
+import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile, canSeeLegalProduct } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
+import { syncLegalMenuProducts } from "./planillas-legal-menu.js?v=20261012d";
 import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
@@ -559,10 +560,9 @@ function updateSistemaUi() {
     legalProductsWrap.setAttribute("aria-hidden", showLegalProducts ? "false" : "true");
   }
   if (showLegalProducts) {
-    void loadReferralModule().then((mod) => {
-      mod.syncLegalMenuProducts?.();
-      mod.prefetchLegalCatalog?.();
-    });
+    // Botones al instante desde la config; Referral + catálogo se precargan en segundo plano.
+    syncLegalMenuProducts(planillasConfig);
+    void loadReferralModule().then((mod) => mod.prefetchLegalCatalog?.());
   }
 
   if (oportunidadBtn) {
@@ -1663,6 +1663,16 @@ function bindEvents() {
     openPdfPortalModal();
   });
 
+  document.getElementById("plan-legal-menu-products")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-legal-menu-product]");
+    if (!btn || !canSeeLegalProduct(btn.dataset.legalMenuProduct)) return;
+    planillasContext.openLegalProduct(btn.dataset.legalMenuProduct);
+  });
+
+  document.getElementById("plan-legal-menu-products")?.addEventListener("pointerenter", () => {
+    void loadReferralModule();
+  }, { passive: true });
+
   document.addEventListener("st2:open-blanqueo-from-alert", () => {
     void revealView("blanqueo");
   });
@@ -1782,7 +1792,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20261012c").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20261012d").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });
