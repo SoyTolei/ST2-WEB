@@ -475,7 +475,8 @@
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.82rem;
+  font-family: var(--r-font-ui);
+  font-size: 0.75rem;
 }
 
 .borrado-table thead th {
@@ -483,7 +484,7 @@
   top: 0;
   z-index: 2;
   padding: 10px 10px;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   letter-spacing: 0.01em;
   background: #e8edf5;
   white-space: nowrap;
@@ -558,7 +559,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.82rem;
+  font-size: inherit;
   font-weight: 600;
   line-height: 1.25;
 }

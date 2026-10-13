@@ -539,6 +539,11 @@ html.st2-theme-dark .borrado-table thead th {
   border-bottom: 1px solid var(--r-line-2) !important;
 }
 
+html.st2-theme-dark .blanqueo-table thead th,
+html.st2-theme-dark .borrado-table thead th {
+  font-size: 0.64rem;
+}
+
 html.st2-theme-dark .plan-gestor-table tbody td,
 html.st2-theme-dark .blanqueo-table tbody td,
 html.st2-theme-dark .borrado-table tbody td {

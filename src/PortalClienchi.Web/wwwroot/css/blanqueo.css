@@ -895,7 +895,8 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.82rem;
+  font-family: var(--r-font-ui);
+  font-size: 0.75rem;
 }
 
 .blanqueo-table thead th {
@@ -903,7 +904,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   top: 0;
   z-index: 2;
   padding: 10px 10px;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   letter-spacing: 0.01em;
   background: #e8edf5;
   white-space: nowrap;
