@@ -583,6 +583,63 @@ html:not(.st2-theme-dark) :is(#ref-planilla-status, #ref-mam-status, #ref-sdk-st
   --sc-check: #ffffff;
 }
 
+/* Casillas de Planilla técnica, MAM y SDK (el input real está oculto). */
+.plan-opt-check-ui {
+  width: 19px;
+  height: 19px;
+  margin-top: 1px;
+  border: 0 !important;
+  border-radius: 6px;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sc-ink, #44403c) 32%, transparent);
+  overflow: hidden;
+  transition: box-shadow 120ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.plan-opt-check-ui::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  transform: scale(0);
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.plan-opt-check input:checked + .plan-opt-check-ui {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px -4px rgba(234, 88, 12, 0.7);
+  animation: sc-swell 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.plan-opt-check input:checked + .plan-opt-check-ui::before {
+  transform: scale(1);
+}
+
+.plan-opt-check input:checked + .plan-opt-check-ui::after {
+  left: 4px;
+  top: 5px;
+  width: 9px;
+  height: 5px;
+  border: 0;
+  border-left: 2.2px solid #1a0d05;
+  border-bottom: 2.2px solid #1a0d05;
+  border-radius: 1px;
+  transform: rotate(-45deg);
+}
+
+html.st2-theme-dark .plan-opt-check-ui {
+  --sc-ink: rgba(255, 237, 220, 0.85);
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+html:not(.st2-theme-dark) .plan-opt-check input:checked + .plan-opt-check-ui::after {
+  border-left-color: #fff;
+  border-bottom-color: #fff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
     input[type="checkbox"]:not(.hidden):not(.plan-opt-check *),
