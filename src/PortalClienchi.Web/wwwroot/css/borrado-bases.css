@@ -511,21 +511,21 @@
 .borrado-table .borrado-th-fecha,
 .borrado-table .borrado-col-fecha { width: 6%; }
 .borrado-table .borrado-th-caso,
-.borrado-table .borrado-col-caso { width: 7%; }
+.borrado-table .borrado-col-caso { width: 6.5%; }
 .borrado-table .borrado-th-cliente,
-.borrado-table .borrado-col-cliente { width: 7%; }
+.borrado-table .borrado-col-cliente { width: 6.5%; }
 .borrado-table .borrado-th-empresa,
-.borrado-table .borrado-col-empresa { width: 14%; }
+.borrado-table .borrado-col-empresa { width: 13%; }
 .borrado-table .borrado-th-cuit,
-.borrado-table .borrado-col-cuit { width: 9%; }
+.borrado-table .borrado-col-cuit { width: 12.5%; }
 .borrado-table .borrado-th-bases,
-.borrado-table .borrado-col-bases { width: 18%; }
+.borrado-table .borrado-col-bases { width: 16%; }
 .borrado-table .borrado-th-solicitante,
-.borrado-table .borrado-col-solicitante { width: 10%; }
+.borrado-table .borrado-col-solicitante { width: 9%; }
 .borrado-table .borrado-th-listo,
 .borrado-table .borrado-col-listo { width: 8%; }
 .borrado-table .borrado-th-aclaracion,
-.borrado-table .borrado-col-aclaracion { width: 13%; }
+.borrado-table .borrado-col-aclaracion { width: 14.5%; }
 .borrado-table .borrado-th-confirmado,
 .borrado-table .borrado-col-confirmado { width: 8%; }
 
@@ -567,9 +567,11 @@
 .borrado-table .borrado-th-cuit,
 .borrado-table .borrado-col-cuit {
   padding-left: 4px;
-  padding-right: 14px;
+  padding-right: 6px;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: visible;
 }
 
 .borrado-table td.borrado-col-caso,

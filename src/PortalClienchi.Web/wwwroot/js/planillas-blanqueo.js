@@ -669,7 +669,8 @@ function parseModulos(raw) {
 
 function formatTipoCell(item) {
   const tipo = item.tipoSolicitud || "—";
-  if (!isHabilitacionTipo(tipo)) return escapeHtml(tipo);
+  const shown = tipo === "Cambio de contraseña" ? "Contraseña" : tipo;
+  if (!isHabilitacionTipo(tipo)) return escapeHtml(shown);
   const mods = parseModulos(item.modulosDetalle);
   if (!mods.length) return escapeHtml(tipo);
   const n = mods.length;
