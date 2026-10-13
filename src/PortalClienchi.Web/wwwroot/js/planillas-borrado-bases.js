@@ -1218,7 +1218,7 @@ function buildRow(item) {
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
     if (e.target.closest("[data-borrado-copy-value]")) return;
-    const pill = e.target.closest("button.borrado-base-pill");
+    const pill = e.target.closest("button.borrado-base-pill, button.borrado-aclaracion-pill");
     if (pill) {
       e.preventDefault();
       e.stopPropagation();
@@ -1242,7 +1242,7 @@ function buildRow(item) {
   });
 
   row.addEventListener("dblclick", (e) => {
-    if (e.target.closest("button.borrado-base-pill, [data-borrado-copy-value]")) return;
+    if (e.target.closest("button.borrado-base-pill, button.borrado-aclaracion-pill, [data-borrado-copy-value]")) return;
     e.preventDefault();
     selectedId = item.id;
     applyFilters();
@@ -1680,7 +1680,7 @@ function formatAclaracionNotaPill(label, detail) {
   const text = String(detail || "").trim();
   if (!text) return "";
   const tip = text.length > 80 ? `${text.slice(0, 80)}…` : text;
-  return `<span class="borrado-base-cg"><button type="button" class="borrado-base-pill has-detail borrado-aclaracion-pill" title="${escapeAttr(tip)}" aria-label="Ver ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(text)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">Ver</span></button></span>`;
+  return `<button type="button" class="borrado-aclaracion-pill" title="${escapeAttr(tip)}" aria-label="Ver ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(text)}"><span>${escapeHtml(label)}</span><span class="borrado-aclaracion-ver">ver</span></button>`;
 }
 
 function formatAclaracionCell(text) {

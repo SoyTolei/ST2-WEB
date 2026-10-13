@@ -1710,23 +1710,20 @@ html.st2-theme-dark .blanqueo-clave-pill--custom:focus-visible {
 }
 
 html.st2-theme-dark button.borrado-aclaracion-pill {
-  background: #422006;
-  border-color: #f59e0b;
-  color: #fde68a;
+  background: #422006 !important;
+  border: 1px solid #f59e0b !important;
+  color: #fde68a !important;
 }
 
 html.st2-theme-dark button.borrado-aclaracion-pill:hover,
 html.st2-theme-dark button.borrado-aclaracion-pill:focus-visible {
-  background: #713f12;
-  border-color: #fbbf24;
-  color: #fff7ed;
+  background: #713f12 !important;
+  border-color: #fbbf24 !important;
+  color: #fff7ed !important;
 }
 
-html.st2-theme-dark button.borrado-aclaracion-pill .borrado-base-pill-action,
-html.st2-theme-dark button.borrado-aclaracion-pill:hover .borrado-base-pill-action,
-html.st2-theme-dark button.borrado-aclaracion-pill:focus-visible .borrado-base-pill-action {
+html.st2-theme-dark .borrado-aclaracion-ver {
   color: #fef3c7;
-  text-decoration-color: #fde68a;
 }
 
 html.st2-theme-dark .borrado-aclaracion-incorrecto {
