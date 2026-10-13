@@ -13,7 +13,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013e";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013h";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -385,7 +385,7 @@ function syncProfilePortalAccess() {
 
   if (visible.length && !visibleSet.has(thomPortalId)) {
     setThomPortalId(visible[0]);
-  } else {
+      } else {
     syncThomPortalUi();
   }
 
@@ -2212,17 +2212,17 @@ function showAccessAdminPanel() {
 async function activateAdminTab() {
   if (!isSt2SuperAdmin()) {
     navigateTab("planillas", { history: "replace" });
-    return;
-  }
+      return;
+    }
 
-  showAccessAdminPanel();
+      showAccessAdminPanel();
   syncAccessAdminHostColumn();
   syncAccessAdminOwnerOnlyUi();
   syncAdminSubnav();
   if (adminSubtab === "uso") void loadAccessAdminUsage();
   else void loadAccessAdminRegistrations();
-  startAccessAdminPolling();
-}
+      startAccessAdminPolling();
+  }
 
 function leaveAdminTab() {
   markAccessAdminEmailsAsSeen(accessAdminItemsCache);
@@ -3506,8 +3506,8 @@ document.addEventListener("st2:open-admin-from-alert", () => {
 });
 accessAdminSearch?.addEventListener("input", () => {
   accessAdminQuery = accessAdminSearch.value || "";
-  renderAccessAdminTable();
-});
+    renderAccessAdminTable();
+  });
 accessAdminQuickFilterButtons.forEach((btn) => {
   btn.addEventListener("click", () => {
     setAccessAdminListFilter(btn.dataset.listFilter || "");
@@ -3545,8 +3545,8 @@ accessAdminModFilterButtons.forEach((btn) => {
     if (accessAdminModFilters.has(key)) accessAdminModFilters.delete(key);
     else accessAdminModFilters.add(key);
     syncAccessAdminModFilterUi();
-    renderAccessAdminTable();
-  });
+  renderAccessAdminTable();
+});
 });
 accessAdminBody?.addEventListener("toggle", (e) => {
   const detail = e.target?.closest?.(".st2-access-admin-perm-detail");
@@ -4820,14 +4820,14 @@ function closeThomPopup({ reclaim = false } = {}) {
   thomPopup = null;
 
   if (reclaim) {
-    // Por si perdimos la referencia tras navegar a css-latam (cross-origin).
-    safeCloseWindow(reclaimNamedWindow(THOM_POPUP_NAME));
+  // Por si perdimos la referencia tras navegar a css-latam (cross-origin).
+  safeCloseWindow(reclaimNamedWindow(THOM_POPUP_NAME));
   }
 
   safeCloseWindow(thomBrowserTab);
   thomBrowserTab = null;
   if (reclaim) {
-    safeCloseWindow(reclaimNamedWindow(THOM_TAB_NAME));
+  safeCloseWindow(reclaimNamedWindow(THOM_TAB_NAME));
   }
 
   updateThomDirectUi();

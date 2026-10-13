@@ -930,22 +930,29 @@ function basesLabel(item) {
   return parts.join(", ") || "—";
 }
 
+function chipHtml(tone, mark, label, { button = false, detail = "", count = 0 } = {}) {
+  const inner = `<span class="borrado-base-mark" aria-hidden="true">${escapeHtml(mark)}</span><span class="borrado-base-name">${escapeHtml(label)}</span>`;
+  if (!button) {
+    return `<span class="borrado-base-pill borrado-base-${tone}" title="${escapeAttr(label)}">${inner}</span>`;
+  }
+  const tip = escapeAttr(`Clic para ver ejercicios\n${detail}`);
+  const n = Number(count) > 0 ? Number(count) : 0;
+  const countHtml = n > 0 ? `<span class="borrado-base-cg-count" aria-hidden="true">${n}</span>` : "";
+  return `<span class="borrado-base-wrap"><button type="button" class="borrado-base-pill borrado-base-${tone} has-detail" title="${tip}" aria-label="Ver ejercicios de ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}">${inner}<span class="borrado-base-pill-action" aria-hidden="true">ver</span></button>${countHtml}</span>`;
+}
+
 function formatBasesPills(item) {
   if (isDetalleSalesforce(item)) {
-    return '<span class="borrado-base-pill salesforce" title="Detalle en Salesforce">Salesforce</span>';
+    return chipHtml("sf", "SF", "Salesforce");
   }
   const pills = [];
-  if (item.iva) {
-    pills.push('<span class="borrado-base-pill" title="IVA">IVA</span>');
-  }
-  if (item.sueldos) {
-    pills.push('<span class="borrado-base-pill" title="Sueldos y Jornales">SJ</span>');
-  }
+  if (item.iva) pills.push(chipHtml("iva", "IV", "IVA"));
+  if (item.sueldos) pills.push(chipHtml("sj", "SJ", "Sueldos"));
   if (item.contabilidad) {
     const detail = String(item.ejerciciosDetalle || "").trim() || "Sin ejercicios";
     const display = formatEjerciciosSeparated(detail);
     const count = splitEjercicios(detail).length || 1;
-    pills.push(basePillHtml("CG", display, true, count));
+    pills.push(chipHtml("cg", "CG", "Contabilidad", { button: true, detail: display, count }));
   }
   return pills.length ? pills.join(" ") : "—";
 }
@@ -1003,15 +1010,11 @@ function formatEjerciciosSeparated(raw) {
 }
 
 function basePillHtml(label, detail, contab, count = 0) {
-  const tip = escapeAttr(`Clic para ver ejercicios\n${detail}`);
-  const cls = contab
-    ? "borrado-base-pill contab has-detail"
-    : "borrado-base-pill has-detail";
-  const n = Number(count) > 0 ? Number(count) : 0;
-  const countHtml = n > 0
-    ? `<span class="borrado-base-cg-count" aria-hidden="true">${n}</span>`
-    : "";
-  return `<span class="borrado-base-cg"><button type="button" class="${cls}" title="${tip}" aria-label="Ver ejercicios de ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">ver</span></button>${countHtml}</span>`;
+  return chipHtml(contab ? "cg" : "iva", contab ? "CG" : "IV", label, {
+    button: true,
+    detail,
+    count,
+  });
 }
 
 function placeFloat(el, x, y) {

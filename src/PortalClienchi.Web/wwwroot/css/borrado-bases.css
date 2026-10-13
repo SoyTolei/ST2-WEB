@@ -292,20 +292,34 @@
 }
 
 .borrado-check:hover {
-  border-color: #fda4af;
-  background: #fff1f2;
+  border-color: #cbd5e1;
+  background: #f8fafc;
 }
 
-.borrado-check:has(input:checked) {
-  border-color: #be123c;
-  background: #fff1f2;
-  color: #9f1239;
+.borrado-check-iva:hover,
+.borrado-check-iva:has(input:checked) {
+  border-color: #38bdf8;
+  background: #f0f9ff;
+  color: #0284c7;
 }
 
-.borrado-check input {
-  margin: 0;
-  accent-color: #be123c;
+.borrado-check-sj:hover,
+.borrado-check-sj:has(input:checked) {
+  border-color: #f97316;
+  background: #fff7ed;
+  color: #ea580c;
 }
+
+.borrado-check-cg:hover,
+.borrado-check-cg:has(input:checked) {
+  border-color: #f0abfc;
+  background: #fdf4ff;
+  color: #c026d3;
+}
+
+.borrado-check-iva input { accent-color: #0284c7; }
+.borrado-check-sj input { accent-color: #ea580c; }
+.borrado-check-cg input { accent-color: #c026d3; }
 
 .borrado-field-ejercicios.hidden,
 .borrado-detail-field.hidden {
@@ -459,7 +473,20 @@
 .borrado-table {
   width: 100%;
   table-layout: auto;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.82rem;
+}
+
+.borrado-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 10px 10px;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  background: #e8edf5;
+  white-space: nowrap;
 }
 
 .borrado-table th,
@@ -469,7 +496,8 @@
 
 .borrado-table thead th,
 .borrado-table tbody td {
-  padding: 8px 10px;
+  padding: 10px 10px;
+  line-height: 1.4;
   vertical-align: middle;
 }
 
@@ -650,65 +678,88 @@
 }
 
 .borrado-base-pill {
-  display: inline-block;
-  margin: 0.1rem 0.15rem 0.1rem 0;
-  padding: 0.18rem 0.5rem;
-  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0.1rem 0.2rem 0.1rem 0;
+  padding: 3px 9px 3px 3px;
+  border: 1px solid transparent;
   border-radius: 999px;
+  background: #f0f0f0;
   font: inherit;
-  font-size: 0.7rem;
-  font-weight: 650;
-  background: #ffe4e6;
-  color: #9f1239;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
   cursor: default;
   vertical-align: middle;
+  box-shadow: none;
 }
+
+.borrado-base-mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.55rem;
+  height: 1.25rem;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  color: #fff;
+}
+
+.borrado-base-name {
+  white-space: nowrap;
+}
+
+.borrado-base-iva {
+  color: #0284c7;
+  border-color: #38bdf8;
+}
+.borrado-base-iva .borrado-base-mark { background: #38bdf8; color: #0c4a6e; }
+
+.borrado-base-sj {
+  color: #ea580c;
+  border-color: #f97316;
+}
+.borrado-base-sj .borrado-base-mark { background: #ea580c; color: #fff; }
 
 .borrado-base-cg {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.28rem;
-  margin: 0.1rem 0.15rem 0.1rem 0;
-  vertical-align: middle;
+  color: #c026d3;
+  border-color: #f0abfc;
 }
+.borrado-base-cg .borrado-base-mark { background: #e879f9; color: #fff; }
 
-.borrado-base-cg .borrado-base-pill {
-  margin: 0;
+.borrado-base-sf {
+  color: #4338ca;
+  border-color: #a5b4fc;
 }
+.borrado-base-sf .borrado-base-mark { background: #6366f1; color: #fff; }
 
 button.borrado-base-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
   cursor: pointer;
-  border: 1px dashed #fb7185;
-  padding: 0.16rem 0.5rem;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease, padding 0.15s ease;
+  border-style: dashed;
 }
 
 button.borrado-base-pill:hover,
 button.borrado-base-pill:focus-visible {
-  background: #fecdd3;
-  border-color: #e11d48;
   border-style: solid;
   outline: none;
-  transform: translateY(-1px);
-  box-shadow: 0 1px 0 rgba(190, 18, 60, 0.18);
+  filter: brightness(0.98);
 }
 
-.borrado-base-pill.contab {
-  background: #fecdd3;
-  color: #be123c;
+.borrado-base-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin: 0.1rem 0.2rem 0.1rem 0;
+  vertical-align: middle;
 }
 
-button.borrado-base-pill.contab:hover,
-button.borrado-base-pill.contab:focus-visible {
-  background: #fda4af;
-}
-
-.borrado-base-pill-label {
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.borrado-base-wrap .borrado-base-pill {
+  margin: 0;
 }
 
 .borrado-base-cg-count {
@@ -719,7 +770,7 @@ button.borrado-base-pill.contab:focus-visible {
   height: 0.85rem;
   padding: 0 0.2rem;
   border-radius: 999px;
-  background: #9f1239;
+  background: #e879f9;
   color: #fff;
   font-size: 0.55rem;
   font-weight: 700;
@@ -736,7 +787,7 @@ button.borrado-base-pill.contab:focus-visible {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #9f1239;
+  color: inherit;
   text-decoration: underline;
   text-underline-offset: 2px;
   white-space: nowrap;
@@ -1027,43 +1078,33 @@ button.borrado-aclaracion-pill .borrado-base-pill-action {
 }
 
 .borrado-row-listo td {
-  background: rgba(16, 185, 129, 0.22);
-  color: #14532d;
+  background: rgba(16, 185, 129, 0.12);
 }
 
 .borrado-row-listo td:first-child {
-  box-shadow: inset 5px 0 0 #047857;
+  box-shadow: inset 4px 0 0 #10b981;
 }
 
 .borrado-row-listo-nota td {
-  background: rgba(16, 185, 129, 0.16);
-  color: #14532d;
+  background: rgba(16, 185, 129, 0.09);
 }
 
 .borrado-row-listo-nota td:first-child {
-  box-shadow: inset 5px 0 0 #047857;
+  box-shadow: inset 4px 0 0 #10b981;
 }
 
 .borrado-row-aclaracion:not(.borrado-row-listo):not(.borrado-row-listo-nota):not(.borrado-row-partial):not(.borrado-row-incorrecto) td {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(245, 158, 11, 0.08);
 }
 
-.borrado-row-partial td {
-  background: rgba(239, 68, 68, 0.18);
-  color: #7f1d1d;
-}
-
-.borrado-row-partial td:first-child {
-  box-shadow: inset 5px 0 0 #b91c1c;
-}
-
+.borrado-row-partial td,
 .borrado-row-incorrecto td {
-  background: rgba(239, 68, 68, 0.18);
-  color: #7f1d1d;
+  background: rgba(239, 68, 68, 0.1);
 }
 
+.borrado-row-partial td:first-child,
 .borrado-row-incorrecto td:first-child {
-  box-shadow: inset 5px 0 0 #b91c1c;
+  box-shadow: inset 4px 0 0 #ef4444;
 }
 
 .borrado-table.plan-gestor-table tbody tr.selected,
@@ -1092,7 +1133,7 @@ html.st2-theme-dark .borrado-table.plan-gestor-table tbody tr.selected {
 .borrado-table tbody tr.borrado-row-listo:hover td:first-child,
 .borrado-table tbody tr.borrado-row-listo-nota:hover td:first-child {
   box-shadow:
-    inset 5px 0 0 #047857,
+    inset 4px 0 0 #10b981,
     inset 0 1px 0 rgba(56, 189, 248, 0.9),
     inset 0 -1px 0 rgba(56, 189, 248, 0.9);
 }
@@ -1100,7 +1141,7 @@ html.st2-theme-dark .borrado-table.plan-gestor-table tbody tr.selected {
 .borrado-table tbody tr.borrado-row-partial:hover td:first-child,
 .borrado-table tbody tr.borrado-row-incorrecto:hover td:first-child {
   box-shadow:
-    inset 5px 0 0 #b91c1c,
+    inset 4px 0 0 #ef4444,
     inset 0 1px 0 rgba(56, 189, 248, 0.9),
     inset 0 -1px 0 rgba(56, 189, 248, 0.9);
 }

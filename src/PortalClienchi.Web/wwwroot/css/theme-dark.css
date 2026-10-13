@@ -2331,9 +2331,8 @@ html.st2-theme-dark .borrado-salesforce-hint {
   color: #94a3b8;
 }
 
-html.st2-theme-dark .borrado-base-pill.salesforce {
-  background: rgba(99, 102, 241, 0.22);
-  color: #c7d2fe;
+html.st2-theme-dark .borrado-base-pill {
+  background: #f0f0f0 !important;
 }
 
 html.st2-theme-dark .borrado-check {
@@ -2342,11 +2341,25 @@ html.st2-theme-dark .borrado-check {
   color: #e2e8f0;
 }
 
-html.st2-theme-dark .borrado-check:hover,
-html.st2-theme-dark .borrado-check:has(input:checked) {
-  background: #3f1d2a;
-  border-color: #be123c;
-  color: #fecdd3;
+html.st2-theme-dark .borrado-check-iva:hover,
+html.st2-theme-dark .borrado-check-iva:has(input:checked) {
+  background: #082f49;
+  border-color: #38bdf8;
+  color: #7dd3fc;
+}
+
+html.st2-theme-dark .borrado-check-sj:hover,
+html.st2-theme-dark .borrado-check-sj:has(input:checked) {
+  background: #431407;
+  border-color: #f97316;
+  color: #fdba74;
+}
+
+html.st2-theme-dark .borrado-check-cg:hover,
+html.st2-theme-dark .borrado-check-cg:has(input:checked) {
+  background: #4a044e;
+  border-color: #f0abfc;
+  color: #f5d0fe;
 }
 
 html.st2-theme-dark .blanqueo-hab-pill {
