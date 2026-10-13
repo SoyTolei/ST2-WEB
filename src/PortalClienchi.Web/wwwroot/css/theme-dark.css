@@ -846,7 +846,7 @@ html.st2-theme-dark .blanqueo-table td {
   border-color: #334155 !important;
 }
 
-html.st2-theme-dark .plan-gestor-table tr:hover td {
+html.st2-theme-dark .plan-gestor-table:not(.borrado-table):not(.blanqueo-table) tr:hover td {
   background: #1e2a3c !important;
 }
 

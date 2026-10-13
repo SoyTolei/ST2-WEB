@@ -551,8 +551,7 @@ html.st2-theme-dark .borrado-table tbody tr {
   transition: background-color 0.15s var(--r-ease);
 }
 
-html.st2-theme-dark .plan-gestor-table tbody tr:hover td,
-html.st2-theme-dark .borrado-table tbody tr:hover td {
+html.st2-theme-dark .plan-gestor-table:not(.borrado-table):not(.blanqueo-table) tbody tr:hover td {
   background-color: rgba(249, 115, 22, 0.05);
 }
 
