@@ -1184,6 +1184,61 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   box-shadow: inset 4px 0 0 #ef4444;
 }
 
+/* La fila elegida no pinta de azul: se confunde con el verde y el rojo.
+   Al pasar el mouse solo se remarca el recuadro. */
+.blanqueo-table.plan-gestor-table tbody tr.selected,
+html.st2-theme-dark .blanqueo-table.plan-gestor-table tbody tr.selected {
+  background: transparent !important;
+}
+
+.blanqueo-table tbody tr:hover td {
+  box-shadow: inset 0 1px 0 rgba(56, 189, 248, 0.9), inset 0 -1px 0 rgba(56, 189, 248, 0.9);
+}
+
+.blanqueo-table tbody tr:hover td:first-child {
+  box-shadow:
+    inset 1px 0 0 rgba(56, 189, 248, 0.9),
+    inset 0 1px 0 rgba(56, 189, 248, 0.9),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.9);
+}
+
+.blanqueo-table tbody tr:hover td:last-child {
+  box-shadow:
+    inset -1px 0 0 rgba(56, 189, 248, 0.9),
+    inset 0 1px 0 rgba(56, 189, 248, 0.9),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.9);
+}
+
+.blanqueo-table tbody tr.blanqueo-row-listo:hover td:first-child,
+.blanqueo-table tbody tr.blanqueo-row-listo-nota:hover td:first-child {
+  box-shadow:
+    inset 4px 0 0 #10b981,
+    inset 0 1px 0 rgba(56, 189, 248, 0.9),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.9);
+}
+
+.blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-child {
+  box-shadow:
+    inset 4px 0 0 #ef4444,
+    inset 0 1px 0 rgba(56, 189, 248, 0.9),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.9);
+}
+
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-listo:hover td:first-child,
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-listo-nota:hover td:first-child {
+  box-shadow:
+    inset 4px 0 0 rgba(52, 211, 153, 0.85),
+    inset 0 1px 0 rgba(56, 189, 248, 0.9),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.9) !important;
+}
+
+html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-child {
+  box-shadow:
+    inset 4px 0 0 rgba(248, 113, 113, 0.9),
+    inset 0 1px 0 rgba(56, 189, 248, 0.9),
+    inset 0 -1px 0 rgba(56, 189, 248, 0.9) !important;
+}
+
 .blanqueo-pill {
   display: inline-block;
   padding: 3px 9px;
