@@ -1052,6 +1052,39 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   white-space: nowrap;
 }
 
+.blanqueo-table td.blanqueo-col-caso,
+.blanqueo-table td.blanqueo-col-cliente {
+  position: relative;
+  overflow: visible;
+}
+
+.blanqueo-table td.blanqueo-col-caso:hover,
+.blanqueo-table td.blanqueo-col-cliente:hover,
+.blanqueo-table td.blanqueo-col-caso:focus-within,
+.blanqueo-table td.blanqueo-col-cliente:focus-within {
+  z-index: 4;
+}
+
+.blanqueo-table .blanqueo-col-caso .blanqueo-mail-copy-hint,
+.blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy-hint {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  z-index: 5;
+  margin-left: 0;
+  transform: translateY(-50%) translateX(-4px);
+  white-space: nowrap;
+}
+
+.blanqueo-table .blanqueo-col-caso .blanqueo-mail-copy:hover .blanqueo-mail-copy-hint,
+.blanqueo-table .blanqueo-col-caso .blanqueo-mail-copy:focus-visible .blanqueo-mail-copy-hint,
+.blanqueo-table .blanqueo-col-caso .blanqueo-mail-copy.is-copied .blanqueo-mail-copy-hint,
+.blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy:hover .blanqueo-mail-copy-hint,
+.blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy:focus-visible .blanqueo-mail-copy-hint,
+.blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy.is-copied .blanqueo-mail-copy-hint {
+  transform: translateY(-50%) translateX(0);
+}
+
 .blanqueo-table .blanqueo-th-correo,
 .blanqueo-table .blanqueo-col-correo {
   width: 28%;
