@@ -22,9 +22,9 @@ public static class CapturasTextoHelper
         ".xml",
     };
 
-    private const string DefaultAdjuntosLabel = "capturas / video / PDF / TXT / Excel / XML";
-    private const string DefaultAdjuntosLabelMayus = "CAPTURAS / VIDEO / PDF / TXT / EXCEL / XML";
-    private const string DefaultAdjuntosTitulo = "Capturas / video / PDF / TXT / Excel / XML";
+    private const string DefaultAdjuntosLabel = "archivos";
+    private const string DefaultAdjuntosLabelMayus = "ARCHIVOS";
+    private const string DefaultAdjuntosTitulo = "Archivos adjuntos";
 
     public static void AppendBloqueCapturas(
         List<string> partes,
@@ -112,7 +112,7 @@ public static class CapturasTextoHelper
         var uno = enlaces.Count == 1;
         var phrase = BuildPhrase(flags, Style.Minuscula, uno);
         if (string.IsNullOrEmpty(phrase))
-            phrase = uno ? "captura / video / PDF / TXT / Excel / XML" : DefaultAdjuntosLabel;
+            phrase = uno ? "archivo" : DefaultAdjuntosLabel;
 
         if (uno)
             return $"Se adjunta {ArticleFor(flags)} {phrase} en el siguiente link:";
