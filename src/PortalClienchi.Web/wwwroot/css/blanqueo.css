@@ -1042,6 +1042,8 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   font-variant-numeric: tabular-nums;
 }
 
+.blanqueo-table .blanqueo-col-caso .blanqueo-mail-copy,
+.blanqueo-table .blanqueo-col-caso .blanqueo-mail-copy-text,
 .blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy,
 .blanqueo-table .blanqueo-col-cliente .blanqueo-mail-copy-text {
   max-width: none;

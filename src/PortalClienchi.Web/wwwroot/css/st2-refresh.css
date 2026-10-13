@@ -37,7 +37,7 @@ html.st2-theme-dark {
 
   /* Tokens que ya usa la web: se refinan acá */
   --panel: var(--r-bg);
-  --st2-suite-surface: linear-gradient(180deg, rgba(28, 23, 20, 0.86) 0%, rgba(18, 15, 13, 0.9) 100%);
+  --st2-suite-surface: linear-gradient(180deg, rgba(28, 23, 20, 0.94) 0%, rgba(18, 15, 13, 0.96) 100%);
   --st2-suite-surface-soft: rgba(20, 16, 14, 0.7);
   --st2-suite-border: var(--r-line-2);
   --st2-suite-glow: var(--r-shadow-card);
@@ -89,10 +89,12 @@ html.st2-theme-dark :focus-visible {
 
 /* ── Header y navegación ──────────────────────────────────────────── */
 
+/*
+ * Ojo: backdrop-filter convierte al elemento en referencia de los position:fixed internos
+ * (menús contextuales, popups, menú de sesión). Solo va en capas sin flotantes adentro.
+ */
 html.st2-theme-dark .app-header {
-  background: linear-gradient(180deg, rgba(20, 15, 12, 0.82) 0%, rgba(12, 9, 8, 0.72) 100%) !important;
-  backdrop-filter: blur(18px) saturate(1.3);
-  -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  background: linear-gradient(180deg, rgba(22, 17, 14, 0.96) 0%, rgba(13, 10, 9, 0.94) 100%) !important;
   border-bottom-color: var(--r-line) !important;
   box-shadow: 0 1px 0 rgba(255, 245, 235, 0.03) inset, 0 12px 32px -18px rgba(0, 0, 0, 0.8);
 }
@@ -126,8 +128,6 @@ html.st2-theme-dark .tab-btn:hover:not(.active) {
 
 html.st2-theme-dark .planillas-card {
   background: var(--st2-suite-surface) !important;
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid var(--r-line-2) !important;
   border-radius: var(--r-radius-lg);
   box-shadow: var(--r-shadow-card) !important;
@@ -712,9 +712,7 @@ html.st2-theme-dark #st2-access-gate .st2-access-submit:hover:not(:disabled) {
 html.st2-theme-dark .st2-access-admin-dialog,
 html.st2-theme-dark .st2-access-name-edit-dialog,
 html.st2-theme-dark .st2-access-modules-dialog {
-  background: linear-gradient(180deg, rgba(28, 23, 20, 0.88) 0%, rgba(18, 15, 13, 0.92) 100%) !important;
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  background: linear-gradient(180deg, rgba(28, 23, 20, 0.97) 0%, rgba(18, 15, 13, 0.98) 100%) !important;
   border: 1px solid var(--r-line-2) !important;
   border-radius: var(--r-radius-lg);
   box-shadow: var(--r-shadow-card);
@@ -937,9 +935,7 @@ html.st2-theme-dark .btn-secondary:not(.pdf-portal-btn-paste):hover:not(:disable
 
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
-  background: linear-gradient(180deg, rgba(28, 23, 20, 0.86) 0%, rgba(18, 15, 13, 0.9) 100%) !important;
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background: linear-gradient(180deg, rgba(28, 23, 20, 0.95) 0%, rgba(18, 15, 13, 0.96) 100%) !important;
   border: 1px solid var(--r-line-2) !important;
   border-radius: var(--r-radius-lg);
   box-shadow: var(--r-shadow-card) !important;

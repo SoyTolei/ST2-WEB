@@ -1,0 +1,523 @@
+/* Componentes ST2 (vanilla): BranchedMenu, BellToggle y SpringCheck. */
+
+/* ── BranchedMenu ─────────────────────────────────────────────────── */
+
+.branched-menu {
+  --bm-ink: #f7f1eb;
+  --bm-accent: #fb923c;
+  --bm-line: rgba(255, 228, 204, 0.16);
+  --bm-font: 13.5px;
+  --bm-row: 34px;
+  --bm-indent: 40px;
+  --bm-line-w: 1.5;
+  --bm-draw: 400ms;
+  --bm-fold: 300ms;
+  --bm-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --bm-muted: color-mix(in srgb, var(--bm-ink) 55%, transparent);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 196px;
+  padding-left: 14px;
+  color: var(--bm-ink);
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: var(--bm-font);
+  line-height: 1.2;
+}
+
+.branched-menu::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(to bottom, var(--bm-line) 0%, var(--bm-line) 55%, transparent 100%);
+}
+
+.branched-menu__marker {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  z-index: 1;
+  width: 2px;
+  height: 16px;
+  border-radius: 1px;
+  background: var(--bm-accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--bm-accent) 70%, transparent);
+  opacity: 0;
+  transition: top 220ms var(--bm-ease-out), opacity 150ms ease;
+}
+
+.branched-menu__marker[data-on] {
+  opacity: 1;
+}
+
+.branched-menu__section {
+  display: flex;
+  flex-direction: column;
+}
+
+.branched-menu__head {
+  display: block;
+  margin: 0;
+  padding: 9px 0;
+  border: 0;
+  background: none;
+  color: var(--bm-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: color 200ms ease;
+}
+
+.branched-menu__section[data-open] .branched-menu__head {
+  color: var(--bm-ink);
+}
+
+.branched-menu__head:focus-visible,
+.branched-menu__item:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--bm-accent) 60%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .branched-menu__head:hover {
+    color: var(--bm-ink);
+  }
+}
+
+.branched-menu__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--bm-fold) var(--bm-ease-out);
+}
+
+.branched-menu__section[data-open] .branched-menu__body {
+  grid-template-rows: 1fr;
+}
+
+.branched-menu__fold {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.branched-menu__tree {
+  position: relative;
+  padding: 6px 0;
+  box-sizing: border-box;
+}
+
+.branched-menu__lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.branched-menu__section[data-open] .branched-menu__lines {
+  opacity: 1;
+  transition: opacity 250ms ease 100ms;
+}
+
+.branched-menu__base,
+.branched-menu__reach {
+  fill: none;
+  stroke-width: var(--bm-line-w);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.branched-menu__base {
+  stroke: var(--bm-line);
+}
+
+.branched-menu__reach {
+  stroke: var(--bm-accent);
+  transition: stroke-dashoffset var(--bm-draw) var(--bm-ease-out);
+}
+
+.branched-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  height: var(--bm-row);
+  margin: 0;
+  padding: 0 10px 0 var(--bm-indent);
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--bm-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+  transition: color 200ms ease, background 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .branched-menu__item:hover {
+    color: var(--bm-ink);
+    background: color-mix(in srgb, var(--bm-accent) 8%, transparent);
+  }
+
+  .branched-menu__item--danger:hover {
+    color: #fda4af;
+    background: rgba(244, 63, 94, 0.1);
+  }
+}
+
+.branched-menu__item[data-active] {
+  color: var(--bm-accent);
+  font-weight: 600;
+}
+
+.branched-menu__icon {
+  display: inline-flex;
+  flex: none;
+}
+
+.branched-menu__label {
+  white-space: nowrap;
+}
+
+/* Menú de sesión con BranchedMenu adentro */
+.st2-session-menu.st2-session-menu--branched {
+  min-width: 228px;
+  padding: 10px 14px 10px 12px;
+}
+
+html:not(.st2-theme-dark) .st2-session-menu--branched .branched-menu {
+  --bm-ink: #fff7ed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branched-menu__marker {
+    transition: opacity 150ms ease;
+  }
+
+  .branched-menu__body,
+  .branched-menu__reach {
+    transition: none;
+  }
+}
+
+/* ── BellToggle (avisos de escritorio) ────────────────────────────── */
+
+.bell-toggle {
+  --bt-color: #f5efe9;
+  --bt-bg: rgba(28, 22, 18, 0.92);
+  --bt-on-color: #ffffff;
+  --bt-on-bg: #f97316;
+  --bt-badge: #ef4444;
+  --bt-radius: 999px;
+  --bt-fade: 200ms;
+  --bt-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  position: relative;
+  display: inline-grid;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 160ms var(--bt-ease-out);
+}
+
+.bell-toggle[hidden] {
+  display: none;
+}
+
+.bell-toggle[data-pressed] {
+  transform: scale(0.97);
+}
+
+.bell-toggle__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  margin: 0;
+  padding: 0 13px 0 11px;
+  border: 1px solid rgba(251, 146, 60, 0.32);
+  border-radius: var(--bt-radius);
+  background: var(--bt-bg);
+  color: var(--bt-color);
+  font: inherit;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--bt-fade) ease, color var(--bt-fade) ease, border-color var(--bt-fade) ease, box-shadow var(--bt-fade) ease;
+}
+
+.bell-toggle__button:focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.75);
+  outline-offset: 2px;
+}
+
+.bell-toggle[data-on="true"] .bell-toggle__button {
+  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  border-color: rgba(255, 190, 140, 0.4);
+  color: var(--bt-on-color);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 8px 20px -10px rgba(234, 88, 12, 0.8);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bell-toggle[data-on="false"] .bell-toggle__button:hover {
+    background: rgba(48, 32, 22, 0.96);
+    border-color: rgba(251, 146, 60, 0.6);
+  }
+}
+
+.bell-toggle__bell {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+
+.bell-toggle__glyph {
+  display: inline-grid;
+  place-items: center;
+  grid-area: 1 / 1;
+  width: 15px;
+  height: 15px;
+  transform-origin: 50% 16%;
+}
+
+.bell-toggle__glyph svg {
+  width: 100%;
+  height: 100%;
+}
+
+.bell-toggle__wave {
+  position: absolute;
+  top: -3px;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bell-toggle__wave--left {
+  right: calc(100% - 2px);
+  transform-origin: 100% 100%;
+}
+
+.bell-toggle__wave--right {
+  left: calc(100% - 2px);
+  transform-origin: 0% 100%;
+}
+
+.bell-toggle__badge {
+  position: absolute;
+  top: -7px;
+  right: -8px;
+  display: grid;
+  place-items: center;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  box-sizing: border-box;
+  border-radius: 7px;
+  background: var(--bt-badge);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 0 0 2px #1a120d;
+  opacity: 0;
+  transform: translateY(5px) scale(0.6);
+  pointer-events: none;
+  transition: transform 180ms var(--bt-ease-out), opacity 140ms ease;
+}
+
+.bell-toggle__badge[data-show] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 120ms ease;
+}
+
+.bell-toggle__say {
+  display: inline-grid;
+  height: 16px;
+  line-height: 16px;
+}
+
+.bell-toggle__face {
+  grid-area: 1 / 1;
+  justify-self: start;
+  opacity: 0;
+  filter: blur(2px);
+  transition: opacity var(--bt-fade) ease, filter var(--bt-fade) ease;
+}
+
+.bell-toggle[data-on="false"] .bell-toggle__face--off,
+.bell-toggle[data-on="true"] .bell-toggle__face--on {
+  opacity: 1;
+  filter: blur(0);
+}
+
+@media (max-width: 900px) {
+  .bell-toggle__say {
+    display: none;
+  }
+
+  .bell-toggle__button {
+    padding: 0 10px;
+  }
+}
+
+html:not(.st2-theme-dark) .bell-toggle[data-on="false"] .bell-toggle__button {
+  background: #fff;
+  color: #9a3412;
+  border-color: #fed7aa;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bell-toggle[data-pressed] {
+    transform: none;
+  }
+
+  .bell-toggle__face {
+    filter: none !important;
+  }
+
+  .bell-toggle__badge,
+  .bell-toggle__badge[data-show] {
+    transform: none;
+  }
+}
+
+/* ── SpringCheck: todas las casillas de los formularios ───────────── */
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *) {
+  --sc-ink: rgba(255, 237, 220, 0.85);
+  --sc-fill: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  --sc-check: #1a0d05;
+
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sc-ink) 32%, transparent);
+  vertical-align: middle;
+  cursor: pointer;
+  transition: box-shadow 120ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--sc-fill);
+  transform: scale(0);
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *)::after {
+  content: "";
+  position: relative;
+  width: 9px;
+  height: 5px;
+  margin-top: -2px;
+  border-left: 2.2px solid var(--sc-check);
+  border-bottom: 2.2px solid var(--sc-check);
+  border-radius: 1px;
+  transform: rotate(-45deg) scale(0);
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1) 60ms;
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *):checked {
+  box-shadow: inset 0 0 0 0 transparent, 0 4px 12px -4px rgba(234, 88, 12, 0.7);
+  animation: sc-swell 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *):checked::before {
+  transform: scale(1);
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *):checked::after {
+  transform: rotate(-45deg) scale(1);
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *):hover:not(:checked):not(:disabled) {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sc-ink) 55%, transparent);
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *):active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *):focus-visible {
+  outline: 2px solid rgba(251, 146, 60, 0.75);
+  outline-offset: 2px;
+}
+
+:is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *):disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+html:not(.st2-theme-dark)
+  :is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+  input[type="checkbox"]:not(.hidden):not(.plan-opt-check *) {
+  --sc-ink: #44403c;
+  --sc-check: #ffffff;
+}
+
+@keyframes sc-swell {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.14); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+    input[type="checkbox"]:not(.hidden):not(.plan-opt-check *),
+  :is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+    input[type="checkbox"]:not(.hidden):not(.plan-opt-check *)::before,
+  :is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
+    input[type="checkbox"]:not(.hidden):not(.plan-opt-check *)::after {
+    transition: none;
+    animation: none;
+  }
+}

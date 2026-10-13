@@ -184,6 +184,11 @@ export function setDesktopNotifSoundEnabled(on) {
   } catch { /* ignore */ }
 }
 
+/** Permiso del navegador concedido y preferencia de ST2 encendida. */
+export function isDesktopNotifActive() {
+  return desktopNotifSupported() && Notification.permission === "granted" && notifEnabled();
+}
+
 export function setDesktopNotifEnabled(on) {
   try {
     localStorage.setItem(NOTIF_PREF_KEY, on ? "1" : "0");

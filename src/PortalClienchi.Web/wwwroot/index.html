@@ -124,7 +124,7 @@
   <link rel="stylesheet" href="/css/theme-dark.css?v=20260917h"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20261012d"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20261012b"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20261013a"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20260917h"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
@@ -136,7 +136,8 @@
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260917c"/>
-  <link rel="stylesheet" href="/css/st2-refresh.css?v=20261013a"/>
+  <link rel="stylesheet" href="/css/st2-refresh.css?v=20261013b"/>
+  <link rel="stylesheet" href="/css/st2-components.css?v=20261013a"/>
   <link rel="modulepreload" href="/js/st2-silk.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907d"/>
@@ -190,21 +191,9 @@
             <span></span><span></span><span></span>
           </span>
         </button>
-        <div id="st2-session-menu" class="st2-session-menu hidden" role="menu" hidden>
+        <div id="st2-session-menu" class="st2-session-menu st2-session-menu--branched hidden" role="menu" hidden>
           <span class="st2-session-menu-glow" aria-hidden="true"></span>
-          <button type="button" id="st2-session-theme" class="st2-session-menu-item" role="menuitem">
-            <span class="st2-session-menu-ico" aria-hidden="true">☀️</span>
-            <span class="st2-session-menu-label">Modo claro</span>
-          </button>
-          <button type="button" id="st2-session-about" class="st2-session-menu-item" role="menuitem">
-            <span class="st2-session-menu-ico" aria-hidden="true">ℹ️</span>
-            <span class="st2-session-menu-label">Acerca de</span>
-          </button>
-          <span class="st2-session-menu-sep" aria-hidden="true"></span>
-          <button type="button" id="st2-session-logout" class="st2-session-menu-item st2-session-menu-item--soft" role="menuitem">
-            <span class="st2-session-menu-ico" aria-hidden="true">🚪</span>
-            <span class="st2-session-menu-label">Cerrar sesión</span>
-          </button>
+          <nav id="st2-session-branched" aria-label="Menú de usuario"></nav>
         </div>
       </span>
       <span id="st2-blobatar-greet" class="st2-blobatar-greet hidden" role="status" aria-live="polite" hidden>
@@ -243,11 +232,12 @@
           <span class="st2-suite-float st2-suite-float--palta3">🥑</span>
         </div>
         <div class="app-header-actions" role="group" aria-label="Ayuda">
+          <span id="st2-notif-bell" class="st2-notif-bell-host"></span>
           <button type="button" id="st2-tour-header-btn" class="st2-tour-header-btn hidden" title="Tutorial" aria-label="Tutorial">
             <span class="st2-tour-header-btn-icon" aria-hidden="true">?</span>
             <span id="st2-tour-header-btn-label">Tutorial</span>
           </button>
-          <button type="button" id="aboutBtn" class="btn-ghost about-btn st2-about-sr" aria-label="Acerca de ST2" tabindex="-1">
+          <button type="button" id="aboutBtn" class="btn-ghost about-btn" aria-label="Acerca de ST2">
             <span class="about-btn-icon" aria-hidden="true">i</span>
             <span class="about-btn-label">Acerca de</span>
           </button>
@@ -2779,6 +2769,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261012d" type="module"></script>
+  <script src="/js/app.js?v=20261013a" type="module"></script>
 </body>
 </html>

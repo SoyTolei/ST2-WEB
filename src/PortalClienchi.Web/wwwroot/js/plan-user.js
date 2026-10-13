@@ -1,5 +1,6 @@
 import { setSessionBirthdayMmDd } from "./planillas-easter-eggs.js";
 import { mountSessionBlobatar } from "./st2-blobatar.js?v=20260916c";
+import { createBranchedMenu } from "./st2-branched-menu.js?v=20261013a";
 
 let cachedEmail = null;
 let cachedDisplayName = null;
@@ -253,6 +254,7 @@ function openSessionMenu() {
   syncSessionThemeMenuLabel();
   menu.classList.remove("hidden");
   menu.removeAttribute("hidden");
+  sessionBranchedMenu?.refresh();
   if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
   document.body.classList.add("st2-session-menu-open");
 }
@@ -264,52 +266,65 @@ function toggleSessionMenu() {
   else closeSessionMenu();
 }
 
+const MENU_ICONS = {
+  dark: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 15.2A8 8 0 1 1 8.8 3.5 6.6 6.6 0 0 0 20.5 15.2z"/></svg>',
+  light: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  logout: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/></svg>',
+};
+
+let sessionBranchedMenu = null;
+
+function currentThemeValue() {
+  return document.documentElement.classList.contains("st2-theme-dark") ? "dark" : "light";
+}
+
 function syncSessionThemeMenuLabel() {
-  const themeBtn = document.getElementById("st2-session-theme");
-  if (!themeBtn) return;
-  const dark = document.documentElement.classList.contains("st2-theme-dark");
-  const ico = themeBtn.querySelector(".st2-session-menu-ico");
-  const label = themeBtn.querySelector(".st2-session-menu-label");
-  if (ico) ico.textContent = dark ? "☀️" : "🌙";
-  if (label) label.textContent = dark ? "Modo claro" : "Modo oscuro";
-  else themeBtn.textContent = dark ? "☀️ Modo claro" : "🌙 Modo oscuro";
+  sessionBranchedMenu?.setActive(currentThemeValue());
+}
+
+function mountSessionBranchedMenu() {
+  const host = document.getElementById("st2-session-branched");
+  if (!host || sessionBranchedMenu) return;
+  sessionBranchedMenu = createBranchedMenu(host, {
+    items: [
+      {
+        label: "Apariencia",
+        children: [
+          { value: "dark", label: "Modo oscuro", icon: MENU_ICONS.dark },
+          { value: "light", label: "Modo claro", icon: MENU_ICONS.light },
+        ],
+      },
+      {
+        label: "Sesión",
+        children: [{ value: "logout", label: "Cerrar sesión", icon: MENU_ICONS.logout, tone: "danger" }],
+      },
+    ],
+    open: [0, 1],
+    active: currentThemeValue(),
+    onSelect: (value) => {
+      if (value === "logout") {
+        closeSessionMenu();
+        void clearPlanUserSession();
+        return false;
+      }
+      // Sin .click() en #themeToggleBtn: ese click sintético burbujea y cerraba el menú.
+      if (value !== currentThemeValue()) document.dispatchEvent(new CustomEvent("st2:toggle-theme"));
+      return true;
+    },
+  });
 }
 
 function bindSessionLogout() {
   const menuBtn = document.getElementById("st2-session-menu-btn");
-  const logoutBtn = document.getElementById("st2-session-logout");
-  const themeBtn = document.getElementById("st2-session-theme");
-  const aboutBtn = document.getElementById("st2-session-about");
   const card = document.getElementById("st2-session-email");
   if (!menuBtn || menuBtn.dataset.bound === "1") return;
   menuBtn.dataset.bound = "1";
+  mountSessionBranchedMenu();
 
   menuBtn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     toggleSessionMenu();
-  });
-
-  themeBtn?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Sin .click() en #themeToggleBtn: ese click sintético burbujea y cerraba el menú.
-    document.dispatchEvent(new CustomEvent("st2:toggle-theme"));
-    syncSessionThemeMenuLabel();
-  });
-
-  aboutBtn?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    closeSessionMenu();
-    document.getElementById("aboutBtn")?.click();
-  });
-
-  logoutBtn?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    closeSessionMenu();
-    void clearPlanUserSession();
   });
 
   document.addEventListener("click", (e) => {

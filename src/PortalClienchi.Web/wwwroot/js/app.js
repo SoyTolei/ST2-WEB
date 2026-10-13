@@ -5,9 +5,12 @@ import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
-import { notifyAccessChanged } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js?v=20260917h";
+import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20260917h";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
+import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013a";
+import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
+import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
 import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261012d";
 import {
@@ -3442,6 +3445,24 @@ async function refreshToolsDiagHint() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
+
+const notifBell = mountBellToggle(document.getElementById("st2-notif-bell"), {
+  getCount: () => {
+    try {
+      return (getBlanqueoAlertCount() || 0) + (getBorradoAlertCount() || 0) + (getAccessAlertCount() || 0);
+    } catch {
+      return 0;
+    }
+  },
+  onDenied: () => {
+    showSt2FlashToast({
+      body: "El navegador bloqueó los avisos. Habilitalos desde el candado de la barra de direcciones.",
+      tone: "warn",
+      duration: 6000,
+    });
+  },
+});
+if (notifBell) setInterval(() => notifBell.refresh(), 10000);
 document.addEventListener("st2:session-changed", () => {
   syncAdminTabVisibility();
   syncViewAsBanner();
