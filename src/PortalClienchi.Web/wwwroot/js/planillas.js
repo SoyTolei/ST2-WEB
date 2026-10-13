@@ -404,7 +404,9 @@ function canOpenRoute(route) {
 let pendingLegalProductId = null;
 
 function referralModuleLabel(sistema = sistemaActual) {
-  return sistema === "Legal" ? "Escalamiento a N2/N3" : "Referral I+D";
+  if (sistema === "Legal") return "Escalamiento a N2/N3";
+  if (sistema === "Chile") return "Referral a Tecnología";
+  return "Referral I+D";
 }
 
 function referralModuleSubtitle(sistema = sistemaActual) {
@@ -427,7 +429,7 @@ function syncReferralModuleLabels(sistema = sistemaActual) {
 function titleForView(name) {
   switch (name) {
     case "transferencia": return "ST² · Transferencia";
-    case "referral": return isLegal() ? "ST² · Escalamiento N2/N3" : "ST² · Referral I+D";
+    case "referral": return `ST² · ${referralModuleLabel()}`;
     case "oportunidadMenu":
     case "oportunidadCargar":
     case "oportunidadGestor": return "ST² · Oportunidad";

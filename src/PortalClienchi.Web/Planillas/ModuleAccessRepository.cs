@@ -406,6 +406,7 @@ public sealed class ModuleAccessRepository
         EnsureBorradoBasesDefaults();
         EnsurePlanillasSistemaDefaults();
         EnsureLegalProductDefaults();
+        EnsurePdfPortalForSqlViewers();
     }
 
     /// <summary>
@@ -540,6 +541,58 @@ public sealed class ModuleAccessRepository
             mark.ExecuteNonQuery();
             _logger.LogInformation("Defaults de sistemas Planillas aplicados (SQL/ONVIO, LEGAL, Chile)");
         }
+    }
+
+    /// <summary>
+    /// Quienes ya pueden ver Bejerman SQL / ONVIO quedan con el generador de PDF.
+    /// Las cuentas nuevas no: el admin lo prende si corresponde.
+    /// </summary>
+    private void EnsurePdfPortalForSqlViewers()
+    {
+        lock (_gate)
+        {
+            using var conn = Open();
+            using (var check = conn.CreateCommand())
+            {
+                check.CommandText = "SELECT value FROM module_access_meta WHERE key = 'seeded_pdf_sql_v1'";
+                var existing = check.ExecuteScalar() as string;
+                if (string.Equals(existing, "1", StringComparison.Ordinal))
+                    return;
+            }
+
+            var granted = 0;
+            foreach (var email in LoadRegisteredEmails(conn))
+            {
+                if (!SqlOnvioVisible(conn, email))
+                    continue;
+                WriteModule(conn, email, PlanModuleIds.PdfPortal, true, false);
+                granted++;
+            }
+
+            using var mark = conn.CreateCommand();
+            mark.CommandText = """
+                INSERT INTO module_access_meta (key, value) VALUES ('seeded_pdf_sql_v1', '1')
+                ON CONFLICT(key) DO UPDATE SET value = excluded.value
+                """;
+            mark.ExecuteNonQuery();
+            _logger.LogInformation("Generador de PDF habilitado para {Count} perfiles con SQL / ONVIO", granted);
+        }
+    }
+
+    private static bool SqlOnvioVisible(SqliteConnection conn, string email)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT can_view FROM module_access
+            WHERE lower(email) = lower($email) AND lower(module) = lower($module)
+            LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("$email", email);
+        cmd.Parameters.AddWithValue("$module", PlanModuleIds.PlanillasSqlOnvio);
+        var raw = cmd.ExecuteScalar();
+        if (raw is null || raw is DBNull)
+            return true;
+        return Convert.ToInt32(raw) != 0;
     }
 
     /// <summary>Migra legal_escalamiento legacy a productos individuales.</summary>

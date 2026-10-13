@@ -290,7 +290,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
   if (visible('[data-plan-modulo="referral"]') && sistema !== "Legal") {
     steps.push({
       selector: '[data-plan-modulo="referral"]',
-      title: sistema === "Legal" ? "Escalamiento N2/N3" : "Referral I+D",
+      title: sistema === "Legal" ? "Escalamiento N2/N3" : (sistema === "Chile" ? "Referral a Tecnología" : "Referral I+D"),
       body: MENU_MODULO_COPY.referral[sistema] || MENU_MODULO_COPY.referral.BejermanSql,
       placement: "top",
     });

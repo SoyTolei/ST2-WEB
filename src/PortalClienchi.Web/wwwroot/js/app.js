@@ -2,7 +2,7 @@
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
-import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js";
+import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261013e";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
@@ -13,7 +13,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013d";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013e";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -2608,7 +2608,6 @@ function renderToolsToast(newer, message) {
     body: String(message || "").trim(),
     tone: "tools",
     actionLabel: "Ver",
-    sticky: true,
     onAction: () => {
       showAbout();
     },
@@ -2671,7 +2670,7 @@ function buildAboutPlanillasDetail() {
   if (canSeePlanillasChile()) {
     const mods = [];
     if (canSeeChileTransferencia()) mods.push("Transferencia de Casos");
-    if (canSeeChileReferral()) mods.push("Referral I+D");
+    if (canSeeChileReferral()) mods.push("Referral a Tecnología");
     if (canSeeChileSaad()) mods.push("SAAD - Facturación");
     if (canSeeChileHr()) mods.push("HR Consola Intranet");
     if (canSeeChileWiki()) mods.push("Wiki errores comunes");
