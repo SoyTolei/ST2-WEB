@@ -3,8 +3,8 @@ import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notify
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
-import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260917h";
-import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261012b";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261013c";
+import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261013c";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile, canSeeLegalProduct } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { syncLegalMenuProducts } from "./planillas-legal-menu.js?v=20261012d";
@@ -21,7 +21,7 @@ import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
 } from "./access-alerts.js";
-import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js";
+import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js?v=20261013c";
 import { syncAguaEgg } from "./planillas-agua-egg.js";
 import {
   initSt2Tours,
@@ -1802,7 +1802,7 @@ function loadReferralModule() {
 
 function loadOportunidadModule() {
   if (!oportunidadModulePromise) {
-    oportunidadModulePromise = import("./planillas-oportunidad.js?v=20260923a").then((mod) => {
+    oportunidadModulePromise = import("./planillas-oportunidad.js?v=20261013c").then((mod) => {
       mod.initOportunidadModule(planillasContext);
       return mod;
     });
@@ -2050,6 +2050,7 @@ export function initPlanillas() {
   syncAguaEgg();
   document.addEventListener("st2:session-changed", syncPlanillasHeroEaster);
   document.addEventListener("st2:view-as-changed", syncPlanillasHeroEaster);
+  document.addEventListener("st2:easter-eggs-changed", syncPlanillasHeroEaster);
   document.addEventListener("st2:session-changed", syncAguaEgg);
   document.addEventListener("st2:view-as-changed", syncAguaEgg);
   document.addEventListener("st2:view-as-changed", () => {

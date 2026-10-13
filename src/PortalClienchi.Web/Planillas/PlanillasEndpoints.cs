@@ -513,7 +513,38 @@ public static class PlanillasEndpoints
                 displayName = string.IsNullOrWhiteSpace(rec?.DisplayName) ? null : rec!.DisplayName!.Trim(),
                 birthdayMmDd = rec?.BirthdayMmDd,
                 birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec?.BirthdayMmDd),
+                easterEggsEnabled = accessRepo.AreEasterEggsEnabled(),
             });
+        });
+
+        app.MapGet("/api/planillas/easter-eggs", (HttpContext ctx, AppAccessRepository accessRepo) =>
+        {
+            if (PlanUserIdentity.GetFromRequest(ctx) is null)
+                return Results.Json(new { error = "Identificá tu usuario para continuar." }, statusCode: StatusCodes.Status401Unauthorized);
+            return Results.Ok(new { enabled = accessRepo.AreEasterEggsEnabled() });
+        });
+
+        app.MapPost("/api/planillas/easter-eggs", async (HttpContext ctx, AppAccessRepository accessRepo, CancellationToken ct) =>
+        {
+            var email = PlanUserIdentity.GetFromRequest(ctx);
+            if (email is null || !St2SuperAdmin.Is(email))
+                return Results.Json(new { error = "Solo el super admin puede cambiar los easter eggs." }, statusCode: StatusCodes.Status403Forbidden);
+
+            var enabled = true;
+            try
+            {
+                using var doc = await JsonDocument.ParseAsync(ctx.Request.Body, cancellationToken: ct).ConfigureAwait(false);
+                if (doc.RootElement.TryGetProperty("enabled", out var prop) &&
+                    (prop.ValueKind == JsonValueKind.False || prop.ValueKind == JsonValueKind.True))
+                    enabled = prop.GetBoolean();
+            }
+            catch
+            {
+                return Results.Json(new { error = "No se pudo leer el cambio." }, statusCode: StatusCodes.Status400BadRequest);
+            }
+
+            accessRepo.SetEasterEggsEnabled(enabled);
+            return Results.Ok(new { enabled = accessRepo.AreEasterEggsEnabled() });
         });
 
         app.MapPost("/api/planillas/session/heartbeat", async (
@@ -548,6 +579,7 @@ public static class PlanillasEndpoints
                 ok = true,
                 webBuild = St2WebBuild.GetBuild(),
                 webBuildAt = St2WebBuild.GetBuildStamp(),
+                easterEggsEnabled = accessRepo.AreEasterEggsEnabled(),
             });
         });
 

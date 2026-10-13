@@ -75,8 +75,23 @@ function sessionBirthdayEgg(email) {
   };
 }
 
+let easterEggsEnabled = true;
+
+/** El super admin puede apagar los huevos de todos. Devuelve true si cambió. */
+export function setEasterEggsEnabled(on) {
+  const next = on !== false && on !== 0 && on !== "0";
+  if (next === easterEggsEnabled) return false;
+  easterEggsEnabled = next;
+  return true;
+}
+
+export function areEasterEggsEnabled() {
+  return easterEggsEnabled;
+}
+
 /** Prioriza banner de cumpleaños en su ventana; si no, el huevo “siempre” (paseo, etc.). */
 export function resolvePlanillasEgg(email) {
+  if (!easterEggsEnabled) return null;
   const key = String(email || "").trim().toLowerCase();
   if (!key) return null;
   const matches = PLANILLAS_EASTER_EGGS.filter((item) => item.email === key);
@@ -142,6 +157,7 @@ function isMmDdToday(mmDd) {
 }
 
 export function isBirthdayGreetingForEmail(email) {
+  if (!easterEggsEnabled) return false;
   const key = String(email || "").trim().toLowerCase();
   if (!key) return false;
   const birthdayEgg = PLANILLAS_EASTER_EGGS.find(

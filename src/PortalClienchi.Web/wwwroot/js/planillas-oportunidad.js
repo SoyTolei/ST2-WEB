@@ -801,9 +801,17 @@ function getGestorItem(id = gestorSelectedId) {
 function showGestorContextMenu(x, y) {
   const menu = document.getElementById("op-gestor-ctx");
   if (!menu) return;
+  if (menu.parentElement !== document.body) document.body.appendChild(menu);
   menu.classList.remove("hidden");
-  menu.style.left = `${x}px`;
-  menu.style.top = `${y}px`;
+  menu.style.position = "fixed";
+  menu.style.zIndex = "4500";
+  const pad = 8;
+  const w = menu.offsetWidth || 220;
+  const h = menu.offsetHeight || 120;
+  const left = Math.min(Math.max(pad, x), Math.max(pad, window.innerWidth - w - pad));
+  const top = Math.min(Math.max(pad, y), Math.max(pad, window.innerHeight - h - pad));
+  menu.style.left = `${Math.round(left)}px`;
+  menu.style.top = `${Math.round(top)}px`;
 }
 
 function bindGestorDatePicker() {

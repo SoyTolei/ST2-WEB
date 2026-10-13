@@ -6,13 +6,14 @@ import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20260917h";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261013c";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
-import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013a";
+import { setEasterEggsEnabled } from "./planillas-easter-eggs.js?v=20261013c";
+import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261012d";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013c";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -1443,9 +1444,64 @@ function syncAccessAdminOwnerOnlyUi() {
     if (!show) el.classList.add("hidden");
   });
   document.getElementById("st2-access-admin-kpis")?.classList.toggle("is-owner-extra", show);
+  const eggWrap = document.getElementById("st2-easter-eggs-toggle");
+  if (eggWrap) {
+    eggWrap.hidden = !show;
+    eggWrap.classList.toggle("hidden", !show);
+  }
+  if (show) void loadEasterEggsToggle();
   if (accessAdminListFilter === "attention" || accessAdminListFilter === "concurrent") {
     accessAdminListFilter = "";
     syncAccessAdminQuickFilters();
+  }
+}
+
+let easterEggsToggleBound = false;
+
+async function loadEasterEggsToggle() {
+  const input = document.getElementById("st2-easter-eggs-enabled");
+  if (!input || !isPrimarySuperAdmin()) return;
+  if (!easterEggsToggleBound) {
+    easterEggsToggleBound = true;
+    input.addEventListener("change", () => {
+      void saveEasterEggsToggle(input.checked);
+    });
+  }
+  try {
+    const res = await fetch("/api/planillas/easter-eggs", { credentials: "include", cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json();
+    input.checked = data?.enabled !== false;
+  } catch {
+    /* ignore */
+  }
+}
+
+async function saveEasterEggsToggle(enabled) {
+  const input = document.getElementById("st2-easter-eggs-enabled");
+  try {
+    const res = await fetch("/api/planillas/easter-eggs", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled: !!enabled }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (input) input.checked = !enabled;
+      showSt2FlashToast({ body: data?.error || "No se pudo cambiar los easter eggs.", tone: "bad" });
+      return;
+    }
+    const on = data?.enabled !== false;
+    if (input) input.checked = on;
+    if (setEasterEggsEnabled(on)) document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
+    showSt2FlashToast({
+      body: on ? "Easter eggs activados." : "Easter eggs desactivados.",
+      tone: "ok",
+      duration: 2400,
+    });
+  } catch {
+    if (input) input.checked = !enabled;
   }
 }
 
@@ -2593,6 +2649,7 @@ function renderToolsToast(newer, message) {
     body: String(message || "").trim(),
     tone: "tools",
     actionLabel: "Ver",
+    sticky: true,
     onAction: () => {
       showAbout();
     },
@@ -3454,11 +3511,14 @@ const notifBell = mountBellToggle(document.getElementById("st2-notif-bell"), {
       return 0;
     }
   },
-  onDenied: () => {
+  onDenied: (permission) => {
+    const blocked = permission === "denied";
     showSt2FlashToast({
-      body: "El navegador bloqueó los avisos. Habilitalos desde el candado de la barra de direcciones.",
+      body: blocked
+        ? "El navegador ya bloqueó las notificaciones y no vuelve a preguntar. Tocá el candado de la barra de direcciones, entrá a Notificaciones y elegí Permitir. Después apretá de nuevo acá."
+        : "Aceptá la consulta del navegador para activar las notificaciones.",
       tone: "warn",
-      duration: 6000,
+      duration: 7000,
     });
   },
 });
@@ -6051,8 +6111,10 @@ function startSessionHeartbeat() {
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        // Mismo contador de confirmación que /api/version (anti flip-flop).
         if (data?.webBuild) applyLiveBuild(data.webBuild, data.webBuildAt);
+        if (data && "easterEggsEnabled" in data && setEasterEggsEnabled(data.easterEggsEnabled !== false)) {
+          document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
+        }
       })
       .catch(() => {});
   };

@@ -1,6 +1,6 @@
 import { getPlanUserEmail, getPlanUserDisplayName } from "./plan-user.js";
 import { getViewAsProfile } from "./module-access.js";
-import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js";
+import { isBirthdayGreetingForEmail } from "./planillas-easter-eggs.js?v=20261013c";
 
 export const TOAST_FOOD_MARK = "{{toast-food}}";
 const TOAST_FOOD_KEY = "st2-toast-food-pizza-used";
@@ -126,7 +126,7 @@ export function greetLine(_name) {
   // 15:00–18:59 → Buenas tardes + merienda
   const isNight = mins >= 19 * 60 || mins < 5 * 60;
   if (isNight) {
-    return `Buenas noches… ¿a esta hora?${bday}`;
+    return `Buenas noches… ¿a esta hora por acá?${bday}`;
   }
 
   if (mins < 12 * 60) {

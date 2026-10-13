@@ -1,5 +1,5 @@
-import { setSessionBirthdayMmDd } from "./planillas-easter-eggs.js";
-import { mountSessionBlobatar } from "./st2-blobatar.js?v=20260916c";
+import { setSessionBirthdayMmDd, setEasterEggsEnabled } from "./planillas-easter-eggs.js?v=20261013c";
+import { mountSessionBlobatar } from "./st2-blobatar.js?v=20261013c";
 import { createBranchedMenu } from "./st2-branched-menu.js?v=20261013a";
 
 let cachedEmail = null;
@@ -267,6 +267,7 @@ function toggleSessionMenu() {
 }
 
 const MENU_ICONS = {
+  about: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 8h.01"/></svg>',
   dark: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 15.2A8 8 0 1 1 8.8 3.5 6.6 6.6 0 0 0 20.5 15.2z"/></svg>',
   light: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   logout: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/></svg>',
@@ -296,12 +297,20 @@ function mountSessionBranchedMenu() {
       },
       {
         label: "Sesión",
-        children: [{ value: "logout", label: "Cerrar sesión", icon: MENU_ICONS.logout, tone: "danger" }],
+        children: [
+          { value: "about", label: "Acerca de", icon: MENU_ICONS.about },
+          { value: "logout", label: "Cerrar sesión", icon: MENU_ICONS.logout, tone: "danger" },
+        ],
       },
     ],
     open: [0, 1],
     active: currentThemeValue(),
     onSelect: (value) => {
+      if (value === "about") {
+        closeSessionMenu();
+        document.getElementById("aboutBtn")?.click();
+        return false;
+      }
       if (value === "logout") {
         closeSessionMenu();
         void clearPlanUserSession();
@@ -591,6 +600,10 @@ function applySessionIdentity(data) {
   const name = String(data?.displayName ?? data?.DisplayName ?? "").trim();
   cachedDisplayName = name || null;
   setSessionBirthdayMmDd(data?.birthdayMmDd || "");
+  const eggs = data?.easterEggsEnabled ?? data?.EasterEggsEnabled;
+  if (eggs !== undefined && setEasterEggsEnabled(eggs !== false)) {
+    document.dispatchEvent(new CustomEvent("st2:easter-eggs-changed"));
+  }
 }
 
 export async function refreshPlanUserSession() {

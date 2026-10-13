@@ -940,6 +940,16 @@ public sealed class AppAccessRepository
         EnsureColumn(conn, "app_access", "last_client_hint", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_user_agent", "TEXT NULL");
         EnsureColumn(conn, "app_access", "last_client_device", "TEXT NULL");
+        using (var flags = conn.CreateCommand())
+        {
+            flags.CommandText = """
+                CREATE TABLE IF NOT EXISTS app_runtime_flags (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+                """;
+            flags.ExecuteNonQuery();
+        }
         using (var notices = conn.CreateCommand())
         {
             notices.CommandText = """
@@ -1405,6 +1415,35 @@ public sealed class AppAccessRepository
         cmd.Parameters.AddWithValue("$email", email.Trim());
         cmd.Parameters.AddWithValue("$admin", isAdmin ? 1 : 0);
         return cmd.ExecuteNonQuery();
+    }
+
+    public bool AreEasterEggsEnabled()
+    {
+        try
+        {
+            using var conn = Open();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT value FROM app_runtime_flags WHERE key = 'easter_eggs' LIMIT 1";
+            var raw = cmd.ExecuteScalar() as string;
+            return !string.Equals(raw, "0", StringComparison.Ordinal);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "No se pudo leer el flag de easter eggs");
+            return true;
+        }
+    }
+
+    public void SetEasterEggsEnabled(bool enabled)
+    {
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO app_runtime_flags (key, value) VALUES ('easter_eggs', $v)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            """;
+        cmd.Parameters.AddWithValue("$v", enabled ? "1" : "0");
+        cmd.ExecuteNonQuery();
     }
 
     private static AppAccessRecordDto ReadRecord(SqliteDataReader reader)

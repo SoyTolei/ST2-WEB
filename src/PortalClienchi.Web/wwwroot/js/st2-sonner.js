@@ -7,7 +7,7 @@ import {
   foodForToast,
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
-} from "./st2-toast-greet.js?v=20260917a";
+} from "./st2-toast-greet.js?v=20261013c";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -194,7 +194,7 @@ export function initSt2Sonner() {
   toaster.setAttribute("position", "top-left");
   toaster.setAttribute("rich-colors", "");
   toaster.setAttribute("close-button", "");
-  toaster.setAttribute("visible-toasts", "5");
+  toaster.setAttribute("visible-toasts", "8");
   toaster.setAttribute("duration", String(STICKY_MS));
   toaster.setAttribute("container-aria-label", "Notificaciones");
   toaster.setAttribute("theme", currentTheme());
@@ -432,6 +432,10 @@ function paintOne(id, title, tone, { force = false } = {}) {
     },
     onDismiss: () => {
       if (dismissingLocally.has(id)) return;
+      // Un repintado reemplaza el toast y Sonner dispara onDismiss del anterior.
+      // Si ya hay una entrada nueva, no la borres: eso hacía que el aviso de descarga
+      // aparezca y se vaya al toque.
+      if (registry.get(id) !== entry) return;
       lastPainted.delete(id);
       if (entry.sticky) {
         // X / cierre fantasma: no “tragar” el aviso; reponer solo este.

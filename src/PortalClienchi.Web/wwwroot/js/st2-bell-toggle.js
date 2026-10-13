@@ -2,7 +2,7 @@
  * BellToggle (vanilla) — campana que activa / desactiva los avisos de escritorio de ST2.
  * Al activarse la campana se balancea y emite ondas; el badge muestra pendientes.
  */
-import { desktopNotifSupported, ensureDesktopNotifPermission, isDesktopNotifActive, setDesktopNotifEnabled } from "./st2-desktop-notif.js?v=20261013a";
+import { desktopNotifSupported, isDesktopNotifActive, setDesktopNotifEnabled } from "./st2-desktop-notif.js?v=20261013c";
 
 const SEG_EASE = "cubic-bezier(0.77, 0, 0.175, 1)";
 const WARP = 0.6;
@@ -25,8 +25,8 @@ function reducedMotion() {
 }
 
 export function mountBellToggle(host, {
-  offLabel = "Activar avisos",
-  onLabel = "Avisos activos",
+  offLabel = "Activar notificaciones",
+  onLabel = "Notificaciones activas",
   getCount = () => 0,
   onDenied,
 } = {}) {
@@ -39,7 +39,7 @@ export function mountBellToggle(host, {
 
   host.classList.add("bell-toggle");
   host.innerHTML = `
-    <button type="button" class="bell-toggle__button" aria-pressed="false" title="Avisos de escritorio cuando ST2 está en otra pestaña">
+    <button type="button" class="bell-toggle__button" aria-pressed="false" title="Notificaciones de escritorio cuando ST2 está en otra pestaña">
       <span class="bell-toggle__bell" aria-hidden="true">
         <span class="bell-toggle__glyph">${BELL_SVG}</span>
         <svg class="bell-toggle__wave bell-toggle__wave--left" viewBox="0 0 14 14"><path d="M14 8a6 6 0 0 0-6 6"/><path d="M14 4A10 10 0 0 0 4 14"/></svg>
@@ -104,9 +104,21 @@ export function mountBellToggle(host, {
       paint();
       return;
     }
-    const granted = await ensureDesktopNotifPermission();
+    let granted = false;
+    let permission = "default";
+    try {
+      if (desktopNotifSupported()) {
+        permission = Notification.permission;
+        const res = await Notification.requestPermission();
+        permission = res || Notification.permission;
+        granted = permission === "granted";
+      }
+    } catch {
+      granted = false;
+      permission = Notification.permission;
+    }
     if (!granted) {
-      onDenied?.();
+      onDenied?.(permission);
       return;
     }
     setDesktopNotifEnabled(true);

@@ -136,8 +136,8 @@
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20260907m"/>
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20260917c"/>
-  <link rel="stylesheet" href="/css/st2-refresh.css?v=20261013b"/>
-  <link rel="stylesheet" href="/css/st2-components.css?v=20261013a"/>
+  <link rel="stylesheet" href="/css/st2-refresh.css?v=20261013c"/>
+  <link rel="stylesheet" href="/css/st2-components.css?v=20261013c"/>
   <link rel="modulepreload" href="/js/st2-silk.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-glitch-text.js?v=20260907d"/>
@@ -237,7 +237,7 @@
             <span class="st2-tour-header-btn-icon" aria-hidden="true">?</span>
             <span id="st2-tour-header-btn-label">Tutorial</span>
           </button>
-          <button type="button" id="aboutBtn" class="btn-ghost about-btn" aria-label="Acerca de ST2">
+          <button type="button" id="aboutBtn" class="btn-ghost about-btn hidden" hidden aria-label="Acerca de ST2">
             <span class="about-btn-icon" aria-hidden="true">i</span>
             <span class="about-btn-label">Acerca de</span>
           </button>
@@ -1802,6 +1802,10 @@
               </div>
               <div class="st2-access-admin-panel-actions">
                 <button type="button" id="st2-access-admin-preset" class="st2-access-admin-preset hidden" title="Crear un perfil aprobado con módulos antes del primer ingreso">Crear un perfil nuevo</button>
+                <label id="st2-easter-eggs-toggle" class="st2-easter-eggs-toggle st2-access-admin-owner-only hidden" title="Muestra u oculta los huevos de los usuarios que los tienen">
+                  <input id="st2-easter-eggs-enabled" type="checkbox" checked/>
+                  <span>Easter eggs</span>
+                </label>
                 <p id="st2-access-admin-updated" class="st2-access-admin-updated hidden" aria-live="polite"></p>
                 <button type="button" id="st2-access-admin-refresh" class="st2-access-admin-refresh" title="Actualizar lista" aria-label="Actualizar lista">↻</button>
               </div>
@@ -2769,6 +2773,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261013a" type="module"></script>
+  <script src="/js/app.js?v=20261013c" type="module"></script>
 </body>
 </html>

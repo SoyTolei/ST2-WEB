@@ -599,14 +599,8 @@ html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-ch
 html.st2-theme-dark #planillas-menu .plan-modulos-grid > .plan-modulo-btn:nth-child(8) { animation-delay: 0.28s; }
 
 @keyframes r-view-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes r-tile-in {

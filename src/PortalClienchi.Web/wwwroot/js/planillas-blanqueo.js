@@ -684,6 +684,22 @@ function hideModPop() {
   pop.setAttribute("aria-hidden", "true");
 }
 
+/** position:fixed dentro de la tarjeta queda corrido: la animación de la vista arma un containing block. */
+function placeFloat(el, x, y) {
+  if (!el) return;
+  if (el.parentElement !== document.body) document.body.appendChild(el);
+  el.classList.remove("hidden");
+  el.style.position = "fixed";
+  el.style.zIndex = "4500";
+  const pad = 8;
+  const w = el.offsetWidth || 240;
+  const h = el.offsetHeight || 140;
+  const left = Math.min(Math.max(pad, x), Math.max(pad, window.innerWidth - w - pad));
+  const top = Math.min(Math.max(pad, y), Math.max(pad, window.innerHeight - h - pad));
+  el.style.left = `${Math.round(left)}px`;
+  el.style.top = `${Math.round(top)}px`;
+}
+
 function showModPop(anchor, mods = []) {
   const pop = document.getElementById("blanqueo-mod-pop");
   const list = document.getElementById("blanqueo-mod-pop-list");
@@ -699,15 +715,7 @@ function showModPop(anchor, mods = []) {
   pop.classList.remove("hidden");
   pop.setAttribute("aria-hidden", "false");
   const rect = anchor.getBoundingClientRect();
-  const pad = 8;
-  const w = pop.offsetWidth || 280;
-  const h = pop.offsetHeight || 140;
-  let left = rect.left;
-  let top = rect.bottom + 6;
-  if (left + w > window.innerWidth - pad) left = window.innerWidth - w - pad;
-  if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
-  pop.style.left = `${Math.max(pad, left)}px`;
-  pop.style.top = `${Math.max(pad, top)}px`;
+  placeFloat(pop, rect.left, rect.bottom + 6);
 }
 
 function hideAclaracionPop() {
@@ -733,15 +741,7 @@ function showAclaracionPop(anchor, detail) {
   pop.classList.remove("hidden");
   pop.setAttribute("aria-hidden", "false");
   const rect = anchor.getBoundingClientRect();
-  const pad = 8;
-  const w = pop.offsetWidth || 280;
-  const h = pop.offsetHeight || 140;
-  let left = rect.left;
-  let top = rect.bottom + 6;
-  if (left + w > window.innerWidth - pad) left = window.innerWidth - w - pad;
-  if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
-  pop.style.left = `${Math.max(pad, left)}px`;
-  pop.style.top = `${Math.max(pad, top)}px`;
+  placeFloat(pop, rect.left, rect.bottom + 6);
   if (selectedId) void markBlanqueoObservationOpened(selectedId);
 }
 
@@ -1582,13 +1582,7 @@ function showCtx(x, y, item) {
   }
 
   menu.classList.remove("hidden");
-  const pad = 8;
-  const w = menu.offsetWidth || 260;
-  const h = menu.offsetHeight || 240;
-  const left = Math.min(x, window.innerWidth - w - pad);
-  const top = Math.min(y, window.innerHeight - h - pad);
-  menu.style.left = `${Math.max(pad, left)}px`;
-  menu.style.top = `${Math.max(pad, top)}px`;
+  placeFloat(menu, x, y);
 }
 
 function hideCtx() {

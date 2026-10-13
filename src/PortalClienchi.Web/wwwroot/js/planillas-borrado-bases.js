@@ -1014,6 +1014,21 @@ function basePillHtml(label, detail, contab, count = 0) {
   return `<span class="borrado-base-cg"><button type="button" class="${cls}" title="${tip}" aria-label="Ver ejercicios de ${escapeAttr(label)}" aria-haspopup="dialog" data-borrado-base-label="${escapeAttr(label)}" data-borrado-base-detail="${escapeAttr(detail)}"><span class="borrado-base-pill-label">${escapeHtml(label)}</span><span class="borrado-base-pill-action" aria-hidden="true">ver</span></button>${countHtml}</span>`;
 }
 
+function placeFloat(el, x, y) {
+  if (!el) return;
+  if (el.parentElement !== document.body) document.body.appendChild(el);
+  el.classList.remove("hidden");
+  el.style.position = "fixed";
+  el.style.zIndex = "4500";
+  const pad = 8;
+  const w = el.offsetWidth || 240;
+  const h = el.offsetHeight || 140;
+  const left = Math.min(Math.max(pad, x), Math.max(pad, window.innerWidth - w - pad));
+  const top = Math.min(Math.max(pad, y), Math.max(pad, window.innerHeight - h - pad));
+  el.style.left = `${Math.round(left)}px`;
+  el.style.top = `${Math.round(top)}px`;
+}
+
 function hideBasePop() {
   const pop = document.getElementById("borrado-base-pop");
   if (!pop) return;
@@ -1046,15 +1061,7 @@ function showBasePop(anchor, label, detail) {
   pop.setAttribute("aria-hidden", "false");
 
   const rect = anchor.getBoundingClientRect();
-  const pad = 8;
-  const w = pop.offsetWidth || (isNote ? 320 : 280);
-  const h = pop.offsetHeight || 140;
-  let left = rect.left;
-  let top = rect.bottom + 6;
-  if (left + w > window.innerWidth - pad) left = window.innerWidth - w - pad;
-  if (top + h > window.innerHeight - pad) top = Math.max(pad, rect.top - h - 6);
-  pop.style.left = `${Math.max(pad, left)}px`;
-  pop.style.top = `${Math.max(pad, top)}px`;
+  placeFloat(pop, rect.left, rect.bottom + 6);
 
   if (isNote && selectedId) void markBorradoObservationOpened(selectedId);
 }
@@ -1714,13 +1721,7 @@ function showCtx(x, y, item) {
   }
 
   menu.classList.remove("hidden");
-  const pad = 8;
-  const w = menu.offsetWidth || 260;
-  const h = menu.offsetHeight || 240;
-  const left = Math.min(x, window.innerWidth - w - pad);
-  const top = Math.min(y, window.innerHeight - h - pad);
-  menu.style.left = `${Math.max(pad, left)}px`;
-  menu.style.top = `${Math.max(pad, top)}px`;
+  placeFloat(menu, x, y);
 }
 
 function hideCtx() {
