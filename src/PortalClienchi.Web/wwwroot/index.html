@@ -122,9 +122,9 @@
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20260917h"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20260917h"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20261012b"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20260917h"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20261012b"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20260917h"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
@@ -808,12 +808,11 @@
               </div>
 
               <div id="blanqueo-ctx" class="plan-gestor-ctx blanqueo-ctx hidden" role="menu">
-                <button type="button" class="blanqueo-ctx-listo" data-blanqueo-ctx="listo">Marcar listo</button>
+                <button type="button" class="blanqueo-ctx-listo" data-blanqueo-ctx="listo">Listo</button>
+                <button type="button" class="blanqueo-ctx-listo" data-blanqueo-ctx="listo-obs">Listo con observación</button>
                 <button type="button" data-blanqueo-ctx="unlisto">Quitar listo</button>
                 <hr/>
                 <button type="button" data-blanqueo-ctx="aclaracion-no-registrado">No registrado</button>
-                <button type="button" data-blanqueo-ctx="aclaracion-manual">Agregar observación</button>
-                <button type="button" data-blanqueo-ctx="clear-aclaracion">Quitar observación</button>
                 <hr/>
                 <button type="button" data-blanqueo-ctx="editar">Editar</button>
                 <button type="button" data-blanqueo-ctx="eliminar">Eliminar</button>
@@ -2234,10 +2233,10 @@
 
   <div id="blanqueo-note-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-note-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
-      <h3 id="blanqueo-note-title">Observación</h3>
-      <p class="plan-user-hint">Dejá un comentario breve sobre esta solicitud (por ejemplo, por qué no se pudo completar).</p>
+      <h3 id="blanqueo-note-title">Listo con observación</h3>
+      <p class="plan-user-hint">Se marca como listo con esta observación. Si dejás el texto vacío, queda listo sin observación.</p>
       <label class="plan-user-label" for="blanqueo-note-text">Detalle</label>
-      <textarea id="blanqueo-note-text" class="blanqueo-note-textarea" rows="4" maxlength="280" placeholder="Ej. el correo no figura en el cliente…"></textarea>
+      <textarea id="blanqueo-note-text" class="blanqueo-note-textarea" rows="4" maxlength="280" placeholder="Ej. se blanqueó con otra clave porque…"></textarea>
       <div class="plan-user-actions">
         <button type="button" id="blanqueo-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="blanqueo-note-save" class="plan-gestor-btn-add">Guardar</button>
@@ -2779,6 +2778,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261012a" type="module"></script>
+  <script src="/js/app.js?v=20261012b" type="module"></script>
 </body>
 </html>

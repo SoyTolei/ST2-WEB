@@ -1212,6 +1212,8 @@ function renderTable(filtered) {
   }
 }
 
+const ROW_INTERACTIVE_SELECTOR = "[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-caso], [data-blanqueo-copy-clave], [data-blanqueo-owner], .blanqueo-hab-pill, .blanqueo-clave-previa-pill";
+
 function buildRow(item) {
   const row = document.createElement("tr");
   if (selectedId === item.id) row.classList.add("selected");
@@ -1233,7 +1235,7 @@ function buildRow(item) {
       </td>`
     : `<td class="blanqueo-col-correo" title="${escapeHtml(item.correo)}">${escapeHtml(item.correo)}</td>`;
 
-  const clienteCell = (canConfirm && isPortalCliente(item.portal) && String(item.nroCliente || "").trim())
+  const clienteCell = (canConfirm && String(item.nroCliente || "").trim())
     ? `<td class="blanqueo-col-cliente">
         <button type="button" class="blanqueo-mail-copy" data-blanqueo-copy-cliente="${escapeHtml(item.nroCliente)}" title="Clic para copiar el n° de cliente">
           <span class="blanqueo-mail-copy-text">${escapeHtml(item.nroCliente)}</span>
@@ -1242,12 +1244,21 @@ function buildRow(item) {
       </td>`
     : `<td class="blanqueo-col-cliente">${escapeHtml(item.nroCliente || "—")}</td>`;
 
+  const casoCell = (canConfirm && String(item.nroCaso || "").trim())
+    ? `<td class="blanqueo-col-caso">
+        <button type="button" class="blanqueo-mail-copy" data-blanqueo-copy-caso="${escapeHtml(item.nroCaso)}" title="Clic para copiar el n° de caso">
+          <span class="blanqueo-mail-copy-text">${escapeHtml(item.nroCaso)}</span>
+          <span class="blanqueo-mail-copy-hint" aria-hidden="true">copiar</span>
+        </button>
+      </td>`
+    : `<td class="blanqueo-col-caso">${escapeHtml(item.nroCaso || "—")}</td>`;
+
   const estadoAclaracionCells = `<td class="blanqueo-col-listo">${formatEstadoCell(item)}</td>
     <td class="blanqueo-col-aclaracion">${formatAclaracionCell(item)}</td>`;
 
   row.innerHTML = `
     <td class="blanqueo-col-fecha" title="${escapeHtml(item.fechaSolicitud || "")}">${escapeHtml(formatFecha(item.fechaSolicitud))}</td>
-    <td class="blanqueo-col-caso">${escapeHtml(item.nroCaso || "—")}</td>
+    ${casoCell}
     ${clienteCell}
     ${mailCell}
     <td class="blanqueo-col-solicitante">${escapeHtml(item.solicitadoPorNombre || item.solicitadoPorEmail || "")}</td>
@@ -1305,6 +1316,28 @@ function buildRow(item) {
     });
   });
 
+  row.querySelector("[data-blanqueo-copy-caso]")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const caso = btn.getAttribute("data-blanqueo-copy-caso") || item.nroCaso;
+    void copyText(caso, {
+      el: btn,
+      hintSelector: ".blanqueo-mail-copy-hint",
+      copiedText: "copiado",
+      restoreText: "copiar",
+    });
+  });
+
+  row.querySelectorAll("[data-blanqueo-owner]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedId = item.id;
+      void handleCtxAction(btn.getAttribute("data-blanqueo-owner"));
+    });
+  });
+
   row.querySelector("[data-blanqueo-copy-mail]")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1335,14 +1368,14 @@ function buildRow(item) {
 
   row.addEventListener("click", (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
+    if (e.target.closest(ROW_INTERACTIVE_SELECTOR)) return;
     selectedId = item.id;
     applyFilters();
   });
 
   row.addEventListener("dblclick", (e) => {
     e.preventDefault();
-    if (e.target.closest("[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-clave], .blanqueo-hab-pill, .blanqueo-clave-previa-pill")) return;
+    if (e.target.closest(ROW_INTERACTIVE_SELECTOR)) return;
     selectedId = item.id;
     applyFilters();
     if (!canConfirm) return;
@@ -1513,7 +1546,12 @@ function formatEstadoCell(item) {
     return '<span class="blanqueo-pill bad" title="No registrado">No registrado</span>';
   }
   if (!aclaracion) {
-    return '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
+    const pending = '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
+    if (!canOwnerMutate(item)) return pending;
+    return `<span class="blanqueo-owner-actions">${pending}
+      <button type="button" class="blanqueo-owner-btn" data-blanqueo-owner="editar" title="Editar mi solicitud (todavía no fue confirmada)" aria-label="Editar solicitud">✏️</button>
+      <button type="button" class="blanqueo-owner-btn blanqueo-owner-btn--del" data-blanqueo-owner="eliminar" title="Eliminar mi solicitud (todavía no fue confirmada)" aria-label="Eliminar solicitud">🗑️</button>
+    </span>`;
   }
   return '<span class="blanqueo-pill note" title="Con aclaración">Nota</span>';
 }
@@ -1528,7 +1566,7 @@ function showCtx(x, y, item) {
     const action = btn.getAttribute("data-blanqueo-ctx");
     let show = false;
     if (action === "editar" || action === "eliminar") show = confirm || canOwnerMutate(item);
-    else if (["listo", "unlisto", "aclaracion-no-registrado", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
+    else if (["listo", "listo-obs", "unlisto", "aclaracion-no-registrado"].includes(action || "")) {
       show = confirm;
     }
     btn.classList.toggle("hidden", !show);
@@ -1588,11 +1626,9 @@ async function handleCtxAction(action) {
       document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
         detail: { expression: "mad", ms: 3200 },
       }));
-    } else if (action === "aclaracion-manual") {
+    } else if (action === "listo-obs") {
       openNoteModal(item);
       return;
-    } else if (action === "clear-aclaracion") {
-      await patchItem(selectedId, { clearAclaracion: true });
     } else if (action === "eliminar") {
       if (!canConfirm && !canOwnerMutate(item)) {
         setStatus("Solo se puede eliminar en estado pendiente.", true);
@@ -1717,7 +1753,9 @@ function openNoteModal(item) {
   selectedId = item.id;
   const overlay = document.getElementById("blanqueo-note-overlay");
   const text = document.getElementById("blanqueo-note-text");
-  if (text) text.value = item.aclaracion || "";
+  const previa = String(item.aclaracion || "").trim();
+  const editable = previa && !isNoRegistrado(previa) && !isActivacionAutoNote(previa);
+  if (text) text.value = editable ? previa : "";
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   text?.focus();
@@ -1735,14 +1773,17 @@ async function saveNoteModal() {
   const text = String(document.getElementById("blanqueo-note-text")?.value || "").trim();
   try {
     if (!text) {
-      await patchItem(selectedId, { clearAclaracion: true });
+      await patchItem(selectedId, { listo: true, clearAclaracion: true });
     } else if (isNoRegistrado(text)) {
       await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
     } else {
-      await patchItem(selectedId, { aclaracion: text });
+      await patchItem(selectedId, { listo: true, aclaracion: text });
     }
     hideNoteModal();
-    setStatus("Aclaración guardada.");
+    setStatus(text && !isNoRegistrado(text) ? "Listo con observación." : "Marcado como listo.");
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: "happy", ms: 2800 },
+    }));
     await reloadList();
     notifyBlanqueoChanged();
   } catch (err) {

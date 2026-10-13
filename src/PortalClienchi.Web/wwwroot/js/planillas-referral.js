@@ -1,6 +1,6 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
-import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261012a";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261012b";
 import { autoTourForReferral } from "./st2-tour-init.js";
 import {
   initChileReferral,

@@ -1319,3 +1319,51 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   border-color: #eace7a !important;
   box-shadow: 0 0 0 2px rgba(234, 206, 122, 0.28) !important;
 }
+
+/* Solicitante: editar / eliminar su propia solicitud mientras está pendiente */
+.blanqueo-owner-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.blanqueo-owner-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s ease;
+}
+
+.blanqueo-owner-btn:hover {
+  border-color: #38bdf8;
+  background: #f0f9ff;
+  transform: translateY(-1px);
+}
+
+.blanqueo-owner-btn--del:hover {
+  border-color: #f43f5e;
+  background: #fff1f2;
+}
+
+html.st2-theme-dark .blanqueo-owner-btn {
+  background: #1c1c1c;
+  border-color: #3d4b61;
+}
+
+html.st2-theme-dark .blanqueo-owner-btn:hover {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: #38bdf8;
+}
+
+html.st2-theme-dark .blanqueo-owner-btn--del:hover {
+  background: rgba(244, 63, 94, 0.14);
+  border-color: #f43f5e;
+}

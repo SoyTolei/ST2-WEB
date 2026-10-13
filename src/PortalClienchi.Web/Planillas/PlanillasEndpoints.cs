@@ -38,7 +38,7 @@ public static class PlanillasEndpoints
 
     public static void MapPlanillasEndpoints(this WebApplication app)
     {
-        app.MapGet("/api/planillas/config", (TransferenciaService svc, ReferralIdService referral) => Results.Ok(new
+        app.MapGet("/api/planillas/config", (TransferenciaService svc, ReferralIdService referral, IConfiguration configuration) => Results.Ok(new
         {
             webBuild = St2WebBuild.GetBuild(),
             mesas = new[] { "TECNICO", "FLEX", "SAAS", "SUELDOS" },
@@ -86,6 +86,8 @@ public static class PlanillasEndpoints
                     icon = p.Icon,
                     layout = p.Layout,
                     catalogProductId = p.CatalogProductId,
+                    subLabel = p.SubLabel,
+                    accessProductId = p.AccessProductId,
                     items = p.Items.Select(i => new
                     {
                         id = i.Id,
@@ -96,6 +98,7 @@ public static class PlanillasEndpoints
                 }),
                 templatesCatalogUrl = "/data/legalone-templates-catalog.json?v=legal-ia-highq-onedrive",
                 iaConfigured = referral.IaConfigured,
+                ado = configuration.GetSection("Legal:Ado").Get<LegalAdoSettings>() ?? new LegalAdoSettings(),
             },
             chile = new
             {

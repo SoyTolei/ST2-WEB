@@ -1,6 +1,7 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
 
-const bound = new Set();
+/** Por elemento: los formularios Legal se re-renderizan y el panel nuevo tiene que volver a enlazarse. */
+const bound = new WeakSet();
 
 export function planFormActionsHtml({
   copyId,
@@ -56,8 +57,8 @@ function getPanel(panelId) {
 
 export function mountPlanTextPreview(panelId) {
   const root = getPanel(panelId);
-  if (!root || bound.has(root.id)) return root;
-  bound.add(root.id);
+  if (!root || bound.has(root)) return root;
+  bound.add(root);
 
   const copyBtn = root.querySelector("[data-plan-preview-copy]");
   copyBtn?.addEventListener("click", () => {

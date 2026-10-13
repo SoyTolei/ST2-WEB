@@ -7,6 +7,7 @@ import { normalizeOnedriveUrl, setupOnedrivePasteInput } from "./plan-onedrive-p
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { autoTour, syncHeaderTourButton } from "./st2-tour-init.js";
 import { errorSt2 } from "./st2-dialog.js?v=20260909a";
+import { renderAdoForm } from "./planillas-legal-ado.js?v=20261012b";
 
 const LEGAL_ICONS = {
   briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>',
@@ -15,6 +16,7 @@ const LEGAL_ICONS = {
   sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 3l1.2 4.2L17 8.5l-3.8 1.3L12 14l-1.2-4.2L7 8.5l3.8-1.3L12 3z"/><path d="M5 16l.8 2.8L8.5 20l-2.7.9L5 23.5l-.8-2.6L1.5 20l2.7-.9L5 16z"/><path d="M19 14l.8 2.8L22.5 18l-2.7.9L19 21.5l-.8-2.6L15.5 18l2.7-.9L19 14z"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2"/></svg>',
   bug: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M8 8a4 4 0 0 1 8 0M5 12h3M16 12h3M6 16h12"/></svg>',
+  ado: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/><path d="M15.5 15.5 17 17l2.5-3"/></svg>',
 };
 
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
@@ -49,6 +51,7 @@ const LEGAL_PRODUCT_BTN_CLASS = {
   firm: "legal-one",
   highq: "highq",
   westlaw: "westlaw",
+  "westlaw-ado": "westlaw",
   cocounsel: "cocounsel",
 };
 
@@ -109,8 +112,14 @@ function findCatalogCategory(catalogProductId, categoryId) {
   return product?.categories?.find((c) => c.id === categoryId);
 }
 
+/** Algunos botones (ej. Plantilla ADO) usan el permiso de otro producto Legal. */
+function canSeeHubProduct(productId) {
+  const hubProduct = findHubProduct(productId);
+  return canSeeLegalProduct(hubProduct?.accessProductId || productId);
+}
+
 function visibleLegalCatalog(catalog) {
-  return (catalog || []).filter((product) => canSeeLegalProduct(product.id));
+  return (catalog || []).filter((product) => canSeeLegalProduct(product.accessProductId || product.id));
 }
 
 function renderProductButtons(catalog, attrName) {
@@ -119,7 +128,7 @@ function renderProductButtons(catalog, attrName) {
       <span class="plan-modulo-icon" aria-hidden="true">${icon(product.icon)}</span>
       <span class="plan-modulo-copy">
         <span class="plan-modulo-label">${product.label}</span>
-        <span class="plan-modulo-sub">${LEGAL_ESCALAMIENTO_LABEL}</span>
+        <span class="plan-modulo-sub">${product.subLabel || LEGAL_ESCALAMIENTO_LABEL}</span>
       </span>
     </button>
   `).join("");
@@ -958,11 +967,30 @@ function resolveTemplate(category, hubItem) {
     || category.templates[0];
 }
 
+function showAdoTemplateForm(hubProduct, hubItem) {
+  const product = { id: hubProduct.id, label: hubProduct.label };
+  const item = { id: hubItem.id, label: hubItem.label, icon: hubItem.icon };
+  navStack = { product, item, category: null, template: { id: "ado", label: hubItem.label } };
+  showHubStatus("");
+  showView("ref-legal-form");
+  const titleEl = document.getElementById("plan-referral-module-title");
+  if (titleEl) titleEl.textContent = hubProduct.label;
+  document.title = `ST² · ${hubProduct.label}`;
+  const root = document.getElementById("ref-legal-form-root");
+  root?.classList.remove("is-ready");
+  renderAdoForm(root, hubCtx?.getConfig()?.legal?.ado || {});
+  syncHeaderTourButton();
+}
+
 async function onHubItemPick(productId, itemId, { fromMenu = false } = {}) {
   try {
     openedFromMenu = !!fromMenu;
     const hubProduct = findHubProduct(productId);
     const hubItem = hubProduct?.items?.find((i) => i.id === itemId);
+    if (hubProduct?.layout === "form" && hubItem?.id === "ado") {
+      showAdoTemplateForm(hubProduct, hubItem);
+      return;
+    }
     showLegalFormLoading(hubProduct?.label || "");
     showHubStatus("");
     await ensureCatalog();
@@ -1004,13 +1032,13 @@ function bindHubEvents() {
   document.addEventListener("click", (e) => {
     const menuBtn = e.target.closest("[data-legal-menu-product]");
     if (menuBtn) {
-      if (!canSeeLegalProduct(menuBtn.dataset.legalMenuProduct)) return;
+      if (!canSeeHubProduct(menuBtn.dataset.legalMenuProduct)) return;
       hubCtx?.openLegalProduct?.(menuBtn.dataset.legalMenuProduct);
       return;
     }
     const hubBtn = e.target.closest("[data-legal-product]");
     if (!hubBtn) return;
-    if (!canSeeLegalProduct(hubBtn.dataset.legalProduct)) return;
+    if (!canSeeHubProduct(hubBtn.dataset.legalProduct)) return;
     const hubProduct = findHubProduct(hubBtn.dataset.legalProduct);
     const bugItem = hubProduct?.items?.[0];
     if (bugItem) void onHubItemPick(hubBtn.dataset.legalProduct, bugItem.id);
@@ -1064,7 +1092,7 @@ export function initLegalReferralHub(context) {
 }
 
 export function openLegalProduct(productId) {
-  if (!canSeeLegalProduct(productId)) {
+  if (!canSeeHubProduct(productId)) {
     openLegalReferralHub();
     showHubStatus("No tenés acceso a este producto LEGAL. Pedí el módulo HighQ en administración.", true);
     return Promise.resolve();
