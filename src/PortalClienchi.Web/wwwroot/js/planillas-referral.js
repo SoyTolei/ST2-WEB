@@ -1,6 +1,6 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
-import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20260923a";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261012a";
 import { autoTourForReferral } from "./st2-tour-init.js";
 import {
   initChileReferral,
@@ -666,7 +666,7 @@ function setReferralPantallasUi(checked) {
   document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !checked);
 }
 
-const REFERRAL_CAPTURAS_ACCEPT = "image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,.xml,application/xml,text/xml";
+const REFERRAL_CAPTURAS_ACCEPT = "image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xlsm,.xlsb,.xls,.csv,.ods,.docx,.docm,.dotx,.doc,.dot,.rtf,.odt,.pptx,.pptm,.ppsx,.ppt,.pps,.odp,.xml,application/xml,text/xml";
 
 function isReferralVideoFile(file) {
   if (/\.(mp4|webm)$/i.test(file.name || "")) return true;
@@ -683,11 +683,9 @@ function isReferralTxtFile(file) {
   return /\.txt$/i.test(file.name || "");
 }
 
-function isReferralExcelFile(file) {
-  if (/\.(xlsx|xls)$/i.test(file.name || "")) return true;
-  const t = file.type || "";
-  return t === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    || t === "application/vnd.ms-excel";
+/** Excel, Word, PowerPoint, CSV, RTF y OpenDocument (mismo listado que OfficeFileTypes.cs). */
+function isReferralOfficeFile(file) {
+  return /\.(xlsx|xlsm|xlsb|xls|csv|ods|docx|docm|dotx|doc|dot|rtf|odt|pptx|pptm|ppsx|ppt|pps|odp)$/i.test(file.name || "");
 }
 
 function isReferralXmlFile(file) {
@@ -700,7 +698,7 @@ function isReferralCapturaFile(file) {
   if (isReferralVideoFile(file)) return true;
   if (isReferralPdfFile(file)) return true;
   if (isReferralTxtFile(file)) return true;
-  if (isReferralExcelFile(file)) return true;
+  if (isReferralOfficeFile(file)) return true;
   if (isReferralXmlFile(file)) return true;
   if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
   return (file.type || "").startsWith("image/");
@@ -710,7 +708,7 @@ const MAX_REFERRAL_VIDEOS = 1;
 const MAX_REFERRAL_VIDEO_BYTES = 100 * 1024 * 1024;
 const MAX_REFERRAL_PDF_BYTES = 12 * 1024 * 1024;
 const MAX_REFERRAL_TXT_BYTES = 12 * 1024 * 1024;
-const MAX_REFERRAL_EXCEL_BYTES = 12 * 1024 * 1024;
+const MAX_REFERRAL_OFFICE_BYTES = 12 * 1024 * 1024;
 const MAX_REFERRAL_XML_BYTES = 12 * 1024 * 1024;
 
 function addReferralCapturaFiles(fileList, targetList) {
@@ -718,7 +716,7 @@ function addReferralCapturaFiles(fileList, targetList) {
   let rejectedHeavy = false;
   let rejectedPdfHeavy = false;
   let rejectedTxtHeavy = false;
-  let rejectedExcelHeavy = false;
+  let rejectedOfficeHeavy = false;
   let rejectedXmlHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
@@ -748,9 +746,9 @@ function addReferralCapturaFiles(fileList, targetList) {
         rejectedTxtHeavy = true;
         continue;
       }
-    } else if (isReferralExcelFile(file)) {
-      if (file.size > MAX_REFERRAL_EXCEL_BYTES) {
-        rejectedExcelHeavy = true;
+    } else if (isReferralOfficeFile(file)) {
+      if (file.size > MAX_REFERRAL_OFFICE_BYTES) {
+        rejectedOfficeHeavy = true;
         continue;
       }
     } else if (isReferralXmlFile(file)) {
@@ -772,14 +770,14 @@ function addReferralCapturaFiles(fileList, targetList) {
     void alertSt2("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedTxtHeavy) {
     void alertSt2("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
-  } else if (rejectedExcelHeavy) {
-    void alertSt2("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedOfficeHeavy) {
+    void alertSt2("Ese archivo Office pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedXmlHeavy) {
     void alertSt2("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
     void alertSt2("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    void alertSt2("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
+    void alertSt2("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Office (Excel, Word, PowerPoint, CSV), XML (.xml) o video MP4/WEBM.");
   }
   if (added > 0) setReferralPantallasUi(true);
   return added;
@@ -802,7 +800,7 @@ function refreshCapturasEstadoReferral(prefix, fileList) {
   const videos = fileList.filter(isReferralVideoFile).length;
   const pdfs = fileList.filter(isReferralPdfFile).length;
   const txts = fileList.filter(isReferralTxtFile).length;
-  const excels = fileList.filter(isReferralExcelFile).length;
+  const excels = fileList.filter(isReferralOfficeFile).length;
   const xmls = fileList.filter(isReferralXmlFile).length;
   const imgs = fileList.length - videos - pdfs - txts - excels - xmls;
   const parts = [];
@@ -810,7 +808,7 @@ function refreshCapturasEstadoReferral(prefix, fileList) {
   if (videos > 0) parts.push(`${videos} video(s)`);
   if (pdfs > 0) parts.push(`${pdfs} PDF`);
   if (txts > 0) parts.push(`${txts} TXT`);
-  if (excels > 0) parts.push(`${excels} Excel`);
+  if (excels > 0) parts.push(`${excels} Office`);
   if (xmls > 0) parts.push(`${xmls} XML`);
   estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
 }
@@ -942,7 +940,7 @@ function refreshChips(id, files, prefix, fileList) {
     const isVideo = isReferralVideoFile(f);
     const isPdf = isReferralPdfFile(f);
     const isTxt = isReferralTxtFile(f);
-    const isExcel = isReferralExcelFile(f);
+    const isExcel = isReferralOfficeFile(f);
     const isXml = isReferralXmlFile(f);
     const isChip = isVideo || isPdf || isTxt || isExcel || isXml;
     const card = document.createElement("div");

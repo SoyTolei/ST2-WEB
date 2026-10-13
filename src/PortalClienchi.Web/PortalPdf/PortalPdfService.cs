@@ -1,6 +1,8 @@
+using QuestPDF.Drawing.Exceptions;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using SkiaSharp;
 
 namespace PortalClienchi.Web.PortalPdf;
 
@@ -73,15 +75,34 @@ public static class PortalPdfService
             H3Color = Color.FromHex("#1E293B"),
         };
 
+    /// <summary>Ancho máximo de imagen dentro del área útil A4.</summary>
+    private const float ImageMaxWidth = 480f;
+
+    /// <summary>Alto máximo por tramo de imagen: tiene que entrar en una página con header y footer.</summary>
+    private const float ImageSliceMaxHeight = 600f;
+
     public static byte[] GeneratePdfBytes(PortalPdfGenerateRequest request, string? contentRoot = null)
     {
         QuestPDF.Settings.License = LicenseType.Community;
 
         var theme = GetTheme(request.DarkMode);
         var brand = (request.Brand ?? "").Trim();
-        var elements = PortalPdfHtmlParser.Parse(request.Html, request.Text);
         var logo = PortalPdfLogoGenerator.GetLogoBytes(theme.IsDark);
+        var elements = PortalPdfHtmlParser.Parse(request.Html, request.Text);
 
+        try
+        {
+            return BuildPdf(elements, theme, brand, logo);
+        }
+        catch (DocumentLayoutException) when (!string.IsNullOrWhiteSpace(request.Text))
+        {
+            // Algún bloque no entra en la página: mejor un PDF en texto plano que ninguno.
+            return BuildPdf(PortalPdfHtmlParser.Parse(null, request.Text), theme, brand, logo);
+        }
+    }
+
+    private static byte[] BuildPdf(IReadOnlyList<PortalPdfElement> elements, PdfTheme theme, string brand, byte[]? logo)
+    {
         return Document.Create(container =>
         {
             container.Page(page =>
@@ -162,7 +183,7 @@ public static class PortalPdfService
                                 break;
 
                             case PortalPdfImageElement img when img.ImageBytes.Length > 0:
-                                col.Item().PaddingVertical(8).MaxWidth(480).Image(img.ImageBytes).FitWidth();
+                                RenderImage(col, img.ImageBytes);
                                 break;
                         }
                     }
@@ -190,6 +211,62 @@ public static class PortalPdfService
                 });
             });
         }).GeneratePdf();
+    }
+
+    private static void RenderImage(ColumnDescriptor col, byte[] bytes)
+    {
+        var slices = SliceTallImage(bytes);
+        col.Item().PaddingVertical(8).Column(imgCol =>
+        {
+            foreach (var slice in slices)
+            {
+                imgCol.Item()
+                    .AlignCenter()
+                    .MaxWidth(ImageMaxWidth)
+                    .MaxHeight(ImageSliceMaxHeight)
+                    .Image(slice)
+                    .FitArea();
+            }
+        });
+    }
+
+    /// <summary>
+    /// Capturas largas (más altas que una página) se cortan en tramos a lo ancho completo,
+    /// para que QuestPDF pueda paginarlas en vez de fallar con DocumentLayoutException.
+    /// </summary>
+    private static IReadOnlyList<byte[]> SliceTallImage(byte[] bytes)
+    {
+        try
+        {
+            using var bmp = SKBitmap.Decode(bytes);
+            if (bmp is null || bmp.Width <= 0 || bmp.Height <= 0)
+                return [bytes];
+
+            var renderedHeight = bmp.Height * (ImageMaxWidth / bmp.Width);
+            if (renderedHeight <= ImageSliceMaxHeight)
+                return [bytes];
+
+            var slicePx = Math.Max(1, (int)Math.Floor(ImageSliceMaxHeight * bmp.Width / ImageMaxWidth));
+            var slices = new List<byte[]>();
+            for (var y = 0; y < bmp.Height; y += slicePx)
+            {
+                var h = Math.Min(slicePx, bmp.Height - y);
+                using var part = new SKBitmap();
+                if (!bmp.ExtractSubset(part, new SKRectI(0, y, bmp.Width, y + h)))
+                    return [bytes];
+                using var image = SKImage.FromBitmap(part);
+                using var data = image.Encode(SKEncodedImageFormat.Png, 90);
+                if (data is null)
+                    return [bytes];
+                slices.Add(data.ToArray());
+            }
+
+            return slices.Count > 0 ? slices : [bytes];
+        }
+        catch
+        {
+            return [bytes];
+        }
     }
 
     private static void RenderParagraph(ColumnDescriptor col, PortalPdfParagraphElement para, PdfTheme theme)

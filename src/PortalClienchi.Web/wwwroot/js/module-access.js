@@ -8,6 +8,7 @@ const MODULES_POLL_MS = 20000;
 
 const MODULE_LABELS = {
   oportunidad: "Oportunidad de Venta",
+  pdfPortal: "Generador de PDF",
   blanqueo: "Blanqueo Claves",
   blanqueoConfirm: "puede confirmar blanqueo",
   blanqueoLoad: "puede cargar blanqueo",
@@ -316,9 +317,9 @@ export function canSeeOportunidadModule() {
   return !!getCachedModuleFlags().oportunidad;
 }
 
+/** Botón del menú SQL / ONVIO. Desde Portal Cliente el generador sigue abierto para todos. */
 export function canSeePdfPortalModule() {
-  // Ya no es módulo de perfil: el generador vive como extra de Portal Cliente.
-  return true;
+  return !!getCachedModuleFlags().pdfPortal;
 }
 
 export function canSeeBlanqueoModule() {

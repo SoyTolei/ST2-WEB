@@ -1,7 +1,8 @@
 /**
- * Generador de PDFs para Portal Cliente (extra del tab Portal).
- * Ya no es opción de menú Planillas ni flag de perfil.
+ * Generador de PDFs: extra del tab Portal (todos) y botón del menú SQL / ONVIO (flag pdfPortal).
  */
+import { canSeePdfPortalModule as canSeePdfPortalMenuButton } from "./module-access.js";
+
 const DEFAULT_EDITOR_COLOR = "#0f172a";
 const DEFAULT_PREVIEW_COLOR = "#1e293b";
 
@@ -55,8 +56,11 @@ export function canSeePdfPortalModule() {
 export function syncPdfPortalModuleVisibility() {
   const btn = document.getElementById("plan-modulo-pdf-portal");
   if (!btn) return;
-  btn.classList.add("hidden");
-  btn.setAttribute("aria-hidden", "true");
+  const sistema = document.body.dataset.planSistema;
+  const sistemaOk = sistema === "BejermanSql" || sistema === "OnvioWeb";
+  const allowed = sistemaOk && canSeePdfPortalMenuButton();
+  btn.classList.toggle("hidden", !allowed);
+  btn.setAttribute("aria-hidden", allowed ? "false" : "true");
 }
 
 let lastRecordedSelection = null;

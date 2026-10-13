@@ -17,11 +17,6 @@ public static class CapturasTextoHelper
         ".txt",
     };
 
-    private static readonly HashSet<string> ExcelExt = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".xlsx", ".xls",
-    };
-
     private static readonly HashSet<string> XmlExt = new(StringComparer.OrdinalIgnoreCase)
     {
         ".xml",
@@ -131,6 +126,7 @@ public static class CapturasTextoHelper
         if (Only(flags, f => f.Pdf)) return "el";
         if (Only(flags, f => f.Txt)) return "el";
         if (Only(flags, f => f.Excel)) return "el";
+        if (Only(flags, f => f.Doc)) return "el";
         if (Only(flags, f => f.Xml)) return "el";
         if (Only(flags, f => f.Images)) return "la";
         return "el";
@@ -148,6 +144,7 @@ public static class CapturasTextoHelper
             _ when Only(flags, f => f.Pdf) => "El PDF se adjunta",
             _ when Only(flags, f => f.Txt) => "El TXT se adjunta",
             _ when Only(flags, f => f.Excel) => "El Excel se adjunta",
+            _ when Only(flags, f => f.Doc) => "El documento se adjunta",
             _ when Only(flags, f => f.Xml) => "El XML se adjunta",
             _ when Only(flags, f => f.Images) => "Las capturas se adjuntan",
             _ => $"{char.ToUpperInvariant(phrase[0])}{phrase[1..]} se adjuntan",
@@ -176,6 +173,7 @@ public static class CapturasTextoHelper
         if (flags.Pdf) n++;
         if (flags.Txt) n++;
         if (flags.Excel) n++;
+        if (flags.Doc) n++;
         if (flags.Xml) n++;
         return n;
     }
@@ -240,6 +238,16 @@ public static class CapturasTextoHelper
             });
         }
 
+        if (flags.Doc)
+        {
+            parts.Add(style switch
+            {
+                Style.Mayuscula => singular ? "DOCUMENTO" : "DOCUMENTOS",
+                Style.Titulo => singular ? "Documento" : "Documentos",
+                _ => singular ? "documento" : "documentos",
+            });
+        }
+
         if (flags.Xml)
         {
             parts.Add(style switch
@@ -275,24 +283,28 @@ public static class CapturasTextoHelper
         var pdf = false;
         var txt = false;
         var excel = false;
+        var doc = false;
         var xml = false;
         foreach (var e in enlaces)
         {
+            var ext = string.IsNullOrWhiteSpace(e.FileName) ? "" : Path.GetExtension(e.FileName);
             if (IsVideoFileName(e.FileName))
                 video = true;
             else if (IsPdfFileName(e.FileName))
                 pdf = true;
             else if (IsTxtFileName(e.FileName))
                 txt = true;
-            else if (IsExcelFileName(e.FileName))
+            else if (OfficeFileTypes.IsSpreadsheet(ext))
                 excel = true;
+            else if (OfficeFileTypes.IsOffice(ext))
+                doc = true;
             else if (IsXmlFileName(e.FileName))
                 xml = true;
             else
                 images = true;
         }
 
-        return new MediaFlags(images, video, pdf, txt, excel, xml);
+        return new MediaFlags(images, video, pdf, txt, excel, doc, xml);
     }
 
     private static bool IsVideoFileName(string? fileName)
@@ -316,13 +328,6 @@ public static class CapturasTextoHelper
         return TxtExt.Contains(Path.GetExtension(fileName));
     }
 
-    private static bool IsExcelFileName(string? fileName)
-    {
-        if (string.IsNullOrWhiteSpace(fileName))
-            return false;
-        return ExcelExt.Contains(Path.GetExtension(fileName));
-    }
-
     private static bool IsXmlFileName(string? fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -330,5 +335,5 @@ public static class CapturasTextoHelper
         return XmlExt.Contains(Path.GetExtension(fileName));
     }
 
-    private readonly record struct MediaFlags(bool Images, bool Video, bool Pdf, bool Txt, bool Excel, bool Xml);
+    private readonly record struct MediaFlags(bool Images, bool Video, bool Pdf, bool Txt, bool Excel, bool Doc, bool Xml);
 }

@@ -3,7 +3,8 @@ namespace PortalClienchi.Web.Planillas;
 public static class PlanModuleIds
 {
     public const string Oportunidad = "oportunidad";
-    public const string PdfPortal = "pdfPortal";
+    /// <summary>Botón «Generador de PDF» en el menú SQL / ONVIO. Las filas legacy "pdfPortal" se ignoran a propósito.</summary>
+    public const string PdfPortal = "pdf_generador";
     public const string Blanqueo = "blanqueo";
     /// <summary>Puede usar el formulario de alta (además de ver el módulo).</summary>
     public const string BlanqueoLoad = "blanqueo_load";

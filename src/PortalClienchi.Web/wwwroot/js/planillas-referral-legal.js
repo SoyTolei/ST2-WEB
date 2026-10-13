@@ -33,7 +33,7 @@ const LEGAL_SECTION_LABELS = {
   adjuntos: "Evidencias visuales",
 };
 
-const LEGAL_EVID_ACCEPT = "image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,.xml,application/xml,text/xml,.log,.har,application/json";
+const LEGAL_EVID_ACCEPT = "image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xlsm,.xlsb,.xls,.csv,.ods,.docx,.docm,.dotx,.doc,.dot,.rtf,.odt,.pptx,.pptm,.ppsx,.ppt,.pps,.odp,.xml,application/xml,text/xml,.log,.har,application/json";
 
 let hubCtx = null;
 let templatesCatalog = null;

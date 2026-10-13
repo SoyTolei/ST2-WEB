@@ -1,4 +1,4 @@
-﻿import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20260910b";
+﻿import { openPdfPortalModal, extractContentFromPortalFrame, bindPortalFrameContentWatcher } from "./pdf-portal.js?v=20261012a";
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
@@ -9,7 +9,7 @@ import { notifyAccessChanged } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings } from "./st2-sonner.js?v=20260917h";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20260923b";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261012a";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -136,6 +136,7 @@ const accessModulesClose = document.getElementById("st2-access-modules-close");
 const accessModulesCancel = document.getElementById("st2-access-modules-cancel");
 const accessModulesSave = document.getElementById("st2-access-modules-save");
 const accessModOportunidad = document.getElementById("st2-mod-oportunidad");
+const accessModPdfPortal = document.getElementById("st2-mod-pdf-portal");
 const accessModBlanqueo = document.getElementById("st2-mod-blanqueo");
 const accessModBlanqueoConfirm = document.getElementById("st2-mod-blanqueo-confirm");
 const accessModBlanqueoLoad = document.getElementById("st2-mod-blanqueo-load");
@@ -3756,8 +3757,7 @@ function accessModDefault(mods, key) {
 function readAccessModuleChecksFromForm() {
   return {
     oportunidad: !!accessModOportunidad?.checked,
-    // Siempre disponible desde Portal Cliente; no se gestiona por perfil.
-    pdfPortal: true,
+    pdfPortal: !!accessModPdfPortal?.checked,
     blanqueo: !!accessModBlanqueo?.checked,
     blanqueoConfirm: !!accessModBlanqueoConfirm?.checked,
     blanqueoLoad: !!accessModBlanqueoLoad?.checked,
@@ -3786,6 +3786,7 @@ function readAccessModuleChecksFromForm() {
 function setAccessModuleChecks(mods, { presetDefaults = false } = {}) {
   const def = (key) => (presetDefaults ? true : accessModDefault(mods, key));
   if (accessModOportunidad) accessModOportunidad.checked = presetDefaults ? false : !!mods.oportunidad;
+  if (accessModPdfPortal) accessModPdfPortal.checked = presetDefaults ? false : !!mods.pdfPortal;
   if (accessModPlanillasSqlOnvio) accessModPlanillasSqlOnvio.checked = def("planillasSqlOnvio");
   if (accessModPlanillasTransferencia) accessModPlanillasTransferencia.checked = def("planillasTransferencia");
   if (accessModPlanillasReferral) accessModPlanillasReferral.checked = def("planillasReferral");
@@ -3834,6 +3835,7 @@ function resetSqlSystemModules(enabled) {
     accessModBorradoBases,
     accessModBorradoBasesConfirm,
     accessModBorradoBasesLoad,
+    accessModPdfPortal,
   ];
   inputs.forEach((el) => { if (el) el.checked = false; });
   if (!on) return;

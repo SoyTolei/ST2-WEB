@@ -2,7 +2,7 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20260910b";
+import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20260917h";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20260917h";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile } from "./module-access.js";
@@ -771,11 +771,9 @@ function isPlanTxtFile(file) {
   return /\.txt$/i.test(file.name || "");
 }
 
-function isPlanExcelFile(file) {
-  if (/\.(xlsx|xls)$/i.test(file.name || "")) return true;
-  const t = file.type || "";
-  return t === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    || t === "application/vnd.ms-excel";
+/** Excel, Word, PowerPoint, CSV, RTF y OpenDocument (mismo listado que OfficeFileTypes.cs). */
+function isPlanOfficeFile(file) {
+  return /\.(xlsx|xlsm|xlsb|xls|csv|ods|docx|docm|dotx|doc|dot|rtf|odt|pptx|pptm|ppsx|ppt|pps|odp)$/i.test(file.name || "");
 }
 
 function isPlanXmlFile(file) {
@@ -788,7 +786,7 @@ function isPlanCapturaFile(file) {
   if (isPlanVideoFile(file)) return true;
   if (isPlanPdfFile(file)) return true;
   if (isPlanTxtFile(file)) return true;
-  if (isPlanExcelFile(file)) return true;
+  if (isPlanOfficeFile(file)) return true;
   if (isPlanXmlFile(file)) return true;
   if (/\.(png|jpe?g|gif|bmp|webp)$/i.test(file.name || "")) return true;
   return (file.type || "").startsWith("image/");
@@ -798,7 +796,7 @@ const MAX_PLAN_VIDEOS = 1;
 const MAX_PLAN_VIDEO_BYTES = 100 * 1024 * 1024;
 const MAX_PLAN_PDF_BYTES = 12 * 1024 * 1024;
 const MAX_PLAN_TXT_BYTES = 12 * 1024 * 1024;
-const MAX_PLAN_EXCEL_BYTES = 12 * 1024 * 1024;
+const MAX_PLAN_OFFICE_BYTES = 12 * 1024 * 1024;
 const MAX_PLAN_XML_BYTES = 12 * 1024 * 1024;
 
 function refreshCapturasUi() {
@@ -812,7 +810,7 @@ function refreshCapturasUi() {
     const isVideo = isPlanVideoFile(f);
     const isPdf = isPlanPdfFile(f);
     const isTxt = isPlanTxtFile(f);
-    const isExcel = isPlanExcelFile(f);
+    const isExcel = isPlanOfficeFile(f);
     const isXml = isPlanXmlFile(f);
     const isChip = isVideo || isPdf || isTxt || isExcel || isXml;
     const card = document.createElement("div");
@@ -862,7 +860,7 @@ function refreshCapturasUi() {
       const videos = capturaFiles.filter(isPlanVideoFile).length;
       const pdfs = capturaFiles.filter(isPlanPdfFile).length;
       const txts = capturaFiles.filter(isPlanTxtFile).length;
-      const excels = capturaFiles.filter(isPlanExcelFile).length;
+      const excels = capturaFiles.filter(isPlanOfficeFile).length;
       const xmls = capturaFiles.filter(isPlanXmlFile).length;
       const imgs = capturaFiles.length - videos - pdfs - txts - excels - xmls;
       const parts = [];
@@ -870,7 +868,7 @@ function refreshCapturasUi() {
       if (videos > 0) parts.push(`${videos} video(s)`);
       if (pdfs > 0) parts.push(`${pdfs} PDF`);
       if (txts > 0) parts.push(`${txts} TXT`);
-      if (excels > 0) parts.push(`${excels} Excel`);
+      if (excels > 0) parts.push(`${excels} Office`);
       if (xmls > 0) parts.push(`${xmls} XML`);
       estado.textContent = `${parts.join(" · ")} listo(s) para subir al generar el texto.`;
     }
@@ -894,7 +892,7 @@ function addCapturaFiles(fileList) {
   let rejectedHeavy = false;
   let rejectedPdfHeavy = false;
   let rejectedTxtHeavy = false;
-  let rejectedExcelHeavy = false;
+  let rejectedOfficeHeavy = false;
   let rejectedXmlHeavy = false;
   let rejectedVideo = false;
   let rejectedFormat = false;
@@ -922,9 +920,9 @@ function addCapturaFiles(fileList) {
         rejectedTxtHeavy = true;
         continue;
       }
-    } else if (isPlanExcelFile(file)) {
-      if (file.size > MAX_PLAN_EXCEL_BYTES) {
-        rejectedExcelHeavy = true;
+    } else if (isPlanOfficeFile(file)) {
+      if (file.size > MAX_PLAN_OFFICE_BYTES) {
+        rejectedOfficeHeavy = true;
         continue;
       }
     } else if (isPlanXmlFile(file)) {
@@ -944,14 +942,14 @@ function addCapturaFiles(fileList) {
     void alertSt2("Ese PDF pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedTxtHeavy) {
     void alertSt2("Ese TXT pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
-  } else if (rejectedExcelHeavy) {
-    void alertSt2("Ese Excel pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
+  } else if (rejectedOfficeHeavy) {
+    void alertSt2("Ese archivo Office pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedXmlHeavy) {
     void alertSt2("Ese XML pesa más de 12 MB. Recomendamos subirlo en los comentarios del caso.");
   } else if (rejectedVideo) {
     void alertSt2("Solo se permite 1 video MP4/WEBM de hasta 100 MB.");
   } else if (rejectedFormat && added === 0 && fileList?.length > 0) {
-    void alertSt2("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Excel (.xlsx/.xls), XML (.xml) o video MP4/WEBM.");
+    void alertSt2("Solo se admiten imágenes (PNG, JPG, GIF, BMP, WEBP), PDF, TXT, Office (Excel, Word, PowerPoint, CSV), XML (.xml) o video MP4/WEBM.");
   }
   if (added > 0) {
     const check = els.capturasCheck();
@@ -1661,6 +1659,10 @@ function bindEvents() {
     void revealView("borradoBases");
   });
 
+  document.querySelector('[data-plan-modulo="pdf-portal"]')?.addEventListener("click", () => {
+    openPdfPortalModal();
+  });
+
   document.addEventListener("st2:open-blanqueo-from-alert", () => {
     void revealView("blanqueo");
   });
@@ -1780,7 +1782,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20260923b").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20261012a").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });

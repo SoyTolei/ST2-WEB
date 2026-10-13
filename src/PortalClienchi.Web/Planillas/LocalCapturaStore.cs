@@ -27,7 +27,7 @@ public sealed class LocalCapturaStore
         ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp",
         ".mp4", ".webm",
         ".pdf",
-        ".xlsx", ".xls",
+        .. OfficeFileTypes.Extensions.Select(e => e.ToLowerInvariant()).Where(e => e != ".csv"),
         ".xml",
         ".trc", ".csv", ".txt",
     ];
@@ -45,11 +45,6 @@ public sealed class LocalCapturaStore
     private static readonly HashSet<string> AllowedPdfExt = new(StringComparer.OrdinalIgnoreCase)
     {
         ".pdf",
-    };
-
-    private static readonly HashSet<string> AllowedExcelExt = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".xlsx", ".xls",
     };
 
     private static readonly HashSet<string> AllowedXmlExt = new(StringComparer.OrdinalIgnoreCase)
@@ -141,7 +136,7 @@ public sealed class LocalCapturaStore
                 var isVideo = AllowedVideoExt.Contains(ext);
                 var isPdf = AllowedPdfExt.Contains(ext) || LooksLikePdf(raw);
                 var isTxt = ext.Equals(".txt", StringComparison.OrdinalIgnoreCase);
-                var isExcel = AllowedExcelExt.Contains(ext);
+                var isOffice = OfficeFileTypes.IsOffice(ext);
                 var isXml = AllowedXmlExt.Contains(ext);
 
                 if (isVideo)
@@ -222,37 +217,37 @@ public sealed class LocalCapturaStore
                     continue;
                 }
 
-                if (isExcel)
+                if (isOffice)
                 {
                     if (raw.Length > maxImageBytes)
                     {
                         results.Add(new CapturaSubidaResult(
                             safeName,
                             null,
-                            $"El Excel supera el máximo de {maxImageBytes / (1024 * 1024.0):0.#} MB."));
+                            $"El archivo Office supera el máximo de {maxImageBytes / (1024 * 1024.0):0.#} MB."));
                         continue;
                     }
 
-                    if (!LooksLikeExcel(raw, ext))
+                    if (!OfficeFileTypes.LooksValid(raw, ext))
                     {
-                        results.Add(new CapturaSubidaResult(safeName, null, "El archivo no parece un Excel válido (.xlsx o .xls)."));
+                        results.Add(new CapturaSubidaResult(safeName, null, $"El archivo no parece un {ext.TrimStart('.').ToUpperInvariant()} válido."));
                         continue;
                     }
 
                     EnsureRoot();
-                    var excelExt = AllowedExcelExt.Contains(ext) ? ext.ToLowerInvariant() : ".xlsx";
-                    var excelId = NewShortId();
-                    await File.WriteAllBytesAsync(Path.Combine(_root, excelId + excelExt), raw, ct)
+                    var officeExt = ext.ToLowerInvariant();
+                    var officeId = NewShortId();
+                    await File.WriteAllBytesAsync(Path.Combine(_root, officeId + officeExt), raw, ct)
                         .ConfigureAwait(false);
-                    var downloadName = SanitizeDownloadName(safeName, excelExt);
+                    var downloadName = SanitizeDownloadName(safeName, officeExt);
                     await File.WriteAllTextAsync(
-                        Path.Combine(_root, excelId + ".meta"),
+                        Path.Combine(_root, officeId + ".meta"),
                         downloadName,
                         ct).ConfigureAwait(false);
 
-                    var excelUrl = $"{baseUrl}/c/{excelId}";
-                    _logger.LogInformation("Excel guardado {Id} ({Bytes} bytes) → {Url}", excelId, raw.Length, excelUrl);
-                    results.Add(new CapturaSubidaResult(safeName, excelUrl, null));
+                    var officeUrl = $"{baseUrl}/c/{officeId}";
+                    _logger.LogInformation("Office guardado {Id} ({Bytes} bytes) → {Url}", officeId, raw.Length, officeUrl);
+                    results.Add(new CapturaSubidaResult(safeName, officeUrl, null));
                     continue;
                 }
 
@@ -300,7 +295,7 @@ public sealed class LocalCapturaStore
 
                 if (!AllowedExt.Contains(ext) && !LooksLikeImage(raw))
                 {
-                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes, PDF, TXT, Excel, XML o video mp4/webm."));
+                    results.Add(new CapturaSubidaResult(safeName, null, "Formato no permitido. Imágenes, PDF, TXT, Office (Excel, Word, PowerPoint, CSV), XML o video mp4/webm."));
                     continue;
                 }
 
@@ -432,7 +427,7 @@ public sealed class LocalCapturaStore
             if (!File.Exists(path))
                 continue;
 
-            var forceDownload = AllowedDownloadExt.Contains(ext) || AllowedExcelExt.Contains(ext) || AllowedXmlExt.Contains(ext);
+            var forceDownload = AllowedDownloadExt.Contains(ext) || OfficeFileTypes.IsOffice(ext) || AllowedXmlExt.Contains(ext);
             string? downloadName = null;
             if (forceDownload)
             {
@@ -665,19 +660,6 @@ public sealed class LocalCapturaStore
         && raw[3] == (byte)'F'
         && raw[4] == (byte)'-';
 
-    private static bool LooksLikeExcel(byte[] raw, string ext)
-    {
-        if (ext.Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
-            return LooksLikeZip(raw);
-        if (ext.Equals(".xls", StringComparison.OrdinalIgnoreCase))
-            return raw.Length >= 8
-                && raw[0] == 0xD0 && raw[1] == 0xCF && raw[2] == 0x11 && raw[3] == 0xE0;
-        return false;
-    }
-
-    private static bool LooksLikeZip(byte[] raw) =>
-        raw.Length >= 4 && raw[0] == 0x50 && raw[1] == 0x4B && raw[2] == 0x03 && raw[3] == 0x04;
-
     private static bool LooksLikeXml(byte[] raw)
     {
         var i = 0;
@@ -705,7 +687,7 @@ public sealed class LocalCapturaStore
         return ".bin";
     }
 
-    private static string MimeForExt(string ext) => ext.ToLowerInvariant() switch
+    private static string MimeForExt(string ext) => OfficeFileTypes.MimeFor(ext) ?? ext.ToLowerInvariant() switch
     {
         ".webp" => "image/webp",
         ".jpg" or ".jpeg" => "image/jpeg",
