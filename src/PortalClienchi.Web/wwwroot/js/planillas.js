@@ -1794,7 +1794,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20261012d").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20261013i").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });

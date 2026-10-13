@@ -290,10 +290,11 @@ function updateCheckStatuses() {
 
 function setStatus(id, ok) {
   const el = document.getElementById(id);
-  if (el) {
-    el.textContent = ok ? "✓" : "○";
-    el.style.color = ok ? "#16a34a" : "#94a3b8";
-  }
+  if (!el) return;
+  el.textContent = "";
+  el.classList.toggle("is-on", !!ok);
+  el.style.color = "";
+  el.setAttribute("aria-label", ok ? "Completo" : "Pendiente");
 }
 
 function bindAdjCard(cardId, checkId, markId, onChange) {

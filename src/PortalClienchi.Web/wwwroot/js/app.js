@@ -13,7 +13,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013i";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013j";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
