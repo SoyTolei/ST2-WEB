@@ -92,6 +92,8 @@ let raf = 0;
 let lastTs = 0;
 let uTime = 0;
 let resizeObs = null;
+const MAX_DPR = 1.5;
+const MIN_FRAME_MS = 1000 / 30;
 
 function prefersReducedMotion() {
   try {
@@ -132,6 +134,7 @@ function stopLoop() {
 function frame(ts) {
   raf = requestAnimationFrame(frame);
   if (!gl || !program) return;
+  if (lastTs && ts - lastTs < MIN_FRAME_MS) return;
   const delta = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 0.016;
   lastTs = ts;
   uTime += 0.1 * delta;
@@ -151,7 +154,7 @@ function startLoop() {
 
 function setSize() {
   if (!canvas || !container || !gl) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
   const w = Math.max(1, Math.floor(container.clientWidth * dpr));
   const h = Math.max(1, Math.floor(container.clientHeight * dpr));
   if (canvas.width !== w || canvas.height !== h) {

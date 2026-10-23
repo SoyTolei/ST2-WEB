@@ -197,6 +197,9 @@ let buffer = null;
 let rafId = 0;
 let running = false;
 let resizeObs = null;
+let lastFrameTs = 0;
+const MAX_DPR = 1.25;
+const MIN_FRAME_MS = 1000 / 30;
 let opts = { ...DEFAULTS };
 const locs = {};
 
@@ -228,7 +231,7 @@ function syncStaticUniforms() {
 
 function updatePlacement() {
   if (!container || !canvas || !gl || !program) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
   const wCss = Math.max(1, container.clientWidth);
   const hCss = Math.max(1, container.clientHeight);
   const bw = Math.max(1, Math.floor(wCss * dpr));
@@ -249,6 +252,11 @@ function updatePlacement() {
 
 function frame(t) {
   if (!running || !gl || !program) return;
+  if (lastFrameTs && t - lastFrameTs < MIN_FRAME_MS) {
+    rafId = requestAnimationFrame(frame);
+    return;
+  }
+  lastFrameTs = t;
 
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -267,6 +275,7 @@ function frame(t) {
 
 function stopLoop() {
   running = false;
+  lastFrameTs = 0;
   if (rafId) {
     cancelAnimationFrame(rafId);
     rafId = 0;
