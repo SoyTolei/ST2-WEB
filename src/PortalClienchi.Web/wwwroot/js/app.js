@@ -14,7 +14,7 @@ import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
 import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013m";
-import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js";
+import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
