@@ -25,6 +25,7 @@ let startTime = 0;
 let lastFrame = 0;
 let options = { ...DEFAULTS };
 let pointer = { x: 0.5, y: 0.5, active: false };
+const MIN_FRAME_MS = 1000 / 60;
 
 const prefersReducedMotion = () => {
   try {
@@ -85,7 +86,7 @@ function sizeCanvas() {
 function draw(timestamp) {
   raf = 0;
   if (!running || !ctx || !host || document.hidden) return;
-  if (lastFrame && timestamp - lastFrame < 1000 / 30) {
+  if (lastFrame && timestamp - lastFrame < MIN_FRAME_MS) {
     raf = requestAnimationFrame(draw);
     return;
   }
