@@ -157,7 +157,7 @@ function renderRound(round) {
     return renderNotice("Está bloqueada", "Resolvé las rondas anteriores para desbloquearla.");
   }
   if (round.state === "closed") {
-    return renderNotice("La competencia cerró", "Mañana a las 08:00 empieza un Críptico nuevo.");
+    return renderNotice("Nueva jornada", "El Críptico siguiente empieza a las 08:00.");
   }
 
   const solved = round.state === "solved";

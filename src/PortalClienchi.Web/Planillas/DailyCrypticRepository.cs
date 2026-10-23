@@ -9,7 +9,6 @@ namespace PortalClienchi.Web.Planillas;
 public sealed class DailyCrypticRepository
 {
     public static readonly int[] Slots = [8, 12, 16];
-    public const int ClosingHour = 19;
     public const int MaxAttempts = 5;
 
     private readonly string _dbPath;
@@ -38,32 +37,24 @@ public sealed class DailyCrypticRepository
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var date = DateOnly.FromDateTime(localNow.DateTime);
+        var (date, overnight) = ResolveCompetition(localNow);
         EnsureSchedule(date);
 
         using var conn = Open();
-        var rounds = LoadRounds(conn, normalizedEmail, date, localNow);
+        var rounds = LoadRounds(conn, normalizedEmail, date, localNow, overnight);
         var ranking = LoadRanking(conn, date);
-        var phase = localNow.Hour < Slots[0]
-            ? "upcoming"
-            : localNow.Hour >= ClosingHour
-                ? "closed"
-                : "active";
-
-        string? nextAt = null;
-        if (phase != "closed")
-        {
-            var nextSlot = Slots.FirstOrDefault(slot => localNow.Hour < slot);
-            if (nextSlot > 0)
-                nextAt = $"{date:yyyy-MM-dd}T{nextSlot:00}:00:00-03:00";
-            else if (localNow.Hour < ClosingHour)
-                nextAt = $"{date:yyyy-MM-dd}T{ClosingHour:00}:00:00-03:00";
-        }
+        var nextSlot = overnight ? 0 : Slots.FirstOrDefault(slot => localNow.Hour < slot);
+        var nextBoundary = overnight
+            ? localNow.Date.AddHours(Slots[0])
+            : nextSlot > 0
+                ? localNow.Date.AddHours(nextSlot)
+                : localNow.Date.AddDays(1).AddHours(Slots[0]);
+        var nextAt = new DateTimeOffset(nextBoundary, TimeSpan.FromHours(-3)).ToString("O");
 
         return new DailyCrypticStatusDto(
             date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             "America/Argentina/Buenos_Aires",
-            phase,
+            "active",
             nextAt,
             rounds,
             ranking);
@@ -85,12 +76,8 @@ public sealed class DailyCrypticRepository
             throw new ArgumentException("Escribí una respuesta.");
 
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var date = DateOnly.FromDateTime(localNow.DateTime);
-        if (localNow.Hour < Slots[0])
-            throw new InvalidOperationException("El Críptico abre a las 08:00.");
-        if (localNow.Hour >= ClosingHour)
-            throw new InvalidOperationException("La competencia de hoy cerró a las 19:00.");
-        if (localNow.Hour < slot)
+        var (date, overnight) = ResolveCompetition(localNow);
+        if (!overnight && localNow.Hour < slot)
             throw new InvalidOperationException($"La ronda de las {slot:00}:00 todavía no abrió.");
 
         EnsureSchedule(date);
@@ -287,11 +274,20 @@ public sealed class DailyCrypticRepository
         return (long)(idCmd.ExecuteScalar() ?? 0L);
     }
 
+    private static (DateOnly Date, bool Overnight) ResolveCompetition(DateTimeOffset localNow)
+    {
+        var date = DateOnly.FromDateTime(localNow.DateTime);
+        return localNow.Hour < Slots[0]
+            ? (date.AddDays(-1), true)
+            : (date, false);
+    }
+
     private IReadOnlyList<DailyCrypticRoundDto> LoadRounds(
         SqliteConnection conn,
         string email,
         DateOnly date,
-        DateTimeOffset localNow)
+        DateTimeOffset localNow,
+        bool overnight)
     {
         var rounds = new List<DailyCrypticRoundDto>(Slots.Length);
         var priorSolved = true;
@@ -301,17 +297,16 @@ public sealed class DailyCrypticRepository
                 ?? throw new InvalidOperationException("Falta la pista programada.");
             var solve = LoadSolve(conn, null, email, date, slot);
             var attempts = CountAttempts(conn, null, email, date, slot);
+            var opened = overnight || localNow.Hour >= slot;
             var state = solve is not null
                 ? "solved"
-                : localNow.Hour < slot
+                : !opened
                     ? "upcoming"
-                    : localNow.Hour >= ClosingHour
-                        ? "closed"
-                        : !priorSolved
-                            ? "blocked"
-                            : attempts >= MaxAttempts
-                                ? "failed"
-                                : "available";
+                    : !priorSolved
+                        ? "blocked"
+                        : attempts >= MaxAttempts
+                            ? "failed"
+                            : "available";
 
             var revealClue = state is "available" or "solved" or "failed";
             var revealSolution = state == "solved";

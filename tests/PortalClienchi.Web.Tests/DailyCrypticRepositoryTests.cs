@@ -77,12 +77,27 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Rejects_submissions_outside_the_competition_window()
+    public void Keeps_the_competition_open_through_the_night()
     {
-        Assert.Throws<InvalidOperationException>(
-            () => _repository.Submit(Email, 8, "mate", AtArgentina(2026, 10, 23, 7, 59)));
-        Assert.Throws<InvalidOperationException>(
-            () => _repository.Submit(Email, 8, "mate", AtArgentina(2026, 10, 23, 19, 0)));
+        var evening = AtArgentina(2026, 10, 23, 23, 30);
+        var eveningStatus = _repository.GetStatus(Email, evening);
+        Assert.Equal("2026-10-23", eveningStatus.Date);
+        Assert.Equal("available", eveningStatus.Rounds[0].State);
+
+        var earlyMorning = AtArgentina(2026, 10, 24, 2, 15);
+        var overnight = _repository.GetStatus(Email, earlyMorning);
+        Assert.Equal("2026-10-23", overnight.Date);
+        Assert.Equal("available", overnight.Rounds[0].State);
+        Assert.Equal("blocked", overnight.Rounds[1].State);
+
+        var answer = ScheduledAnswer(overnight.Date, 8);
+        var solved = _repository.Submit(Email, 8, answer, earlyMorning);
+        Assert.True(solved.Correct);
+
+        var nextCompetition = _repository.GetStatus(Email, AtArgentina(2026, 10, 24, 8, 0));
+        Assert.Equal("2026-10-24", nextCompetition.Date);
+        Assert.Equal("available", nextCompetition.Rounds[0].State);
+        Assert.Equal(0, nextCompetition.Rounds[0].AttemptsUsed);
     }
 
     [Fact]
