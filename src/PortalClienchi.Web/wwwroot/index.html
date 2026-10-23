@@ -454,6 +454,9 @@
               </div>
             </div>
           </div>
+          <aside id="st2-cryptic" class="st2-cryptic" aria-labelledby="st2-cryptic-title">
+            <div class="st2-cryptic-loading" role="status" aria-live="polite">Preparando el Críptico del día…</div>
+          </aside>
         </div>
 
         <div id="planillas-chile-embed" class="planillas-view hidden">
@@ -1833,6 +1836,16 @@
                     <span class="st2-admin-subtab-sub">Qué módulos abren y con qué frecuencia</span>
                   </span>
                 </button>
+                <button type="button" class="st2-admin-subtab" data-admin-subtab="cripticos" role="tab" aria-selected="false">
+                  <span class="st2-admin-subtab-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="m16 15 1.5 1.5L20 14"/></svg>
+                  </span>
+                  <span class="st2-admin-subtab-copy">
+                    <span class="st2-admin-subtab-eyebrow">Juego diario</span>
+                    <span class="st2-admin-subtab-title">Crípticos</span>
+                    <span class="st2-admin-subtab-sub">Banco, revisión y dificultad</span>
+                  </span>
+                </button>
               </div>
             </div>
             <div data-admin-sub="accesos">
@@ -1911,6 +1924,70 @@
                 <div id="st2-admin-usage-months-body" class="st2-admin-usage-months-body"></div>
               </section>
             </div>
+          </div>
+          <div class="st2-cryptic-admin hidden" data-admin-sub="cripticos" hidden>
+            <div class="st2-cryptic-admin-head">
+              <div>
+                <h4>Banco de Crípticos</h4>
+                <p id="st2-cryptic-admin-summary">Cargando pistas…</p>
+              </div>
+              <button type="button" id="st2-cryptic-admin-new" class="st2-access-admin-preset">Nueva pista</button>
+            </div>
+            <form id="st2-cryptic-admin-form" class="st2-cryptic-admin-form hidden" hidden>
+              <input type="hidden" id="st2-cryptic-admin-id"/>
+              <div class="st2-cryptic-admin-grid">
+                <label class="is-wide">Pista
+                  <input id="st2-cryptic-admin-clue" type="text" maxlength="280" required/>
+                </label>
+                <label>Respuesta
+                  <input id="st2-cryptic-admin-answer" type="text" maxlength="80" required/>
+                </label>
+                <label>Enumeración
+                  <input id="st2-cryptic-admin-enumeration" type="text" maxlength="24" placeholder="(8)" required/>
+                </label>
+                <label>Definición
+                  <input id="st2-cryptic-admin-definition" type="text" maxlength="120" required/>
+                </label>
+                <label>Mecanismo
+                  <input id="st2-cryptic-admin-mechanism" type="text" maxlength="120" required/>
+                </label>
+                <label>Indicador
+                  <input id="st2-cryptic-admin-indicator" type="text" maxlength="120"/>
+                </label>
+                <label>Material
+                  <input id="st2-cryptic-admin-fodder" type="text" maxlength="180" required/>
+                </label>
+                <label class="is-wide">Construcción
+                  <input id="st2-cryptic-admin-wordplay" type="text" maxlength="300" required/>
+                </label>
+                <label class="is-wide">Explicación final
+                  <textarea id="st2-cryptic-admin-parse" rows="3" maxlength="700" required></textarea>
+                </label>
+                <label>Dificultad
+                  <select id="st2-cryptic-admin-difficulty">
+                    <option value="1">1 · Entrada</option>
+                    <option value="2">2 · Intermedia</option>
+                    <option value="3">3 · Difícil</option>
+                  </select>
+                </label>
+                <label>Respuestas alternativas
+                  <input id="st2-cryptic-admin-aliases" type="text" placeholder="Separadas por coma"/>
+                </label>
+              </div>
+              <div class="st2-cryptic-admin-checks">
+                <label><input id="st2-cryptic-admin-reviewed" type="checkbox"/> Revisada y lista para rotar</label>
+                <label><input id="st2-cryptic-admin-active" type="checkbox" checked/> Activa</label>
+              </div>
+              <p id="st2-cryptic-admin-status" role="status" aria-live="polite"></p>
+              <div class="st2-cryptic-admin-actions">
+                <button type="button" id="st2-cryptic-admin-cancel" class="st2-access-admin-cancel">Cancelar</button>
+                <button type="submit" class="st2-access-admin-submit">Guardar pista</button>
+              </div>
+            </form>
+            <div class="st2-cryptic-admin-toolbar">
+              <input id="st2-cryptic-admin-search" type="search" placeholder="Buscar pista, respuesta o mecanismo…" autocomplete="off"/>
+            </div>
+            <div id="st2-cryptic-admin-list" class="st2-cryptic-admin-list"></div>
           </div>
           <div data-admin-sub="accesos">
           <div id="st2-access-admin-inbox" class="st2-access-admin-inbox hidden"></div>

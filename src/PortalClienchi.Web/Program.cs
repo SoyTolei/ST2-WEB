@@ -44,6 +44,7 @@ builder.Services.AddSingleton<BlanqueoRepository>();
 builder.Services.AddSingleton<BorradoBasesRepository>();
 builder.Services.AddSingleton<AppAccessRepository>();
 builder.Services.AddSingleton<ModuleAccessRepository>();
+builder.Services.AddSingleton<DailyCrypticRepository>();
 builder.Services.AddSingleton<St2ToolsStore>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -475,6 +476,7 @@ app.MapMethods("/embed/{site}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE",
         await proxy.HandleAsync(ctx, site, "", ct));
 
 app.MapPlanillasEndpoints();
+app.MapDailyCrypticEndpoints();
 app.MapBlanqueoEndpoints();
 app.MapBorradoBasesEndpoints();
 app.MapPortalPdfEndpoints();

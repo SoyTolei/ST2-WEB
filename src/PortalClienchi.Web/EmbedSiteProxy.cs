@@ -93,6 +93,7 @@ internal sealed class EmbedSiteProxy
         "/api/planillas/",
         "/api/portal-pdf/",
         "/api/access/",
+        "/api/cryptic/",
         "/api/capturas/",
         "/api/tools/",
     ];

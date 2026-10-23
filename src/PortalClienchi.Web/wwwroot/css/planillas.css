@@ -5804,3 +5804,701 @@ html.st2-theme-dark .plan-legal-ado-reminder {
     transform: none !important;
   }
 }
+
+/* ── Críptico diario ───────────────────────────────────────────── */
+
+.st2-cryptic {
+  width: min(1200px, 98vw);
+  margin: 14px auto 0;
+  padding: 18px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 18px 48px color-mix(in srgb, #312e81 14%, transparent);
+}
+
+.st2-cryptic[aria-busy="true"] {
+  cursor: progress;
+}
+
+.st2-cryptic-loading {
+  min-height: 112px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.st2-cryptic-head,
+.st2-cryptic-ranking-head,
+.st2-cryptic-answer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.st2-cryptic-head h2 {
+  margin: 2px 0 0;
+  font-family: var(--r-font-display, inherit);
+  font-size: 1.18rem;
+  letter-spacing: -0.02em;
+}
+
+.st2-cryptic-head p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  text-transform: capitalize;
+}
+
+.st2-cryptic-kicker {
+  color: #f97316;
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.st2-cryptic-rank-toggle,
+.st2-cryptic-hints button,
+.st2-cryptic-notice button {
+  min-height: 36px;
+  padding: 0 13px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 75%, #f97316 7%);
+  border: 1px solid color-mix(in srgb, var(--border) 72%, #f97316 28%);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-cryptic-rank-toggle span {
+  display: inline-grid;
+  min-width: 20px;
+  min-height: 20px;
+  margin-left: 5px;
+  place-items: center;
+  color: #fff;
+  background: #f97316;
+  border-radius: 999px;
+  font-size: 0.66rem;
+}
+
+.st2-cryptic-rounds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 14px 0;
+}
+
+.st2-cryptic-round {
+  min-width: 0;
+  min-height: 53px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 7px;
+  align-items: center;
+  padding: 8px 10px;
+  text-align: left;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.st2-cryptic-round > span {
+  grid-row: 1 / 3;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-round strong {
+  font-size: 0.76rem;
+}
+
+.st2-cryptic-round small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st2-cryptic-round.is-active {
+  border-color: color-mix(in srgb, #f97316 64%, var(--border));
+  background: color-mix(in srgb, var(--panel) 78%, #f97316 11%);
+}
+
+.st2-cryptic-round.is-solved > span {
+  color: #22c55e;
+}
+
+.st2-cryptic-round.is-available > span,
+.st2-cryptic-round.is-active > span {
+  color: #f97316;
+}
+
+.st2-cryptic-body {
+  min-height: 150px;
+  padding: 15px;
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.st2-cryptic-clue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.st2-cryptic-clue-meta span {
+  padding: 3px 8px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 80%, #3a3391 12%);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-clue {
+  margin: 14px 0 15px;
+  padding: 0;
+  color: var(--text);
+  border: 0;
+  font-family: var(--r-font-display, inherit);
+  font-size: clamp(1rem, 1.6vw, 1.3rem);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.st2-cryptic-clue b {
+  color: #f97316;
+  font-size: 0.78em;
+  white-space: nowrap;
+}
+
+.st2-cryptic-form label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-form > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.st2-cryptic-form input {
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 12px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.86rem;
+  text-transform: uppercase;
+}
+
+.st2-cryptic-form input:focus-visible {
+  outline: 2px solid color-mix(in srgb, #f97316 78%, transparent);
+  outline-offset: 2px;
+}
+
+.st2-cryptic-form button {
+  min-width: 88px;
+  min-height: 42px;
+  padding: 0 16px;
+  color: #fff;
+  background: #f97316;
+  border: 0;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.st2-cryptic-form button:disabled {
+  cursor: wait;
+  opacity: 0.66;
+}
+
+.st2-cryptic-status {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.st2-cryptic-status.is-error {
+  color: #ef4444;
+}
+
+.st2-cryptic-hints {
+  margin-top: 8px;
+}
+
+.st2-cryptic-hints button {
+  min-height: 30px;
+  padding-inline: 10px;
+  font-size: 0.67rem;
+}
+
+.st2-cryptic-hints button:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
+.st2-cryptic-hints ul {
+  margin: 9px 0 0;
+  padding: 10px 12px 10px 27px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 72%, #3a3391 8%);
+  border-radius: 9px;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.st2-cryptic-notice {
+  min-height: 116px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.st2-cryptic-notice strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.st2-cryptic-notice p {
+  margin: 0;
+  font-size: 0.73rem;
+}
+
+.st2-cryptic-notice button {
+  width: fit-content;
+  margin: 8px auto 0;
+}
+
+.st2-cryptic-solution {
+  display: grid;
+  gap: 11px;
+}
+
+.st2-cryptic-answer {
+  padding: 10px 12px;
+  background: color-mix(in srgb, #22c55e 11%, var(--panel));
+  border: 1px solid color-mix(in srgb, #22c55e 42%, var(--border));
+  border-radius: 10px;
+}
+
+.st2-cryptic-answer span,
+.st2-cryptic-answer small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.st2-cryptic-answer strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.st2-cryptic-solution dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+
+.st2-cryptic-solution dl > div {
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.st2-cryptic-solution dt {
+  color: var(--text-muted);
+  font-size: 0.61rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.st2-cryptic-solution dd {
+  margin: 3px 0 0;
+  color: var(--text);
+  font-size: 0.73rem;
+}
+
+.st2-cryptic-parse {
+  margin: 0;
+  padding: 9px 11px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, #f97316 7%, var(--panel));
+  border-left: 3px solid #f97316;
+  border-radius: 4px 8px 8px 4px;
+  font-size: 0.73rem;
+  line-height: 1.5;
+}
+
+.st2-cryptic-ranking {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.st2-cryptic-ranking-head strong {
+  font-size: 0.82rem;
+}
+
+.st2-cryptic-ranking-head small {
+  color: var(--text-muted);
+  font-size: 0.64rem;
+}
+
+.st2-cryptic-ranking ol {
+  display: grid;
+  gap: 4px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.st2-cryptic-ranking li {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 35px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+}
+
+.st2-cryptic-ranking li:nth-child(odd) {
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+}
+
+.st2-cryptic-rank-pos {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 76%, #f97316 8%);
+  border-radius: 999px;
+  font-size: 0.63rem;
+  font-weight: 800;
+}
+
+.st2-cryptic-rank-player {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st2-cryptic-rank-meta,
+.st2-cryptic-empty {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.st2-cryptic-empty {
+  margin: 12px 0 0;
+  text-align: center;
+}
+
+html.st2-theme-dark .st2-cryptic {
+  background:
+    radial-gradient(480px 180px at 0 0, rgba(58, 51, 145, 0.2), transparent 65%),
+    rgba(15, 11, 24, 0.86);
+  border-color: rgba(191, 184, 255, 0.15);
+  box-shadow: 0 24px 70px rgba(5, 3, 15, 0.4);
+}
+
+@media (min-width: 1850px) {
+  .st2-cryptic {
+    position: fixed;
+    z-index: 25;
+    top: 152px;
+    right: 22px;
+    width: 300px;
+    max-height: calc(100vh - 174px);
+    margin: 0;
+    overflow: auto;
+  }
+
+  .st2-cryptic-round {
+    padding-inline: 7px;
+  }
+
+  .st2-cryptic-round small {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .st2-cryptic {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 11px;
+  }
+
+  .st2-cryptic-head {
+    align-items: flex-start;
+  }
+
+  .st2-cryptic-rank-toggle {
+    padding-inline: 10px;
+  }
+
+  .st2-cryptic-round {
+    padding-inline: 6px;
+  }
+
+  .st2-cryptic-round small {
+    display: none;
+  }
+
+  .st2-cryptic-form > div {
+    grid-template-columns: 1fr;
+  }
+
+  .st2-cryptic-form button {
+    width: 100%;
+  }
+
+  .st2-cryptic-solution dl {
+    grid-template-columns: 1fr;
+  }
+
+  .st2-cryptic-ranking li {
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+  }
+
+  .st2-cryptic-rank-meta {
+    display: none;
+  }
+}
+
+/* ── Editorial de Crípticos en ADMIN ───────────────────────────── */
+
+.st2-cryptic-admin {
+  display: grid;
+  gap: 14px;
+  padding: 18px 0 4px;
+}
+
+.st2-cryptic-admin-head,
+.st2-cryptic-admin-actions,
+.st2-cryptic-admin-checks {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.st2-cryptic-admin-head h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.st2-cryptic-admin-head p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.st2-cryptic-admin-form {
+  padding: 16px;
+  background: color-mix(in srgb, var(--panel) 88%, #3a3391 5%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.st2-cryptic-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.st2-cryptic-admin-grid label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-admin-grid label.is-wide {
+  grid-column: 1 / -1;
+}
+
+.st2-cryptic-admin-grid input,
+.st2-cryptic-admin-grid textarea,
+.st2-cryptic-admin-grid select,
+.st2-cryptic-admin-toolbar input {
+  width: 100%;
+  min-height: 39px;
+  padding: 8px 10px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.76rem;
+}
+
+.st2-cryptic-admin-grid textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.st2-cryptic-admin-checks {
+  justify-content: flex-start;
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-admin-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#st2-cryptic-admin-status {
+  min-height: 18px;
+  margin: 8px 0;
+  color: #ef4444;
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-admin-actions {
+  justify-content: flex-end;
+}
+
+.st2-cryptic-admin-toolbar input {
+  max-width: 440px;
+}
+
+.st2-cryptic-admin-list {
+  display: grid;
+  gap: 7px;
+  max-height: 58vh;
+  overflow: auto;
+}
+
+.st2-cryptic-admin-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 12px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.st2-cryptic-admin-item.is-inactive {
+  opacity: 0.62;
+}
+
+.st2-cryptic-admin-item-main {
+  min-width: 0;
+}
+
+.st2-cryptic-admin-item-main > strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.st2-cryptic-admin-item-main > p {
+  overflow: hidden;
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st2-cryptic-admin-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.st2-cryptic-admin-item-badges span {
+  padding: 2px 6px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 70%, #3a3391 10%);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.59rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-admin-item-badges span.is-reviewed {
+  color: #16a34a;
+  border-color: color-mix(in srgb, #22c55e 35%, var(--border));
+}
+
+.st2-cryptic-admin-item-badges span.is-pending {
+  color: #f97316;
+}
+
+.st2-cryptic-admin-item > button {
+  min-height: 34px;
+  padding: 0 11px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-cryptic-admin-empty {
+  padding: 22px;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 0.76rem;
+}
+
+@media (max-width: 720px) {
+  .st2-cryptic-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .st2-cryptic-admin-grid label.is-wide {
+    grid-column: auto;
+  }
+
+  .st2-cryptic-admin-checks {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

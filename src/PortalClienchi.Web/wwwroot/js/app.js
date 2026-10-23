@@ -14,6 +14,7 @@ import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
 import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013m";
+import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js";
 import {
   ACCESS_NAME_PARTICLES,
   ACCESS_NAME_ALIASES,
@@ -753,7 +754,7 @@ let accessAdminUsageRows = [];
 let accessAdminUsageActiveDays = new Map();
 let adminUsageLoadSeq = 0;
 let adminUsageLoadError = false;
-/** "accesos" | "uso" — sub-pestaña del panel ADMIN. */
+/** "accesos" | "uso" | "cripticos" — sub-pestaña del panel ADMIN. */
 let adminSubtab = "accesos";
 /** 0 = todo el historial | 1 | 3 | 7 | 15 | 30 — días calendario AR. */
 let adminUsageDays = 0;
@@ -1526,27 +1527,34 @@ function syncAdminSubnav() {
   });
 
   const onUsage = adminSubtab === "uso";
-  accessAdminPresetBtn?.classList.toggle("hidden", onUsage || !isSt2SuperAdmin());
+  const onCryptics = adminSubtab === "cripticos";
+  accessAdminPresetBtn?.classList.toggle("hidden", onUsage || onCryptics || !isSt2SuperAdmin());
   if (accessAdminRefresh) {
-    accessAdminRefresh.title = onUsage ? "Actualizar uso" : "Actualizar lista";
-    accessAdminRefresh.setAttribute("aria-label", onUsage ? "Actualizar uso" : "Actualizar lista");
+    const refreshLabel = onUsage ? "Actualizar uso" : onCryptics ? "Actualizar Crípticos" : "Actualizar lista";
+    accessAdminRefresh.title = refreshLabel;
+    accessAdminRefresh.setAttribute("aria-label", refreshLabel);
   }
 
   const titles = document.querySelector("#st2-access-admin-panel .st2-access-admin-panel-titles .st2-access-admin-title");
   const kicker = document.querySelector("#st2-access-admin-panel .st2-access-admin-panel-titles .st2-access-admin-kicker");
   if (titles) {
-    titles.textContent = onUsage ? "Uso de la plataforma" : "Control de accesos";
+    titles.textContent = onUsage ? "Uso de la plataforma" : onCryptics ? "Banco de Crípticos" : "Control de accesos";
   }
   if (kicker) {
-    kicker.textContent = onUsage ? "Consulta · actividad" : "Consulta · personas";
+    kicker.textContent = onUsage ? "Consulta · actividad" : onCryptics ? "Juego diario · editorial" : "Consulta · personas";
   }
 }
 
 function setAdminSubtab(tab) {
-  const next = tab === "uso" && canSeeAdminUsage() ? "uso" : "accesos";
+  const next = tab === "uso" && canSeeAdminUsage()
+    ? "uso"
+    : tab === "cripticos" && isSt2SuperAdmin()
+      ? "cripticos"
+      : "accesos";
   adminSubtab = next;
   syncAdminSubnav();
   if (next === "uso") void loadAccessAdminUsage();
+  if (next === "cripticos") void loadCrypticAdminClues();
 }
 
 function normalizeUsageDays(days) {
@@ -1868,7 +1876,7 @@ function canSeeAccessAdminOwnerColumns() {
 }
 
 function syncAccessAdminHostColumn() {
-  accessAdminPresetBtn?.classList.toggle("hidden", adminSubtab === "uso" || !isSt2SuperAdmin());
+  accessAdminPresetBtn?.classList.toggle("hidden", adminSubtab !== "accesos" || !isSt2SuperAdmin());
   const showOwnerCols = canSeeAccessAdminOwnerColumns();
   accessAdminThHost?.classList.toggle("hidden", !showOwnerCols);
   accessAdminThLast?.classList.toggle("hidden", !showOwnerCols);
@@ -2220,6 +2228,7 @@ async function activateAdminTab() {
   syncAccessAdminOwnerOnlyUi();
   syncAdminSubnav();
   if (adminSubtab === "uso") void loadAccessAdminUsage();
+  else if (adminSubtab === "cripticos") void loadCrypticAdminClues();
   else void loadAccessAdminRegistrations();
       startAccessAdminPolling();
   }
@@ -3491,6 +3500,7 @@ viewAsExitBtn?.addEventListener("click", () => {
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
   if (adminSubtab === "uso") void loadAccessAdminUsage();
+  else if (adminSubtab === "cripticos") void loadCrypticAdminClues();
   else void loadAccessAdminRegistrations({ silent: true, force: true });
 });
 accessAdminPresetBtn?.addEventListener("click", () => {
@@ -3533,6 +3543,7 @@ adminUsageSortButtons.forEach((btn) => {
   });
 });
 syncAccessAdminQuickFilters();
+initCrypticAdmin();
 accessAdminPermsFilterBtn?.addEventListener("click", (e) => {
   e.stopPropagation();
   toggleAccessAdminPermsFilterPop();

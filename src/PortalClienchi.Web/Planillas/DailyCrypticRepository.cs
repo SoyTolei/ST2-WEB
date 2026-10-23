@@ -1,0 +1,807 @@
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using Microsoft.Data.Sqlite;
+
+namespace PortalClienchi.Web.Planillas;
+
+public sealed class DailyCrypticRepository
+{
+    public static readonly int[] Slots = [8, 12, 16];
+    public const int ClosingHour = 19;
+    public const int MaxAttempts = 5;
+
+    private readonly string _dbPath;
+    private readonly AppAccessRepository _accessRepo;
+    private readonly ILogger<DailyCrypticRepository> _logger;
+    private readonly TimeZoneInfo _argentinaTimeZone;
+
+    public DailyCrypticRepository(
+        AppAccessRepository accessRepo,
+        ILogger<DailyCrypticRepository> logger)
+    {
+        _accessRepo = accessRepo;
+        _logger = logger;
+        _argentinaTimeZone = ResolveArgentinaTimeZone();
+
+        var dataDir = St2Paths.GetDataDirectory();
+        Directory.CreateDirectory(dataDir);
+        _dbPath = Path.Combine(dataDir, "daily_cryptic.db");
+        EnsureSchema();
+        SeedClues();
+        _logger.LogInformation("Críptico diario SQLite en {DbPath}", _dbPath);
+    }
+
+    public DailyCrypticStatusDto GetStatus(string email, DateTimeOffset? nowUtc = null)
+    {
+        var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
+            ?? throw new ArgumentException("Correo inválido.", nameof(email));
+        var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
+        var date = DateOnly.FromDateTime(localNow.DateTime);
+        EnsureSchedule(date);
+
+        using var conn = Open();
+        var rounds = LoadRounds(conn, normalizedEmail, date, localNow);
+        var ranking = LoadRanking(conn, date);
+        var phase = localNow.Hour < Slots[0]
+            ? "upcoming"
+            : localNow.Hour >= ClosingHour
+                ? "closed"
+                : "active";
+
+        string? nextAt = null;
+        if (phase != "closed")
+        {
+            var nextSlot = Slots.FirstOrDefault(slot => localNow.Hour < slot);
+            if (nextSlot > 0)
+                nextAt = $"{date:yyyy-MM-dd}T{nextSlot:00}:00:00-03:00";
+            else if (localNow.Hour < ClosingHour)
+                nextAt = $"{date:yyyy-MM-dd}T{ClosingHour:00}:00:00-03:00";
+        }
+
+        return new DailyCrypticStatusDto(
+            date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            "America/Argentina/Buenos_Aires",
+            phase,
+            nextAt,
+            rounds,
+            ranking);
+    }
+
+    public DailyCrypticAttemptResult Submit(
+        string email,
+        int slot,
+        string? submittedAnswer,
+        DateTimeOffset? nowUtc = null)
+    {
+        var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
+            ?? throw new ArgumentException("Correo inválido.", nameof(email));
+        if (!Slots.Contains(slot))
+            throw new ArgumentException("Ronda inválida.", nameof(slot));
+
+        var normalizedAnswer = NormalizeAnswer(submittedAnswer);
+        if (normalizedAnswer.Length == 0)
+            throw new ArgumentException("Escribí una respuesta.");
+
+        var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
+        var date = DateOnly.FromDateTime(localNow.DateTime);
+        if (localNow.Hour < Slots[0])
+            throw new InvalidOperationException("El Críptico abre a las 08:00.");
+        if (localNow.Hour >= ClosingHour)
+            throw new InvalidOperationException("La competencia de hoy cerró a las 19:00.");
+        if (localNow.Hour < slot)
+            throw new InvalidOperationException($"La ronda de las {slot:00}:00 todavía no abrió.");
+
+        EnsureSchedule(date);
+        using var conn = Open();
+        using var tx = conn.BeginTransaction(deferred: false);
+
+        var scheduled = LoadScheduledClue(conn, tx, date, slot)
+            ?? throw new InvalidOperationException("No se pudo cargar la pista de esta ronda.");
+
+        var solved = LoadSolve(conn, tx, normalizedEmail, date, slot);
+        if (solved is not null)
+        {
+            tx.Commit();
+            return new DailyCrypticAttemptResult(
+                true,
+                "Esta ronda ya estaba resuelta.",
+                Math.Max(0, MaxAttempts - solved.AttemptCount),
+                GetStatus(normalizedEmail, nowUtc));
+        }
+
+        foreach (var priorSlot in Slots.Where(s => s < slot))
+        {
+            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
+                throw new InvalidOperationException($"Primero resolvé la ronda de las {priorSlot:00}:00.");
+        }
+
+        var attemptsUsed = CountAttempts(conn, tx, normalizedEmail, date, slot);
+        if (attemptsUsed >= MaxAttempts)
+            throw new InvalidOperationException("Ya usaste los cinco intentos de esta ronda.");
+
+        var correct = scheduled.AcceptedAnswers
+            .Append(scheduled.Answer)
+            .Select(NormalizeAnswer)
+            .Any(answer => answer == normalizedAnswer);
+
+        using (var insertAttempt = conn.CreateCommand())
+        {
+            insertAttempt.Transaction = tx;
+            insertAttempt.CommandText = """
+                INSERT INTO daily_cryptic_attempts
+                    (play_date, slot_hour, clue_id, email, submitted_answer, correct, created_at)
+                VALUES ($date, $slot, $clue, $email, $answer, $correct, $created)
+                """;
+            insertAttempt.Parameters.AddWithValue("$date", DateKey(date));
+            insertAttempt.Parameters.AddWithValue("$slot", slot);
+            insertAttempt.Parameters.AddWithValue("$clue", scheduled.Id);
+            insertAttempt.Parameters.AddWithValue("$email", normalizedEmail);
+            insertAttempt.Parameters.AddWithValue("$answer", submittedAnswer?.Trim() ?? "");
+            insertAttempt.Parameters.AddWithValue("$correct", correct ? 1 : 0);
+            insertAttempt.Parameters.AddWithValue("$created", DateTimeOffset.UtcNow.ToString("O"));
+            insertAttempt.ExecuteNonQuery();
+        }
+
+        var remaining = MaxAttempts - attemptsUsed - 1;
+        var message = remaining > 0
+            ? $"No es esa. Te quedan {remaining} intento{(remaining == 1 ? "" : "s")}."
+            : "No era esa. Se terminaron los intentos de esta ronda.";
+
+        if (correct)
+        {
+            var position = CountSolves(conn, tx, date, slot) + 1;
+            var points = PointsForPosition(position);
+            var solvedAt = DateTimeOffset.UtcNow.ToString("O");
+            using var insertSolve = conn.CreateCommand();
+            insertSolve.Transaction = tx;
+            insertSolve.CommandText = """
+                INSERT INTO daily_cryptic_solves
+                    (play_date, slot_hour, clue_id, email, position, points, attempt_count, solved_at)
+                VALUES ($date, $slot, $clue, $email, $position, $points, $attempts, $solved)
+                """;
+            insertSolve.Parameters.AddWithValue("$date", DateKey(date));
+            insertSolve.Parameters.AddWithValue("$slot", slot);
+            insertSolve.Parameters.AddWithValue("$clue", scheduled.Id);
+            insertSolve.Parameters.AddWithValue("$email", normalizedEmail);
+            insertSolve.Parameters.AddWithValue("$position", position);
+            insertSolve.Parameters.AddWithValue("$points", points);
+            insertSolve.Parameters.AddWithValue("$attempts", attemptsUsed + 1);
+            insertSolve.Parameters.AddWithValue("$solved", solvedAt);
+            insertSolve.ExecuteNonQuery();
+            message = position <= 3
+                ? $"¡Correcto! Llegaste {FormatPosition(position)} y sumaste {points} puntos."
+                : $"¡Correcto! Sumaste {points} punto.";
+        }
+
+        tx.Commit();
+        return new DailyCrypticAttemptResult(
+            correct,
+            message,
+            remaining,
+            GetStatus(normalizedEmail, nowUtc));
+    }
+
+    public IReadOnlyList<object> ListAdminClues()
+    {
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, clue, answer, enumeration, definition, wordplay, mechanism,
+                   indicator, fodder, parse, difficulty, accepted_answers,
+                   author, reviewer, reviewed, active, created_at, updated_at
+            FROM daily_cryptic_clues
+            ORDER BY active DESC, reviewed DESC, difficulty, id
+            """;
+        using var reader = cmd.ExecuteReader();
+        var items = new List<object>();
+        while (reader.Read())
+        {
+            items.Add(new
+            {
+                id = reader.GetInt64(0),
+                clue = reader.GetString(1),
+                answer = reader.GetString(2),
+                enumeration = reader.GetString(3),
+                definition = reader.GetString(4),
+                wordplay = reader.GetString(5),
+                mechanism = reader.GetString(6),
+                indicator = reader.GetString(7),
+                fodder = reader.GetString(8),
+                parse = reader.GetString(9),
+                difficulty = reader.GetInt32(10),
+                acceptedAnswers = ParseAnswers(reader.GetString(11)),
+                author = reader.GetString(12),
+                reviewer = reader.GetString(13),
+                reviewed = reader.GetInt32(14) != 0,
+                active = reader.GetInt32(15) != 0,
+                createdAt = reader.GetString(16),
+                updatedAt = reader.GetString(17),
+            });
+        }
+        return items;
+    }
+
+    public long UpsertAdminClue(DailyCrypticAdminRequest request, string actor)
+    {
+        ValidateAdminClue(request);
+        var now = DateTimeOffset.UtcNow.ToString("O");
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        if (request.Id is > 0)
+        {
+            cmd.CommandText = """
+                UPDATE daily_cryptic_clues
+                SET clue = $clue, answer = $answer, enumeration = $enumeration,
+                    definition = $definition, wordplay = $wordplay, mechanism = $mechanism,
+                    indicator = $indicator, fodder = $fodder, parse = $parse,
+                    difficulty = $difficulty, accepted_answers = $accepted,
+                    reviewer = $reviewer, reviewed = $reviewed, active = $active,
+                    updated_at = $updated
+                WHERE id = $id
+                """;
+            cmd.Parameters.AddWithValue("$id", request.Id.Value);
+        }
+        else
+        {
+            cmd.CommandText = """
+                INSERT INTO daily_cryptic_clues
+                    (seed_key, clue, answer, enumeration, definition, wordplay, mechanism,
+                     indicator, fodder, parse, difficulty, accepted_answers, author,
+                     reviewer, reviewed, active, created_at, updated_at)
+                VALUES
+                    ($seed, $clue, $answer, $enumeration, $definition, $wordplay, $mechanism,
+                     $indicator, $fodder, $parse, $difficulty, $accepted, $author,
+                     $reviewer, $reviewed, $active, $created, $updated)
+                """;
+            cmd.Parameters.AddWithValue("$seed", $"admin:{Guid.NewGuid():N}");
+            cmd.Parameters.AddWithValue("$author", actor);
+            cmd.Parameters.AddWithValue("$created", now);
+        }
+
+        cmd.Parameters.AddWithValue("$clue", request.Clue.Trim());
+        cmd.Parameters.AddWithValue("$answer", request.Answer.Trim());
+        cmd.Parameters.AddWithValue("$enumeration", request.Enumeration.Trim());
+        cmd.Parameters.AddWithValue("$definition", request.Definition.Trim());
+        cmd.Parameters.AddWithValue("$wordplay", request.Wordplay.Trim());
+        cmd.Parameters.AddWithValue("$mechanism", request.Mechanism.Trim());
+        cmd.Parameters.AddWithValue("$indicator", request.Indicator.Trim());
+        cmd.Parameters.AddWithValue("$fodder", request.Fodder.Trim());
+        cmd.Parameters.AddWithValue("$parse", request.Parse.Trim());
+        cmd.Parameters.AddWithValue("$difficulty", Math.Clamp(request.Difficulty, 1, 3));
+        cmd.Parameters.AddWithValue("$accepted", JsonSerializer.Serialize(request.AcceptedAnswers ?? []));
+        cmd.Parameters.AddWithValue("$reviewer", request.Reviewed ? actor : "");
+        cmd.Parameters.AddWithValue("$reviewed", request.Reviewed ? 1 : 0);
+        cmd.Parameters.AddWithValue("$active", request.Active ? 1 : 0);
+        cmd.Parameters.AddWithValue("$updated", now);
+        var changed = cmd.ExecuteNonQuery();
+        if (changed == 0)
+            throw new InvalidOperationException("No se encontró la pista.");
+
+        if (request.Id is > 0)
+            return request.Id.Value;
+
+        using var idCmd = conn.CreateCommand();
+        idCmd.CommandText = "SELECT last_insert_rowid()";
+        return (long)(idCmd.ExecuteScalar() ?? 0L);
+    }
+
+    private IReadOnlyList<DailyCrypticRoundDto> LoadRounds(
+        SqliteConnection conn,
+        string email,
+        DateOnly date,
+        DateTimeOffset localNow)
+    {
+        var rounds = new List<DailyCrypticRoundDto>(Slots.Length);
+        var priorSolved = true;
+        foreach (var slot in Slots)
+        {
+            var clue = LoadScheduledClue(conn, null, date, slot)
+                ?? throw new InvalidOperationException("Falta la pista programada.");
+            var solve = LoadSolve(conn, null, email, date, slot);
+            var attempts = CountAttempts(conn, null, email, date, slot);
+            var state = solve is not null
+                ? "solved"
+                : localNow.Hour < slot
+                    ? "upcoming"
+                    : localNow.Hour >= ClosingHour
+                        ? "closed"
+                        : !priorSolved
+                            ? "blocked"
+                            : attempts >= MaxAttempts
+                                ? "failed"
+                                : "available";
+
+            var revealClue = state is "available" or "solved" or "failed";
+            var revealSolution = state == "solved";
+            rounds.Add(new DailyCrypticRoundDto(
+                slot,
+                $"{slot:00}:00",
+                state,
+                revealClue ? clue.Clue : null,
+                revealClue ? clue.Enumeration : null,
+                clue.Difficulty,
+                attempts,
+                Math.Max(0, MaxAttempts - attempts),
+                solve?.Position,
+                solve?.Points,
+                solve?.SolvedAt,
+                revealSolution ? clue.Answer : null,
+                revealClue ? clue.Definition : null,
+                revealClue ? clue.Mechanism : null,
+                revealClue ? clue.Indicator : null,
+                revealClue ? clue.Fodder : null,
+                revealSolution ? clue.Parse : null));
+
+            priorSolved = priorSolved && solve is not null;
+        }
+        return rounds;
+    }
+
+    private IReadOnlyList<DailyCrypticRankingDto> LoadRanking(SqliteConnection conn, DateOnly date)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            SELECT email, SUM(points) AS total_points, COUNT(*) AS solved,
+                   SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) AS wins,
+                   MIN(solved_at) AS first_solve
+            FROM daily_cryptic_solves
+            WHERE play_date = $date
+            GROUP BY email
+            ORDER BY total_points DESC, wins DESC, solved DESC, first_solve ASC
+            LIMIT 50
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        using var reader = cmd.ExecuteReader();
+        var ranking = new List<DailyCrypticRankingDto>();
+        var rank = 0;
+        while (reader.Read())
+        {
+            rank++;
+            var email = reader.GetString(0);
+            ranking.Add(new DailyCrypticRankingDto(
+                rank,
+                ResolvePlayerName(email),
+                reader.GetInt32(1),
+                reader.GetInt32(2),
+                reader.GetInt32(3)));
+        }
+        return ranking;
+    }
+
+    private string ResolvePlayerName(string email)
+    {
+        var record = _accessRepo.Find(email);
+        if (!string.IsNullOrWhiteSpace(record?.DisplayName))
+            return record.DisplayName.Trim();
+
+        var local = email.Split('@')[0];
+        return CultureInfo.GetCultureInfo("es-AR").TextInfo.ToTitleCase(local.Replace('.', ' '));
+    }
+
+    private void EnsureSchedule(DateOnly date)
+    {
+        using var conn = Open();
+        using var tx = conn.BeginTransaction(deferred: false);
+        var selected = new HashSet<long>();
+        foreach (var slot in Slots)
+        {
+            using var existing = conn.CreateCommand();
+            existing.Transaction = tx;
+            existing.CommandText = """
+                SELECT clue_id FROM daily_cryptic_schedule
+                WHERE play_date = $date AND slot_hour = $slot
+                """;
+            existing.Parameters.AddWithValue("$date", DateKey(date));
+            existing.Parameters.AddWithValue("$slot", slot);
+            var found = existing.ExecuteScalar();
+            if (found is long id)
+            {
+                selected.Add(id);
+                continue;
+            }
+
+            var difficulty = Array.IndexOf(Slots, slot) + 1;
+            var candidates = LoadCandidateIds(conn, tx, date, difficulty)
+                .Where(id => !selected.Contains(id))
+                .ToList();
+            if (candidates.Count == 0)
+                candidates = LoadAllActiveIds(conn, tx, difficulty).Where(id => !selected.Contains(id)).ToList();
+            if (candidates.Count == 0)
+                throw new InvalidOperationException($"No hay pistas revisadas de dificultad {difficulty}.");
+
+            var hash = SHA256.HashData(Encoding.UTF8.GetBytes($"{date:yyyy-MM-dd}:{slot}:st2"));
+            var index = BitConverter.ToUInt32(hash, 0) % (uint)candidates.Count;
+            var clueId = candidates[(int)index];
+            using var insert = conn.CreateCommand();
+            insert.Transaction = tx;
+            insert.CommandText = """
+                INSERT OR IGNORE INTO daily_cryptic_schedule (play_date, slot_hour, clue_id, created_at)
+                VALUES ($date, $slot, $clue, $created)
+                """;
+            insert.Parameters.AddWithValue("$date", DateKey(date));
+            insert.Parameters.AddWithValue("$slot", slot);
+            insert.Parameters.AddWithValue("$clue", clueId);
+            insert.Parameters.AddWithValue("$created", DateTimeOffset.UtcNow.ToString("O"));
+            insert.ExecuteNonQuery();
+            selected.Add(clueId);
+        }
+        tx.Commit();
+    }
+
+    private static List<long> LoadCandidateIds(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date,
+        int difficulty)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT id
+            FROM daily_cryptic_clues
+            WHERE active = 1 AND reviewed = 1 AND difficulty = $difficulty
+              AND id NOT IN (
+                  SELECT clue_id FROM daily_cryptic_schedule
+                  WHERE play_date >= $since AND play_date < $date
+              )
+            ORDER BY id
+            """;
+        cmd.Parameters.AddWithValue("$difficulty", difficulty);
+        cmd.Parameters.AddWithValue("$since", DateKey(date.AddDays(-30)));
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        using var reader = cmd.ExecuteReader();
+        var ids = new List<long>();
+        while (reader.Read())
+            ids.Add(reader.GetInt64(0));
+        return ids;
+    }
+
+    private static List<long> LoadAllActiveIds(SqliteConnection conn, SqliteTransaction tx, int difficulty)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT id FROM daily_cryptic_clues
+            WHERE active = 1 AND reviewed = 1 AND difficulty = $difficulty
+            ORDER BY id
+            """;
+        cmd.Parameters.AddWithValue("$difficulty", difficulty);
+        using var reader = cmd.ExecuteReader();
+        var ids = new List<long>();
+        while (reader.Read())
+            ids.Add(reader.GetInt64(0));
+        return ids;
+    }
+
+    private static ScheduledClue? LoadScheduledClue(
+        SqliteConnection conn,
+        SqliteTransaction? tx,
+        DateOnly date,
+        int slot)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT c.id, c.clue, c.answer, c.enumeration, c.definition, c.wordplay,
+                   c.mechanism, c.indicator, c.fodder, c.parse, c.difficulty,
+                   c.accepted_answers
+            FROM daily_cryptic_schedule s
+            JOIN daily_cryptic_clues c ON c.id = s.clue_id
+            WHERE s.play_date = $date AND s.slot_hour = $slot
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read())
+            return null;
+        return new ScheduledClue(
+            reader.GetInt64(0),
+            reader.GetString(1),
+            reader.GetString(2),
+            reader.GetString(3),
+            reader.GetString(4),
+            reader.GetString(5),
+            reader.GetString(6),
+            reader.GetString(7),
+            reader.GetString(8),
+            reader.GetString(9),
+            reader.GetInt32(10),
+            ParseAnswers(reader.GetString(11)));
+    }
+
+    private static SolveRecord? LoadSolve(
+        SqliteConnection conn,
+        SqliteTransaction? tx,
+        string email,
+        DateOnly date,
+        int slot)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT position, points, attempt_count, solved_at
+            FROM daily_cryptic_solves
+            WHERE play_date = $date AND slot_hour = $slot AND email = $email
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        cmd.Parameters.AddWithValue("$email", email);
+        using var reader = cmd.ExecuteReader();
+        return reader.Read()
+            ? new SolveRecord(reader.GetInt32(0), reader.GetInt32(1), reader.GetInt32(2), reader.GetString(3))
+            : null;
+    }
+
+    private static int CountAttempts(
+        SqliteConnection conn,
+        SqliteTransaction? tx,
+        string email,
+        DateOnly date,
+        int slot)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT COUNT(*) FROM daily_cryptic_attempts
+            WHERE play_date = $date AND slot_hour = $slot AND email = $email
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        cmd.Parameters.AddWithValue("$email", email);
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+    }
+
+    private static int CountSolves(SqliteConnection conn, SqliteTransaction tx, DateOnly date, int slot)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT COUNT(*) FROM daily_cryptic_solves
+            WHERE play_date = $date AND slot_hour = $slot
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+    }
+
+    private void EnsureSchema()
+    {
+        using var conn = Open();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS daily_cryptic_clues (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                seed_key TEXT NOT NULL UNIQUE,
+                clue TEXT NOT NULL,
+                answer TEXT NOT NULL,
+                enumeration TEXT NOT NULL,
+                definition TEXT NOT NULL,
+                wordplay TEXT NOT NULL,
+                mechanism TEXT NOT NULL,
+                indicator TEXT NOT NULL,
+                fodder TEXT NOT NULL,
+                parse TEXT NOT NULL,
+                difficulty INTEGER NOT NULL CHECK (difficulty BETWEEN 1 AND 3),
+                accepted_answers TEXT NOT NULL DEFAULT '[]',
+                author TEXT NOT NULL DEFAULT 'ST2',
+                reviewer TEXT NOT NULL DEFAULT '',
+                reviewed INTEGER NOT NULL DEFAULT 0,
+                active INTEGER NOT NULL DEFAULT 1,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS daily_cryptic_schedule (
+                play_date TEXT NOT NULL,
+                slot_hour INTEGER NOT NULL,
+                clue_id INTEGER NOT NULL,
+                created_at TEXT NOT NULL,
+                PRIMARY KEY (play_date, slot_hour)
+            );
+
+            CREATE TABLE IF NOT EXISTS daily_cryptic_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                play_date TEXT NOT NULL,
+                slot_hour INTEGER NOT NULL,
+                clue_id INTEGER NOT NULL,
+                email TEXT NOT NULL,
+                submitted_answer TEXT NOT NULL,
+                correct INTEGER NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS daily_cryptic_solves (
+                play_date TEXT NOT NULL,
+                slot_hour INTEGER NOT NULL,
+                clue_id INTEGER NOT NULL,
+                email TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                points INTEGER NOT NULL,
+                attempt_count INTEGER NOT NULL,
+                solved_at TEXT NOT NULL,
+                PRIMARY KEY (play_date, slot_hour, email)
+            );
+
+            CREATE INDEX IF NOT EXISTS ix_daily_cryptic_attempts_player
+                ON daily_cryptic_attempts (play_date, slot_hour, email);
+            CREATE INDEX IF NOT EXISTS ix_daily_cryptic_solves_ranking
+                ON daily_cryptic_solves (play_date, points DESC, solved_at);
+            """;
+        cmd.ExecuteNonQuery();
+    }
+
+    private void SeedClues()
+    {
+        var items = DailyCrypticSeed.Items;
+        if (items.Count == 0)
+            return;
+
+        using var conn = Open();
+        using var tx = conn.BeginTransaction();
+        foreach (var item in items)
+        {
+            using var cmd = conn.CreateCommand();
+            cmd.Transaction = tx;
+            var seedKey = Convert.ToHexString(
+                SHA256.HashData(Encoding.UTF8.GetBytes($"{item.Clue}\n{item.Answer}")))
+                .ToLowerInvariant();
+            var now = DateTimeOffset.UtcNow.ToString("O");
+            cmd.CommandText = """
+                INSERT INTO daily_cryptic_clues
+                    (seed_key, clue, answer, enumeration, definition, wordplay, mechanism,
+                     indicator, fodder, parse, difficulty, accepted_answers, author,
+                     reviewer, reviewed, active, created_at, updated_at)
+                VALUES
+                    ($seed, $clue, $answer, $enumeration, $definition, $wordplay, $mechanism,
+                     $indicator, $fodder, $parse, $difficulty, $accepted, 'ST2',
+                     'ST2 editorial', 1, 1, $created, $updated)
+                ON CONFLICT(seed_key) DO UPDATE SET
+                    clue = excluded.clue,
+                    answer = excluded.answer,
+                    enumeration = excluded.enumeration,
+                    definition = excluded.definition,
+                    wordplay = excluded.wordplay,
+                    mechanism = excluded.mechanism,
+                    indicator = excluded.indicator,
+                    fodder = excluded.fodder,
+                    parse = excluded.parse,
+                    difficulty = excluded.difficulty,
+                    accepted_answers = excluded.accepted_answers,
+                    updated_at = excluded.updated_at
+                """;
+            cmd.Parameters.AddWithValue("$seed", seedKey);
+            cmd.Parameters.AddWithValue("$clue", item.Clue);
+            cmd.Parameters.AddWithValue("$answer", item.Answer);
+            cmd.Parameters.AddWithValue("$enumeration", item.Enumeration);
+            cmd.Parameters.AddWithValue("$definition", item.Definition);
+            cmd.Parameters.AddWithValue("$wordplay", item.Wordplay);
+            cmd.Parameters.AddWithValue("$mechanism", item.Mechanism);
+            cmd.Parameters.AddWithValue("$indicator", item.Indicator);
+            cmd.Parameters.AddWithValue("$fodder", item.Fodder);
+            cmd.Parameters.AddWithValue("$parse", item.Parse);
+            cmd.Parameters.AddWithValue("$difficulty", Math.Clamp(item.Difficulty, 1, 3));
+            cmd.Parameters.AddWithValue("$accepted", JsonSerializer.Serialize(item.AcceptedAnswers ?? []));
+            cmd.Parameters.AddWithValue("$created", now);
+            cmd.Parameters.AddWithValue("$updated", now);
+            cmd.ExecuteNonQuery();
+        }
+        tx.Commit();
+    }
+
+    private SqliteConnection Open()
+    {
+        var conn = new SqliteConnection($"Data Source={_dbPath};Cache=Shared");
+        conn.Open();
+        using var pragma = conn.CreateCommand();
+        pragma.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;";
+        pragma.ExecuteNonQuery();
+        return conn;
+    }
+
+    private DateTimeOffset ToLocal(DateTimeOffset utc) =>
+        TimeZoneInfo.ConvertTime(utc, _argentinaTimeZone);
+
+    private static TimeZoneInfo ResolveArgentinaTimeZone()
+    {
+        foreach (var id in new[] { "America/Argentina/Buenos_Aires", "Argentina Standard Time" })
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(id);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                // Probar el siguiente id.
+            }
+        }
+        return TimeZoneInfo.CreateCustomTimeZone(
+            "Argentina",
+            TimeSpan.FromHours(-3),
+            "Argentina",
+            "Argentina");
+    }
+
+    private static string NormalizeAnswer(string? value)
+    {
+        var decomposed = (value ?? "").Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
+        var builder = new StringBuilder(decomposed.Length);
+        foreach (var ch in decomposed)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(ch) == UnicodeCategory.NonSpacingMark)
+                continue;
+            if (char.IsLetterOrDigit(ch))
+                builder.Append(ch);
+        }
+        return builder.ToString().Normalize(NormalizationForm.FormC);
+    }
+
+    private static string[] ParseAnswers(string json)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<string[]>(json) ?? [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static string DateKey(DateOnly date) =>
+        date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private static int PointsForPosition(int position) => position switch
+    {
+        1 => 10,
+        2 => 7,
+        3 => 5,
+        _ => 1,
+    };
+
+    private static string FormatPosition(int position) => position switch
+    {
+        1 => "1.º",
+        2 => "2.º",
+        3 => "3.º",
+        _ => $"{position}.º",
+    };
+
+    private static void ValidateAdminClue(DailyCrypticAdminRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Clue)
+            || string.IsNullOrWhiteSpace(request.Answer)
+            || string.IsNullOrWhiteSpace(request.Enumeration)
+            || string.IsNullOrWhiteSpace(request.Definition)
+            || string.IsNullOrWhiteSpace(request.Wordplay)
+            || string.IsNullOrWhiteSpace(request.Mechanism)
+            || string.IsNullOrWhiteSpace(request.Parse))
+        {
+            throw new ArgumentException("Completá pista, respuesta, definición, construcción y explicación.");
+        }
+
+        var expectedLetters = new string(request.Enumeration.Where(char.IsDigit).ToArray());
+        if (int.TryParse(expectedLetters, out var count)
+            && NormalizeAnswer(request.Answer).Length != count)
+        {
+            throw new ArgumentException("La enumeración no coincide con la respuesta.");
+        }
+    }
+
+    private sealed record ScheduledClue(
+        long Id,
+        string Clue,
+        string Answer,
+        string Enumeration,
+        string Definition,
+        string Wordplay,
+        string Mechanism,
+        string Indicator,
+        string Fodder,
+        string Parse,
+        int Difficulty,
+        string[] AcceptedAnswers);
+
+    private sealed record SolveRecord(int Position, int Points, int AttemptCount, string SolvedAt);
+}
