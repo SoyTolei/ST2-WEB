@@ -60,6 +60,54 @@ public sealed class DailyCrypticRepository
             ranking);
     }
 
+    public int RevealHint(string email, int slot, DateTimeOffset? nowUtc = null)
+    {
+        var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
+            ?? throw new ArgumentException("Correo inválido.", nameof(email));
+        if (!Slots.Contains(slot))
+            throw new ArgumentException("Ronda inválida.", nameof(slot));
+
+        var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
+        var (date, overnight) = ResolveCompetition(localNow);
+        if (!overnight && localNow.Hour < slot)
+            throw new InvalidOperationException($"La ronda de las {slot:00}:00 todavía no abrió.");
+
+        EnsureSchedule(date);
+        using var conn = Open();
+        using var tx = conn.BeginTransaction(deferred: false);
+        if (LoadSolve(conn, tx, normalizedEmail, date, slot) is not null)
+            throw new InvalidOperationException("Esta ronda ya está resuelta.");
+
+        foreach (var priorSlot in Slots.Where(s => s < slot))
+        {
+            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
+                throw new InvalidOperationException($"Primero resolvé la ronda de las {priorSlot:00}:00.");
+        }
+
+        var current = CountHints(conn, tx, normalizedEmail, date, slot);
+        if (current >= 4)
+        {
+            tx.Commit();
+            return current;
+        }
+
+        var next = current + 1;
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            INSERT INTO daily_cryptic_hints (play_date, slot_hour, email, level)
+            VALUES ($date, $slot, $email, $level)
+            ON CONFLICT (play_date, slot_hour, email) DO UPDATE SET level = excluded.level
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        cmd.Parameters.AddWithValue("$email", normalizedEmail);
+        cmd.Parameters.AddWithValue("$level", next);
+        cmd.ExecuteNonQuery();
+        tx.Commit();
+        return next;
+    }
+
     public DailyCrypticAttemptResult Submit(
         string email,
         int slot,
@@ -139,7 +187,9 @@ public sealed class DailyCrypticRepository
         if (correct)
         {
             var position = CountSolves(conn, tx, date, slot) + 1;
-            var points = PointsForPosition(position);
+            var hints = CountHints(conn, tx, normalizedEmail, date, slot);
+            var basePoints = PointsForPosition(position);
+            var points = Math.Max(0, basePoints - hints);
             var solvedAt = DateTimeOffset.UtcNow.ToString("O");
             using var insertSolve = conn.CreateCommand();
             insertSolve.Transaction = tx;
@@ -157,9 +207,12 @@ public sealed class DailyCrypticRepository
             insertSolve.Parameters.AddWithValue("$attempts", attemptsUsed + 1);
             insertSolve.Parameters.AddWithValue("$solved", solvedAt);
             insertSolve.ExecuteNonQuery();
-            message = position <= 3
-                ? $"¡Correcto! Llegaste {FormatPosition(position)} y sumaste {points} puntos."
-                : $"¡Correcto! Sumaste {points} punto.";
+            var pointsLabel = points == 1 ? "punto" : "puntos";
+            message = hints > 0
+                ? $"¡Correcto! Sumaste {points} {pointsLabel} ({basePoints} menos {hints} por {(hints == 1 ? "la pista" : "las pistas")})."
+                : position <= 3
+                    ? $"¡Correcto! Llegaste {FormatPosition(position)} y sumaste {points} {pointsLabel}."
+                    : $"¡Correcto! Sumaste {points} {pointsLabel}.";
         }
 
         tx.Commit();
@@ -327,7 +380,8 @@ public sealed class DailyCrypticRepository
                 revealClue ? clue.Mechanism : null,
                 revealClue ? clue.Indicator : null,
                 revealClue ? clue.Fodder : null,
-                revealSolution ? clue.Parse : null));
+                revealSolution ? clue.Parse : null,
+                CountHints(conn, null, email, date, slot)));
 
             priorSolved = priorSolved && solve is not null;
         }
@@ -548,6 +602,26 @@ public sealed class DailyCrypticRepository
         return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
     }
 
+    private static int CountHints(
+        SqliteConnection conn,
+        SqliteTransaction? tx,
+        string email,
+        DateOnly date,
+        int slot)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT level FROM daily_cryptic_hints
+            WHERE play_date = $date AND slot_hour = $slot AND email = $email
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        cmd.Parameters.AddWithValue("$email", email);
+        var value = cmd.ExecuteScalar();
+        return value is null or DBNull ? 0 : Convert.ToInt32(value, CultureInfo.InvariantCulture);
+    }
+
     private static int CountSolves(SqliteConnection conn, SqliteTransaction tx, DateOnly date, int slot)
     {
         using var cmd = conn.CreateCommand();
@@ -623,6 +697,14 @@ public sealed class DailyCrypticRepository
                 ON daily_cryptic_attempts (play_date, slot_hour, email);
             CREATE INDEX IF NOT EXISTS ix_daily_cryptic_solves_ranking
                 ON daily_cryptic_solves (play_date, points DESC, solved_at);
+
+            CREATE TABLE IF NOT EXISTS daily_cryptic_hints (
+                play_date TEXT NOT NULL,
+                slot_hour INTEGER NOT NULL,
+                email TEXT NOT NULL,
+                level INTEGER NOT NULL,
+                PRIMARY KEY (play_date, slot_hour, email)
+            );
             """;
         cmd.ExecuteNonQuery();
     }

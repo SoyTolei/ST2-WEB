@@ -14,6 +14,8 @@ let host = null;
 let snapshot = null;
 let selectedSlot = null;
 let hintLevel = 0;
+let hintSlot = null;
+let hintPending = false;
 let rankingOpen = false;
 let refreshTimer = 0;
 let initialized = false;
@@ -64,6 +66,8 @@ async function loadStatus({ quiet = false } = {}) {
       }
     }
     render();
+    const pending = (snapshot?.rounds || []).some((round) => round.state === "available");
+    document.dispatchEvent(new CustomEvent("st2:cryptic-pending", { detail: { pending } }));
     scheduleRefresh();
   } catch (error) {
     if (!quiet) renderError(error?.message || "No se pudo cargar el Críptico.");
@@ -103,6 +107,15 @@ function roundIcon(state) {
 function render() {
   if (!host || !snapshot || submitting) return;
   const round = getSelectedRound();
+  if (round) {
+    const revealed = Number(round.hintsUsed || 0);
+    if (hintSlot !== round.slot) {
+      hintSlot = round.slot;
+      hintLevel = revealed;
+    } else {
+      hintLevel = Math.max(hintLevel, revealed);
+    }
+  }
   const rounds = snapshot.rounds || [];
   const ranking = snapshot.ranking || [];
   const dateLabel = new Intl.DateTimeFormat("es-AR", {
@@ -143,7 +156,7 @@ function render() {
     <div class="st2-cryptic-ranking ${rankingOpen ? "" : "hidden"}" data-cryptic-ranking ${rankingOpen ? "" : "hidden"}>
       <div class="st2-cryptic-ranking-head">
         <strong>Ranking de hoy</strong>
-        <small>10 · 7 · 5 · 1 puntos por orden de llegada</small>
+        <small>10 · 7 · 5 · 1, menos 1 por cada pista</small>
       </div>
       ${ranking.length ? `
         <ol>
@@ -177,17 +190,14 @@ function renderRound(round) {
 
   const solved = round.state === "solved";
   const failed = round.state === "failed";
-  const clue = escapeHtml(round.clue || "");
-  const attempts = `${round.attemptsRemaining} intento${round.attemptsRemaining === 1 ? "" : "s"}`;
+  const clue = escapeHtml(clueWithoutCount(round.clue, round.enumeration));
   const letterCount = groupsFromEnumeration(round.enumeration).reduce((sum, count) => sum + count, 0);
-  const note = statusNote || (letterCount ? `Se comprueba sola al completar las ${letterCount} letras.` : "");
+  const attempts = round.attemptsRemaining;
+  const note = statusNote || (letterCount
+    ? `Te quedan ${attempts} intento${attempts === 1 ? "" : "s"}. Se comprueba sola al completar las ${letterCount} letras.`
+    : "");
   const tone = statusNote ? statusTone : "";
   return `
-    <div class="st2-cryptic-clue-meta">
-      <span>${difficultyLabel(round.difficulty)}</span>
-      <span>${escapeHtml(round.enumeration || "")}</span>
-      ${solved && round.position ? `<span>puesto ${round.position}</span>` : `<span>${attempts}</span>`}
-    </div>
     <blockquote class="st2-cryptic-clue">${clue} <b>${escapeHtml(round.enumeration || "")}</b></blockquote>
     ${solved ? renderSolution(round) : failed ? `
       <div class="st2-cryptic-notice is-failed">
@@ -203,6 +213,13 @@ function renderRound(round) {
       ${renderHints(round)}
     `}
   `;
+}
+
+function clueWithoutCount(clue, enumeration) {
+  const text = String(clue || "").trim();
+  const mark = String(enumeration || "").trim();
+  if (mark && text.endsWith(mark)) return text.slice(0, -mark.length).trim();
+  return text.replace(/\s*\(\d[\d,\s]*\)\s*$/, "").trim();
 }
 
 function renderNotice(title, body) {
@@ -254,7 +271,9 @@ function mountAnswerSlots(round) {
   if (!container || !round || round.state === "solved" || round.state === "failed") return;
   const groups = groupsFromEnumeration(round.enumeration);
   const letterCount = groups.reduce((sum, count) => sum + count, 0);
-  const hint = letterCount ? `Se comprueba sola al completar las ${letterCount} letras.` : "";
+  const hint = letterCount
+    ? `Te quedan ${round.attemptsRemaining} intento${round.attemptsRemaining === 1 ? "" : "s"}. Se comprueba sola al completar las ${letterCount} letras.`
+    : "";
   const shouldFocus = pendingFocus;
   pendingFocus = false;
   activeSlots = createCodeSlots(container, {
@@ -327,6 +346,31 @@ async function submitAttempt(form) {
   }
 }
 
+async function revealHint() {
+  const round = getSelectedRound();
+  if (!round || hintLevel >= 4 || hintPending) return;
+  hintPending = true;
+  try {
+    const response = await fetch(`${API}/hint`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slot: round.slot }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body?.error || `Error ${response.status}`);
+    hintSlot = round.slot;
+    hintLevel = Number(body.level || hintLevel + 1);
+    render();
+  } catch (error) {
+    statusNote = error?.message || "No se pudo revelar la pista.";
+    statusTone = "is-error";
+    render();
+  } finally {
+    hintPending = false;
+  }
+}
+
 function renderError(message) {
   if (!host) return;
   host.innerHTML = `
@@ -344,6 +388,7 @@ function bindHostEvents() {
     if (roundButton) {
       selectedSlot = Number(roundButton.dataset.crypticSlot);
       hintLevel = 0;
+      hintSlot = null;
       statusNote = "";
       statusTone = "";
       render();
@@ -352,8 +397,7 @@ function bindHostEvents() {
 
     const action = event.target.closest("[data-cryptic-action]")?.dataset.crypticAction;
     if (action === "hint") {
-      hintLevel = Math.min(4, hintLevel + 1);
-      render();
+      void revealHint();
     } else if (action === "ranking") {
       rankingOpen = !rankingOpen;
       render();
@@ -383,6 +427,7 @@ export function initDailyCryptic() {
     snapshot = null;
     selectedSlot = null;
     hintLevel = 0;
+    hintSlot = null;
     rankingOpen = false;
     void loadStatus();
   });

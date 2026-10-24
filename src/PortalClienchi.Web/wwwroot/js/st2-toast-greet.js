@@ -156,6 +156,7 @@ export function syncSessionGreetBubble() {
     bubble.classList.add("hidden");
     bubble.setAttribute("hidden", "");
     textEl.textContent = "";
+    syncCrypticGreet(false);
     return;
   }
 
@@ -164,6 +165,7 @@ export function syncSessionGreetBubble() {
     bubble.classList.add("hidden");
     bubble.setAttribute("hidden", "");
     textEl.textContent = "";
+    syncCrypticGreet(false);
     return;
   }
 
@@ -175,7 +177,35 @@ export function syncSessionGreetBubble() {
   }
   bubble.classList.remove("hidden");
   bubble.removeAttribute("hidden");
+  syncCrypticGreet();
 }
+
+function syncCrypticGreet(pending = crypticPending) {
+  const link = document.getElementById("st2-blobatar-cryptic");
+  const bubble = document.getElementById("st2-blobatar-greet");
+  if (!link) return;
+  const show = pending && bubble && !bubble.classList.contains("hidden");
+  link.classList.toggle("hidden", !show);
+  if (show) link.removeAttribute("hidden");
+  else link.setAttribute("hidden", "");
+}
+
+let crypticPending = false;
+
+document.getElementById("st2-blobatar-cryptic")?.addEventListener("click", () => {
+  document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
+  window.setTimeout(() => {
+    const target = document.getElementById("st2-cryptic");
+    target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    target?.classList.add("is-nudged");
+    window.setTimeout(() => target?.classList.remove("is-nudged"), 1600);
+  }, 80);
+});
+
+document.addEventListener("st2:cryptic-pending", (event) => {
+  crypticPending = Boolean(event.detail?.pending);
+  syncCrypticGreet();
+});
 
 document.addEventListener("st2:greet-bubble-sync", () => syncSessionGreetBubble());
 document.addEventListener("st2:session-changed", () => syncSessionGreetBubble());

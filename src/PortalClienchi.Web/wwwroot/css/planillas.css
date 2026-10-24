@@ -5818,8 +5818,9 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   box-shadow: 0 18px 48px color-mix(in srgb, #312e81 14%, transparent);
 }
 
-.st2-cryptic[aria-busy="true"] {
-  cursor: progress;
+.st2-cryptic.is-nudged {
+  outline: 2px solid #f97316;
+  outline-offset: 3px;
 }
 
 .st2-cryptic-loading {

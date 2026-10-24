@@ -73,7 +73,8 @@ public sealed record DailyCrypticRoundDto(
     string? Mechanism,
     string? Indicator,
     string? Fodder,
-    string? Parse);
+    string? Parse,
+    int HintsUsed);
 
 public sealed record DailyCrypticStatusDto(
     string Date,

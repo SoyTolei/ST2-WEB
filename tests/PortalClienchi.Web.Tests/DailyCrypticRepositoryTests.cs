@@ -116,6 +116,23 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Equal([10, 7], second.Status.Ranking.Select(item => item.Points).ToArray());
     }
 
+    [Fact]
+    public void Each_hint_costs_one_ranking_point()
+    {
+        var at0900 = AtArgentina(2026, 10, 23, 9, 0);
+        var date = _repository.GetStatus(Email, at0900).Date;
+        var answer = ScheduledAnswer(date, 8);
+
+        Assert.Equal(1, _repository.RevealHint(Email, 8, at0900));
+        Assert.Equal(2, _repository.RevealHint(Email, 8, at0900));
+
+        var solved = _repository.Submit(Email, 8, answer, at0900);
+
+        Assert.Equal(8, solved.Status.Rounds[0].Points);
+        Assert.Equal(2, solved.Status.Rounds[0].HintsUsed);
+        Assert.Equal(8, solved.Status.Ranking[0].Points);
+    }
+
     private string ScheduledAnswer(string date, int slot)
     {
         using var conn = new SqliteConnection($"Data Source={Path.Combine(_dataDir, "daily_cryptic.db")}");

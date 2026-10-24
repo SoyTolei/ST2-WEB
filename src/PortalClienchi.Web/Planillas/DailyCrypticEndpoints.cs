@@ -63,6 +63,42 @@ public static class DailyCrypticEndpoints
             }
         });
 
+        app.MapPost("/api/cryptic/hint", (
+            HttpContext ctx,
+            DailyCrypticRepository repository,
+            DailyCrypticAttemptRequest body) =>
+        {
+            var email = PlanUserIdentity.GetFromRequest(ctx);
+            if (email is null)
+                return Results.Json(
+                    new { error = "Identificá tu usuario para continuar." },
+                    statusCode: StatusCodes.Status401Unauthorized);
+
+            St2HttpCache.NoStore(ctx);
+            try
+            {
+                var level = repository.RevealHint(email, body.Slot);
+                return Results.Ok(new { level });
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Results.Json(
+                    new { error = ex.Message },
+                    statusCode: StatusCodes.Status409Conflict);
+            }
+            catch (Exception ex)
+            {
+                app.Logger.LogError(ex, "No se pudo revelar una pista del Críptico para {Email}", email);
+                return Results.Json(
+                    new { error = "No se pudo revelar la pista." },
+                    statusCode: StatusCodes.Status500InternalServerError);
+            }
+        });
+
         app.MapGet("/api/cryptic/admin/clues", (
             HttpContext ctx,
             IConfiguration configuration,
