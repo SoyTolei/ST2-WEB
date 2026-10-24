@@ -5987,53 +5987,186 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 
 .st2-cryptic-form label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: var(--text-muted);
   font-size: 0.69rem;
   font-weight: 700;
 }
 
-.st2-cryptic-form > div {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+.code-slots {
+  --cs-accent: #f97316;
+  --cs-ink: #f97316;
+  --cs-slot: #27272a;
+  --cs-digit: #000;
+  --cs-danger: #ff3b30;
+  --cs-size: 36px;
+  --cs-gap: 4px;
+  --cs-radius: 12px;
+  --cs-font: 16px;
+  position: relative;
+  width: 100%;
 }
 
-.st2-cryptic-form input {
+.code-slots__row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px var(--cs-gap);
+  cursor: text;
+  touch-action: manipulation;
+}
+
+.code-slots__row[data-disabled] {
+  cursor: progress;
+}
+
+.code-slots__word {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-gap);
   min-width: 0;
-  min-height: 42px;
-  padding: 0 12px;
-  color: var(--text);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  font: inherit;
-  font-size: 0.86rem;
-  text-transform: uppercase;
 }
 
-.st2-cryptic-form input:focus-visible {
-  outline: 2px solid color-mix(in srgb, #f97316 78%, transparent);
-  outline-offset: 2px;
-}
-
-.st2-cryptic-form button {
-  min-width: 88px;
-  min-height: 42px;
-  padding: 0 16px;
-  color: #fff;
-  background: #f97316;
+.code-slots__input {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  margin: 0;
+  padding: 0;
   border: 0;
-  border-radius: 9px;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 800;
-  cursor: pointer;
+  outline: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: 16px;
+  opacity: 0;
 }
 
-.st2-cryptic-form button:disabled {
-  cursor: wait;
-  opacity: 0.66;
+.code-slots__slot {
+  position: relative;
+  width: var(--cs-size);
+  height: calc(var(--cs-size) * 1.18);
+  flex: 0 0 var(--cs-size);
+  border-radius: min(var(--cs-radius), calc(var(--cs-size) / 2));
+  overflow: hidden;
+  background: var(--cs-slot);
+  user-select: none;
+}
+
+.code-slots__fill,
+.code-slots__digit {
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.code-slots__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--cs-accent);
+  transform: scale(0);
+  transform-origin: center;
+}
+
+.code-slots__slot.is-filled .code-slots__fill {
+  transform: scale(1);
+}
+
+.code-slots__slot.is-active {
+  background: color-mix(in srgb, var(--cs-ink) 16%, var(--cs-slot));
+}
+
+.code-slots__row[data-status="error"] .code-slots__slot {
+  background: color-mix(in srgb, var(--cs-danger) 24%, var(--cs-slot));
+}
+
+.code-slots__row[data-status="error"] .code-slots__fill {
+  background: var(--cs-danger);
+}
+
+.code-slots__digit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: var(--cs-digit);
+  font-size: var(--cs-font);
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.code-slots__slot.is-filled .code-slots__digit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.code-slots__slot.is-caret::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 24%;
+  left: calc(50% - 0.75px);
+  width: 1.5px;
+  height: 52%;
+  background: var(--cs-ink);
+  animation: code-slots-blink 1s linear infinite;
+}
+
+.code-slots__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--cs-accent);
+  color: #000;
+  pointer-events: none;
+  opacity: 0;
+  clip-path: inset(0 50% round 12px);
+}
+
+.code-slots__row[data-status="success"] .code-slots__wash {
+  opacity: 1;
+  clip-path: inset(0 0 round 12px);
+  transition: clip-path 0.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s ease;
+}
+
+.code-slots__check {
+  width: calc(var(--cs-size) * 0.7);
+  height: calc(var(--cs-size) * 0.7);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: translateY(6px) scale(0.9);
+  opacity: 0;
+}
+
+.code-slots__row[data-status="success"] .code-slots__check {
+  opacity: 1;
+  transform: none;
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1) 0.18s, opacity 0.2s ease 0.18s;
+}
+
+@keyframes code-slots-blink {
+  0%, 49.9% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-slots__fill,
+  .code-slots__digit,
+  .code-slots__wash,
+  .code-slots__check,
+  .code-slots__slot.is-caret::after {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
 }
 
 .st2-cryptic-status {
@@ -6276,14 +6409,6 @@ html.st2-theme-dark .st2-cryptic {
 
   .st2-cryptic-round small {
     display: none;
-  }
-
-  .st2-cryptic-form > div {
-    grid-template-columns: 1fr;
-  }
-
-  .st2-cryptic-form button {
-    width: 100%;
   }
 
   .st2-cryptic-solution dl {

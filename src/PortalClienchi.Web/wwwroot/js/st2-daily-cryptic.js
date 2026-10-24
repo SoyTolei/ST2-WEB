@@ -1,3 +1,5 @@
+import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261023c";
+
 const API = "/api/cryptic";
 const STATE_LABELS = {
   available: "Disponible",
@@ -15,6 +17,12 @@ let hintLevel = 0;
 let rankingOpen = false;
 let refreshTimer = 0;
 let initialized = false;
+let submitting = false;
+let pendingFocus = false;
+let statusNote = "";
+let statusTone = "";
+const draftBySlot = new Map();
+let activeSlots = null;
 
 const escapeHtml = (value) => String(value ?? "")
   .replaceAll("&", "&amp;")
@@ -38,6 +46,10 @@ async function loadStatus({ quiet = false } = {}) {
     });
     if (!response.ok) throw new Error(await readProblem(response));
     snapshot = await response.json();
+    if (submitting) {
+      scheduleRefresh();
+      return;
+    }
     const rounds = snapshot?.rounds || [];
     if (!rounds.some((round) => round.slot === selectedSlot)) {
       selectedSlot = rounds.find((round) => round.state === "available")?.slot
@@ -89,7 +101,7 @@ function roundIcon(state) {
 }
 
 function render() {
-  if (!host || !snapshot) return;
+  if (!host || !snapshot || submitting) return;
   const round = getSelectedRound();
   const rounds = snapshot.rounds || [];
   const ranking = snapshot.ranking || [];
@@ -99,6 +111,8 @@ function render() {
     month: "long",
   }).format(new Date(`${snapshot.date}T12:00:00-03:00`));
 
+  activeSlots?.destroy();
+  activeSlots = null;
   host.innerHTML = `
     <div class="st2-cryptic-head">
       <div>
@@ -145,6 +159,7 @@ function render() {
       ` : `<p class="st2-cryptic-empty">Todavía nadie sumó puntos.</p>`}
     </div>
   `;
+  mountAnswerSlots(round);
 }
 
 function renderRound(round) {
@@ -164,6 +179,9 @@ function renderRound(round) {
   const failed = round.state === "failed";
   const clue = escapeHtml(round.clue || "");
   const attempts = `${round.attemptsRemaining} intento${round.attemptsRemaining === 1 ? "" : "s"}`;
+  const letterCount = groupsFromEnumeration(round.enumeration).reduce((sum, count) => sum + count, 0);
+  const note = statusNote || (letterCount ? `Se comprueba sola al completar las ${letterCount} letras.` : "");
+  const tone = statusNote ? statusTone : "";
   return `
     <div class="st2-cryptic-clue-meta">
       <span>${difficultyLabel(round.difficulty)}</span>
@@ -179,12 +197,8 @@ function renderRound(round) {
     ` : `
       <form class="st2-cryptic-form" data-cryptic-form>
         <label for="st2-cryptic-answer">Tu respuesta</label>
-        <div>
-          <input id="st2-cryptic-answer" name="answer" type="text" autocomplete="off"
-            autocapitalize="characters" spellcheck="false" maxlength="80" required/>
-          <button type="submit">Probar</button>
-        </div>
-        <p class="st2-cryptic-status" data-cryptic-status role="status" aria-live="polite"></p>
+        <div data-code-slots></div>
+        <p class="st2-cryptic-status ${tone}" data-cryptic-status role="status" aria-live="polite">${escapeHtml(note)}</p>
       </form>
       ${renderHints(round)}
     `}
@@ -235,19 +249,48 @@ function renderSolution(round) {
   `;
 }
 
+function mountAnswerSlots(round) {
+  const container = host?.querySelector("[data-code-slots]");
+  if (!container || !round || round.state === "solved" || round.state === "failed") return;
+  const groups = groupsFromEnumeration(round.enumeration);
+  const letterCount = groups.reduce((sum, count) => sum + count, 0);
+  const hint = letterCount ? `Se comprueba sola al completar las ${letterCount} letras.` : "";
+  const shouldFocus = pendingFocus;
+  pendingFocus = false;
+  activeSlots = createCodeSlots(container, {
+    groups: groups.length ? groups : [8],
+    initial: draftBySlot.get(round.slot) || "",
+    autoFocus: shouldFocus,
+    onChange: (code) => {
+      draftBySlot.set(round.slot, code);
+      if (!statusNote) return;
+      statusNote = "";
+      statusTone = "";
+      const status = host?.querySelector("[data-cryptic-status]");
+      if (!status) return;
+      status.textContent = hint;
+      status.className = "st2-cryptic-status";
+    },
+    onComplete: () => {
+      const form = host?.querySelector("[data-cryptic-form]");
+      if (form) void submitAttempt(form);
+    },
+  });
+}
+
 async function submitAttempt(form) {
   const round = getSelectedRound();
-  const input = form.querySelector("input[name='answer']");
-  const button = form.querySelector("button[type='submit']");
   const status = form.querySelector("[data-cryptic-status]");
-  const answer = input?.value?.trim() || "";
-  if (!round || !answer || !button) return;
+  const answer = activeSlots?.value()?.trim() || "";
+  if (!round || !activeSlots || answer.length !== activeSlots.length || submitting) return;
 
-  button.disabled = true;
-  input.disabled = true;
+  submitting = true;
+  activeSlots.setBusy(true);
+  statusNote = "Comprobando…";
+  statusTone = "";
   if (status) {
-    status.textContent = "Comprobando…";
-    status.classList.remove("is-error", "is-success");
+    status.textContent = statusNote;
+    status.className = "st2-cryptic-status";
   }
 
   try {
@@ -259,30 +302,28 @@ async function submitAttempt(form) {
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body?.error || `Error ${response.status}`);
-    snapshot = body.status;
+    snapshot = body.status || snapshot;
     hintLevel = 0;
+    draftBySlot.delete(round.slot);
     if (!body.correct) {
-      render();
-      const freshStatus = host?.querySelector("[data-cryptic-status]");
-      const freshInput = host?.querySelector("input[name='answer']");
-      if (freshStatus) {
-        freshStatus.textContent = body.message;
-        freshStatus.classList.add("is-error");
-      }
-      freshInput?.focus();
+      await activeSlots.fail();
+      statusNote = body.message || "Esa no es.";
+      statusTone = "is-error";
+      pendingFocus = true;
       return;
     }
+    statusNote = "";
+    statusTone = "";
+    await activeSlots.succeed();
+  } catch (error) {
+    statusNote = error?.message || "No se pudo comprobar.";
+    statusTone = "is-error";
+    pendingFocus = true;
+  } finally {
+    submitting = false;
     render();
     const solution = host?.querySelector(".st2-cryptic-solution");
     solution?.classList.add("is-revealed");
-  } catch (error) {
-    if (status) {
-      status.textContent = error?.message || "No se pudo comprobar.";
-      status.classList.add("is-error");
-    }
-    button.disabled = false;
-    input.disabled = false;
-    input.focus();
   }
 }
 
@@ -303,6 +344,8 @@ function bindHostEvents() {
     if (roundButton) {
       selectedSlot = Number(roundButton.dataset.crypticSlot);
       hintLevel = 0;
+      statusNote = "";
+      statusTone = "";
       render();
       return;
     }
