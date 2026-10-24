@@ -31,7 +31,7 @@ internal static class DailyCrypticSeed
         S("Película de cien mezclado (4)", "CINE", "Película", "Anagrama", "mezclado", "CIEN", "CIEN*", 1),
         S("Nubosidad: buen revuelto (4)", "NUBE", "Nubosidad", "Anagrama", "revuelto", "BUEN", "BUEN*", 1),
         S("Ambiente interior de lonas desordenadas (5)", "SALÓN", "Ambiente interior", "Anagrama", "desordenadas", "LONAS", "LONAS*", 1),
-        S("Superficie escondida cuando tomes algo (4)", "MESA", "Superficie", "Oculta", "escondida", "toMES Algo", "to[MESA]lgo", 1),
+        S("Superficie escondida cuando tomés algo (4)", "MESA", "Superficie", "Oculta", "escondida", "toMES Algo", "to[MESA]lgo", 1),
         S("Refugio escondido en lo venido ayer (4)", "NIDO", "Refugio", "Oculta", "escondido", "veNIDO", "ve[NIDO]", 1),
         S("Alegría contenida en brisas nuevas (4)", "RISA", "Alegría", "Oculta", "contenida", "bRISAs", "b[RISA]s", 1),
         S("Ave escondida: sepa todo antes (4)", "PATO", "Ave", "Oculta", "escondida", "sePA TOdo", "se[PA TO]do", 1),
@@ -77,7 +77,7 @@ internal static class DailyCrypticSeed
         S("Diversión formada por pasa y tiempo (10)", "PASATIEMPO", "Diversión", "Charada", "formada por", "PASA + TIEMPO", "PASA+TIEMPO", 2),
         S("Flor al unir gira y astro (7)", "GIRASOL", "Flor", "Charada", "al unir", "GIRA + SOL", "GIRA+SOL", 2),
         S("Combustión o entusiasmo intenso (5)", "FUEGO", "Combustión / entusiasmo", "Doble definición", "o", "combustión; entusiasmo", "FUEGO / FUEGO", 2),
-        S("Roedor o dispositivo de computadora (5)", "RATÓN", "Roedor / dispositivo", "Doble definición", "o", "roedor; dispositivo de computadora", "RATÓN / RATÓN", 2),
+        S("Roedor o mouse de la computadora (5)", "RATÓN", "Roedor / mouse", "Doble definición", "o", "roedor; mouse de la computadora", "RATÓN / RATÓN", 2),
         S("Lengua de fuego o animal andino (5)", "LLAMA", "Lengua de fuego / animal andino", "Doble definición", "o", "lengua de fuego; camélido", "LLAMA / LLAMA", 2),
         S("Cumbre, según se oye, desde la sima (4)", "CIMA", "Cumbre", "Homófono rioplatense", "según se oye", "SIMA", "SIMA~ (seseo)", 2),
         S("Hogar, según se oye, que caza (4)", "CASA", "Hogar", "Homófono rioplatense", "según se oye", "CAZA", "CAZA~ (seseo)", 2),
@@ -85,7 +85,7 @@ internal static class DailyCrypticSeed
         S("Extremidad animal o apoyo de mesa (4)", "PATA", "Extremidad animal / apoyo de mesa", "Doble definición", "o", "extremidad animal; apoyo de mesa", "PATA / PATA", 2),
 
         // Dificultad 3: predominan construcciones combinadas.
-        S("Custodio: pe más torero desordenado (7)", "PORTERO", "Custodio", "Prefijo + anagrama", "más ... desordenado", "P + TORERO", "P+(TORERO*)", 3),
+        S("Quien cuida la puerta: pe más torero desordenado (7)", "PORTERO", "Quien cuida la puerta", "Prefijo + anagrama", "más ... desordenado", "P + TORERO", "P+(TORERO*)", 3),
         S("Estandarte: be más arena y de revueltas (7)", "BANDERA", "Estandarte", "Prefijo + anagrama", "más ... revueltas", "B + ARENA + D", "B+(ARENA+D)*", 3),
         S("Obrero de piedra: ce más norte y a mezclados (7)", "CANTERO", "Obrero de piedra", "Prefijo + anagrama", "más ... mezclados", "C + NORTE + A", "C+(NORTE+A)*", 3),
         S("Dulce: pe más telas revueltas (6)", "PASTEL", "Dulce", "Prefijo + anagrama", "más ... revueltas", "P + TELAS", "P+(TELAS*)", 3),

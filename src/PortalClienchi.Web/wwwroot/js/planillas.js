@@ -28,9 +28,9 @@ import {
   setTourContext,
   autoTour,
   syncHeaderTourButton,
-} from "./st2-tour-init.js?v=20261024b";
+} from "./st2-tour-init.js?v=20261024c";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
-import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261024b";
+import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261024c";
 
 const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 

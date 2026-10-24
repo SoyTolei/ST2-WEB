@@ -887,6 +887,7 @@ public sealed class DailyCrypticRepository
 
         using var conn = Open();
         using var tx = conn.BeginTransaction();
+        var liveKeys = new List<string>(items.Count);
         foreach (var item in items)
         {
             using var cmd = conn.CreateCommand();
@@ -894,6 +895,7 @@ public sealed class DailyCrypticRepository
             var seedKey = Convert.ToHexString(
                 SHA256.HashData(Encoding.UTF8.GetBytes($"{item.Clue}\n{item.Answer}")))
                 .ToLowerInvariant();
+            liveKeys.Add(seedKey);
             var now = DateTimeOffset.UtcNow.ToString("O");
             cmd.CommandText = """
                 INSERT INTO daily_cryptic_clues
@@ -934,6 +936,27 @@ public sealed class DailyCrypticRepository
             cmd.Parameters.AddWithValue("$updated", now);
             cmd.ExecuteNonQuery();
         }
+
+        using (var retire = conn.CreateCommand())
+        {
+            retire.Transaction = tx;
+            var names = new string[liveKeys.Count];
+            for (var index = 0; index < liveKeys.Count; index++)
+            {
+                names[index] = $"$k{index}";
+                retire.Parameters.AddWithValue(names[index], liveKeys[index]);
+            }
+
+            retire.Parameters.AddWithValue("$updated", DateTimeOffset.UtcNow.ToString("O"));
+            retire.CommandText = $"""
+                UPDATE daily_cryptic_clues
+                SET active = 0, updated_at = $updated
+                WHERE reviewer = 'ST2 editorial'
+                  AND seed_key NOT IN ({string.Join(", ", names)})
+                """;
+            retire.ExecuteNonQuery();
+        }
+
         tx.Commit();
     }
 
