@@ -82,7 +82,9 @@ public sealed record DailyCrypticStatusDto(
     string Phase,
     string? NextAt,
     IReadOnlyList<DailyCrypticRoundDto> Rounds,
-    IReadOnlyList<DailyCrypticRankingDto> Ranking);
+    IReadOnlyList<DailyCrypticRankingDto> Ranking,
+    string Season,
+    IReadOnlyList<DailyCrypticRankingDto> SeasonRanking);
 
 public sealed record DailyCrypticRankingDto(
     int Rank,

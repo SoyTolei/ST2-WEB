@@ -90,18 +90,12 @@ export function createCodeSlots(container, {
   container.querySelectorAll(".code-slots__slot").forEach((el) => slotEls.push(el));
 
   const fit = () => {
-    const width = container.clientWidth || 240;
+    const width = Math.max(140, container.clientWidth || 240);
     const gap = 4;
     const longest = Math.max(...layout);
-    const columns = longest;
-    let size = Math.floor((width - (columns - 1) * gap) / columns);
-    if (size < 26) {
-      const wrapped = Math.ceil(longest / 2);
-      size = Math.floor((width - (wrapped - 1) * gap) / wrapped);
-    }
-    size = Math.max(20, Math.min(44, size));
+    const size = Math.max(16, Math.min(40, Math.floor((width - Math.max(0, longest - 1) * gap) / longest)));
     container.style.setProperty("--cs-size", `${size}px`);
-    container.style.setProperty("--cs-font", `${Math.round(size * 0.46)}px`);
+    container.style.setProperty("--cs-font", `${Math.max(11, Math.round(size * 0.46))}px`);
   };
 
   const applyProgress = (index, value) => {

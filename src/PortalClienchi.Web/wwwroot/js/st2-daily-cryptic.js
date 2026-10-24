@@ -1,4 +1,4 @@
-import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261023g";
+import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261023h";
 
 const API = "/api/cryptic";
 const STATE_LABELS = {
@@ -156,7 +156,6 @@ function render() {
     <div class="st2-cryptic-ranking ${rankingOpen ? "" : "hidden"}" data-cryptic-ranking ${rankingOpen ? "" : "hidden"}>
       <div class="st2-cryptic-ranking-head">
         <strong>Ranking de hoy</strong>
-        <small>10 por ronda · 25 si completás las dos · −1 por pista</small>
       </div>
       ${ranking.length ? `
         <ol>
@@ -170,6 +169,21 @@ function render() {
           `).join("")}
         </ol>
       ` : `<p class="st2-cryptic-empty">Todavía nadie sumó puntos.</p>`}
+      <div class="st2-cryptic-ranking-head is-season">
+        <strong>${escapeHtml(snapshot.season || "")}</strong>
+      </div>
+      ${(snapshot.seasonRanking || []).length ? `
+        <ol>
+          ${snapshot.seasonRanking.map((item) => `
+            <li>
+              <span class="st2-cryptic-rank-pos">${item.rank}</span>
+              <span class="st2-cryptic-rank-player">${escapeHtml(item.player)}</span>
+              <span class="st2-cryptic-rank-meta">${item.wins} victoria${item.wins === 1 ? "" : "s"}</span>
+              <strong>${item.points} pt${item.points === 1 ? "" : "s"}</strong>
+            </li>
+          `).join("")}
+        </ol>
+      ` : `<p class="st2-cryptic-empty">Este trimestre todavía no tiene puntos.</p>`}
     </div>
   `;
   mountAnswerSlots(round);
@@ -206,14 +220,16 @@ function renderRound(round) {
       </div>
     ` : `
       <form class="st2-cryptic-form" data-cryptic-form>
-        <label for="st2-cryptic-answer">Tu respuesta</label>
-        <div class="st2-cryptic-answer-row">
-          <div data-code-slots></div>
+        <div data-code-slots></div>
+        <p class="st2-cryptic-status ${tone}" data-cryptic-status role="status" aria-live="polite">${escapeHtml(note)}</p>
+        <div class="st2-cryptic-actions">
+          <button type="button" data-cryptic-action="hint" ${hintLevel >= 4 ? "disabled" : ""}>
+            💡 ${hintLevel === 0 ? "Necesito una pista" : hintLevel >= 4 ? "Pistas listas" : "Otra pista"}
+          </button>
           <button type="submit" class="st2-cryptic-check" data-cryptic-check disabled>Comprobar</button>
         </div>
-        <p class="st2-cryptic-status ${tone}" data-cryptic-status role="status" aria-live="polite">${escapeHtml(note)}</p>
       </form>
-      ${renderHints(round)}
+      ${renderHintList(round)}
     `}
   `;
 }
@@ -234,20 +250,14 @@ function renderNotice(title, body) {
   `;
 }
 
-function renderHints(round) {
+function renderHintList(round) {
   const rows = [];
   if (hintLevel >= 1) rows.push(`<li><b>Definición:</b> ${escapeHtml(round.definition)}</li>`);
   if (hintLevel >= 2) rows.push(`<li><b>Mecanismo:</b> ${escapeHtml(round.mechanism)}</li>`);
   if (hintLevel >= 3) rows.push(`<li><b>Indicador:</b> ${escapeHtml(round.indicator || "sin indicador explícito")}</li>`);
   if (hintLevel >= 4) rows.push(`<li><b>Material:</b> ${escapeHtml(round.fodder)}</li>`);
-  return `
-    <div class="st2-cryptic-hints">
-      <button type="button" data-cryptic-action="hint" ${hintLevel >= 4 ? "disabled" : ""}>
-        ${hintLevel === 0 ? "Necesito una pista" : hintLevel >= 4 ? "Todas las ayudas reveladas" : "Revelar otra ayuda"}
-      </button>
-      ${rows.length ? `<ul>${rows.join("")}</ul>` : ""}
-    </div>
-  `;
+  if (!rows.length) return "";
+  return `<ul class="st2-cryptic-hint-list">${rows.join("")}</ul>`;
 }
 
 function renderSolution(round) {

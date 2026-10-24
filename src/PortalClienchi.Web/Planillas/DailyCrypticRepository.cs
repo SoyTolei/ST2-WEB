@@ -45,7 +45,10 @@ public sealed class DailyCrypticRepository
         using var conn = Open();
         var daySlots = ReadScheduledSlots(conn, null, date);
         var rounds = LoadRounds(conn, normalizedEmail, date, localNow, overnight, daySlots);
-        var ranking = LoadRanking(conn, date);
+        var ranking = LoadRanking(conn, date, date.AddDays(1));
+        var quarterStart = new DateOnly(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1);
+        var season = $"Q{(date.Month - 1) / 3 + 1} {date.Year}";
+        var seasonRanking = LoadRanking(conn, quarterStart, quarterStart.AddMonths(3));
         var minute = MinuteOf(localNow);
         var nextSlot = overnight ? 0 : daySlots.FirstOrDefault(slot => minute < SlotMinute(slot));
         var nextBoundary = nextSlot > 0
@@ -59,7 +62,9 @@ public sealed class DailyCrypticRepository
             "active",
             nextAt,
             rounds,
-            ranking);
+            ranking,
+            season,
+            seasonRanking);
     }
 
     public int RevealHint(string email, int slot, DateTimeOffset? nowUtc = null)
@@ -405,7 +410,7 @@ public sealed class DailyCrypticRepository
         return rounds;
     }
 
-    private IReadOnlyList<DailyCrypticRankingDto> LoadRanking(SqliteConnection conn, DateOnly date)
+    private IReadOnlyList<DailyCrypticRankingDto> LoadRanking(SqliteConnection conn, DateOnly from, DateOnly to)
     {
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
@@ -413,12 +418,13 @@ public sealed class DailyCrypticRepository
                    SUM(CASE WHEN position = 1 THEN 1 ELSE 0 END) AS wins,
                    MIN(solved_at) AS first_solve
             FROM daily_cryptic_solves
-            WHERE play_date = $date
+            WHERE play_date >= $from AND play_date < $to
             GROUP BY email
             ORDER BY total_points DESC, wins DESC, solved DESC, first_solve ASC
             LIMIT 50
             """;
-        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$from", DateKey(from));
+        cmd.Parameters.AddWithValue("$to", DateKey(to));
         using var reader = cmd.ExecuteReader();
         var ranking = new List<DailyCrypticRankingDto>();
         var rank = 0;
