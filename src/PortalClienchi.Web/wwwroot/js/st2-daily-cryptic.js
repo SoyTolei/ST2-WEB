@@ -1,4 +1,4 @@
-import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261023h";
+import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261023i";
 
 const API = "/api/cryptic";
 const STATE_LABELS = {
@@ -17,6 +17,7 @@ let hintLevel = 0;
 let hintSlot = null;
 let hintPending = false;
 let rankingOpen = false;
+let rankingTab = "today";
 let refreshTimer = 0;
 let initialized = false;
 let submitting = false;
@@ -154,39 +155,33 @@ function render() {
       ${renderRound(round)}
     </div>
     <div class="st2-cryptic-ranking ${rankingOpen ? "" : "hidden"}" data-cryptic-ranking ${rankingOpen ? "" : "hidden"}>
-      <div class="st2-cryptic-ranking-head">
-        <strong>Ranking de hoy</strong>
+      <div class="st2-cryptic-rank-tabs" role="tablist" aria-label="Rankings">
+        <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="today" class="${rankingTab === "general" ? "" : "is-active"}" aria-selected="${rankingTab === "general" ? "false" : "true"}">Hoy</button>
+        <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="general" class="${rankingTab === "general" ? "is-active" : ""}" aria-selected="${rankingTab === "general" ? "true" : "false"}">General</button>
       </div>
-      ${ranking.length ? `
-        <ol>
-          ${ranking.map((item) => `
-            <li>
-              <span class="st2-cryptic-rank-pos">${item.rank}</span>
-              <span class="st2-cryptic-rank-player">${escapeHtml(item.player)}</span>
-              <span class="st2-cryptic-rank-meta">${item.wins} victoria${item.wins === 1 ? "" : "s"}</span>
-              <strong>${item.points} pt${item.points === 1 ? "" : "s"}</strong>
-            </li>
-          `).join("")}
-        </ol>
-      ` : `<p class="st2-cryptic-empty">Todavía nadie sumó puntos.</p>`}
-      <div class="st2-cryptic-ranking-head is-season">
-        <strong>${escapeHtml(snapshot.season || "")}</strong>
-      </div>
-      ${(snapshot.seasonRanking || []).length ? `
-        <ol>
-          ${snapshot.seasonRanking.map((item) => `
-            <li>
-              <span class="st2-cryptic-rank-pos">${item.rank}</span>
-              <span class="st2-cryptic-rank-player">${escapeHtml(item.player)}</span>
-              <span class="st2-cryptic-rank-meta">${item.wins} victoria${item.wins === 1 ? "" : "s"}</span>
-              <strong>${item.points} pt${item.points === 1 ? "" : "s"}</strong>
-            </li>
-          `).join("")}
-        </ol>
-      ` : `<p class="st2-cryptic-empty">Este trimestre todavía no tiene puntos.</p>`}
+      ${renderRankingList(
+        rankingTab === "general" ? (snapshot.seasonRanking || []) : ranking,
+        rankingTab === "general" ? "Todavía no hay puntos en el ranking general." : "Todavía nadie sumó puntos.",
+      )}
     </div>
   `;
   mountAnswerSlots(round);
+}
+
+function renderRankingList(items, empty) {
+  if (!items.length) return `<p class="st2-cryptic-empty">${escapeHtml(empty)}</p>`;
+  return `
+    <ol>
+      ${items.map((item) => `
+        <li>
+          <span class="st2-cryptic-rank-pos">${item.rank}</span>
+          <span class="st2-cryptic-rank-player">${escapeHtml(item.player)}</span>
+          <span class="st2-cryptic-rank-meta">${item.wins} victoria${item.wins === 1 ? "" : "s"}</span>
+          <strong>${item.points} pt${item.points === 1 ? "" : "s"}</strong>
+        </li>
+      `).join("")}
+    </ol>
+  `;
 }
 
 function renderRound(round) {
@@ -416,6 +411,10 @@ function bindHostEvents() {
       void revealHint();
     } else if (action === "ranking") {
       rankingOpen = !rankingOpen;
+      render();
+    } else if (action === "rank-tab") {
+      rankingTab = event.target.closest("[data-rank-tab]")?.dataset.rankTab === "general" ? "general" : "today";
+      rankingOpen = true;
       render();
     } else if (action === "retry") {
       void loadStatus();
