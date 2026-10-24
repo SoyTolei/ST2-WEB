@@ -43,14 +43,13 @@ export function createCodeSlots(container, {
   groups,
   initial = "",
   onChange,
-  onComplete,
   autoFocus = false,
 } = {}) {
   const layout = (groups?.length ? groups : [4]).filter((count) => count > 0);
   const length = layout.reduce((sum, count) => sum + count, 0);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const slots = Array.from({ length }, (_, index) => lettersOf(initial)[index] || "");
-  let sealed = slots.every(Boolean);
+  let armed = !slots.every(Boolean);
   const slotEls = [];
   let active = Math.max(0, slots.findIndex((slot) => !slot) === -1 ? length - 1 : slots.findIndex((slot) => !slot));
   let focused = false;
@@ -146,12 +145,15 @@ export function createCodeSlots(container, {
   const emit = () => onChange?.(slots.join(""));
 
   const insert = (raw, from = active) => {
-    if (busy || sealed || row.dataset.status === "success") return;
+    if (busy || row.dataset.status === "success") return;
+    if (slots.every(Boolean) && !armed) return;
     const chars = lettersOf(raw);
     if (!chars) return;
     const step = reduceMotion ? 0 : CASCADE;
+    const replacing = slots.every(Boolean);
     let index = from;
-    for (const char of chars) {
+    const letters = replacing ? chars.slice(0, 1) : chars;
+    for (const char of letters) {
       if (index >= length) break;
       const el = slotEls[index];
       slots[index] = char;
@@ -160,12 +162,9 @@ export function createCodeSlots(container, {
       index += 1;
     }
     active = Math.min(index, length - 1);
+    armed = !slots.every(Boolean);
     paint();
     emit();
-    if (slots.every(Boolean)) {
-      sealed = true;
-      onComplete?.(slots.join(""));
-    }
   };
 
   const clearSlot = (index, stepBack = false) => {
@@ -177,7 +176,7 @@ export function createCodeSlots(container, {
     }
     const el = slotEls[index];
     slots[index] = "";
-    sealed = false;
+    armed = true;
     void drive(index, 0).then(() => {
       if (!slots[index]) el.querySelector(".code-slots__digit").textContent = "";
     });
@@ -189,7 +188,9 @@ export function createCodeSlots(container, {
   const onKeyDown = (event) => {
     if (busy || event.metaKey || event.ctrlKey || event.altKey) return;
     const key = event.key;
-    if (/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]$/.test(key)) {
+    if (key === "Enter") {
+      event.preventDefault();
+    } else if (/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]$/.test(key)) {
       event.preventDefault();
       typedFromKey = true;
       insert(key);
@@ -203,18 +204,22 @@ export function createCodeSlots(container, {
     } else if (key === "ArrowLeft") {
       event.preventDefault();
       active = Math.max(active - 1, 0);
+      armed = true;
       paint();
     } else if (key === "ArrowRight") {
       event.preventDefault();
       active = Math.min(active + 1, length - 1);
+      armed = true;
       paint();
     } else if (key === "Home") {
       event.preventDefault();
       active = 0;
+      armed = true;
       paint();
     } else if (key === "End") {
       event.preventDefault();
       active = length - 1;
+      armed = true;
       paint();
     }
   };
@@ -228,6 +233,7 @@ export function createCodeSlots(container, {
       const firstEmpty = slots.indexOf("");
       const limit = firstEmpty === -1 ? length - 1 : firstEmpty;
       active = Math.max(0, Math.min(index, limit));
+      armed = true;
       paint();
     }
     input.focus();
@@ -291,7 +297,7 @@ export function createCodeSlots(container, {
       });
       slots.fill("");
       active = 0;
-      sealed = false;
+      armed = true;
       row.dataset.status = "idle";
       paint();
       emit();
