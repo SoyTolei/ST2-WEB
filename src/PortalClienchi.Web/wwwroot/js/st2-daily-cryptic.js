@@ -137,7 +137,7 @@ function render() {
         Ranking <span>${ranking.length}</span>
       </button>
     </div>
-    <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico">
+    <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico" style="grid-template-columns: repeat(${rounds.length}, minmax(0, 1fr))">
       ${rounds.map((item) => `
         <button type="button"
           class="st2-cryptic-round ${item.slot === round?.slot ? "is-active" : ""} is-${escapeHtml(item.state)}"
@@ -156,7 +156,7 @@ function render() {
     <div class="st2-cryptic-ranking ${rankingOpen ? "" : "hidden"}" data-cryptic-ranking ${rankingOpen ? "" : "hidden"}>
       <div class="st2-cryptic-ranking-head">
         <strong>Ranking de hoy</strong>
-        <small>10 · 7 · 5 · 1, menos 1 por cada pista</small>
+        <small>10 por ronda · 25 si completás las dos · −1 por pista</small>
       </div>
       ${ranking.length ? `
         <ol>
@@ -164,7 +164,7 @@ function render() {
             <li>
               <span class="st2-cryptic-rank-pos">${item.rank}</span>
               <span class="st2-cryptic-rank-player">${escapeHtml(item.player)}</span>
-              <span class="st2-cryptic-rank-meta">${item.solved}/3 · ${item.wins} victoria${item.wins === 1 ? "" : "s"}</span>
+              <span class="st2-cryptic-rank-meta">${item.wins} victoria${item.wins === 1 ? "" : "s"}</span>
               <strong>${item.points} pt${item.points === 1 ? "" : "s"}</strong>
             </li>
           `).join("")}
@@ -185,7 +185,7 @@ function renderRound(round) {
     return renderNotice("Está bloqueada", "Resolvé las rondas anteriores para desbloquearla.");
   }
   if (round.state === "closed") {
-    return renderNotice("Nueva jornada", "El Críptico siguiente empieza a las 08:00.");
+    return renderNotice("Nueva jornada", "El Críptico siguiente empieza a las 09:00.");
   }
 
   const solved = round.state === "solved";

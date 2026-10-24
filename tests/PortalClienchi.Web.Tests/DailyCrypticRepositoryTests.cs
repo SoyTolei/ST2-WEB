@@ -27,31 +27,31 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     [Fact]
     public void Unlocks_rounds_in_order_and_accumulates_ranking()
     {
-        var at1230 = AtArgentina(2026, 10, 23, 12, 30);
-        var initial = _repository.GetStatus(Email, at1230);
+        var morning = DailyCrypticRepository.MorningSlot;
+        var afternoon = DailyCrypticRepository.AfternoonSlot;
+        var at1000 = AtArgentina(2026, 10, 23, 10, 0);
+        var initial = _repository.GetStatus(Email, at1000);
 
         Assert.Equal("active", initial.Phase);
+        Assert.Equal(2, initial.Rounds.Count);
+        Assert.Equal("09:00", initial.Rounds[0].Label);
+        Assert.Equal("13:30", initial.Rounds[1].Label);
         Assert.Equal("available", initial.Rounds[0].State);
-        Assert.Equal("blocked", initial.Rounds[1].State);
-        Assert.Equal("upcoming", initial.Rounds[2].State);
+        Assert.Equal("upcoming", initial.Rounds[1].State);
 
-        var first = _repository.Submit(Email, 8, ScheduledAnswer(initial.Date, 8), at1230);
+        var first = _repository.Submit(Email, morning, ScheduledAnswer(initial.Date, morning), at1000);
         Assert.True(first.Correct);
         Assert.Equal(10, first.Status.Rounds[0].Points);
-        Assert.Equal("available", first.Status.Rounds[1].State);
+        Assert.Equal("upcoming", first.Status.Rounds[1].State);
 
-        var second = _repository.Submit(Email, 12, ScheduledAnswer(initial.Date, 12), at1230);
+        var at1330 = AtArgentina(2026, 10, 23, 13, 30);
+        var secondReady = _repository.GetStatus(Email, at1330);
+        Assert.Equal("available", secondReady.Rounds[1].State);
+
+        var second = _repository.Submit(Email, afternoon, ScheduledAnswer(initial.Date, afternoon), at1330);
         Assert.True(second.Correct);
-        Assert.Equal(20, second.Status.Ranking.Single().Points);
-
-        var at1630 = AtArgentina(2026, 10, 23, 16, 30);
-        var thirdReady = _repository.GetStatus(Email, at1630);
-        Assert.Equal("available", thirdReady.Rounds[2].State);
-
-        var third = _repository.Submit(Email, 16, ScheduledAnswer(initial.Date, 16), at1630);
-        Assert.True(third.Correct);
-        Assert.Equal(30, third.Status.Ranking.Single().Points);
-        Assert.Equal(3, third.Status.Ranking.Single().Solved);
+        Assert.Equal(25, second.Status.Ranking.Single().Points);
+        Assert.Equal(2, second.Status.Ranking.Single().Solved);
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var at0900 = AtArgentina(2026, 10, 23, 9, 0);
         for (var attempt = 1; attempt <= DailyCrypticRepository.MaxAttempts; attempt++)
         {
-            var result = _repository.Submit(Email, 8, "respuesta-imposible-xyz", at0900);
+            var result = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "respuesta-imposible-xyz", at0900);
             Assert.False(result.Correct);
             Assert.Equal(DailyCrypticRepository.MaxAttempts - attempt, result.AttemptsRemaining);
         }
@@ -68,7 +68,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var failed = _repository.GetStatus(Email, at0900);
         Assert.Equal("failed", failed.Rounds[0].State);
         Assert.Throws<InvalidOperationException>(
-            () => _repository.Submit(Email, 8, "otro-intento", at0900));
+            () => _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "otro-intento", at0900));
 
         var nextDay = AtArgentina(2026, 10, 24, 9, 0);
         var reset = _repository.GetStatus(Email, nextDay);
@@ -90,11 +90,11 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Equal("available", overnight.Rounds[0].State);
         Assert.Equal("blocked", overnight.Rounds[1].State);
 
-        var answer = ScheduledAnswer(overnight.Date, 8);
-        var solved = _repository.Submit(Email, 8, answer, earlyMorning);
+        var answer = ScheduledAnswer(overnight.Date, DailyCrypticRepository.MorningSlot);
+        var solved = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, earlyMorning);
         Assert.True(solved.Correct);
 
-        var nextCompetition = _repository.GetStatus(Email, AtArgentina(2026, 10, 24, 8, 0));
+        var nextCompetition = _repository.GetStatus(Email, AtArgentina(2026, 10, 24, 9, 0));
         Assert.Equal("2026-10-24", nextCompetition.Date);
         Assert.Equal("available", nextCompetition.Rounds[0].State);
         Assert.Equal(0, nextCompetition.Rounds[0].AttemptsUsed);
@@ -106,14 +106,15 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         const string secondEmail = "otra.persona@thomsonreuters.com";
         var at0900 = AtArgentina(2026, 10, 23, 9, 0);
         var date = _repository.GetStatus(Email, at0900).Date;
-        var answer = ScheduledAnswer(date, 8);
+        var answer = ScheduledAnswer(date, DailyCrypticRepository.MorningSlot);
 
-        var first = _repository.Submit(Email, 8, answer, at0900);
-        var second = _repository.Submit(secondEmail, 8, answer, at0900.AddMinutes(1));
+        var first = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, at0900);
+        var second = _repository.Submit(secondEmail, DailyCrypticRepository.MorningSlot, answer, at0900.AddMinutes(1));
 
         Assert.Equal(10, first.Status.Rounds[0].Points);
-        Assert.Equal(7, second.Status.Rounds[0].Points);
-        Assert.Equal([10, 7], second.Status.Ranking.Select(item => item.Points).ToArray());
+        Assert.Equal(10, second.Status.Rounds[0].Points);
+        Assert.Equal([10, 10], second.Status.Ranking.Select(item => item.Points).ToArray());
+        Assert.Equal(1, second.Status.Ranking[0].Wins);
     }
 
     [Fact]
@@ -121,12 +122,12 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     {
         var at0900 = AtArgentina(2026, 10, 23, 9, 0);
         var date = _repository.GetStatus(Email, at0900).Date;
-        var answer = ScheduledAnswer(date, 8);
+        var answer = ScheduledAnswer(date, DailyCrypticRepository.MorningSlot);
 
-        Assert.Equal(1, _repository.RevealHint(Email, 8, at0900));
-        Assert.Equal(2, _repository.RevealHint(Email, 8, at0900));
+        Assert.Equal(1, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, at0900));
+        Assert.Equal(2, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, at0900));
 
-        var solved = _repository.Submit(Email, 8, answer, at0900);
+        var solved = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, at0900);
 
         Assert.Equal(8, solved.Status.Rounds[0].Points);
         Assert.Equal(2, solved.Status.Rounds[0].HintsUsed);

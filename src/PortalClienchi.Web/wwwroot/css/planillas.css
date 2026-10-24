@@ -5891,7 +5891,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 
 .st2-cryptic-rounds {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
   margin: 14px 0;
 }
@@ -6405,11 +6405,7 @@ html.st2-theme-dark .st2-cryptic {
   }
 
   .st2-cryptic-ranking li {
-    grid-template-columns: 24px minmax(0, 1fr) auto;
-  }
-
-  .st2-cryptic-rank-meta {
-    display: none;
+    grid-template-columns: 24px minmax(0, 1fr) auto auto;
   }
 }
 

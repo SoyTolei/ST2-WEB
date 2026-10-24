@@ -8,7 +8,9 @@ namespace PortalClienchi.Web.Planillas;
 
 public sealed class DailyCrypticRepository
 {
-    public static readonly int[] Slots = [8, 12, 16];
+    public const int MorningSlot = 9 * 60;
+    public const int AfternoonSlot = 13 * 60 + 30;
+    public static readonly int[] Slots = [MorningSlot, AfternoonSlot];
     public const int MaxAttempts = 5;
 
     private readonly string _dbPath;
@@ -41,14 +43,14 @@ public sealed class DailyCrypticRepository
         EnsureSchedule(date);
 
         using var conn = Open();
-        var rounds = LoadRounds(conn, normalizedEmail, date, localNow, overnight);
+        var daySlots = ReadScheduledSlots(conn, null, date);
+        var rounds = LoadRounds(conn, normalizedEmail, date, localNow, overnight, daySlots);
         var ranking = LoadRanking(conn, date);
-        var nextSlot = overnight ? 0 : Slots.FirstOrDefault(slot => localNow.Hour < slot);
-        var nextBoundary = overnight
-            ? localNow.Date.AddHours(Slots[0])
-            : nextSlot > 0
-                ? localNow.Date.AddHours(nextSlot)
-                : localNow.Date.AddDays(1).AddHours(Slots[0]);
+        var minute = MinuteOf(localNow);
+        var nextSlot = overnight ? 0 : daySlots.FirstOrDefault(slot => minute < SlotMinute(slot));
+        var nextBoundary = nextSlot > 0
+            ? localNow.Date.AddMinutes(SlotMinute(nextSlot))
+            : localNow.Date.AddDays(overnight ? 0 : 1).AddMinutes(SlotMinute(MorningSlot));
         var nextAt = new DateTimeOffset(nextBoundary, TimeSpan.FromHours(-3)).ToString("O");
 
         return new DailyCrypticStatusDto(
@@ -64,24 +66,24 @@ public sealed class DailyCrypticRepository
     {
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
-        if (!Slots.Contains(slot))
-            throw new ArgumentException("Ronda inválida.", nameof(slot));
-
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
         var (date, overnight) = ResolveCompetition(localNow);
-        if (!overnight && localNow.Hour < slot)
-            throw new InvalidOperationException($"La ronda de las {slot:00}:00 todavía no abrió.");
-
         EnsureSchedule(date);
         using var conn = Open();
+        var daySlots = ReadScheduledSlots(conn, null, date);
+        if (!daySlots.Contains(slot))
+            throw new ArgumentException("Ronda inválida.", nameof(slot));
+        if (!overnight && MinuteOf(localNow) < SlotMinute(slot))
+            throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
+
         using var tx = conn.BeginTransaction(deferred: false);
         if (LoadSolve(conn, tx, normalizedEmail, date, slot) is not null)
             throw new InvalidOperationException("Esta ronda ya está resuelta.");
 
-        foreach (var priorSlot in Slots.Where(s => s < slot))
+        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
         {
             if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                throw new InvalidOperationException($"Primero resolvé la ronda de las {priorSlot:00}:00.");
+                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
         }
 
         var current = CountHints(conn, tx, normalizedEmail, date, slot);
@@ -116,20 +118,19 @@ public sealed class DailyCrypticRepository
     {
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
-        if (!Slots.Contains(slot))
-            throw new ArgumentException("Ronda inválida.", nameof(slot));
-
         var normalizedAnswer = NormalizeAnswer(submittedAnswer);
         if (normalizedAnswer.Length == 0)
             throw new ArgumentException("Escribí una respuesta.");
-
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
         var (date, overnight) = ResolveCompetition(localNow);
-        if (!overnight && localNow.Hour < slot)
-            throw new InvalidOperationException($"La ronda de las {slot:00}:00 todavía no abrió.");
-
         EnsureSchedule(date);
         using var conn = Open();
+        var daySlots = ReadScheduledSlots(conn, null, date);
+        if (!daySlots.Contains(slot))
+            throw new ArgumentException("Ronda inválida.", nameof(slot));
+        if (!overnight && MinuteOf(localNow) < SlotMinute(slot))
+            throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
+
         using var tx = conn.BeginTransaction(deferred: false);
 
         var scheduled = LoadScheduledClue(conn, tx, date, slot)
@@ -146,10 +147,10 @@ public sealed class DailyCrypticRepository
                 GetStatus(normalizedEmail, nowUtc));
         }
 
-        foreach (var priorSlot in Slots.Where(s => s < slot))
+        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
         {
             if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                throw new InvalidOperationException($"Primero resolvé la ronda de las {priorSlot:00}:00.");
+                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
         }
 
         var attemptsUsed = CountAttempts(conn, tx, normalizedEmail, date, slot);
@@ -188,8 +189,10 @@ public sealed class DailyCrypticRepository
         {
             var position = CountSolves(conn, tx, date, slot) + 1;
             var hints = CountHints(conn, tx, normalizedEmail, date, slot);
-            var basePoints = PointsForPosition(position);
-            var points = Math.Max(0, basePoints - hints);
+            var roundPoints = Math.Max(0, 10 - hints);
+            var alreadySolved = CountPlayerSolves(conn, tx, normalizedEmail, date);
+            var completesDay = daySlots.Count == 2 && alreadySolved + 1 == 2;
+            var points = roundPoints + (completesDay ? 5 : 0);
             var solvedAt = DateTimeOffset.UtcNow.ToString("O");
             using var insertSolve = conn.CreateCommand();
             insertSolve.Transaction = tx;
@@ -208,11 +211,23 @@ public sealed class DailyCrypticRepository
             insertSolve.Parameters.AddWithValue("$solved", solvedAt);
             insertSolve.ExecuteNonQuery();
             var pointsLabel = points == 1 ? "punto" : "puntos";
-            message = hints > 0
-                ? $"¡Correcto! Sumaste {points} {pointsLabel} ({basePoints} menos {hints} por {(hints == 1 ? "la pista" : "las pistas")})."
-                : position <= 3
-                    ? $"¡Correcto! Llegaste {FormatPosition(position)} y sumaste {points} {pointsLabel}."
-                    : $"¡Correcto! Sumaste {points} {pointsLabel}.";
+            if (completesDay)
+            {
+                var total = SumPlayerPoints(conn, tx, normalizedEmail, date);
+                message = $"¡Correcto! Cerraste las dos rondas y el día suma {total} puntos.";
+            }
+            else if (hints > 0)
+            {
+                message = $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {hints} por {(hints == 1 ? "la pista" : "las pistas")}).";
+            }
+            else if (daySlots.Count == 2)
+            {
+                message = $"¡Correcto! Sumaste {points} puntos. Si cerrás la otra ronda, el día suma 25.";
+            }
+            else
+            {
+                message = $"¡Correcto! Sumaste {points} {pointsLabel}.";
+            }
         }
 
         tx.Commit();
@@ -330,7 +345,7 @@ public sealed class DailyCrypticRepository
     private static (DateOnly Date, bool Overnight) ResolveCompetition(DateTimeOffset localNow)
     {
         var date = DateOnly.FromDateTime(localNow.DateTime);
-        return localNow.Hour < Slots[0]
+        return MinuteOf(localNow) < SlotMinute(MorningSlot)
             ? (date.AddDays(-1), true)
             : (date, false);
     }
@@ -340,17 +355,19 @@ public sealed class DailyCrypticRepository
         string email,
         DateOnly date,
         DateTimeOffset localNow,
-        bool overnight)
+        bool overnight,
+        IReadOnlyList<int> daySlots)
     {
-        var rounds = new List<DailyCrypticRoundDto>(Slots.Length);
+        var rounds = new List<DailyCrypticRoundDto>(daySlots.Count);
         var priorSolved = true;
-        foreach (var slot in Slots)
+        var minute = MinuteOf(localNow);
+        foreach (var slot in daySlots)
         {
             var clue = LoadScheduledClue(conn, null, date, slot)
                 ?? throw new InvalidOperationException("Falta la pista programada.");
             var solve = LoadSolve(conn, null, email, date, slot);
             var attempts = CountAttempts(conn, null, email, date, slot);
-            var opened = overnight || localNow.Hour >= slot;
+            var opened = overnight || minute >= SlotMinute(slot);
             var state = solve is not null
                 ? "solved"
                 : !opened
@@ -365,7 +382,7 @@ public sealed class DailyCrypticRepository
             var revealSolution = state == "solved";
             rounds.Add(new DailyCrypticRoundDto(
                 slot,
-                $"{slot:00}:00",
+                SlotLabel(slot),
                 state,
                 revealClue ? clue.Clue : null,
                 revealClue ? clue.Enumeration : null,
@@ -433,50 +450,69 @@ public sealed class DailyCrypticRepository
     {
         using var conn = Open();
         using var tx = conn.BeginTransaction(deferred: false);
-        var selected = new HashSet<long>();
-        foreach (var slot in Slots)
+        if (KeepOrMigrateSchedule(conn, tx, date))
         {
-            using var existing = conn.CreateCommand();
-            existing.Transaction = tx;
-            existing.CommandText = """
-                SELECT clue_id FROM daily_cryptic_schedule
-                WHERE play_date = $date AND slot_hour = $slot
-                """;
-            existing.Parameters.AddWithValue("$date", DateKey(date));
-            existing.Parameters.AddWithValue("$slot", slot);
-            var found = existing.ExecuteScalar();
-            if (found is long id)
-            {
-                selected.Add(id);
-                continue;
-            }
+            tx.Commit();
+            return;
+        }
 
-            var difficulty = Array.IndexOf(Slots, slot) + 1;
-            var candidates = LoadCandidateIds(conn, tx, date, difficulty)
-                .Where(id => !selected.Contains(id))
-                .ToList();
-            if (candidates.Count == 0)
-                candidates = LoadAllActiveIds(conn, tx, difficulty).Where(id => !selected.Contains(id)).ToList();
-            if (candidates.Count == 0)
-                throw new InvalidOperationException($"No hay pistas revisadas de dificultad {difficulty}.");
-
-            var hash = SHA256.HashData(Encoding.UTF8.GetBytes($"{date:yyyy-MM-dd}:{slot}:st2"));
-            var index = BitConverter.ToUInt32(hash, 0) % (uint)candidates.Count;
-            var clueId = candidates[(int)index];
-            using var insert = conn.CreateCommand();
-            insert.Transaction = tx;
-            insert.CommandText = """
-                INSERT OR IGNORE INTO daily_cryptic_schedule (play_date, slot_hour, clue_id, created_at)
-                VALUES ($date, $slot, $clue, $created)
-                """;
-            insert.Parameters.AddWithValue("$date", DateKey(date));
-            insert.Parameters.AddWithValue("$slot", slot);
-            insert.Parameters.AddWithValue("$clue", clueId);
-            insert.Parameters.AddWithValue("$created", DateTimeOffset.UtcNow.ToString("O"));
-            insert.ExecuteNonQuery();
-            selected.Add(clueId);
+        var selected = new HashSet<long>();
+        var difficulties = DifficultiesFor(date);
+        foreach (var (slot, difficulty) in new[] { (MorningSlot, difficulties.Morning), (AfternoonSlot, difficulties.Afternoon) })
+        {
+            InsertScheduledClue(conn, tx, date, slot, difficulty, selected);
         }
         tx.Commit();
+    }
+
+    private bool KeepOrMigrateSchedule(SqliteConnection conn, SqliteTransaction tx, DateOnly date)
+    {
+        var slots = ReadScheduledSlots(conn, tx, date);
+        if (slots.Count == 0)
+            return false;
+        if (slots.Count == Slots.Length && Slots.All(slots.Contains))
+            return true;
+        if (slots.Any(slot => slot >= 24))
+            return true;
+
+        var solvedSlots = ReadSolvedSlots(conn, tx, date);
+        if (solvedSlots.Any(slot => slot != 8))
+            return true;
+
+        foreach (var table in new[] { "daily_cryptic_schedule", "daily_cryptic_solves", "daily_cryptic_attempts", "daily_cryptic_hints" })
+        {
+            using var remap = conn.CreateCommand();
+            remap.Transaction = tx;
+            remap.CommandText = $"""
+                UPDATE {table}
+                SET slot_hour = $next
+                WHERE play_date = $date AND slot_hour = 8
+                """;
+            remap.Parameters.AddWithValue("$next", MorningSlot);
+            remap.Parameters.AddWithValue("$date", DateKey(date));
+            remap.ExecuteNonQuery();
+
+            using var drop = conn.CreateCommand();
+            drop.Transaction = tx;
+            drop.CommandText = $"""
+                DELETE FROM {table}
+                WHERE play_date = $date AND slot_hour IN (12, 16)
+                """;
+            drop.Parameters.AddWithValue("$date", DateKey(date));
+            drop.ExecuteNonQuery();
+        }
+
+        if (!ReadScheduledSlots(conn, tx, date).Contains(AfternoonSlot))
+        {
+            InsertScheduledClue(
+                conn,
+                tx,
+                date,
+                AfternoonSlot,
+                DifficultiesFor(date).Afternoon,
+                new HashSet<long>());
+        }
+        return true;
     }
 
     private static List<long> LoadCandidateIds(
@@ -826,24 +862,118 @@ public sealed class DailyCrypticRepository
         }
     }
 
+    private static int MinuteOf(DateTimeOffset local) => local.Hour * 60 + local.Minute;
+
+    private static int SlotMinute(int slot) => slot < 24 ? slot * 60 : slot;
+
+    private static string SlotLabel(int slot)
+    {
+        var minute = SlotMinute(slot);
+        return $"{minute / 60:00}:{minute % 60:00}";
+    }
+
+    private static (int Morning, int Afternoon) DifficultiesFor(DateOnly date) =>
+        (date.DayNumber % 3) switch
+        {
+            0 => (1, 2),
+            1 => (2, 3),
+            _ => (1, 3),
+        };
+
+    private static List<int> ReadScheduledSlots(SqliteConnection conn, SqliteTransaction? tx, DateOnly date)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT slot_hour FROM daily_cryptic_schedule
+            WHERE play_date = $date
+            ORDER BY slot_hour
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        using var reader = cmd.ExecuteReader();
+        var slots = new List<int>();
+        while (reader.Read())
+            slots.Add(reader.GetInt32(0));
+        return slots;
+    }
+
+    private static List<int> ReadSolvedSlots(SqliteConnection conn, SqliteTransaction tx, DateOnly date)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT DISTINCT slot_hour FROM daily_cryptic_solves
+            WHERE play_date = $date
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        using var reader = cmd.ExecuteReader();
+        var slots = new List<int>();
+        while (reader.Read())
+            slots.Add(reader.GetInt32(0));
+        return slots;
+    }
+
+    private static int CountPlayerSolves(SqliteConnection conn, SqliteTransaction tx, string email, DateOnly date)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT COUNT(*) FROM daily_cryptic_solves
+            WHERE play_date = $date AND email = $email
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$email", email);
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+    }
+
+    private static int SumPlayerPoints(SqliteConnection conn, SqliteTransaction tx, string email, DateOnly date)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT COALESCE(SUM(points), 0) FROM daily_cryptic_solves
+            WHERE play_date = $date AND email = $email
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$email", email);
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+    }
+
+    private static void InsertScheduledClue(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date,
+        int slot,
+        int difficulty,
+        ISet<long> selected)
+    {
+        var candidates = LoadCandidateIds(conn, tx, date, difficulty)
+            .Where(id => !selected.Contains(id))
+            .ToList();
+        if (candidates.Count == 0)
+            candidates = LoadAllActiveIds(conn, tx, difficulty).Where(id => !selected.Contains(id)).ToList();
+        if (candidates.Count == 0)
+            throw new InvalidOperationException($"No hay pistas revisadas de dificultad {difficulty}.");
+
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes($"{date:yyyy-MM-dd}:{slot}:st2"));
+        var index = BitConverter.ToUInt32(hash, 0) % (uint)candidates.Count;
+        var clueId = candidates[(int)index];
+        using var insert = conn.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = """
+            INSERT OR IGNORE INTO daily_cryptic_schedule (play_date, slot_hour, clue_id, created_at)
+            VALUES ($date, $slot, $clue, $created)
+            """;
+        insert.Parameters.AddWithValue("$date", DateKey(date));
+        insert.Parameters.AddWithValue("$slot", slot);
+        insert.Parameters.AddWithValue("$clue", clueId);
+        insert.Parameters.AddWithValue("$created", DateTimeOffset.UtcNow.ToString("O"));
+        insert.ExecuteNonQuery();
+        selected.Add(clueId);
+    }
+
     private static string DateKey(DateOnly date) =>
         date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-    private static int PointsForPosition(int position) => position switch
-    {
-        1 => 10,
-        2 => 7,
-        3 => 5,
-        _ => 1,
-    };
-
-    private static string FormatPosition(int position) => position switch
-    {
-        1 => "1.º",
-        2 => "2.º",
-        3 => "3.º",
-        _ => $"{position}.º",
-    };
 
     private static void ValidateAdminClue(DailyCrypticAdminRequest request)
     {
