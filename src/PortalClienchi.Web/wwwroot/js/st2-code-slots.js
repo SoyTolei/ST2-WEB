@@ -10,7 +10,34 @@ export function groupsFromEnumeration(enumeration) {
     .filter((count) => count > 0);
 }
 
-const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+const SETTLE = 0.3;
+const BOUNCE = 0.2;
+const RISE = 8;
+const CASCADE = 20;
+
+function playSpring(from, to, delayMs, onUpdate) {
+  const zeta = 1 - BOUNCE;
+  const omega = -Math.log(0.01) / (zeta * SETTLE);
+  const wd = omega * Math.sqrt(1 - zeta * zeta);
+  const delta = to - from;
+  const startAt = performance.now() + delayMs;
+
+  return new Promise((resolve) => {
+    const frame = (now) => {
+      if (now < startAt) {
+        requestAnimationFrame(frame);
+        return;
+      }
+      const elapsed = (now - startAt) / 1000;
+      const decay = Math.exp(-zeta * omega * elapsed);
+      const value = to - delta * decay * (Math.cos(wd * elapsed) + ((zeta * omega) / wd) * Math.sin(wd * elapsed));
+      const keepGoing = onUpdate(elapsed < SETTLE ? value : to);
+      if (keepGoing === false || elapsed >= SETTLE) resolve();
+      else requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  });
+}
 
 export function createCodeSlots(container, {
   groups,
@@ -32,8 +59,10 @@ export function createCodeSlots(container, {
   let typedFromKey = false;
 
   container.classList.add("code-slots");
-  container.style.setProperty("--cs-accent", "#f97316");
+  container.style.setProperty("--cs-accent", "#ec4899");
   container.style.setProperty("--cs-danger", "#ff3b30");
+  const progress = Array.from({ length }, (_, index) => (slots[index] ? 1 : 0));
+  const motionGen = Array.from({ length }, () => 0);
   container.innerHTML = `
     <div class="code-slots__row" data-status="idle">
       <input id="st2-cryptic-answer" class="code-slots__input" type="text" inputmode="text"
@@ -76,17 +105,42 @@ export function createCodeSlots(container, {
     container.style.setProperty("--cs-font", `${Math.round(size * 0.46)}px`);
   };
 
+  const applyProgress = (index, value) => {
+    progress[index] = value;
+    const el = slotEls[index];
+    if (!el) return;
+    el.querySelector(".code-slots__fill").style.transform = `scale(${Math.max(value, 0)})`;
+    const digit = el.querySelector(".code-slots__digit");
+    digit.style.opacity = String(Math.min(1, Math.max(value, 0)));
+    digit.style.transform = `translateY(${(1 - value) * RISE}px)`;
+  };
+
+  const drive = (index, to, delayMs = 0) => {
+    const gen = ++motionGen[index];
+    if (to === 1 && progress[index] > 0.04) applyProgress(index, 0);
+    const from = progress[index];
+    if (reduceMotion) {
+      applyProgress(index, to);
+      return Promise.resolve();
+    }
+    return playSpring(from, to, delayMs, (value) => {
+      if (destroyed || motionGen[index] !== gen) return false;
+      applyProgress(index, value);
+      return true;
+    });
+  };
+
   const paint = () => {
     slotEls.forEach((el, index) => {
       const char = slots[index];
-      el.classList.toggle("is-filled", Boolean(char));
       el.classList.toggle("is-active", focused && index === active && !busy);
       el.classList.toggle("is-caret", focused && index === active && !char && !busy && row.dataset.status !== "success");
       const digit = el.querySelector(".code-slots__digit");
       if (char) digit.textContent = char;
+      if (!digit.style.transform) applyProgress(index, progress[index]);
     });
-    row.dataset.focused = focused ? "" : undefined;
-    if (!focused) delete row.dataset.focused;
+    if (focused) row.dataset.focused = "";
+    else delete row.dataset.focused;
   };
 
   const emit = () => onChange?.(slots.join(""));
@@ -95,20 +149,16 @@ export function createCodeSlots(container, {
     if (busy || sealed || row.dataset.status === "success") return;
     const chars = lettersOf(raw);
     if (!chars) return;
-    const step = reduceMotion ? 0 : 20;
+    const step = reduceMotion ? 0 : CASCADE;
     let index = from;
     for (const char of chars) {
       if (index >= length) break;
       const el = slotEls[index];
-      const delay = `${(index - from) * step}ms`;
-      el.querySelector(".code-slots__fill").style.transitionDelay = delay;
-      el.querySelector(".code-slots__digit").style.transitionDelay = delay;
-      el.classList.remove("is-filled");
       slots[index] = char;
       el.querySelector(".code-slots__digit").textContent = char;
+      void drive(index, 1, (index - from) * step);
       index += 1;
     }
-    void container.offsetWidth;
     active = Math.min(index, length - 1);
     paint();
     emit();
@@ -126,14 +176,11 @@ export function createCodeSlots(container, {
       return;
     }
     const el = slotEls[index];
-    el.querySelector(".code-slots__fill").style.transitionDelay = "0ms";
-    el.querySelector(".code-slots__digit").style.transitionDelay = "0ms";
-    el.classList.remove("is-filled");
     slots[index] = "";
     sealed = false;
-    window.setTimeout(() => {
+    void drive(index, 0).then(() => {
       if (!slots[index]) el.querySelector(".code-slots__digit").textContent = "";
-    }, reduceMotion ? 0 : 180);
+    });
     if (stepBack) active = index;
     paint();
     emit();
@@ -233,14 +280,11 @@ export function createCodeSlots(container, {
       if (destroyed) return;
       row.dataset.status = "error";
       const filled = slots.map((char, index) => (char ? index : -1)).filter((index) => index >= 0).reverse();
-      const step = reduceMotion ? 0 : 36;
-      filled.forEach((index, order) => {
-        window.setTimeout(() => {
-          slotEls[index]?.classList.remove("is-filled");
-          slots[index] = "";
-        }, order * step);
+      const step = reduceMotion ? 0 : CASCADE;
+      filled.forEach((index) => {
+        slots[index] = "";
       });
-      await wait(reduceMotion ? 160 : Math.max(180, (filled.length - 1) * step + 220));
+      await Promise.all(filled.map((index, order) => drive(index, 0, order * step)));
       if (destroyed) return;
       slotEls.forEach((el) => {
         el.querySelector(".code-slots__digit").textContent = "";
