@@ -133,13 +133,21 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var date = _repository.GetStatus(Email, at0900).Date;
         var answer = ScheduledAnswer(date, DailyCrypticRepository.MorningSlot);
 
-        Assert.Equal(1, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, at0900));
-        Assert.Equal(2, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, at0900));
+        Assert.Null(_repository.GetStatus(Email, at0900).Rounds[0].Definition);
+        Assert.Equal(1, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, "definition", at0900));
+        Assert.Equal(2, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, "indicator", at0900));
+        Assert.Equal(2, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, "indicator", at0900));
+
+        var hinted = _repository.GetStatus(Email, at0900);
+        Assert.NotNull(hinted.Rounds[0].Definition);
+        Assert.NotNull(hinted.Rounds[0].Indicator);
+        Assert.Null(hinted.Rounds[0].Fodder);
 
         var solved = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, at0900);
 
         Assert.Equal(6, solved.Status.Rounds[0].Points);
         Assert.Equal(2, solved.Status.Rounds[0].HintsUsed);
+        Assert.Equal(DailyCrypticRepository.HintDefinition | DailyCrypticRepository.HintIndicator, solved.Status.Rounds[0].HintMask);
         Assert.Equal(6, solved.Status.Ranking[0].Points);
     }
 
@@ -151,7 +159,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var at0900 = AtArgentina(2026, 10, 23, 9, 0);
         var date = _repository.GetStatus(Email, at0900).Date;
 
-        Assert.Equal(1, _repository.RevealHint(Email, morning, at0900));
+        Assert.Equal(1, _repository.RevealHint(Email, morning, "definition", at0900));
         var first = _repository.Submit(Email, morning, ScheduledAnswer(date, morning), at0900);
         Assert.Equal(8, first.Status.Rounds[0].Points);
 

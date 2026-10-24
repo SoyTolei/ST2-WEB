@@ -9,6 +9,9 @@ public sealed class DailyCrypticAttemptRequest
 
     [JsonPropertyName("answer")]
     public string Answer { get; set; } = "";
+
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = "";
 }
 
 public sealed class DailyCrypticAdminRequest
@@ -74,7 +77,8 @@ public sealed record DailyCrypticRoundDto(
     string? Indicator,
     string? Fodder,
     string? Parse,
-    int HintsUsed);
+    int HintsUsed,
+    int HintMask);
 
 public sealed record DailyCrypticStatusDto(
     string Date,

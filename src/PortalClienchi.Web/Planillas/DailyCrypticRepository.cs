@@ -12,6 +12,10 @@ public sealed class DailyCrypticRepository
     public const int AfternoonSlot = 13 * 60 + 30;
     public static readonly int[] Slots = [MorningSlot, AfternoonSlot];
     public const int MaxAttempts = 5;
+    public const int HintDefinition = 1;
+    public const int HintMechanism = 2;
+    public const int HintIndicator = 4;
+    public const int HintFodder = 8;
 
     private readonly string _dbPath;
     private readonly AppAccessRepository _accessRepo;
@@ -77,7 +81,7 @@ public sealed class DailyCrypticRepository
             seasonRanking);
     }
 
-    public int RevealHint(string email, int slot, DateTimeOffset? nowUtc = null)
+    public int RevealHint(string email, int slot, string? kind, DateTimeOffset? nowUtc = null)
     {
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
@@ -104,25 +108,26 @@ public sealed class DailyCrypticRepository
                 throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
         }
 
-        var current = CountHints(conn, tx, normalizedEmail, date, slot);
-        if (current >= 4)
-        {
-            tx.Commit();
-            return current;
-        }
+        var bit = NormalizeHintKind(kind);
+        var mask = LoadHintMask(conn, tx, normalizedEmail, date, slot);
+        if ((mask & bit) == 0 && PopCount(mask) < 4)
+            mask |= bit;
 
-        var next = current + 1;
+        var next = PopCount(mask);
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = """
-            INSERT INTO daily_cryptic_hints (play_date, slot_hour, email, level)
-            VALUES ($date, $slot, $email, $level)
-            ON CONFLICT (play_date, slot_hour, email) DO UPDATE SET level = excluded.level
+            INSERT INTO daily_cryptic_hints (play_date, slot_hour, email, level, kinds)
+            VALUES ($date, $slot, $email, $level, $kinds)
+            ON CONFLICT (play_date, slot_hour, email) DO UPDATE SET
+                level = excluded.level,
+                kinds = excluded.kinds
             """;
         cmd.Parameters.AddWithValue("$date", DateKey(date));
         cmd.Parameters.AddWithValue("$slot", slot);
         cmd.Parameters.AddWithValue("$email", normalizedEmail);
         cmd.Parameters.AddWithValue("$level", next);
+        cmd.Parameters.AddWithValue("$kinds", mask);
         cmd.ExecuteNonQuery();
         tx.Commit();
         return next;
@@ -441,6 +446,11 @@ public sealed class DailyCrypticRepository
 
             var revealClue = state is "available" or "solved" or "failed";
             var revealSolution = state == "solved";
+            var hintMask = LoadHintMask(conn, null, email, date, slot);
+            var showDefinition = revealSolution || (hintMask & HintDefinition) != 0;
+            var showMechanism = revealSolution || (hintMask & (HintMechanism | HintIndicator)) != 0;
+            var showIndicator = revealSolution || (hintMask & HintIndicator) != 0;
+            var showFodder = revealSolution || (hintMask & HintFodder) != 0;
             rounds.Add(new DailyCrypticRoundDto(
                 slot,
                 SlotLabel(slot),
@@ -454,12 +464,13 @@ public sealed class DailyCrypticRepository
                 solve?.Points,
                 solve?.SolvedAt,
                 revealSolution ? clue.Answer : null,
-                revealClue ? clue.Definition : null,
-                revealClue ? clue.Mechanism : null,
-                revealClue ? clue.Indicator : null,
-                revealClue ? clue.Fodder : null,
+                showDefinition ? clue.Definition : null,
+                showMechanism ? clue.Mechanism : null,
+                showIndicator ? clue.Indicator : null,
+                showFodder ? clue.Fodder : null,
                 revealSolution ? clue.Parse : null,
-                CountHints(conn, null, email, date, slot)));
+                PopCount(hintMask),
+                hintMask));
 
             priorSolved = priorSolved && solve is not null;
         }
@@ -705,19 +716,62 @@ public sealed class DailyCrypticRepository
         SqliteTransaction? tx,
         string email,
         DateOnly date,
+        int slot) =>
+        PopCount(LoadHintMask(conn, tx, email, date, slot));
+
+    private static int LoadHintMask(
+        SqliteConnection conn,
+        SqliteTransaction? tx,
+        string email,
+        DateOnly date,
         int slot)
     {
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = """
-            SELECT level FROM daily_cryptic_hints
+            SELECT level, kinds FROM daily_cryptic_hints
             WHERE play_date = $date AND slot_hour = $slot AND email = $email
             """;
         cmd.Parameters.AddWithValue("$date", DateKey(date));
         cmd.Parameters.AddWithValue("$slot", slot);
         cmd.Parameters.AddWithValue("$email", email);
-        var value = cmd.ExecuteScalar();
-        return value is null or DBNull ? 0 : Convert.ToInt32(value, CultureInfo.InvariantCulture);
+        using var reader = cmd.ExecuteReader();
+        if (!reader.Read())
+            return 0;
+
+        var level = reader.GetInt32(0);
+        var kinds = reader.GetInt32(1);
+        return kinds > 0 ? kinds : LegacyHintMask(level);
+    }
+
+    private static int LegacyHintMask(int level) => level switch
+    {
+        <= 0 => 0,
+        1 => HintDefinition,
+        2 => HintDefinition | HintMechanism,
+        3 => HintDefinition | HintMechanism | HintIndicator,
+        _ => HintDefinition | HintMechanism | HintIndicator | HintFodder,
+    };
+
+    private static int NormalizeHintKind(string? kind) => kind?.Trim().ToLowerInvariant() switch
+    {
+        "definition" or "definicion" => HintDefinition,
+        "mechanism" or "mecanismo" => HintMechanism,
+        "indicator" or "indicador" => HintIndicator,
+        "fodder" or "material" => HintFodder,
+        _ => throw new ArgumentException("Elegí un tipo de pista."),
+    };
+
+    private static int PopCount(int mask)
+    {
+        var count = 0;
+        var bits = mask;
+        while (bits != 0)
+        {
+            count += bits & 1;
+            bits >>= 1;
+        }
+        return count;
     }
 
     private static int CountSolves(SqliteConnection conn, SqliteTransaction tx, DateOnly date, int slot)
@@ -801,10 +855,28 @@ public sealed class DailyCrypticRepository
                 slot_hour INTEGER NOT NULL,
                 email TEXT NOT NULL,
                 level INTEGER NOT NULL,
+                kinds INTEGER NOT NULL DEFAULT 0,
                 PRIMARY KEY (play_date, slot_hour, email)
             );
             """;
         cmd.ExecuteNonQuery();
+        EnsureHintKindsColumn(conn);
+    }
+
+    private static void EnsureHintKindsColumn(SqliteConnection conn)
+    {
+        using var info = conn.CreateCommand();
+        info.CommandText = "PRAGMA table_info(daily_cryptic_hints)";
+        using var reader = info.ExecuteReader();
+        while (reader.Read())
+        {
+            if (string.Equals(reader.GetString(1), "kinds", StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        using var alter = conn.CreateCommand();
+        alter.CommandText = "ALTER TABLE daily_cryptic_hints ADD COLUMN kinds INTEGER NOT NULL DEFAULT 0";
+        alter.ExecuteNonQuery();
     }
 
     private void SeedClues()

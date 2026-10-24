@@ -77,7 +77,7 @@ public static class DailyCrypticEndpoints
             St2HttpCache.NoStore(ctx);
             try
             {
-                var level = repository.RevealHint(email, body.Slot);
+                var level = repository.RevealHint(email, body.Slot, body.Kind);
                 return Results.Ok(new { level });
             }
             catch (ArgumentException ex)

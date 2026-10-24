@@ -5882,6 +5882,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 
 .st2-cryptic-rank-toggle,
 .st2-cryptic-actions button,
+.st2-cryptic-hint-picks button,
 .st2-cryptic-notice button {
   min-height: 36px;
   padding: 0 13px;
@@ -6006,9 +6007,209 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 
 .st2-cryptic-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.st2-cryptic-actions .st2-cryptic-check {
+  flex: 1;
+}
+
+.st2-cryptic-help {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+}
+
+.st2-cryptic-attempt-row {
+  display: flex;
+  align-items: center;
   gap: 8px;
   margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-pips {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.st2-cryptic-pips i {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.st2-cryptic-pips i.is-used {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.st2-cryptic-hint-picks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.st2-cryptic-hint-picks button {
+  min-height: 46px;
+  padding: 6px 4px;
+  border-radius: 10px;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.st2-cryptic-hint-picks button.is-on,
+.st2-cryptic-hint-picks button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.st2-cryptic-hint-picks button.is-on {
+  color: var(--text);
+  border-color: #f97316;
+  box-shadow: inset 0 0 0 1px #f97316;
+  background: color-mix(in srgb, var(--panel) 78%, #f97316 14%);
+}
+
+.st2-cryptic-mark.is-definition {
+  text-decoration: underline;
+  text-decoration-color: #22c55e;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.st2-cryptic-mark.is-indicator {
+  text-decoration: underline;
+  text-decoration-color: #f97316;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.st2-cryptic-mark.is-fodder {
+  text-decoration: underline;
+  text-decoration-color: #38bdf8;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.st2-cryptic-hint-sheet {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--panel) 86%, #000 8%);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.st2-cryptic-hint-sheet strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+}
+
+.st2-cryptic-hint-sheet p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.st2-cryptic-guide {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.st2-cryptic-guide-card {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  padding: 22px 22px 18px;
+  color: var(--text);
+  background: var(--panel, #fff);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.st2-cryptic-guide-card h3 {
+  margin: 4px 0 10px;
+  font-size: 1.35rem;
+}
+
+.st2-cryptic-guide-card p {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.st2-cryptic-guide-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.st2-cryptic-guide-rules {
+  padding: 10px 12px;
+  background: color-mix(in srgb, #f97316 12%, var(--panel));
+  border-radius: 10px;
+}
+
+.st2-cryptic-guide-label {
+  margin: 14px 0 8px;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.st2-cryptic-guide-anatomy,
+.st2-cryptic-guide-types {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.st2-cryptic-guide-anatomy div,
+.st2-cryptic-guide-types article {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.st2-cryptic-guide-anatomy dt,
+.st2-cryptic-guide-types h4 {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.st2-cryptic-guide-anatomy dd,
+.st2-cryptic-guide-types p,
+.st2-cryptic-guide-types span {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 
 .st2-cryptic-actions button:disabled,
