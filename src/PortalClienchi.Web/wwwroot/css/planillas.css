@@ -5865,6 +5865,13 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   text-transform: capitalize;
 }
 
+.st2-cryptic-about {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
 .st2-cryptic-kicker {
   color: #f97316;
   font-size: 0.67rem;
@@ -6225,6 +6232,59 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   font-size: 0.7rem;
 }
 
+.st2-cryptic-actions .st2-cryptic-check {
+  color: #042f2e;
+  background: linear-gradient(180deg, #5eead4 0%, #0d9488 100%);
+  border-color: transparent;
+  box-shadow: 0 8px 18px -10px rgba(13, 148, 136, 0.95);
+}
+
+.st2-cryptic-actions .st2-cryptic-check:disabled {
+  color: #042f2e;
+  box-shadow: none;
+}
+
+.st2-cryptic-hint-cost {
+  margin-left: 4px;
+  color: #f97316;
+  font-weight: 800;
+}
+
+.st2-cryptic-attempts {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-hint-note {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.st2-cryptic-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.st2-cryptic-rank-link {
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.st2-cryptic-rank-link:hover {
+  color: var(--text);
+}
+
 .st2-cryptic-hint-list {
   margin: 9px 0 0;
   padding: 10px 12px 10px 27px;
@@ -6321,8 +6381,8 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 }
 
 .st2-cryptic-ranking {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid var(--border);
 }
 

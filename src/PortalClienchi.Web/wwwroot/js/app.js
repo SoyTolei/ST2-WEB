@@ -2,7 +2,7 @@
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
-import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261013e";
+import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261024a";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
@@ -13,7 +13,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261013m";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261024a";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -1513,8 +1513,15 @@ function syncAdminSubnav() {
     adminSubnav.hidden = !canAdmin;
   }
   if (!canAdmin && adminSubtab !== "accesos") adminSubtab = "accesos";
+  if (adminSubtab === "cripticos" && !isPrimarySuperAdmin()) adminSubtab = "accesos";
 
   for (const btn of adminSubtabButtons) {
+    const cryptic = btn.dataset.adminSubtab === "cripticos";
+    if (cryptic) {
+      const showCryptic = isPrimarySuperAdmin();
+      btn.classList.toggle("hidden", !showCryptic);
+      btn.hidden = !showCryptic;
+    }
     const on = btn.dataset.adminSubtab === adminSubtab;
     btn.classList.toggle("is-on", on);
     btn.setAttribute("aria-selected", on ? "true" : "false");
@@ -1548,7 +1555,7 @@ function syncAdminSubnav() {
 function setAdminSubtab(tab) {
   const next = tab === "uso" && canSeeAdminUsage()
     ? "uso"
-    : tab === "cripticos" && isSt2SuperAdmin()
+    : tab === "cripticos" && isPrimarySuperAdmin()
       ? "cripticos"
       : "accesos";
   adminSubtab = next;
@@ -2228,7 +2235,7 @@ async function activateAdminTab() {
   syncAccessAdminOwnerOnlyUi();
   syncAdminSubnav();
   if (adminSubtab === "uso") void loadAccessAdminUsage();
-  else if (adminSubtab === "cripticos") void loadCrypticAdminClues();
+  else if (adminSubtab === "cripticos" && isPrimarySuperAdmin()) void loadCrypticAdminClues();
   else void loadAccessAdminRegistrations();
       startAccessAdminPolling();
   }
@@ -3500,7 +3507,7 @@ viewAsExitBtn?.addEventListener("click", () => {
 accessAdminCancel?.addEventListener("click", () => navigateTab("planillas"));
 accessAdminRefresh?.addEventListener("click", () => {
   if (adminSubtab === "uso") void loadAccessAdminUsage();
-  else if (adminSubtab === "cripticos") void loadCrypticAdminClues();
+  else if (adminSubtab === "cripticos" && isPrimarySuperAdmin()) void loadCrypticAdminClues();
   else void loadAccessAdminRegistrations({ silent: true, force: true });
 });
 accessAdminPresetBtn?.addEventListener("click", () => {

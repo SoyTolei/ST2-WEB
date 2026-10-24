@@ -110,7 +110,8 @@ public static class DailyCrypticEndpoints
                     configuration,
                     accessRepository,
                     out _,
-                    out var denied))
+                    out var denied,
+                    ownerOnly: true))
             {
                 return denied!;
             }
@@ -131,7 +132,8 @@ public static class DailyCrypticEndpoints
                     configuration,
                     accessRepository,
                     out _,
-                    out var denied))
+                    out var denied,
+                    ownerOnly: true))
             {
                 return denied!;
             }

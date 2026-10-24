@@ -70,7 +70,11 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Throws<InvalidOperationException>(
             () => _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "otro-intento", at0900));
 
-        var nextDay = AtArgentina(2026, 10, 24, 9, 0);
+        var saturday = _repository.GetStatus(Email, AtArgentina(2026, 10, 24, 9, 0));
+        Assert.Equal("weekend", saturday.Phase);
+        Assert.Empty(saturday.Rounds);
+
+        var nextDay = AtArgentina(2026, 10, 26, 9, 0);
         var reset = _repository.GetStatus(Email, nextDay);
         Assert.Equal("available", reset.Rounds[0].State);
         Assert.Equal(0, reset.Rounds[0].AttemptsUsed);
@@ -94,8 +98,13 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var solved = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, earlyMorning);
         Assert.True(solved.Correct);
 
-        var nextCompetition = _repository.GetStatus(Email, AtArgentina(2026, 10, 24, 9, 0));
-        Assert.Equal("2026-10-24", nextCompetition.Date);
+        var saturdayMorning = _repository.GetStatus(Email, AtArgentina(2026, 10, 24, 9, 0));
+        Assert.Equal("weekend", saturdayMorning.Phase);
+        Assert.Empty(saturdayMorning.Rounds);
+        Assert.StartsWith("2026-10-26T09:00:00", saturdayMorning.NextAt);
+
+        var nextCompetition = _repository.GetStatus(Email, AtArgentina(2026, 10, 26, 9, 0));
+        Assert.Equal("2026-10-26", nextCompetition.Date);
         Assert.Equal("available", nextCompetition.Rounds[0].State);
         Assert.Equal(0, nextCompetition.Rounds[0].AttemptsUsed);
     }
@@ -118,7 +127,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Each_hint_costs_one_ranking_point()
+    public void Each_hint_costs_two_ranking_points()
     {
         var at0900 = AtArgentina(2026, 10, 23, 9, 0);
         var date = _repository.GetStatus(Email, at0900).Date;
@@ -129,9 +138,46 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
 
         var solved = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, at0900);
 
-        Assert.Equal(8, solved.Status.Rounds[0].Points);
+        Assert.Equal(6, solved.Status.Rounds[0].Points);
         Assert.Equal(2, solved.Status.Rounds[0].HintsUsed);
-        Assert.Equal(8, solved.Status.Ranking[0].Points);
+        Assert.Equal(6, solved.Status.Ranking[0].Points);
+    }
+
+    [Fact]
+    public void Hints_on_one_round_drop_the_clean_day_bonus()
+    {
+        var morning = DailyCrypticRepository.MorningSlot;
+        var afternoon = DailyCrypticRepository.AfternoonSlot;
+        var at0900 = AtArgentina(2026, 10, 23, 9, 0);
+        var date = _repository.GetStatus(Email, at0900).Date;
+
+        Assert.Equal(1, _repository.RevealHint(Email, morning, at0900));
+        var first = _repository.Submit(Email, morning, ScheduledAnswer(date, morning), at0900);
+        Assert.Equal(8, first.Status.Rounds[0].Points);
+
+        var at1330 = AtArgentina(2026, 10, 23, 13, 30);
+        var second = _repository.Submit(Email, afternoon, ScheduledAnswer(date, afternoon), at1330);
+
+        Assert.True(second.Correct);
+        Assert.Equal(10, second.Status.Rounds[1].Points);
+        Assert.Equal(18, second.Status.Ranking.Single().Points);
+    }
+
+    [Fact]
+    public void Weekend_has_no_cryptic_until_monday()
+    {
+        var saturday = _repository.GetStatus(Email, AtArgentina(2026, 10, 24, 15, 0));
+        var sunday = _repository.GetStatus(Email, AtArgentina(2026, 10, 25, 11, 0));
+        var mondayEarly = _repository.GetStatus(Email, AtArgentina(2026, 10, 26, 8, 30));
+
+        Assert.Equal("weekend", saturday.Phase);
+        Assert.Empty(saturday.Rounds);
+        Assert.Equal("weekend", sunday.Phase);
+        Assert.Empty(sunday.Rounds);
+        Assert.Equal("weekend", mondayEarly.Phase);
+        Assert.Empty(mondayEarly.Rounds);
+        Assert.Throws<InvalidOperationException>(
+            () => _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "algo", AtArgentina(2026, 10, 24, 15, 0)));
     }
 
     private string ScheduledAnswer(string date, int slot)

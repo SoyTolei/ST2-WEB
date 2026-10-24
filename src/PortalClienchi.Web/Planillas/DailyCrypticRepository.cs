@@ -39,22 +39,32 @@ public sealed class DailyCrypticRepository
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var (date, overnight) = ResolveCompetition(localNow);
-        EnsureSchedule(date);
+        var window = ResolveCompetition(localNow);
+        var date = window.Date;
+        if (!window.Closed)
+            EnsureSchedule(date);
 
         using var conn = Open();
-        var daySlots = ReadScheduledSlots(conn, null, date);
-        var rounds = LoadRounds(conn, normalizedEmail, date, localNow, overnight, daySlots);
-        var ranking = LoadRanking(conn, date, date.AddDays(1));
         var quarterStart = new DateOnly(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1);
         var season = $"Q{(date.Month - 1) / 3 + 1} {date.Year}";
         var seasonRanking = LoadRanking(conn, quarterStart, quarterStart.AddMonths(3));
-        var minute = MinuteOf(localNow);
-        var nextSlot = overnight ? 0 : daySlots.FirstOrDefault(slot => minute < SlotMinute(slot));
-        var nextBoundary = nextSlot > 0
-            ? localNow.Date.AddMinutes(SlotMinute(nextSlot))
-            : localNow.Date.AddDays(overnight ? 0 : 1).AddMinutes(SlotMinute(MorningSlot));
-        var nextAt = new DateTimeOffset(nextBoundary, TimeSpan.FromHours(-3)).ToString("O");
+        if (window.Closed)
+        {
+            return new DailyCrypticStatusDto(
+                date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                "America/Argentina/Buenos_Aires",
+                "weekend",
+                NextOpen(localNow, window, []).ToString("O"),
+                [],
+                [],
+                season,
+                seasonRanking);
+        }
+
+        var daySlots = ReadScheduledSlots(conn, null, date);
+        var rounds = LoadRounds(conn, normalizedEmail, date, localNow, window.Overnight, daySlots);
+        var ranking = LoadRanking(conn, date, date.AddDays(1));
+        var nextAt = NextOpen(localNow, window, daySlots).ToString("O");
 
         return new DailyCrypticStatusDto(
             date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
@@ -72,13 +82,16 @@ public sealed class DailyCrypticRepository
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var (date, overnight) = ResolveCompetition(localNow);
+        var window = ResolveCompetition(localNow);
+        if (window.Closed)
+            throw new InvalidOperationException("El Críptico es de lunes a viernes.");
+        var date = window.Date;
         EnsureSchedule(date);
         using var conn = Open();
         var daySlots = ReadScheduledSlots(conn, null, date);
         if (!daySlots.Contains(slot))
             throw new ArgumentException("Ronda inválida.", nameof(slot));
-        if (!overnight && MinuteOf(localNow) < SlotMinute(slot))
+        if (!window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
             throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
 
         using var tx = conn.BeginTransaction(deferred: false);
@@ -127,13 +140,16 @@ public sealed class DailyCrypticRepository
         if (normalizedAnswer.Length == 0)
             throw new ArgumentException("Escribí una respuesta.");
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var (date, overnight) = ResolveCompetition(localNow);
+        var window = ResolveCompetition(localNow);
+        if (window.Closed)
+            throw new InvalidOperationException("El Críptico es de lunes a viernes.");
+        var date = window.Date;
         EnsureSchedule(date);
         using var conn = Open();
         var daySlots = ReadScheduledSlots(conn, null, date);
         if (!daySlots.Contains(slot))
             throw new ArgumentException("Ronda inválida.", nameof(slot));
-        if (!overnight && MinuteOf(localNow) < SlotMinute(slot))
+        if (!window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
             throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
 
         using var tx = conn.BeginTransaction(deferred: false);
@@ -187,17 +203,20 @@ public sealed class DailyCrypticRepository
 
         var remaining = MaxAttempts - attemptsUsed - 1;
         var message = remaining > 0
-            ? $"No es esa. Te quedan {remaining} intento{(remaining == 1 ? "" : "s")}."
+            ? "No es esa."
             : "No era esa. Se terminaron los intentos de esta ronda.";
 
         if (correct)
         {
             var position = CountSolves(conn, tx, date, slot) + 1;
             var hints = CountHints(conn, tx, normalizedEmail, date, slot);
-            var roundPoints = Math.Max(0, 10 - hints);
+            var roundPoints = Math.Max(0, 10 - hints * 2);
             var alreadySolved = CountPlayerSolves(conn, tx, normalizedEmail, date);
             var completesDay = daySlots.Count == 2 && alreadySolved + 1 == 2;
-            var points = roundPoints + (completesDay ? 5 : 0);
+            var cleanDay = completesDay
+                && hints == 0
+                && daySlots.Where(item => item != slot).All(item => CountHints(conn, tx, normalizedEmail, date, item) == 0);
+            var points = roundPoints + (cleanDay ? 5 : 0);
             var solvedAt = DateTimeOffset.UtcNow.ToString("O");
             using var insertSolve = conn.CreateCommand();
             insertSolve.Transaction = tx;
@@ -223,11 +242,12 @@ public sealed class DailyCrypticRepository
             }
             else if (hints > 0)
             {
-                message = $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {hints} por {(hints == 1 ? "la pista" : "las pistas")}).";
+                var deducted = hints * 2;
+                message = $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {deducted} por {(hints == 1 ? "la pista" : "las pistas")}).";
             }
             else if (daySlots.Count == 2)
             {
-                message = $"¡Correcto! Sumaste {points} puntos. Si cerrás la otra ronda, el día suma 25.";
+                message = $"¡Correcto! Sumaste {points} puntos. Si cerrás la otra sin pistas, el día suma 25.";
             }
             else
             {
@@ -347,12 +367,48 @@ public sealed class DailyCrypticRepository
         return (long)(idCmd.ExecuteScalar() ?? 0L);
     }
 
-    private static (DateOnly Date, bool Overnight) ResolveCompetition(DateTimeOffset localNow)
+    private readonly record struct CompetitionWindow(DateOnly Date, bool Overnight, bool Closed);
+
+    private static bool IsPlayDay(DateOnly date) =>
+        date.DayOfWeek is >= DayOfWeek.Monday and <= DayOfWeek.Friday;
+
+    private static CompetitionWindow ResolveCompetition(DateTimeOffset localNow)
     {
         var date = DateOnly.FromDateTime(localNow.DateTime);
-        return MinuteOf(localNow) < SlotMinute(MorningSlot)
-            ? (date.AddDays(-1), true)
-            : (date, false);
+        if (MinuteOf(localNow) < SlotMinute(MorningSlot))
+        {
+            var previous = date.AddDays(-1);
+            if (IsPlayDay(previous))
+                return new CompetitionWindow(previous, Overnight: true, Closed: false);
+            return new CompetitionWindow(date, Overnight: false, Closed: true);
+        }
+
+        if (!IsPlayDay(date))
+            return new CompetitionWindow(date, Overnight: false, Closed: true);
+        return new CompetitionWindow(date, Overnight: false, Closed: false);
+    }
+
+    private static DateTimeOffset NextOpen(DateTimeOffset localNow, CompetitionWindow window, IReadOnlyList<int> daySlots)
+    {
+        if (window.Closed)
+        {
+            var openOn = window.Date;
+            if (!IsPlayDay(openOn))
+            {
+                openOn = openOn.AddDays(1);
+                while (!IsPlayDay(openOn))
+                    openOn = openOn.AddDays(1);
+            }
+
+            return new DateTimeOffset(openOn.ToDateTime(TimeOnly.MinValue).AddMinutes(MorningSlot), TimeSpan.FromHours(-3));
+        }
+
+        var minute = MinuteOf(localNow);
+        var nextSlot = window.Overnight ? 0 : daySlots.FirstOrDefault(slot => minute < SlotMinute(slot));
+        var boundary = nextSlot > 0
+            ? localNow.Date.AddMinutes(SlotMinute(nextSlot))
+            : localNow.Date.AddDays(window.Overnight ? 0 : 1).AddMinutes(SlotMinute(MorningSlot));
+        return new DateTimeOffset(boundary, TimeSpan.FromHours(-3));
     }
 
     private IReadOnlyList<DailyCrypticRoundDto> LoadRounds(

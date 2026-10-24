@@ -119,26 +119,30 @@ function render() {
   }
   const rounds = snapshot.rounds || [];
   const ranking = snapshot.ranking || [];
+  const weekend = snapshot.phase === "weekend";
+  const weekday = new Date(`${snapshot.date}T12:00:00-03:00`).getDay();
   const dateLabel = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
     day: "numeric",
     month: "long",
   }).format(new Date(`${snapshot.date}T12:00:00-03:00`));
+  const weekendCopy = weekday === 0 || weekday === 6
+    ? "El Críptico es de lunes a viernes. Vuelve el lunes a las 09:00."
+    : "Hoy arranca a las 09:00.";
 
   activeSlots?.destroy();
   activeSlots = null;
   host.innerHTML = `
     <div class="st2-cryptic-head">
       <div>
-        <span class="st2-cryptic-kicker">Desafío diario</span>
+        <span class="st2-cryptic-kicker">Desafío del día</span>
         <h2 id="st2-cryptic-title">Críptico ST²</h2>
         <p>${escapeHtml(dateLabel)}</p>
       </div>
-      <button type="button" class="st2-cryptic-rank-toggle" data-cryptic-action="ranking" aria-expanded="${rankingOpen ? "true" : "false"}">
-        Ranking <span>${ranking.length}</span>
-      </button>
     </div>
-    <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico" style="grid-template-columns: repeat(${rounds.length}, minmax(0, 1fr))">
+    <p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras. Cada pista resta 2 puntos de 10.</p>
+    ${weekend ? "" : `
+    <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico" style="grid-template-columns: repeat(${Math.max(rounds.length, 1)}, minmax(0, 1fr))">
       ${rounds.map((item) => `
         <button type="button"
           class="st2-cryptic-round ${item.slot === round?.slot ? "is-active" : ""} is-${escapeHtml(item.state)}"
@@ -150,9 +154,14 @@ function render() {
           <small>${escapeHtml(STATE_LABELS[item.state] || item.state)}</small>
         </button>
       `).join("")}
-    </div>
+    </div>`}
     <div class="st2-cryptic-body">
-      ${renderRound(round)}
+      ${weekend ? renderNotice("Fin de semana", weekendCopy) : renderRound(round)}
+    </div>
+    <div class="st2-cryptic-foot">
+      <button type="button" class="st2-cryptic-rank-link" data-cryptic-action="ranking" aria-expanded="${rankingOpen ? "true" : "false"}">
+        ${rankingOpen ? "Ocultar ranking" : "Ver ranking"}
+      </button>
     </div>
     <div class="st2-cryptic-ranking ${rankingOpen ? "" : "hidden"}" data-cryptic-ranking ${rankingOpen ? "" : "hidden"}>
       <div class="st2-cryptic-rank-tabs" role="tablist" aria-label="Rankings">
@@ -200,29 +209,32 @@ function renderRound(round) {
   const solved = round.state === "solved";
   const failed = round.state === "failed";
   const clue = escapeHtml(clueWithoutCount(round.clue, round.enumeration));
-  const letterCount = groupsFromEnumeration(round.enumeration).reduce((sum, count) => sum + count, 0);
   const attempts = round.attemptsRemaining;
-  const note = statusNote || (letterCount
-    ? `Te quedan ${attempts} intento${attempts === 1 ? "" : "s"}. Tocá Comprobar cuando esté lista.`
-    : "");
+  const missed = Number(round.attemptsUsed || 0) > 0 && attempts > 0;
   const tone = statusNote ? statusTone : "";
+  const hintLabel = hintLevel === 0
+    ? "Necesito una pista"
+    : hintLevel >= 4
+      ? "Pistas listas"
+      : "Otra pista";
   return `
     <blockquote class="st2-cryptic-clue">${clue} <b>${escapeHtml(round.enumeration || "")}</b></blockquote>
     ${solved ? renderSolution(round) : failed ? `
       <div class="st2-cryptic-notice is-failed">
         <strong>Se terminaron los intentos</strong>
-        <p>La explicación se revela sólo al resolver. Mañana hay revancha.</p>
+        <p>La explicación se revela sólo al resolver. El próximo día hábil hay revancha.</p>
       </div>
     ` : `
       <form class="st2-cryptic-form" data-cryptic-form>
         <div data-code-slots></div>
-        <p class="st2-cryptic-status ${tone}" data-cryptic-status role="status" aria-live="polite">${escapeHtml(note)}</p>
         <div class="st2-cryptic-actions">
           <button type="button" data-cryptic-action="hint" ${hintLevel >= 4 ? "disabled" : ""}>
-            💡 ${hintLevel === 0 ? "Necesito una pista" : hintLevel >= 4 ? "Pistas listas" : "Otra pista"}
+            💡 ${hintLabel}${hintLevel >= 4 ? "" : ` <span class="st2-cryptic-hint-cost">−2</span>`}
           </button>
           <button type="submit" class="st2-cryptic-check" data-cryptic-check disabled>Comprobar</button>
         </div>
+        ${missed ? `<p class="st2-cryptic-attempts">Te quedan ${attempts} intento${attempts === 1 ? "" : "s"}.</p>` : ""}
+        <p class="st2-cryptic-status ${tone}" data-cryptic-status role="status" aria-live="polite"${statusNote ? "" : " hidden"}>${escapeHtml(statusNote)}</p>
       </form>
       ${renderHintList(round)}
     `}
@@ -252,7 +264,11 @@ function renderHintList(round) {
   if (hintLevel >= 3) rows.push(`<li><b>Indicador:</b> ${escapeHtml(round.indicator || "sin indicador explícito")}</li>`);
   if (hintLevel >= 4) rows.push(`<li><b>Material:</b> ${escapeHtml(round.fodder)}</li>`);
   if (!rows.length) return "";
-  return `<ul class="st2-cryptic-hint-list">${rows.join("")}</ul>`;
+  const cost = hintLevel * 2;
+  return `
+    <ul class="st2-cryptic-hint-list">${rows.join("")}</ul>
+    <p class="st2-cryptic-hint-note">Estas pistas restan ${cost} puntos de los 10 de esta ronda.</p>
+  `;
 }
 
 function renderSolution(round) {
@@ -278,10 +294,6 @@ function mountAnswerSlots(round) {
   const container = host?.querySelector("[data-code-slots]");
   if (!container || !round || round.state === "solved" || round.state === "failed") return;
   const groups = groupsFromEnumeration(round.enumeration);
-  const letterCount = groups.reduce((sum, count) => sum + count, 0);
-  const hint = letterCount
-    ? `Te quedan ${round.attemptsRemaining} intento${round.attemptsRemaining === 1 ? "" : "s"}. Tocá Comprobar cuando esté lista.`
-    : "";
   const shouldFocus = pendingFocus;
   pendingFocus = false;
   const check = host?.querySelector("[data-cryptic-check]");
@@ -301,7 +313,8 @@ function mountAnswerSlots(round) {
       statusTone = "";
       const status = host?.querySelector("[data-cryptic-status]");
       if (!status) return;
-      status.textContent = hint;
+      status.textContent = "";
+      status.hidden = true;
       status.className = "st2-cryptic-status";
     },
   });
@@ -319,6 +332,7 @@ async function submitAttempt(form) {
   statusNote = "Comprobando…";
   statusTone = "";
   if (status) {
+    status.hidden = false;
     status.textContent = statusNote;
     status.className = "st2-cryptic-status";
   }
