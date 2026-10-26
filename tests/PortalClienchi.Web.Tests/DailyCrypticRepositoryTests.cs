@@ -188,6 +188,28 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
             () => _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "algo", AtArgentina(2026, 10, 24, 15, 0)));
     }
 
+    [Fact]
+    public void Owner_previews_the_next_weekday_and_stays_out_of_the_ranking()
+    {
+        const string owner = St2SuperAdmin.PrimaryEmail;
+        var sunday = AtArgentina(2026, 10, 25, 22, 0);
+        var preview = _repository.GetStatus(owner, sunday);
+
+        Assert.Equal("active", preview.Phase);
+        Assert.Equal("2026-10-26", preview.Date);
+        Assert.Equal("available", preview.Rounds[0].State);
+        Assert.Equal("available", preview.Rounds[1].State);
+
+        var answer = ScheduledAnswer(preview.Date, DailyCrypticRepository.MorningSlot);
+        var ownerSolve = _repository.Submit(owner, DailyCrypticRepository.MorningSlot, answer, sunday);
+        Assert.True(ownerSolve.Correct);
+        Assert.Empty(ownerSolve.Status.Ranking);
+
+        var teammate = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, AtArgentina(2026, 10, 26, 9, 0));
+        Assert.Single(teammate.Status.Ranking);
+        Assert.DoesNotContain(teammate.Status.Ranking, item => item.Player.Contains("Leonel", StringComparison.OrdinalIgnoreCase));
+    }
+
     private string ScheduledAnswer(string date, int slot)
     {
         using var conn = new SqliteConnection($"Data Source={Path.Combine(_dataDir, "daily_cryptic.db")}");

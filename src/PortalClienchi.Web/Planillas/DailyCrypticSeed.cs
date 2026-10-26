@@ -114,15 +114,23 @@ internal static class DailyCrypticSeed
         S("Reserva de otros y e revueltos (6)", "TESORO", "Reserva", "Anagrama combinado", "revueltos", "OTROS + E", "(OTROS+E)*", 3),
         S("Confidencial: cortes y e desordenados (7)", "SECRETO", "Confidencial", "Anagrama combinado", "desordenados", "CORTES + E", "(CORTES+E)*", 3),
         S("Parte del saco: astro más tapa sin inicial (6)", "SOLAPA", "Parte del saco", "Charada + sustracción", "más ... sin inicial", "SOL + TAPA", "SOL+(TAPA-T)", 3),
-        S("Ave: pala sin final más amo al revés (6)", "PALOMA", "Ave", "Charada + sustracción + reverso", "sin final ... más ... al revés", "PALA - A + AMO", "(PALA-A)+(AMO<)", 3)
+        S("Ave: pala sin final más amo al revés (6)", "PALOMA", "Ave", "Charada + sustracción + reverso", "sin final ... más ... al revés", "PALA - A + AMO", "(PALA-A)+(AMO<)", 3),
+
+        // Banco nuevo, escrito para el equipo: español rioplatense, sin repetir los de arriba.
+        S("Lluvia menuda de gato revuelto (4)", "GOTA", "Lluvia menuda", "Anagrama", "revuelto", "GATO", "GATO*", 1),
+        S("Vacío que vuelve Adán (4)", "NADA", "Vacío", "Reverso", "vuelve", "ADÁN", "ADÁN<", 1),
+        S("Viaje escondido en la cola de la esquina (4)", "COLA", "Viaje", "Oculta", "escondido", "la COLA de", "la[COLA]de", 1),
+        S("Tren bajo al juntar sub y te (5)", "SUBTE", "Tren bajo", "Charada", "al juntar", "SUB + TE", "SUB+TE", 2),
+        S("Fruta, según se oye, que vaya (4)", "BAYA", "Fruta", "Homófono rioplatense", "según se oye", "VAYA", "VAYA~", 2),
+        S("Juego de turco revuelto (5)", "TRUCO", "Juego", "Anagrama", "revuelto", "TURCO", "TURCO*", 3),
+        S("Carne de soda a revuelta (5)", "ASADO", "Carne", "Anagrama", "revuelta", "SODA A", "SODA A*", 3),
     ];
 
     static DailyCrypticSeed()
     {
-        if (Items.Count != 90 ||
-            Items.GroupBy(entry => entry.Difficulty).Any(group => group.Count() != 30))
+        if (Items.GroupBy(entry => entry.Difficulty).Any(group => group.Key is < 1 or > 3 || group.Count() < 30))
         {
-            throw new InvalidOperationException("El seed debe contener exactamente 30 pistas por dificultad.");
+            throw new InvalidOperationException("El seed debe tener al menos 30 pistas por dificultad.");
         }
 
         foreach (DailyCrypticSeedEntry entry in Items)

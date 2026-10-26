@@ -352,7 +352,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#st2-cryptic",
       title: "Críptico del día",
-      body: "De lunes a viernes hay dos acertijos, a las 09:00 y a las 13:30. La frase no dice la respuesta: la arma. Cada pista resta 2 puntos de 10 y marca en la frase la parte que pediste.",
+      body: "De lunes a viernes hay dos acertijos, a las 09:00 y a las 13:30. La frase no dice la respuesta: la arma. Cada pista resta 2 puntos y marca en la frase la parte que pediste.",
       placement: "left",
       when: () => visible("#st2-cryptic"),
     });

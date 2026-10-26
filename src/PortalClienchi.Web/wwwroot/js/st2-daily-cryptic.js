@@ -135,7 +135,7 @@ function render() {
         <p>${escapeHtml(dateLabel)}</p>
       </div>
     </div>
-    <p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras. Cada pista resta 2 puntos de 10.</p>
+    <p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras. Cada pista resta 2 puntos.</p>
     ${weekend ? "" : `
     <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico" style="grid-template-columns: repeat(${Math.max(rounds.length, 1)}, minmax(0, 1fr))">
       ${rounds.map((item) => `

@@ -43,7 +43,7 @@ public sealed class DailyCrypticRepository
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var window = ResolveCompetition(localNow);
+        var window = ResolveForPlayer(localNow, normalizedEmail);
         var date = window.Date;
         if (!window.Closed)
             EnsureSchedule(date);
@@ -66,7 +66,7 @@ public sealed class DailyCrypticRepository
         }
 
         var daySlots = ReadScheduledSlots(conn, null, date);
-        var rounds = LoadRounds(conn, normalizedEmail, date, localNow, window.Overnight, daySlots);
+        var rounds = LoadRounds(conn, normalizedEmail, date, localNow, window.Overnight, daySlots, window.ForceOpen);
         var ranking = LoadRanking(conn, date, date.AddDays(1));
         var nextAt = NextOpen(localNow, window, daySlots).ToString("O");
 
@@ -86,7 +86,7 @@ public sealed class DailyCrypticRepository
         var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
             ?? throw new ArgumentException("Correo inválido.", nameof(email));
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var window = ResolveCompetition(localNow);
+        var window = ResolveForPlayer(localNow, normalizedEmail);
         if (window.Closed)
             throw new InvalidOperationException("El Críptico es de lunes a viernes.");
         var date = window.Date;
@@ -95,17 +95,20 @@ public sealed class DailyCrypticRepository
         var daySlots = ReadScheduledSlots(conn, null, date);
         if (!daySlots.Contains(slot))
             throw new ArgumentException("Ronda inválida.", nameof(slot));
-        if (!window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
+        if (!window.ForceOpen && !window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
             throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
 
         using var tx = conn.BeginTransaction(deferred: false);
         if (LoadSolve(conn, tx, normalizedEmail, date, slot) is not null)
             throw new InvalidOperationException("Esta ronda ya está resuelta.");
 
-        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
+        if (!window.ForceOpen)
         {
-            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
+            foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
+            {
+                if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
+                    throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
+            }
         }
 
         var bit = NormalizeHintKind(kind);
@@ -145,7 +148,7 @@ public sealed class DailyCrypticRepository
         if (normalizedAnswer.Length == 0)
             throw new ArgumentException("Escribí una respuesta.");
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var window = ResolveCompetition(localNow);
+        var window = ResolveForPlayer(localNow, normalizedEmail);
         if (window.Closed)
             throw new InvalidOperationException("El Críptico es de lunes a viernes.");
         var date = window.Date;
@@ -154,7 +157,7 @@ public sealed class DailyCrypticRepository
         var daySlots = ReadScheduledSlots(conn, null, date);
         if (!daySlots.Contains(slot))
             throw new ArgumentException("Ronda inválida.", nameof(slot));
-        if (!window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
+        if (!window.ForceOpen && !window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
             throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
 
         using var tx = conn.BeginTransaction(deferred: false);
@@ -173,10 +176,13 @@ public sealed class DailyCrypticRepository
                 GetStatus(normalizedEmail, nowUtc));
         }
 
-        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
+        if (!window.ForceOpen)
         {
-            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
+            foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
+            {
+                if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
+                    throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
+            }
         }
 
         var attemptsUsed = CountAttempts(conn, tx, normalizedEmail, date, slot);
@@ -374,6 +380,20 @@ public sealed class DailyCrypticRepository
 
     private readonly record struct CompetitionWindow(DateOnly Date, bool Overnight, bool Closed);
 
+    private readonly record struct PlayerWindow(DateOnly Date, bool Overnight, bool Closed, bool ForceOpen);
+
+    private static PlayerWindow ResolveForPlayer(DateTimeOffset localNow, string email)
+    {
+        var window = ResolveCompetition(localNow);
+        if (!St2SuperAdmin.Is(email) || !window.Closed)
+            return new PlayerWindow(window.Date, window.Overnight, window.Closed, false);
+
+        var next = window.Date;
+        while (!IsPlayDay(next))
+            next = next.AddDays(1);
+        return new PlayerWindow(next, Overnight: false, Closed: false, ForceOpen: true);
+    }
+
     private static bool IsPlayDay(DateOnly date) =>
         date.DayOfWeek is >= DayOfWeek.Monday and <= DayOfWeek.Friday;
 
@@ -393,7 +413,7 @@ public sealed class DailyCrypticRepository
         return new CompetitionWindow(date, Overnight: false, Closed: false);
     }
 
-    private static DateTimeOffset NextOpen(DateTimeOffset localNow, CompetitionWindow window, IReadOnlyList<int> daySlots)
+    private static DateTimeOffset NextOpen(DateTimeOffset localNow, PlayerWindow window, IReadOnlyList<int> daySlots)
     {
         if (window.Closed)
         {
@@ -422,7 +442,8 @@ public sealed class DailyCrypticRepository
         DateOnly date,
         DateTimeOffset localNow,
         bool overnight,
-        IReadOnlyList<int> daySlots)
+        IReadOnlyList<int> daySlots,
+        bool forceOpen = false)
     {
         var rounds = new List<DailyCrypticRoundDto>(daySlots.Count);
         var priorSolved = true;
@@ -433,12 +454,12 @@ public sealed class DailyCrypticRepository
                 ?? throw new InvalidOperationException("Falta la pista programada.");
             var solve = LoadSolve(conn, null, email, date, slot);
             var attempts = CountAttempts(conn, null, email, date, slot);
-            var opened = overnight || minute >= SlotMinute(slot);
+            var opened = forceOpen || overnight || minute >= SlotMinute(slot);
             var state = solve is not null
                 ? "solved"
                 : !opened
                     ? "upcoming"
-                    : !priorSolved
+                    : !forceOpen && !priorSolved
                         ? "blocked"
                         : attempts >= MaxAttempts
                             ? "failed"
@@ -486,12 +507,14 @@ public sealed class DailyCrypticRepository
                    MIN(solved_at) AS first_solve
             FROM daily_cryptic_solves
             WHERE play_date >= $from AND play_date < $to
+              AND email != $owner
             GROUP BY email
             ORDER BY total_points DESC, wins DESC, solved DESC, first_solve ASC
             LIMIT 50
             """;
         cmd.Parameters.AddWithValue("$from", DateKey(from));
         cmd.Parameters.AddWithValue("$to", DateKey(to));
+        cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
         using var reader = cmd.ExecuteReader();
         var ranking = new List<DailyCrypticRankingDto>();
         var rank = 0;
