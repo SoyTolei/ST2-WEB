@@ -5866,10 +5866,14 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 }
 
 .st2-cryptic-about {
-  margin: 8px 0 0;
+  margin: 12px 0 0;
   color: var(--text-muted);
   font-size: 0.72rem;
-  line-height: 1.45;
+  line-height: 1.55;
+}
+
+.st2-cryptic-about + .st2-cryptic-body {
+  margin-top: 16px;
 }
 
 .st2-cryptic-kicker {
@@ -5912,7 +5916,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
-  margin: 14px 0;
+  margin: 16px 0 12px;
 }
 
 .st2-cryptic-round {
