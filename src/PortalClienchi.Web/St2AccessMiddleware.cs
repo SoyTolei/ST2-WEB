@@ -34,6 +34,14 @@ public static class St2AccessMiddleware
         if (path.Equals("/api/live", StringComparison.OrdinalIgnoreCase) && HttpMethods.IsGet(method))
             return true;
 
+        var cryptic = path.Value ?? "";
+        if (cryptic.Equals("/api/cryptic/status", StringComparison.OrdinalIgnoreCase) && HttpMethods.IsGet(method))
+            return true;
+        if ((cryptic.Equals("/api/cryptic/attempt", StringComparison.OrdinalIgnoreCase)
+                || cryptic.Equals("/api/cryptic/hint", StringComparison.OrdinalIgnoreCase))
+            && HttpMethods.IsPost(method))
+            return true;
+
         // Capturas públicas (links en TXT de planillas); token opaco.
         var value = path.Value ?? "";
         if (!HttpMethods.IsGet(method))

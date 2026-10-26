@@ -40,8 +40,8 @@ public sealed class DailyCrypticRepository
 
     public DailyCrypticStatusDto GetStatus(string email, DateTimeOffset? nowUtc = null)
     {
-        var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
-            ?? throw new ArgumentException("Correo inválido.", nameof(email));
+        var normalizedEmail = NormalizePlayer(email);
+        var ranked = !CrypticGuestIdentity.IsPlayer(normalizedEmail);
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
         var window = ResolveForPlayer(localNow, normalizedEmail);
         var date = window.Date;
@@ -51,7 +51,9 @@ public sealed class DailyCrypticRepository
         using var conn = Open();
         var quarterStart = new DateOnly(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1);
         var season = $"Q{(date.Month - 1) / 3 + 1} {date.Year}";
-        var seasonRanking = LoadRanking(conn, quarterStart, quarterStart.AddMonths(3));
+        var seasonRanking = ranked
+            ? LoadRanking(conn, quarterStart, quarterStart.AddMonths(3))
+            : [];
         if (window.Closed)
         {
             return new DailyCrypticStatusDto(
@@ -62,12 +64,13 @@ public sealed class DailyCrypticRepository
                 [],
                 [],
                 season,
-                seasonRanking);
+                seasonRanking,
+                ranked);
         }
 
         var daySlots = ReadScheduledSlots(conn, null, date);
         var rounds = LoadRounds(conn, normalizedEmail, date, localNow, window.Overnight, daySlots, window.ForceOpen);
-        var ranking = LoadRanking(conn, date, date.AddDays(1));
+        var ranking = ranked ? LoadRanking(conn, date, date.AddDays(1)) : [];
         var nextAt = NextOpen(localNow, window, daySlots).ToString("O");
 
         return new DailyCrypticStatusDto(
@@ -78,13 +81,13 @@ public sealed class DailyCrypticRepository
             rounds,
             ranking,
             season,
-            seasonRanking);
+            seasonRanking,
+            ranked);
     }
 
     public int RevealHint(string email, int slot, string? kind, DateTimeOffset? nowUtc = null)
     {
-        var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
-            ?? throw new ArgumentException("Correo inválido.", nameof(email));
+        var normalizedEmail = NormalizePlayer(email);
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
         var window = ResolveForPlayer(localNow, normalizedEmail);
         if (window.Closed)
@@ -142,8 +145,7 @@ public sealed class DailyCrypticRepository
         string? submittedAnswer,
         DateTimeOffset? nowUtc = null)
     {
-        var normalizedEmail = PlanUserIdentity.ValidateAndNormalize(email)
-            ?? throw new ArgumentException("Correo inválido.", nameof(email));
+        var normalizedEmail = NormalizePlayer(email);
         var normalizedAnswer = NormalizeAnswer(submittedAnswer);
         if (normalizedAnswer.Length == 0)
             throw new ArgumentException("Escribí una respuesta.");
@@ -378,6 +380,14 @@ public sealed class DailyCrypticRepository
         return (long)(idCmd.ExecuteScalar() ?? 0L);
     }
 
+    private static string NormalizePlayer(string player)
+    {
+        if (CrypticGuestIdentity.IsPlayer(player))
+            return player;
+        return PlanUserIdentity.ValidateAndNormalize(player)
+            ?? throw new ArgumentException("Correo inválido.", nameof(player));
+    }
+
     private readonly record struct CompetitionWindow(DateOnly Date, bool Overnight, bool Closed);
 
     private readonly record struct PlayerWindow(DateOnly Date, bool Overnight, bool Closed, bool ForceOpen);
@@ -508,6 +518,7 @@ public sealed class DailyCrypticRepository
             FROM daily_cryptic_solves
             WHERE play_date >= $from AND play_date < $to
               AND email != $owner
+              AND email NOT LIKE 'guest:%'
             GROUP BY email
             ORDER BY total_points DESC, wins DESC, solved DESC, first_solve ASC
             LIMIT 50
@@ -804,6 +815,7 @@ public sealed class DailyCrypticRepository
         cmd.CommandText = """
             SELECT COUNT(*) FROM daily_cryptic_solves
             WHERE play_date = $date AND slot_hour = $slot
+              AND email NOT LIKE 'guest:%'
             """;
         cmd.Parameters.AddWithValue("$date", DateKey(date));
         cmd.Parameters.AddWithValue("$slot", slot);

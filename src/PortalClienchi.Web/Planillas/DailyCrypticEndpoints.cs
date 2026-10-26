@@ -8,12 +8,7 @@ public static class DailyCrypticEndpoints
             HttpContext ctx,
             DailyCrypticRepository repository) =>
         {
-            var email = PlanUserIdentity.GetFromRequest(ctx);
-            if (email is null)
-                return Results.Json(
-                    new { error = "Identificá tu usuario para continuar." },
-                    statusCode: StatusCodes.Status401Unauthorized);
-
+            var email = ResolvePlayer(ctx);
             St2HttpCache.NoStore(ctx);
             try
             {
@@ -33,12 +28,7 @@ public static class DailyCrypticEndpoints
             DailyCrypticRepository repository,
             DailyCrypticAttemptRequest body) =>
         {
-            var email = PlanUserIdentity.GetFromRequest(ctx);
-            if (email is null)
-                return Results.Json(
-                    new { error = "Identificá tu usuario para continuar." },
-                    statusCode: StatusCodes.Status401Unauthorized);
-
+            var email = ResolvePlayer(ctx);
             St2HttpCache.NoStore(ctx);
             try
             {
@@ -68,12 +58,7 @@ public static class DailyCrypticEndpoints
             DailyCrypticRepository repository,
             DailyCrypticAttemptRequest body) =>
         {
-            var email = PlanUserIdentity.GetFromRequest(ctx);
-            if (email is null)
-                return Results.Json(
-                    new { error = "Identificá tu usuario para continuar." },
-                    statusCode: StatusCodes.Status401Unauthorized);
-
+            var email = ResolvePlayer(ctx);
             St2HttpCache.NoStore(ctx);
             try
             {
@@ -162,4 +147,7 @@ public static class DailyCrypticEndpoints
             }
         });
     }
+
+    private static string ResolvePlayer(HttpContext ctx) =>
+        PlanUserIdentity.GetFromRequest(ctx) ?? CrypticGuestIdentity.Ensure(ctx);
 }

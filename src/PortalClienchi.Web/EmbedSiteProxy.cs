@@ -102,6 +102,9 @@ internal sealed class EmbedSiteProxy
     [
         "/",
         "/index.html",
+        "/criptico",
+        "/criptico/",
+        "/criptico.html",
         "/st2.ico",
         "/css/styles.css",
         "/css/planillas.css",

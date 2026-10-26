@@ -114,6 +114,7 @@ function render() {
   const round = getSelectedRound();
   const rounds = snapshot.rounds || [];
   const ranking = snapshot.ranking || [];
+  const ranked = snapshot.ranked !== false;
   const weekend = snapshot.phase === "weekend";
   const weekday = new Date(`${snapshot.date}T12:00:00-03:00`).getDay();
   const dateLabel = new Intl.DateTimeFormat("es-AR", {
@@ -153,6 +154,7 @@ function render() {
     <div class="st2-cryptic-body">
       ${weekend ? renderNotice("Fin de semana", weekendCopy) : renderRound(round)}
     </div>
+    ${ranked ? `
     <div class="st2-cryptic-foot">
       <button type="button" class="st2-cryptic-rank-link" data-cryptic-action="ranking" aria-expanded="${rankingOpen ? "true" : "false"}">
         ${rankingOpen ? "Ocultar ranking" : "Ver ranking"}
@@ -167,7 +169,7 @@ function render() {
         rankingTab === "general" ? (snapshot.seasonRanking || []) : ranking,
         rankingTab === "general" ? "Todavía no hay puntos en el ranking general." : "Todavía nadie sumó puntos.",
       )}
-    </div>
+    </div>` : `<p class="st2-cryptic-guest-note">Sin usuario de ST² el críptico se juega igual. El ranking queda solo para quien entra con su cuenta.</p>`}
   `;
   mountAnswerSlots(round);
 }

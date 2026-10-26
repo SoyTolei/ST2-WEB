@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging.Abstractions;
+using PortalClienchi.Web;
 using PortalClienchi.Web.Planillas;
 using Xunit;
 
@@ -208,6 +209,35 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var teammate = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, AtArgentina(2026, 10, 26, 9, 0));
         Assert.Single(teammate.Status.Ranking);
         Assert.DoesNotContain(teammate.Status.Ranking, item => item.Player.Contains("Leonel", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Guest_plays_without_a_ranking_and_does_not_take_first_place()
+    {
+        const string guest = "guest:0123456789abcdef0123456789abcdef";
+        var at = AtArgentina(2026, 10, 23, 10, 0);
+        var status = _repository.GetStatus(guest, at);
+
+        Assert.False(status.Ranked);
+        Assert.Empty(status.Ranking);
+        Assert.Empty(status.SeasonRanking);
+
+        var answer = ScheduledAnswer(status.Date, DailyCrypticRepository.MorningSlot);
+        var guestSolve = _repository.Submit(guest, DailyCrypticRepository.MorningSlot, answer, at);
+        Assert.True(guestSolve.Correct);
+        Assert.False(guestSolve.Status.Ranked);
+        Assert.Empty(guestSolve.Status.Ranking);
+
+        var teammate = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, at);
+        Assert.True(teammate.Status.Ranked);
+        Assert.Equal(1, teammate.Status.Rounds[0].Position);
+        Assert.Single(teammate.Status.Ranking);
+        Assert.DoesNotContain(teammate.Status.Ranking, item => item.Player.StartsWith("guest", StringComparison.OrdinalIgnoreCase));
+
+        Assert.True(St2AccessMiddleware.IsPublicPath("/api/cryptic/status", "GET"));
+        Assert.True(St2AccessMiddleware.IsPublicPath("/api/cryptic/attempt", "POST"));
+        Assert.True(St2AccessMiddleware.IsPublicPath("/api/cryptic/hint", "POST"));
+        Assert.False(St2AccessMiddleware.IsPublicPath("/api/cryptic/admin/clues", "GET"));
     }
 
     private string ScheduledAnswer(string date, int slot)

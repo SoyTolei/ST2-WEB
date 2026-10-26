@@ -553,6 +553,16 @@ app.MapGet("/api/capturas/status", (LocalCapturaStore store) =>
     }
 });
 
+app.MapGet("/criptico", ServePublicCryptic);
+
+static Task ServePublicCryptic(HttpContext ctx, IWebHostEnvironment env)
+{
+    var path = Path.Combine(env.WebRootPath, "criptico.html");
+    ctx.Response.ContentType = "text/html; charset=utf-8";
+    St2HttpCache.NoStore(ctx);
+    return ctx.Response.SendFileAsync(path, ctx.RequestAborted);
+}
+
 // Fallback SPA: mismo HTML inyectado (nunca el index crudo sin meta st2-build).
 app.MapFallback(async (HttpContext ctx, IWebHostEnvironment env) =>
 {

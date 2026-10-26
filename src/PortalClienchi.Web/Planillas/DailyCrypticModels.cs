@@ -88,7 +88,8 @@ public sealed record DailyCrypticStatusDto(
     IReadOnlyList<DailyCrypticRoundDto> Rounds,
     IReadOnlyList<DailyCrypticRankingDto> Ranking,
     string Season,
-    IReadOnlyList<DailyCrypticRankingDto> SeasonRanking);
+    IReadOnlyList<DailyCrypticRankingDto> SeasonRanking,
+    bool Ranked);
 
 public sealed record DailyCrypticRankingDto(
     int Rank,

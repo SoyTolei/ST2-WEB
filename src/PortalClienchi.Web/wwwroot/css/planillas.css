@@ -6471,6 +6471,23 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   font-size: 0.68rem;
 }
 
+.st2-cryptic-guest-note {
+  margin: 14px 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+body.st2-cryptic-public {
+  margin: 0;
+  min-height: 100vh;
+  background: #0f0f0f;
+}
+
+body.st2-cryptic-public .st2-cryptic {
+  margin-top: 28px;
+}
+
 .st2-cryptic-foot {
   display: flex;
   justify-content: flex-end;
