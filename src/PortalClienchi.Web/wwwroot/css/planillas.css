@@ -6011,13 +6011,17 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 
 .st2-cryptic-actions {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 18px;
 }
 
-.st2-cryptic-actions .st2-cryptic-check {
-  flex: 1;
+.st2-cryptic-actions button {
+  flex: 0 0 auto;
+  width: auto;
+  white-space: nowrap;
 }
 
 .st2-cryptic-help {
