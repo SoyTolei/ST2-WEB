@@ -6481,11 +6481,146 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 body.st2-cryptic-public {
   margin: 0;
   min-height: 100vh;
-  background: #0f0f0f;
+  background:
+    radial-gradient(900px 420px at 50% -10%, rgba(249, 115, 22, 0.16), transparent 60%),
+    #0c0c0e;
+}
+
+.st2-cryptic-public-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 4px 0;
+  color: var(--text-muted, #a1a1aa);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-public-brand {
+  color: #fff;
+  font-family: var(--r-font-display, Sora, sans-serif);
+  font-size: 1.15rem;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.st2-cryptic-public-brand sup {
+  color: #f97316;
+  font-size: 0.62em;
+}
+
+.st2-cryptic-public-enter {
+  margin-left: auto;
+  color: inherit;
+  text-decoration: none;
+}
+
+.st2-cryptic-public-enter:hover {
+  color: #fff;
+}
+
+.st2-cryptic-stage {
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 40px;
 }
 
 body.st2-cryptic-public .st2-cryptic {
+  width: 100%;
+  min-height: calc(100vh - 120px);
+  margin: 0;
+  padding: 36px 40px 32px;
+}
+
+body.st2-cryptic-public .st2-cryptic-head,
+body.st2-cryptic-public .st2-cryptic-head > div {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+body.st2-cryptic-public .st2-cryptic-head h2 {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+body.st2-cryptic-public .st2-cryptic-head p {
+  text-transform: none;
+}
+
+body.st2-cryptic-public .st2-cryptic-head p::first-letter {
+  text-transform: uppercase;
+}
+
+body.st2-cryptic-public .st2-cryptic-about,
+body.st2-cryptic-public .st2-cryptic-next,
+body.st2-cryptic-public .st2-cryptic-guest-note {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-size: 0.92rem;
+}
+
+body.st2-cryptic-public .st2-cryptic-rounds {
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.st2-cryptic-public .st2-cryptic-body {
+  margin-top: 22px;
+  padding: 36px 28px 32px;
+}
+
+body.st2-cryptic-public .st2-cryptic-clue {
+  margin: 8px auto 28px;
+  max-width: 18em;
+  font-size: clamp(1.7rem, 3.6vw, 2.7rem);
+  line-height: 1.25;
+  text-align: center;
+}
+
+body.st2-cryptic-public .code-slots {
+  --cs-size: 72px;
+  --cs-font: 30px;
+  --cs-gap: 12px;
+}
+
+body.st2-cryptic-public .code-slots__row,
+body.st2-cryptic-public .st2-cryptic-actions,
+body.st2-cryptic-public .st2-cryptic-foot {
+  align-items: center;
+  justify-content: center;
+}
+
+body.st2-cryptic-public .st2-cryptic-actions {
   margin-top: 28px;
+}
+
+body.st2-cryptic-public .st2-cryptic-actions button {
+  min-height: 44px;
+  padding-inline: 18px;
+  font-size: 0.9rem;
+}
+
+body.st2-cryptic-public .st2-cryptic-hint-list,
+body.st2-cryptic-public .st2-cryptic-hint-note,
+body.st2-cryptic-public .st2-cryptic-attempts,
+body.st2-cryptic-public .st2-cryptic-status {
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  body.st2-cryptic-public .st2-cryptic {
+    padding: 22px 16px 20px;
+  }
+
+  body.st2-cryptic-public .code-slots {
+    --cs-size: 46px;
+    --cs-font: 20px;
+  }
 }
 
 .st2-cryptic-foot {

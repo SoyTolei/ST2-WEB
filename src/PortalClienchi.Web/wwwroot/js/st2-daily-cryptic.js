@@ -102,6 +102,19 @@ function difficultyLabel(value) {
   return "Entrada";
 }
 
+function formatNext(iso) {
+  const when = new Date(iso);
+  if (Number.isNaN(when.getTime())) return "";
+  return new Intl.DateTimeFormat("es-AR", {
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "America/Argentina/Buenos_Aires",
+  }).format(when);
+}
+
 function roundIcon(state) {
   if (state === "solved") return "✓";
   if (state === "available") return "●";
@@ -115,6 +128,7 @@ function render() {
   const rounds = snapshot.rounds || [];
   const ranking = snapshot.ranking || [];
   const ranked = snapshot.ranked !== false;
+  const stage = document.body.classList.contains("st2-cryptic-public");
   const weekend = snapshot.phase === "weekend";
   const weekday = new Date(`${snapshot.date}T12:00:00-03:00`).getDay();
   const dateLabel = new Intl.DateTimeFormat("es-AR", {
@@ -134,6 +148,7 @@ function render() {
         <span class="st2-cryptic-kicker">Desafío del día</span>
         <h2 id="st2-cryptic-title">Críptico ST²</h2>
         <p>${escapeHtml(dateLabel)}</p>
+        ${stage && snapshot.nextAt ? `<p class="st2-cryptic-next">Siguiente pista: ${escapeHtml(formatNext(snapshot.nextAt))}</p>` : ""}
       </div>
     </div>
     <p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras. Cada pista resta 2 puntos.</p>

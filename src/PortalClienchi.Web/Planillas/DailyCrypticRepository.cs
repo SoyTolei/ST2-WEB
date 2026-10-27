@@ -634,6 +634,7 @@ public sealed class DailyCrypticRepository
             SELECT id
             FROM daily_cryptic_clues
             WHERE active = 1 AND reviewed = 1 AND difficulty = $difficulty
+              AND mechanism != 'Charada'
               AND id NOT IN (
                   SELECT clue_id FROM daily_cryptic_schedule
                   WHERE play_date >= $since AND play_date < $date
@@ -657,6 +658,7 @@ public sealed class DailyCrypticRepository
         cmd.CommandText = """
             SELECT id FROM daily_cryptic_clues
             WHERE active = 1 AND reviewed = 1 AND difficulty = $difficulty
+              AND mechanism != 'Charada'
             ORDER BY id
             """;
         cmd.Parameters.AddWithValue("$difficulty", difficulty);
@@ -1065,12 +1067,7 @@ public sealed class DailyCrypticRepository
     }
 
     private static (int Morning, int Afternoon) DifficultiesFor(DateOnly date) =>
-        (date.DayNumber % 3) switch
-        {
-            0 => (1, 2),
-            1 => (2, 3),
-            _ => (1, 3),
-        };
+        date.DayNumber % 2 == 0 ? (2, 3) : (3, 2);
 
     private static List<int> ReadScheduledSlots(SqliteConnection conn, SqliteTransaction? tx, DateOnly date)
     {
