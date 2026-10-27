@@ -628,11 +628,7 @@ public sealed class DailyCrypticRepository
         if (queue.Count == 0)
             return false;
 
-        var used = CountScheduledProgressive(conn, tx, date);
-        if (used == 0 && date > DailyCrypticSeed.ProgressiveStartsOn)
-        {
-            used = PlayDaysBetween(DailyCrypticSeed.ProgressiveStartsOn, date) * 2;
-        }
+        var used = PlayDaysBetween(DailyCrypticSeed.ProgressiveStartsOn, date) * 2;
         if (used + 2 > queue.Count)
             return false;
 
@@ -667,31 +663,6 @@ public sealed class DailyCrypticRepository
             byKey[reader.GetString(0)] = reader.GetInt64(1);
 
         return keys.Select(key => byKey.TryGetValue(key, out var id) ? id : 0L).Where(id => id > 0).ToList();
-    }
-
-    private static int CountScheduledProgressive(SqliteConnection conn, SqliteTransaction tx, DateOnly before)
-    {
-        var keys = DailyCrypticSeed.Items
-            .Skip(DailyCrypticSeed.ProgressiveFrom)
-            .Select(item => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{item.Clue}\n{item.Answer}"))).ToLowerInvariant())
-            .ToList();
-        if (keys.Count == 0)
-            return 0;
-
-        using var cmd = conn.CreateCommand();
-        cmd.Transaction = tx;
-        var names = keys.Select((_, index) => $"$k{index}").ToArray();
-        cmd.CommandText = $"""
-            SELECT COUNT(*)
-            FROM daily_cryptic_schedule s
-            JOIN daily_cryptic_clues c ON c.id = s.clue_id
-            WHERE s.play_date < $before
-              AND c.seed_key IN ({string.Join(", ", names)})
-            """;
-        cmd.Parameters.AddWithValue("$before", DateKey(before));
-        for (var index = 0; index < keys.Count; index++)
-            cmd.Parameters.AddWithValue(names[index], keys[index]);
-        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
     }
 
     private static int PlayDaysBetween(DateOnly from, DateOnly to)
@@ -731,6 +702,7 @@ public sealed class DailyCrypticRepository
         DateOnly date,
         int difficulty)
     {
+        var reserved = LoadProgressiveQueue(conn, tx);
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = """
@@ -750,12 +722,17 @@ public sealed class DailyCrypticRepository
         using var reader = cmd.ExecuteReader();
         var ids = new List<long>();
         while (reader.Read())
-            ids.Add(reader.GetInt64(0));
+        {
+            var id = reader.GetInt64(0);
+            if (!reserved.Contains(id))
+                ids.Add(id);
+        }
         return ids;
     }
 
     private static List<long> LoadAllActiveIds(SqliteConnection conn, SqliteTransaction tx, int difficulty)
     {
+        var reserved = LoadProgressiveQueue(conn, tx);
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = """
@@ -768,7 +745,11 @@ public sealed class DailyCrypticRepository
         using var reader = cmd.ExecuteReader();
         var ids = new List<long>();
         while (reader.Read())
-            ids.Add(reader.GetInt64(0));
+        {
+            var id = reader.GetInt64(0);
+            if (!reserved.Contains(id))
+                ids.Add(id);
+        }
         return ids;
     }
 

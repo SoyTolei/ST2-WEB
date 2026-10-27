@@ -264,6 +264,14 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var unlocked = _repository.GetStatus(Email, afternoonLocked);
         Assert.Equal("Donde vivís: el lodo se traga el uno (6)", unlocked.Rounds[1].Clue);
         Assert.Equal("available", unlocked.Rounds[1].State);
+
+        var continuation = AtArgentina(2026, 11, 16, 13, 30);
+        var lastOfFirst = _repository.GetStatus(Email, continuation);
+        Assert.Equal("Los del banquillo perdieron dos y el que queda señala con el dedo (5)", lastOfFirst.Rounds[0].Clue);
+        var finished = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "ACUSA", continuation);
+        Assert.True(finished.Correct);
+        var nextBatch = _repository.GetStatus(Email, continuation);
+        Assert.Equal("Norte metido en la chata: poco confiable (6)", nextBatch.Rounds[1].Clue);
     }
 
     private string ScheduledAnswer(string date, int slot)

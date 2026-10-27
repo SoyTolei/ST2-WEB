@@ -158,6 +158,19 @@ internal static class DailyCrypticSeed
         S("Lilas bailando, la que te falta cuando para la música (5)", "SILLA", "La que te falta cuando para la música", "Anagrama", "bailando", "LILAS", "LILAS*", 1),
         S("Con una nota metida en lo que chorrea la vela, el pibe se comerá cualquier cuento (6)", "CREERÁ", "Se comerá cualquier cuento", "Contenedor", "metida en", "RE en CERA", "C(RE)ERA", 2),
         S("Los del banquillo perdieron dos y el que queda señala con el dedo (5)", "ACUSA", "Señala con el dedo", "Sustracción", "perdieron dos", "ACUSADOS - DOS", "ACUSA(DOS)", 2),
+
+        S("Norte metido en la chata: poco confiable (6)", "CHANTA", "Poco confiable", "Contenedor", "metido en", "N en CHATA", "CHA(N)TA", 2),
+        S("Quedó el campanario sin río a la vista y ahora es la que se lleva el humo de la fritanga (7)", "CAMPANA", "La que se lleva el humo de la fritanga", "Sustracción", "sin río", "CAMPANARIO - RÍO", "CAMPANA(RIO)", 2),
+        S("El dios del vino se traga el norte y queda donde el jubilado tira maíz a las palomas (5)", "BANCO", "Donde el jubilado tira maíz a las palomas", "Contenedor", "se traga", "N en BACO", "BA(N)CO", 2),
+        S("Vianda que es morfina sin sodio (5)", "MORFI", "Vianda", "Sustracción", "sin sodio", "MORFINA - NA", "MORFI(NA)", 2),
+        S("Con las rentas descontroladas, la agarrás del mango (6)", "SARTÉN", "La agarrás del mango", "Anagrama", "descontroladas", "RENTAS", "RENTAS*", 2),
+        S("El del mediodía junto al que grita lejos del nido, ese que zafa de los suegros (7)", "SOLTERO", "El que zafa de los suegros", "Charada", "junto al", "SOL + TERO", "SOL+TERO", 2),
+        S("Si vas a montarte a los tumbos, imaginate el lío que se viene (8)", "TORMENTA", "El lío que se viene", "Anagrama", "a los tumbos", "MONTARTE", "MONTARTE*", 2),
+        S("Dicen que hasta las paredes tienen uno cuando el odio retrocede. (4)", "OÍDO", "Hasta las paredes tienen uno", "Reverso", "retrocede", "ODIO", "ODIO<", 1),
+        S("Tenía la bronca tan metida en la vena y ni así aprovechó el hueco en el horario (7)", "VENTANA", "El hueco en el horario", "Contenedor", "metida en", "TAN en VENA", "VEN(TAN)A", 2),
+        S("Un cacho del menú bestial es lo que te tapa el sol en la playa (4)", "NUBE", "Lo que te tapa el sol", "Oculta", "un cacho del", "meNÚ BEstial", "me[NÚ BE]stial", 1),
+        S("Acelerás medio loco y ni saludás a la vecina del ascensor (8)", "ESCALERA", "La vecina del ascensor", "Anagrama", "medio loco", "ACELERÁS", "ACELERÁS*", 2),
+        S("Esta se come un ¡uf!, la que el gato no larga en julio (6)", "ESTUFA", "La que el gato no larga en julio", "Contenedor", "se come", "UF en ESTA", "EST(UF)A", 2),
     ];
 
     static DailyCrypticSeed()
