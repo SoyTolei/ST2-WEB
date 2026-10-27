@@ -6,14 +6,15 @@ import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261023e";
-import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261027a";
+import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js?v=20261027a";
+import { initCrypticNudge } from "./st2-cryptic-nudge.js?v=20261027a";
 import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261013d";
 import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261026b";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261027a";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -3521,6 +3522,21 @@ document.addEventListener("st2:open-admin-from-alert", () => {
   document.querySelector('.tab-btn[data-tab="admin"]')?.click();
   void loadAccessAdminRegistrations({ silent: true, force: true });
 });
+document.addEventListener("st2:open-cryptic", () => {
+  const planillasTab = document.querySelector('.tab-btn[data-tab="planillas"]');
+  if (planillasTab && !planillasTab.classList.contains("active")) {
+    planillasTab.click();
+  }
+  window.setTimeout(() => {
+    goPlanillasHome({ history: "push" });
+    window.setTimeout(() => {
+      const target = document.getElementById("st2-cryptic");
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+      target?.classList.add("is-nudged");
+      window.setTimeout(() => target?.classList.remove("is-nudged"), 1600);
+    }, 80);
+  }, 80);
+});
 accessAdminSearch?.addEventListener("input", () => {
   accessAdminQuery = accessAdminSearch.value || "";
     renderAccessAdminTable();
@@ -5536,6 +5552,7 @@ async function bootstrapApp() {
   syncViewAsBanner();
   bindAboutToolsUi();
   await initPlanillas();
+  initCrypticNudge();
   setTourContext({
     getActiveTab: () => document.querySelector(".tab-btn.active")?.dataset?.tab || "planillas",
     getPortalTabLabel: () => getPortalClientTabLabel(),

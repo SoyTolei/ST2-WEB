@@ -44,7 +44,8 @@ async function readProblem(response) {
 }
 
 async function loadStatus({ quiet = false } = {}) {
-  if (!host || document.hidden) return;
+  if (!host) return;
+  if (document.hidden && !quiet) return;
   if (!quiet) host.setAttribute("aria-busy", "true");
   try {
     const response = await fetch(`${API}/status`, {
@@ -70,21 +71,41 @@ async function loadStatus({ quiet = false } = {}) {
         selectedSlot = rounds.find((round) => round.state === "available")?.slot ?? selectedSlot;
       }
     }
-    render();
-    const pending = (snapshot?.rounds || []).some((round) => round.state === "available");
-    document.dispatchEvent(new CustomEvent("st2:cryptic-pending", { detail: { pending } }));
+    if (!document.hidden) render();
+    publishPending();
     scheduleRefresh();
   } catch (error) {
-    if (!quiet) renderError(error?.message || "No se pudo cargar el Críptico.");
+    if (!quiet && !document.hidden) renderError(error?.message || "No se pudo cargar el Críptico.");
   } finally {
     host?.removeAttribute("aria-busy");
   }
 }
 
+function publishPending() {
+  const publicPage = document.body.classList.contains("st2-cryptic-public");
+  const rounds = snapshot?.rounds || [];
+  const available = publicPage ? [] : rounds.filter((round) => round.state === "available");
+  document.dispatchEvent(new CustomEvent("st2:cryptic-pending", {
+    detail: {
+      pending: available.length > 0,
+      phase: snapshot?.phase || "",
+      date: snapshot?.date || "",
+      slots: available.map((round) => Number(round.slot)),
+      afternoon: available.some((round) => Number(round.slot) > 12 * 60),
+    },
+  }));
+}
+
 function scheduleRefresh() {
   window.clearTimeout(refreshTimer);
-  if (!snapshot?.nextAt) return;
-  const delay = Math.max(5000, Math.min(30 * 60 * 1000, new Date(snapshot.nextAt).getTime() - Date.now() + 1200));
+  const untilNext = snapshot?.nextAt
+    ? new Date(snapshot.nextAt).getTime() - Date.now() + 1200
+    : NaN;
+  const waiting = Number.isFinite(untilNext) && untilNext > 0;
+  const heartbeat = document.hidden ? 3 * 60 * 1000 : 90 * 1000;
+  const delay = waiting
+    ? Math.max(8000, Math.min(heartbeat, untilNext))
+    : heartbeat;
   refreshTimer = window.setTimeout(() => void loadStatus({ quiet: true }), delay);
 }
 

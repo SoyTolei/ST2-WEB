@@ -180,31 +180,81 @@ export function syncSessionGreetBubble() {
   syncCrypticGreet();
 }
 
+const CRYPTIC_POP_MS = 5 * 60 * 1000;
+let crypticPending = false;
+let crypticAfternoon = false;
+let crypticPopTimer = 0;
+let crypticBubbleBound = false;
+
+function crypticLinkCopy() {
+  return crypticAfternoon ? "Ya está el de la tarde →" : "¿Ya hiciste el Críptico?";
+}
+
+function openCrypticFromGreet(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  document.dispatchEvent(new CustomEvent("st2:open-cryptic"));
+}
+
+function popCrypticBubble() {
+  const bubble = document.getElementById("st2-blobatar-greet");
+  if (!bubble || bubble.classList.contains("hidden") || !crypticPending) return;
+  bubble.classList.remove("st2-blobatar-greet--pop");
+  void bubble.offsetWidth;
+  bubble.classList.add("st2-blobatar-greet--pop");
+  document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+    detail: { expression: "wink", ms: 2200 },
+  }));
+}
+
+function syncCrypticPopTimer(on) {
+  window.clearInterval(crypticPopTimer);
+  crypticPopTimer = 0;
+  if (!on) return;
+  crypticPopTimer = window.setInterval(popCrypticBubble, CRYPTIC_POP_MS);
+}
+
 function syncCrypticGreet(pending = crypticPending) {
   const link = document.getElementById("st2-blobatar-cryptic");
   const bubble = document.getElementById("st2-blobatar-greet");
+  const avatar = document.getElementById("st2-session-avatar-host");
   if (!link) return;
   const show = pending && bubble && !bubble.classList.contains("hidden");
+  link.textContent = crypticLinkCopy();
   link.classList.toggle("hidden", !show);
   if (show) link.removeAttribute("hidden");
   else link.setAttribute("hidden", "");
+  bubble?.classList.toggle("st2-blobatar-greet--cryptic", !!show);
+  avatar?.classList.toggle("st2-blobatar-cryptic-dot", !!show);
+  if (!crypticBubbleBound && bubble) {
+    crypticBubbleBound = true;
+    bubble.addEventListener("click", (event) => {
+      if (!crypticPending) return;
+      if (event.target?.closest?.("#st2-session-menu-btn, #st2-session-menu")) return;
+      openCrypticFromGreet(event);
+    });
+  }
+  if (link.dataset.crypticBound !== "1") {
+    link.dataset.crypticBound = "1";
+    link.addEventListener("click", openCrypticFromGreet);
+  }
 }
 
-let crypticPending = false;
-
-document.getElementById("st2-blobatar-cryptic")?.addEventListener("click", () => {
-  document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
-  window.setTimeout(() => {
-    const target = document.getElementById("st2-cryptic");
-    target?.scrollIntoView({ behavior: "smooth", block: "center" });
-    target?.classList.add("is-nudged");
-    window.setTimeout(() => target?.classList.remove("is-nudged"), 1600);
-  }, 80);
+document.addEventListener("st2:cryptic-pending", (event) => {
+  const next = Boolean(event.detail?.pending);
+  const afternoon = Boolean(event.detail?.afternoon);
+  const becamePending = next && !crypticPending;
+  crypticPending = next;
+  crypticAfternoon = afternoon;
+  syncCrypticGreet();
+  syncCrypticPopTimer(next);
+  if (becamePending) {
+    window.setTimeout(popCrypticBubble, 280);
+  }
 });
 
-document.addEventListener("st2:cryptic-pending", (event) => {
-  crypticPending = Boolean(event.detail?.pending);
-  syncCrypticGreet();
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && crypticPending) popCrypticBubble();
 });
 
 document.addEventListener("st2:greet-bubble-sync", () => syncSessionGreetBubble());

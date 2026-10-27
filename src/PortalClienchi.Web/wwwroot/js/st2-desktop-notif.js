@@ -263,6 +263,32 @@ export function notifyWebUpdateDesktop(build) {
   });
 }
 
+let lastCrypticSig = "";
+
+/** Aviso del Críptico del día: una vez por ronda disponible. */
+export function notifyCrypticDesktop(body, signature, { allowWhileVisible = false } = {}) {
+  const sig = String(signature || "");
+  const text = String(body || "").trim();
+  if (!sig || !text || sig === lastCrypticSig) return;
+  lastCrypticSig = sig;
+  void ensureDesktopNotifPermission().then((ok) => {
+    if (!ok) return;
+    showDesktopNotif(
+      "ST2 · Críptico",
+      text,
+      `cryptic-${sig}`,
+      {
+        allowWhileVisible,
+        onClick: () => {
+          try {
+            document.dispatchEvent(new CustomEvent("st2:open-cryptic"));
+          } catch { /* ignore */ }
+        },
+      },
+    );
+  });
+}
+
 const lastClientChangeTags = new Set();
 
 /** Aviso cuando un ADMIN WEB crea un perfil (solo super-admin). */

@@ -7,7 +7,7 @@ import {
   foodForToast,
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
-} from "./st2-toast-greet.js?v=20261023e";
+} from "./st2-toast-greet.js?v=20261027a";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -20,6 +20,7 @@ export const ST2_TOAST = {
   borradoMine: "st2-toast-borrado-mine",
   access: "st2-toast-access",
   accessOwner: "st2-toast-access-owner",
+  cryptic: "st2-toast-cryptic",
   agua: "st2-toast-agua",
 };
 
@@ -267,6 +268,10 @@ export function setSt2AlertToast({
     onAction,
     onDismiss,
   });
+  if (id === ST2_TOAST.cryptic) {
+    paintOne(id, plainTitle(formatToastMessage(text)), tone);
+    return;
+  }
   paintGreetStack();
 }
 
@@ -466,4 +471,12 @@ export function syncStackedToastGreetings() {
   paintGreetStack();
   const agua = registry.get(ST2_TOAST.agua);
   if (agua) paintOne(ST2_TOAST.agua, plainTitle(agua.body), "agua");
+  const cryptic = registry.get(ST2_TOAST.cryptic);
+  if (cryptic) {
+    paintOne(
+      ST2_TOAST.cryptic,
+      plainTitle(formatToastMessage(cryptic.body)),
+      cryptic.tone || "ok",
+    );
+  }
 }

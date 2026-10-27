@@ -104,6 +104,10 @@ html.st2-theme-dark .st2-blobatar-greet::before {
   border-bottom-color: rgba(251, 146, 60, 0.48);
 }
 
+html.st2-theme-dark .st2-blobatar-greet.st2-blobatar-greet--cryptic {
+  border-color: rgba(251, 146, 60, 0.72);
+}
+
 html.st2-theme-dark .st2-session-menu-hint > span {
   background: rgba(253, 186, 116, 0.7);
 }
