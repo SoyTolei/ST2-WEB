@@ -174,6 +174,10 @@ internal static class DailyCrypticSeed
         S("Dicen que hasta las paredes tienen uno cuando el odio retrocede. (4)", "OÍDO", "Hasta las paredes tienen uno", "Reverso", "retrocede", "ODIO", "ODIO<", 1),
         S("Los del banquillo perdieron dos y el que queda señala con el dedo (5)", "ACUSA", "Señala con el dedo", "Sustracción", "perdieron dos", "ACUSADOS - DOS", "ACUSA(DOS)", 2),
         S("El dios del vino se traga el norte y queda donde el jubilado tira maíz a las palomas (5)", "BANCO", "Donde el jubilado tira maíz a las palomas", "Contenedor", "se traga", "N en BACO", "BA(N)CO", 2),
+        S("Objeto volador no identificado descoloca la primera alma enamorada. (5)", "NOVIA", "Enamorada", "Anagrama", "descoloca", "OVNI + A", "OVNIA*", 2),
+        S("En occidente un destello caótico sin romanos. (5)", "OESTE", "En occidente", "Anagrama", "caótico", "ESTEO", "DESTELLO-DLL*", 3),
+        S("Es terco y loco el misterio. (7)", "SECRETO", "El misterio", "Anagrama", "loco", "ES TERCO", "ESTERCO*", 1),
+        S("Césped con rey cuida el rebaño. (6)", "PASTOR", "Cuida el rebaño", "Charada", "con", "PASTO + R", "PASTO+R", 1),
 
     ];
 
