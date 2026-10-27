@@ -6554,13 +6554,16 @@ body.st2-cryptic-public .st2-cryptic-head p::first-letter {
 }
 
 body.st2-cryptic-public .st2-cryptic-about,
-body.st2-cryptic-public .st2-cryptic-next,
-body.st2-cryptic-public .st2-cryptic-guest-note {
+body.st2-cryptic-public .st2-cryptic-next {
   max-width: 640px;
   margin-left: auto;
   margin-right: auto;
   text-align: center;
   font-size: 0.92rem;
+}
+
+body.st2-cryptic-public .st2-cryptic-body + .st2-cryptic-about {
+  margin-top: 22px;
 }
 
 body.st2-cryptic-public .st2-cryptic-rounds {

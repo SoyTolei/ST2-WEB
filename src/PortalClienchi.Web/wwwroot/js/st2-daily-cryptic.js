@@ -148,10 +148,10 @@ function render() {
         <span class="st2-cryptic-kicker">Desafío del día</span>
         <h2 id="st2-cryptic-title">Críptico ST²</h2>
         <p>${escapeHtml(dateLabel)}</p>
-        ${stage && snapshot.nextAt ? `<p class="st2-cryptic-next">Siguiente pista: ${escapeHtml(formatNext(snapshot.nextAt))}</p>` : ""}
+        ${stage && snapshot.nextAt ? `<p class="st2-cryptic-next">Siguiente críptico: ${escapeHtml(formatNext(snapshot.nextAt))}</p>` : ""}
       </div>
     </div>
-    <p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras. Cada pista resta 2 puntos.</p>
+    ${stage ? "" : `<p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras. Cada pista resta 2 puntos.</p>`}
     ${weekend ? "" : `
     <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico" style="grid-template-columns: repeat(${Math.max(rounds.length, 1)}, minmax(0, 1fr))">
       ${rounds.map((item) => `
@@ -169,7 +169,8 @@ function render() {
     <div class="st2-cryptic-body">
       ${weekend ? renderNotice("Fin de semana", weekendCopy) : renderRound(round)}
     </div>
-    ${ranked ? `
+    ${stage ? `<p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras.</p>` : ""}
+    ${!stage && ranked ? `
     <div class="st2-cryptic-foot">
       <button type="button" class="st2-cryptic-rank-link" data-cryptic-action="ranking" aria-expanded="${rankingOpen ? "true" : "false"}">
         ${rankingOpen ? "Ocultar ranking" : "Ver ranking"}
@@ -184,7 +185,7 @@ function render() {
         rankingTab === "general" ? (snapshot.seasonRanking || []) : ranking,
         rankingTab === "general" ? "Todavía no hay puntos en el ranking general." : "Todavía nadie sumó puntos.",
       )}
-    </div>` : `<p class="st2-cryptic-guest-note">Sin usuario de ST² el críptico se juega igual. El ranking queda solo para quien entra con su cuenta.</p>`}
+    </div>` : ""}
   `;
   mountAnswerSlots(round);
 }
@@ -287,7 +288,7 @@ function renderHintList(round) {
   if (!rows.length) return "";
   return `
     <ul class="st2-cryptic-hint-list">${rows.join("")}</ul>
-    <p class="st2-cryptic-hint-note">Estas pistas restan ${popcount(mask) * 2} puntos de los 10 de esta ronda.</p>
+    ${document.body.classList.contains("st2-cryptic-public") ? "" : `<p class="st2-cryptic-hint-note">Estas pistas restan ${popcount(mask) * 2} puntos de los 10 de esta ronda.</p>`}
   `;
 }
 
