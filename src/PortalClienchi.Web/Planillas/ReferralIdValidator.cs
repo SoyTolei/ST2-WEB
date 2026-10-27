@@ -34,9 +34,6 @@ public static class ReferralIdValidator
         if (common is not null)
             return common;
 
-        if (!c.PlanillaConfigured)
-            return "Completá la planilla técnica (todas las opciones obligatorias).";
-
         if (c.Adjuntos.BackupBases &&
             !(c.Adjuntos.BackupManager || c.Adjuntos.BackupSbda || c.Adjuntos.BackupCg || c.Adjuntos.BackupSj))
             return "Seleccioná al menos una base en Backup Bases.";

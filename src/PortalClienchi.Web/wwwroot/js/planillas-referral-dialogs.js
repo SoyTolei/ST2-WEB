@@ -448,12 +448,10 @@ export async function runSdkDialog(referralCfg, { sdkState, sdkApp }) {
 
 export async function runPlanillaDialog(planillaState) {
   const s = planillaState;
-  const required = [
+  const checks = [
     ["pl-proceso", "El proceso funcionaba correctamente", s.procesoFuncionaba],
     ["pl-reproduce", "Se pudo reproducir el error", s.reproduceError],
     ["pl-ultima", "Última actualización aplicada correctamente", s.ultimaActualizOk],
-  ];
-  const optional = [
     ["pl-relevada", "¿Se relevó planilla técnica?", s.relevada],
     ["pl-vinculos", "Se actualizaron vínculos", s.optVinculos],
     ["pl-modelo", "Se pudo reproducir en la base MODELO", s.optBaseModelo],
@@ -468,16 +466,14 @@ export async function runPlanillaDialog(planillaState) {
       <span class="plan-opt-check-text">${esc(label)}</span>
     </label>`).join("");
 
-  const bodyHtml = `<p class="plan-modal-hint">Completá los ítems obligatorios. Los opcionales suman detalle al referral.</p>
-    <h4 class="plan-modal-section">Obligatorio</h4>
-    ${optionWell(renderChecks(required))}
-    <h4 class="plan-modal-section">Opcional</h4>
-    ${optionWell(renderChecks(optional))}`;
+  const bodyHtml = `<p class="plan-modal-hint">Marcá los chequeos que apliquen. Nada es obligatorio.</p>
+    <h4 class="plan-modal-section">Chequeos</h4>
+    ${optionWell(renderChecks(checks))}`;
 
   const result = await showDialog({
     accent: "planilla",
     title: "Planilla técnica",
-    subtitle: "Relevamiento y comprobaciones del caso",
+    subtitle: "Chequeos del caso, a completar",
     width: 680,
     tall: true,
     acceptText: "Aceptar",

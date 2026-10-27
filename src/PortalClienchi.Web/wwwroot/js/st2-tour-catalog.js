@@ -121,7 +121,7 @@ const MENU_MODULO_COPY = {
   },
   referral: {
     BejermanSql:
-      "Escalamiento a I+D o N2 cuando el caso requiere desarrollo. Indicá versión y módulo Bejerman, asunto, descripción, paso a paso, planilla técnica, MAM, SDK y adjuntos según lo revisado.",
+      "Escalamiento a I+D o N2 cuando el caso requiere desarrollo. Indicá versión y módulo Bejerman, asunto, descripción, paso a paso, chequeos de planilla técnica, MAM, SDK y adjuntos según lo revisado.",
     OnvioWeb:
       "Escalamiento ONVIO/WEB a desarrollo o N2. Marcá si reproduciste el caso, si hay ticket de servicio y qué pantallas adjuntás. El TXT unifica sistema, detalle y adjuntos.",
     Chile:
@@ -528,7 +528,7 @@ export function buildReferralStandardTour(ctx, sistema) {
       selector: "#ref-bejerman-post",
       title: "Comprobaciones y adjuntos",
       body:
-        "Perfil Técnico u Otra mesa. Planilla técnica (se completa sola), MAM y SDK si los revisaste. Abajo marcá pantallas, traza SQL o backup de bases según lo que vas a incluir.",
+        "Perfil Técnico u Otra mesa. Planilla técnica con chequeos a completar, MAM y SDK si los revisaste. Abajo marcá pantallas, traza SQL o backup de bases según lo que vas a incluir.",
       placement: "top",
       when: () => visible("#ref-bejerman-post"),
     });

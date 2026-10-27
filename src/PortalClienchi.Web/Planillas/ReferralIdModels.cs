@@ -22,7 +22,7 @@ public sealed class ReferralIdCase
     public bool EsTecnico { get; set; }
     public bool MamConfigured => Mam.HasSelection;
     public bool SdkConfigured => Sdk.HasSelection;
-    public bool PlanillaConfigured => Planilla.IsComplete;
+    public bool PlanillaConfigured => !Planilla.IsEmpty;
     public bool RequiresCollationSql =>
         Sistema == PlanillasSistema.BejermanSql &&
         Adjuntos.BackupBases &&
@@ -56,7 +56,6 @@ public sealed class PlanillaTecnicaState
     public bool OptBaseModelo { get; set; }
     public bool OptSoloCliente { get; set; }
     public bool OptReproduceSistematicamente { get; set; }
-    public bool IsComplete => ProcesoFuncionaba && ReproduceError && UltimaActualizOk;
 
     public bool IsEmpty =>
         !Relevada
@@ -67,19 +66,6 @@ public sealed class PlanillaTecnicaState
         && !OptBaseModelo
         && !OptSoloCliente
         && !OptReproduceSistematicamente;
-
-    /// <summary>
-    /// Si el agente no marcó nada, completa los 3 ítems obligatorios para no bloquear el TXT.
-    /// </summary>
-    public void ApplyMandatoryDefaultsIfEmpty()
-    {
-        if (!IsEmpty)
-            return;
-
-        ProcesoFuncionaba = true;
-        ReproduceError = true;
-        UltimaActualizOk = true;
-    }
 }
 
 public sealed class OnvioReferralState

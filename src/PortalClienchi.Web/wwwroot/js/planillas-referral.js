@@ -69,19 +69,6 @@ function isPlanillaEmpty(state = planillaState) {
   );
 }
 
-/** Si no marcaron nada en planilla, completa los 3 obligatorios. */
-function ensurePlanillaDefaults() {
-  if (!isBejerman() || !isPlanillaEmpty()) return false;
-  planillaState = {
-    ...planillaState,
-    procesoFuncionaba: true,
-    reproduceError: true,
-    ultimaActualizOk: true,
-  };
-  updateCheckStatuses();
-  return true;
-}
-
 function syncPerfilUi() {
   const otra = document.getElementById("ref-perfil-otra");
   const tecnico = document.getElementById("ref-perfil-tecnico");
@@ -90,8 +77,8 @@ function syncPerfilUi() {
 
   const planBadge = document.getElementById("ref-planilla-badge");
   if (planBadge) {
-    planBadge.textContent = esTecnico ? "Opcional" : "Se completa sola";
-    planBadge.className = esTecnico ? "plan-check-badge is-optional" : "plan-check-badge is-auto";
+    planBadge.textContent = "A completar";
+    planBadge.className = "plan-check-badge is-auto";
   }
 
   const mamBadge = document.getElementById("ref-mam-badge");
@@ -134,7 +121,7 @@ function updateSqlHint() {
 
 function loadReferralDialogs() {
   if (!referralDialogsPromise) {
-    referralDialogsPromise = import("./planillas-referral-dialogs.js").then((mod) => {
+    referralDialogsPromise = import("./planillas-referral-dialogs.js?v=20261027b").then((mod) => {
       mod.initReferralDialogs();
       return mod;
     });
@@ -282,7 +269,7 @@ function updateSqlPanel() {
 function updateCheckStatuses() {
   const mamOk = Object.values(mamState).some(Boolean);
   const sdkOk = Object.values(sdkState).some(Boolean);
-  const planOk = planillaState.procesoFuncionaba && planillaState.reproduceError && planillaState.ultimaActualizOk;
+  const planOk = !isPlanillaEmpty();
   setStatus("ref-mam-status", mamOk);
   setStatus("ref-sdk-status", sdkOk);
   setStatus("ref-planilla-status", planOk);
@@ -987,8 +974,6 @@ function refreshChips(id, files, prefix, fileList) {
 }
 
 function buildPayload() {
-  if (isBejerman()) ensurePlanillaDefaults();
-
   const payload = {
     sistema: ctx.getSistema(),
     asunto: document.getElementById("ref-asunto")?.value.trim() || "",
@@ -1123,7 +1108,6 @@ async function generarReferral(copiar) {
   const status = document.getElementById("ref-status");
   const btnCopiar = document.getElementById("ref-btn-copiar");
   const btnVer = document.getElementById("ref-btn-ver-planilla");
-  const autoPlanilla = isBejerman() && isPlanillaEmpty();
   const payload = buildPayload();
   const files = pickReferralCapturaFiles(payload);
   const trazas = isBejerman() && esTecnico ? [...trazaFiles] : [];
@@ -1204,15 +1188,13 @@ async function generarReferral(copiar) {
     const trazasMsg = (payload.trazaEnlaces?.length || 0) > 0
       ? ` (${payload.trazaEnlaces.length} traza(s) con link de descarga)`
       : "";
-    const autoMsg = autoPlanilla ? " Se marcaron los ítems obligatorios de planilla técnica." : "";
-
     if (copiar) {
       await navigator.clipboard.writeText(data.texto);
-      status.textContent = `Texto copiado al portapapeles.${capturasMsg}${trazasMsg}${autoMsg}`;
+      status.textContent = `Texto copiado al portapapeles.${capturasMsg}${trazasMsg}`;
     } else {
       const texto = data.texto;
       showPlanTextPreview("ref-text-preview", texto);
-      status.textContent = `Planilla lista.${capturasMsg}${trazasMsg}${autoMsg} Podés copiar desde el panel de vista previa.`;
+      status.textContent = `Planilla lista.${capturasMsg}${trazasMsg} Podés copiar desde el panel de vista previa.`;
     }
   } catch (ex) {
     status.textContent = ex.message || "Error";

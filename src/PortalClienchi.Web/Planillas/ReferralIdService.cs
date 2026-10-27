@@ -65,7 +65,6 @@ public sealed class ReferralIdService
         if (sistema == PlanillasSistema.BejermanSql)
         {
             caso.EsTecnico = req.EsTecnico;
-            caso.Planilla.ApplyMandatoryDefaultsIfEmpty();
         }
 
         if (req.Onvio is not null)
