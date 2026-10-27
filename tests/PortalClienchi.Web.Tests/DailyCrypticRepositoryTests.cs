@@ -199,7 +199,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Equal("active", preview.Phase);
         Assert.Equal("2026-10-26", preview.Date);
         Assert.Equal("available", preview.Rounds[0].State);
-        Assert.Equal("available", preview.Rounds[1].State);
+        Assert.Equal("blocked", preview.Rounds[1].State);
 
         var answer = ScheduledAnswer(preview.Date, DailyCrypticRepository.MorningSlot);
         var ownerSolve = _repository.Submit(owner, DailyCrypticRepository.MorningSlot, answer, sunday);
@@ -238,6 +238,32 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.True(St2AccessMiddleware.IsPublicPath("/api/cryptic/attempt", "POST"));
         Assert.True(St2AccessMiddleware.IsPublicPath("/api/cryptic/hint", "POST"));
         Assert.False(St2AccessMiddleware.IsPublicPath("/api/cryptic/admin/clues", "GET"));
+    }
+
+    [Fact]
+    public void Progressive_queue_starts_after_today_and_keeps_the_afternoon_locked()
+    {
+        var monday = AtArgentina(2026, 10, 26, 10, 0);
+        var today = _repository.GetStatus(Email, monday);
+        Assert.NotEqual("Gorra vasca que vuelve en mañana ni obras (5)", today.Rounds[0].Clue);
+
+        var tuesday = AtArgentina(2026, 10, 27, 10, 0);
+        var next = _repository.GetStatus(Email, tuesday);
+        Assert.Equal("Gorra vasca que vuelve en mañana ni obras (5)", next.Rounds[0].Clue);
+        Assert.Equal("upcoming", next.Rounds[1].State);
+        Assert.Null(next.Rounds[1].Clue);
+
+        var afternoonLocked = AtArgentina(2026, 10, 27, 13, 30);
+        var locked = _repository.GetStatus(Email, afternoonLocked);
+        Assert.Equal("blocked", locked.Rounds[1].State);
+        Assert.Null(locked.Rounds[1].Clue);
+
+        var first = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "BOINA", tuesday);
+        Assert.True(first.Correct);
+
+        var unlocked = _repository.GetStatus(Email, afternoonLocked);
+        Assert.Equal("Donde vivís: el lodo se traga el uno (6)", unlocked.Rounds[1].Clue);
+        Assert.Equal("available", unlocked.Rounds[1].State);
     }
 
     private string ScheduledAnswer(string date, int slot)

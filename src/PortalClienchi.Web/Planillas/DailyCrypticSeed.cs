@@ -18,6 +18,9 @@ internal sealed record DailyCrypticSeedEntry(
 
 internal static class DailyCrypticSeed
 {
+    internal const int ProgressiveFrom = 97;
+    internal static readonly DateOnly ProgressiveStartsOn = new(2026, 10, 27);
+
     internal static IReadOnlyList<DailyCrypticSeedEntry> Items { get; } =
     [
         // Dificultad 1: mecanismos directos.
@@ -124,6 +127,37 @@ internal static class DailyCrypticSeed
         S("Fruta, según se oye, que vaya (4)", "BAYA", "Fruta", "Homófono rioplatense", "según se oye", "VAYA", "VAYA~", 2),
         S("Juego de turco revuelto (5)", "TRUCO", "Juego", "Anagrama", "revuelto", "TURCO", "TURCO*", 3),
         S("Carne de soda a revuelta (5)", "ASADO", "Carne", "Anagrama", "revuelta", "SODA A", "SODA A*", 3),
+
+        // Lote progresivo: sale a partir del próximo día hábil, en este orden, dos por día.
+        S("Gorra vasca que vuelve en mañana ni obras (5)", "BOINA", "Gorra vasca", "Oculta + reverso", "que vuelve en", "mañana ni obras", "mañan[A NI OB]ras <", 2),
+        S("Donde vivís: el lodo se traga el uno (6)", "BARRIO", "Donde vivís", "Contenedor", "se traga", "BARRO + I", "BARR(I)O", 2),
+        S("Esquive del delantero, paso de baile (7)", "GAMBETA", "Esquive del delantero / paso de baile", "Doble definición", ",", "esquive; paso de baile", "GAMBETA / GAMBETA", 1),
+        S("Elegante con el oeste: el más joven de la familia (5)", "CHICO", "El más joven de la familia", "Charada", "con", "CHIC + O", "CHIC+O", 2),
+        S("Una nota antes del francés y ya tenés lo que se abre a las doce del 24 (6)", "REGALO", "Lo que se abre a las doce del 24", "Charada", "antes del", "RE + GALO", "RE+GALO", 2),
+        S("Corriente alterna metida en abono, primo de la llama (7)", "GUANACO", "Primo de la llama", "Contenedor", "metida en", "AC en GUANO", "GUAN(AC)O", 3),
+        S("Pasaba la noche: parte de alrededor Miami (6)", "DORMÍA", "Pasaba la noche", "Oculta", "parte de", "alreDEDOR MIAmi", "alre[DOR MIA]mi", 2),
+        S("De ese zapato embarrado, sobrevive el que hace cuac. (4)", "PATO", "El que hace cuac", "Sustracción", "embarrado, sobrevive", "ZAPATO - ZA", "zaPATO", 1),
+        S("Créditos barajados dejan a cualquiera de perfil bajo (8)", "DISCRETO", "De perfil bajo", "Anagrama", "barajados", "CRÉDITOS", "CRÉDITOS*", 2),
+        S("El capo se traga mil y va a parar donde canta el gallo (5)", "CAMPO", "Donde canta el gallo", "Contenedor", "se traga", "CAPO + M", "CA(M)PO", 2),
+        S("La te se escondió en los altares, por detrás (5)", "ATRÁS", "Por detrás", "Contenedor", "se escondió en", "T en ARAS", "A(T)RAS", 2),
+        S("Se emborrachó el primo: hice añicos el vaso (5)", "ROMPÍ", "Hice añicos el vaso", "Anagrama", "se emborrachó", "PRIMO", "PRIMO*", 2),
+        S("Jungla que se quedó sin nota, psicoanalista de los arquetipos (4)", "JUNG", "Psicoanalista de los arquetipos", "Sustracción", "se quedó sin nota", "JUNGLA - LA", "JUNGLA-LA", 3),
+        S("Gigantes del Jurásico, divinos sin el centro (5)", "DINOS", "Gigantes del Jurásico", "Sustracción", "sin el centro", "DIVINOS - VI", "DI(VI)NOS", 2),
+        S("El patrón viajó hacia el sur: los que mandan en la oficina (5)", "JEFES", "Los que mandan en la oficina", "Charada", "viajó hacia", "JEFE + S", "JEFE+S", 1),
+        S("Corta, revuelta, el que hace de otro (5)", "ACTOR", "El que hace de otro", "Anagrama", "revuelta", "CORTA", "CORTA*", 1),
+        S("Se mira para pedir, llega por correo (5)", "CARTA", "Se mira para pedir / llega por correo", "Doble definición", ",", "menú; correo", "CARTA / CARTA", 1),
+        S("Nota seguida del océano, para amansar potros (5)", "DOMAR", "Para amansar potros", "Charada", "seguida del", "DO + MAR", "DO+MAR", 2),
+        S("¡Melchor, por ejemplo, asoma en forma gobierno! (4)", "MAGO", "Melchor, por ejemplo", "Oculta", "asoma en", "forMA GObierno", "for[MA GO]bierno", 1),
+        S("Trofeos de campeones, pocas revueltas (5)", "COPAS", "Trofeos de campeones", "Anagrama", "revueltas", "POCAS", "POCAS*", 1),
+        S("Se da vuelta la lámina y sale un bicho (6)", "ANIMAL", "Un bicho", "Reverso", "se da vuelta", "LÁMINA", "LÁMINA<", 1),
+        S("Salud por la que pesa bebés y la que sostiene la Justicia (7)", "BALANZA", "La que pesa bebés / la que sostiene la Justicia", "Doble definición", "y", "báscula; símbolo", "BALANZA / BALANZA", 1),
+        S("Fue gol, al final, y en medio de eso, lo que le pedís a un desconocido con el pucho en la boca (5)", "FUEGO", "Lo que le pedís a un desconocido con el pucho", "Sustracción", "al final", "FUEGOL - L", "FUEGO(L)", 2),
+        S("El que ya fue y después cuelga la ropa, estira la sobremesa hasta la merienda. (8)", "EXTIENDE", "Estira la sobremesa hasta la merienda", "Charada", "después", "EX + TIENDE", "EX+TIENDE", 2),
+        S("Se busca rito medio loco, remate del nueve (4)", "TIRO", "Remate del nueve", "Anagrama", "medio loco", "RITO", "RITO*", 1),
+        S("Cuando la del suero abraza a usted, aparece la que cobra la pensión. (5)", "VIUDA", "La que cobra la pensión", "Contenedor", "abraza a", "UD en VÍA", "VI(UD)A", 3),
+        S("Lilas bailando, la que te falta cuando para la música (5)", "SILLA", "La que te falta cuando para la música", "Anagrama", "bailando", "LILAS", "LILAS*", 1),
+        S("Con una nota metida en lo que chorrea la vela, el pibe se comerá cualquier cuento (6)", "CREERÁ", "Se comerá cualquier cuento", "Contenedor", "metida en", "RE en CERA", "C(RE)ERA", 2),
+        S("Los del banquillo perdieron dos y el que queda señala con el dedo (5)", "ACUSA", "Señala con el dedo", "Sustracción", "perdieron dos", "ACUSADOS - DOS", "ACUSA(DOS)", 2),
     ];
 
     static DailyCrypticSeed()
@@ -157,8 +191,14 @@ internal static class DailyCrypticSeed
             }
 
             string normalizedFodder = Normalize(entry.Fodder);
-            if (!entry.Mechanism.Contains("Oculta", StringComparison.OrdinalIgnoreCase) &&
-                Normalize(entry.Clue).Contains(normalizedAnswer, StringComparison.Ordinal))
+            var clueWords = entry.Clue
+                .Split([' ', ',', '.', ':', ';', '¡', '!', '¿', '?', '(', ')'], StringSplitOptions.RemoveEmptyEntries)
+                .Select(Normalize)
+                .Where(word => word.Length > 0)
+                .ToArray();
+            var answerShownAsWord = clueWords.Contains(normalizedAnswer);
+            if (answerShownAsWord &&
+                !entry.Mechanism.Contains("Oculta", StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException($"La respuesta aparece explícita en la pista de {entry.Answer}.");
             }

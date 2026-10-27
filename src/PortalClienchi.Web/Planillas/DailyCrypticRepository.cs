@@ -105,13 +105,10 @@ public sealed class DailyCrypticRepository
         if (LoadSolve(conn, tx, normalizedEmail, date, slot) is not null)
             throw new InvalidOperationException("Esta ronda ya está resuelta.");
 
-        if (!window.ForceOpen)
+        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
         {
-            foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
-            {
-                if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                    throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
-            }
+            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
+                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
         }
 
         var bit = NormalizeHintKind(kind);
@@ -178,13 +175,10 @@ public sealed class DailyCrypticRepository
                 GetStatus(normalizedEmail, nowUtc));
         }
 
-        if (!window.ForceOpen)
+        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
         {
-            foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
-            {
-                if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                    throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
-            }
+            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
+                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
         }
 
         var attemptsUsed = CountAttempts(conn, tx, normalizedEmail, date, slot);
@@ -464,12 +458,12 @@ public sealed class DailyCrypticRepository
                 ?? throw new InvalidOperationException("Falta la pista programada.");
             var solve = LoadSolve(conn, null, email, date, slot);
             var attempts = CountAttempts(conn, null, email, date, slot);
-            var opened = forceOpen || overnight || minute >= SlotMinute(slot);
+            var opened = overnight || minute >= SlotMinute(slot);
             var state = solve is not null
                 ? "solved"
                 : !opened
                     ? "upcoming"
-                    : !forceOpen && !priorSolved
+                    : !priorSolved
                         ? "blocked"
                         : attempts >= MaxAttempts
                             ? "failed"
@@ -563,6 +557,12 @@ public sealed class DailyCrypticRepository
             return;
         }
 
+        if (date >= DailyCrypticSeed.ProgressiveStartsOn && TryScheduleProgressive(conn, tx, date))
+        {
+            tx.Commit();
+            return;
+        }
+
         var selected = new HashSet<long>();
         var difficulties = DifficultiesFor(date);
         foreach (var (slot, difficulty) in new[] { (MorningSlot, difficulties.Morning), (AfternoonSlot, difficulties.Afternoon) })
@@ -620,6 +620,109 @@ public sealed class DailyCrypticRepository
                 new HashSet<long>());
         }
         return true;
+    }
+
+    private static bool TryScheduleProgressive(SqliteConnection conn, SqliteTransaction tx, DateOnly date)
+    {
+        var queue = LoadProgressiveQueue(conn, tx);
+        if (queue.Count == 0)
+            return false;
+
+        var used = CountScheduledProgressive(conn, tx, date);
+        if (used == 0 && date > DailyCrypticSeed.ProgressiveStartsOn)
+        {
+            used = PlayDaysBetween(DailyCrypticSeed.ProgressiveStartsOn, date) * 2;
+        }
+        if (used + 2 > queue.Count)
+            return false;
+
+        InsertFixedClue(conn, tx, date, MorningSlot, queue[used]);
+        InsertFixedClue(conn, tx, date, AfternoonSlot, queue[used + 1]);
+        return true;
+    }
+
+    private static List<long> LoadProgressiveQueue(SqliteConnection conn, SqliteTransaction tx)
+    {
+        var keys = DailyCrypticSeed.Items
+            .Skip(DailyCrypticSeed.ProgressiveFrom)
+            .Select(item => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{item.Clue}\n{item.Answer}"))).ToLowerInvariant())
+            .ToList();
+        if (keys.Count == 0)
+            return [];
+
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        var names = keys.Select((_, index) => $"$k{index}").ToArray();
+        cmd.CommandText = $"""
+            SELECT seed_key, id
+            FROM daily_cryptic_clues
+            WHERE seed_key IN ({string.Join(", ", names)})
+            """;
+        for (var index = 0; index < keys.Count; index++)
+            cmd.Parameters.AddWithValue(names[index], keys[index]);
+
+        var byKey = new Dictionary<string, long>(StringComparer.Ordinal);
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            byKey[reader.GetString(0)] = reader.GetInt64(1);
+
+        return keys.Select(key => byKey.TryGetValue(key, out var id) ? id : 0L).Where(id => id > 0).ToList();
+    }
+
+    private static int CountScheduledProgressive(SqliteConnection conn, SqliteTransaction tx, DateOnly before)
+    {
+        var keys = DailyCrypticSeed.Items
+            .Skip(DailyCrypticSeed.ProgressiveFrom)
+            .Select(item => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes($"{item.Clue}\n{item.Answer}"))).ToLowerInvariant())
+            .ToList();
+        if (keys.Count == 0)
+            return 0;
+
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        var names = keys.Select((_, index) => $"$k{index}").ToArray();
+        cmd.CommandText = $"""
+            SELECT COUNT(*)
+            FROM daily_cryptic_schedule s
+            JOIN daily_cryptic_clues c ON c.id = s.clue_id
+            WHERE s.play_date < $before
+              AND c.seed_key IN ({string.Join(", ", names)})
+            """;
+        cmd.Parameters.AddWithValue("$before", DateKey(before));
+        for (var index = 0; index < keys.Count; index++)
+            cmd.Parameters.AddWithValue(names[index], keys[index]);
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+    }
+
+    private static int PlayDaysBetween(DateOnly from, DateOnly to)
+    {
+        var count = 0;
+        for (var day = from; day < to; day = day.AddDays(1))
+        {
+            if (IsPlayDay(day))
+                count++;
+        }
+        return count;
+    }
+
+    private static void InsertFixedClue(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date,
+        int slot,
+        long clueId)
+    {
+        using var insert = conn.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = """
+            INSERT OR IGNORE INTO daily_cryptic_schedule (play_date, slot_hour, clue_id, created_at)
+            VALUES ($date, $slot, $clue, $created)
+            """;
+        insert.Parameters.AddWithValue("$date", DateKey(date));
+        insert.Parameters.AddWithValue("$slot", slot);
+        insert.Parameters.AddWithValue("$clue", clueId);
+        insert.Parameters.AddWithValue("$created", DateTimeOffset.UtcNow.ToString("O"));
+        insert.ExecuteNonQuery();
     }
 
     private static List<long> LoadCandidateIds(
