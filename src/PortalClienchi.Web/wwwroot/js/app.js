@@ -2,7 +2,7 @@
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20261110g";
-import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261110a";
+import { scheduleWelcomeTour, scheduleOrpenFeatureTip, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261110j";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
@@ -14,7 +14,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110i";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110j";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -4513,14 +4513,13 @@ function getEmbedFrameUrl(kind) {
   }
   if (kind === "ai") return aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
   if (kind === "orpen") {
-    const raw = appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php";
+    // Absolute: Orpen no manda X-Frame-Options y el proxy PHP/sesión suele quedar en blanco.
+    const raw = String(appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php").trim();
     try {
       const u = new URL(raw);
-      if (u.hostname.endsWith("orpen.com.br")) {
-        return `/embed/orpen${u.pathname}${u.search}`;
-      }
-    } catch { /* keep absolute fallback */ }
-    return raw;
+      if (u.protocol === "http:" || u.protocol === "https:") return u.href;
+    } catch { /* fall through */ }
+    return "https://thomsontap.orpen.com.br/rcx/login.php";
   }
   if (kind === "portal") return getPortalLoginUrl();
   return null;
@@ -5556,6 +5555,13 @@ document.getElementById("portalGeneratePdfBtn")?.addEventListener("click", async
   const extracted = extractContentFromPortalFrame(portalFrame);
   await openPdfPortalModal(extracted);
 });
+document.getElementById("orpenReloadBtn")?.addEventListener("click", () => {
+  loadEmbedFrame("orpen", { force: true });
+});
+document.getElementById("orpenOpenBtn")?.addEventListener("click", () => {
+  const url = getEmbedFrameUrl("orpen");
+  if (url) window.open(url, "_blank", "noopener");
+});
 
 async function bootstrapApp() {
   applyAboutUpdated();
@@ -5594,6 +5600,7 @@ async function bootstrapApp() {
   });
   syncHeaderTourButton();
   scheduleWelcomeTour();
+  scheduleOrpenFeatureTip();
   syncProfilePortalAccess();
   syncAdminTabVisibility();
   syncAboutToolsBadge();

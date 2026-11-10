@@ -215,6 +215,20 @@ export function initBlanqueoModule() {
     if (e.target === e.currentTarget) hideNoteModal();
   });
 
+  document.getElementById("blanqueo-clave-cancel")?.addEventListener("click", () => hideClaveModal());
+  document.getElementById("blanqueo-clave-save")?.addEventListener("click", () => {
+    void saveClaveModal();
+  });
+  document.getElementById("blanqueo-clave-overlay")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) hideClaveModal();
+  });
+  document.getElementById("blanqueo-clave-input")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      void saveClaveModal();
+    }
+  });
+
   document.getElementById("blanqueo-mod-pop-close")?.addEventListener("click", (e) => {
     e.preventDefault();
     hideModPop();
@@ -778,10 +792,10 @@ function syncDefaultClave(clave) {
 function syncClaveVisibility() {
   const hint = document.getElementById("blanqueo-clave-hint");
   if (!hint) return;
-  const sistema = document.body.dataset.planSistema;
-  const hide = sistema === "Legal" || sistema === "Chile";
-  hint.classList.toggle("hidden", hide);
-  hint.setAttribute("aria-hidden", hide ? "true" : "false");
+  // Ya no mostramos clave por defecto: quien confirma indica la contraseña usada.
+  hint.classList.add("hidden");
+  hint.hidden = true;
+  hint.setAttribute("aria-hidden", "true");
 }
 
 function syncClaveUi(clave) {
@@ -1395,17 +1409,17 @@ function buildRow(item) {
 
 async function toggleListoByDoubleClick(item) {
   try {
-    const nextListo = !item.listo;
-    const body = nextListo
-      ? { listo: true, ...(isNoRegistrado(item.aclaracion) ? { clearAclaracion: true } : {}) }
-      : { listo: false };
-    await patchItem(item.id, body);
-    setStatus(nextListo ? "Marcado como listo." : "Se quitó el listo.");
-    await reloadList();
-    notifyBlanqueoChanged();
-    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
-      detail: { expression: nextListo ? "happy" : "thinking", ms: 2800 },
-    }));
+    if (item.listo) {
+      await patchItem(item.id, { listo: false });
+      setStatus("Se quitó el listo.");
+      await reloadList();
+      notifyBlanqueoChanged();
+      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+        detail: { expression: "thinking", ms: 2800 },
+      }));
+      return;
+    }
+    openClaveModal(item);
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
     document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
@@ -1520,10 +1534,14 @@ function formatAclaracionCell(item) {
     if (isActivacionAutoNote(aclaracion)) {
       return `<span class="blanqueo-pill blanqueo-pill-clave-style" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
     }
+    // Contraseña informada al confirmar: pastilla copiable.
+    if (item?.listo && !isNoRegistrado(aclaracion)) {
+      return formatClaveCopyPill(aclaracion, "Clic para copiar la contraseña usada", { custom: true }) || "—";
+    }
     return `<span class="blanqueo-pill ${cls}" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
   }
   if (item?.listo && isBlanqueoConClave(item)) {
-    return formatClaveCopyPill(claveDefault(), "Clic para copiar la clave genérica") || "—";
+    return "—";
   }
   return "—";
 }
@@ -1605,12 +1623,8 @@ async function handleCtxAction(action) {
       return;
     }
     if (action === "listo") {
-      const body = { listo: true };
-      if (isNoRegistrado(item.aclaracion)) body.clearAclaracion = true;
-      await patchItem(selectedId, body);
-      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
-        detail: { expression: "happy", ms: 2800 },
-      }));
+      openClaveModal(item);
+      return;
     } else if (action === "unlisto") {
       await patchItem(selectedId, { listo: false });
       document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
@@ -1761,6 +1775,52 @@ function hideNoteModal() {
   const overlay = document.getElementById("blanqueo-note-overlay");
   overlay?.classList.add("hidden");
   overlay?.setAttribute("aria-hidden", "true");
+}
+
+function openClaveModal(item) {
+  selectedId = item.id;
+  const overlay = document.getElementById("blanqueo-clave-overlay");
+  const input = document.getElementById("blanqueo-clave-input");
+  const previa = String(item.aclaracion || "").trim();
+  const seed = previa && !isNoRegistrado(previa) && !isActivacionAutoNote(previa)
+    ? previa
+    : "";
+  if (input) {
+    input.value = seed;
+    input.placeholder = `Ej: ${claveDefault()}`;
+  }
+  overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  input?.focus();
+  input?.select?.();
+}
+
+function hideClaveModal() {
+  const overlay = document.getElementById("blanqueo-clave-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+}
+
+async function saveClaveModal() {
+  if (!selectedId) return;
+  const clave = String(document.getElementById("blanqueo-clave-input")?.value || "").trim();
+  if (!clave) {
+    setStatus("Indicá la contraseña que colocaste.", true);
+    document.getElementById("blanqueo-clave-input")?.focus();
+    return;
+  }
+  try {
+    await patchItem(selectedId, { listo: true, aclaracion: clave });
+    hideClaveModal();
+    setStatus("Marcado como listo con la contraseña en aclaración.");
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: "happy", ms: 2800 },
+    }));
+    await reloadList();
+    notifyBlanqueoChanged();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo confirmar el blanqueo.", true);
+  }
 }
 
 async function saveNoteModal() {

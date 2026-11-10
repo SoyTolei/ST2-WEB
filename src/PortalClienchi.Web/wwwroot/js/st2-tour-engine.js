@@ -391,9 +391,10 @@ function queryVisibleAll(selector) {
 function revealTourTargets(selector) {
   const nodes = [...document.querySelectorAll(selector)];
   for (const el of nodes) {
-    el.classList.remove("hidden");
+    el.classList.remove("hidden", "ref-step-hidden");
     el.removeAttribute("hidden");
     el.closest(".plan-ia-group")?.classList.remove("hidden");
+    el.closest("[data-ref-step-panel]")?.classList.remove("ref-step-hidden");
   }
   return nodes.filter((el) => {
     if (el.closest(".hidden,[hidden]") && !el.matches(selector)) return false;

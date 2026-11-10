@@ -3037,3 +3037,55 @@ html.st2-theme-dark .portal-generate-pdf-btn:hover {
   border-color: #f36c00 !important;
 }
 
+
+/* Tabs Oportunidad + stepper Referral (evitar bloque blanco en dark) */
+html.st2-theme-dark .plan-op-tabs,
+html.st2-theme-dark .plan-ref-stepper {
+  background: #1c1c1c !important;
+  border-color: #3d4b61 !important;
+}
+html.st2-theme-dark .plan-op-tab,
+html.st2-theme-dark .plan-ref-step {
+  color: #94a3b8 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html.st2-theme-dark .plan-op-tab.active,
+html.st2-theme-dark .plan-ref-step.active {
+  background: #2a2a2a !important;
+  color: #f8fafc !important;
+  box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.35) !important;
+}
+html.st2-theme-dark .plan-op-tab:hover:not(.active),
+html.st2-theme-dark .plan-ref-step:hover:not(.active) {
+  background: #242424 !important;
+  color: #e2e8f0 !important;
+}
+html.st2-theme-dark .plan-ref-step-num {
+  background: #334155 !important;
+  color: #cbd5e1 !important;
+}
+html.st2-theme-dark .plan-ref-step.active .plan-ref-step-num {
+  background: #ea580c !important;
+  color: #fff !important;
+}
+html.st2-theme-dark .plan-ref-step-nav-btn {
+  background: #1c1c1c !important;
+  border-color: #3d4b61 !important;
+  color: #e2e8f0 !important;
+}
+html.st2-theme-dark .plan-ref-step-nav-btn--primary {
+  background: #ea580c !important;
+  border-color: #c2410c !important;
+  color: #fff !important;
+}
+html.st2-theme-dark .plan-gestor-date-wrap {
+  background: #121212 !important;
+  border-color: #475569 !important;
+  box-shadow: none !important;
+}
+html.st2-theme-dark .plan-gestor-date-wrap:focus-within,
+html.st2-theme-dark .plan-gestor-date-wrap:focus-visible {
+  border-color: #ea580c !important;
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.22) !important;
+}

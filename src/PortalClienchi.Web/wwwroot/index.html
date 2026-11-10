@@ -118,11 +118,11 @@
       background: #1a0e06;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20261110i"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20261110j"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20261110g"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20261110i"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20261110j"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20261110j"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20261013l"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20261013m"/>
@@ -757,10 +757,8 @@
                 <h3 class="plan-gestor-panel-title">
                   Listado <span id="blanqueo-count" class="plan-gestor-count"></span>
                 </h3>
-                <p id="blanqueo-clave-hint" class="blanqueo-clave-hint">
-                  <span class="blanqueo-clave-hint-label">Para los blanqueos de On Balance y ONVIO, la clave generada por defecto es</span>
-                  <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code" title="Clic para copiar la clave" data-copy-hint="Clic para copiar">Sueldo.2026</button>
-                  <span class="blanqueo-clave-hint-note">, a menos que se indique otra en la columna de aclaraciones.</span>
+                <p id="blanqueo-clave-hint" class="blanqueo-clave-hint hidden" hidden aria-hidden="true">
+                  <button type="button" id="blanqueo-clave-copy" class="blanqueo-clave-code hidden" hidden tabindex="-1" aria-hidden="true">Sueldo.2026</button>
                 </p>
                 <div class="blanqueo-filter-bar">
                   <label class="blanqueo-filter-month">
@@ -1107,7 +1105,7 @@
               </button>
               <button type="button" class="plan-ref-step" data-ref-step="3">
                 <span class="plan-ref-step-num">3</span>
-                <span class="plan-ref-step-label">Generar</span>
+                <span class="plan-ref-step-label">Generar Planilla</span>
               </button>
             </nav>
             <div id="ref-standard-fields" data-ref-step-panel="1">
@@ -1826,6 +1824,10 @@
     </section>
 
     <section id="panel-orpen" class="tab-panel hidden" role="tabpanel">
+      <div class="embed-toolbar">
+        <button type="button" id="orpenReloadBtn" class="btn btn-secondary">Recargar</button>
+        <button type="button" id="orpenOpenBtn" class="btn btn-secondary">Abrir en navegador</button>
+      </div>
       <p class="embed-hint hidden" id="orpenEmbedHint" aria-hidden="true"></p>
       <div class="embed-frame-wrap">
         <iframe id="orpenFrame" class="embed-frame" title="WhatsApp / Orpen"
@@ -2361,6 +2363,19 @@
       <div class="plan-user-actions">
         <button type="button" id="blanqueo-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="blanqueo-note-save" class="plan-gestor-btn-add">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blanqueo-clave-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-clave-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="blanqueo-clave-title">Contraseña usada</h3>
+      <p class="plan-user-hint">Indicá qué contraseña colocaste en el blanqueo. Queda en la columna Aclaración para el equipo.</p>
+      <label class="plan-user-label" for="blanqueo-clave-input">Contraseña</label>
+      <input id="blanqueo-clave-input" type="text" class="plan-user-input" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Ej: Sueldo.2026"/>
+      <div class="plan-user-actions">
+        <button type="button" id="blanqueo-clave-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="blanqueo-clave-save" class="plan-gestor-btn-add">Confirmar listo</button>
       </div>
     </div>
   </div>
@@ -2914,6 +2929,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261110i" type="module"></script>
+  <script src="/js/app.js?v=20261110j" type="module"></script>
 </body>
 </html>

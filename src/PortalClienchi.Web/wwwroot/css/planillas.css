@@ -4272,14 +4272,15 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-gestor-date-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: fit-content;
-  background: linear-gradient(180deg, #ffffff 0%, #fffaf7 100%);
-  border: 1px solid rgba(214, 64, 0, 0.18);
+  max-width: 100%;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, rgba(214, 64, 0, 0.18));
   border-radius: 10px;
   padding: 0 12px;
   min-height: 44px;
-  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   cursor: pointer;
   user-select: none;
@@ -4312,14 +4313,15 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-gestor-date-wrap input[type="date"] {
-  width: 9.2rem;
-  flex: none;
+  width: 12.5rem;
+  max-width: 100%;
+  flex: 1 1 auto;
   border: none;
   background: transparent;
   font: inherit;
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: var(--dark);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text, var(--dark));
   padding: 10px 0;
   min-height: 42px;
   line-height: 1.2;
@@ -7356,11 +7358,11 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
 .plan-op-tabs {
   display: flex;
   gap: 6px;
-  margin: 8px 0 4px;
+  margin: 8px 0 10px;
   padding: 4px;
   border-radius: 12px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--surface-2, #f1f5f9);
+  border: 1px solid var(--border, #e2e8f0);
 }
 .plan-op-tab {
   flex: 1;
@@ -7368,7 +7370,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   border: none;
   border-radius: 9px;
   background: transparent;
-  color: #475569;
+  color: var(--text-muted, #475569);
   font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
@@ -7376,13 +7378,13 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
 .plan-op-tab.active {
-  background: #fff;
-  color: #0f172a;
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 .plan-op-tab:hover:not(.active) {
-  color: #0f172a;
-  background: rgba(255, 255, 255, 0.55);
+  color: var(--text, #0f172a);
+  background: color-mix(in srgb, var(--surface, #fff) 55%, transparent);
 }
 
 .plan-ref-stepper {
@@ -7392,8 +7394,8 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   margin: 0 0 16px;
   padding: 6px;
   border-radius: 14px;
-  background: linear-gradient(180deg, #f8fafc, #f1f5f9);
-  border: 1px solid #e2e8f0;
+  background: var(--surface-2, #f1f5f9);
+  border: 1px solid var(--border, #e2e8f0);
 }
 .plan-ref-step {
   display: flex;
@@ -7404,7 +7406,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: #64748b;
+  color: var(--text-muted, #64748b);
   font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
@@ -7418,13 +7420,13 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #e2e8f0;
-  color: #475569;
+  background: color-mix(in srgb, var(--text-muted, #64748b) 22%, transparent);
+  color: var(--text-muted, #475569);
   font-size: 0.72rem;
 }
 .plan-ref-step.active {
-  background: #fff;
-  color: #0f172a;
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 .plan-ref-step.active .plan-ref-step-num {
@@ -7432,8 +7434,8 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   color: #fff;
 }
 .plan-ref-step:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.65);
-  color: #0f172a;
+  background: color-mix(in srgb, var(--surface, #fff) 55%, transparent);
+  color: var(--text, #0f172a);
 }
 .ref-step-hidden {
   display: none !important;

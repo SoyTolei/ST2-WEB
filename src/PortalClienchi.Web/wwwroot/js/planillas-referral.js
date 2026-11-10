@@ -614,7 +614,7 @@ function syncReferralStepper() {
   document.getElementById("ref-step-prev")?.classList.toggle("hidden", refStep <= 1);
   document.getElementById("ref-step-next")?.classList.toggle("hidden", refStep >= 3);
   const next = document.getElementById("ref-step-next");
-  if (next) next.textContent = refStep === 2 ? "Ir a generar →" : "Siguiente →";
+  if (next) next.textContent = refStep === 2 ? "Ir a Generar Planilla →" : "Siguiente →";
 }
 
 function setReferralPantallasUi(checked) {

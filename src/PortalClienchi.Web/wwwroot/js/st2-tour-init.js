@@ -6,13 +6,13 @@ import {
   isTourCompleted,
   isTourSeen,
   shouldAutoStartTours,
-} from "./st2-tour-engine.js?v=20260907j";
+} from "./st2-tour-engine.js?v=20261110j";
 import {
   resolveTour,
   resolveCurrentTourId,
   tourIdForReferralView,
   tourLabelForId,
-} from "./st2-tour-catalog.js?v=20261110g";
+} from "./st2-tour-catalog.js?v=20261110j";
 
 let tourContext = {};
 let headerBound = false;
@@ -122,6 +122,16 @@ export function scheduleWelcomeTour(delay = 1800) {
     // Preferimos el menú de planillas (incluye tema + módulos). Welcome queda de respaldo.
     const sistema = tourContext.getSistema?.() || "BejermanSql";
     autoTour(`planillas-menu:${sistema}`, { delay: 0, force: false });
+  }, delay);
+}
+
+/** Tip único para la pestaña WhatsApp/Orpen (también para quienes ya vieron el tour viejo). */
+export function scheduleOrpenFeatureTip(delay = 2600) {
+  if (isTourSeen("orpen-tab-intro")) return;
+  setTimeout(() => {
+    if (isTourSeen("orpen-tab-intro") || isTourRunning()) return;
+    if (!document.querySelector('.tab-btn[data-tab="orpen"]')) return;
+    autoTour("orpen-tab-intro", { delay: 0, force: false });
   }, delay);
 }
 

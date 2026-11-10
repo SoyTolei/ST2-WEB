@@ -78,6 +78,15 @@ function buildTopNavTabSteps(ctx = {}) {
     });
   }
 
+  if (visible('.tab-btn[data-tab="orpen"]')) {
+    steps.push({
+      selector: '.tab-btn[data-tab="orpen"]',
+      title: "WhatsApp / Orpen",
+      body: "Nueva pestaña: abrí Orpen (WhatsApp) embebido acá, sin salir de ST². Si hace falta, también podés abrirlo en el navegador desde la barra del panel.",
+      placement: "bottom",
+    });
+  }
+
   if (visible('.tab-btn[data-tab="thom"]')) {
     steps.push({
       selector: '.tab-btn[data-tab="thom"]',
@@ -108,6 +117,21 @@ function buildTopNavTabSteps(ctx = {}) {
   }
 
   return steps;
+}
+
+export function buildOrpenTabIntroTour() {
+  return {
+    id: "orpen-tab-intro",
+    steps: [
+      {
+        selector: '.tab-btn[data-tab="orpen"]',
+        title: "WhatsApp / Orpen",
+        body: "Nueva opción en la barra de arriba: Orpen queda embebido en ST² para WhatsApp. Tocá la pestaña para abrirla; desde el panel también podés recargar o abrirla en el navegador.",
+        placement: "bottom",
+        when: () => visible('.tab-btn[data-tab="orpen"]'),
+      },
+    ],
+  };
 }
 
 const MENU_MODULO_COPY = {
@@ -208,10 +232,25 @@ export function tourIdForReferralView(ctx) {
   return `referral:${sistema}`;
 }
 
+export function buildOrpenTabTour() {
+  return {
+    id: "orpen-tab",
+    steps: [
+      {
+        selector: '#panel-orpen, .tab-btn[data-tab="orpen"]',
+        title: "WhatsApp / Orpen",
+        body: "Orpen queda embebido acá. Usá Recargar si la sesión no carga, o Abrir en navegador si preferís pestaña aparte.",
+        placement: "bottom",
+      },
+    ],
+  };
+}
+
 export function resolveCurrentTourId(ctx = {}) {
   const tab = ctx.getActiveTab?.() || "planillas";
   if (tab === "thom") return "thom-tab";
   if (tab === "ai") return "ai-tab";
+  if (tab === "orpen") return "orpen-tab";
   if (tab === "portal") return "portal-tab";
   if (tab === "admin") return null;
 
@@ -310,7 +349,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-modulo-oportunidad",
       title: "Oportunidad de Venta",
-      body: MENU_MODULO_COPY.oportunidad[sistema] || MENU_MODULO_COPY.oportunidad.BejermanSql,
+      body: `${MENU_MODULO_COPY.oportunidad[sistema] || MENU_MODULO_COPY.oportunidad.BejermanSql} Adentro vas a ver dos caminos claros: Seguimiento/Gestor y Armar PDF de contacto.`,
       placement: "top",
     });
   }
@@ -455,7 +494,7 @@ export function buildTransferenciaTour(ctx, sistema) {
     {
       selector: "#plan-descripcion",
       title: "Descripción",
-      body: descripcionCopy[sistema] || descripcionCopy.BejermanSql,
+      body: `${descripcionCopy[sistema] || descripcionCopy.BejermanSql} Si falta un dato, el aviso aparece inline debajo del campo (sin modal por cada uno).`,
       placement: "bottom",
       when: () => visible("#plan-descripcion"),
     },
@@ -469,7 +508,7 @@ export function buildTransferenciaTour(ctx, sistema) {
     {
       selector: "#plan-ticket-wrap",
       title: "Ticket de servicio",
-      body: "Indicá si ya se pidió ticket de servicio y, si corresponde, el número. Aparece según sistema y mesa destino.",
+      body: "Cuando aplica (LEGAL, ONVIO, SaaS/Sueldos) el ticket queda visible en el formulario: lo marcás acá, sin pregunta a mitad de Copiar.",
       placement: "top",
       when: () => visible("#plan-ticket-wrap"),
     },
@@ -508,6 +547,14 @@ export function buildReferralStandardTour(ctx, sistema) {
 
   const steps = [];
 
+  steps.push({
+    selector: "#ref-stepper",
+    title: "Pasos del referral",
+    body: "El armado va en 3 pasos: Datos → Chequeos → Generar Planilla. Podés avanzar con Siguiente o saltar tocando el paso.",
+    placement: "bottom",
+    when: () => visible("#ref-stepper"),
+  });
+
   if (sistema === "BejermanSql") {
     steps.push({
       selector: "#ref-bejerman-panel",
@@ -535,42 +582,43 @@ export function buildReferralStandardTour(ctx, sistema) {
 
   if (sistema === "BejermanSql") {
     steps.push({
-      selector: "#ref-bejerman-post",
-      title: "Comprobaciones y adjuntos",
+      selector: "#ref-bejerman-post, [data-ref-step=\"2\"]",
+      title: "Chequeos y adjuntos",
       body:
-        "Perfil Técnico u Otra mesa. Planilla técnica con chequeos a completar, MAM y SDK si los revisaste. Abajo marcá pantallas, traza SQL o backup de bases según lo que vas a incluir.",
+        "En el paso 2: perfil Técnico u Otra mesa, planilla técnica, MAM/SDK si aplica, y adjuntos (pantallas, traza, backup).",
       placement: "top",
-      when: () => visible("#ref-bejerman-post"),
+      revealHidden: true,
+      when: () => !!document.querySelector("#ref-bejerman-post"),
     });
   } else if (sistema === "OnvioWeb") {
     steps.push({
-      selector: "#ref-onvio-panel",
-      title: "Comprobaciones ONVIO",
+      selector: "#ref-onvio-panel, [data-ref-step=\"2\"]",
+      title: "Chequeos ONVIO",
       body:
-        "¿El proceso funcionaba? ¿El error se reproduce? Marcá ticket de servicio (N° y técnico), pantallas adjuntas y completá empresa, usuario y ejercicio del cliente.",
+        "En el paso 2: ¿el proceso funcionaba? ¿se reproduce? Ticket, pantallas, empresa, usuario y ejercicio.",
       placement: "top",
-      when: () => visible("#ref-onvio-panel"),
+      revealHidden: true,
+      when: () => !!document.querySelector("#ref-onvio-panel"),
     });
   } else if (sistema === "Chile") {
-    steps.push(
-      {
-        selector: "#ref-chile-post .plan-form-2col, #ref-chile-usuario",
-        title: "Ingreso y entorno",
-        body: "Usuario, clave, sistema operativo y motor SQL si corresponde. Datos para que N2 retome el entorno del cliente.",
-        placement: "top",
-        when: () => visible("#ref-chile-usuario") || visible("#ref-chile-post"),
-      },
-      {
-        selector: "#ref-chile-post .plan-adj-grid, #ref-card-chile-pantallas",
-        title: "Adjuntos Chile",
-        body: "Indicá si adjuntás pantallas, bases u otros archivos del producto chileno para orientar a N2.",
-        placement: "top",
-        when: () => visible("#ref-card-chile-pantallas") || visible("#ref-chile-post"),
-      },
-    );
+    steps.push({
+      selector: "#ref-chile-post, [data-ref-step=\"2\"]",
+      title: "Chequeos Chile",
+      body: "En el paso 2: ingreso, entorno y adjuntos del producto chileno para que N2 retome el caso.",
+      placement: "top",
+      revealHidden: true,
+      when: () => !!document.querySelector("#ref-chile-post"),
+    });
   }
 
-  steps.push(previewCopyStep("#ref-btn-ver-planilla", "#ref-btn-copiar"));
+  steps.push({
+    selector: "#ref-standard-actions, [data-ref-step=\"3\"]",
+    title: "Generar Planilla",
+    body: "Paso 3: Vista previa o Copiar al portapapeles. Limpiar borra el formulario si necesitás empezar de cero.",
+    placement: "top",
+    revealHidden: true,
+    when: () => !!document.querySelector("#ref-standard-actions"),
+  });
 
   return { id: `referral:${sistema}`, steps };
 }
@@ -674,18 +722,18 @@ export function buildOportunidadMenuTour() {
     id: "oportunidad-menu",
     steps: [
       {
-        selector: '[data-op-view="cargar"]',
-        title: "Cargar oportunidad",
-        body: "Formulario con datos del contacto, cliente y descripción. Al final podés mejorar texto con IA y generar PDF.",
-        placement: "top",
-        when: () => visible('[data-op-view="cargar"]'),
-      },
-      {
         selector: '[data-op-view="gestor"]',
-        title: "Gestor",
-        body: "Tabla de oportunidades: filtrá, confirmá contacto o descargá el registro.",
+        title: "Seguimiento / Gestor",
+        body: "Cargá links, filtrá por mes y marcá confirmadas. Es el seguimiento del equipo comercial.",
         placement: "top",
         when: () => visible('[data-op-view="gestor"]'),
+      },
+      {
+        selector: '[data-op-view="cargar"]',
+        title: "Armar PDF de contacto",
+        body: "Formulario de contacto: canal, datos del cliente y descripción. Al final generás el PDF.",
+        placement: "top",
+        when: () => visible('[data-op-view="cargar"]'),
       },
     ],
   };
@@ -695,6 +743,13 @@ export function buildOportunidadCargarTour() {
   return {
     id: "oportunidad-cargar",
     steps: [
+      {
+        selector: "#planillas-oportunidad-cargar .plan-op-tabs",
+        title: "Cambiar de vista",
+        body: "Estas pestañas te llevan entre Seguimiento/Gestor y Armar PDF sin volver al menú intermedio.",
+        placement: "bottom",
+        when: () => visible("#planillas-oportunidad-cargar .plan-op-tabs"),
+      },
       {
         selector: "#op-metodo-radios",
         title: "Cómo ingresó el contacto",
@@ -733,16 +788,23 @@ export function buildOportunidadGestorTour() {
     id: "oportunidad-gestor",
     steps: [
       {
+        selector: "#planillas-oportunidad-gestor .plan-op-tabs",
+        title: "Cambiar de vista",
+        body: "Saltá a Armar PDF de contacto desde acá cuando necesites el formulario.",
+        placement: "bottom",
+        when: () => visible("#planillas-oportunidad-gestor .plan-op-tabs"),
+      },
+      {
         selector: ".plan-gestor-panel-new",
         title: "Nueva oportunidad",
-        body: "Cargá fecha, descripción y link. «Agregar» la suma al listado del mes.",
+        body: "Cargá fecha, descripción y link. «Agregar» la suma al listado.",
         placement: "bottom",
         when: () => visible(".plan-gestor-panel-new"),
       },
       {
         selector: ".plan-gestor-filter-bar",
         title: "Filtro por mes",
-        body: "Elegí el mes para ver solo las oportunidades de ese período.",
+        body: "Por defecto ves Todas. Elegí un mes si querés acotar el listado.",
         placement: "bottom",
         when: () => visible(".plan-gestor-filter-bar"),
       },
@@ -756,7 +818,7 @@ export function buildOportunidadGestorTour() {
       {
         selector: ".plan-gestor-footer-actions",
         title: "Acciones",
-        body: "Editar, eliminar o confirmar la fila seleccionada. También podés paginar el listado.",
+        body: "Editar, eliminar o Marcar confirmada / Quitar confirmación en la fila seleccionada.",
         placement: "top",
         when: () => visible(".plan-gestor-footer-actions"),
       },
@@ -1020,6 +1082,8 @@ export function resolveTour(tourId, ctx = {}) {
   if (tourId === "welcome") return buildWelcomeTour(ctx);
   if (tourId === "thom-tab") return buildThomTabTour();
   if (tourId === "ai-tab") return buildAiTabTour();
+  if (tourId === "orpen-tab") return buildOrpenTabTour();
+  if (tourId === "orpen-tab-intro") return buildOrpenTabIntroTour();
   if (tourId === "portal-tab") return buildPortalTabTour(ctx);
   if (tourId === "oportunidad-menu") return buildOportunidadMenuTour();
   if (tourId === "oportunidad-cargar") return buildOportunidadCargarTour();
