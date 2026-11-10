@@ -532,7 +532,7 @@ function updateSistemaUi() {
   const opcionesHead = document.getElementById("plan-opciones-head");
   const opcionesTitle = document.getElementById("plan-opciones-section-title");
   const opcionesWell = document.getElementById("plan-opciones-modulos-well");
-  const asistentesStrip = document.getElementById("plan-asistentes-strip");
+  const asistentesBlock = document.getElementById("plan-asistentes-block");
   const legalProductsWrap = document.getElementById("plan-legal-products-wrap");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
   const hideCommercial = hidesCommercialModules();
@@ -573,10 +573,9 @@ function updateSistemaUi() {
     bukowskiBtn.disabled = placeholderBlocked || !showBukowski;
     bukowskiBtn.setAttribute("aria-hidden", showBukowski ? "false" : "true");
   }
-  asistentesStrip?.classList.toggle("hidden", !showAsistentes);
-  asistentesStrip?.toggleAttribute("hidden", !showAsistentes);
-  asistentesStrip?.setAttribute("aria-hidden", showAsistentes ? "false" : "true");
-  opcionesHead?.classList.toggle("has-asistentes", showAsistentes && !showLegalProducts);
+  asistentesBlock?.classList.toggle("hidden", !showAsistentes);
+  asistentesBlock?.toggleAttribute("hidden", !showAsistentes);
+  asistentesBlock?.setAttribute("aria-hidden", showAsistentes ? "false" : "true");
   opcionesHead?.classList.toggle("hidden", showLegalProducts);
   opcionesHead?.toggleAttribute("hidden", showLegalProducts);
   opcionesTitle?.classList.toggle("hidden", showLegalProducts);
@@ -615,6 +614,22 @@ function updateSistemaUi() {
   syncHeaderTourButton();
 }
 
+let sistemaStaggerTimer = null;
+
+function playSistemaMenuStagger() {
+  const menu = document.getElementById("planillas-menu");
+  if (!menu) return;
+  menu.classList.remove("is-sistema-stagger");
+  // Retrigger CSS animation.
+  void menu.offsetWidth;
+  menu.classList.add("is-sistema-stagger");
+  if (sistemaStaggerTimer) window.clearTimeout(sistemaStaggerTimer);
+  sistemaStaggerTimer = window.setTimeout(() => {
+    menu.classList.remove("is-sistema-stagger");
+    sistemaStaggerTimer = null;
+  }, 700);
+}
+
 function selectSistema(id) {
   const normalized = normalizeSistemaId(id);
   if (!normalized || !canSeeSistema(normalized)) return;
@@ -622,10 +637,12 @@ function selectSistema(id) {
     closeChileEmbed();
     showView("menu", { history: "replace" });
   }
+  const changed = sistemaActual !== normalized;
   sistemaActual = normalized;
   rememberSistema(normalized);
   normalizeMesaForSistema();
   updateSistemaUi();
+  if (changed) playSistemaMenuStagger();
   updateTransferenciaPanels();
   if (!routeSyncing && normalizePath(window.location.pathname) === "/") {
     window.history.replaceState({ st2: "menu", sistema: id }, "", "/");

@@ -441,12 +441,12 @@
 .planillas-hero {
   position: relative;
   text-align: center;
-  padding: 20px 16px 24px;
+  padding: 14px 16px 16px;
   border: 1px solid var(--st2-suite-border);
   border-radius: 10px;
   background: var(--st2-suite-surface);
   box-shadow: var(--st2-suite-glow);
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   overflow: visible;
   z-index: 1;
 }
@@ -1046,12 +1046,35 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .planillas-hero-tagline {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   color: var(--text-muted);
   font-size: 0.9rem;
   line-height: 1.45;
   max-width: 32rem;
   text-align: center;
+}
+
+.planillas-hero-tagline--reveal {
+  animation: planillas-tagline-reveal 0.55s cubic-bezier(0.22, 0.9, 0.28, 1) both;
+}
+
+@keyframes planillas-tagline-reveal {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .planillas-hero-tagline--reveal {
+    animation: none;
+  }
 }
 
 @keyframes planillas-hero-st2-float {
@@ -1318,15 +1341,13 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-modulo-btn.blanqueo { background: #1d4ed8; }
 .plan-modulo-btn.borrado-bases { background: #be123c; }
 
-/* LEIA / Bukowski van en la fila de “Opciones” (derecha): atajos, no una barra vacía. */
+/* Asistentes AI: debajo del sistema, fila larga (SQL/ONVIO). Opciones queda solo módulos ST². */
 .plan-opciones-head {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
   width: 100%;
   margin: 0 0 12px;
-  min-height: 30px;
 }
 
 .plan-opciones-head.hidden {
@@ -1338,19 +1359,32 @@ body.st2-balloons-sides .st2-x-balloon-body {
   text-align: center;
 }
 
-.plan-opciones-head.has-asistentes {
-  justify-content: space-between;
+.plan-asistentes-block {
+  width: 100%;
+  margin: 0 0 14px;
 }
 
-.plan-opciones-head.has-asistentes .planillas-section-title {
-  text-align: left;
+.plan-asistentes-block.hidden {
+  display: none !important;
+}
+
+.plan-asistentes-block .planillas-section-title {
+  margin-bottom: 10px;
+}
+
+.plan-asistentes-well {
+  background: var(--st2-suite-surface-soft);
+  border: 2px solid var(--st2-suite-border);
+  border-radius: 14px;
+  padding: 8px;
+  width: 100%;
+  margin: 0;
 }
 
 .plan-asistentes-strip {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
+  align-items: stretch;
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -1358,54 +1392,58 @@ body.st2-balloons-sides .st2-x-balloon-body {
   background: transparent;
 }
 
-.plan-asistentes-strip.hidden {
-  display: none !important;
-}
-
 .plan-asistente-chip {
   appearance: none;
   border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 10px;
-  min-height: 30px;
-  height: 30px;
-  padding: 0 10px 0 6px;
+  border-radius: 12px;
+  min-height: 44px;
+  height: auto;
+  padding: 10px 14px;
   margin: 0;
+  flex: 1 1 calc(50% - 4px);
+  min-width: min(100%, 280px);
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  justify-content: flex-start;
+  gap: 10px;
   color: var(--dark, #1a1f2e);
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.78);
   cursor: pointer;
   font: inherit;
   box-shadow: none;
+  text-align: left;
   transition:
-    background 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease,
-    box-shadow 0.16s ease;
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .plan-asistente-chip.leia {
-  border-color: rgba(13, 148, 136, 0.38);
+  border-color: rgba(13, 148, 136, 0.4);
 }
 
 .plan-asistente-chip.bukowski {
-  border-color: rgba(99, 102, 241, 0.38);
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
 .plan-asistente-chip:hover:not(:disabled) {
   background: #fff;
-  border-color: rgba(234, 88, 12, 0.5);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  border-color: rgba(234, 88, 12, 0.52);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
 }
 
 .plan-asistente-chip:active:not(:disabled) {
+  transform: translateY(0);
   background: rgba(255, 247, 237, 0.95);
 }
 
 .plan-asistente-chip:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  transform: none;
 }
 
 .plan-asistente-chip.hidden {
@@ -1413,76 +1451,90 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-asistente-chip-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 7px;
+  border-radius: 9px;
   background: rgba(15, 23, 42, 0.06);
 }
 
 .plan-asistente-chip.leia .plan-asistente-chip-icon {
   color: #0f766e;
-  background: rgba(13, 148, 136, 0.12);
+  background: rgba(13, 148, 136, 0.14);
 }
 
 .plan-asistente-chip.bukowski .plan-asistente-chip-icon {
   color: #4338ca;
-  background: rgba(99, 102, 241, 0.12);
+  background: rgba(99, 102, 241, 0.14);
 }
 
 .plan-asistente-chip-icon svg {
-  width: 13px;
-  height: 13px;
+  width: 15px;
+  height: 15px;
   display: block;
-}
-
-.plan-asistente-chip-text {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  min-width: 0;
 }
 
 .plan-asistente-chip-label {
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.plan-asistente-chip-sub {
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  line-height: 1;
-  color: var(--text-muted, #64748b);
+/* Stagger al cambiar sistema (idea AnimatedList, CSS only) */
+#planillas-menu.is-sistema-stagger .plan-asistente-chip:not(.hidden),
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well:not(.hidden) .plan-modulo-btn:not(.hidden),
+#planillas-menu.is-sistema-stagger #plan-legal-products-wrap:not(.hidden) .plan-modulo-btn:not(.hidden),
+#planillas-menu.is-sistema-stagger #plan-chile-soporte-wrap:not(.hidden) .plan-modulo-btn:not(.hidden) {
+  animation: plan-menu-stagger-in 0.34s cubic-bezier(0.22, 0.9, 0.28, 1) both;
 }
 
-@media (max-width: 640px) {
-  .plan-opciones-head.has-asistentes {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
+#planillas-menu.is-sistema-stagger .plan-asistente-chip:nth-child(1) { animation-delay: 0.04s; }
+#planillas-menu.is-sistema-stagger .plan-asistente-chip:nth-child(2) { animation-delay: 0.09s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(1) { animation-delay: 0.06s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(2) { animation-delay: 0.1s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(3) { animation-delay: 0.14s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(4) { animation-delay: 0.18s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(5) { animation-delay: 0.22s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(6) { animation-delay: 0.26s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(7) { animation-delay: 0.3s; }
+#planillas-menu.is-sistema-stagger #plan-opciones-modulos-well .plan-modulo-btn:nth-child(8) { animation-delay: 0.34s; }
 
-  .plan-opciones-head.has-asistentes .planillas-section-title {
-    width: 100%;
-    text-align: center;
+@keyframes plan-menu-stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
-
-  .plan-asistentes-strip {
-    width: 100%;
-    justify-content: center;
-    gap: 6px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
+@media (prefers-reduced-motion: reduce) {
+  #planillas-menu.is-sistema-stagger .plan-asistente-chip:not(.hidden),
+  #planillas-menu.is-sistema-stagger #plan-opciones-modulos-well:not(.hidden) .plan-modulo-btn:not(.hidden),
+  #planillas-menu.is-sistema-stagger #plan-legal-products-wrap:not(.hidden) .plan-modulo-btn:not(.hidden),
+  #planillas-menu.is-sistema-stagger #plan-chile-soporte-wrap:not(.hidden) .plan-modulo-btn:not(.hidden) {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 720px) {
   .plan-asistente-chip {
-    flex: 0 1 auto;
-    justify-content: center;
+    flex-basis: 100%;
+  }
+
+  .plan-asistente-chip-label {
+    white-space: normal;
   }
 }
 

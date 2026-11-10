@@ -296,12 +296,12 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     });
   }
 
-  if (visible("#plan-asistentes-strip") && (visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski"))) {
+  if (visible("#plan-asistentes-block") && (visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski"))) {
     steps.push({
-      selector: "#plan-asistentes-strip",
-      title: "LEIA y Bukowski",
-      body: "Atajos a las chains, al lado de Opciones: LEIA para WhatsApp y Bukowski para la mesa. Se abren en la pestaña AI Platform.",
-      placement: "left",
+      selector: "#plan-asistentes-block",
+      title: "Asistentes",
+      body: "Atajos del sistema activo a AI Platform: LEIA resume WhatsApp y Bukowski asiste a la mesa. Van debajo del selector, antes de Opciones.",
+      placement: "bottom",
       when: () => visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski"),
     });
   }
