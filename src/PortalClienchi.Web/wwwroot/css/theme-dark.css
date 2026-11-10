@@ -648,13 +648,13 @@ html.st2-theme-dark .plan-asistente-chip.bukowski {
 }
 
 html.st2-theme-dark .plan-asistente-chip.leia .plan-asistente-chip-icon {
-  color: #5eead4;
-  background: rgba(45, 212, 191, 0.14);
+  color: #4ade80;
+  background: rgba(37, 211, 102, 0.18);
 }
 
 html.st2-theme-dark .plan-asistente-chip.bukowski .plan-asistente-chip-icon {
   color: #a5b4fc;
-  background: rgba(129, 140, 248, 0.14);
+  background: rgba(129, 140, 248, 0.18);
 }
 
 html.st2-theme-dark .plan-pill-btn:not(.active) {

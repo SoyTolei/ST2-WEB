@@ -3,7 +3,7 @@
  * El glow sigue el cursor; el tinte respeta el color de cada tarjeta.
  */
 
-const SELECTOR = ".plan-modulo-btn";
+const SELECTOR = ".plan-modulo-btn, .plan-asistente-chip";
 const CLASS_NAME = "st2-card-spotlight";
 const DEFAULT_SPOTLIGHT = "rgba(255, 255, 255, 0.55)";
 
@@ -41,7 +41,7 @@ function setMouse(card, clientX, clientY) {
 }
 
 function enhanceCard(card) {
-  if (!(card instanceof HTMLElement) || card.disabled) return;
+  if (!(card instanceof HTMLElement)) return;
   if (card.dataset.spotlightBound === "1") return;
 
   card.classList.add(CLASS_NAME);

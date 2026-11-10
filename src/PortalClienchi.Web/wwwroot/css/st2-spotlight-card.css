@@ -113,3 +113,58 @@ html.st2-theme-dark .plan-modulo-btn.st2-card-spotlight:active:not(:disabled) {
 .plan-modulo-btn.st2-card-spotlight.cocounsel {
   --spotlight-color: rgba(221, 214, 254, 0.9);
 }
+
+/* Asistentes LEIA / Bukowski: mismo glow que sigue el cursor */
+.plan-asistente-chip.st2-card-spotlight {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --spotlight-color: rgba(255, 255, 255, 0.45);
+  --spotlight-size: 200px;
+}
+
+.plan-asistente-chip.st2-card-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    var(--spotlight-size) circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color) 0%,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: soft-light;
+}
+
+.plan-asistente-chip.st2-card-spotlight:hover::before,
+.plan-asistente-chip.st2-card-spotlight:focus-visible::before,
+.plan-asistente-chip.st2-card-spotlight.is-spotlight-on::before {
+  opacity: 1;
+}
+
+.plan-asistente-chip.st2-card-spotlight > * {
+  position: relative;
+  z-index: 2;
+}
+
+.plan-asistente-chip.st2-card-spotlight.leia {
+  --spotlight-color: rgba(134, 239, 172, 0.75);
+}
+
+.plan-asistente-chip.st2-card-spotlight.bukowski {
+  --spotlight-color: rgba(196, 181, 253, 0.75);
+}
+
+html.st2-theme-dark .plan-asistente-chip.st2-card-spotlight.leia {
+  --spotlight-color: rgba(52, 211, 153, 0.45);
+}
+
+html.st2-theme-dark .plan-asistente-chip.st2-card-spotlight.bukowski {
+  --spotlight-color: rgba(167, 139, 250, 0.42);
+}

@@ -1462,13 +1462,13 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-asistente-chip.leia .plan-asistente-chip-icon {
-  color: #0f766e;
-  background: rgba(13, 148, 136, 0.14);
+  color: #16a34a;
+  background: rgba(37, 211, 102, 0.16);
 }
 
 .plan-asistente-chip.bukowski .plan-asistente-chip-icon {
-  color: #4338ca;
-  background: rgba(99, 102, 241, 0.14);
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.16);
 }
 
 .plan-asistente-chip-icon svg {

@@ -539,9 +539,16 @@ function updateSistemaUi() {
   const showTransfer = canSeeTransferenciaModule();
   const showReferral = canSeeReferralModule() && !isLegal();
   const showLegalProducts = isLegal() && canSeeAnyLegalProduct();
-  const sqlOnvioMenu = (sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb") && !showLegalProducts;
-  const showLeia = sqlOnvioMenu && canSeePlanillasLeia();
-  const showBukowski = sqlOnvioMenu && canSeePlanillasBukowski();
+  // LEIA: SQL, ONVIO, LEGAL y Chile. Bukowski: solo Bejerman SQL / ONVIO.
+  const showLeia = !placeholderBlocked
+    && canSeePlanillasLeia()
+    && (sistemaActual === "BejermanSql"
+      || sistemaActual === "OnvioWeb"
+      || sistemaActual === "Legal"
+      || sistemaActual === "Chile");
+  const showBukowski = !placeholderBlocked
+    && canSeePlanillasBukowski()
+    && (sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb");
   const showAsistentes = showLeia || showBukowski;
 
   if (transferBtn) {

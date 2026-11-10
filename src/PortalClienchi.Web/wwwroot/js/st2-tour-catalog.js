@@ -300,7 +300,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-asistentes-block",
       title: "Asistentes",
-      body: "Atajos del sistema activo a AI Platform: LEIA resume WhatsApp y Bukowski asiste a la mesa. Van debajo del selector, antes de Opciones.",
+      body: "Atajos a AI Platform debajo del sistema: LEIA (WhatsApp) en SQL, ONVIO, LEGAL y Chile; Bukowski (mesa) solo en SQL/ONVIO.",
       placement: "bottom",
       when: () => visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski"),
     });
