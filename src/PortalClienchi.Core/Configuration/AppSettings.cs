@@ -16,6 +16,8 @@ public sealed class AppSettings
     public bool ThomAutoCloseHelpPanel { get; set; } = true;
     /// <summary>AI Platform / Core AI &amp; Data Platforms.</summary>
     public string AiPlatformUrl { get; set; } = "https://aiplatform.thomsonreuters.com/ai-platform/ai-experiences/";
+    /// <summary>Orpen / WhatsApp TAP (login RCX).</summary>
+    public string OrpenUrl { get; set; } = "https://thomsontap.orpen.com.br/rcx/login.php";
     /// <summary>Zoom del visor AI Platform (1 = pantalla completa dentro de ST²).</summary>
     public double AiPlatformZoomFactor { get; set; } = 1;
     /// <summary>Intentar cerrar el panel de ayuda al cargar AI Platform.</summary>

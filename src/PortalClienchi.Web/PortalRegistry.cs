@@ -229,6 +229,7 @@ internal static class PortalSettingsNormalizer
             ThomLegalUrl = root.ThomLegalUrl,
             ThomChileUrl = root.ThomChileUrl,
             AiPlatformUrl = root.AiPlatformUrl,
+            OrpenUrl = root.OrpenUrl,
             ThomZoomFactor = root.ThomZoomFactor,
             AiPlatformZoomFactor = root.AiPlatformZoomFactor,
             SyncPageSize = root.SyncPageSize,

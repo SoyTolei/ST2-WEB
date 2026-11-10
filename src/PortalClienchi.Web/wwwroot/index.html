@@ -118,11 +118,11 @@
       background: #1a0e06;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20261110d"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20261110i"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20261110g"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20261110h"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20261110i"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20261013l"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20261013m"/>
@@ -262,6 +262,10 @@
         <span class="tab-reminder-slot">
           <span class="tab-reminder-badge hidden" data-reminder="planillas" aria-hidden="true">0</span>
         </span>
+      </button>
+      <button type="button" class="tab-btn" data-tab="orpen" role="tab" title="WhatsApp / Orpen">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2.05c-5.46 0-9.9 4.4-9.9 9.83 0 1.73.46 3.42 1.33 4.91L2 22l5.38-1.4a10 10 0 0 0 4.66 1.13h.01c5.46 0 9.9-4.4 9.9-9.83 0-2.62-1.03-5.09-2.91-6.94a9.9 9.9 0 0 0-6.99-2.91Zm0 17.95h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.19.83.85-3.08-.2-.32a8.1 8.1 0 0 1-1.26-4.32c0-4.5 3.7-8.17 8.26-8.17 2.2 0 4.28.85 5.84 2.4a8.1 8.1 0 0 1 2.42 5.79c0 4.5-3.7 8.17-8.23 8.17Z"/></svg>
+        WhatsApp/Orpen
       </button>
       <div class="tab-portal-wrap">
         <button type="button" class="tab-btn" data-tab="thom" role="tab">
@@ -584,7 +588,8 @@
 
               <div class="plan-field">
                 <label for="plan-descripcion">Descripción del caso</label>
-                <textarea id="plan-descripcion" class="placeholder-active" rows="4">Detalle y/o proceso realizado por el usuario</textarea>
+                <textarea id="plan-descripcion" rows="4" placeholder="Detalle y/o proceso realizado por el usuario"></textarea>
+                <p id="plan-trans-validation" class="plan-inline-validation hidden" role="alert" hidden></p>
               </div>
 
               <div class="plan-field">
@@ -1091,11 +1096,25 @@
             </div>
 
             <div id="ref-standard-flow">
-            <div id="ref-standard-fields">
+            <nav id="ref-stepper" class="plan-ref-stepper hidden" aria-label="Pasos del referral">
+              <button type="button" class="plan-ref-step active" data-ref-step="1" aria-current="step">
+                <span class="plan-ref-step-num">1</span>
+                <span class="plan-ref-step-label">Datos</span>
+              </button>
+              <button type="button" class="plan-ref-step" data-ref-step="2">
+                <span class="plan-ref-step-num">2</span>
+                <span class="plan-ref-step-label">Chequeos</span>
+              </button>
+              <button type="button" class="plan-ref-step" data-ref-step="3">
+                <span class="plan-ref-step-num">3</span>
+                <span class="plan-ref-step-label">Generar</span>
+              </button>
+            </nav>
+            <div id="ref-standard-fields" data-ref-step-panel="1">
             <div class="plan-form-grid">
               <div class="plan-field"><label for="ref-asunto">Asunto y/o Error</label><input id="ref-asunto" type="text" autocomplete="off" placeholder="Resumen del caso"/></div>
-              <div class="plan-field"><label for="ref-descripcion">Descripción del caso</label><textarea id="ref-descripcion" rows="4" class="placeholder-active"></textarea></div>
-              <div class="plan-field"><label for="ref-paso">Paso a paso realizado</label><textarea id="ref-paso" rows="4" class="placeholder-active"></textarea></div>
+              <div class="plan-field"><label for="ref-descripcion">Descripción del caso</label><textarea id="ref-descripcion" rows="4" placeholder="Detalle y/o descripción del caso"></textarea></div>
+              <div class="plan-field"><label for="ref-paso">Paso a paso realizado</label><textarea id="ref-paso" rows="4" placeholder="Detalle paso a paso del proceso realizado por el usuario"></textarea></div>
             </div>
 
             <div class="plan-ia-bar">
@@ -1109,7 +1128,7 @@
             </div>
             </div><!-- /ref-standard-fields -->
 
-            <div id="ref-bejerman-post" class="plan-ref-block hidden">
+            <div id="ref-bejerman-post" class="plan-ref-block hidden" data-ref-step-panel="2">
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
               <div class="plan-bej-config plan-ref-perfil" role="group" aria-label="Perfil del agente">
                 <div class="plan-bej-field">
@@ -1118,6 +1137,7 @@
                     <button type="button" class="plan-segment-btn active" id="ref-perfil-otra" data-perfil="otra">Otra mesa</button>
                     <button type="button" class="plan-segment-btn" id="ref-perfil-tecnico" data-perfil="tecnico">Técnico</button>
                   </div>
+                  <p id="ref-perfil-hint" class="plan-ref-hint">Otra mesa: planilla técnica a completar. Técnico: también MAM, SDK y traza SQL.</p>
                 </div>
               </div>
               <div class="plan-check-cards">
@@ -1244,7 +1264,7 @@
               </div>
             </div>
 
-            <div id="ref-chile-post" class="plan-ref-block hidden">
+            <div id="ref-chile-post" class="plan-ref-block hidden" data-ref-step-panel="2">
               <p class="plan-ref-title">Ingreso a sistema</p>
               <div class="plan-well-box">
                 <div class="plan-form-2col plan-form-2col-tight">
@@ -1310,7 +1330,7 @@
               </div>
             </div>
 
-            <div id="ref-onvio-panel" class="plan-ref-block hidden">
+            <div id="ref-onvio-panel" class="plan-ref-block hidden" data-ref-step-panel="2">
               <p class="plan-ref-title">Comprobaciones y procesos realizados</p>
               <div class="plan-onvio-grid">
                 <button type="button" class="plan-onvio-card tone-slate" id="ref-card-onvio-proceso" data-onvio="proceso">
@@ -1510,7 +1530,11 @@
               </div>
             </div>
 
-            <div class="plan-ref-actions" id="ref-standard-actions">
+            <div id="ref-step-nav" class="plan-ref-step-nav hidden">
+              <button type="button" id="ref-step-prev" class="plan-ref-step-nav-btn">← Anterior</button>
+              <button type="button" id="ref-step-next" class="plan-ref-step-nav-btn plan-ref-step-nav-btn--primary">Siguiente →</button>
+            </div>
+            <div class="plan-ref-actions" id="ref-standard-actions" data-ref-step-panel="3">
               <button type="button" id="ref-btn-copiar" class="plan-action-btn green">
                 <span class="plan-action-btn-main">
                   <span class="plan-action-btn-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
@@ -1560,16 +1584,16 @@
               <div class="plan-op-card" data-op-view="gestor">
                 <div class="op-accent purple"></div>
                 <span class="plan-op-icon purple" data-plan-icon="gestor"></span>
-                <strong>Gestor de Oportunidades</strong>
-                <span>Administra y gestiona tus oportunidades de venta</span>
-                <button type="button" class="plan-op-open-btn purple">Abrir Gestor</button>
+                <strong>Seguimiento / Gestor</strong>
+                <span>Cargá links, filtrá por mes y marcá confirmadas</span>
+                <button type="button" class="plan-op-open-btn purple">Abrir seguimiento</button>
               </div>
               <div class="plan-op-card" data-op-view="cargar">
                 <div class="op-accent orange"></div>
                 <span class="plan-op-icon orange" data-plan-icon="cargar"></span>
-                <strong>Cargar Oportunidad</strong>
-                <span>Completa el formulario y genera el PDF de la oportunidad</span>
-                <button type="button" class="plan-op-open-btn orange">Cargar Oportunidad</button>
+                <strong>Armar PDF de contacto</strong>
+                <span>Formulario de contacto y PDF para enviar</span>
+                <button type="button" class="plan-op-open-btn orange">Armar PDF</button>
               </div>
             </div>
           </div>
@@ -1579,14 +1603,18 @@
           <div class="planillas-card">
             <div class="plan-module-sticky-head">
               <div class="plan-module-header-bar">
-                <button type="button" class="planillas-back" data-plan-back-op-cargar>← Volver a opciones</button>
+                <button type="button" class="planillas-back" data-plan-back-op-cargar>← Volver al menú</button>
                 <span id="op-cargar-sistema" class="plan-sistema-badge"></span>
+              </div>
+              <div class="plan-op-tabs" role="tablist" aria-label="Oportunidad">
+                <button type="button" class="plan-op-tab" data-op-tab="gestor" role="tab">Seguimiento / Gestor</button>
+                <button type="button" class="plan-op-tab active" data-op-tab="cargar" role="tab" aria-selected="true">Armar PDF de contacto</button>
               </div>
             </div>
 
             <div class="plan-op-cargar-panel">
               <div class="plan-gestor-panel-accent purple"></div>
-              <h3 class="plan-gestor-panel-title">Cargar Oportunidad</h3>
+              <h3 class="plan-gestor-panel-title">Armar PDF de contacto</h3>
 
               <div class="plan-field plan-op-metodo-field">
                 <label>¿Cómo ingresó el contacto?</label>
@@ -1634,14 +1662,18 @@
           <div class="planillas-card">
             <div class="plan-module-sticky-head">
               <div class="plan-module-header-bar">
-                <button type="button" class="planillas-back" data-plan-back-op-gestor>← Volver a opciones</button>
+                <button type="button" class="planillas-back" data-plan-back-op-gestor>← Volver al menú</button>
                 <div class="plan-module-title-row">
                   <span class="plan-module-icon-badge oportunidad" data-plan-icon="gestor"></span>
-                  <h2 class="plan-module-title plan-title-oportunidad">Gestor de Oportunidades</h2>
+                  <h2 class="plan-module-title plan-title-oportunidad">Seguimiento / Gestor</h2>
                 </div>
                 <div class="plan-module-header-meta">
                   <span id="op-gestor-sistema" class="plan-sistema-badge"></span>
                 </div>
+              </div>
+              <div class="plan-op-tabs" role="tablist" aria-label="Oportunidad">
+                <button type="button" class="plan-op-tab active" data-op-tab="gestor" role="tab" aria-selected="true">Seguimiento / Gestor</button>
+                <button type="button" class="plan-op-tab" data-op-tab="cargar" role="tab">Armar PDF de contacto</button>
               </div>
               <div class="plan-accent-bar oportunidad"></div>
             </div>
@@ -1700,7 +1732,7 @@
                 <div class="plan-gestor-footer-actions">
                   <button type="button" id="op-gestor-editar" class="plan-gestor-btn-tool">Editar</button>
                   <button type="button" id="op-gestor-eliminar" class="plan-gestor-btn-red">Eliminar</button>
-                  <button type="button" id="op-gestor-confirmar" class="plan-gestor-btn-green">Confirmar</button>
+                  <button type="button" id="op-gestor-confirmar" class="plan-gestor-btn-green">Marcar confirmada</button>
                 </div>
                 <div class="plan-gestor-pagination">
                   <button type="button" id="op-gestor-prev" class="plan-gestor-page-btn" aria-label="Página anterior">◀</button>
@@ -1712,7 +1744,7 @@
             </div>
 
             <div id="op-gestor-ctx" class="plan-gestor-ctx hidden" role="menu">
-              <button type="button" data-ctx="confirmar" id="op-ctx-confirmar">✅ Confirmar oportunidad</button>
+              <button type="button" data-ctx="confirmar" id="op-ctx-confirmar">✅ Marcar confirmada</button>
               <hr/>
               <button type="button" data-ctx="abrir">🌐 Abrir en el navegador</button>
               <button type="button" data-ctx="editar">✏️ Editar</button>
@@ -1790,6 +1822,14 @@
       <div class="embed-frame-wrap">
         <iframe id="aiFrame" class="embed-frame" title="AI Platform"
           allow="clipboard-read; clipboard-write; fullscreen; autoplay"></iframe>
+      </div>
+    </section>
+
+    <section id="panel-orpen" class="tab-panel hidden" role="tabpanel">
+      <p class="embed-hint hidden" id="orpenEmbedHint" aria-hidden="true"></p>
+      <div class="embed-frame-wrap">
+        <iframe id="orpenFrame" class="embed-frame" title="WhatsApp / Orpen"
+          allow="clipboard-read; clipboard-write; fullscreen; autoplay; microphone; camera"></iframe>
       </div>
     </section>
 
@@ -2874,6 +2914,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261110g" type="module"></script>
+  <script src="/js/app.js?v=20261110i" type="module"></script>
 </body>
 </html>

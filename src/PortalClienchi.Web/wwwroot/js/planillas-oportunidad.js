@@ -13,7 +13,7 @@ let metodoContacto = null;
 
 const OP_METODOS_VALIDOS = new Set(["Telefónicamente", "WhatsApp", "Email"]);
 
-const GESTOR_POR_PAGINA = 5;
+const GESTOR_POR_PAGINA = 10;
 const LINK_PLACEHOLDER = "Pegar link de la oportunidad";
 const GESTOR_MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -66,12 +66,12 @@ function bindOportunidadEvents() {
     else ctx.showView("menu");
   });
   document.querySelector("[data-plan-back-op-cargar]")?.addEventListener("click", () => {
-    if (ctx.goOportunidadMenu) ctx.goOportunidadMenu();
-    else ctx.showView("oportunidadMenu");
+    if (ctx.goPlanillasMenu) ctx.goPlanillasMenu();
+    else ctx.showView("menu");
   });
   document.querySelector("[data-plan-back-op-gestor]")?.addEventListener("click", () => {
-    if (ctx.goOportunidadMenu) ctx.goOportunidadMenu();
-    else ctx.showView("oportunidadMenu");
+    if (ctx.goPlanillasMenu) ctx.goPlanillasMenu();
+    else ctx.showView("menu");
   });
 
   document.querySelectorAll("[data-op-view]").forEach((card) => {
@@ -83,6 +83,13 @@ function bindOportunidadEvents() {
     card.querySelector(".plan-op-open-btn")?.addEventListener("click", (e) => {
       e.stopPropagation();
       go();
+    });
+  });
+
+  document.querySelectorAll("[data-op-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      if (tab.dataset.opTab === "cargar") openCargar();
+      else openGestor();
     });
   });
 
@@ -404,7 +411,7 @@ function currentGestorMonthLabel(date = new Date()) {
 
 function resetGestorFilters() {
   const combo = document.getElementById("op-filter-month-combo");
-  if (combo) combo.value = currentGestorMonthLabel();
+  if (combo) combo.value = "Todas";
 }
 
 function parseGestorItems(data) {
@@ -578,10 +585,10 @@ function safeApplyGestorFilterAndPage() {
 
 function applyGestorFilterAndPage() {
   const combo = document.getElementById("op-filter-month-combo");
-  const keep = combo?.value || currentGestorMonthLabel();
+  const keep = combo?.value || "Todas";
   rebuildGestorMonthOptions(gestorAllItems, keep);
 
-  const filtro = combo?.value || currentGestorMonthLabel();
+  const filtro = combo?.value || "Todas";
 
   let query = [...gestorAllItems];
   if (filtro !== "Todas") {
@@ -634,7 +641,7 @@ function rebuildGestorMonthOptions(all, keep) {
 
   gestorUpdatingMonthCombo = true;
   combo.innerHTML = opciones.map((o) => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("");
-  combo.value = opciones.includes(keep) ? keep : mesActual;
+  combo.value = opciones.includes(keep) ? keep : "Todas";
   gestorUpdatingMonthCombo = false;
 }
 
@@ -968,8 +975,8 @@ function updateConfirmActionLabels() {
   const confirmada = item ? isConfirmada(item) : false;
   const btn = document.getElementById("op-gestor-confirmar");
   const ctx = document.getElementById("op-ctx-confirmar");
-  if (btn) btn.textContent = confirmada ? "No confirmada" : "Confirmar";
-  if (ctx) ctx.textContent = confirmada ? "↩️ Marcar como no confirmada" : "✅ Confirmar oportunidad";
+  if (btn) btn.textContent = confirmada ? "Quitar confirmación" : "Marcar confirmada";
+  if (ctx) ctx.textContent = confirmada ? "↩️ Quitar confirmación" : "✅ Marcar confirmada";
 }
 
 let editGestorId = null;

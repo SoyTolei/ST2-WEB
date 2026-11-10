@@ -24,6 +24,8 @@ public static class St2AppRoutes
             or "/chile"
             or "/thom"
             or "/ai"
+            or "/orpen"
+            or "/whatsapp"
             or "/admin"
             or "/tolei"
             or "/portal"

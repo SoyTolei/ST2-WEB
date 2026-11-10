@@ -14,7 +14,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110g";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110i";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -44,6 +44,7 @@ const thomFrame = document.getElementById("thomFrame");
 const thomEmbedLoading = document.getElementById("thomEmbedLoading");
 const thomDirectGate = document.getElementById("thomDirectGate");
 const aiFrame = document.getElementById("aiFrame");
+const orpenFrame = document.getElementById("orpenFrame");
 const portalSistemaBar = document.getElementById("portalSistemaBar");
 const thomPortalBar = document.getElementById("thomPortalBar");
 const thomTabWrap = document.querySelector('.tab-btn[data-tab="thom"]')?.closest(".tab-portal-wrap");
@@ -4511,6 +4512,16 @@ function getEmbedFrameUrl(kind) {
     }
   }
   if (kind === "ai") return aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
+  if (kind === "orpen") {
+    const raw = appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php";
+    try {
+      const u = new URL(raw);
+      if (u.hostname.endsWith("orpen.com.br")) {
+        return `/embed/orpen${u.pathname}${u.search}`;
+      }
+    } catch { /* keep absolute fallback */ }
+    return raw;
+  }
   if (kind === "portal") return getPortalLoginUrl();
   return null;
 }
@@ -5106,15 +5117,18 @@ function getEmbedZoom(kind) {
   return 0.9;
 }
 
+function embedFrameFor(kind) {
+  if (kind === "thom") return thomFrame;
+  if (kind === "portal") return portalFrame;
+  if (kind === "orpen") return orpenFrame;
+  return aiFrame;
+}
+
 function applyEmbedZoom(kind) {
-  const frame = kind === "thom" ? thomFrame : kind === "portal" ? portalFrame : aiFrame;
+  const frame = embedFrameFor(kind);
   if (!frame) return;
-  // AI: CSS ya va 1:1; no mezclar style.zoom con transform (deforma el layout).
-  if (kind === "ai") {
-    frame.style.zoom = "";
-    return;
-  }
-  if (kind === "portal") {
+  // AI / Orpen / Portal: CSS 1:1; no mezclar style.zoom con transform.
+  if (kind === "ai" || kind === "orpen" || kind === "portal") {
     frame.style.zoom = "";
     return;
   }
@@ -5235,7 +5249,7 @@ function onThomEmbedMessage(event) {
 }
 
 function loadEmbedFrame(kind, { force = false } = {}) {
-  const frame = kind === "thom" ? thomFrame : kind === "portal" ? portalFrame : aiFrame;
+  const frame = embedFrameFor(kind);
   if (kind === "thom" && isThomWindowMode()) return;
   const url = getEmbedFrameUrl(kind);
   if (!frame || !url) return;
@@ -5252,7 +5266,10 @@ function loadEmbedFrame(kind, { force = false } = {}) {
 }
 
 function clearEmbedHint(kind) {
-  const id = kind === "thom" ? "thomEmbedHint" : kind === "portal" ? "portalEmbedHint" : "aiEmbedHint";
+  const id = kind === "thom" ? "thomEmbedHint"
+    : kind === "portal" ? "portalEmbedHint"
+      : kind === "orpen" ? "orpenEmbedHint"
+        : "aiEmbedHint";
   const el = document.getElementById(id);
   if (!el) return;
   el.classList.add("hidden");
@@ -5261,7 +5278,10 @@ function clearEmbedHint(kind) {
 }
 
 function setEmbedHint(kind, message) {
-  const id = kind === "thom" ? "thomEmbedHint" : kind === "portal" ? "portalEmbedHint" : "aiEmbedHint";
+  const id = kind === "thom" ? "thomEmbedHint"
+    : kind === "portal" ? "portalEmbedHint"
+      : kind === "orpen" ? "orpenEmbedHint"
+        : "aiEmbedHint";
   const el = document.getElementById(id);
   if (!el) return;
   // Hints de embed ocultos: el toolbar ya tiene «Abrir en navegador».
@@ -5290,6 +5310,7 @@ function tabFromPath(pathname) {
   const p = normalizeShellPath(pathname);
   if (p === ADMIN_PATH || p === "/tolei") return ADMIN_TAB_ID;
   if (p === "/ai") return "ai";
+  if (p === "/orpen" || p === "/whatsapp") return "orpen";
   if (p === "/portal" || p.startsWith("/portal/")) return "portal";
   if (p === "/thom" || p.startsWith("/thom/")) return "thom";
   return "planillas";
@@ -5316,6 +5337,7 @@ function pathForTab(tabId) {
   if (tabId === ADMIN_TAB_ID) return ADMIN_PATH;
   if (tabId === "thom") return `/thom/${thomPortalId || "bejerman"}`;
   if (tabId === "ai") return "/ai";
+  if (tabId === "orpen") return "/orpen";
   if (tabId === "portal") {
     return activePortalId ? `/portal/${activePortalId}` : "/portal";
   }
@@ -5326,6 +5348,7 @@ function titleForTab(tabId) {
   if (tabId === ADMIN_TAB_ID) return "ST² · ADMIN";
   if (tabId === "thom") return "ST² · THOM";
   if (tabId === "ai") return "ST² · AI Platform";
+  if (tabId === "orpen") return "ST² · WhatsApp/Orpen";
   if (tabId === "portal") return `ST² · ${getPortalClientTabLabel()}`;
   if (tabId === "planillas") return "ST² · Suite Web";
   return "ST² · Suite Web";
@@ -5448,7 +5471,7 @@ function switchTab(tabId) {
   document.body.classList.toggle("thom-tab-active", tabId === "thom");
   document.body.classList.toggle("thom-context-active", tabId === "thom" && thomCtxVisible);
   document.body.classList.toggle("admin-tab-active", tabId === ADMIN_TAB_ID);
-  document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai" || tabId === "portal");
+  document.body.classList.toggle("embed-active", tabId === "thom" || tabId === "ai" || tabId === "orpen" || tabId === "portal");
 
   if (tabId !== "thom") {
     closeThomPopup({ reclaim: false });
@@ -5461,6 +5484,9 @@ function switchTab(tabId) {
   } else if (tabId === "ai") {
     loadEmbedFrame("ai");
     startEngagementTimer("ai");
+  } else if (tabId === "orpen") {
+    loadEmbedFrame("orpen");
+    startEngagementTimer("orpen");
   } else if (tabId === "portal") {
     loadEmbedFrame("portal");
     startEngagementTimer("portal");
@@ -5483,6 +5509,7 @@ function switchTab(tabId) {
 function initEmbedReminders() {
   bindEmbedEngagement(thomFrame, "thom");
   bindEmbedEngagement(aiFrame, "ai");
+  bindEmbedEngagement(orpenFrame, "orpen");
   bindEmbedEngagement(portalFrame, "portal");
   bindPortalFrameContentWatcher(portalFrame);
   window.addEventListener("message", onThomEmbedMessage);

@@ -262,6 +262,7 @@ app.MapGet("/api/app-config", (HttpContext ctx, AppSettings settings, PortalRegi
     settings.ThomLegalUrl,
     settings.ThomChileUrl,
     settings.AiPlatformUrl,
+    settings.OrpenUrl,
     settings.PortalBaseUrl,
     defaultPortalId = registry.DefaultId,
     portals = registry.List().Select(p =>

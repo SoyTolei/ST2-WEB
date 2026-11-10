@@ -22,6 +22,7 @@ internal sealed class EmbedSiteProxy
     {
         ["thom"] = "https://css-latam.int.thomsonreuters.com",
         ["ai"] = "https://aiplatform.thomsonreuters.com",
+        ["orpen"] = "https://thomsontap.orpen.com.br",
         ["portal-bejerman"] = "https://clientes.thomsonreuters.com.ar",
         ["portal-bejerman-api"] = "https://clientes.thomsonreuters.com.ar:3333",
         ["portal-legal"] = "https://portaldelcliente.thomsonreuters.com.ar",

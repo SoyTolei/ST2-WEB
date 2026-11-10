@@ -29,10 +29,9 @@ import {
   autoTour,
   syncHeaderTourButton,
 } from "./st2-tour-init.js?v=20261110a";
-import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
+import { alertSt2, errorSt2 } from "./st2-dialog.js?v=20260909a";
 import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261027a";
 
-const DESCRIPCION_PLACEHOLDER = "Detalle y/o proceso realizado por el usuario";
 
 const MESA_LABELS = {
   TECNICO: "TÉCNICO",
@@ -178,8 +177,8 @@ let legalProdutoSel = null;
 let legalModuloSel = null;
 let legalAmbienteSel = null;
 let capturaFiles = [];
-let descripcionEsPlaceholder = true;
 let transferIaUndo = null;
+let transferenciaSistemaLoaded = null;
 
 const views = {
   menu: document.getElementById("planillas-menu"),
@@ -307,6 +306,7 @@ function isForeignAppPath(pathname) {
   const p = normalizePath(pathname);
   return p === "/thom" || p.startsWith("/thom/")
     || p === "/ai"
+    || p === "/orpen" || p === "/whatsapp"
     || p === "/portal" || p.startsWith("/portal/");
 }
 
@@ -746,7 +746,8 @@ function styleTicketCard(selected) {
   card?.classList.toggle("selected", selected);
   if (mark) {
     mark.textContent = selected ? "✓" : "○";
-    mark.style.color = selected ? "#16a34a" : "#94a3b8";
+    mark.classList.toggle("is-on", !!selected);
+    mark.style.color = "";
   }
 }
 
@@ -1017,12 +1018,7 @@ function addCapturaFiles(fileList) {
 function transferIaFieldDefs() {
   return [
     { id: "plan-asunto" },
-    {
-      id: "plan-descripcion",
-      kind: "placeholder-textarea",
-      placeholderActive: descripcionEsPlaceholder,
-      onRestore: (ph) => { descripcionEsPlaceholder = ph; },
-    },
+    { id: "plan-descripcion" },
   ];
 }
 
@@ -1060,12 +1056,7 @@ async function mejorarTransferenciaIa() {
     }
 
     if (data.asunto) els.asunto().value = data.asunto;
-    if (data.descripcion) {
-      const desc = els.descripcion();
-      desc.value = data.descripcion;
-      desc.classList.remove("placeholder-active");
-      descripcionEsPlaceholder = false;
-    }
+    if (data.descripcion) els.descripcion().value = data.descripcion;
     setPlanStatus("");
     notifyIaUndoHint("plan-btn-ia-undo");
   } catch (ex) {
@@ -1076,23 +1067,47 @@ async function mejorarTransferenciaIa() {
   }
 }
 
+function clearTransValidation() {
+  document.querySelectorAll("#planillas-transferencia .is-invalid").forEach((el) => {
+    el.classList.remove("is-invalid");
+  });
+  const box = document.getElementById("plan-trans-validation");
+  if (!box) return;
+  box.hidden = true;
+  box.classList.add("hidden");
+  box.textContent = "";
+}
+
+function markTransInvalid(el) {
+  const wrap = el?.closest?.(".plan-field, .plan-bej-field, .plan-mesa-field") || el;
+  wrap?.classList?.add("is-invalid");
+}
+
+function showTransValidation(errors, firstField) {
+  const box = document.getElementById("plan-trans-validation");
+  if (box) {
+    box.hidden = false;
+    box.classList.remove("hidden");
+    box.textContent = errors.join(" · ");
+  }
+  firstField?.focus?.();
+}
+
 function limpiarTransferencia() {
   mesaActual = null;
   legalProdutoSel = null;
   legalModuloSel = null;
   legalAmbienteSel = null;
   capturaFiles = [];
-  descripcionEsPlaceholder = true;
   transferIaUndo?.clearSnapshot();
+  clearTransValidation();
 
   els.numeroCliente().value = "";
   document.getElementById("plan-legal-chave") && (document.getElementById("plan-legal-chave").value = "");
   document.getElementById("plan-legal-usuario") && (document.getElementById("plan-legal-usuario").value = "");
   document.getElementById("plan-legal-escritorio") && (document.getElementById("plan-legal-escritorio").value = "");
   els.asunto().value = "";
-  const desc = els.descripcion();
-  desc.value = DESCRIPCION_PLACEHOLDER;
-  desc.classList.add("placeholder-active");
+  els.descripcion().value = "";
 
   els.capturasCheck().checked = false;
   els.capturasPanel()?.classList.add("hidden");
@@ -1112,81 +1127,57 @@ function limpiarTransferencia() {
 function initTransferenciaForm() {
   els.sistemaBadge().textContent = sistemaBadgeLabel(sistemaActual);
   initTransferenciaIaUi();
-  limpiarTransferencia();
+  if (transferenciaSistemaLoaded !== sistemaActual) {
+    limpiarTransferencia();
+    transferenciaSistemaLoaded = sistemaActual;
+  }
   updateTransferenciaPanels();
+  showTicketSection();
 }
 
 function getDescripcionPlain() {
-  if (descripcionEsPlaceholder) return "";
-  return els.descripcion().value.trim();
-}
-
-/** Aviso de dato faltante: enfoca el campo y devuelve false para cortar el flujo. */
-async function faltaDato(mensaje, campo) {
-  await alertSt2(mensaje, { title: "Falta completar" });
-  campo?.focus();
-  return false;
+  return els.descripcion()?.value.trim() || "";
 }
 
 async function validarCampos() {
+  clearTransValidation();
+  const errors = [];
+  let firstField = null;
+
+  const push = (msg, field) => {
+    errors.push(msg);
+    if (field) markTransInvalid(field);
+    if (!firstField && field) firstField = field;
+  };
+
   if (isLegal()) {
-    if (!document.getElementById("plan-legal-chave")?.value.trim()) {
-      return faltaDato("Completá la clave de registro.", document.getElementById("plan-legal-chave"));
-    }
-    if (!legalProdutoSel) {
-      return faltaDato("Seleccioná el producto Legal One.");
-    }
-    if (!legalModuloSel) {
-      return faltaDato("Seleccioná el módulo.");
-    }
-    if (!legalAmbienteSel) {
-      return faltaDato("Seleccioná el ambiente.");
-    }
-    if (!mesaActual) {
-      return faltaDato("Elegí la mesa de destino.");
-    }
-    if (!document.getElementById("plan-legal-usuario")?.value.trim()) {
-      return faltaDato("Completá el usuario OnePass.", document.getElementById("plan-legal-usuario"));
-    }
-    if (!document.getElementById("plan-legal-escritorio")?.value.trim()) {
-      return faltaDato("Completá el estudio / empresa.", document.getElementById("plan-legal-escritorio"));
-    }
+    const chave = document.getElementById("plan-legal-chave");
+    if (!chave?.value.trim()) push("Completá la clave de registro.", chave);
+    if (!legalProdutoSel) push("Seleccioná el producto Legal One.", document.getElementById("plan-legal-produto-pills"));
+    if (!legalModuloSel) push("Seleccioná el módulo.", document.getElementById("plan-legal-modulo-pills"));
+    if (!legalAmbienteSel) push("Seleccioná el ambiente.", document.getElementById("plan-legal-ambiente-pills"));
+    if (!mesaActual) push("Elegí la mesa de destino.", document.getElementById("plan-legal-mesas"));
+    const usuario = document.getElementById("plan-legal-usuario");
+    if (!usuario?.value.trim()) push("Completá el usuario OnePass.", usuario);
+    const escritorio = document.getElementById("plan-legal-escritorio");
+    if (!escritorio?.value.trim()) push("Completá el estudio / empresa.", escritorio);
   } else {
-    if (!els.numeroCliente().value.trim()) {
-      return faltaDato("Completá el N° de Cliente.", els.numeroCliente());
-    }
+    const nro = els.numeroCliente();
+    if (!nro?.value.trim()) push("Completá el N° de Cliente.", nro);
     if (!mesaActual) {
-      return faltaDato(isChile()
-        ? "Elegí la mesa de destino (Técnico o Funcional)."
-        : "Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).");
+      push(
+        isChile()
+          ? "Elegí la mesa de destino (Técnico o Funcional)."
+          : "Elegí la mesa de destino (Técnico, Flex, SaaS o Sueldos).",
+        document.getElementById("plan-mesas") || document.querySelector(".plan-mesa-field"),
+      );
     }
   }
-  if (!els.asunto().value.trim()) {
-    return faltaDato("Completá el campo Asunto y/o Error.", els.asunto());
-  }
-  return true;
-}
+  const asunto = els.asunto();
+  if (!asunto?.value.trim()) push("Completá el campo Asunto y/o Error.", asunto);
 
-async function preguntarTicketLegal() {
-  if (!isLegal() || els.ticketCheck().checked) return true;
-  if (await askSt2("¿Se solicitó ticket de servicio?", { title: "Ticket de servicio" })) {
-    els.ticketCheck().checked = true;
-    onTicketToggle();
-    els.ticketNumero().focus();
-    return false;
-  }
-  return true;
-}
-
-async function preguntarTicketSiSaasSueldos() {
-  if (sistemaActual !== "BejermanSql" || (mesaActual !== "SAAS" && mesaActual !== "SUELDOS"))
-    return true;
-  if (els.ticketCheck().checked) return true;
-
-  if (await askSt2("¿Se solicitó ticket de servicio?", { title: "Ticket de servicio" })) {
-    els.ticketCheck().checked = true;
-    onTicketToggle();
-    els.ticketNumero().focus();
+  if (errors.length) {
+    showTransValidation(errors, firstField);
     return false;
   }
   return true;
@@ -1228,8 +1219,6 @@ function setPlanStatus(text, isError = false) {
 
 async function generarTexto() {
   if (!(await validarCampos())) return null;
-  if (!(await preguntarTicketLegal())) return null;
-  if (!(await preguntarTicketSiSaasSueldos())) return null;
 
   const payload = buildPayload();
 
@@ -1802,20 +1791,6 @@ function bindEvents() {
 
   els.ticketCheck()?.addEventListener("change", onTicketToggle);
 
-  const desc = els.descripcion();
-  desc?.addEventListener("focus", () => {
-    if (!descripcionEsPlaceholder) return;
-    desc.value = "";
-    desc.classList.remove("placeholder-active");
-    descripcionEsPlaceholder = false;
-  });
-  desc?.addEventListener("blur", () => {
-    if (desc.value.trim()) return;
-    desc.value = DESCRIPCION_PLACEHOLDER;
-    desc.classList.add("placeholder-active");
-    descripcionEsPlaceholder = true;
-  });
-
   els.numeroCliente()?.addEventListener("input", (e) => {
     e.target.value = e.target.value.replace(/\D/g, "");
   });
@@ -1854,7 +1829,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20261027b").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20261110i").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });
@@ -1864,7 +1839,7 @@ function loadReferralModule() {
 
 function loadOportunidadModule() {
   if (!oportunidadModulePromise) {
-    oportunidadModulePromise = import("./planillas-oportunidad.js?v=20261013c").then((mod) => {
+    oportunidadModulePromise = import("./planillas-oportunidad.js?v=20261110i").then((mod) => {
       mod.initOportunidadModule(planillasContext);
       return mod;
     });
