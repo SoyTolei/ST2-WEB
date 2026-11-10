@@ -1376,7 +1376,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   background: var(--st2-suite-surface-soft);
   border: 2px solid var(--st2-suite-border);
   border-radius: 14px;
-  padding: 8px;
+  padding: 6px;
   width: 100%;
   margin: 0;
 }
@@ -1395,10 +1395,10 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-asistente-chip {
   appearance: none;
   border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 12px;
-  min-height: 44px;
+  border-radius: 11px;
+  min-height: 34px;
   height: auto;
-  padding: 10px 14px;
+  padding: 6px 12px;
   margin: 0;
   flex: 1 1 calc(50% - 4px);
   min-width: min(100%, 280px);
@@ -1451,13 +1451,13 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-asistente-chip-icon {
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 9px;
+  border-radius: 7px;
   background: rgba(15, 23, 42, 0.06);
 }
 
@@ -1472,17 +1472,17 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-asistente-chip-icon svg {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
   display: block;
 }
 
 .plan-asistente-chip-label {
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: -0.015em;
-  line-height: 1.25;
+  line-height: 1.2;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
