@@ -531,8 +531,7 @@ function updateSistemaUi() {
   const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
   const opcionesTitle = document.getElementById("plan-opciones-section-title");
   const opcionesWell = document.getElementById("plan-opciones-modulos-well");
-  const asistentesTitle = document.getElementById("plan-asistentes-section-title");
-  const asistentesWell = document.getElementById("plan-asistentes-modulos-well");
+  const asistentesStrip = document.getElementById("plan-asistentes-strip");
   const legalProductsWrap = document.getElementById("plan-legal-products-wrap");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
   const hideCommercial = hidesCommercialModules();
@@ -573,10 +572,9 @@ function updateSistemaUi() {
     bukowskiBtn.disabled = placeholderBlocked || !showBukowski;
     bukowskiBtn.setAttribute("aria-hidden", showBukowski ? "false" : "true");
   }
-  asistentesTitle?.classList.toggle("hidden", !showAsistentes);
-  asistentesTitle?.toggleAttribute("hidden", !showAsistentes);
-  asistentesWell?.classList.toggle("hidden", !showAsistentes);
-  asistentesWell?.toggleAttribute("hidden", !showAsistentes);
+  asistentesStrip?.classList.toggle("hidden", !showAsistentes);
+  asistentesStrip?.toggleAttribute("hidden", !showAsistentes);
+  asistentesStrip?.setAttribute("aria-hidden", showAsistentes ? "false" : "true");
   opcionesTitle?.classList.toggle("hidden", showLegalProducts);
   opcionesTitle?.toggleAttribute("hidden", showLegalProducts);
   opcionesWell?.classList.toggle("hidden", showLegalProducts);

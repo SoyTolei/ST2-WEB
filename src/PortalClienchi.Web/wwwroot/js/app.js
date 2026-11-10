@@ -14,7 +14,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110b";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110c";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -5109,6 +5109,15 @@ function getEmbedZoom(kind) {
 function applyEmbedZoom(kind) {
   const frame = kind === "thom" ? thomFrame : kind === "portal" ? portalFrame : aiFrame;
   if (!frame) return;
+  // AI: CSS ya va 1:1; no mezclar style.zoom con transform (deforma el layout).
+  if (kind === "ai") {
+    frame.style.zoom = "";
+    return;
+  }
+  if (kind === "portal") {
+    frame.style.zoom = "";
+    return;
+  }
   frame.style.zoom = String(getEmbedZoom(kind));
 }
 

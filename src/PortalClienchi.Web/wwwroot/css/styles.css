@@ -2238,7 +2238,8 @@ body.portal-tab-active .combo-box {
   background: #fff;
 }
 
-/* Densidad ~90%: entra más contenido del sitio embebido sin achicar las pestañas ST2. */
+/* Densidad ~90% en THOM/Portal: entra más contenido sin achicar las pestañas ST2.
+   AI Platform va a 1:1 (sin scale+zoom a la vez) para que no se vea achicada/deformada. */
 body.embed-active #panel-thom .embed-frame-wrap,
 body.embed-active #panel-ai .embed-frame-wrap,
 body.embed-active #panel-portal .embed-frame-wrap {
@@ -2246,12 +2247,39 @@ body.embed-active #panel-portal .embed-frame-wrap {
 }
 
 body.embed-active #panel-thom .embed-frame-wrap > .embed-frame,
-body.embed-active #panel-ai .embed-frame-wrap > .embed-frame,
 body.embed-active #panel-portal .embed-frame-wrap > .embed-frame {
   width: 111.111%; /* 100 / 0.90 */
   height: 111.111%;
   transform: scale(0.90);
   transform-origin: 0 0;
+}
+
+body.embed-active #panel-ai .embed-frame-wrap > .embed-frame {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  transform: none;
+  zoom: 1;
+}
+
+#panel-ai .embed-toolbar.embed-toolbar-compact {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  margin: 0;
+  pointer-events: none;
+}
+
+#panel-ai .embed-toolbar .plan-chile-embed-nav,
+#panel-ai .embed-toolbar .plan-chile-embed-menu-btn,
+#panel-ai .embed-toolbar .plan-chile-embed-menu {
+  pointer-events: auto;
+}
+
+#panel-ai .embed-frame-wrap {
+  border-radius: 8px;
+  border-color: color-mix(in srgb, var(--border) 80%, transparent);
 }
 
 .embed-loading {
@@ -2438,6 +2466,7 @@ body.embed-active.thom-tab-active.thom-context-active .tab-bar {
 #panel-thom.active,
 #panel-ai.active,
 #panel-portal.active {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;
