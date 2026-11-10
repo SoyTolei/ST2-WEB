@@ -4,7 +4,7 @@ import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=2
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20260907a";
 import { scheduleWelcomeTour, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261110a";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
-import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
+import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261027a";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js?v=20261027a";
@@ -14,7 +14,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110a";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110b";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -154,6 +154,8 @@ const accessModPlanillasLegal = document.getElementById("st2-mod-planillas-legal
 const accessModPlanillasChile = document.getElementById("st2-mod-planillas-chile");
 const accessModPlanillasTransferencia = document.getElementById("st2-mod-planillas-transferencia");
 const accessModPlanillasReferral = document.getElementById("st2-mod-planillas-referral");
+const accessModPlanillasLeia = document.getElementById("st2-mod-planillas-leia");
+const accessModPlanillasBukowski = document.getElementById("st2-mod-planillas-bukowski");
 const accessModLegalFirm = document.getElementById("st2-mod-legal-firm");
 const accessModLegalHighq = document.getElementById("st2-mod-legal-highq");
 const accessModLegalWestlaw = document.getElementById("st2-mod-legal-westlaw");
@@ -1193,6 +1195,12 @@ function normalizeAccessModules(modules) {
     planillasReferral: m.planillasReferral == null && m.PlanillasReferral == null
       ? true
       : !!(m.planillasReferral ?? m.PlanillasReferral),
+    planillasLeia: m.planillasLeia == null && m.PlanillasLeia == null
+      ? true
+      : !!(m.planillasLeia ?? m.PlanillasLeia),
+    planillasBukowski: m.planillasBukowski == null && m.PlanillasBukowski == null
+      ? true
+      : !!(m.planillasBukowski ?? m.PlanillasBukowski),
     planillasLegal: m.planillasLegal == null && m.PlanillasLegal == null
       ? true
       : !!(m.planillasLegal ?? m.PlanillasLegal),
@@ -2665,6 +2673,8 @@ function buildAboutPlanillasDetail() {
     const mods = [];
     if (canSeePlanillasTransferencia()) mods.push("Transferencia de Casos");
     if (canSeePlanillasReferral()) mods.push("Referral I+D");
+    if (canSeePlanillasLeia()) mods.push("LEIA");
+    if (canSeePlanillasBukowski()) mods.push("Bukowski");
     if (canSeeOportunidadModule()) mods.push("Oportunidad de Venta");
     if (canSeeBlanqueoModule()) mods.push("Blanqueo de accesos");
     if (canSeeBorradoBasesModule()) mods.push("Borrado de Bases Web");
@@ -3840,6 +3850,8 @@ function readAccessModuleChecksFromForm() {
     planillasSqlOnvio: !!accessModPlanillasSqlOnvio?.checked,
     planillasTransferencia: !!accessModPlanillasTransferencia?.checked,
     planillasReferral: !!accessModPlanillasReferral?.checked,
+    planillasLeia: !!accessModPlanillasLeia?.checked,
+    planillasBukowski: !!accessModPlanillasBukowski?.checked,
     planillasLegal: !!accessModPlanillasLegal?.checked,
     legalFirm: !!accessModLegalFirm?.checked,
     legalHighq: !!accessModLegalHighq?.checked,
@@ -3863,6 +3875,8 @@ function setAccessModuleChecks(mods, { presetDefaults = false } = {}) {
   if (accessModPlanillasSqlOnvio) accessModPlanillasSqlOnvio.checked = def("planillasSqlOnvio");
   if (accessModPlanillasTransferencia) accessModPlanillasTransferencia.checked = def("planillasTransferencia");
   if (accessModPlanillasReferral) accessModPlanillasReferral.checked = def("planillasReferral");
+  if (accessModPlanillasLeia) accessModPlanillasLeia.checked = def("planillasLeia");
+  if (accessModPlanillasBukowski) accessModPlanillasBukowski.checked = def("planillasBukowski");
   if (accessModPlanillasLegal) accessModPlanillasLegal.checked = def("planillasLegal");
   if (accessModLegalFirm) accessModLegalFirm.checked = def("legalFirm");
   if (accessModLegalHighq) accessModLegalHighq.checked = def("legalHighq");
@@ -3901,6 +3915,8 @@ function resetSqlSystemModules(enabled) {
   const inputs = [
     accessModPlanillasTransferencia,
     accessModPlanillasReferral,
+    accessModPlanillasLeia,
+    accessModPlanillasBukowski,
     accessModOportunidad,
     accessModBlanqueo,
     accessModBlanqueoConfirm,
@@ -3915,6 +3931,8 @@ function resetSqlSystemModules(enabled) {
   [
     accessModPlanillasTransferencia,
     accessModPlanillasReferral,
+    accessModPlanillasLeia,
+    accessModPlanillasBukowski,
     accessModOportunidad,
     accessModBlanqueo,
     accessModBorradoBases,
@@ -4441,8 +4459,39 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+/** URL puntual de una chain (LEIA/Bukowski); null = home de AI Platform. */
+let aiFrameOverrideUrl = null;
+
 document.querySelectorAll(".tab-btn").forEach((btn) => {
-  btn.addEventListener("click", () => navigateTab(btn.dataset.tab));
+  btn.addEventListener("click", () => {
+    if (btn.dataset.tab === "ai") aiFrameOverrideUrl = null;
+    navigateTab(btn.dataset.tab);
+  });
+});
+
+function normalizeAiPlatformUrl(raw) {
+  const value = String(raw || "").trim();
+  if (!value) return null;
+  try {
+    const u = new URL(value, window.location.origin);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    if (u.hostname && u.hostname !== "aiplatform.thomsonreuters.com") return null;
+    return u.href;
+  } catch {
+    return null;
+  }
+}
+
+function openAiPlatformUrl(rawUrl) {
+  const url = normalizeAiPlatformUrl(rawUrl);
+  if (!url) return;
+  aiFrameOverrideUrl = url;
+  navigateTab("ai");
+  loadEmbedFrame("ai", { force: true });
+}
+
+document.addEventListener("st2:open-ai-url", (e) => {
+  openAiPlatformUrl(e.detail?.url);
 });
 
 function getEmbedFrameUrl(kind) {
@@ -4461,7 +4510,7 @@ function getEmbedFrameUrl(kind) {
       return "/css-tap";
     }
   }
-  if (kind === "ai") return appConfig?.aiPlatformUrl;
+  if (kind === "ai") return aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
   if (kind === "portal") return getPortalLoginUrl();
   return null;
 }
@@ -5476,7 +5525,8 @@ function reloadAiEmbed() {
 }
 
 function openAiEmbedInBrowser() {
-  if (appConfig?.aiPlatformUrl) window.open(appConfig.aiPlatformUrl, "_blank", "noopener");
+  const url = aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
+  if (url) window.open(url, "_blank", "noopener");
 }
 
 document.getElementById("aiEmbedMenuBtn")?.addEventListener("click", (e) => {

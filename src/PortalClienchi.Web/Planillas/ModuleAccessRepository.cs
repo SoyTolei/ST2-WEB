@@ -115,6 +115,8 @@ public sealed class ModuleAccessRepository
         var planillasSqlOnvio = req.PlanillasSqlOnvio ?? current.PlanillasSqlOnvio;
         var planillasTransferencia = req.PlanillasTransferencia ?? current.PlanillasTransferencia;
         var planillasReferral = req.PlanillasReferral ?? current.PlanillasReferral;
+        var planillasLeia = req.PlanillasLeia ?? current.PlanillasLeia;
+        var planillasBukowski = req.PlanillasBukowski ?? current.PlanillasBukowski;
         var planillasLegal = req.PlanillasLegal ?? current.PlanillasLegal;
         var legalFirm = req.LegalFirm ?? current.LegalFirm;
         var legalHighq = req.LegalHighq ?? current.LegalHighq;
@@ -138,6 +140,8 @@ public sealed class ModuleAccessRepository
         WriteModule(conn, email, PlanModuleIds.PlanillasSqlOnvio, planillasSqlOnvio, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasTransferencia, planillasTransferencia, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasReferral, planillasReferral, false);
+        WriteModule(conn, email, PlanModuleIds.PlanillasLeia, planillasLeia, false);
+        WriteModule(conn, email, PlanModuleIds.PlanillasBukowski, planillasBukowski, false);
         WriteModule(conn, email, PlanModuleIds.PlanillasLegal, planillasLegal, false);
         WriteModule(conn, email, PlanModuleIds.LegalFirm, legalFirm, false);
         WriteModule(conn, email, PlanModuleIds.LegalHighq, legalHighq, false);
@@ -217,6 +221,10 @@ public sealed class ModuleAccessRepository
                 flags.PlanillasTransferencia = view;
             else if (module.Equals(PlanModuleIds.PlanillasReferral, StringComparison.OrdinalIgnoreCase))
                 flags.PlanillasReferral = view;
+            else if (module.Equals(PlanModuleIds.PlanillasLeia, StringComparison.OrdinalIgnoreCase))
+                flags.PlanillasLeia = view;
+            else if (module.Equals(PlanModuleIds.PlanillasBukowski, StringComparison.OrdinalIgnoreCase))
+                flags.PlanillasBukowski = view;
             else if (module.Equals(PlanModuleIds.PlanillasLegal, StringComparison.OrdinalIgnoreCase))
                 flags.PlanillasLegal = view;
             else if (module.Equals("legal_escalamiento", StringComparison.OrdinalIgnoreCase))
@@ -267,6 +275,10 @@ public sealed class ModuleAccessRepository
             flags.PlanillasTransferencia = true;
         if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasReferral))
             flags.PlanillasReferral = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasLeia))
+            flags.PlanillasLeia = true;
+        if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasBukowski))
+            flags.PlanillasBukowski = true;
         if (!HasModuleRow(conn, email, PlanModuleIds.PlanillasLegal))
             flags.PlanillasLegal = true;
 

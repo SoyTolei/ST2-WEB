@@ -1650,6 +1650,8 @@ public sealed class AccessPresetRequest
     public bool? PlanillasSqlOnvio { get; set; }
     public bool? PlanillasTransferencia { get; set; }
     public bool? PlanillasReferral { get; set; }
+    public bool? PlanillasLeia { get; set; }
+    public bool? PlanillasBukowski { get; set; }
     public bool? PlanillasLegal { get; set; }
     public bool? LegalFirm { get; set; }
     public bool? LegalHighq { get; set; }

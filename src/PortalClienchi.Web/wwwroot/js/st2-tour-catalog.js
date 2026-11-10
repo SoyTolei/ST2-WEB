@@ -296,11 +296,11 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     });
   }
 
-  if (visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski")) {
+  if (visible("#plan-asistentes-modulos-well") && (visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski"))) {
     steps.push({
-      selector: visible("#plan-modulo-leia") ? "#plan-modulo-leia" : "#plan-modulo-bukowski",
-      title: "LEIA y Bukowski",
-      body: "Atajos a las chains de AI Platform: LEIA resume atención por WhatsApp y Bukowski asiste a la mesa. Se abren en una pestaña nueva.",
+      selector: "#plan-asistentes-modulos-well",
+      title: "Asistentes",
+      body: "LEIA resume atención por WhatsApp y Bukowski asiste a la mesa. Se abren en la pestaña AI Platform, sin salir de ST².",
       placement: "top",
       when: () => visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski"),
     });

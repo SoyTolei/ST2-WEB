@@ -14,6 +14,8 @@ public static class PlanModuleIds
     public const string PlanillasSqlOnvio = "planillas_sql_onvio";
     public const string PlanillasTransferencia = "planillas_transferencia";
     public const string PlanillasReferral = "planillas_referral";
+    public const string PlanillasLeia = "planillas_leia";
+    public const string PlanillasBukowski = "planillas_bukowski";
     public const string PlanillasLegal = "planillas_legal";
     public const string LegalFirm = "legal_firm";
     public const string LegalHighq = "legal_highq";
@@ -39,6 +41,8 @@ public static class PlanModuleIds
         PlanillasSqlOnvio,
         PlanillasTransferencia,
         PlanillasReferral,
+        PlanillasLeia,
+        PlanillasBukowski,
         PlanillasLegal,
         LegalFirm,
         LegalHighq,
@@ -70,6 +74,8 @@ public sealed class ModuleAccessFlagsDto
     public bool PlanillasSqlOnvio { get; set; } = true;
     public bool PlanillasTransferencia { get; set; } = true;
     public bool PlanillasReferral { get; set; } = true;
+    public bool PlanillasLeia { get; set; } = true;
+    public bool PlanillasBukowski { get; set; } = true;
     public bool PlanillasLegal { get; set; } = true;
     public bool LegalFirm { get; set; } = true;
     public bool LegalHighq { get; set; } = true;
@@ -99,6 +105,8 @@ public sealed class ModuleAccessUpdateRequest
     public bool? PlanillasSqlOnvio { get; set; }
     public bool? PlanillasTransferencia { get; set; }
     public bool? PlanillasReferral { get; set; }
+    public bool? PlanillasLeia { get; set; }
+    public bool? PlanillasBukowski { get; set; }
     public bool? PlanillasLegal { get; set; }
     public bool? LegalFirm { get; set; }
     public bool? LegalHighq { get; set; }

@@ -1066,6 +1066,8 @@ public static class PlanillasEndpoints
                     PlanillasSqlOnvio = body.PlanillasSqlOnvio,
                     PlanillasTransferencia = body.PlanillasTransferencia,
                     PlanillasReferral = body.PlanillasReferral,
+                    PlanillasLeia = body.PlanillasLeia,
+                    PlanillasBukowski = body.PlanillasBukowski,
                     PlanillasLegal = body.PlanillasLegal,
                     LegalFirm = body.LegalFirm,
                     LegalHighq = body.LegalHighq,

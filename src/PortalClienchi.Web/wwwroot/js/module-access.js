@@ -39,6 +39,8 @@ function fullFlags() {
     planillasSqlOnvio: true,
     planillasTransferencia: true,
     planillasReferral: true,
+    planillasLeia: true,
+    planillasBukowski: true,
     planillasLegal: true,
     legalFirm: true,
     legalHighq: true,
@@ -68,6 +70,8 @@ function emptyFlags() {
     planillasSqlOnvio: false,
     planillasTransferencia: false,
     planillasReferral: false,
+    planillasLeia: false,
+    planillasBukowski: false,
     planillasLegal: false,
     legalFirm: false,
     legalHighq: false,
@@ -203,6 +207,8 @@ function parseFlagsFromApi(m) {
     planillasSqlOnvio: m.planillasSqlOnvio == null ? true : !!m.planillasSqlOnvio,
     planillasTransferencia: m.planillasTransferencia == null ? true : !!m.planillasTransferencia,
     planillasReferral: m.planillasReferral == null ? true : !!m.planillasReferral,
+    planillasLeia: m.planillasLeia == null ? true : !!m.planillasLeia,
+    planillasBukowski: m.planillasBukowski == null ? true : !!m.planillasBukowski,
     planillasLegal: m.planillasLegal == null ? true : !!m.planillasLegal,
     legalFirm: m.legalFirm == null ? true : !!m.legalFirm,
     legalHighq: m.legalHighq == null ? true : !!m.legalHighq,
@@ -364,6 +370,14 @@ export function canSeePlanillasTransferencia() {
 
 export function canSeePlanillasReferral() {
   return !!getCachedModuleFlags().planillasReferral;
+}
+
+export function canSeePlanillasLeia() {
+  return !!getCachedModuleFlags().planillasLeia;
+}
+
+export function canSeePlanillasBukowski() {
+  return !!getCachedModuleFlags().planillasBukowski;
 }
 
 export function canSeeLegalFirm() {

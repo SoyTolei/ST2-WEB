@@ -5,7 +5,7 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261013i";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261013m";
-import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile, canSeeLegalProduct } from "./module-access.js";
+import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile, canSeeLegalProduct } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { syncLegalMenuProducts } from "./planillas-legal-menu.js?v=20261012d";
 import { getPlanUserEmail } from "./plan-user.js";
@@ -531,12 +531,18 @@ function updateSistemaUi() {
   const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
   const opcionesTitle = document.getElementById("plan-opciones-section-title");
   const opcionesWell = document.getElementById("plan-opciones-modulos-well");
+  const asistentesTitle = document.getElementById("plan-asistentes-section-title");
+  const asistentesWell = document.getElementById("plan-asistentes-modulos-well");
   const legalProductsWrap = document.getElementById("plan-legal-products-wrap");
   const placeholderBlocked = !sistemaActual || isSistemaPlaceholder(sistemaActual);
   const hideCommercial = hidesCommercialModules();
   const showTransfer = canSeeTransferenciaModule();
   const showReferral = canSeeReferralModule() && !isLegal();
   const showLegalProducts = isLegal() && canSeeAnyLegalProduct();
+  const sqlOnvioMenu = (sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb") && !showLegalProducts;
+  const showLeia = sqlOnvioMenu && canSeePlanillasLeia();
+  const showBukowski = sqlOnvioMenu && canSeePlanillasBukowski();
+  const showAsistentes = showLeia || showBukowski;
 
   if (transferBtn) {
     transferBtn.classList.toggle("hidden", !showTransfer);
@@ -553,15 +559,24 @@ function updateSistemaUi() {
     referralBtn.toggleAttribute("hidden", !showReferral || showLegalProducts);
     referralBtn.disabled = placeholderBlocked || !showReferral;
   }
-  const showAiChains = (sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb") && !showLegalProducts;
-  for (const id of ["plan-modulo-leia", "plan-modulo-bukowski"]) {
-    const btn = document.getElementById(id);
-    if (!btn) continue;
-    btn.classList.toggle("hidden", !showAiChains);
-    btn.toggleAttribute("hidden", !showAiChains);
-    btn.disabled = placeholderBlocked || !showAiChains;
-    btn.setAttribute("aria-hidden", showAiChains ? "false" : "true");
+  const leiaBtn = document.getElementById("plan-modulo-leia");
+  if (leiaBtn) {
+    leiaBtn.classList.toggle("hidden", !showLeia);
+    leiaBtn.toggleAttribute("hidden", !showLeia);
+    leiaBtn.disabled = placeholderBlocked || !showLeia;
+    leiaBtn.setAttribute("aria-hidden", showLeia ? "false" : "true");
   }
+  const bukowskiBtn = document.getElementById("plan-modulo-bukowski");
+  if (bukowskiBtn) {
+    bukowskiBtn.classList.toggle("hidden", !showBukowski);
+    bukowskiBtn.toggleAttribute("hidden", !showBukowski);
+    bukowskiBtn.disabled = placeholderBlocked || !showBukowski;
+    bukowskiBtn.setAttribute("aria-hidden", showBukowski ? "false" : "true");
+  }
+  asistentesTitle?.classList.toggle("hidden", !showAsistentes);
+  asistentesTitle?.toggleAttribute("hidden", !showAsistentes);
+  asistentesWell?.classList.toggle("hidden", !showAsistentes);
+  asistentesWell?.toggleAttribute("hidden", !showAsistentes);
   opcionesTitle?.classList.toggle("hidden", showLegalProducts);
   opcionesTitle?.toggleAttribute("hidden", showLegalProducts);
   opcionesWell?.classList.toggle("hidden", showLegalProducts);
@@ -1659,12 +1674,12 @@ function bindEvents() {
     void loadReferralModule();
   }, { passive: true });
 
-  document.querySelectorAll("[data-plan-external-url]").forEach((btn) => {
+  document.querySelectorAll("[data-plan-ai-url]").forEach((btn) => {
     btn.addEventListener("click", () => {
       if (btn.disabled || btn.classList.contains("hidden")) return;
-      const url = String(btn.getAttribute("data-plan-external-url") || "").trim();
+      const url = String(btn.getAttribute("data-plan-ai-url") || "").trim();
       if (!url) return;
-      window.open(url, "_blank", "noopener,noreferrer");
+      document.dispatchEvent(new CustomEvent("st2:open-ai-url", { detail: { url } }));
     });
   });
 

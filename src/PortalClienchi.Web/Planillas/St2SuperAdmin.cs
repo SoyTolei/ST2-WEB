@@ -25,6 +25,8 @@ public static class St2SuperAdmin
         PlanillasSqlOnvio = true,
         PlanillasTransferencia = true,
         PlanillasReferral = true,
+        PlanillasLeia = true,
+        PlanillasBukowski = true,
         PlanillasLegal = true,
         LegalFirm = true,
         LegalHighq = true,

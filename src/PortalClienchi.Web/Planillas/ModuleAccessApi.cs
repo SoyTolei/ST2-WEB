@@ -15,6 +15,8 @@ public static class ModuleAccessApi
         planillasSqlOnvio = flags.PlanillasSqlOnvio,
         planillasTransferencia = flags.PlanillasTransferencia,
         planillasReferral = flags.PlanillasReferral,
+        planillasLeia = flags.PlanillasLeia,
+        planillasBukowski = flags.PlanillasBukowski,
         planillasLegal = flags.PlanillasLegal,
         legalFirm = flags.LegalFirm,
         legalHighq = flags.LegalHighq,
