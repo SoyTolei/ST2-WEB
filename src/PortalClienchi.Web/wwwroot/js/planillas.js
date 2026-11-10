@@ -28,7 +28,7 @@ import {
   setTourContext,
   autoTour,
   syncHeaderTourButton,
-} from "./st2-tour-init.js?v=20261027b";
+} from "./st2-tour-init.js?v=20261110a";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261027a";
 
@@ -552,6 +552,15 @@ function updateSistemaUi() {
     referralBtn.classList.toggle("hidden", !showReferral || showLegalProducts);
     referralBtn.toggleAttribute("hidden", !showReferral || showLegalProducts);
     referralBtn.disabled = placeholderBlocked || !showReferral;
+  }
+  const showAiChains = (sistemaActual === "BejermanSql" || sistemaActual === "OnvioWeb") && !showLegalProducts;
+  for (const id of ["plan-modulo-leia", "plan-modulo-bukowski"]) {
+    const btn = document.getElementById(id);
+    if (!btn) continue;
+    btn.classList.toggle("hidden", !showAiChains);
+    btn.toggleAttribute("hidden", !showAiChains);
+    btn.disabled = placeholderBlocked || !showAiChains;
+    btn.setAttribute("aria-hidden", showAiChains ? "false" : "true");
   }
   opcionesTitle?.classList.toggle("hidden", showLegalProducts);
   opcionesTitle?.toggleAttribute("hidden", showLegalProducts);
@@ -1649,6 +1658,15 @@ function bindEvents() {
   document.querySelector('[data-plan-modulo="referral"]')?.addEventListener("pointerenter", () => {
     void loadReferralModule();
   }, { passive: true });
+
+  document.querySelectorAll("[data-plan-external-url]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (btn.disabled || btn.classList.contains("hidden")) return;
+      const url = String(btn.getAttribute("data-plan-external-url") || "").trim();
+      if (!url) return;
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  });
 
   document.querySelector('[data-plan-modulo="oportunidad"]')?.addEventListener("click", () => {
     void revealView("oportunidadMenu");
