@@ -5511,57 +5511,6 @@ document.getElementById("thomGateCloseBtn")?.addEventListener("click", () => clo
 document.getElementById("thomOpenBtn")?.addEventListener("click", openThomBrowserTab);
 document.getElementById("thomProxyOpenBtn")?.addEventListener("click", openThomBrowserTab);
 
-let aiEmbedMenuOpen = false;
-
-function closeAiEmbedMenu() {
-  aiEmbedMenuOpen = false;
-  document.getElementById("aiEmbedMenu")?.classList.add("hidden");
-  document.getElementById("aiEmbedMenuBtn")?.setAttribute("aria-expanded", "false");
-}
-
-function toggleAiEmbedMenu() {
-  const menu = document.getElementById("aiEmbedMenu");
-  const btn = document.getElementById("aiEmbedMenuBtn");
-  if (!menu || !btn) return;
-  aiEmbedMenuOpen = !aiEmbedMenuOpen;
-  menu.classList.toggle("hidden", !aiEmbedMenuOpen);
-  btn.setAttribute("aria-expanded", aiEmbedMenuOpen ? "true" : "false");
-}
-
-function reloadAiEmbed() {
-  if (isEmbedFrameEmpty(aiFrame)) loadEmbedFrame("ai", { force: true });
-  else aiFrame.contentWindow?.location.reload();
-}
-
-function openAiEmbedInBrowser() {
-  const url = aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
-  if (url) window.open(url, "_blank", "noopener");
-}
-
-document.getElementById("aiEmbedMenuBtn")?.addEventListener("click", (e) => {
-  e.stopPropagation();
-  toggleAiEmbedMenu();
-});
-
-document.querySelectorAll("[data-ai-embed-action]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const action = btn.getAttribute("data-ai-embed-action");
-    closeAiEmbedMenu();
-    if (action === "reload") reloadAiEmbed();
-    else if (action === "open") openAiEmbedInBrowser();
-  });
-});
-
-document.addEventListener("click", (e) => {
-  if (!aiEmbedMenuOpen) return;
-  if (e.target.closest("#panel-ai .plan-chile-embed-nav")) return;
-  closeAiEmbedMenu();
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && aiEmbedMenuOpen) closeAiEmbedMenu();
-});
-
 document.getElementById("portalReloadBtn")?.addEventListener("click", () => {
   if (isEmbedFrameEmpty(portalFrame)) loadEmbedFrame("portal", { force: true });
   else {

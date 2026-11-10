@@ -1318,14 +1318,19 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-modulo-btn.blanqueo { background: #1d4ed8; }
 .plan-modulo-btn.borrado-bases { background: #be123c; }
 
-/* Franja fina LEIA / Bukowski encima de Opciones */
+/* Franja fina LEIA / Bukowski: acción secundaria quieta (no tile de color).
+   Misma lógica que chips de dashboard dark: superficie neutra + acento solo en el ícono. */
 .plan-asistentes-strip {
   display: flex;
   flex-wrap: wrap;
-  align-items: stretch;
+  align-items: center;
   gap: 8px;
   width: 100%;
-  margin: 0 0 10px;
+  margin: 2px 0 12px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--st2-suite-border);
+  background: color-mix(in srgb, var(--st2-suite-surface-soft) 88%, transparent);
 }
 
 .plan-asistentes-strip.hidden {
@@ -1334,53 +1339,48 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .plan-asistente-chip {
   appearance: none;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  min-height: 34px;
-  height: 34px;
-  padding: 0 12px 0 8px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 10px;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 10px 0 6px;
   margin: 0;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: #fff;
+  gap: 7px;
+  color: var(--dark, #1a1f2e);
+  background: rgba(255, 255, 255, 0.72);
   cursor: pointer;
   font: inherit;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  box-shadow: none;
   transition:
-    transform 0.16s ease,
-    filter 0.16s ease,
-    box-shadow 0.16s ease,
-    border-color 0.16s ease;
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .plan-asistente-chip.leia {
-  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  border-color: rgba(13, 148, 136, 0.38);
 }
 
 .plan-asistente-chip.bukowski {
-  background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+  border-color: rgba(99, 102, 241, 0.38);
 }
 
 .plan-asistente-chip:hover:not(:disabled) {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-  border-color: rgba(255, 255, 255, 0.55);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
-    0 8px 18px rgba(15, 23, 42, 0.16);
+  background: #fff;
+  border-color: rgba(234, 88, 12, 0.5);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
 }
 
 .plan-asistente-chip:active:not(:disabled) {
-  transform: translateY(0);
-  filter: brightness(1.02);
+  background: rgba(255, 247, 237, 0.95);
 }
 
 .plan-asistente-chip:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-  filter: none;
-  transform: none;
 }
 
 .plan-asistente-chip.hidden {
@@ -1388,19 +1388,29 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-asistente-chip-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
+  border-radius: 7px;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.plan-asistente-chip.leia .plan-asistente-chip-icon {
+  color: #0f766e;
+  background: rgba(13, 148, 136, 0.12);
+}
+
+.plan-asistente-chip.bukowski .plan-asistente-chip-icon {
+  color: #4338ca;
+  background: rgba(99, 102, 241, 0.12);
 }
 
 .plan-asistente-chip-icon svg {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   display: block;
 }
 
@@ -1413,7 +1423,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .plan-asistente-chip-label {
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   line-height: 1;
@@ -1421,11 +1431,11 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .plan-asistente-chip-sub {
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--text-muted, #64748b);
 }
 
 @media (max-width: 640px) {

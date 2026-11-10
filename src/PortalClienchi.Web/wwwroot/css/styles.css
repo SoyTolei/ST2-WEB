@@ -1161,13 +1161,13 @@ body.portal-tab-active.st2-has-modules-update.st2-has-tools-update .main-shell {
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 10px 12px;
-  min-height: 58px;
-  margin: 0 auto 14px;
+  gap: 4px;
+  padding: 5px 8px;
+  min-height: 44px;
+  margin: 0 auto 10px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 14px;
   box-shadow:
     0 1px 2px rgba(26, 31, 46, 0.04),
     0 8px 24px rgba(26, 31, 46, 0.05);
@@ -1194,17 +1194,17 @@ body.portal-tab-active.portal-context-active .tab-bar {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-muted);
-  font-size: 13.5px;
+  font-size: 12.75px;
   font-weight: 600;
   letter-spacing: 0.01em;
-  padding: 11px 18px;
-  min-height: 42px;
+  padding: 7px 13px;
+  min-height: 34px;
   margin: 0;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition:
     background 0.18s ease,
@@ -2260,21 +2260,6 @@ body.embed-active #panel-ai .embed-frame-wrap > .embed-frame {
   min-height: 0;
   transform: none;
   zoom: 1;
-}
-
-#panel-ai .embed-toolbar.embed-toolbar-compact {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 6;
-  margin: 0;
-  pointer-events: none;
-}
-
-#panel-ai .embed-toolbar .plan-chile-embed-nav,
-#panel-ai .embed-toolbar .plan-chile-embed-menu-btn,
-#panel-ai .embed-toolbar .plan-chile-embed-menu {
-  pointer-events: auto;
 }
 
 #panel-ai .embed-frame-wrap {
