@@ -616,11 +616,6 @@ html.st2-theme-dark #planillas-menu .planillas-section-title {
   color: #94a3b8 !important;
 }
 
-html.st2-theme-dark .plan-asistentes-strip {
-  background: rgba(26, 26, 26, 0.72);
-  border-color: rgba(251, 146, 60, 0.2);
-}
-
 html.st2-theme-dark .plan-asistente-chip {
   background: rgba(20, 20, 20, 0.92);
   border-color: rgba(148, 163, 184, 0.22);

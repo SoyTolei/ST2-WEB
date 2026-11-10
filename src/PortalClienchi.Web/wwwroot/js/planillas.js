@@ -529,6 +529,7 @@ function updateSistemaUi() {
   const referralBtn = document.querySelector('[data-plan-modulo="referral"]');
   const oportunidadBtn = document.querySelector('[data-plan-modulo="oportunidad"]');
   const oportunidadNa = document.getElementById("plan-modulo-oportunidad-na");
+  const opcionesHead = document.getElementById("plan-opciones-head");
   const opcionesTitle = document.getElementById("plan-opciones-section-title");
   const opcionesWell = document.getElementById("plan-opciones-modulos-well");
   const asistentesStrip = document.getElementById("plan-asistentes-strip");
@@ -575,6 +576,9 @@ function updateSistemaUi() {
   asistentesStrip?.classList.toggle("hidden", !showAsistentes);
   asistentesStrip?.toggleAttribute("hidden", !showAsistentes);
   asistentesStrip?.setAttribute("aria-hidden", showAsistentes ? "false" : "true");
+  opcionesHead?.classList.toggle("has-asistentes", showAsistentes && !showLegalProducts);
+  opcionesHead?.classList.toggle("hidden", showLegalProducts);
+  opcionesHead?.toggleAttribute("hidden", showLegalProducts);
   opcionesTitle?.classList.toggle("hidden", showLegalProducts);
   opcionesTitle?.toggleAttribute("hidden", showLegalProducts);
   opcionesWell?.classList.toggle("hidden", showLegalProducts);

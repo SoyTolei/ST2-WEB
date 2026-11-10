@@ -121,8 +121,8 @@
   <link rel="stylesheet" href="/css/styles.css?v=20261110d"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20261110d"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20261110d"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20261110e"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20261110e"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20261013l"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20261013m"/>
@@ -347,24 +347,25 @@
             </div>
             </div>
 
-            <div class="plan-asistentes-strip hidden" id="plan-asistentes-strip" hidden>
-              <button type="button" class="plan-asistente-chip leia hidden" data-plan-ai-url="https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/86898a4b-51b0-4a13-899c-a244945694b0?sidebar=instructions_auto" id="plan-modulo-leia" hidden title="LEIA · Resumen de atención por WhatsApp">
-                <span class="plan-asistente-chip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7A2.5 2.5 0 0 1 16.5 16H12l-4 3.5V16H7.5A2.5 2.5 0 0 1 5 13.5z"/><path d="M9 9h6M9 12h4"/></svg></span>
-                <span class="plan-asistente-chip-text">
-                  <span class="plan-asistente-chip-label">LEIA</span>
-                  <span class="plan-asistente-chip-sub">WhatsApp</span>
-                </span>
-              </button>
-              <button type="button" class="plan-asistente-chip bukowski hidden" data-plan-ai-url="https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/ed8e080e-b181-4ae9-b6da-3034fbf17a83?chain_builder=true" id="plan-modulo-bukowski" hidden title="Bukowski · Asistente de mesa de ayuda">
-                <span class="plan-asistente-chip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 19c1.2-3 3.2-4.5 5.5-4.5s4.3 1.5 5.5 4.5"/><path d="M16.5 7.2 18 5.8M7.5 7.2 6 5.8M14.8 11.2l1.7 1.1M9.2 11.2 7.5 12.3"/></svg></span>
-                <span class="plan-asistente-chip-text">
-                  <span class="plan-asistente-chip-label">Bukowski</span>
-                  <span class="plan-asistente-chip-sub">Mesa de ayuda</span>
-                </span>
-              </button>
+            <div class="plan-opciones-head" id="plan-opciones-head">
+              <p class="planillas-section-title" id="plan-opciones-section-title">Opciones</p>
+              <div class="plan-asistentes-strip hidden" id="plan-asistentes-strip" hidden aria-label="Asistentes AI">
+                <button type="button" class="plan-asistente-chip leia hidden" data-plan-ai-url="https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/86898a4b-51b0-4a13-899c-a244945694b0?sidebar=instructions_auto" id="plan-modulo-leia" hidden title="LEIA · Resumen de atención por WhatsApp">
+                  <span class="plan-asistente-chip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v7A2.5 2.5 0 0 1 16.5 16H12l-4 3.5V16H7.5A2.5 2.5 0 0 1 5 13.5z"/><path d="M9 9h6M9 12h4"/></svg></span>
+                  <span class="plan-asistente-chip-text">
+                    <span class="plan-asistente-chip-label">LEIA</span>
+                    <span class="plan-asistente-chip-sub">WhatsApp</span>
+                  </span>
+                </button>
+                <button type="button" class="plan-asistente-chip bukowski hidden" data-plan-ai-url="https://aiplatform.thomsonreuters.com/ai-platform/ai-chains/use/ed8e080e-b181-4ae9-b6da-3034fbf17a83?chain_builder=true" id="plan-modulo-bukowski" hidden title="Bukowski · Asistente de mesa de ayuda">
+                  <span class="plan-asistente-chip-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M6.5 19c1.2-3 3.2-4.5 5.5-4.5s4.3 1.5 5.5 4.5"/><path d="M16.5 7.2 18 5.8M7.5 7.2 6 5.8M14.8 11.2l1.7 1.1M9.2 11.2 7.5 12.3"/></svg></span>
+                  <span class="plan-asistente-chip-text">
+                    <span class="plan-asistente-chip-label">Bukowski</span>
+                    <span class="plan-asistente-chip-sub">Mesa de ayuda</span>
+                  </span>
+                </button>
+              </div>
             </div>
-
-            <p class="planillas-section-title" id="plan-opciones-section-title">Opciones</p>
             <div class="plan-modulos-well" id="plan-opciones-modulos-well">
               <div class="plan-modulos-grid">
                 <button type="button" class="plan-modulo-btn transfer" data-plan-modulo="transferencia" id="plan-modulo-transferencia">
@@ -2873,6 +2874,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261110d" type="module"></script>
+  <script src="/js/app.js?v=20261110e" type="module"></script>
 </body>
 </html>

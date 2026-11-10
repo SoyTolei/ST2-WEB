@@ -1318,19 +1318,44 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .plan-modulo-btn.blanqueo { background: #1d4ed8; }
 .plan-modulo-btn.borrado-bases { background: #be123c; }
 
-/* Franja fina LEIA / Bukowski: acción secundaria quieta (no tile de color).
-   Misma lógica que chips de dashboard dark: superficie neutra + acento solo en el ícono. */
-.plan-asistentes-strip {
+/* LEIA / Bukowski van en la fila de “Opciones” (derecha): atajos, no una barra vacía. */
+.plan-opciones-head {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 12px;
+  min-height: 30px;
+}
+
+.plan-opciones-head.hidden {
+  display: none !important;
+}
+
+.plan-opciones-head .planillas-section-title {
+  margin: 0;
+  text-align: center;
+}
+
+.plan-opciones-head.has-asistentes {
+  justify-content: space-between;
+}
+
+.plan-opciones-head.has-asistentes .planillas-section-title {
+  text-align: left;
+}
+
+.plan-asistentes-strip {
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-  width: 100%;
-  margin: 2px 0 12px;
-  padding: 6px 8px;
-  border-radius: 12px;
-  border: 1px solid var(--st2-suite-border);
-  background: color-mix(in srgb, var(--st2-suite-surface-soft) 88%, transparent);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .plan-asistentes-strip.hidden {
@@ -1439,12 +1464,24 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 @media (max-width: 640px) {
+  .plan-opciones-head.has-asistentes {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .plan-opciones-head.has-asistentes .planillas-section-title {
+    width: 100%;
+    text-align: center;
+  }
+
   .plan-asistentes-strip {
+    width: 100%;
+    justify-content: center;
     gap: 6px;
   }
 
   .plan-asistente-chip {
-    flex: 1 1 calc(50% - 6px);
+    flex: 0 1 auto;
     justify-content: center;
   }
 }

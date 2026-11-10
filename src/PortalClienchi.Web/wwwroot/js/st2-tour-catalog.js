@@ -300,8 +300,8 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-asistentes-strip",
       title: "LEIA y Bukowski",
-      body: "Atajos finos a las chains: LEIA para WhatsApp y Bukowski para la mesa. Se abren en la pestaña AI Platform, a pantalla dentro de ST².",
-      placement: "bottom",
+      body: "Atajos a las chains, al lado de Opciones: LEIA para WhatsApp y Bukowski para la mesa. Se abren en la pestaña AI Platform.",
+      placement: "left",
       when: () => visible("#plan-modulo-leia") || visible("#plan-modulo-bukowski"),
     });
   }
