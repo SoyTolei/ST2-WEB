@@ -1493,15 +1493,28 @@ function isBlanqueoConClave(item) {
 const BLANQUEO_CLAVE_PREVIA = "Sueldo.20261";
 
 /** Pastilla con la clave: punteada, “Copiar” al hover, clic copia. */
-function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custom = false } = {}) {
+function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custom = false, bubble = false } = {}) {
   const value = String(clave || "").trim();
   if (!value) return "";
   const isCustom = custom || value.toLowerCase() !== claveDefault().toLowerCase();
-  const cls = isCustom ? "blanqueo-clave-pill blanqueo-clave-pill--custom" : "blanqueo-clave-pill";
+  const cls = bubble
+    ? "blanqueo-clave-pill blanqueo-clave-bubble"
+    : isCustom
+      ? "blanqueo-clave-pill blanqueo-clave-pill--custom"
+      : "blanqueo-clave-pill";
   return `<button type="button" class="${cls}" data-blanqueo-copy-clave="${escapeHtml(value)}" title="${escapeHtml(title)}" aria-label="Copiar clave ${escapeHtml(value)}">
     <code class="blanqueo-clave-pill-label">${escapeHtml(value)}</code>
     <span class="blanqueo-clave-pill-action" aria-hidden="true">Copiar</span>
   </button>`;
+}
+
+/** Clave “sola” (Sueldo.07612) vs aclaración libre (“ya estaba aceptado”, “Sueldo.2027 Sin MFA”). */
+function looksLikeClaveOnly(text) {
+  const t = String(text || "").trim();
+  if (!t) return false;
+  if (/^sueldo\.\d+$/i.test(t)) return true;
+  if (/\s/.test(t)) return false;
+  return /^[A-Za-z0-9._@-]{4,48}$/.test(t);
 }
 
 function aclaracionTieneClavePrevia(aclaracion) {
@@ -1528,20 +1541,20 @@ function formatAclaracionCell(item) {
     if (aclaracionTieneClavePrevia(aclaracion)) {
       return formatClavePreviaPill(aclaracion);
     }
-    const cls = isNoRegistrado(aclaracion) ? "bad" : "note";
-    // "No registrado" va en Estado; acá queda vacío.
-    if (cls === "bad") return "—";
+    if (isNoRegistrado(aclaracion)) return "—";
     if (isActivacionAutoNote(aclaracion)) {
       return `<span class="blanqueo-pill blanqueo-pill-clave-style" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
     }
-    // Contraseña informada al confirmar: pastilla copiable.
-    if (item?.listo && !isNoRegistrado(aclaracion)) {
-      return formatClaveCopyPill(aclaracion, "Clic para copiar la contraseña usada", { custom: true }) || "—";
+    // Contraseña sola → globito; aclaración libre → recuadro amarillo.
+    if (looksLikeClaveOnly(aclaracion)) {
+      return formatClaveCopyPill(aclaracion, "Clic para copiar la contraseña", { bubble: true }) || "—";
     }
-    return `<span class="blanqueo-pill ${cls}" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
+    return formatClaveCopyPill(aclaracion, "Clic para copiar la aclaración", { custom: true })
+      || `<span class="blanqueo-pill note" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
   }
+  // Histórico: listo sin texto → seguimos mostrando la clave por defecto (no se borró del servidor).
   if (item?.listo && isBlanqueoConClave(item)) {
-    return "—";
+    return formatClaveCopyPill(claveDefault(), "Clave histórica por defecto · clic para copiar", { bubble: true }) || "—";
   }
   return "—";
 }
@@ -1556,8 +1569,11 @@ function formatGestionadoPorCell(item) {
 function formatEstadoCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (item.listo) {
-    if (aclaracion && !isActivacionAutoNote(aclaracion)) {
-      return '<span class="blanqueo-pill ok-note" title="Listo con aclaración">Listo · nota</span>';
+    if (aclaracion && !isActivacionAutoNote(aclaracion) && !looksLikeClaveOnly(aclaracion)) {
+      return '<span class="blanqueo-pill ok-note" title="Listo + Aclaración">Listo · nota</span>';
+    }
+    if (aclaracion && looksLikeClaveOnly(aclaracion)) {
+      return '<span class="blanqueo-pill ok" title="Listo - Indicar Contraseña">Listo · clave</span>';
     }
     return '<span class="blanqueo-pill ok">Listo</span>';
   }

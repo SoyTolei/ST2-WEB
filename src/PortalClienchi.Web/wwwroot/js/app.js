@@ -14,7 +14,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110j";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261110k";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -4513,13 +4513,17 @@ function getEmbedFrameUrl(kind) {
   }
   if (kind === "ai") return aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
   if (kind === "orpen") {
-    // Absolute: Orpen no manda X-Frame-Options y el proxy PHP/sesión suele quedar en blanco.
+    // Proxy: el login se ve bien en absoluto, pero post-login la sesión/cookies
+    // y redirects suelen romper el iframe. El proxy reescribe cookies y URLs.
     const raw = String(appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php").trim();
     try {
       const u = new URL(raw);
+      if (u.hostname.endsWith("orpen.com.br")) {
+        return `/embed/orpen${u.pathname}${u.search || ""}`;
+      }
       if (u.protocol === "http:" || u.protocol === "https:") return u.href;
     } catch { /* fall through */ }
-    return "https://thomsontap.orpen.com.br/rcx/login.php";
+    return "/embed/orpen/rcx/login.php";
   }
   if (kind === "portal") return getPortalLoginUrl();
   return null;
@@ -5283,7 +5287,14 @@ function setEmbedHint(kind, message) {
         : "aiEmbedHint";
   const el = document.getElementById(id);
   if (!el) return;
-  // Hints de embed ocultos: el toolbar ya tiene «Abrir en navegador».
+  const text = String(message || "").trim();
+  // Orpen: sí mostramos aviso si el iframe queda en blanco post-login.
+  if (kind === "orpen" && text) {
+    el.textContent = text;
+    el.classList.remove("hidden");
+    el.removeAttribute("aria-hidden");
+    return;
+  }
   el.classList.add("hidden");
   el.setAttribute("aria-hidden", "true");
   el.textContent = "";
@@ -5559,8 +5570,29 @@ document.getElementById("orpenReloadBtn")?.addEventListener("click", () => {
   loadEmbedFrame("orpen", { force: true });
 });
 document.getElementById("orpenOpenBtn")?.addEventListener("click", () => {
-  const url = getEmbedFrameUrl("orpen");
-  if (url) window.open(url, "_blank", "noopener");
+  const raw = String(appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php").trim();
+  window.open(raw, "_blank", "noopener");
+});
+
+orpenFrame?.addEventListener("load", () => {
+  // Si el proxy falla o Orpen queda en blanco, ofrecemos abrir afuera.
+  window.setTimeout(() => {
+    if (document.querySelector('.tab-btn.active')?.dataset?.tab !== "orpen") return;
+    try {
+      const doc = orpenFrame.contentDocument;
+      if (doc && doc.body && doc.body.childElementCount === 0) {
+        setEmbedHint("orpen", "Orpen no cargó acá. Probá Recargar o Abrir en navegador.");
+        const hint = document.getElementById("orpenEmbedHint");
+        if (hint) {
+          hint.classList.remove("hidden");
+          hint.removeAttribute("aria-hidden");
+          hint.textContent = "Orpen no cargó acá. Probá Recargar o Abrir en navegador.";
+        }
+      }
+    } catch {
+      // Cross-origin vía proxy absoluto: no leemos el doc; no es error.
+    }
+  }, 2500);
 });
 
 async function bootstrapApp() {

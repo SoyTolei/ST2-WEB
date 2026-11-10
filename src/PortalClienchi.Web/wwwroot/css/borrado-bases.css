@@ -22,8 +22,8 @@
 
 .borrado-form-panel {
   margin: 0;
-  width: fit-content;
-  max-width: min(44rem, 100%);
+  width: min(52rem, 100%);
+  max-width: 100%;
 }
 
 .borrado-form-panel.hidden {
@@ -31,7 +31,9 @@
 }
 
 .borrado-form-panel .plan-gestor-panel-title {
-  text-align: center;
+  text-align: left;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
 }
 
 .borrado-app.borrado-list-only .borrado-table-wrap {
@@ -56,27 +58,28 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
-  width: min(40rem, 100%);
+  gap: 8px;
+  width: 100%;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .borrado-salesforce-toggle {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin: 0 auto;
-  padding: 8px 12px;
-  border: 1px dashed #fda4af;
-  border-radius: 8px;
-  background: #fff1f2;
-  font-size: 0.82rem;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, #fda4af 70%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, #fff1f2 88%, #fff);
+  font-size: 0.8rem;
   font-weight: 600;
   color: #9f1239;
   cursor: pointer;
   user-select: none;
-  align-self: center;
+  align-self: stretch;
+  width: fit-content;
 }
 
 .borrado-salesforce-toggle:hover {
@@ -107,7 +110,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 

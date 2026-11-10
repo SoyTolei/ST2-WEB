@@ -1742,6 +1742,19 @@ html.st2-theme-dark .blanqueo-clave-code:hover {
   border-color: #cbd5e1;
 }
 
+html.st2-theme-dark .blanqueo-clave-pill.blanqueo-clave-bubble {
+  background: linear-gradient(180deg, #3b2412 0%, #2a1a0e 100%);
+  border-style: solid;
+  border-color: #fb923c;
+  color: #fdba74;
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.18), 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+html.st2-theme-dark .blanqueo-clave-pill.blanqueo-clave-bubble:hover,
+html.st2-theme-dark .blanqueo-clave-pill.blanqueo-clave-bubble:focus-visible {
+  background: linear-gradient(180deg, #4a2c14 0%, #3b2412 100%);
+  border-color: #fdba74;
+  color: #ffedd5;
+}
 html.st2-theme-dark .blanqueo-clave-pill--custom {
   background: #3b2a14;
   border-color: #f59e0b;

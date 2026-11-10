@@ -27,6 +27,8 @@ let gestorSelectedId = null;
 let gestorUpdatingMonthCombo = false;
 let linkPlaceholderActive = true;
 let oportunidadIaUndo = null;
+let gestorWarm = false;
+let gestorLoadPromise = null;
 
 export function initOportunidadModule(context) {
   ctx = context;
@@ -76,8 +78,8 @@ function bindOportunidadEvents() {
 
   document.querySelectorAll("[data-op-view]").forEach((card) => {
     const go = () => {
-      if (card.dataset.opView === "cargar") openCargar();
-      else openGestor();
+      if (card.dataset.opView === "cargar") openCargar({ soft: false });
+      else void openGestor({ soft: false });
     };
     card.addEventListener("click", go);
     card.querySelector(".plan-op-open-btn")?.addEventListener("click", (e) => {
@@ -88,8 +90,8 @@ function bindOportunidadEvents() {
 
   document.querySelectorAll("[data-op-tab]").forEach((tab) => {
     tab.addEventListener("click", () => {
-      if (tab.dataset.opTab === "cargar") openCargar();
-      else openGestor();
+      if (tab.dataset.opTab === "cargar") openCargar({ soft: true });
+      else void openGestor({ soft: true });
     });
   });
 
@@ -117,10 +119,11 @@ function bindOportunidadEvents() {
   bindGestorEvents();
 }
 
-function openCargar() {
+function openCargar({ soft = false } = {}) {
   document.getElementById("op-cargar-sistema").textContent = sistemaLabel();
   syncIaUndoBar("op-btn-ia", "op-btn-ia-undo", ctx.getConfig()?.oportunidad?.iaConfigured);
-  ctx.showView("oportunidadCargar");
+  // Entre pestañas: replace = sin delay de historial; menú usa push.
+  ctx.showView("oportunidadCargar", { history: soft ? "replace" : "push" });
 }
 
 function oportunidadIaFieldDefs() {
@@ -142,32 +145,59 @@ function oportunidadIaFieldDefs() {
   ];
 }
 
-async function openGestor() {
-  await syncPlanUserSession();
-  const user = await ensurePlanUser();
-  if (!user) {
-    ctx.showView("oportunidadMenu");
+async function openGestor({ soft = false } = {}) {
+  document.getElementById("op-gestor-sistema").textContent = sistemaLabel();
+  // Pintar la vista al toque; la data se refresca en segundo plano si hace falta.
+  ctx.showView("oportunidadGestor", { history: soft ? "replace" : "push" });
+
+  if (soft && gestorWarm) {
+    if (!gestorLoadPromise) void refreshGestorInBackground();
     return;
   }
 
-  ctx.showView("oportunidadGestor");
+  await ensureGestorReady({ resetFilters: !soft });
+}
 
-  resetGestorFilters();
-  document.getElementById("op-gestor-sistema").textContent = sistemaLabel();
-  const fechaInput = document.getElementById("op-gestor-fecha");
-  if (fechaInput) fechaInput.valueAsDate = new Date();
-  setLinkPlaceholder();
-  updateLinkStatusUi();
-
-  try {
-    await cargarGestor(user);
-  } catch (err) {
-    console.error(err);
-    const status = document.getElementById("op-gestor-status");
-    if (status) {
-      status.textContent = "No se pudo cargar el listado. Recargá con Ctrl+F5.";
-      status.classList.remove("hidden");
+async function ensureGestorReady({ resetFilters = true } = {}) {
+  if (gestorLoadPromise) return gestorLoadPromise;
+  gestorLoadPromise = (async () => {
+    try {
+      await syncPlanUserSession();
+      const user = await ensurePlanUser();
+      if (!user) {
+        ctx.showView("oportunidadMenu", { history: "replace" });
+        return;
+      }
+      if (resetFilters || !gestorWarm) resetGestorFilters();
+      const fechaInput = document.getElementById("op-gestor-fecha");
+      if (fechaInput && !fechaInput.value) fechaInput.valueAsDate = new Date();
+      setLinkPlaceholder();
+      updateLinkStatusUi();
+      await cargarGestor(user);
+      gestorWarm = true;
+    } catch (err) {
+      console.error(err);
+      const status = document.getElementById("op-gestor-status");
+      if (status) {
+        status.textContent = "No se pudo cargar el listado. Recargá con Ctrl+F5.";
+        status.classList.remove("hidden");
+      }
+    } finally {
+      gestorLoadPromise = null;
     }
+  })();
+  return gestorLoadPromise;
+}
+
+async function refreshGestorInBackground() {
+  try {
+    await syncPlanUserSession();
+    const user = await ensurePlanUser();
+    if (!user) return;
+    await cargarGestor(user);
+    gestorWarm = true;
+  } catch (err) {
+    console.warn("[Gestor] refresh background", err);
   }
 }
 

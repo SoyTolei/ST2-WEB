@@ -349,7 +349,7 @@ export function buildPlanillasMenuTour(ctx, sistema) {
     steps.push({
       selector: "#plan-modulo-oportunidad",
       title: "Oportunidad de Venta",
-      body: `${MENU_MODULO_COPY.oportunidad[sistema] || MENU_MODULO_COPY.oportunidad.BejermanSql} Adentro vas a ver dos caminos claros: Seguimiento/Gestor y Armar PDF de contacto.`,
+      body: `${MENU_MODULO_COPY.oportunidad[sistema] || MENU_MODULO_COPY.oportunidad.BejermanSql} Adentro vas a ver dos caminos claros: Seguimiento/Gestor y Generar PDF.`,
       placement: "top",
     });
   }
@@ -730,7 +730,7 @@ export function buildOportunidadMenuTour() {
       },
       {
         selector: '[data-op-view="cargar"]',
-        title: "Armar PDF de contacto",
+        title: "Generar PDF",
         body: "Formulario de contacto: canal, datos del cliente y descripción. Al final generás el PDF.",
         placement: "top",
         when: () => visible('[data-op-view="cargar"]'),
@@ -746,7 +746,7 @@ export function buildOportunidadCargarTour() {
       {
         selector: "#planillas-oportunidad-cargar .plan-op-tabs",
         title: "Cambiar de vista",
-        body: "Estas pestañas te llevan entre Seguimiento/Gestor y Armar PDF sin volver al menú intermedio.",
+        body: "Estas pestañas te llevan entre Seguimiento/Gestor y Generar PDF sin volver al menú intermedio.",
         placement: "bottom",
         when: () => visible("#planillas-oportunidad-cargar .plan-op-tabs"),
       },
@@ -790,7 +790,7 @@ export function buildOportunidadGestorTour() {
       {
         selector: "#planillas-oportunidad-gestor .plan-op-tabs",
         title: "Cambiar de vista",
-        body: "Saltá a Armar PDF de contacto desde acá cuando necesites el formulario.",
+        body: "Saltá a Generar PDF desde acá cuando necesites el formulario.",
         placement: "bottom",
         when: () => visible("#planillas-oportunidad-gestor .plan-op-tabs"),
       },
