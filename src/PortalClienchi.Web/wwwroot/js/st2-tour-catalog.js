@@ -126,7 +126,7 @@ export function buildOrpenTabIntroTour() {
       {
         selector: '.tab-btn[data-tab="orpen"]',
         title: "WhatsApp / Orpen",
-        body: "Nueva opción en la barra de arriba: Orpen queda embebido en ST² para WhatsApp. Tocá la pestaña para abrirla; desde el panel también podés recargar o abrirla en el navegador.",
+        body: "Nueva opción en la barra de arriba: WhatsApp/Orpen. Tocá la pestaña y se abre en una ventana sobre este panel (así menús y chats no se traban).",
         placement: "bottom",
         when: () => visible('.tab-btn[data-tab="orpen"]'),
       },
@@ -239,7 +239,7 @@ export function buildOrpenTabTour() {
       {
         selector: '#panel-orpen, .tab-btn[data-tab="orpen"]',
         title: "WhatsApp / Orpen",
-        body: "Orpen queda embebido acá. Usá Recargar si la sesión no carga, o Abrir en navegador si preferís pestaña aparte.",
+        body: "Orpen se abre en una ventana propia sobre este panel. Usá «Abrir Orpen aquí» o «Abrir en otra pestaña» si el navegador bloquea emergentes.",
         placement: "bottom",
       },
     ],

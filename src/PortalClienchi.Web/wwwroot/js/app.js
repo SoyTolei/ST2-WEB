@@ -4513,20 +4513,21 @@ function getEmbedFrameUrl(kind) {
   }
   if (kind === "ai") return aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
   if (kind === "orpen") {
-    // Siempre vía proxy: reescribe cookies/SameSite y URLs absolutas de Orpen
-    // (sin esto el login se ve, pero post-login la sesión no sobrevive en el iframe).
-    const raw = String(appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php").trim();
-    try {
-      const u = new URL(raw);
-      if (u.hostname.endsWith("orpen.com.br")) {
-        return `/embed/orpen${u.pathname}${u.search || ""}`;
-      }
-      if (u.protocol === "http:" || u.protocol === "https:") return u.href;
-    } catch { /* fall through */ }
-    return "/embed/orpen/rcx/login.php";
+    // Orpen usa WebSocket/API en :5601: el iframe/proxy deja menús y widgets trabados.
+    // Abrimos URL absoluta en ventana sobre el panel (mismo patrón que THOM window).
+    return getOrpenAbsoluteUrl();
   }
   if (kind === "portal") return getPortalLoginUrl();
   return null;
+}
+
+function getOrpenAbsoluteUrl() {
+  const raw = String(appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php").trim();
+  try {
+    const u = new URL(raw);
+    if (u.protocol === "http:" || u.protocol === "https:") return u.href;
+  } catch { /* fall through */ }
+  return "https://thomsontap.orpen.com.br/rcx/login.php";
 }
 
 function isThomWindowMode() {
@@ -4687,9 +4688,9 @@ function measureThomPopupChrome(popup = thomPopup) {
 /** Holgura mínima debajo de las pestañas ST2 (el ancla real es el panel). */
 const THOM_POPUP_TAB_GAP = 4;
 
-function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
+function getEmbedPanelRect(panelSelector, popupChrome = THOM_POPUP_CHROME_WITH_URL, { respectThomPortalBar = false } = {}) {
   const tabBar = document.querySelector(".tab-bar");
-  const frameWrap = document.querySelector("#panel-thom .embed-frame-wrap");
+  const frameWrap = document.querySelector(`${panelSelector} .embed-frame-wrap`);
   const tabRect = tabBar?.getBoundingClientRect();
   const wrapRect = frameWrap?.getBoundingClientRect();
 
@@ -4707,7 +4708,7 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   if (tabRect) {
     viewportTop = Math.max(viewportTop, Math.round(tabRect.bottom + THOM_POPUP_TAB_GAP));
   }
-  if (thomPortalBar && !thomPortalBar.classList.contains("hidden")) {
+  if (respectThomPortalBar && thomPortalBar && !thomPortalBar.classList.contains("hidden")) {
     const barRect = thomPortalBar.getBoundingClientRect();
     if (barRect.height > 0) {
       viewportTop = Math.max(viewportTop, Math.round(barRect.bottom + THOM_POPUP_TAB_GAP));
@@ -4732,6 +4733,14 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   }
 
   return { top, left, width, height };
+}
+
+function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
+  return getEmbedPanelRect("#panel-thom", popupChrome, { respectThomPortalBar: true });
+}
+
+function getOrpenPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
+  return getEmbedPanelRect("#panel-orpen", popupChrome);
 }
 
 function buildThomPopupFeatures(rect) {
@@ -5100,6 +5109,184 @@ function activateThomTab() {
     showThomPanelPlaceholder();
     openThomWindow();
   }
+}
+
+const ORPEN_POPUP_NAME = "st2OrpenPanel";
+const ORPEN_TAB_NAME = "st2OrpenBrowserTab";
+let orpenPopup = null;
+let orpenBrowserTab = null;
+let orpenOpenGeneration = 0;
+let orpenPopupWatchTimer = null;
+let orpenPopupAnchor = null;
+const orpenDirectGate = document.getElementById("orpenDirectGate");
+
+function updateOrpenDirectUi() {
+  const active = !!(orpenPopup && !orpenPopup.closed);
+  orpenFrame?.classList.add("hidden");
+  orpenDirectGate?.classList.remove("hidden");
+  orpenDirectGate?.classList.toggle("embed-panel-active", active);
+  const gateOpenBtn = document.getElementById("orpenGateOpenBtn");
+  if (gateOpenBtn) gateOpenBtn.textContent = active ? "Enfocar Orpen" : "Abrir Orpen aquí";
+  document.getElementById("orpenGateCloseBtn")?.classList.toggle("hidden", !active);
+  document.getElementById("orpenGateStatus")?.classList.toggle("hidden", !active);
+  document.getElementById("orpenGateNote")?.classList.toggle("hidden", active);
+}
+
+function showOrpenPanelPlaceholder() {
+  orpenDirectGate?.classList.remove("hidden");
+  setEmbedHint("orpen", "Orpen corre en ventana propia para que menús y chats no se traben.");
+}
+
+function stopOrpenPopupWatch() {
+  clearInterval(orpenPopupWatchTimer);
+  orpenPopupWatchTimer = null;
+  orpenPopupAnchor = null;
+}
+
+function startOrpenPopupWatch() {
+  stopOrpenPopupWatch();
+  orpenPopupAnchor = readThomAnchor();
+  orpenPopupWatchTimer = setInterval(() => {
+    if (!orpenPopup || orpenPopup.closed) {
+      orpenPopup = null;
+      stopOrpenPopupWatch();
+      updateOrpenDirectUi();
+      return;
+    }
+    const anchor = readThomAnchor();
+    if (anchor === orpenPopupAnchor) return;
+    orpenPopupAnchor = anchor;
+    repositionOrpenPopup();
+  }, 400);
+}
+
+function repositionOrpenPopup() {
+  if (!orpenPopup || orpenPopup.closed) return;
+  const rect = getOrpenPanelRect(measureThomPopupChrome(orpenPopup));
+  try {
+    orpenPopup.moveTo(rect.left, rect.top);
+    orpenPopup.resizeTo(rect.width, rect.height);
+    const actualTop = Number.isFinite(orpenPopup.screenTop) ? orpenPopup.screenTop : orpenPopup.screenY;
+    const driftY = rect.top - actualTop;
+    if (Number.isFinite(driftY) && Math.abs(driftY) > 2 && Math.abs(driftY) < 220) {
+      orpenPopup.moveBy(0, driftY);
+    }
+  } catch {
+    // Cross-origin tras navegar a Orpen.
+  }
+}
+
+function scheduleOrpenPopupReposition() {
+  if (!orpenPopup || orpenPopup.closed) return;
+  repositionOrpenPopup();
+}
+
+function closeOrpenPopup({ reclaim = false } = {}) {
+  orpenOpenGeneration += 1;
+  stopOrpenPopupWatch();
+  safeCloseWindow(orpenPopup);
+  orpenPopup = null;
+  if (reclaim) safeCloseWindow(reclaimNamedWindow(ORPEN_POPUP_NAME));
+  safeCloseWindow(orpenBrowserTab);
+  orpenBrowserTab = null;
+  if (reclaim) safeCloseWindow(reclaimNamedWindow(ORPEN_TAB_NAME));
+  updateOrpenDirectUi();
+}
+
+function openOrpenWindow({ reload = false } = {}) {
+  const url = getOrpenAbsoluteUrl();
+  const generation = ++orpenOpenGeneration;
+
+  if (!reload && orpenPopup && !orpenPopup.closed) {
+    try { orpenPopup.focus(); } catch { /* ignore */ }
+    repositionOrpenPopup();
+    startOrpenPopupWatch();
+    updateOrpenDirectUi();
+    return orpenPopup;
+  }
+
+  if (reload && orpenPopup && !orpenPopup.closed) {
+    try {
+      orpenPopup.location.replace(url);
+    } catch {
+      try { orpenPopup.location.href = url; } catch {
+        safeCloseWindow(orpenPopup);
+        orpenPopup = null;
+      }
+    }
+    if (orpenPopup && !orpenPopup.closed) {
+      try { orpenPopup.focus(); } catch { /* ignore */ }
+      showOrpenPanelPlaceholder();
+      startOrpenPopupWatch();
+      updateOrpenDirectUi();
+      repositionOrpenPopup();
+      return orpenPopup;
+    }
+  }
+
+  if (orpenPopup?.closed) orpenPopup = null;
+  void document.body.offsetHeight;
+  const rect = getOrpenPanelRect();
+  const features = buildThomPopupFeatures(rect);
+  orpenPopup = window.open("about:blank", ORPEN_POPUP_NAME, features);
+  if (!orpenPopup) {
+    orpenBrowserTab = window.open(url, ORPEN_TAB_NAME);
+    setEmbedHint("orpen", "Permití ventanas emergentes para abrir Orpen en este espacio.");
+    updateOrpenDirectUi();
+    return null;
+  }
+  if (generation !== orpenOpenGeneration) {
+    safeCloseWindow(orpenPopup);
+    orpenPopup = null;
+    return null;
+  }
+  try { orpenPopup.location.replace(url); } catch { orpenPopup.location.href = url; }
+  try { orpenPopup.focus(); } catch { /* ignore */ }
+  showOrpenPanelPlaceholder();
+  startOrpenPopupWatch();
+  updateOrpenDirectUi();
+  requestAnimationFrame(() => {
+    if (generation !== orpenOpenGeneration || !orpenPopup || orpenPopup.closed) return;
+    repositionOrpenPopup();
+    try { orpenPopup.focus(); } catch { /* ignore */ }
+  });
+  return orpenPopup;
+}
+
+function focusOrpenPopup() {
+  if (!orpenPopup || orpenPopup.closed) {
+    openOrpenWindow();
+    return;
+  }
+  repositionOrpenPopup();
+  try { orpenPopup.focus(); } catch { /* ignore */ }
+}
+
+function openOrpenBrowserTab() {
+  const url = getOrpenAbsoluteUrl();
+  if (orpenBrowserTab && !orpenBrowserTab.closed) {
+    try {
+      orpenBrowserTab.location.href = url;
+      orpenBrowserTab.focus();
+      return orpenBrowserTab;
+    } catch {
+      safeCloseWindow(orpenBrowserTab);
+      orpenBrowserTab = null;
+    }
+  }
+  orpenBrowserTab = window.open(url, ORPEN_TAB_NAME);
+  return orpenBrowserTab;
+}
+
+function activateOrpenTab() {
+  orpenFrame?.classList.add("hidden");
+  if (orpenFrame) {
+    orpenFrame.removeAttribute("src");
+    orpenFrame.src = "about:blank";
+  }
+  showOrpenPanelPlaceholder();
+  updateOrpenDirectUi();
+  openOrpenWindow();
 }
 
 function isEmbedFrameEmpty(frame) {
@@ -5486,6 +5673,9 @@ function switchTab(tabId) {
   if (tabId !== "thom") {
     closeThomPopup({ reclaim: false });
   }
+  if (tabId !== "orpen") {
+    closeOrpenPopup({ reclaim: false });
+  }
 
   stopEngagementTimer();
   if (tabId === "thom") {
@@ -5495,7 +5685,7 @@ function switchTab(tabId) {
     loadEmbedFrame("ai");
     startEngagementTimer("ai");
   } else if (tabId === "orpen") {
-    loadEmbedFrame("orpen");
+    activateOrpenTab();
     startEngagementTimer("orpen");
   } else if (tabId === "portal") {
     loadEmbedFrame("portal");
@@ -5532,12 +5722,24 @@ function initEmbedReminders() {
     }
     scheduleThomBlankCheck();
   });
-  window.addEventListener("resize", scheduleThomPopupReposition);
-  window.addEventListener("scroll", scheduleThomPopupReposition, { passive: true });
-  // Sin esto quedan ventanas THOM huérfanas al cerrar o recargar ST2.
-  window.addEventListener("pagehide", () => closeThomPopup({ reclaim: true }));
+  window.addEventListener("resize", () => {
+    scheduleThomPopupReposition();
+    scheduleOrpenPopupReposition();
+  });
+  window.addEventListener("scroll", () => {
+    scheduleThomPopupReposition();
+    scheduleOrpenPopupReposition();
+  }, { passive: true });
+  // Sin esto quedan ventanas THOM/Orpen huérfanas al cerrar o recargar ST2.
+  window.addEventListener("pagehide", () => {
+    closeThomPopup({ reclaim: true });
+    closeOrpenPopup({ reclaim: true });
+  });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) scheduleThomPopupReposition();
+    if (!document.hidden) {
+      scheduleThomPopupReposition();
+      scheduleOrpenPopupReposition();
+    }
   });
   initThomPortalSelector();
   initDailyTabReminders();
@@ -5566,43 +5768,9 @@ document.getElementById("portalGeneratePdfBtn")?.addEventListener("click", async
   const extracted = extractContentFromPortalFrame(portalFrame);
   await openPdfPortalModal(extracted);
 });
-document.getElementById("orpenReloadBtn")?.addEventListener("click", () => {
-  loadEmbedFrame("orpen", { force: true });
-});
-document.getElementById("orpenOpenBtn")?.addEventListener("click", () => {
-  const raw = String(appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php").trim();
-  window.open(raw, "_blank", "noopener");
-});
-
-orpenFrame?.addEventListener("load", () => {
-  // Si el proxy falla o Orpen queda en blanco, ofrecemos abrir afuera.
-  window.setTimeout(() => {
-    if (document.querySelector('.tab-btn.active')?.dataset?.tab !== "orpen") return;
-    try {
-      const doc = orpenFrame.contentDocument;
-      const body = doc?.body;
-      if (!body) return;
-      const text = (body.innerText || "").trim();
-      const empty = body.childElementCount === 0 || text.length < 8;
-      const forbidden = /403|forbidden|access denied/i.test(text);
-      if (empty || forbidden) {
-        const msg = "Orpen no cargó acá. Probá Recargar o Abrir en navegador.";
-        setEmbedHint("orpen", msg);
-        const hint = document.getElementById("orpenEmbedHint");
-        if (hint) {
-          hint.classList.remove("hidden");
-          hint.removeAttribute("aria-hidden");
-          hint.textContent = msg;
-        }
-        return;
-      }
-      clearEmbedHint("orpen");
-      document.getElementById("orpenEmbedHint")?.classList.add("hidden");
-    } catch {
-      // Cross-origin (URL absoluta): no leemos el doc; no es error.
-    }
-  }, 2500);
-});
+document.getElementById("orpenGateOpenBtn")?.addEventListener("click", () => focusOrpenPopup());
+document.getElementById("orpenGateCloseBtn")?.addEventListener("click", () => closeOrpenPopup({ reclaim: true }));
+document.getElementById("orpenOpenBtn")?.addEventListener("click", openOrpenBrowserTab);
 
 async function bootstrapApp() {
   applyAboutUpdated();
