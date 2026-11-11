@@ -567,7 +567,23 @@
   }
 }
 
-/* Preview header sling */
+/* Preview header sling + label Copiar */
+.plan-text-preview-head .plan-fx-sling-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.plan-text-preview-head .plan-fx-sling-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.plan-text-preview-head .plan-fx-sling-sub {
+  display: none;
+}
+
 .plan-text-preview-head .sling-button,
 .plan-text-preview-copy.sling-button {
   vertical-align: middle;
@@ -580,7 +596,8 @@
 }
 
 /* Evitar estilos viejos del botón verde plano sobre el sling */
-.plan-text-preview-copy.sling-button {
+.plan-text-preview-copy.sling-button,
+.plan-text-preview-head .plan-fx-sling-wrap {
   background: none !important;
   border: 0 !important;
   padding: 0 !important;

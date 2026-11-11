@@ -1302,6 +1302,16 @@ body.portal-tab-active.portal-context-active .tab-bar {
   fill: currentColor;
 }
 
+.tab-icon--wa,
+.tab-icon--search {
+  fill: currentColor;
+}
+
+.tab-icon--wa path,
+.tab-icon--search path {
+  fill: currentColor;
+}
+
 .tab-panel {
   flex: 1;
   min-height: 0;
@@ -6365,7 +6375,8 @@ body.st2-access-ok #st2-app-root {
   user-select: auto;
 }
 
-/* Recarga con sesión conocida: splash neutro, sin mostrar Planillas genéricas. */
+/* Splash hasta desbloquear; el gate solo con .show-access-gate. */
+body.st2-access-pending:not(.show-access-gate) #st2-access-gate,
 body.st2-access-restoring #st2-access-gate {
   display: none !important;
 }
@@ -6374,7 +6385,7 @@ body.st2-access-restoring #st2-access-gate {
   display: none;
   position: fixed;
   inset: 0;
-  z-index: 2450;
+  z-index: 10000;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -6386,8 +6397,14 @@ body.st2-access-restoring #st2-access-gate {
   color: #e5e5e5;
 }
 
+body.st2-access-pending:not(.show-access-gate) .st2-boot-splash,
 body.st2-access-restoring .st2-boot-splash {
   display: flex;
+}
+
+body.st2-access-pending.show-access-gate .st2-boot-splash,
+body.st2-access-ok .st2-boot-splash {
+  display: none !important;
 }
 
 .st2-boot-splash-brand {

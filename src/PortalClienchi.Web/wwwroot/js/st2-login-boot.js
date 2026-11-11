@@ -8,10 +8,14 @@ import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907d";
 import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260915b";
 import { initClickSpark } from "./st2-click-spark.js?v=20261111e";
 
-const restoring = document.body.classList.contains("st2-access-restoring");
+const bootSplash =
+  document.body.classList.contains("st2-access-restoring")
+  || (document.body.classList.contains("st2-access-pending")
+    && !document.body.classList.contains("show-access-gate"));
 
 initBorderGlowCards();
-const gradientAsciiEnabled = !restoring && initLoginGradientAscii({
+// Gradient/login silk solo cuando el gate ya está visible; al boot priorizamos splash.
+const gradientAsciiEnabled = !bootSplash && initLoginGradientAscii({
   colors: ["#3a3391", "#6d63d8", "#f97316", "#d97706"],
   cellSize: 14,
   density: 0.7,
@@ -41,13 +45,13 @@ initClickSpark({
   extraScale: 1,
 });
 
-if (!restoring) {
+if (bootSplash) {
+  stopLoginSilk();
+  startSplashSilk();
+  initSplashDecryptedText();
+} else {
   stopSplashSilk();
   if (gradientAsciiEnabled) startLoginGradientAscii();
   else startLoginSilk();
   document.dispatchEvent(new CustomEvent("st2:access-gate-shown"));
-} else {
-  stopLoginSilk();
-  startSplashSilk();
-  initSplashDecryptedText();
 }

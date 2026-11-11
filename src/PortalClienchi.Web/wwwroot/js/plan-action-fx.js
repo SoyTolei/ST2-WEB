@@ -108,7 +108,8 @@ function mountSling(el, onSend, opts = {}) {
   const particles = compact ? 10 : 12;
   const label = opts.label || readLabel(el, "Copiar");
   const sub = opts.sub ?? readSub(el, compact ? "" : "Tirar y soltar para copiar");
-  const withMeta = !compact;
+  // Compact también puede llevar label (p. ej. Copiar en la vista previa).
+  const withMeta = !compact || opts.showLabel !== false;
 
   const GAP = 4;
   const R = maxPull;
@@ -137,7 +138,7 @@ function mountSling(el, onSend, opts = {}) {
 
   const sling = withMeta ? document.createElement("span") : host;
   if (withMeta) {
-    sling.className = "sling-button";
+    sling.className = compact ? "sling-button sling-button--compact" : "sling-button";
     host.appendChild(sling);
   }
 

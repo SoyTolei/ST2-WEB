@@ -6,7 +6,7 @@
 import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111d";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111g";
 
 /** Etiquetas de la salida por idioma. Ajustar textos acá, sin tocar la lógica. */
 export const ADO_LABELS = {

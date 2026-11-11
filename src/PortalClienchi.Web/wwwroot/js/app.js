@@ -5623,6 +5623,8 @@ function navigateTab(tabId, { history = "push" } = {}) {
     }
     // Siempre al menú: tocar la pestaña equivale al logo, incluso ya estando en Planillas.
     goPlanillasHome({ history: "replace" });
+    document.title = titleForTab("planillas");
+    syncTabHistory("planillas", history);
     return;
   }
 
@@ -5709,9 +5711,9 @@ function switchTab(tabId) {
     closeThomPopup({ reclaim: false });
   }
   if (tabId !== "orpen") {
-    // Sin reclaim: window.open("", name) robaba foco / “refrescaba” al ir a Planillas u otra pestaña.
-    // El reclaim queda solo en pagehide para huérfanas.
-    closeOrpenPopup({ reclaim: false });
+    // No cerrar Orpen al cambiar de pestaña: cerrar la ventana hacía “refrescar” ST²
+    // (robo de foco) y mataba la sesión. Solo paramos el anclaje; pagehide sí cierra.
+    stopOrpenPopupWatch();
   }
 
   stopEngagementTimer();

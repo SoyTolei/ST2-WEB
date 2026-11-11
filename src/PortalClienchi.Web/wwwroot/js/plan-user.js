@@ -391,7 +391,7 @@ export async function ensureAppAccess() {
 
 function unlockAppShell() {
   appUnlocked = true;
-  document.body.classList.remove("st2-access-pending", "st2-access-restoring");
+  document.body.classList.remove("st2-access-pending", "st2-access-restoring", "show-access-gate");
   document.body.classList.add("st2-access-ok");
   document.getElementById("st2-access-gate")?.classList.add("hidden");
   document.dispatchEvent(new CustomEvent("st2:access-gate-hidden"));
@@ -400,7 +400,7 @@ function unlockAppShell() {
 
 function lockAppShell() {
   appUnlocked = false;
-  document.body.classList.add("st2-access-pending");
+  document.body.classList.add("st2-access-pending", "show-access-gate");
   document.body.classList.remove("st2-access-ok", "st2-access-restoring");
   document.getElementById("st2-access-gate")?.classList.remove("hidden");
   document.dispatchEvent(new CustomEvent("st2:access-gate-shown"));

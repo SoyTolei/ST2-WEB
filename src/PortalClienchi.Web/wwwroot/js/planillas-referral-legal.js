@@ -1,5 +1,5 @@
 import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111d";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111g";
 import { enhancePlanSelect } from "./plan-custom-select.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { canSeeLegalProduct } from "./module-access.js";

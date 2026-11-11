@@ -10,8 +10,8 @@ import {
   syncChileReferralCards,
 } from "./planillas-referral-chile.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111d";
-import { mountStarBorder } from "./star-border.js?v=20261111d";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111g";
+import { mountStarBorder } from "./star-border.js?v=20261111g";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
@@ -576,11 +576,11 @@ function bindReferralEvents() {
   mountStarBorder(document.getElementById("ref-stepper"), {
     color: "#fdba74",
     trailColor: "#fb923c",
-    duration: 6.5,
+    duration: 14,
     thickness: 1.5,
     radius: 16,
-    trailLength: 0.26,
-    glow: 0.4,
+    trailLength: 0.22,
+    glow: 0.38,
   });
 }
 
