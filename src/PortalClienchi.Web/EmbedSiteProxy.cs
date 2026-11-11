@@ -649,14 +649,14 @@ internal sealed class EmbedSiteProxy
     {
         var uri = new Uri(baseUrl);
         var embed = $"/embed/{site}";
-        content = content.Replace(baseUrl, embed, StringComparison.OrdinalIgnoreCase);
-        content = content.Replace(baseUrl.TrimEnd('/'), embed, StringComparison.OrdinalIgnoreCase);
 
+        // No usar string.Replace naive: "https://host" es prefijo de "https://host:5601"
+        // y Orpen habla API/WebSocket en :5601 (romperlo deja el dashboard trabado).
         if (uri.IsDefaultPort)
         {
-            content = content.Replace($"https://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
-            content = content.Replace($"http://{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
-            content = content.Replace($"//{uri.Host}", embed, StringComparison.OrdinalIgnoreCase);
+            content = ReplaceHostUrlKeepOtherPorts(content, $"https://{uri.Host}", embed);
+            content = ReplaceHostUrlKeepOtherPorts(content, $"http://{uri.Host}", embed);
+            content = ReplaceHostUrlKeepOtherPorts(content, $"//{uri.Host}", embed);
         }
         else
         {
@@ -667,6 +667,17 @@ internal sealed class EmbedSiteProxy
         }
 
         return content;
+    }
+
+    /// <summary>
+    /// Reemplaza https://host (puerto default) sin tocar https://host:OTRO_PUERTO.
+    /// </summary>
+    private static string ReplaceHostUrlKeepOtherPorts(string content, string schemeHost, string embed)
+    {
+        // Permite :80/:443 opcionales. Exige fin de host (path/query/quote/espacio),
+        // así "https://host:5601" NO matchea (Orpen API/WS).
+        var pattern = Regex.Escape(schemeHost) + @"(?::(?:80|443))?(?=[/""'\s<>?#]|$)";
+        return Regex.Replace(content, pattern, embed, RegexOptions.IgnoreCase);
     }
 
     private static string RewriteUrl(string? url, string currentSite)
@@ -698,6 +709,10 @@ internal sealed class EmbedSiteProxy
             var hostPort = $"{host}:{port}";
             if (HostToSite.TryGetValue(hostPort, out var siteWithPort))
                 return siteWithPort;
+
+            // Puertos no default (ej. Orpen :5601 API/WS) no se mapean al site :443.
+            // Dejamos la URL absoluta para que el browser hable directo con ese servicio.
+            return null;
         }
 
         if (HostToSite.TryGetValue(host, out var site))
