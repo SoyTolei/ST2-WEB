@@ -4530,19 +4530,7 @@ function getOrpenAbsoluteUrl() {
   return "https://thomsontap.orpen.com.br/rcx/login.php";
 }
 
-/** Ventana sobre el panel: vía proxy same-origin para poder aplicar zoom 90%. */
-function getOrpenWindowUrl() {
-  const raw = getOrpenAbsoluteUrl();
-  try {
-    const u = new URL(raw);
-    if (u.hostname.endsWith("orpen.com.br")) {
-      return `/embed/orpen${u.pathname}${u.search || ""}`;
-    }
-  } catch { /* fall through */ }
-  return "/embed/orpen/rcx/login.php";
-}
-
-const ORPEN_CONTENT_ZOOM = 0.9;
+/** Ventana sobre el panel: URL absoluta de Orpen (el proxy rompe login/sesión). */
 
 function isThomWindowMode() {
   const mode = appConfig?.thomEmbedMode;
@@ -4779,19 +4767,6 @@ function getOrpenPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
   }
 
   return { top, left, width, height };
-}
-
-function applyOrpenContentZoom(win) {
-  if (!win || win.closed) return;
-  try {
-    const z = String(ORPEN_CONTENT_ZOOM);
-    const doc = win.document;
-    if (!doc?.documentElement) return;
-    doc.documentElement.style.zoom = z;
-    if (doc.body) doc.body.style.zoom = z;
-  } catch {
-    // Cross-origin (URL absoluta): el proxy inyecta el zoom.
-  }
 }
 
 function buildThomPopupFeatures(rect) {
@@ -5248,14 +5223,14 @@ function closeOrpenPopup({ reclaim = false } = {}) {
 }
 
 function openOrpenWindow({ reload = false } = {}) {
-  const url = getOrpenWindowUrl();
+  // Absolute Orpen: login/sesión/sockets OK. El proxy /embed/orpen rompía la clave.
+  const url = getOrpenAbsoluteUrl();
   const generation = ++orpenOpenGeneration;
 
   if (orpenPopup?.closed) orpenPopup = null;
 
   if (!reload && orpenPopup && !orpenPopup.closed) {
     try { orpenPopup.focus(); } catch { /* ignore */ }
-    applyOrpenContentZoom(orpenPopup);
     repositionOrpenPopup();
     startOrpenPopupWatch();
     updateOrpenDirectUi();
@@ -5277,7 +5252,6 @@ function openOrpenWindow({ reload = false } = {}) {
       startOrpenPopupWatch();
       updateOrpenDirectUi();
       repositionOrpenPopup();
-      window.setTimeout(() => applyOrpenContentZoom(orpenPopup), 400);
       return orpenPopup;
     }
   }
@@ -5292,8 +5266,7 @@ function openOrpenWindow({ reload = false } = {}) {
   // Mismo nombre siempre: el browser reusa la ventana en vez de abrir otra.
   orpenPopup = window.open(url, ORPEN_POPUP_NAME, features);
   if (!orpenPopup) {
-    // Fallback: pestaña real de Orpen (sin zoom ST2).
-    orpenBrowserTab = window.open(getOrpenAbsoluteUrl(), ORPEN_TAB_NAME);
+    orpenBrowserTab = window.open(url, ORPEN_TAB_NAME);
     updateOrpenDirectUi();
     return null;
   }
@@ -5309,11 +5282,8 @@ function openOrpenWindow({ reload = false } = {}) {
   requestAnimationFrame(() => {
     if (generation !== orpenOpenGeneration || !orpenPopup || orpenPopup.closed) return;
     repositionOrpenPopup();
-    applyOrpenContentZoom(orpenPopup);
     try { orpenPopup.focus(); } catch { /* ignore */ }
   });
-  window.setTimeout(() => applyOrpenContentZoom(orpenPopup), 600);
-  window.setTimeout(() => applyOrpenContentZoom(orpenPopup), 1800);
   return orpenPopup;
 }
 
