@@ -10,7 +10,7 @@ import {
   syncChileReferralCards,
 } from "./planillas-referral-chile.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111a";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111c";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
