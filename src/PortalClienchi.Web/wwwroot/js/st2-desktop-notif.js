@@ -196,7 +196,7 @@ export function setDesktopNotifEnabled(on) {
 }
 
 function st2IconUrl() {
-  return document.querySelector('meta[name="st2-icon"]')?.content || "/st2.ico";
+  return document.querySelector('meta[name="st2-icon"]')?.content || "/img/st2-brand.png";
 }
 
 function showDesktopNotif(title, body, tag, { allowWhileVisible = false, onClick } = {}) {

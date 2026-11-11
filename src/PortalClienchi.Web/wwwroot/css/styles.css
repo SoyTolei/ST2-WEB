@@ -176,6 +176,8 @@ html, body {
   z-index: 1;
   width: 46px;
   height: 46px;
+  object-fit: contain;
+  border-radius: 10px;
   image-rendering: -webkit-optimize-contrast;
   pointer-events: none;
   transition: transform 0.22s ease, filter 0.22s ease;
@@ -2573,6 +2575,7 @@ body.portal-tab-active .main-shell {
 .st2-about-icon {
   flex-shrink: 0;
   border-radius: 10px;
+  object-fit: contain;
   cursor: default;
   width: 40px;
   height: 40px;

@@ -67,7 +67,7 @@ public static class St2IndexHtml
         sb.AppendLine($"<meta name=\"st2-build\" content=\"{WebUtility.HtmlEncode(build)}\"/>");
         sb.AppendLine($"<meta name=\"st2-build-at\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetBuildStamp())}\"/>");
         var icoV = GetIconVersion(env, v);
-        sb.AppendLine($"<meta name=\"st2-icon\" content=\"/st2.ico?v={WebUtility.HtmlEncode(icoV)}\"/>");
+        sb.AppendLine($"<meta name=\"st2-icon\" content=\"/img/st2-brand.png?v={WebUtility.HtmlEncode(icoV)}\"/>");
         sb.AppendLine($"<meta name=\"st2-version-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetVersionLabel())}\"/>");
         sb.AppendLine($"<meta name=\"st2-updated-label\" content=\"{WebUtility.HtmlEncode(St2WebBuild.GetUpdatedLabel())}\"/>");
         if (!string.IsNullOrWhiteSpace(sqlLabel))
@@ -104,7 +104,7 @@ public static class St2IndexHtml
         html = html.Replace("/css/vendor/blobatar-motion.css", $"/css/vendor/blobatar-motion.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/css/vendor/blobatar-gaze.css", $"/css/vendor/blobatar-gaze.css?v={v}", StringComparison.Ordinal);
         html = html.Replace("/js/app.js", $"/js/app.js?v={v}", StringComparison.Ordinal);
-        html = html.Replace("/st2.ico", $"/st2.ico?v={icoV}", StringComparison.Ordinal);
+        html = html.Replace("/img/st2-brand.png", $"/img/st2-brand.png?v={icoV}", StringComparison.Ordinal);
         if (!string.IsNullOrWhiteSpace(sqlLabel))
         {
             html = html.Replace(
@@ -134,7 +134,9 @@ public static class St2IndexHtml
     {
         try
         {
-            var path = Path.Combine(env.WebRootPath, "st2.ico");
+            var path = Path.Combine(env.WebRootPath, "img", "st2-brand.png");
+            if (!File.Exists(path))
+                path = Path.Combine(env.WebRootPath, "st2.ico");
             if (!File.Exists(path))
                 return fallback;
 
