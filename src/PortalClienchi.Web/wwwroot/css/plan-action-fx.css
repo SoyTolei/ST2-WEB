@@ -4,9 +4,10 @@
 .plan-ref-actions:has(.slide-commit),
 .plan-ref-actions:has(.fuse-button),
 .plan-fx-row {
-  grid-template-columns: auto minmax(180px, 1fr) auto;
-  gap: 12px;
+  grid-template-columns: auto auto auto;
+  gap: 14px;
   align-items: center;
+  justify-content: start;
 }
 
 @media (max-width: 720px) {
@@ -20,8 +21,13 @@
   .plan-fx-sling-wrap {
     justify-content: flex-start;
   }
+  .slide-commit {
+    width: 100% !important;
+    max-width: none;
+  }
   .fuse-button {
     width: 100%;
+    justify-self: stretch;
   }
 }
 
@@ -55,15 +61,15 @@
 }
 
 .sling-button {
-  --sl-size: 56px;
-  --sl-svg: 90px;
-  --sl-pad: #f0fdf4;
+  --sl-size: 48px;
+  --sl-svg: 78px;
+  --sl-pad: #ecfdf5;
   --sl-icon: #166534;
-  --sl-accent: #22c55e;
+  --sl-accent: #16a34a;
   --sl-well: #14532d;
   --sl-band: #4ade80;
-  --sl-stroke: 3px;
-  --sl-dot: 8px;
+  --sl-stroke: 2.75px;
+  --sl-dot: 7px;
   --sl-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   position: relative;
   display: inline-block;
@@ -223,24 +229,26 @@
 /* ========== SLIDE COMMIT (Vista previa) ========== */
 .slide-commit {
   --sc-track: #1e3a8a;
-  --sc-ink: #eff6ff;
-  --sc-ok: #22c55e;
+  --sc-ink: #dbeafe;
+  --sc-ok: #16a34a;
   --sc-no: #e5484d;
   --sc-on-ink: #1e3a8a;
   --sc-on-ok: #14532d;
   --sc-on-no: #ffffff;
-  --sc-radius: 28px;
-  --sc-grip-r: 24px;
-  --sc-pad: 4px;
-  --sc-font: 14px;
-  --sc-w: 100%;
-  --sc-h: 56px;
+  --sc-radius: 22px;
+  --sc-grip-r: 18px;
+  --sc-pad: 3px;
+  --sc-font: 12.5px;
+  --sc-w: 200px;
+  --sc-h: 48px;
   position: relative;
   display: block;
   width: var(--sc-w);
+  max-width: 200px;
   height: var(--sc-h);
   font-family: inherit;
   min-width: 0;
+  flex-shrink: 0;
 }
 
 .slide-commit[data-disabled] {
@@ -391,22 +399,22 @@
 
 /* ========== FUSE (Limpiar / delete) ========== */
 .fuse-button {
-  --fb-ink: #fecaca;
-  --fb-bg: #7f1d1d;
+  --fb-ink: #fafaf9;
+  --fb-bg: #292524;
   --fb-fuse: #fb923c;
   --fb-fuse-h: 2px;
-  --fb-radius: 22px;
+  --fb-radius: 16px;
   --fb-fade: 200ms;
   --fb-press: 0.97;
-  --fb-h: 56px;
-  --fb-fs: 14px;
-  --fb-icon: 15px;
-  --fb-px: 18px;
+  --fb-h: 40px;
+  --fb-fs: 12.5px;
+  --fb-icon: 13px;
+  --fb-px: 12px;
   --fb-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   position: relative;
   display: inline-grid;
   grid-template-columns: minmax(0, 1fr);
-  min-width: 132px;
+  min-width: 96px;
   height: var(--fb-h);
   border-radius: var(--fb-radius);
   background: var(--fb-bg);
@@ -423,7 +431,8 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition: transform 160ms var(--fb-ease-out);
-  box-shadow: inset 0 0 0 1px rgba(254, 202, 202, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.22);
+  align-self: center;
 }
 
 .fuse-button[data-pressed] { transform: scale(var(--fb-press)); }
@@ -594,6 +603,13 @@ html.st2-theme-dark .sling-button {
 html.st2-theme-dark .slide-commit {
   --sc-track: #1e3a8a;
   --sc-ink: #dbeafe;
+}
+
+html.st2-theme-dark .fuse-button {
+  --fb-bg: #1c1917;
+  --fb-ink: #e7e5e4;
+  --fb-fuse: #fb923c;
+  box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.28);
 }
 
 @media (prefers-reduced-motion: reduce) {

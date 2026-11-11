@@ -1,0 +1,52 @@
+/* Star Border (React Bits) — versión ST² para el stepper de referral */
+
+.star-border-host {
+  --star-border-radius: 16px;
+  --star-border-thickness: 1.5px;
+  --star-border-surface: transparent;
+  --star-border-track: rgba(234, 88, 12, 0.22);
+  position: relative;
+  isolation: isolate;
+  display: block;
+  border-radius: var(--star-border-radius);
+  background: var(--star-border-surface);
+}
+
+.star-border-host.hidden {
+  display: none !important;
+}
+
+.star-border-host::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 var(--star-border-thickness) var(--star-border-track);
+  pointer-events: none;
+}
+
+.star-border-host__canvas {
+  position: absolute;
+  top: -48px;
+  left: -48px;
+  z-index: 2;
+  width: calc(100% + 96px);
+  height: calc(100% + 96px);
+  pointer-events: none;
+}
+
+.star-border-host__inner {
+  position: relative;
+  z-index: 1;
+}
+
+html.st2-theme-dark .star-border-host {
+  --star-border-track: rgba(251, 146, 60, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-border-host__canvas {
+    opacity: 0.35;
+  }
+}

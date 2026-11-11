@@ -10,7 +10,8 @@ import {
   syncChileReferralCards,
 } from "./planillas-referral-chile.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111c";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111d";
+import { mountStarBorder } from "./star-border.js?v=20261111d";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
@@ -571,6 +572,16 @@ function bindReferralEvents() {
   });
   document.getElementById("ref-step-prev")?.addEventListener("click", () => setReferralStep(refStep - 1));
   document.getElementById("ref-step-next")?.addEventListener("click", () => setReferralStep(refStep + 1));
+
+  mountStarBorder(document.getElementById("ref-stepper"), {
+    color: "#fdba74",
+    trailColor: "#fb923c",
+    duration: 6.5,
+    thickness: 1.5,
+    radius: 16,
+    trailLength: 0.26,
+    glow: 0.4,
+  });
 }
 
 function referralIaFieldDefs() {
@@ -594,6 +605,8 @@ function syncReferralStepper() {
   const legal = isLegal();
   const stepper = document.getElementById("ref-stepper");
   const stepNav = document.getElementById("ref-step-nav");
+  const stepperShell = stepper?.closest(".star-border-host") || stepper;
+  stepperShell?.classList.toggle("hidden", legal);
   stepper?.classList.toggle("hidden", legal);
   stepNav?.classList.toggle("hidden", legal || refStep >= 3);
 

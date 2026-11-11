@@ -3052,10 +3052,16 @@ html.st2-theme-dark .portal-generate-pdf-btn:hover {
 
 
 /* Tabs Oportunidad + stepper Referral (evitar bloque blanco en dark) */
-html.st2-theme-dark .plan-op-tabs,
-html.st2-theme-dark .plan-ref-stepper {
+html.st2-theme-dark .plan-op-tabs {
   background: #1c1c1c !important;
   border-color: #3d4b61 !important;
+}
+html.st2-theme-dark .plan-ref-stepper {
+  background: #1c1c1c !important;
+  border-color: rgba(251, 146, 60, 0.34) !important;
+  box-shadow:
+    0 0 0 1px rgba(251, 146, 60, 0.12),
+    0 10px 28px rgba(0, 0, 0, 0.28);
 }
 html.st2-theme-dark .plan-op-tab,
 html.st2-theme-dark .plan-ref-step {

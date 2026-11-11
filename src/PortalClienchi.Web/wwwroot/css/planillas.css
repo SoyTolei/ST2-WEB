@@ -7391,27 +7391,33 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin: 0 0 16px;
-  padding: 6px;
+  margin: 0;
+  padding: 8px;
   border-radius: 14px;
   background: var(--surface-2, #f1f5f9);
-  border: 1px solid var(--border, #e2e8f0);
+  border: 1px solid color-mix(in srgb, #ea580c 28%, var(--border, #e2e8f0));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, #ea580c 10%, transparent),
+    0 8px 22px rgba(15, 23, 42, 0.06);
+}
+.star-border-host:has(.plan-ref-stepper) {
+  margin: 0 0 18px;
 }
 .plan-ref-step {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 42px;
+  min-height: 44px;
   border: none;
   border-radius: 10px;
   background: transparent;
   color: var(--text-muted, #64748b);
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 .plan-ref-step-num {
   width: 22px;
@@ -7427,7 +7433,9 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
 .plan-ref-step.active {
   background: var(--surface, #fff);
   color: var(--text, #0f172a);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #ea580c 55%, transparent),
+    0 1px 3px rgba(15, 23, 42, 0.08);
 }
 .plan-ref-step.active .plan-ref-step-num {
   background: #ea580c;
