@@ -3102,3 +3102,59 @@ html.st2-theme-dark .plan-gestor-date-wrap:focus-visible {
   border-color: #ea580c !important;
   box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.22) !important;
 }
+
+/* Gates THOM / Orpen: contraste legible en tema oscuro (antes texto claro sobre blanco). */
+html.st2-theme-dark .embed-direct-gate {
+  background: linear-gradient(180deg, #1a1410 0%, #12100e 55%, #0f0f0f 100%);
+  color: #f5f5f4;
+  border: 1px solid rgba(251, 146, 60, 0.22);
+}
+
+html.st2-theme-dark .embed-direct-gate.embed-panel-active {
+  background: linear-gradient(180deg, #221810 0%, #161210 60%, #101010 100%);
+  border: 1px dashed rgba(251, 146, 60, 0.4);
+}
+
+html.st2-theme-dark .embed-direct-gate p,
+html.st2-theme-dark .embed-direct-gate strong {
+  color: #f5f5f4;
+}
+
+html.st2-theme-dark .embed-direct-gate ol,
+html.st2-theme-dark .embed-direct-gate-note {
+  color: #d6d3d1;
+}
+
+html.st2-theme-dark .btn-gate-alt {
+  background: #1c1917;
+  color: #fafaf9;
+  border-color: rgba(251, 146, 60, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+html.st2-theme-dark .btn-gate-alt:hover {
+  background: #292524;
+  border-color: rgba(251, 146, 60, 0.55);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+html.st2-theme-dark .embed-direct-gate-status {
+  background: rgba(22, 163, 74, 0.16);
+  border-color: rgba(74, 222, 128, 0.35);
+  color: #86efac;
+}
+
+html.st2-theme-dark .embed-loading {
+  background: rgba(15, 15, 15, 0.94);
+  color: #d6d3d1;
+}
+
+html.st2-theme-dark .embed-frame-wrap {
+  background: #0f0f0f;
+  border-color: rgba(251, 146, 60, 0.22);
+}
+
+html.st2-theme-dark.orpen-popup-active #panel-orpen .embed-frame-wrap,
+html.st2-theme-dark body.orpen-popup-active #panel-orpen .embed-frame-wrap {
+  background: transparent;
+}

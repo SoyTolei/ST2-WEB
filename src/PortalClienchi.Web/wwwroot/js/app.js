@@ -4740,23 +4740,28 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
 }
 
 function getOrpenPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
-  // Pegado a las pestañas ST2: máximo alto útil para Orpen.
+  // ~90% del hueco bajo pestañas (misma densidad que THOM), centrado.
   const tabBar = document.querySelector(".tab-bar");
   const tabRect = tabBar?.getBoundingClientRect();
   if (!tabRect) return getEmbedPanelRect("#panel-orpen", popupChrome);
 
   const gap = 2;
   const viewportTop = Math.round(tabRect.bottom + gap);
-  const viewportHeight = Math.max(360, Math.round(window.innerHeight - viewportTop - 2));
+  const availW = Math.max(480, Math.round(window.innerWidth));
+  const availH = Math.max(360, Math.round(window.innerHeight - viewportTop - 2));
+  const width = Math.max(480, Math.round(availW * 0.9));
+  const contentH = Math.max(360, Math.round(availH * 0.9));
+  const padX = Math.round((availW - width) / 2);
+  const padY = Math.round((availH - contentH) / 2);
+
   const chromeTop = Math.max(0, window.outerHeight - window.innerHeight);
   const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
   const screenTop = Number.isFinite(window.screenTop) ? window.screenTop : window.screenY;
   const screenLeft = Number.isFinite(window.screenLeft) ? window.screenLeft : window.screenX;
 
-  let top = Math.round(screenTop + chromeTop + viewportTop);
-  const left = Math.round(screenLeft + chromeLeft);
-  const width = Math.max(480, Math.round(window.innerWidth));
-  let height = viewportHeight + popupChrome;
+  let top = Math.round(screenTop + chromeTop + viewportTop + padY);
+  const left = Math.round(screenLeft + chromeLeft + padX);
+  let height = contentH + popupChrome;
 
   const availTop = window.screen?.availTop ?? 0;
   const availBottom = availTop + (window.screen?.availHeight ?? window.screen?.height ?? top + height);
@@ -5224,6 +5229,8 @@ function openOrpenWindow({ reload = false } = {}) {
   const url = getOrpenAbsoluteUrl();
   const generation = ++orpenOpenGeneration;
 
+  if (orpenPopup?.closed) orpenPopup = null;
+
   if (!reload && orpenPopup && !orpenPopup.closed) {
     try { orpenPopup.focus(); } catch { /* ignore */ }
     repositionOrpenPopup();
@@ -5251,14 +5258,17 @@ function openOrpenWindow({ reload = false } = {}) {
     }
   }
 
-  if (orpenPopup?.closed) orpenPopup = null;
+  // Cerrar fallback previo para no acumular Orpens.
+  safeCloseWindow(orpenBrowserTab);
+  orpenBrowserTab = null;
+
   void document.body.offsetHeight;
   const rect = getOrpenPanelRect();
   const features = buildThomPopupFeatures(rect);
-  orpenPopup = window.open("about:blank", ORPEN_POPUP_NAME, features);
+  // Mismo nombre siempre: el browser reusa la ventana en vez de abrir otra.
+  orpenPopup = window.open(url, ORPEN_POPUP_NAME, features);
   if (!orpenPopup) {
     orpenBrowserTab = window.open(url, ORPEN_TAB_NAME);
-    setEmbedHint("orpen", "Permití ventanas emergentes para abrir Orpen en este espacio.");
     updateOrpenDirectUi();
     return null;
   }
@@ -5267,7 +5277,6 @@ function openOrpenWindow({ reload = false } = {}) {
     orpenPopup = null;
     return null;
   }
-  try { orpenPopup.location.replace(url); } catch { orpenPopup.location.href = url; }
   try { orpenPopup.focus(); } catch { /* ignore */ }
   showOrpenPanelPlaceholder();
   startOrpenPopupWatch();
@@ -5701,7 +5710,10 @@ function switchTab(tabId) {
   if (tabId !== "thom") {
     closeThomPopup({ reclaim: false });
   }
-  // Orpen: no cerrar al cambiar de pestaña — la sesión/socket siguen vivos en la ventana.
+  if (tabId !== "orpen") {
+    // Al salir de la pestaña Orpen, cerrar su ventana (evita N Orpens sueltos).
+    closeOrpenPopup({ reclaim: true });
+  }
 
   stopEngagementTimer();
   if (tabId === "thom") {
