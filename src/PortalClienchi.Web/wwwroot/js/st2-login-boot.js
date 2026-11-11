@@ -6,7 +6,7 @@ import { initLoginGradientAscii, startLoginGradientAscii } from "./st2-gradient-
 import { initBorderGlowCards } from "./st2-border-glow.js?v=20260915a";
 import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907d";
 import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260915b";
-import { initClickSpark } from "./st2-click-spark.js?v=20260910a";
+import { initClickSpark } from "./st2-click-spark.js?v=20261111e";
 
 const restoring = document.body.classList.contains("st2-access-restoring");
 

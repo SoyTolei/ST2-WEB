@@ -42,6 +42,13 @@ function resize() {
   ctx?.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
+function clearCanvas() {
+  if (!ctx || !canvas) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+}
+
 function stopLoop() {
   if (rafId) {
     cancelAnimationFrame(rafId);
@@ -77,6 +84,7 @@ function draw(timestamp) {
 
   // Sin chispas vivas no seguimos consumiendo frames.
   if (!sparks.length) {
+    clearCanvas();
     stopLoop();
     return;
   }
@@ -152,8 +160,16 @@ export function initClickSpark(options = {}) {
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       sparks = [];
+      clearCanvas();
       stopLoop();
     }
+  });
+  // Si el foco salta a un popup (Orpen/THOM), no dejar el estallido congelado.
+  window.addEventListener("blur", () => {
+    if (!sparks.length) return;
+    sparks = [];
+    clearCanvas();
+    stopLoop();
   });
 }
 

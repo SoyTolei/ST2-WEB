@@ -61,14 +61,28 @@ html.st2-theme-dark .tab-bar.st2-gooey-host .tab-btn.active:hover {
     0 2px 12px rgba(234, 88, 12, 0.22) !important;
 }
 
-/* Subnav (THOM/Portal): sigue con pastilla gooey */
+/* Subnav (THOM/Portal): misma selección que tabs (sin pastilla flotante aparte). */
 .st2-context-seg.st2-gooey-host .st2-context-btn.active,
 .st2-context-seg.st2-gooey-host .st2-context-btn.active:hover {
-  background: transparent !important;
-  border-color: transparent !important;
+  background: rgba(249, 115, 22, 0.2) !important;
+  border-color: rgba(234, 88, 12, 0.88) !important;
   color: var(--st2-gooey-pill-text) !important;
-  box-shadow: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 247, 237, 0.35),
+    0 2px 10px rgba(234, 88, 12, 0.18) !important;
   text-shadow: none;
+}
+
+html.st2-theme-dark .st2-context-seg.st2-gooey-host .st2-context-btn.active,
+html.st2-theme-dark .st2-context-seg.st2-gooey-host .st2-context-btn.active:hover {
+  background: rgba(249, 115, 22, 0.22) !important;
+  border-color: rgba(251, 146, 60, 0.92) !important;
+  color: #ffedd5 !important;
+}
+
+.st2-context-seg.st2-gooey-host > .st2-gooey-filter {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .tab-bar.st2-gooey-host .tab-btn-admin:not(.active),

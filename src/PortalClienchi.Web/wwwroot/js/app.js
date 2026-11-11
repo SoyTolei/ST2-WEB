@@ -5709,8 +5709,9 @@ function switchTab(tabId) {
     closeThomPopup({ reclaim: false });
   }
   if (tabId !== "orpen") {
-    // Al salir de la pestaña Orpen, cerrar su ventana (evita N Orpens sueltos).
-    closeOrpenPopup({ reclaim: true });
+    // Sin reclaim: window.open("", name) robaba foco / “refrescaba” al ir a Planillas u otra pestaña.
+    // El reclaim queda solo en pagehide para huérfanas.
+    closeOrpenPopup({ reclaim: false });
   }
 
   stopEngagementTimer();
