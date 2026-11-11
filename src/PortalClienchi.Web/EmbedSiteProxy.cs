@@ -212,7 +212,7 @@ internal sealed class EmbedSiteProxy
         if (ShouldRewrite(contentType))
         {
             var text = await response.Content.ReadAsStringAsync(ct);
-            text = RewriteContent(text, site, contentType, mirrorPaths, _autoCloseThomHelpPanel, _thomZoomFactor);
+            text = RewriteContent(text, site, contentType, mirrorPaths, _autoCloseThomHelpPanel, _thomZoomFactor, relativePath);
             var bytes = Encoding.UTF8.GetBytes(text);
             context.Response.ContentLength = bytes.Length;
             await context.Response.Body.WriteAsync(bytes, ct);
@@ -323,7 +323,21 @@ internal sealed class EmbedSiteProxy
         @"redirect_uri=([^&""'\s]+)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    private static string RewriteContent(string content, string site, string contentType, bool mirrorPaths, bool autoCloseHelpPanel, double thomZoomFactor)
+    private static string EmbedBaseHref(string site, string relativePath)
+    {
+        var dir = "";
+        if (!string.IsNullOrEmpty(relativePath))
+        {
+            var normalized = relativePath.Replace('\\', '/').Trim('/');
+            var lastSlash = normalized.LastIndexOf('/');
+            if (lastSlash >= 0)
+                dir = normalized[..(lastSlash + 1)];
+        }
+
+        return $"/embed/{site}/{dir}";
+    }
+
+    private static string RewriteContent(string content, string site, string contentType, bool mirrorPaths, bool autoCloseHelpPanel, double thomZoomFactor, string relativePath = "")
     {
         if (mirrorPaths)
         {
@@ -353,7 +367,7 @@ internal sealed class EmbedSiteProxy
         {
             content = RewriteAbsoluteHostsPreservingOAuth(content);
 
-            var baseTag = $"""<base href="/embed/{site}/">""";
+            var baseTag = $"""<base href="{EmbedBaseHref(site, relativePath)}">""";
             if (!content.Contains("<base ", StringComparison.OrdinalIgnoreCase))
             {
                 content = Regex.Replace(
@@ -688,6 +702,8 @@ internal sealed class EmbedSiteProxy
 
         if (HostToSite.TryGetValue(host, out var site))
             return site;
+        if (IsAllowedOrpenHost(host))
+            return "orpen";
         if (host.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase))
             return "aad";
         if (host.Equals("d3uc069fcn7uxw.cloudfront.net", StringComparison.OrdinalIgnoreCase))
@@ -703,9 +719,14 @@ internal sealed class EmbedSiteProxy
 
     private static bool IsAllowedHost(string host) =>
         IsAllowedThomsonHost(host)
+        || IsAllowedOrpenHost(host)
         || host.Equals("login.microsoftonline.com", StringComparison.OrdinalIgnoreCase)
         || host.EndsWith(".cloudfront.net", StringComparison.OrdinalIgnoreCase)
         || host.Contains("amazoncognito.com", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsAllowedOrpenHost(string host) =>
+        host.Equals("orpen.com.br", StringComparison.OrdinalIgnoreCase)
+        || host.EndsWith(".orpen.com.br", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsAllowedThomsonHost(string host) =>
         host.EndsWith(".thomsonreuters.com", StringComparison.OrdinalIgnoreCase)

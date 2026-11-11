@@ -4513,8 +4513,8 @@ function getEmbedFrameUrl(kind) {
   }
   if (kind === "ai") return aiFrameOverrideUrl || appConfig?.aiPlatformUrl;
   if (kind === "orpen") {
-    // Proxy: el login se ve bien en absoluto, pero post-login la sesión/cookies
-    // y redirects suelen romper el iframe. El proxy reescribe cookies y URLs.
+    // Siempre vía proxy: reescribe cookies/SameSite y URLs absolutas de Orpen
+    // (sin esto el login se ve, pero post-login la sesión no sobrevive en el iframe).
     const raw = String(appConfig?.orpenUrl || "https://thomsontap.orpen.com.br/rcx/login.php").trim();
     try {
       const u = new URL(raw);
@@ -5580,17 +5580,26 @@ orpenFrame?.addEventListener("load", () => {
     if (document.querySelector('.tab-btn.active')?.dataset?.tab !== "orpen") return;
     try {
       const doc = orpenFrame.contentDocument;
-      if (doc && doc.body && doc.body.childElementCount === 0) {
-        setEmbedHint("orpen", "Orpen no cargó acá. Probá Recargar o Abrir en navegador.");
+      const body = doc?.body;
+      if (!body) return;
+      const text = (body.innerText || "").trim();
+      const empty = body.childElementCount === 0 || text.length < 8;
+      const forbidden = /403|forbidden|access denied/i.test(text);
+      if (empty || forbidden) {
+        const msg = "Orpen no cargó acá. Probá Recargar o Abrir en navegador.";
+        setEmbedHint("orpen", msg);
         const hint = document.getElementById("orpenEmbedHint");
         if (hint) {
           hint.classList.remove("hidden");
           hint.removeAttribute("aria-hidden");
-          hint.textContent = "Orpen no cargó acá. Probá Recargar o Abrir en navegador.";
+          hint.textContent = msg;
         }
+        return;
       }
+      clearEmbedHint("orpen");
+      document.getElementById("orpenEmbedHint")?.classList.add("hidden");
     } catch {
-      // Cross-origin vía proxy absoluto: no leemos el doc; no es error.
+      // Cross-origin (URL absoluta): no leemos el doc; no es error.
     }
   }, 2500);
 });
