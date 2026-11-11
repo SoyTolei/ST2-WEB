@@ -4740,7 +4740,31 @@ function getThomPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
 }
 
 function getOrpenPanelRect(popupChrome = THOM_POPUP_CHROME_WITH_URL) {
-  return getEmbedPanelRect("#panel-orpen", popupChrome);
+  // Pegado a las pestañas ST2: máximo alto útil para Orpen.
+  const tabBar = document.querySelector(".tab-bar");
+  const tabRect = tabBar?.getBoundingClientRect();
+  if (!tabRect) return getEmbedPanelRect("#panel-orpen", popupChrome);
+
+  const gap = 2;
+  const viewportTop = Math.round(tabRect.bottom + gap);
+  const viewportHeight = Math.max(360, Math.round(window.innerHeight - viewportTop - 2));
+  const chromeTop = Math.max(0, window.outerHeight - window.innerHeight);
+  const chromeLeft = Math.max(0, (window.outerWidth - window.innerWidth) / 2);
+  const screenTop = Number.isFinite(window.screenTop) ? window.screenTop : window.screenY;
+  const screenLeft = Number.isFinite(window.screenLeft) ? window.screenLeft : window.screenX;
+
+  let top = Math.round(screenTop + chromeTop + viewportTop);
+  const left = Math.round(screenLeft + chromeLeft);
+  const width = Math.max(480, Math.round(window.innerWidth));
+  let height = viewportHeight + popupChrome;
+
+  const availTop = window.screen?.availTop ?? 0;
+  const availBottom = availTop + (window.screen?.availHeight ?? window.screen?.height ?? top + height);
+  if (top + height > availBottom) {
+    height = Math.max(360 + popupChrome, availBottom - top);
+  }
+
+  return { top, left, width, height };
 }
 
 function buildThomPopupFeatures(rect) {
@@ -5125,16 +5149,19 @@ function updateOrpenDirectUi() {
   orpenFrame?.classList.add("hidden");
   orpenDirectGate?.classList.remove("hidden");
   orpenDirectGate?.classList.toggle("embed-panel-active", active);
+  document.body.classList.toggle("orpen-popup-active", active);
   const gateOpenBtn = document.getElementById("orpenGateOpenBtn");
   if (gateOpenBtn) gateOpenBtn.textContent = active ? "Enfocar Orpen" : "Abrir Orpen aquí";
   document.getElementById("orpenGateCloseBtn")?.classList.toggle("hidden", !active);
   document.getElementById("orpenGateStatus")?.classList.toggle("hidden", !active);
   document.getElementById("orpenGateNote")?.classList.toggle("hidden", active);
+  // Sin hint arriba: ese renglón robaba alto útil bajo las pestañas.
+  clearEmbedHint("orpen");
 }
 
 function showOrpenPanelPlaceholder() {
   orpenDirectGate?.classList.remove("hidden");
-  setEmbedHint("orpen", "Orpen corre en ventana propia para que menús y chats no se traben.");
+  clearEmbedHint("orpen");
 }
 
 function stopOrpenPopupWatch() {
@@ -5476,11 +5503,11 @@ function setEmbedHint(kind, message) {
   const el = document.getElementById(id);
   if (!el) return;
   const text = String(message || "").trim();
-  // Orpen: sí mostramos aviso si el iframe queda en blanco post-login.
-  if (kind === "orpen" && text) {
-    el.textContent = text;
-    el.classList.remove("hidden");
-    el.removeAttribute("aria-hidden");
+  // Orpen en ventana: no mostrar hint bajo pestañas (roba espacio al popup).
+  if (kind === "orpen" || !text) {
+    el.classList.add("hidden");
+    el.setAttribute("aria-hidden", "true");
+    el.textContent = "";
     return;
   }
   el.classList.add("hidden");

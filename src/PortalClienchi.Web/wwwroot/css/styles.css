@@ -2249,6 +2249,25 @@ body.embed-active #panel-portal .embed-frame-wrap {
   overflow: hidden;
 }
 
+/* Orpen en popup: panel a tope bajo las pestañas, sin franja vacía. */
+body.embed-active #panel-orpen.active {
+  margin-top: 0;
+  padding-top: 0;
+  gap: 0;
+}
+
+body.embed-active #panel-orpen .embed-hint {
+  display: none !important;
+  margin: 0;
+  height: 0;
+}
+
+body.orpen-popup-active #panel-orpen .embed-frame-wrap {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
 body.embed-active #panel-thom .embed-frame-wrap > .embed-frame,
 body.embed-active #panel-portal .embed-frame-wrap > .embed-frame {
   width: 111.111%; /* 100 / 0.90 */
