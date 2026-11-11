@@ -2,7 +2,7 @@
 import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20261110g";
-import { scheduleWelcomeTour, scheduleOrpenFeatureTip, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261110j";
+import { scheduleWelcomeTour, scheduleOrpenFeatureTip, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261110m";
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
