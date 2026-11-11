@@ -1093,6 +1093,20 @@
               <div class="plan-accent-bar referral"></div>
             </div>
 
+            <nav id="ref-stepper" class="plan-ref-stepper hidden" aria-label="Pasos del referral">
+              <button type="button" class="plan-ref-step active" data-ref-step="1" aria-current="step">
+                <span class="plan-ref-step-num">1</span>
+                <span class="plan-ref-step-label">Datos</span>
+              </button>
+              <button type="button" class="plan-ref-step" data-ref-step="2">
+                <span class="plan-ref-step-num">2</span>
+                <span class="plan-ref-step-label">Chequeos</span>
+              </button>
+              <button type="button" class="plan-ref-step" data-ref-step="3">
+                <span class="plan-ref-step-num">3</span>
+                <span class="plan-ref-step-label">Generar Planilla</span>
+              </button>
+            </nav>
 
             <div id="ref-bejerman-panel" class="plan-bej-toolbar hidden">
               <div class="plan-bej-config">
@@ -1135,20 +1149,6 @@
             </div>
 
             <div id="ref-standard-flow">
-            <nav id="ref-stepper" class="plan-ref-stepper hidden" aria-label="Pasos del referral">
-              <button type="button" class="plan-ref-step active" data-ref-step="1" aria-current="step">
-                <span class="plan-ref-step-num">1</span>
-                <span class="plan-ref-step-label">Datos</span>
-              </button>
-              <button type="button" class="plan-ref-step" data-ref-step="2">
-                <span class="plan-ref-step-num">2</span>
-                <span class="plan-ref-step-label">Chequeos</span>
-              </button>
-              <button type="button" class="plan-ref-step" data-ref-step="3">
-                <span class="plan-ref-step-num">3</span>
-                <span class="plan-ref-step-label">Generar Planilla</span>
-              </button>
-            </nav>
             <div id="ref-standard-fields" data-ref-step-panel="1">
             <div class="plan-form-grid">
               <div class="plan-field"><label for="ref-asunto">Asunto y/o Error</label><input id="ref-asunto" type="text" autocomplete="off" placeholder="Resumen del caso"/></div>
