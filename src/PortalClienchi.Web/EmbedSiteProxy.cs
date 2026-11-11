@@ -381,6 +381,8 @@ internal sealed class EmbedSiteProxy
             if (IsPortalWebSite(site))
                 content = RewritePortalWebpackPublicPath(content, site);
             content = StripCrossOriginAttributes(content);
+            if (site.Equals("orpen", StringComparison.OrdinalIgnoreCase))
+                content = InjectOrpenZoom(content, 0.9);
         }
         else if (contentType.Contains("javascript", StringComparison.OrdinalIgnoreCase)
                  || contentType.Contains("css", StringComparison.OrdinalIgnoreCase))
@@ -397,6 +399,36 @@ internal sealed class EmbedSiteProxy
         }
 
         return content;
+    }
+
+    private static string InjectOrpenZoom(string content, double zoomFactor)
+    {
+        if (content.Contains("st2-orpen-zoom", StringComparison.Ordinal))
+            return content;
+
+        var z = zoomFactor.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var script = $$"""
+<script data-st2-orpen-zoom="1">
+(function () {
+  function apply() {
+    try {
+      var z = "{{z}}";
+      document.documentElement.style.zoom = z;
+      if (document.body) document.body.style.zoom = z;
+    } catch (e) {}
+  }
+  apply();
+  window.addEventListener("load", apply);
+  document.addEventListener("DOMContentLoaded", apply);
+  try {
+    new MutationObserver(apply).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+})();
+</script>
+""";
+        if (Regex.IsMatch(content, @"</body>", RegexOptions.IgnoreCase))
+            return Regex.Replace(content, @"</body>", script + "</body>", RegexOptions.IgnoreCase);
+        return content + script;
     }
 
     private static string RewriteCloudFrontHosts(string content)
