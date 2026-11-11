@@ -1,6 +1,6 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
-import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261012d";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261111a";
 import { autoTourForReferral } from "./st2-tour-init.js";
 import {
   initChileReferral,
@@ -10,6 +10,7 @@ import {
   syncChileReferralCards,
 } from "./planillas-referral-chile.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111a";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
@@ -547,10 +548,15 @@ function bindReferralEvents() {
   setupCapturas("ref-chile-capt", chileCapturaFiles);
   setupTraza();
 
-  document.getElementById("ref-btn-copiar")?.addEventListener("click", () => generarReferral(true));
-  document.getElementById("ref-btn-ver-planilla")?.addEventListener("click", () => generarReferral(false));
   mountPlanTextPreview("ref-text-preview");
-  document.getElementById("ref-btn-limpiar")?.addEventListener("click", resetReferralForm);
+  wirePlanActionTrio({
+    copyBtn: document.getElementById("ref-btn-copiar"),
+    previewBtn: document.getElementById("ref-btn-ver-planilla"),
+    clearBtn: document.getElementById("ref-btn-limpiar"),
+    onCopy: () => generarReferral(true),
+    onPreview: () => generarReferral(false),
+    onClear: resetReferralForm,
+  });
   document.getElementById("ref-btn-ia")?.addEventListener("click", mejorarReferralIa);
 
   referralIaUndo = bindIaUndoButtons({

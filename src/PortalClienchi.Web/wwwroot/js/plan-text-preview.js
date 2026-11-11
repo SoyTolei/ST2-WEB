@@ -11,22 +11,26 @@ export function planFormActionsHtml({
 }) {
   return `
     <div class="plan-ref-actions">
-      <button type="button" id="${copyId}" class="plan-action-btn green">
-        <span class="plan-action-btn-main">
-          <span class="plan-action-btn-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
-          Copiar al portapapeles
+      <button type="button" id="${copyId}" class="plan-action-btn green plan-fx plan-fx--sling" data-plan-fx="sling">
+        <span class="plan-fx-face">
+          <span class="plan-action-btn-main">
+            <span class="plan-action-btn-icon" data-plan-icon="clipboard" aria-hidden="true"></span>
+            Copiar al portapapeles
+          </span>
+          <span class="plan-action-btn-sub">Tirar y soltar para copiar</span>
         </span>
-        <span class="plan-action-btn-sub">Solo copiar y pegar</span>
       </button>
-      <button type="button" id="${previewId}" class="plan-action-btn blue">
+      <button type="button" id="${previewId}" class="plan-action-btn blue plan-fx plan-fx--slide" data-plan-fx="slide">
         <span class="plan-action-btn-main">
           <span class="plan-action-btn-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
           Vista previa
         </span>
-        <span class="plan-action-btn-sub">Genera y muestra la planilla acá en pantalla</span>
+        <span class="plan-action-btn-sub">Deslizá para generar</span>
       </button>
-      <button type="button" id="${clearId}" class="plan-action-btn ghost">
-        <span class="plan-action-btn-main">${clearLabel}</span>
+      <button type="button" id="${clearId}" class="plan-action-btn ghost plan-fx plan-fx--hold" data-plan-fx="hold">
+        <span class="plan-fx-face">
+          <span class="plan-action-btn-main">${clearLabel}</span>
+        </span>
       </button>
     </div>
   `;

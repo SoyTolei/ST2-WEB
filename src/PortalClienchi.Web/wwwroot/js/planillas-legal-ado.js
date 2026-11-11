@@ -6,6 +6,7 @@
 import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111a";
 
 /** Etiquetas de la salida por idioma. Ajustar textos acá, sin tocar la lógica. */
 export const ADO_LABELS = {
@@ -487,26 +488,31 @@ export function renderAdoForm(root, settings) {
   });
   form?.addEventListener("change", () => syncVisibility(settings));
 
-  document.getElementById("ado-btn-ver")?.addEventListener("click", () => {
-    const text = generate(settings);
-    if (!text) return;
-    showPlanTextPreview("ado-text-preview", text);
-    setStatus("Plantilla lista. Podés copiarla desde el panel de vista previa.");
-  });
-  document.getElementById("ado-btn-copiar")?.addEventListener("click", async () => {
-    const text = generate(settings);
-    if (!text) return;
-    try {
-      await navigator.clipboard.writeText(text);
-      setStatus("Plantilla copiada al portapapeles.");
-    } catch {
-      showPlanTextPreview("ado-text-preview", text);
-      setStatus("No se pudo copiar automáticamente: copiala desde la vista previa.", true);
-    }
-  });
-  document.getElementById("ado-btn-limpiar")?.addEventListener("click", () => resetForm(settings));
-
   mountPlanTextPreview("ado-text-preview");
+  wirePlanActionTrio({
+    copyBtn: document.getElementById("ado-btn-copiar"),
+    previewBtn: document.getElementById("ado-btn-ver"),
+    clearBtn: document.getElementById("ado-btn-limpiar"),
+    onCopy: async () => {
+      const text = generate(settings);
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("Plantilla copiada al portapapeles.");
+      } catch {
+        showPlanTextPreview("ado-text-preview", text);
+        setStatus("No se pudo copiar automáticamente: copiala desde la vista previa.", true);
+      }
+    },
+    onPreview: () => {
+      const text = generate(settings);
+      if (!text) return;
+      showPlanTextPreview("ado-text-preview", text);
+      setStatus("Plantilla lista. Podés copiarla desde el panel de vista previa.");
+    },
+    onClear: () => resetForm(settings),
+  });
+
   document.querySelectorAll("#ado-form select.plan-select").forEach(enhancePlanSelect);
   injectModuleHeaders();
   syncVisibility(settings);

@@ -2,6 +2,7 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111a";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261013i";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261110k";
@@ -1795,10 +1796,15 @@ function bindEvents() {
     e.target.value = e.target.value.replace(/\D/g, "");
   });
 
-  els.btnCopiar()?.addEventListener("click", onCopiarAlPortapapeles);
-  els.btnVerPlanilla()?.addEventListener("click", onVerPlanilla);
   mountPlanTextPreview("plan-text-preview");
-  document.getElementById("plan-btn-limpiar")?.addEventListener("click", limpiarTransferencia);
+  wirePlanActionTrio({
+    copyBtn: els.btnCopiar(),
+    previewBtn: els.btnVerPlanilla(),
+    clearBtn: document.getElementById("plan-btn-limpiar"),
+    onCopy: onCopiarAlPortapapeles,
+    onPreview: onVerPlanilla,
+    onClear: limpiarTransferencia,
+  });
 }
 
 async function loadConfig() {
@@ -1829,7 +1835,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20261110j").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20261111a").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });

@@ -1,4 +1,5 @@
 import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111a";
 import { enhancePlanSelect } from "./plan-custom-select.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { canSeeLegalProduct } from "./module-access.js";
@@ -7,7 +8,7 @@ import { normalizeOnedriveUrl, setupOnedrivePasteInput } from "./plan-onedrive-p
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { autoTour, syncHeaderTourButton } from "./st2-tour-init.js";
 import { errorSt2 } from "./st2-dialog.js?v=20260909a";
-import { renderAdoForm } from "./planillas-legal-ado.js?v=20261012c";
+import { renderAdoForm } from "./planillas-legal-ado.js?v=20261111a";
 import { legalIcon as icon, legalProductBtnClass, legalModuloButtonHtml, renderLegalProductButtons, visibleLegalProducts, syncLegalMenuProducts as paintLegalMenuProducts } from "./planillas-legal-menu.js?v=20261012d";
 
 const LEGAL_ESCALAMIENTO_LABEL = "Escalamiento a N2/N3";
@@ -802,10 +803,6 @@ function showTemplateForm(product, item, template) {
     setStatus("");
   }
 
-  document.getElementById("ref-legal-btn-limpar")?.addEventListener("click", () => {
-    limpiarLegalTemplateForm();
-  });
-
   const hasFileEvidencias = (template.fields || []).some((field) => field.type === "file");
   if (hasFileEvidencias) setupLegalEvidenciasPanel();
   setupLegalOnedriveLinks();
@@ -851,11 +848,13 @@ function showTemplateForm(product, item, template) {
     }
   };
 
-  document.getElementById("ref-legal-btn-ver-planilla")?.addEventListener("click", () => {
-    void runGenerate();
-  });
-  document.getElementById("ref-legal-btn-copiar")?.addEventListener("click", () => {
-    void runGenerate({ copy: true });
+  wirePlanActionTrio({
+    copyBtn: document.getElementById("ref-legal-btn-copiar"),
+    previewBtn: document.getElementById("ref-legal-btn-ver-planilla"),
+    clearBtn: document.getElementById("ref-legal-btn-limpar"),
+    onCopy: () => runGenerate({ copy: true }),
+    onPreview: () => runGenerate(),
+    onClear: limpiarLegalTemplateForm,
   });
 }
 

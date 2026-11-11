@@ -1,0 +1,257 @@
+/* Micro-FX planillas: Sling / Slide Commit / Hold (estética ST²) */
+
+.plan-fx {
+  --fx-pull: 0px;
+  --fx-stretch: 1;
+  --fx-slide: 0;
+  --fx-hold: 0;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  user-select: none;
+  touch-action: none;
+  transition: box-shadow 0.18s ease, filter 0.18s ease, transform 0.18s ease;
+}
+
+.plan-fx:focus-visible {
+  outline: 2px solid rgba(249, 115, 22, 0.75);
+  outline-offset: 2px;
+}
+
+.plan-fx-face {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+}
+
+/* —— Sling (Copiar / verde) —— */
+.plan-fx--sling .plan-fx-face {
+  transform: translateY(var(--fx-pull)) scaleY(var(--fx-stretch));
+  transform-origin: center top;
+  transition: transform 0.12s ease;
+}
+
+.plan-fx--sling.is-pulling .plan-fx-face {
+  transition: none;
+}
+
+.plan-fx--sling.is-armed {
+  box-shadow: 0 8px 22px rgba(21, 128, 61, 0.35);
+  filter: saturate(1.08);
+}
+
+.plan-fx--sling.is-firing .plan-fx-face {
+  animation: plan-fx-sling-fire 0.28s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.plan-fx--sling.is-done {
+  box-shadow: 0 0 0 2px rgba(134, 239, 172, 0.55);
+}
+
+@keyframes plan-fx-sling-fire {
+  0% { transform: translateY(var(--fx-pull)) scale(1.02); }
+  55% { transform: translateY(-10px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* —— Slide Commit (Vista previa / azul) —— */
+.plan-fx--slide {
+  padding: 0 !important;
+  display: block;
+}
+
+.plan-fx-slide-track {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 56px;
+  padding: 6px;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.plan-fx-slide-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--fx-slide) * 100%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.28));
+  pointer-events: none;
+  transition: width 0.12s ease;
+}
+
+.plan-fx--slide.is-dragging .plan-fx-slide-fill {
+  transition: none;
+}
+
+.plan-fx-thumb {
+  position: relative;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.96);
+  color: #1d4ed8;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.22);
+  cursor: grab;
+  transition: transform 0.14s ease, box-shadow 0.14s ease;
+}
+
+.plan-fx--slide.is-dragging .plan-fx-thumb {
+  cursor: grabbing;
+  transition: none;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.3);
+}
+
+.plan-fx-thumb-icon {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.plan-fx-slide-labels {
+  position: absolute;
+  inset: 0 10px 0 56px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.plan-fx-slide-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.plan-fx-slide-sub {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.plan-fx-slide-done {
+  display: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.plan-fx--slide.is-armed .plan-fx-thumb {
+  background: #fff;
+  color: #15803c;
+}
+
+.plan-fx--slide.is-done .plan-fx-slide-title,
+.plan-fx--slide.is-done .plan-fx-slide-sub {
+  display: none;
+}
+
+.plan-fx--slide.is-done .plan-fx-slide-done {
+  display: inline;
+}
+
+.plan-fx--slide.is-done .plan-fx-thumb {
+  background: #bbf7d0;
+  color: #166534;
+}
+
+/* El thumb ya lleva translateX inline; el spin va en el icono. */
+.plan-fx--slide.is-committing .plan-fx-thumb-icon {
+  display: inline-block;
+  animation: plan-fx-spin-icon 0.65s linear infinite;
+}
+
+@keyframes plan-fx-spin-icon {
+  to { transform: rotate(360deg); }
+}
+
+/* —— Hold (Limpiar / ghost) —— */
+.plan-fx--hold {
+  overflow: hidden;
+}
+
+.plan-fx-hold-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--fx-hold) * 100%);
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.18), rgba(234, 88, 12, 0.55));
+  z-index: 1;
+  pointer-events: none;
+  transition: height 0.08s linear;
+}
+
+.plan-fx--hold .plan-fx-face {
+  z-index: 2;
+}
+
+.plan-fx-hold-hint {
+  position: absolute;
+  right: 10px;
+  bottom: 7px;
+  z-index: 2;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.plan-fx--hold.is-holding {
+  border-color: rgba(234, 88, 12, 0.55);
+}
+
+.plan-fx--hold.is-armed {
+  box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.35);
+}
+
+.plan-fx--hold.is-done {
+  border-color: rgba(234, 88, 12, 0.7);
+}
+
+/* Dark theme */
+html.st2-theme-dark .plan-fx--sling.is-armed {
+  box-shadow: 0 10px 24px rgba(21, 128, 61, 0.28);
+}
+
+html.st2-theme-dark .plan-fx-thumb {
+  background: #f8fafc;
+  color: #1d4ed8;
+}
+
+html.st2-theme-dark .plan-fx--hold .plan-fx-hold-fill {
+  background: linear-gradient(180deg, rgba(249, 115, 22, 0.22), rgba(234, 88, 12, 0.62));
+}
+
+html.st2-theme-dark .plan-fx-hold-hint {
+  color: #d6d3d1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-fx--sling .plan-fx-face,
+  .plan-fx-thumb,
+  .plan-fx-slide-fill,
+  .plan-fx-hold-fill {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .plan-fx-hold-hint { display: none; }
+  .plan-fx-slide-sub { display: none; }
+}
