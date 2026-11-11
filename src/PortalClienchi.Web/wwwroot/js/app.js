@@ -5286,7 +5286,8 @@ function activateOrpenTab() {
   }
   showOrpenPanelPlaceholder();
   updateOrpenDirectUi();
-  openOrpenWindow();
+  // Si ya hay sesión abierta, solo enfocar/reubicar (sin reload).
+  openOrpenWindow({ reload: false });
 }
 
 function isEmbedFrameEmpty(frame) {
@@ -5673,9 +5674,7 @@ function switchTab(tabId) {
   if (tabId !== "thom") {
     closeThomPopup({ reclaim: false });
   }
-  if (tabId !== "orpen") {
-    closeOrpenPopup({ reclaim: false });
-  }
+  // Orpen: no cerrar al cambiar de pestaña — la sesión/socket siguen vivos en la ventana.
 
   stopEngagementTimer();
   if (tabId === "thom") {
