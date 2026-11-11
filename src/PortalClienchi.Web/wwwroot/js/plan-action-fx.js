@@ -480,10 +480,11 @@ function mountSling(el, onSend, opts = {}) {
 
 function mountSlide(el, onConfirm, opts = {}) {
   const label = opts.label || readLabel(el, "Vista previa");
+  const sub = opts.sub ?? readSub(el, "Deslizá para generar");
   const doneLabel = opts.doneLabel || "Listo";
   const errorLabel = opts.errorLabel || "Error";
   const PAD = 3;
-  const height = 48;
+  const height = sub ? 56 : 48;
   const radius = 22;
   const holdMs = 1500;
   const MIN_PENDING = 300;
@@ -502,10 +503,13 @@ function mountSlide(el, onConfirm, opts = {}) {
   host.innerHTML = `
     <div class="slide-commit__track">
       <span class="slide-commit__label" aria-hidden="true">
-        <span class="slide-commit__text slide-commit__text--plain">${escapeHtml(label)}</span>
+        <span class="slide-commit__text slide-commit__text--plain">
+          <span class="slide-commit__title">${escapeHtml(label)}</span>
+          ${sub ? `<span class="slide-commit__sub">${escapeHtml(sub)}</span>` : ""}
+        </span>
         <span class="slide-commit__text slide-commit__text--error">${escapeHtml(errorLabel)}</span>
       </span>
-      <div class="slide-commit__capsule" role="slider" tabindex="0" aria-label="${escapeHtml(label)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="slide-commit__capsule" role="slider" tabindex="0" aria-label="${escapeHtml(label)}. ${escapeHtml(sub)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <div class="slide-commit__content">
           <span class="slide-commit__arrow" aria-hidden="true">${ICON_ARROW_RIGHT}</span>
           <span class="slide-commit__spin" aria-hidden="true">${ICON_SPINNER}</span>

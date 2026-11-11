@@ -240,12 +240,12 @@
   --sc-grip-r: 18px;
   --sc-pad: 3px;
   --sc-font: 12.5px;
-  --sc-w: 200px;
-  --sc-h: 48px;
+  --sc-w: 220px;
+  --sc-h: 56px;
   position: relative;
   display: block;
   width: var(--sc-w);
-  max-width: 200px;
+  max-width: 240px;
   height: var(--sc-h);
   font-family: inherit;
   min-width: 0;
@@ -283,14 +283,32 @@
   pointer-events: none;
   font-size: var(--sc-font);
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.15;
   white-space: nowrap;
+  padding-left: calc(var(--sc-h) * 0.35);
 }
 
 .slide-commit__text {
   grid-area: 1 / 1;
-  color: color-mix(in srgb, var(--sc-ink) 55%, transparent);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: color-mix(in srgb, var(--sc-ink) 62%, transparent);
   transition: opacity 200ms ease, filter 200ms ease;
+}
+
+.slide-commit__title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--sc-ink) 78%, transparent);
+}
+
+.slide-commit__sub {
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--sc-ink) 48%, transparent);
 }
 
 .slide-commit__text--error {

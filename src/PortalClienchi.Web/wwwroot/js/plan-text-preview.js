@@ -1,5 +1,5 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { bindPlanActionFx } from "./plan-action-fx.js?v=20261111g";
+import { bindPlanActionFx } from "./plan-action-fx.js?v=20261111h";
 
 /** Por elemento: los formularios Legal se re-renderizan y el panel nuevo tiene que volver a enlazarse. */
 const bound = new WeakSet();
@@ -18,6 +18,7 @@ export function planFormActionsHtml({
       </button>
       <button type="button" id="${previewId}" class="plan-action-btn blue" data-plan-fx="slide" aria-label="Vista previa">
         <span class="plan-action-btn-main">Vista previa</span>
+        <span class="plan-action-btn-sub">Deslizá para generar</span>
       </button>
       <button type="button" id="${clearId}" class="plan-action-btn ghost" data-plan-fx="fuse" aria-label="${clearLabel.replace(/^🗑\s*/, "")}">
         <span class="plan-action-btn-main">${clearLabel.replace(/^🗑\s*/, "")}</span>
