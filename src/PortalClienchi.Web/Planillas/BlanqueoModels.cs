@@ -152,7 +152,7 @@ public sealed class BlanqueoAlertsSeenRequest
 public static class BlanqueoClave
 {
     /// <summary>Clave temporal vigente (puede cambiarse a mano cuando se actualice el proceso).</summary>
-    public const string Actual = "Sueldo.2026";
+    public const string Actual = "Sueldo.2027";
 }
 
 public static class BlanqueoNotas

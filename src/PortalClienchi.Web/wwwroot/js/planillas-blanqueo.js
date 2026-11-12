@@ -38,7 +38,7 @@ let fechaSortDir = "desc";
 let monthFilterTouched = false;
 let listLoadGen = 0;
 let scrollListToEndOnce = false;
-let defaultClaveBlanqueo = "Sueldo.2026";
+let defaultClaveBlanqueo = "Sueldo.2027";
 
 const liveList = createPlanillasLiveList({
   viewId: "planillas-blanqueo",
@@ -224,6 +224,9 @@ export function initBlanqueoModule() {
   });
   document.getElementById("blanqueo-clave-has-nota")?.addEventListener("change", () => {
     syncClaveNotaField();
+  });
+  document.getElementById("blanqueo-clave-sugerida-btn")?.addEventListener("click", () => {
+    void applySuggestedClave();
   });
 
   document.getElementById("blanqueo-rechazado-cancel")?.addEventListener("click", () => hideRechazadoModal());
@@ -810,9 +813,14 @@ function syncClaveVisibility() {
 function syncClaveUi(clave) {
   const btn = document.getElementById("blanqueo-clave-copy");
   if (!btn) return;
-  const value = String(clave || defaultClaveBlanqueo || "Sueldo.2026").trim() || "Sueldo.2026";
+  const value = String(clave || defaultClaveBlanqueo || "Sueldo.2027").trim() || "Sueldo.2027";
   btn.textContent = value;
   btn.dataset.clave = value;
+  const sugerida = document.getElementById("blanqueo-clave-sugerida-btn");
+  if (sugerida) {
+    sugerida.textContent = value;
+    sugerida.dataset.clave = value;
+  }
   syncClaveVisibility();
 }
 
@@ -1515,7 +1523,7 @@ function formatFecha(iso) {
 }
 
 function claveDefault() {
-  return String(defaultClaveBlanqueo || "Sueldo.2026").trim() || "Sueldo.2026";
+  return String(defaultClaveBlanqueo || "Sueldo.2027").trim() || "Sueldo.2027";
 }
 
 function isBlanqueoConClave(item) {
@@ -1911,6 +1919,33 @@ function syncClaveNotaField() {
   if (on) document.getElementById("blanqueo-clave-nota")?.focus();
 }
 
+function syncClaveSugeridaUi() {
+  const btn = document.getElementById("blanqueo-clave-sugerida-btn");
+  if (!btn) return;
+  const value = claveDefault();
+  btn.textContent = value;
+  btn.dataset.clave = value;
+  btn.classList.remove("is-copied");
+  btn.setAttribute("data-copy-hint", "Clic para usar");
+}
+
+async function applySuggestedClave() {
+  const btn = document.getElementById("blanqueo-clave-sugerida-btn");
+  const input = document.getElementById("blanqueo-clave-input");
+  const value = String(btn?.dataset.clave || btn?.textContent || claveDefault()).trim() || claveDefault();
+  if (input) {
+    input.value = value;
+    input.focus();
+    input.select?.();
+  }
+  await copyText(value, {
+    el: btn,
+    attr: "data-copy-hint",
+    copiedText: "Lista",
+    restoreText: "Clic para usar",
+  });
+}
+
 function openClaveModal(item) {
   selectedId = item.id;
   const overlay = document.getElementById("blanqueo-clave-overlay");
@@ -1920,6 +1955,7 @@ function openClaveModal(item) {
   const previa = String(item.aclaracion || "").trim();
   const packed = unpackClaveAclaracion(previa);
   const usable = previa && !isRejectedState(previa) && !isActivacionAutoNote(previa);
+  syncClaveSugeridaUi();
   if (input) {
     input.value = usable ? (packed.clave || (looksLikeClaveOnly(previa) ? previa : "")) : "";
     input.placeholder = `Ej: ${claveDefault()}`;

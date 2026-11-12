@@ -1771,6 +1771,10 @@ html.st2-theme-dark .blanqueo-clave-hint-note {
   color: #cbd5e1;
 }
 
+html.st2-theme-dark .blanqueo-clave-sugerida {
+  color: #94a3b8;
+}
+
 html.st2-theme-dark .blanqueo-clave-code {
   background: #121212;
   border-color: #94a3b8;
