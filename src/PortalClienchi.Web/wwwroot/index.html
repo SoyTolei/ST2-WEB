@@ -183,7 +183,7 @@
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20261111e"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20261111d"/>
-  <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261111h"/>
+  <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261112e"/>
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20261110k"/>
@@ -200,7 +200,7 @@
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20261027a"/>
   <link rel="stylesheet" href="/css/st2-refresh.css?v=20261023n"/>
   <link rel="stylesheet" href="/css/st2-components.css?v=20261013j"/>
-  <link rel="stylesheet" href="/css/plan-pill-nav.css?v=20261112d"/>
+  <link rel="stylesheet" href="/css/plan-pill-nav.css?v=20261112e"/>
   <link rel="modulepreload" href="/js/st2-silk.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-gradient-ascii.js?v=20261023c"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260915a"/>
@@ -1412,23 +1412,19 @@
               </div>
 
               <p class="plan-ref-title">Adjuntos</p>
-              <div class="plan-onvio-grid">
-                <button type="button" class="plan-onvio-card tone-orange" id="ref-card-onvio-pantallas" data-onvio="pantallas">
-                  <span class="plan-onvio-body">
-                    <span class="plan-inline-icon orange" data-plan-icon="camera"></span>
-                    <span>Archivos adjuntos</span>
-                  </span>
-                  <span class="card-mark plan-onvio-state">No</span>
+              <div class="plan-adj-stack">
+                <button type="button" class="plan-adj-card tone-orange" id="ref-card-onvio-pantallas" data-onvio="pantallas">
+                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Archivos adjuntos</span>
+                  <span class="card-mark plan-yn-state" id="ref-mark-onvio-pantallas">No</span>
                 </button>
                 <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
-                <div id="ref-onvio-capturas" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Imágenes, videos cortos, PDF, TXT, Excel o XML. Si no cargás nada, el texto indica que van en comentarios.</p>
+                <div id="ref-onvio-capturas" class="plan-capturas-panel plan-capturas-panel--lite hidden">
                   <div class="plan-capturas-actions">
-                    <button type="button" id="ref-onvio-capt-agregar" class="plan-capturas-browse">
-                      <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                    <button type="button" id="ref-onvio-capt-agregar" class="plan-capturas-browse plan-capturas-browse--lite">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">＋</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes, video, PDF, TXT, Excel o XML</strong>
-                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM · PDF · TXT · Excel / Word / PowerPoint / CSV · XML</small>
+                        <strong>Agregar archivos</strong>
+                        <small>Imágenes, video, PDF, TXT, Office, XML</small>
                       </span>
                     </button>
                     <input id="ref-onvio-capt-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xlsm,.xlsb,.xls,.csv,.ods,.docx,.docm,.dotx,.doc,.dot,.rtf,.odt,.pptx,.pptm,.ppsx,.ppt,.pps,.odp,.xml,application/xml,text/xml" multiple class="hidden"/>
@@ -1436,34 +1432,37 @@
                   <div id="ref-onvio-capt-chips" class="plan-capturas-thumbs"></div>
                   <p id="ref-onvio-capt-estado" class="plan-capturas-estado"></p>
                 </div>
-                <button type="button" class="plan-onvio-card tone-blue" id="ref-card-onvio-ticket" data-onvio="ticket">
-                  <span class="plan-onvio-body">
+
+                <button type="button" class="plan-adj-card plan-ticket-card tone-blue" id="ref-card-onvio-ticket" data-onvio="ticket">
+                  <span class="plan-adj-label">
                     <span class="plan-inline-icon blue" data-plan-icon="ticket"></span>
-                    <span>Ticket de servicio<small>N° y técnico</small></span>
+                    <span class="plan-adj-backup-text">
+                      <strong>Ticket de servicio</strong>
+                      <small>N° y técnico</small>
+                    </span>
                   </span>
-                  <span class="card-mark plan-onvio-state">No</span>
+                  <span class="card-mark plan-yn-state" id="ref-mark-onvio-ticket">No</span>
                 </button>
                 <input type="checkbox" id="ref-onvio-ticket" class="hidden"/>
-                <div id="ref-onvio-ticket-panel" class="plan-onvio-ticket-detail hidden">
-                  <p class="plan-backup-detail-title">Datos del ticket</p>
-                  <div class="plan-form-2col">
-                    <div class="plan-field"><label for="ref-onvio-ticket-num">N° de Ticket</label><input id="ref-onvio-ticket-num" type="text" maxlength="20"/></div>
-                    <div class="plan-field"><label for="ref-onvio-tecnico">Técnico</label><input id="ref-onvio-tecnico" type="text"/></div>
+                <div id="ref-onvio-ticket-panel" class="plan-ticket-detail plan-backup-detail--lite hidden">
+                  <div class="plan-form-2col plan-form-2col-tight">
+                    <div class="plan-field">
+                      <label class="plan-opt-field-label" for="ref-onvio-ticket-num">N° de Ticket</label>
+                      <input id="ref-onvio-ticket-num" type="text" class="plan-opt-input" maxlength="20" autocomplete="off" placeholder="Número de ticket"/>
+                    </div>
+                    <div class="plan-field">
+                      <label class="plan-opt-field-label" for="ref-onvio-tecnico">Técnico</label>
+                      <input id="ref-onvio-tecnico" type="text" class="plan-opt-input" autocomplete="off" placeholder="Nombre del técnico"/>
+                    </div>
                   </div>
-                  <div class="plan-onvio-ticket-options">
-                    <button type="button" class="plan-onvio-card tone-slate" id="ref-card-onvio-rep-ticket">
-                      <span class="plan-onvio-body">
-                        <span class="plan-inline-icon slate" data-plan-icon="ticket"></span>
-                        <span>Se reprodujo con el ticket</span>
-                      </span>
-                      <span class="card-mark plan-onvio-state">No</span>
+                  <div class="plan-adj-stack plan-onvio-ticket-options">
+                    <button type="button" class="plan-adj-card tone-slate" id="ref-card-onvio-rep-ticket">
+                      <span class="plan-adj-label"><span class="plan-inline-icon slate" data-plan-icon="ticket"></span>Se reprodujo con el ticket</span>
+                      <span class="card-mark plan-yn-state" id="ref-mark-onvio-rep-ticket">No</span>
                     </button>
-                    <button type="button" class="plan-onvio-card tone-slate" id="ref-card-onvio-rep-prueba">
-                      <span class="plan-onvio-body">
-                        <span class="plan-inline-icon slate" data-plan-icon="building"></span>
-                        <span>Se reproduce con la empresa de prueba</span>
-                      </span>
-                      <span class="card-mark plan-onvio-state">No</span>
+                    <button type="button" class="plan-adj-card tone-slate" id="ref-card-onvio-rep-prueba">
+                      <span class="plan-adj-label"><span class="plan-inline-icon slate" data-plan-icon="building"></span>Se reproduce con la empresa de prueba</span>
+                      <span class="card-mark plan-yn-state" id="ref-mark-onvio-rep-prueba">No</span>
                     </button>
                   </div>
                   <input type="checkbox" id="ref-onvio-rep-ticket" class="hidden"/>
@@ -2993,6 +2992,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261112d" type="module"></script>
+  <script src="/js/app.js?v=20261112e" type="module"></script>
 </body>
 </html>

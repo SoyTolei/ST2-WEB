@@ -91,10 +91,14 @@ export function wirePlanActionTrio({
   onPreview,
   onClear,
   onClearUndo,
+  clearUndoWindow = 900,
 }) {
   bindPlanActionFx(copyBtn, "sling", onCopy);
   bindPlanActionFx(previewBtn, "slide", onPreview);
-  bindPlanActionFx(clearBtn, "fuse", onClear, { onUndo: onClearUndo });
+  bindPlanActionFx(clearBtn, "fuse", onClear, {
+    onUndo: onClearUndo,
+    undoWindow: clearUndoWindow,
+  });
 }
 
 /* ===================== SLING ===================== */
@@ -770,6 +774,8 @@ function mountFuse(el, onCommit, opts = {}) {
   const undoLabel = opts.undoLabel || "Deshacer";
   const doneLabel = opts.doneLabel || "Listo";
   const undoWindow = opts.undoWindow || 4000;
+  /** Si true, borra al toque; la mecha solo da un Deshacer corto (si hay onUndo). */
+  const commitOnArm = opts.commitOnArm !== false;
   const fuseMode = "bottom";
   const LINE = [{ transform: "scaleX(1)" }, { transform: "scaleX(0)" }];
 
@@ -844,7 +850,7 @@ function mountFuse(el, onCommit, opts = {}) {
     });
     if (from) a.currentTime = from;
     a.onfinish = () => {
-      void onCommit?.("fuseEnd");
+      if (!commitOnArm) void onCommit?.("fuseEnd");
       go("idle");
     };
     anim = a;
@@ -853,9 +859,9 @@ function mountFuse(el, onCommit, opts = {}) {
 
   const arm = () => {
     if (disabled || phase !== "idle") return;
-    if (prefersReducedMotion()) {
+    if (commitOnArm || prefersReducedMotion()) {
       void onCommit?.("press");
-      return;
+      if (prefersReducedMotion() || !opts.onUndo) return;
     }
     light();
     pause.canHoverPause = false;

@@ -12,7 +12,7 @@ import {
   isChileReferralStep2Complete,
 } from "./planillas-referral-chile.js?v=20261112d";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111h";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261112e";
 import { mountStarBorder } from "./star-border.js?v=20261111g";
 import { syncPillNav } from "./plan-pill-nav.js?v=20261111b";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
@@ -391,6 +391,10 @@ function syncReferralCards() {
     ["ref-card-backup", "ref-adj-backup", "ref-mark-backup"],
     ["ref-card-chile-pantallas", "ref-chile-pantallas", "ref-mark-chile-pantallas"],
     ["ref-card-chile-bases", "ref-chile-bases-check", "ref-mark-chile-bases"],
+    ["ref-card-onvio-pantallas", "ref-onvio-pantallas", "ref-mark-onvio-pantallas"],
+    ["ref-card-onvio-ticket", "ref-onvio-ticket", "ref-mark-onvio-ticket"],
+    ["ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket", "ref-mark-onvio-rep-ticket"],
+    ["ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba", "ref-mark-onvio-rep-prueba"],
   ].forEach(([cardId, checkId, markId]) => syncCardVisual(cardId, checkId, markId));
   [
     ["ref-card-backup-manager", "ref-backup-manager", "ref-mark-backup-manager"],
@@ -401,10 +405,6 @@ function syncReferralCards() {
   document.querySelectorAll(".plan-onvio-card[data-onvio]").forEach((card) => {
     syncCardVisual(card.id, `ref-onvio-${card.dataset.onvio}`, null, card.querySelector(".card-mark"));
   });
-  [
-    ["ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket"],
-    ["ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba"],
-  ].forEach(([cardId, checkId]) => syncCardVisual(cardId, checkId, null));
   document.querySelectorAll(".plan-onvio-card[data-legal]").forEach((card) => {
     syncCardVisual(card.id, `ref-legal-${card.dataset.legal}`, null, card.querySelector(".card-mark"));
   });
@@ -446,13 +446,11 @@ function clearOnvioTicketFields() {
     if (c) c.checked = false;
   });
   [
-    ["ref-card-onvio-rep-ticket", null],
-    ["ref-card-onvio-rep-prueba", null],
-  ].forEach(([cardId]) => {
-    const card = document.getElementById(cardId);
-    const mark = card?.querySelector(".card-mark");
-    card?.classList.remove("selected");
-    applyCardMark(mark, false);
+    ["ref-card-onvio-rep-ticket", "ref-mark-onvio-rep-ticket"],
+    ["ref-card-onvio-rep-prueba", "ref-mark-onvio-rep-prueba"],
+  ].forEach(([cardId, markId]) => {
+    document.getElementById(cardId)?.classList.remove("selected");
+    applyCardMark(document.getElementById(markId), false);
   });
 }
 
@@ -534,17 +532,16 @@ function bindReferralEvents() {
 
   bindOnvioCard("ref-card-onvio-proceso", "ref-onvio-proceso");
   bindOnvioCard("ref-card-onvio-reproduce", "ref-onvio-reproduce");
-  bindOnvioCard("ref-card-onvio-pantallas", "ref-onvio-pantallas", () => {
+  bindAdjCard("ref-card-onvio-pantallas", "ref-onvio-pantallas", "ref-mark-onvio-pantallas", () => {
     document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !document.getElementById("ref-onvio-pantallas").checked);
   });
-  bindOnvioCard("ref-card-onvio-ticket", "ref-onvio-ticket", () => {
+  bindAdjCard("ref-card-onvio-ticket", "ref-onvio-ticket", "ref-mark-onvio-ticket", () => {
     const on = document.getElementById("ref-onvio-ticket")?.checked;
     document.getElementById("ref-onvio-ticket-panel")?.classList.toggle("hidden", !on);
     if (!on) clearOnvioTicketFields();
-    syncReferralStepCompletion();
   });
-  bindOnvioCard("ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket");
-  bindOnvioCard("ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba");
+  bindAdjCard("ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket", "ref-mark-onvio-rep-ticket");
+  bindAdjCard("ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba", "ref-mark-onvio-rep-prueba");
 
   bindOnvioCard("ref-card-legal-proceso", "ref-legal-proceso");
   bindOnvioCard("ref-card-legal-reproduce", "ref-legal-reproduce");
@@ -694,14 +691,15 @@ function isReferralStep1Complete() {
 
 /**
  * Paso 2:
- * - Bejerman: sin fijos; si backup → bases. ✓ al visitar el paso.
- * - Onvio: Empresa + Usuario (+ N° ticket si marcó ticket).
+ * - Bejerman: sin fijos (salvo backup con bases). ✓ recién al pasar a Generar (Siguiente).
+ * - Onvio: Empresa + Usuario obligatorios (+ N° ticket si marcó ticket).
  * - Chile: Usuario + Clave + SO (+ tipo/base si aplica).
  */
 function isReferralStep2Complete() {
   if (isBejerman()) {
     if (!isBackupSelectionValid()) return false;
-    return maxStepReached >= 2;
+    // Sin obligatorios fijos: no marcar ✓ solo por entrar al paso.
+    return maxStepReached > 2;
   }
   if (isOnvio()) {
     if (!(isFilled("ref-onvio-empresa") && isFilled("ref-onvio-usuario"))) return false;
@@ -854,10 +852,8 @@ function setReferralPantallasUi(checked) {
   const check = document.getElementById("ref-onvio-pantallas");
   if (!check) return;
   check.checked = checked;
-  const card = document.getElementById("ref-card-onvio-pantallas");
-  const mark = card?.querySelector(".card-mark");
-  card?.classList.toggle("selected", checked);
-  applyCardMark(mark, checked);
+  document.getElementById("ref-card-onvio-pantallas")?.classList.toggle("selected", checked);
+  applyCardMark(document.getElementById("ref-mark-onvio-pantallas"), checked);
   document.getElementById("ref-onvio-capturas")?.classList.toggle("hidden", !checked);
 }
 
@@ -1518,7 +1514,7 @@ function resetReferralForm({ keepLegalHub = false } = {}) {
   });
   document.querySelectorAll("#ref-bejerman-post input[type=checkbox], #ref-onvio-panel input[type=checkbox], #ref-legal-panel input[type=checkbox]").forEach((c) => { c.checked = false; });
   document.querySelectorAll(".plan-adj-card, .plan-backup-base-card, .plan-onvio-card").forEach((el) => el.classList.remove("selected"));
-  document.querySelectorAll(".plan-onvio-card .card-mark").forEach((mark) => applyCardMark(mark, false));
+  document.querySelectorAll(".plan-adj-card .card-mark, .plan-onvio-card .card-mark").forEach((mark) => applyCardMark(mark, false));
   clearBackupBases();
   clearOnvioTicketFields();
   clearLegalTicketFields();
