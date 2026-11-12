@@ -744,6 +744,12 @@ body.st2-session-menu-open .st2-blobatar-greet {
 .st2-greet-bell.has-unread .bell-toggle__button {
   border-color: rgba(251, 146, 60, 0.55);
   box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12);
+  animation: st2-greet-bell-blink 1.35s ease-in-out infinite;
+}
+
+@keyframes st2-greet-bell-blink {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.1); }
+  50% { box-shadow: 0 0 0 5px rgba(251, 146, 60, 0.28); }
 }
 
 .st2-session-menu-glow {

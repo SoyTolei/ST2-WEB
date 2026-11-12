@@ -6,7 +6,7 @@ import {
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
 import { notifyBlanqueoDesktop } from "./st2-desktop-notif.js";
-import { clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
+import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -292,9 +292,54 @@ export function renderBlanqueoAlertUi({ forceHide = false } = {}) {
     modBadge.setAttribute("aria-hidden", totalCount && !hideForSistema ? "false" : "true");
   }
 
-  // Toasts sticky: solo update web / descargas. Blanqueo queda en badges de pestaña/módulo.
-  clearSt2AlertToast(ST2_TOAST.blanqueo);
+  if (hideForSistema) {
+    clearSt2AlertToast(ST2_TOAST.blanqueo);
+    clearSt2AlertToast(ST2_TOAST.blanqueoMine);
+    return;
+  }
+
+  if (alertMode === "confirm") {
+    if (pendingSummary) {
+      setSt2AlertToast({
+        id: ST2_TOAST.blanqueo,
+        body: pendingSummary.text,
+        tone: pendingSummary.tone,
+        actionLabel: "Ver",
+        sticky: true,
+        onAction: openBlanqueoFromAlert,
+      });
+    } else {
+      clearSt2AlertToast(ST2_TOAST.blanqueo);
+    }
+
+    if (personalSummary) {
+      setSt2AlertToast({
+        id: ST2_TOAST.blanqueoMine,
+        body: personalSummary.text,
+        tone: personalSummary.tone,
+        actionLabel: "Ver",
+        sticky: true,
+        onAction: openBlanqueoFromAlert,
+      });
+    } else {
+      clearSt2AlertToast(ST2_TOAST.blanqueoMine);
+    }
+    return;
+  }
+
   clearSt2AlertToast(ST2_TOAST.blanqueoMine);
+  if (personalSummary) {
+    setSt2AlertToast({
+      id: ST2_TOAST.blanqueo,
+      body: personalSummary.text,
+      tone: personalSummary.tone,
+      actionLabel: "Ver",
+      sticky: true,
+      onAction: openBlanqueoFromAlert,
+    });
+  } else {
+    clearSt2AlertToast(ST2_TOAST.blanqueo);
+  }
 }
 
 function pollIntervalMs() {

@@ -8,7 +8,7 @@ import {
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
 } from "./st2-toast-greet.js?v=20261027a";
-import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261112b";
+import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261112j";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -25,13 +25,24 @@ export const ST2_TOAST = {
   agua: "st2-toast-agua",
 };
 
-/** Orden del stack flotante: solo update web y descargas. */
+/** Orden del stack flotante (saludo solo en el primero). */
 const GREET_STACK = [
   ST2_TOAST.update,
   ST2_TOAST.tools,
+  ST2_TOAST.blanqueo,
+  ST2_TOAST.blanqueoMine,
+  ST2_TOAST.borrado,
+  ST2_TOAST.borradoMine,
 ];
 
-const INBOX_TOAST_IDS = new Set([ST2_TOAST.update, ST2_TOAST.tools]);
+const INBOX_TOAST_IDS = new Set([
+  ST2_TOAST.update,
+  ST2_TOAST.tools,
+  ST2_TOAST.blanqueo,
+  ST2_TOAST.blanqueoMine,
+  ST2_TOAST.borrado,
+  ST2_TOAST.borradoMine,
+]);
 
 const TOASTER_ID = "st2-sonner";
 
@@ -497,7 +508,7 @@ function paintOne(id, title, tone, { force = false } = {}) {
 export function syncStackedToastGreetings() {
   syncSessionGreetBubble();
   if (floatingSuppressed) return;
-  if (registry.has(ST2_TOAST.update) || registry.has(ST2_TOAST.tools)) paintGreetStack();
+  if (GREET_STACK.some((id) => registry.has(id))) paintGreetStack();
   const agua = registry.get(ST2_TOAST.agua);
   if (agua) paintOne(ST2_TOAST.agua, plainTitle(agua.body), "agua");
 }

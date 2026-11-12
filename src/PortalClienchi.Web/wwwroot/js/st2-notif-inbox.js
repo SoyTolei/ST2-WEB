@@ -1,13 +1,23 @@
 /**
- * Bandeja de avisos: historial con hora y estado visto.
- * Los sticky de Sonner siguen avisando en vivo; acá se listan sin solaparse.
+ * Bandeja de avisos: historial con hora exacta, visto/no visto y click para ir.
  */
 const STORAGE_KEY = "st2-notif-inbox-v1";
 const MAX_ITEMS = 40;
-const ALLOWED_IDS = new Set(["st2-toast-update", "st2-toast-tools"]);
+const ALLOWED_IDS = new Set([
+  "st2-toast-update",
+  "st2-toast-tools",
+  "st2-toast-blanqueo",
+  "st2-toast-blanqueo-mine",
+  "st2-toast-borrado",
+  "st2-toast-borrado-mine",
+]);
 const TITLE_BY_ID = {
   "st2-toast-update": "Actualización",
   "st2-toast-tools": "Descargas",
+  "st2-toast-blanqueo": "Blanqueo",
+  "st2-toast-blanqueo-mine": "Tu blanqueo",
+  "st2-toast-borrado": "Borrado",
+  "st2-toast-borrado-mine": "Tu borrado",
 };
 
 /** @type {Array<{ id: string, title: string, body: string, tone: string, at: number, seen: boolean }>} */
@@ -61,33 +71,16 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-function formatWhen(at) {
-  const ts = Number(at) || Date.now();
-  const diff = Math.max(0, Date.now() - ts);
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "ahora";
-  if (mins < 60) return `hace ${mins} min`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `hace ${hours} h`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `hace ${days} d`;
+function exactWhen(at) {
   try {
-    return new Date(ts).toLocaleString("es-AR", {
+    return new Date(Number(at) || Date.now()).toLocaleString("es-AR", {
       day: "2-digit",
       month: "2-digit",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-}
-
-function clockLabel(at) {
-  try {
-    return new Date(Number(at) || Date.now()).toLocaleTimeString("es-AR", {
-      hour: "2-digit",
-      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
     });
   } catch {
     return "";
@@ -172,6 +165,31 @@ function emitChange() {
   }
 }
 
+function navigateFromNotif(id) {
+  const key = String(id || "");
+  if (key === "st2-toast-update") {
+    try {
+      document.dispatchEvent(new CustomEvent("st2:reload-for-update"));
+    } catch {
+      window.location.reload();
+    }
+    return;
+  }
+  if (key === "st2-toast-tools") {
+    document.dispatchEvent(new CustomEvent("st2:open-about-downloads"));
+    return;
+  }
+  if (key === "st2-toast-blanqueo" || key === "st2-toast-blanqueo-mine") {
+    document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
+    document.dispatchEvent(new CustomEvent("st2:open-blanqueo-from-alert"));
+    return;
+  }
+  if (key === "st2-toast-borrado" || key === "st2-toast-borrado-mine") {
+    document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
+    document.dispatchEvent(new CustomEvent("st2:open-borrado-from-alert"));
+  }
+}
+
 function ensurePanel() {
   if (panelEl) return panelEl;
   const el = document.createElement("div");
@@ -188,7 +206,6 @@ function ensurePanel() {
       </div>
       <button type="button" class="st2-notif-inbox__close" aria-label="Cerrar">×</button>
     </div>
-    <p class="st2-notif-inbox__hint">Solo actualización de la web y versiones para descargar.</p>
     <div class="st2-notif-inbox__empty" data-empty hidden>No hay avisos todavía.</div>
     <ul class="st2-notif-inbox__list" data-list></ul>
   `;
@@ -198,6 +215,15 @@ function ensurePanel() {
   emptyEl = el.querySelector("[data-empty]");
   unreadEl = el.querySelector("[data-unread]");
   el.querySelector(".st2-notif-inbox__close")?.addEventListener("click", () => closeNotifInbox());
+  listEl?.addEventListener("click", (e) => {
+    const row = e.target.closest?.(".st2-notif-inbox__item");
+    if (!row) return;
+    const id = row.getAttribute("data-id");
+    if (!id) return;
+    markNotifInboxSeen([id]);
+    closeNotifInbox();
+    navigateFromNotif(id);
+  });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && open) closeNotifInbox();
   });
@@ -205,6 +231,7 @@ function ensurePanel() {
     if (!open) return;
     if (el.contains(e.target)) return;
     if (e.target.closest?.("#st2-session-email")) return;
+    if (e.target.closest?.("#st2-greet-bell")) return;
     closeNotifInbox();
   });
   return el;
@@ -227,16 +254,17 @@ function paintList() {
   listEl.innerHTML = items
     .map((item) => {
       const tone = String(item.tone || "ok");
+      const when = exactWhen(item.at);
       return `
-        <li class="st2-notif-inbox__item${item.seen ? " is-seen" : " is-unread"}" data-id="${escapeHtml(item.id)}" data-tone="${escapeHtml(tone)}">
+        <li class="st2-notif-inbox__item${item.seen ? " is-seen" : " is-unread"}" data-id="${escapeHtml(item.id)}" data-tone="${escapeHtml(tone)}" role="button" tabindex="0" title="Abrir">
           <span class="st2-notif-inbox__dot" aria-hidden="true"></span>
           <span class="st2-notif-inbox__copy">
             <span class="st2-notif-inbox__meta">
               <span class="st2-notif-inbox__kind">${escapeHtml(item.title)}</span>
-              <time class="st2-notif-inbox__time" datetime="${new Date(item.at).toISOString()}" title="${escapeHtml(formatWhen(item.at))}">${escapeHtml(clockLabel(item.at))}</time>
+              <time class="st2-notif-inbox__time" datetime="${new Date(item.at).toISOString()}">${escapeHtml(when)}</time>
             </span>
             <span class="st2-notif-inbox__body">${escapeHtml(item.body)}</span>
-            <span class="st2-notif-inbox__ago">${escapeHtml(formatWhen(item.at))}${item.seen ? " · visto" : ""}</span>
+            <span class="st2-notif-inbox__ago">${item.seen ? "Visto · clic para abrir" : "Sin ver · clic para abrir"}</span>
           </span>
         </li>`;
     })
@@ -245,8 +273,10 @@ function paintList() {
 
 function placePanel() {
   const el = ensurePanel();
+  const bell = document.getElementById("st2-greet-bell");
   const session = document.getElementById("st2-session-email");
-  const rect = session?.getBoundingClientRect?.();
+  const anchor = bell?.getClientRects?.().length ? bell : session;
+  const rect = anchor?.getBoundingClientRect?.();
   if (rect && rect.width) {
     el.style.top = `${Math.round(rect.bottom + 8)}px`;
     el.style.left = `${Math.max(10, Math.round(rect.left))}px`;
@@ -272,7 +302,6 @@ export function openNotifInbox() {
 
 export function closeNotifInbox() {
   if (!panelEl) return;
-  markNotifInboxSeen();
   panelEl.classList.add("hidden");
   panelEl.setAttribute("hidden", "");
   open = false;

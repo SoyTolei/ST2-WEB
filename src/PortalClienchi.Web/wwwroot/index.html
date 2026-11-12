@@ -178,7 +178,7 @@
       color: #fdba74 !important;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20261112i"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20261112j"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20261112g"/>
@@ -186,8 +186,8 @@
   <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261112f"/>
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20261112g"/>
-  <link rel="stylesheet" href="/css/borrado-bases.css?v=20261112i"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20261112j"/>
+  <link rel="stylesheet" href="/css/borrado-bases.css?v=20261112j"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20261111e"/>
@@ -197,7 +197,7 @@
   <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260915b"/>
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20261110g"/>
-  <link rel="stylesheet" href="/css/st2-sonner.css?v=20261112i"/>
+  <link rel="stylesheet" href="/css/st2-sonner.css?v=20261112j"/>
   <link rel="stylesheet" href="/css/st2-refresh.css?v=20261023n"/>
   <link rel="stylesheet" href="/css/st2-components.css?v=20261112i"/>
   <link rel="stylesheet" href="/css/plan-pill-nav.css?v=20261112h"/>
@@ -894,12 +894,27 @@
                 </div>
               </div>
 
-              <div id="blanqueo-ctx" class="plan-gestor-ctx blanqueo-ctx hidden" role="menu">
-                <button type="button" class="blanqueo-ctx-listo" data-blanqueo-ctx="listo">Listo</button>
-                <hr/>
-                <button type="button" data-blanqueo-ctx="incorrecto">Incorrecto</button>
+              <div id="blanqueo-ctx" class="plan-gestor-ctx blanqueo-ctx st2-ctx-menu hidden" role="menu">
+                <p class="st2-ctx-kicker" aria-hidden="true">Gestión</p>
+                <button type="button" class="st2-ctx-listo" data-blanqueo-ctx="listo">
+                  <span class="st2-ctx-ico" aria-hidden="true">✓</span>
+                  <span class="st2-ctx-copy">
+                    <strong>Listo</strong>
+                    <small>Contraseña y/o aclaración</small>
+                  </span>
+                </button>
+                <button type="button" class="st2-ctx-rechazado" data-blanqueo-ctx="incorrecto">
+                  <span class="st2-ctx-ico" aria-hidden="true">✕</span>
+                  <span class="st2-ctx-copy">
+                    <strong>Rechazado</strong>
+                    <small>Explicá por qué</small>
+                  </span>
+                </button>
                 <hr class="blanqueo-ctx-hr-unlisto"/>
-                <button type="button" data-blanqueo-ctx="unlisto">Quitar listo</button>
+                <button type="button" class="st2-ctx-muted" data-blanqueo-ctx="unlisto">
+                  <span class="st2-ctx-ico" aria-hidden="true">↺</span>
+                  <span class="st2-ctx-copy"><strong>Quitar listo</strong></span>
+                </button>
               </div>
 
               <div id="blanqueo-mod-pop" class="borrado-base-pop blanqueo-mod-pop hidden" role="dialog" aria-labelledby="blanqueo-mod-pop-title" aria-hidden="true">
@@ -1061,43 +1076,26 @@
                 </div>
               </div>
 
-              <div id="borrado-ctx" class="plan-gestor-ctx borrado-ctx hidden" role="menu">
-                <p class="borrado-ctx-kicker" aria-hidden="true">Gestión</p>
-                <button type="button" class="borrado-ctx-listo" data-borrado-ctx="listo">
-                  <span class="borrado-ctx-ico" aria-hidden="true">✓</span>
-                  <span class="borrado-ctx-copy">
+              <div id="borrado-ctx" class="plan-gestor-ctx borrado-ctx st2-ctx-menu hidden" role="menu">
+                <p class="st2-ctx-kicker" aria-hidden="true">Gestión</p>
+                <button type="button" class="st2-ctx-listo" data-borrado-ctx="listo">
+                  <span class="st2-ctx-ico" aria-hidden="true">✓</span>
+                  <span class="st2-ctx-copy">
                     <strong>Listo</strong>
                     <small>Contraseña y/o aclaración</small>
                   </span>
                 </button>
-                <button type="button" class="borrado-ctx-rechazado" data-borrado-ctx="aclaracion-incorrecto">
-                  <span class="borrado-ctx-ico" aria-hidden="true">✕</span>
-                  <span class="borrado-ctx-copy">
+                <button type="button" class="st2-ctx-rechazado" data-borrado-ctx="aclaracion-incorrecto">
+                  <span class="st2-ctx-ico" aria-hidden="true">✕</span>
+                  <span class="st2-ctx-copy">
                     <strong>Rechazado</strong>
                     <small>Explicá por qué</small>
                   </span>
                 </button>
-                <button type="button" class="borrado-ctx-muted" data-borrado-ctx="unlisto">
-                  <span class="borrado-ctx-ico" aria-hidden="true">↺</span>
-                  <span class="borrado-ctx-copy"><strong>Quitar listo</strong></span>
-                </button>
-                <hr/>
-                <button type="button" data-borrado-ctx="aclaracion-manual">
-                  <span class="borrado-ctx-ico" aria-hidden="true">✎</span>
-                  <span class="borrado-ctx-copy"><strong>Agregar aclaración</strong></span>
-                </button>
-                <button type="button" class="borrado-ctx-muted" data-borrado-ctx="clear-aclaracion">
-                  <span class="borrado-ctx-ico" aria-hidden="true">⌀</span>
-                  <span class="borrado-ctx-copy"><strong>Quitar aclaración</strong></span>
-                </button>
-                <hr/>
-                <button type="button" data-borrado-ctx="editar">
-                  <span class="borrado-ctx-ico" aria-hidden="true">✎</span>
-                  <span class="borrado-ctx-copy"><strong>Editar</strong></span>
-                </button>
-                <button type="button" class="borrado-ctx-danger" data-borrado-ctx="eliminar">
-                  <span class="borrado-ctx-ico" aria-hidden="true">⌫</span>
-                  <span class="borrado-ctx-copy"><strong>Eliminar</strong></span>
+                <hr class="borrado-ctx-hr-unlisto"/>
+                <button type="button" class="st2-ctx-muted" data-borrado-ctx="unlisto">
+                  <span class="st2-ctx-ico" aria-hidden="true">↺</span>
+                  <span class="st2-ctx-copy"><strong>Quitar listo</strong></span>
                 </button>
               </div>
 
@@ -2328,9 +2326,8 @@
           <h3 class="st2-about-changelog-title">Novedades recientes</h3>
           <ul class="st2-about-changelog-list">
             <li>Referral / Onvio: stepper por obligatorios, adjuntos lite y badge Técnico al lado de Traza SQL.</li>
-            <li>Blanqueo: Listo con contraseña y/o aclaración; menú contextual más claro.</li>
-            <li>Borrado de bases: Listo con aclaración y <strong>Rechazado</strong> con motivo.</li>
-            <li>Avisos: solo actualización de la web y descargas de herramientas; campanita junto al saludo.</li>
+            <li>Blanqueo y borrado: click derecho con <strong>Listo</strong> / <strong>Rechazado</strong> (misma lógica cada uno).</li>
+            <li>Avisos con click: blanqueo, borrado, descargas o recargar update; campanita junto al saludo.</li>
             <li>Menú del blobatar: Apariencia, Sesión y activación de notificaciones de escritorio.</li>
           </ul>
         </section>
@@ -2503,6 +2500,19 @@
       <div class="plan-user-actions">
         <button type="button" id="blanqueo-clave-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="blanqueo-clave-save" class="plan-gestor-btn-add">Confirmar listo</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blanqueo-rechazado-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-rechazado-title" aria-modal="true">
+    <div class="plan-user-dialog blanqueo-dialog">
+      <h3 id="blanqueo-rechazado-title">Rechazado</h3>
+      <p class="plan-user-hint">Explicá por qué se rechaza. La solicitud no queda como listo.</p>
+      <label class="plan-user-label" for="blanqueo-rechazado-nota">Aclaración</label>
+      <textarea id="blanqueo-rechazado-nota" class="blanqueo-note-textarea" rows="3" maxlength="280" placeholder="Ej. correo inexistente, cliente equivocado…"></textarea>
+      <div class="plan-user-actions">
+        <button type="button" id="blanqueo-rechazado-cancel" class="plan-gestor-btn-tool">Cancelar</button>
+        <button type="button" id="blanqueo-rechazado-save" class="plan-gestor-btn-red">Confirmar rechazo</button>
       </div>
     </div>
   </div>
@@ -3057,6 +3067,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261112i" type="module"></script>
+  <script src="/js/app.js?v=20261112j" type="module"></script>
 </body>
 </html>

@@ -1431,43 +1431,125 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
 }
 
 .blanqueo-ctx {
-  min-width: 240px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.16);
-  padding: 6px;
+  position: fixed;
+  z-index: 80;
 }
 
-.blanqueo-ctx button {
-  border-radius: 7px;
-  padding: 9px 12px;
-  font-size: 0.84rem;
-  color: #0f172a;
+.plan-gestor-ctx.st2-ctx-menu,
+.st2-ctx-menu {
+  min-width: 15.5rem;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(251, 146, 60, 0.28);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(251, 146, 60, 0.14), transparent 55%),
+    rgba(17, 17, 17, 0.96);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(10px);
+  color: #ffedd5;
 }
 
-.blanqueo-ctx button:hover {
-  background: #f1f5f9;
+html:not(.st2-theme-dark) .st2-ctx-menu {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(249, 115, 22, 0.1), transparent 55%),
+    rgba(28, 25, 23, 0.96);
 }
 
-.blanqueo-ctx button.blanqueo-ctx-listo {
-  color: #047857;
+.st2-ctx-kicker {
+  margin: 2px 8px 6px;
+  font-size: 0.62rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(253, 186, 116, 0.7);
 }
 
-.blanqueo-ctx button.blanqueo-ctx-listo:hover {
-  background: #ecfdf5;
-  color: #065f46;
+.st2-ctx-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #ffedd5;
+  text-align: left;
+  padding: 8px 10px;
+  cursor: pointer;
+  font: inherit;
 }
 
-.blanqueo-ctx hr {
-  margin: 5px 4px;
+.st2-ctx-menu button:hover {
+  background: rgba(251, 146, 60, 0.12);
 }
 
-.plan-gestor-ctx.blanqueo-ctx button.hidden,
-.plan-gestor-ctx.blanqueo-ctx hr.hidden {
-  display: none !important;
+.st2-ctx-ico {
+  flex: none;
+  width: 1.35rem;
+  height: 1.35rem;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.78rem;
+  color: #fdba74;
 }
 
+.st2-ctx-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.st2-ctx-copy strong {
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.st2-ctx-copy small {
+  font-size: 0.62rem;
+  color: rgba(253, 186, 116, 0.72);
+}
+
+.st2-ctx-menu button.st2-ctx-listo .st2-ctx-ico {
+  background: rgba(16, 185, 129, 0.16);
+  color: #34d399;
+}
+
+.st2-ctx-menu button.st2-ctx-listo strong {
+  color: #6ee7b7;
+}
+
+.st2-ctx-menu button.st2-ctx-listo:hover {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.st2-ctx-menu button.st2-ctx-rechazado .st2-ctx-ico {
+  background: rgba(248, 113, 113, 0.16);
+  color: #f87171;
+}
+
+.st2-ctx-menu button.st2-ctx-rechazado strong {
+  color: #fca5a5;
+}
+
+.st2-ctx-menu button.st2-ctx-rechazado:hover {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.st2-ctx-menu button.st2-ctx-muted {
+  opacity: 0.78;
+}
+
+.st2-ctx-menu hr {
+  margin: 6px;
+  border: 0;
+  border-top: 1px solid rgba(251, 146, 60, 0.18);
+}
+
+.plan-gestor-ctx.st2-ctx-menu button.hidden,
+.plan-gestor-ctx.st2-ctx-menu hr.hidden,
 .plan-gestor-ctx button.hidden,
 .plan-gestor-ctx hr.hidden {
   display: none !important;

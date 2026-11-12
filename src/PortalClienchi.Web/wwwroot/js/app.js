@@ -6,12 +6,12 @@ import { scheduleWelcomeTour, scheduleOrpenFeatureTip, setTourContext, syncHeade
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261112i";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261112j";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js?v=20261027a";
 import { initCrypticNudge } from "./st2-cryptic-nudge.js?v=20261027a";
 import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261013d";
 import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
-import { getNotifInboxUnreadCount } from "./st2-notif-inbox.js?v=20261112b";
+import { getNotifInboxUnreadCount } from "./st2-notif-inbox.js?v=20261112j";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
 import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261112g";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
@@ -3488,6 +3488,17 @@ async function refreshToolsDiagHint() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
+
+document.addEventListener("st2:open-about-downloads", () => {
+  showAbout();
+});
+document.addEventListener("st2:reload-for-update", () => {
+  try {
+    reloadForUpdate();
+  } catch {
+    window.location.reload();
+  }
+});
 
 const notifBell = mountBellToggle(document.getElementById("st2-notif-bell"), {
   offLabel: "Activar notificaciones",

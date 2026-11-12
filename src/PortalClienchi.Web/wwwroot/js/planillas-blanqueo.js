@@ -226,6 +226,14 @@ export function initBlanqueoModule() {
     syncClaveNotaField();
   });
 
+  document.getElementById("blanqueo-rechazado-cancel")?.addEventListener("click", () => hideRechazadoModal());
+  document.getElementById("blanqueo-rechazado-save")?.addEventListener("click", () => {
+    void saveRechazadoModal();
+  });
+  document.getElementById("blanqueo-rechazado-overlay")?.addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) hideRechazadoModal();
+  });
+
   document.getElementById("blanqueo-mod-pop-close")?.addEventListener("click", (e) => {
     e.preventDefault();
     hideModPop();
@@ -1627,7 +1635,7 @@ function formatEstadoCell(item) {
     return '<span class="blanqueo-pill ok">Listo</span>';
   }
   if (isIncorrecto(aclaracion)) {
-    return '<span class="blanqueo-pill bad" title="Incorrecto">Incorrecto</span>';
+    return '<span class="blanqueo-pill bad" title="Rechazado">Rechazado</span>';
   }
   if (isNoRegistrado(aclaracion)) {
     return '<span class="blanqueo-pill bad" title="No registrado">No registrado</span>';
@@ -1716,15 +1724,14 @@ async function handleCtxAction(action) {
       openClaveModal(item);
       return;
     }
+    if (action === "incorrecto") {
+      openRechazadoModal(item);
+      return;
+    }
     if (action === "unlisto") {
       await patchItem(selectedId, { listo: false, clearAclaracion: true });
       document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
         detail: { expression: "thinking", ms: 2400 },
-      }));
-    } else if (action === "incorrecto") {
-      await patchItem(selectedId, { listo: false, aclaracion: "Incorrecto" });
-      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
-        detail: { expression: "mad", ms: 3200 },
       }));
     } else {
       return;
@@ -1926,7 +1933,57 @@ function isNoRegistrado(value) {
 }
 
 function isIncorrecto(value) {
-  return String(value || "").trim().toLowerCase() === "incorrecto";
+  const raw = String(value || "").trim();
+  if (!raw) return false;
+  const head = raw.includes("---") ? raw.slice(0, raw.indexOf("---")).trim() : raw.split(/\n+/)[0].trim();
+  return /^(rechazado|incorrecto)\b/i.test(head);
+}
+
+function openRechazadoModal(item) {
+  selectedId = item.id;
+  const overlay = document.getElementById("blanqueo-rechazado-overlay");
+  const nota = document.getElementById("blanqueo-rechazado-nota");
+  const previa = String(item.aclaracion || "").trim();
+  let seed = "";
+  if (isIncorrecto(previa)) {
+    if (previa.includes("---")) seed = previa.slice(previa.indexOf("---") + 3).trim();
+    else seed = previa.replace(/^(rechazado|incorrecto)\s*[:·-]?\s*/i, "").trim();
+  }
+  if (nota) nota.value = seed;
+  overlay?.classList.remove("hidden");
+  overlay?.setAttribute("aria-hidden", "false");
+  nota?.focus();
+}
+
+function hideRechazadoModal() {
+  const overlay = document.getElementById("blanqueo-rechazado-overlay");
+  overlay?.classList.add("hidden");
+  overlay?.setAttribute("aria-hidden", "true");
+  const nota = document.getElementById("blanqueo-rechazado-nota");
+  if (nota) nota.value = "";
+}
+
+async function saveRechazadoModal() {
+  if (!selectedId) return;
+  const detalle = String(document.getElementById("blanqueo-rechazado-nota")?.value || "").trim();
+  if (!detalle) {
+    setStatus("Explicá por qué se rechaza.", true);
+    document.getElementById("blanqueo-rechazado-nota")?.focus();
+    return;
+  }
+  try {
+    const aclaracion = `Rechazado\n---\n${detalle}`;
+    await patchItem(selectedId, { listo: false, aclaracion });
+    hideRechazadoModal();
+    setStatus("Marcado como rechazado.");
+    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+      detail: { expression: "mad", ms: 3200 },
+    }));
+    await reloadList();
+    notifyBlanqueoChanged();
+  } catch (err) {
+    setStatus(err?.message || "No se pudo rechazar.", true);
+  }
 }
 
 function isRejectedState(value) {

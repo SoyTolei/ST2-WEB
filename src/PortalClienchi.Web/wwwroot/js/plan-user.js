@@ -1,7 +1,7 @@
 import { setSessionBirthdayMmDd, setFunEggEnabled } from "./planillas-easter-eggs.js?v=20261013d";
 import { mountSessionBlobatar } from "./st2-blobatar.js?v=20261013d";
 import { createBranchedMenu } from "./st2-branched-menu.js?v=20261013a";
-import { mountGreetBell } from "./st2-greet-bell.js?v=20261112b";
+import { mountGreetBell } from "./st2-greet-bell.js?v=20261112j";
 
 let cachedEmail = null;
 let cachedDisplayName = null;

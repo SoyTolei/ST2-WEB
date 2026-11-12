@@ -1729,20 +1729,27 @@ function showCtx(x, y, item) {
   const menu = document.getElementById("borrado-ctx");
   if (!menu) return;
 
-  const confirm = canConfirm;
+  if (!canConfirm) {
+    menu.classList.add("hidden");
+    return;
+  }
 
   menu.querySelectorAll("[data-borrado-ctx]").forEach((btn) => {
     const action = btn.getAttribute("data-borrado-ctx");
     let show = false;
-    if (action === "editar" || action === "eliminar") show = confirm || canOwnerMutate(item);
-    else if (["listo", "unlisto", "aclaracion-incorrecto", "aclaracion-manual", "clear-aclaracion"].includes(action || "")) {
-      show = confirm;
-    }
+    if (action === "listo") show = true;
+    else if (action === "aclaracion-incorrecto") show = !item?.listo;
+    else if (action === "unlisto") show = !!item?.listo;
     btn.classList.toggle("hidden", !show);
   });
 
-  const hrs = menu.querySelectorAll("hr");
-  hrs.forEach((hr) => hr.classList.toggle("hidden", !confirm));
+  menu.querySelectorAll("hr").forEach((hr) => {
+    if (hr.classList.contains("borrado-ctx-hr-unlisto")) {
+      hr.classList.toggle("hidden", !item?.listo);
+    } else {
+      hr.classList.toggle("hidden", !!item?.listo);
+    }
+  });
 
   const anyVisible = [...menu.querySelectorAll("[data-borrado-ctx]")].some((b) => !b.classList.contains("hidden"));
   if (!anyVisible) {
