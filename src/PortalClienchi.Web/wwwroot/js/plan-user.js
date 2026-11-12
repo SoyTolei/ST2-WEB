@@ -1,7 +1,8 @@
 import { setSessionBirthdayMmDd, setFunEggEnabled } from "./planillas-easter-eggs.js?v=20261013d";
 import { mountSessionBlobatar } from "./st2-blobatar.js?v=20261013d";
 import { createBranchedMenu } from "./st2-branched-menu.js?v=20261013a";
-import { mountGreetBell } from "./st2-greet-bell.js?v=20261112j";
+import { mountGreetBell } from "./st2-greet-bell.js?v=20261112m";
+import { closeNotifInbox } from "./st2-notif-inbox.js?v=20261112m";
 
 let cachedEmail = null;
 let cachedDisplayName = null;
@@ -252,6 +253,12 @@ function openSessionMenu() {
   const menu = document.getElementById("st2-session-menu");
   const menuBtn = document.getElementById("st2-session-menu-btn");
   if (!menu || !cachedEmail) return;
+  // No superponer menú del blobatar con la bandeja de avisos.
+  try {
+    closeNotifInbox();
+  } catch {
+    /* ignore */
+  }
   syncSessionThemeMenuLabel();
   menu.classList.remove("hidden");
   menu.removeAttribute("hidden");

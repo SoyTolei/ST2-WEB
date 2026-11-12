@@ -273,12 +273,17 @@ function paintList() {
 
 function placePanel() {
   const el = ensurePanel();
-  const bell = document.getElementById("st2-greet-bell");
+  // Debajo del blobatar / tarjeta de sesión (no encima del menú).
   const session = document.getElementById("st2-session-email");
-  const anchor = bell?.getClientRects?.().length ? bell : session;
+  const avatar = document.getElementById("st2-session-avatar-host");
+  const bell = document.getElementById("st2-greet-bell");
+  const anchor =
+    (session && !session.classList.contains("hidden") && session) ||
+    (avatar?.getClientRects?.().length ? avatar : null) ||
+    (bell?.getClientRects?.().length ? bell : null);
   const rect = anchor?.getBoundingClientRect?.();
   if (rect && rect.width) {
-    el.style.top = `${Math.round(rect.bottom + 8)}px`;
+    el.style.top = `${Math.round(rect.bottom + 10)}px`;
     el.style.left = `${Math.max(10, Math.round(rect.left))}px`;
   } else {
     el.style.top = "64px";
@@ -286,7 +291,23 @@ function placePanel() {
   }
 }
 
+function closeSessionMenuIfOpen() {
+  try {
+    document.body.classList.remove("st2-session-menu-open");
+    const menu = document.getElementById("st2-session-menu");
+    const menuBtn = document.getElementById("st2-session-menu-btn");
+    if (menu) {
+      menu.classList.add("hidden");
+      menu.setAttribute("hidden", "");
+    }
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+  } catch {
+    /* ignore */
+  }
+}
+
 export function openNotifInbox() {
+  closeSessionMenuIfOpen();
   ensurePanel();
   paintList();
   placePanel();

@@ -12,12 +12,12 @@
   --offset-left: 22px;
 }
 
-/* Menú del blobatar abierto: Sonner vive en top-layer (popover) y tapaba el menú. */
-body.st2-session-menu-open #st2-sonner {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.18s ease, visibility 0.18s ease;
+/* Menú del blobatar abierto: nada de avisos/toasts tapando el menú. */
+body.st2-session-menu-open #st2-sonner,
+body.st2-session-menu-open #st2-notif-inbox {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 body.st2-access-pending #st2-sonner,

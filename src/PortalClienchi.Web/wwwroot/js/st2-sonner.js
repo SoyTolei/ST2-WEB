@@ -8,7 +8,7 @@ import {
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
 } from "./st2-toast-greet.js?v=20261027a";
-import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261112j";
+import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261112m";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -163,6 +163,7 @@ export function shouldShowSonnerToasts() {
 
 /** Muestra/oculta el toaster según home + tutorial. */
 export function syncSonnerHomeVisibility() {
+  // Solo flashes efímeros usan Sonner; el stack de alertas va a la campanita.
   const show = shouldShowSonnerToasts();
   document.body.classList.toggle("st2-sonner-home", show);
   const toaster = document.getElementById(TOASTER_ID);
@@ -172,9 +173,8 @@ export function syncSonnerHomeVisibility() {
   }
   if (show) {
     syncSonnerPlacement();
-    if (registry.size) syncStackedToastGreetings();
+    syncStackedToastGreetings();
   } else {
-    // Sacar del DOM sin “marcar visto”: el registry se conserva y al volver a home se re-pinta.
     for (const id of [...registry.keys()]) {
       dismissProgrammatically(id);
     }
@@ -205,15 +205,17 @@ export function initSt2Sonner() {
   toaster.setAttribute("position", "top-left");
   toaster.setAttribute("rich-colors", "");
   toaster.setAttribute("close-button", "");
-  toaster.setAttribute("visible-toasts", "3");
+  toaster.setAttribute("visible-toasts", "2");
   toaster.setAttribute("duration", String(STICKY_MS));
   toaster.setAttribute("container-aria-label", "Notificaciones");
   toaster.setAttribute("theme", currentTheme());
   toaster.removeAttribute("offset");
 
+  floatingSuppressed = true;
   syncSonnerTheme();
   syncSonnerPlacement();
   syncSonnerHomeVisibility();
+  hideFloatingAlertToasts();
 
   document.addEventListener("st2:notif-inbox-opened", () => {
     hideFloatingAlertToasts();
@@ -292,10 +294,11 @@ export function setSt2AlertToast({
       /* ignore */
     }
   }
-  if (bodyChanged) floatingSuppressed = false;
-  if (floatingSuppressed) return;
-  if (!GREET_STACK.includes(id) && id !== ST2_TOAST.agua) return;
-  paintGreetStack();
+  // Sin stack flotante bajo el blobatar: solo campanita / bandeja.
+  floatingSuppressed = true;
+  lastPainted.delete(id);
+  dismissProgrammatically(id);
+  void bodyChanged;
 }
 
 /** Toast de agua: texto propio, fuera del stack de saludo. */
@@ -507,8 +510,10 @@ function paintOne(id, title, tone, { force = false } = {}) {
 /** Re-pinta el stack (p. ej. al volver al home). El saludo va en el globo, no acá. */
 export function syncStackedToastGreetings() {
   syncSessionGreetBubble();
-  if (floatingSuppressed) return;
-  if (GREET_STACK.some((id) => registry.has(id))) paintGreetStack();
-  const agua = registry.get(ST2_TOAST.agua);
-  if (agua) paintOne(ST2_TOAST.agua, plainTitle(agua.body), "agua");
+  // Alertas sticky viven en la campanita; no re-apilar Sonner bajo el blobatar.
+  floatingSuppressed = true;
+  for (const id of GREET_STACK) {
+    lastPainted.delete(id);
+    dismissProgrammatically(id);
+  }
 }
