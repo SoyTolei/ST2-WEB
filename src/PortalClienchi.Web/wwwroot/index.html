@@ -181,9 +181,9 @@
   <link rel="stylesheet" href="/css/styles.css?v=20261112j"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20261113a"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20261113b"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20261111d"/>
-  <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261112f"/>
+  <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261113b"/>
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20261113a"/>
@@ -716,13 +716,11 @@
             </div>
 
             <div class="plan-ref-actions">
-              <button type="button" id="plan-btn-copiar" class="plan-action-btn green" data-plan-fx="sling" aria-label="Copiar al portapapeles">
-                <span class="plan-action-btn-main">Copiar al portapapeles</span>
-                <span class="plan-action-btn-sub">Tirar y soltar para copiar</span>
+              <button type="button" id="plan-btn-copiar" class="plan-action-btn green" data-plan-fx="tap" aria-label="Copiar">
+                <span class="plan-action-btn-main">Copiar</span>
               </button>
-              <button type="button" id="plan-btn-ver-planilla" class="plan-action-btn blue" data-plan-fx="slide" aria-label="Vista previa">
-                <span class="plan-action-btn-main">Vista previa</span>
-                <span class="plan-action-btn-sub">Deslizá para generar</span>
+              <button type="button" id="plan-btn-ver-planilla" class="plan-action-btn blue" data-plan-fx="tap" aria-label="Ver planilla">
+                <span class="plan-action-btn-main">Ver planilla</span>
               </button>
               <button type="button" id="plan-btn-limpiar" class="plan-action-btn ghost" data-plan-fx="fuse" aria-label="Limpiar">
                 <span class="plan-action-btn-main">Limpiar</span>
@@ -734,7 +732,7 @@
                   <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
                   Vista previa de la planilla
                 </p>
-                <button type="button" class="plan-text-preview-copy" data-plan-preview-copy data-plan-fx="sling" aria-label="Copiar">
+                <button type="button" class="plan-text-preview-copy" data-plan-preview-copy data-plan-fx="tap" aria-label="Copiar">
                   Copiar
                 </button>
               </div>
@@ -1670,13 +1668,11 @@
               <button type="button" id="ref-step-next" class="plan-ref-step-nav-btn plan-ref-step-nav-btn--primary">Siguiente →</button>
             </div>
             <div class="plan-ref-actions" id="ref-standard-actions" data-ref-step-panel="3">
-              <button type="button" id="ref-btn-copiar" class="plan-action-btn green" data-plan-fx="sling" aria-label="Copiar al portapapeles">
-                <span class="plan-action-btn-main">Copiar al portapapeles</span>
-                <span class="plan-action-btn-sub">Tirar y soltar para copiar</span>
+              <button type="button" id="ref-btn-copiar" class="plan-action-btn green" data-plan-fx="tap" aria-label="Copiar">
+                <span class="plan-action-btn-main">Copiar</span>
               </button>
-              <button type="button" id="ref-btn-ver-planilla" class="plan-action-btn blue" data-plan-fx="slide" aria-label="Vista previa">
-                <span class="plan-action-btn-main">Vista previa</span>
-                <span class="plan-action-btn-sub">Deslizá para generar</span>
+              <button type="button" id="ref-btn-ver-planilla" class="plan-action-btn blue" data-plan-fx="tap" aria-label="Ver planilla">
+                <span class="plan-action-btn-main">Ver planilla</span>
               </button>
               <button type="button" id="ref-btn-limpiar" class="plan-action-btn ghost" data-plan-fx="fuse" aria-label="Limpiar">
                 <span class="plan-action-btn-main">Limpiar</span>
@@ -1688,7 +1684,7 @@
                   <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
                   Vista previa de la planilla
                 </p>
-                <button type="button" class="plan-text-preview-copy" data-plan-preview-copy data-plan-fx="sling" aria-label="Copiar">
+                <button type="button" class="plan-text-preview-copy" data-plan-preview-copy data-plan-fx="tap" aria-label="Copiar">
                   Copiar
                 </button>
               </div>
@@ -2504,7 +2500,6 @@
   <div id="blanqueo-clave-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-clave-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
       <h3 id="blanqueo-clave-title">Listo</h3>
-      <p class="plan-user-hint">Indicá la contraseña. Si hace falta, marcá aclaración.</p>
       <p class="blanqueo-clave-sugerida">
         Contraseña sugerida:
         <button type="button" id="blanqueo-clave-sugerida-btn" class="blanqueo-clave-code blanqueo-clave-sugerida-btn" data-copy-hint="Clic para usar" title="Clic para pegar en Contraseña y copiar">Sueldo.2027</button>
@@ -3085,6 +3080,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261113a" type="module"></script>
+  <script src="/js/app.js?v=20261113b" type="module"></script>
 </body>
 </html>

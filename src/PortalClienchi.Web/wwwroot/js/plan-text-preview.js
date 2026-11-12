@@ -1,5 +1,5 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { bindPlanActionFx } from "./plan-action-fx.js?v=20261111h";
+import { bindPlanActionFx } from "./plan-action-fx.js?v=20261113b";
 
 /** Por elemento: los formularios Legal se re-renderizan y el panel nuevo tiene que volver a enlazarse. */
 const bound = new WeakSet();
@@ -12,13 +12,11 @@ export function planFormActionsHtml({
 }) {
   return `
     <div class="plan-ref-actions">
-      <button type="button" id="${copyId}" class="plan-action-btn green" data-plan-fx="sling" aria-label="Copiar al portapapeles">
-        <span class="plan-action-btn-main">Copiar al portapapeles</span>
-        <span class="plan-action-btn-sub">Tirar y soltar para copiar</span>
+      <button type="button" id="${copyId}" class="plan-action-btn green" data-plan-fx="tap" aria-label="Copiar">
+        <span class="plan-action-btn-main">Copiar</span>
       </button>
-      <button type="button" id="${previewId}" class="plan-action-btn blue" data-plan-fx="slide" aria-label="Vista previa">
-        <span class="plan-action-btn-main">Vista previa</span>
-        <span class="plan-action-btn-sub">Deslizá para generar</span>
+      <button type="button" id="${previewId}" class="plan-action-btn blue" data-plan-fx="tap" aria-label="Ver planilla">
+        <span class="plan-action-btn-main">Ver planilla</span>
       </button>
       <button type="button" id="${clearId}" class="plan-action-btn ghost" data-plan-fx="fuse" aria-label="${clearLabel.replace(/^🗑\s*/, "")}">
         <span class="plan-action-btn-main">${clearLabel.replace(/^🗑\s*/, "")}</span>
@@ -36,7 +34,7 @@ export function planTextPreviewHtml(panelId, statusTargetId = "") {
           <span class="plan-text-preview-icon" data-plan-icon="previewDoc" aria-hidden="true"></span>
           Vista previa de la planilla
         </p>
-        <button type="button" class="plan-text-preview-copy" data-plan-preview-copy data-plan-fx="sling" aria-label="Copiar">
+        <button type="button" class="plan-text-preview-copy" data-plan-preview-copy data-plan-fx="tap" aria-label="Copiar">
           Copiar
         </button>
       </div>
@@ -56,10 +54,10 @@ export function mountPlanTextPreview(panelId) {
 
   const copyBtn = root.querySelector("[data-plan-preview-copy]");
   if (copyBtn) {
-    bindPlanActionFx(copyBtn, "sling", () => copyPlanTextPreview(root.id), {
+    bindPlanActionFx(copyBtn, "tap", () => copyPlanTextPreview(root.id), {
       compact: true,
       label: "Copiar",
-      showLabel: true,
+      successLabel: "¡Copiado!",
     });
   }
 

@@ -1,5 +1,6 @@
-/* Ports visuales de React Bits: Sling / SlideCommit / Fuse — paleta ST² */
+/* Ports visuales de React Bits: Tap+ClickSpark / Sling / SlideCommit / Fuse — paleta ST² */
 
+.plan-ref-actions:has(.plan-fx-tap),
 .plan-ref-actions:has(.sling-button),
 .plan-ref-actions:has(.slide-commit),
 .plan-ref-actions:has(.fuse-button),
@@ -12,12 +13,17 @@
 }
 
 @media (max-width: 720px) {
+  .plan-ref-actions:has(.plan-fx-tap),
   .plan-ref-actions:has(.sling-button),
   .plan-ref-actions:has(.slide-commit),
   .plan-ref-actions:has(.fuse-button),
   .plan-fx-row {
     grid-template-columns: 1fr;
     justify-items: stretch;
+  }
+  .plan-fx-tap {
+    width: 100%;
+    justify-content: center;
   }
   .plan-fx-sling-wrap {
     justify-content: flex-start;
@@ -29,6 +35,146 @@
   .fuse-button {
     width: 100%;
     justify-self: stretch;
+  }
+}
+
+/* ========== TAP + CLICK SPARK (Copiar / Ver) ========== */
+.plan-fx-tap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.55rem;
+  padding: 0.55rem 1.05rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.plan-fx-tap:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.plan-fx-tap:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.plan-fx-tap:disabled,
+.plan-fx-tap[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.plan-fx-tap--green {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  border-color: #15803d;
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(21, 128, 61, 0.35), 0 6px 16px rgba(22, 163, 74, 0.22);
+}
+
+.plan-fx-tap--green:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+.plan-fx-tap--blue {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #1d4ed8;
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(29, 78, 216, 0.35), 0 6px 16px rgba(37, 99, 235, 0.22);
+}
+
+.plan-fx-tap--blue:hover:not(:disabled) {
+  filter: brightness(1.04);
+}
+
+.plan-fx-tap--ghost {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #334155;
+  box-shadow: none;
+}
+
+.plan-fx-tap--compact {
+  min-height: 2rem;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.78rem;
+  gap: 0.32rem;
+}
+
+.plan-fx-tap[data-success="1"].plan-fx-tap--green,
+.plan-fx-tap[data-success="1"].plan-fx-tap--blue {
+  background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+  border-color: #047857;
+}
+
+.plan-fx-tap__icon {
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: 0 0 auto;
+}
+
+.plan-fx-tap--compact .plan-fx-tap__icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.plan-fx-tap__icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.plan-fx-tap__label {
+  white-space: nowrap;
+}
+
+.plan-fx-tap__sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
+}
+
+.plan-fx-tap__spark {
+  position: absolute;
+  width: 7px;
+  height: 2.5px;
+  margin: -1px 0 0 -3.5px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.95;
+  transform: translate(0, 0) rotate(var(--srot, 0deg));
+  animation: plan-fx-tap-spark 480ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes plan-fx-tap-spark {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(var(--srot, 0deg)) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--sx), var(--sy)) rotate(var(--srot, 0deg)) scale(0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan-fx-tap__spark {
+    animation: none;
+    display: none;
   }
 }
 

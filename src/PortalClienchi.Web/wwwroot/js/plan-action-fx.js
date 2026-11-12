@@ -1,4 +1,4 @@
-/** Ports vanilla de React Bits: SlingButton / SlideCommit / FuseButton. */
+/** Ports vanilla de React Bits: Tap+ClickSpark (default) / Sling / SlideCommit / Fuse. */
 
 const bound = new WeakSet();
 
@@ -6,6 +6,7 @@ const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
 const ICON_CLIPBOARD = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6a2 2 0 0 1 2 2v1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1V5a2 2 0 0 1 2-2zm0 3h6V5H9v1zm-1 2v1h8V8H8zm0 3v7h8v-7H8z" fill="currentColor"/></svg>`;
 const ICON_ARROW_UP = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-6 6h4v8h4v-8h4l-6-6z" fill="currentColor"/></svg>`;
 const ICON_ARROW_RIGHT = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6l6 6-6 6-1.4-1.4L13.2 12 8.6 7.4 10 6z" fill="currentColor"/></svg>`;
+const ICON_EYE = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c5.2 0 9.5 3.2 11 7-1.5 3.8-5.8 7-11 7S2.5 15.8 1 12c1.5-3.8 5.8-7 11-7zm0 2.2c-3.8 0-7 2.2-8.6 4.8 1.6 2.6 4.8 4.8 8.6 4.8s7-2.2 8.6-4.8C19 9.4 15.8 7.2 12 7.2zm0 2a2.8 2.8 0 1 1 0 5.6 2.8 2.8 0 0 1 0-5.6z" fill="currentColor"/></svg>`;
 const ICON_CHECK = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 16.2 5.8 12.5l1.4-1.4 2.3 2.3 6.3-6.3 1.4 1.4-7.7 7.7z" fill="currentColor"/></svg>`;
 const ICON_TRASH = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z" fill="currentColor"/></svg>`;
 const ICON_UNDO = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2L7 7l5 5V9c3.3 0 6 2.7 6 6a6 6 0 0 1-6 6 6 6 0 0 1-5.7-4.2l-2.1.7A8 8 0 0 0 12 23a8 8 0 0 0 8-8c0-4.4-3.6-8-8-8z" fill="currentColor"/></svg>`;
@@ -69,14 +70,15 @@ function proxyDisabled(host, apply) {
 
 /**
  * @param {HTMLElement | null | undefined} btn
- * @param {"sling" | "slide" | "fuse"} type
+ * @param {"tap" | "sling" | "slide" | "fuse"} type
  * @param {() => void | Promise<void>} onCommit
- * @param {{ onUndo?: () => void | Promise<void>, compact?: boolean, label?: string, sub?: string }=} opts
+ * @param {{ onUndo?: () => void | Promise<void>, compact?: boolean, label?: string, sub?: string, successLabel?: string, icon?: string }=} opts
  */
 export function bindPlanActionFx(btn, type, onCommit, opts = {}) {
   if (!(btn instanceof HTMLElement) || bound.has(btn)) return btn;
   bound.add(btn);
 
+  if (type === "tap" || type === "spark") return mountTap(btn, onCommit, opts);
   if (type === "sling") return mountSling(btn, onCommit, opts);
   if (type === "slide") return mountSlide(btn, onCommit, opts);
   if (type === "fuse") return mountFuse(btn, onCommit, opts);
@@ -93,12 +95,122 @@ export function wirePlanActionTrio({
   onClearUndo,
   clearUndoWindow = 900,
 }) {
-  bindPlanActionFx(copyBtn, "sling", onCopy);
-  bindPlanActionFx(previewBtn, "slide", onPreview);
+  // Clic simple + Click Spark (React Bits): más claro que tirar/deslizar.
+  bindPlanActionFx(copyBtn, "tap", onCopy, {
+    label: "Copiar",
+    successLabel: "¡Copiado!",
+    icon: ICON_CLIPBOARD,
+  });
+  bindPlanActionFx(previewBtn, "tap", onPreview, {
+    label: "Ver planilla",
+    successLabel: "Listo",
+    icon: ICON_EYE,
+  });
   bindPlanActionFx(clearBtn, "fuse", onClear, {
     onUndo: onClearUndo,
     undoWindow: clearUndoWindow,
   });
+}
+
+/* ===================== TAP + CLICK SPARK ===================== */
+
+function mountTap(el, onCommit, opts = {}) {
+  const compact = !!opts.compact;
+  const label = opts.label || readLabel(el, "Acción");
+  const successLabel = opts.successLabel || "Listo";
+  const tone = el.classList.contains("green")
+    ? "green"
+    : el.classList.contains("blue")
+      ? "blue"
+      : el.classList.contains("ghost")
+        ? "ghost"
+        : (el.classList.contains("plan-text-preview-copy") ? "green" : "green");
+  const icon = opts.icon
+    || (tone === "blue" ? ICON_EYE : tone === "ghost" ? ICON_TRASH : ICON_CLIPBOARD);
+
+  const host = document.createElement("button");
+  host.type = "button";
+  host.id = el.id;
+  host.className = [
+    "plan-fx-tap",
+    `plan-fx-tap--${tone}`,
+    compact ? "plan-fx-tap--compact" : "",
+    el.classList.contains("plan-text-preview-copy") ? "plan-text-preview-copy" : "",
+  ].filter(Boolean).join(" ");
+  host.dataset.planFx = "tap";
+  if (el.dataset.planPreviewCopy != null) host.dataset.planPreviewCopy = "";
+  host.setAttribute("aria-label", label);
+  host.innerHTML = `
+    <span class="plan-fx-tap__sparks" aria-hidden="true"></span>
+    <span class="plan-fx-tap__icon" data-tap-icon>${icon}</span>
+    <span class="plan-fx-tap__label" data-tap-label>${escapeHtml(label)}</span>
+  `;
+  el.replaceWith(host);
+
+  const sparks = host.querySelector(".plan-fx-tap__sparks");
+  const iconEl = host.querySelector("[data-tap-icon]");
+  const labelEl = host.querySelector("[data-tap-label]");
+  let busy = false;
+  let successTimer = 0;
+  let disabled = false;
+
+  const setDisabled = (on) => {
+    disabled = on;
+    host.disabled = on;
+    host.setAttribute("aria-disabled", on ? "true" : "false");
+  };
+  proxyDisabled(host, setDisabled);
+  if (el instanceof HTMLButtonElement && el.disabled) host.disabled = true;
+
+  const burstSpark = (clientX, clientY) => {
+    if (!sparks || prefersReducedMotion()) return;
+    const rect = host.getBoundingClientRect();
+    const ox = (clientX ?? rect.left + rect.width / 2) - rect.left;
+    const oy = (clientY ?? rect.top + rect.height / 2) - rect.top;
+    const count = compact ? 7 : 10;
+    for (let i = 0; i < count; i += 1) {
+      const spark = document.createElement("span");
+      spark.className = "plan-fx-tap__spark";
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
+      const dist = (compact ? 18 : 26) + Math.random() * (compact ? 14 : 22);
+      spark.style.left = `${ox}px`;
+      spark.style.top = `${oy}px`;
+      spark.style.setProperty("--sx", `${Math.cos(angle) * dist}px`);
+      spark.style.setProperty("--sy", `${Math.sin(angle) * dist}px`);
+      spark.style.setProperty("--srot", `${Math.round(Math.random() * 120 - 60)}deg`);
+      sparks.appendChild(spark);
+      window.setTimeout(() => spark.remove(), 520);
+    }
+  };
+
+  const flashSuccess = () => {
+    window.clearTimeout(successTimer);
+    host.dataset.success = "1";
+    if (iconEl) iconEl.innerHTML = ICON_CHECK;
+    if (labelEl) labelEl.textContent = successLabel;
+    host.setAttribute("aria-label", successLabel);
+    successTimer = window.setTimeout(() => {
+      delete host.dataset.success;
+      if (iconEl) iconEl.innerHTML = icon;
+      if (labelEl) labelEl.textContent = label;
+      host.setAttribute("aria-label", label);
+    }, 1400);
+  };
+
+  host.addEventListener("click", (e) => {
+    if (disabled || busy) return;
+    busy = true;
+    burstSpark(e.clientX, e.clientY);
+    flashSuccess();
+    Promise.resolve()
+      .then(() => onCommit?.())
+      .catch?.(() => {})
+      .finally(() => {
+        busy = false;
+      });
+  });
+
+  return host;
 }
 
 /* ===================== SLING ===================== */

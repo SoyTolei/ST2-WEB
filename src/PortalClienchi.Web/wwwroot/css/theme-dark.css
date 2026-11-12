@@ -780,6 +780,20 @@ html.st2-theme-dark .btn-secondary {
   border: 1px solid #3d4b61 !important;
 }
 
+html.st2-theme-dark .plan-fx-tap--ghost {
+  background: #1c1c1c;
+  border-color: #3d4b61;
+  color: #e5e5e5;
+}
+
+html.st2-theme-dark .plan-fx-tap--green {
+  box-shadow: 0 1px 0 rgba(21, 128, 61, 0.45), 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+html.st2-theme-dark .plan-fx-tap--blue {
+  box-shadow: 0 1px 0 rgba(29, 78, 216, 0.45), 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
 html.st2-theme-dark .planillas-back {
   background: transparent !important;
   border: none !important;
