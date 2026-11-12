@@ -2474,21 +2474,16 @@ html.st2-theme-dark .borrado-check-cg:has(input:checked) {
 }
 
 html.st2-theme-dark button.blanqueo-obs-pill {
-  background: #4c0519;
-  border-color: #fb7185;
-  color: #fecdd3;
+  background: #451a03;
+  border-color: #f59e0b;
+  color: #fde68a;
 }
 
 html.st2-theme-dark button.blanqueo-obs-pill:hover,
 html.st2-theme-dark button.blanqueo-obs-pill:focus-visible {
-  background: #881337;
-  border-color: #fda4af;
-  color: #fecdd3;
-}
-
-html.st2-theme-dark button.blanqueo-obs-pill:hover .blanqueo-obs-pill-action,
-html.st2-theme-dark button.blanqueo-obs-pill:focus-visible .blanqueo-obs-pill-action {
-  color: #fff;
+  background: #78350f;
+  border-color: #fbbf24;
+  color: #fef3c7;
 }
 
 html.st2-theme-dark .blanqueo-hab-pill {

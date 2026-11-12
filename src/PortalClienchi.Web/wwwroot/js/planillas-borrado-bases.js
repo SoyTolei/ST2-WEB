@@ -1680,7 +1680,7 @@ function formatAclaracionCell(text) {
       parts.push(formatResultadoHtml(resultado));
     }
   }
-  if (nota) parts.push(formatAclaracionNotaPill("Observación", nota));
+  if (nota) parts.push(formatAclaracionNotaPill("Ver observación", nota));
   return `<div class="borrado-aclaracion-stack">${parts.join("")}</div>`;
 }
 

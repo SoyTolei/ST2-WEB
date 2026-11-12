@@ -5,8 +5,8 @@ import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from 
 import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261112f";
 import { initPlanPillNav, syncPillNav } from "./plan-pill-nav.js?v=20261111b";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
-import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261112l";
-import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261112n";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261112o";
+import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261112o";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile, canSeeLegalProduct } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
 import { syncLegalMenuProducts } from "./planillas-legal-menu.js?v=20261012d";

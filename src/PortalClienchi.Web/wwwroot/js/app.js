@@ -13,7 +13,7 @@ import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.j
 import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getNotifInboxUnreadCount } from "./st2-notif-inbox.js?v=20261112m";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261112n";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261112o";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,

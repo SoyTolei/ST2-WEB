@@ -1236,7 +1236,7 @@ function renderTable(filtered) {
   }
 }
 
-const ROW_INTERACTIVE_SELECTOR = "[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-caso], [data-blanqueo-copy-clave], [data-blanqueo-owner], .blanqueo-hab-pill, .blanqueo-clave-previa-pill, .blanqueo-clave-nota-pill";
+const ROW_INTERACTIVE_SELECTOR = "[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-caso], [data-blanqueo-copy-clave], [data-blanqueo-owner], .blanqueo-hab-pill, .blanqueo-clave-previa-pill, .blanqueo-clave-nota-pill, .blanqueo-obs-pill";
 
 function buildRow(item) {
   const row = document.createElement("tr");
@@ -1535,8 +1535,8 @@ function rechazoDetalle(aclaracion) {
 function formatObservacionPill(detail) {
   const text = String(detail || "").trim();
   if (!text) return "";
-  const tip = "Clic para ver la observación";
-  return `<button type="button" class="blanqueo-obs-pill" title="${escapeAttr(tip)}" aria-label="Ver observación" aria-haspopup="dialog" data-blanqueo-aclaracion-detail="${escapeAttr(text)}"><span class="blanqueo-obs-pill-label">Observación</span><span class="blanqueo-obs-pill-action" aria-hidden="true">ver</span></button>`;
+  const tip = text.length > 80 ? `${text.slice(0, 80)}…` : text;
+  return `<button type="button" class="blanqueo-obs-pill" title="${escapeAttr(tip)}" aria-label="Ver observación" aria-haspopup="dialog" data-blanqueo-aclaracion-detail="${escapeAttr(text)}"><span class="blanqueo-obs-pill-label">Ver observación</span></button>`;
 }
 
 const BLANQUEO_CLAVE_PREVIA = "Sueldo.20261";
@@ -1581,12 +1581,15 @@ function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custo
   </button>`;
 }
 
-/** Clave + aclaración: estilo Hab. módulos (remarcado + nº + ver). */
+/** Clave arriba + “Ver observación” abajo (misma pastilla que el rechazo). */
 function formatClaveConNotaPill(clave, nota) {
   const pass = String(clave || "").trim();
   const detail = String(nota || "").trim();
   if (!pass || !detail) return "";
-  return `<span class="blanqueo-hab-wrap blanqueo-clave-nota-wrap"><button type="button" class="blanqueo-hab-pill blanqueo-clave-nota-pill" title="Clic para ver la aclaración" aria-label="Ver aclaración de ${escapeAttr(pass)}" aria-haspopup="dialog" data-blanqueo-aclaracion-detail="${escapeAttr(detail)}"><span class="blanqueo-hab-pill-label"><code>${escapeHtml(pass)}</code></span><span class="blanqueo-hab-pill-action" aria-hidden="true">ver</span></button><span class="blanqueo-hab-count" aria-hidden="true" title="Tiene aclaración">1</span></span>`;
+  const passPill = formatClaveCopyPill(pass, "Clic para copiar la contraseña", { bubble: true, soft: true });
+  const obsPill = formatObservacionPill(detail);
+  if (!passPill || !obsPill) return passPill || obsPill || "";
+  return `<div class="blanqueo-aclaracion-stack">${passPill}${obsPill}</div>`;
 }
 
 /** Clave “sola” (Sueldo.07612) vs aclaración libre (“ya estaba aceptado”, “Sueldo.2027 Sin MFA”). */
