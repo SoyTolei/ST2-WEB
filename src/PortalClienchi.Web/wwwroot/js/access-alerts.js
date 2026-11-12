@@ -1,7 +1,7 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, isViewingAsProfile } from "./module-access.js";
 import { notifyOwnerPresetDesktop } from "./st2-desktop-notif.js";
-import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
+import { clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -271,34 +271,9 @@ export function renderAccessAlertUi() {
     document.dispatchEvent(new CustomEvent("st2:open-admin-from-alert"));
   };
 
-  if (count === 0 || !summary || hideToast) {
-    clearSt2AlertToast(ST2_TOAST.access);
-  } else {
-    setSt2AlertToast({
-      id: ST2_TOAST.access,
-      body: summary.text,
-      tone: "warn",
-      actionLabel: "Ver",
-      onAction: openAdmin,
-      onDismiss: markAccessAlertsSeen,
-    });
-  }
-
-  if (!isPrimarySuperAdmin() || ownerCount === 0 || !ownerSummary || hideOwnerToast) {
-    clearSt2AlertToast(ST2_TOAST.accessOwner);
-  } else {
-    setSt2AlertToast({
-      id: ST2_TOAST.accessOwner,
-      body: ownerSummary.text,
-      tone: "warn",
-      actionLabel: "Ver",
-      onAction: () => {
-        void markOwnerNoticesSeen();
-        openAdmin();
-      },
-      onDismiss: dismissOwnerToastOnly,
-    });
-  }
+  // Sin sticky de accesos: el badge de Admin alcanza. Solo update/tools en Sonner.
+  clearSt2AlertToast(ST2_TOAST.access);
+  clearSt2AlertToast(ST2_TOAST.accessOwner);
 }
 
 function pollIntervalMs() {

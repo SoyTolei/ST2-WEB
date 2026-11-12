@@ -6,10 +6,12 @@ import { scheduleWelcomeTour, scheduleOrpenFeatureTip, setTourContext, syncHeade
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261112h";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261112i";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js?v=20261027a";
 import { initCrypticNudge } from "./st2-cryptic-nudge.js?v=20261027a";
 import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261013d";
+import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
+import { getNotifInboxUnreadCount } from "./st2-notif-inbox.js?v=20261112b";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
 import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261112g";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
@@ -2631,6 +2633,7 @@ function renderToolsToast(newer, message) {
     body: String(message || "").trim(),
     tone: "tools",
     actionLabel: "Ver",
+    sticky: true,
     onAction: () => {
       showAbout();
     },
@@ -3485,6 +3488,32 @@ async function refreshToolsDiagHint() {
 }
 
 aboutBtn?.addEventListener("click", showAbout);
+
+const notifBell = mountBellToggle(document.getElementById("st2-notif-bell"), {
+  offLabel: "Activar notificaciones",
+  onLabel: "Notificaciones activas",
+  getCount: () => {
+    try {
+      return getNotifInboxUnreadCount() || 0;
+    } catch {
+      return 0;
+    }
+  },
+  onDenied: (permission) => {
+    const blocked = permission === "denied";
+    showSt2FlashToast({
+      body: blocked
+        ? "El navegador ya bloqueó las notificaciones y no vuelve a preguntar. Tocá el candado de la barra de direcciones, entrá a Notificaciones y elegí Permitir. Después apretá de nuevo acá."
+        : "Aceptá la consulta del navegador para activar las notificaciones.",
+      tone: "warn",
+      duration: 7000,
+    });
+  },
+});
+if (notifBell) {
+  setInterval(() => notifBell.refresh(), 10000);
+  document.addEventListener("st2:notif-inbox-changed", () => notifBell.refresh());
+}
 
 document.addEventListener("st2:session-changed", () => {
   syncAdminTabVisibility();

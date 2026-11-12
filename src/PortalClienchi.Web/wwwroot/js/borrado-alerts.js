@@ -6,7 +6,7 @@ import {
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
 import { notifyBorradoDesktop } from "./st2-desktop-notif.js";
-import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
+import { clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;
@@ -296,54 +296,9 @@ export function renderBorradoAlertUi({ forceHide = false } = {}) {
     modBadge.setAttribute("aria-hidden", totalCount && !hideForSistema ? "false" : "true");
   }
 
-  if (hideForSistema) {
-    clearSt2AlertToast(ST2_TOAST.borrado);
-    clearSt2AlertToast(ST2_TOAST.borradoMine);
-    return;
-  }
-
-  if (alertMode === "confirm") {
-    if (pendingSummary) {
-      setSt2AlertToast({
-        id: ST2_TOAST.borrado,
-        body: pendingSummary.text,
-        tone: pendingSummary.tone,
-        actionLabel: "Ver",
-        sticky: true,
-        onAction: openBorradoFromAlert,
-      });
-    } else {
-      clearSt2AlertToast(ST2_TOAST.borrado);
-    }
-
-    if (personalSummary) {
-      setSt2AlertToast({
-        id: ST2_TOAST.borradoMine,
-        body: personalSummary.text,
-        tone: personalSummary.tone,
-        actionLabel: "Ver",
-        sticky: true,
-        onAction: openBorradoFromAlert,
-      });
-    } else {
-      clearSt2AlertToast(ST2_TOAST.borradoMine);
-    }
-    return;
-  }
-
+  // Toasts sticky: solo update web / descargas. Borrado queda en badges de pestaña/módulo.
+  clearSt2AlertToast(ST2_TOAST.borrado);
   clearSt2AlertToast(ST2_TOAST.borradoMine);
-  if (personalSummary) {
-    setSt2AlertToast({
-      id: ST2_TOAST.borrado,
-      body: personalSummary.text,
-      tone: personalSummary.tone,
-      actionLabel: "Ver",
-      sticky: true,
-      onAction: openBorradoFromAlert,
-    });
-  } else {
-    clearSt2AlertToast(ST2_TOAST.borrado);
-  }
 }
 
 function pollIntervalMs() {

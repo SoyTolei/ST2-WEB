@@ -233,10 +233,6 @@ export function initBorradoBasesModule() {
   document.getElementById("borrado-incorrecto-overlay")?.addEventListener("click", (e) => {
     if (e.target === e.currentTarget) hideIncorrectoModal();
   });
-  document.getElementById("borrado-incorrecto-has-note")?.addEventListener("change", () => {
-    syncIncorrectoNoteVisibility({ focus: true });
-  });
-
   const ctx = document.getElementById("borrado-ctx");
   ctx?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -1206,7 +1202,7 @@ function buildRow(item) {
       e.stopPropagation();
       selectedId = item.id;
       const label = el.classList.contains("borrado-aclaracion-incorrecto")
-        ? "Incorrecto"
+        ? "Rechazado"
         : el.classList.contains("borrado-aclaracion-marks")
           ? "Aclaración"
           : "Aclaración";
@@ -1231,7 +1227,7 @@ function buildRow(item) {
         pill.getAttribute("data-borrado-base-detail") || "",
       );
       // Incorrecto / resultado con Ver también cuenta como “abrir” la novedad.
-      if (/incorrecto|aclaraci[oó]n|observaci[oó]n/i.test(label)) {
+      if (/incorrecto|rechazado|aclaraci[oó]n|observaci[oó]n/i.test(label)) {
         void markBorradoObservationOpened(item.id);
       }
       return;
@@ -1308,7 +1304,8 @@ function openListoModal(item) {
   const chkCg = document.getElementById("borrado-listo-contabilidad");
   const sf = isDetalleSalesforce(item);
   const { nota } = parseAclaracion(isIncorrecto(item.aclaracion) ? "" : item.aclaracion);
-  const hasNota = !!String(nota || "").trim();
+  const packed = unpackListoExtra(nota);
+  const hasNota = !!String(packed.nota || "").trim();
 
   wrapIva?.classList.toggle("hidden", !sf && !item.iva);
   wrapSj?.classList.toggle("hidden", !sf && !item.sueldos);
@@ -1319,17 +1316,20 @@ function openListoModal(item) {
 
   document.getElementById("borrado-listo-hint")?.classList.toggle("hidden", sf);
   document.getElementById("borrado-listo-salesforce-hint")?.classList.toggle("hidden", !sf);
+  document.getElementById("borrado-listo-clave-block")?.classList.toggle("hidden", sf);
   document.getElementById("borrado-listo-note-block")?.classList.toggle("hidden", sf);
+  const claveInput = document.getElementById("borrado-listo-clave");
   const hasNoteChk = document.getElementById("borrado-listo-has-note");
   const noteText = document.getElementById("borrado-listo-note");
+  if (claveInput) claveInput.value = sf ? "" : (packed.clave || "");
   if (hasNoteChk) hasNoteChk.checked = !sf && hasNota;
-  if (noteText) noteText.value = sf ? "" : (nota || "");
+  if (noteText) noteText.value = sf ? "" : (packed.nota || "");
   syncListoNoteVisibility();
 
   overlay?.classList.toggle("is-salesforce", sf);
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
-  document.getElementById("borrado-listo-confirm")?.focus();
+  (claveInput && !sf ? claveInput : document.getElementById("borrado-listo-confirm"))?.focus();
 }
 
 function syncListoNoteVisibility({ focus = false } = {}) {
@@ -1347,9 +1347,12 @@ function hideListoModal() {
   overlay?.setAttribute("aria-hidden", "true");
   document.getElementById("borrado-listo-hint")?.classList.remove("hidden");
   document.getElementById("borrado-listo-salesforce-hint")?.classList.add("hidden");
+  document.getElementById("borrado-listo-clave-block")?.classList.remove("hidden");
   document.getElementById("borrado-listo-note-block")?.classList.remove("hidden");
+  const claveInput = document.getElementById("borrado-listo-clave");
   const hasNoteChk = document.getElementById("borrado-listo-has-note");
   const noteText = document.getElementById("borrado-listo-note");
+  if (claveInput) claveInput.value = "";
   if (hasNoteChk) hasNoteChk.checked = false;
   if (noteText) noteText.value = "";
   document.getElementById("borrado-listo-note-wrap")?.classList.add("hidden");
@@ -1367,7 +1370,6 @@ function openIncorrectoModal(item) {
   const chkCg = document.getElementById("borrado-incorrecto-contabilidad");
   const sf = isDetalleSalesforce(item);
   const { resultado, nota } = parseAclaracion(item.aclaracion);
-  const hasNota = !!String(nota || "").trim();
 
   wrapIva?.classList.toggle("hidden", !sf && !item.iva);
   wrapSj?.classList.toggle("hidden", !sf && !item.sueldos);
@@ -1386,22 +1388,12 @@ function openIncorrectoModal(item) {
   document.getElementById("borrado-incorrecto-hint")?.classList.toggle("hidden", sf);
   document.getElementById("borrado-incorrecto-salesforce-hint")?.classList.toggle("hidden", !sf);
   document.getElementById("borrado-incorrecto-checks")?.classList.toggle("hidden", sf);
-  const hasNoteChk = document.getElementById("borrado-incorrecto-has-note");
   const noteText = document.getElementById("borrado-incorrecto-note");
-  if (hasNoteChk) hasNoteChk.checked = hasNota;
   if (noteText) noteText.value = nota || "";
-  syncIncorrectoNoteVisibility();
 
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
-  document.getElementById("borrado-incorrecto-confirm")?.focus();
-}
-
-function syncIncorrectoNoteVisibility({ focus = false } = {}) {
-  const hasNote = !!document.getElementById("borrado-incorrecto-has-note")?.checked;
-  const wrap = document.getElementById("borrado-incorrecto-note-wrap");
-  wrap?.classList.toggle("hidden", !hasNote);
-  if (focus && hasNote) document.getElementById("borrado-incorrecto-note")?.focus();
+  noteText?.focus();
 }
 
 function hideIncorrectoModal() {
@@ -1412,11 +1404,8 @@ function hideIncorrectoModal() {
   document.getElementById("borrado-incorrecto-hint")?.classList.remove("hidden");
   document.getElementById("borrado-incorrecto-salesforce-hint")?.classList.add("hidden");
   document.getElementById("borrado-incorrecto-checks")?.classList.remove("hidden");
-  const hasNoteChk = document.getElementById("borrado-incorrecto-has-note");
   const noteText = document.getElementById("borrado-incorrecto-note");
-  if (hasNoteChk) hasNoteChk.checked = false;
   if (noteText) noteText.value = "";
-  document.getElementById("borrado-incorrecto-note-wrap")?.classList.add("hidden");
 }
 
 async function confirmIncorrectoModal() {
@@ -1437,17 +1426,16 @@ async function confirmIncorrectoModal() {
     const anyBase = !!(item.iva || item.sueldos || item.contabilidad);
     const anyMarked = !!(marked.iva || marked.sueldos || marked.contabilidad);
     if (anyBase && !anyMarked) {
-      setStatus("Marcá al menos una base incorrecta.", true);
+      setStatus("Marcá al menos una base rechazada.", true);
       return;
     }
   }
 
   const summary = sf ? INCORRECTO_LABEL : buildIncorrectoSummary(item, marked);
-  const wantNote = !!document.getElementById("borrado-incorrecto-has-note")?.checked;
-  const noteFromUi = String(document.getElementById("borrado-incorrecto-note")?.value || "").trim();
-  const notaFinal = wantNote ? noteFromUi : "";
-  if (wantNote && !notaFinal) {
-    setStatus("Escribí la observación o desmarcá «¿Hay observación?».", true);
+  const notaFinal = String(document.getElementById("borrado-incorrecto-note")?.value || "").trim();
+  if (!notaFinal) {
+    setStatus("Explicá por qué se rechaza.", true);
+    document.getElementById("borrado-incorrecto-note")?.focus();
     return;
   }
   const aclaracion = composeAclaracion(summary, notaFinal);
@@ -1463,7 +1451,7 @@ async function confirmIncorrectoModal() {
   }
 }
 
-/** Resumen: "Incorrecto" o "Incorrecto IVA, SJ". */
+/** Resumen: "Rechazado" o "Rechazado IVA, SJ". */
 function buildIncorrectoSummary(item, marked) {
   const parts = [];
   if (item.iva && marked.iva) parts.push("IVA");
@@ -1494,15 +1482,26 @@ async function confirmListoModal() {
       contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
     };
   const summary = sf ? buildListoSummarySalesforce(done) : buildListoSummary(item, done);
+  const clave = sf ? "" : String(document.getElementById("borrado-listo-clave")?.value || "").trim();
   const wantNote = !sf && !!document.getElementById("borrado-listo-has-note")?.checked;
   const noteFromUi = String(document.getElementById("borrado-listo-note")?.value || "").trim();
-  const notaFinal = sf ? DETALLE_SALESFORCE_NOMBRE : (wantNote ? noteFromUi : "");
+  if (wantNote && !noteFromUi) {
+    setStatus("Escribí la aclaración o desmarcá el check.", true);
+    document.getElementById("borrado-listo-note")?.focus();
+    return;
+  }
+  const notaFinal = sf
+    ? DETALLE_SALESFORCE_NOMBRE
+    : packListoExtra(clave, wantNote ? noteFromUi : "");
   const aclaracion = composeAclaracion(summary, notaFinal);
 
   try {
     await patchItem(pendingListoId, { listo: true, aclaracion });
     hideListoModal();
-    setStatus(`Confirmado: ${summary}`);
+    const extras = [];
+    if (clave) extras.push("contraseña");
+    if (wantNote && noteFromUi) extras.push("aclaración");
+    setStatus(extras.length ? `Confirmado: ${summary} · ${extras.join(" y ")}` : `Confirmado: ${summary}`);
     await reloadList();
     notifyBorradoChanged();
     document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
@@ -1540,10 +1539,31 @@ function buildListoSummary(item, done) {
 }
 
 const ACLARACION_SEP = "\n---\n";
-const INCORRECTO_LABEL = "Incorrecto";
+const INCORRECTO_LABEL = "Rechazado";
+const LISTO_CLAVE_MARK = "Clave: ";
+
+function packListoExtra(clave, nota) {
+  const c = String(clave || "").trim();
+  const n = String(nota || "").trim();
+  if (c && n) return `${LISTO_CLAVE_MARK}${c}\n${n}`;
+  if (c) return `${LISTO_CLAVE_MARK}${c}`;
+  return n;
+}
+
+function unpackListoExtra(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return { clave: "", nota: "" };
+  if (text.startsWith(LISTO_CLAVE_MARK)) {
+    const rest = text.slice(LISTO_CLAVE_MARK.length);
+    const nl = rest.indexOf("\n");
+    if (nl < 0) return { clave: rest.trim(), nota: "" };
+    return { clave: rest.slice(0, nl).trim(), nota: rest.slice(nl + 1).trim() };
+  }
+  return { clave: "", nota: text };
+}
 
 function isIncorrectoResultado(text) {
-  return /^Incorrecto\b/i.test(String(text || "").trim());
+  return /^(Rechazado|Incorrecto)\b/i.test(String(text || "").trim());
 }
 
 /** Solicitud con datos erróneos / no corresponde procesar (análogo a "No registrado" en blanqueo). */
@@ -1631,15 +1651,22 @@ function formatGestionadoPorCell(item) {
 
 function formatEstadoCell(item) {
   if (isIncorrecto(item.aclaracion)) {
-    return '<span class="borrado-pill bad" title="Solicitud o datos incorrectos (no se procesa)">Incorrecto</span>';
+    return '<span class="borrado-pill bad" title="Solicitud rechazada (no se procesa)">Rechazado</span>';
   }
   const { resultado, nota } = parseAclaracion(item.aclaracion);
   if (item.listo) {
     if (isPartialListo(item)) {
       return '<span class="borrado-pill partial" title="Algunas bases quedaron pendientes">Parcial</span>';
     }
-    if (String(nota || "").trim()) {
-      return '<span class="borrado-pill ok-note" title="Eliminada con observación">Eliminada · nota</span>';
+    const extra = unpackListoExtra(nota);
+    if (extra.clave && extra.nota) {
+      return '<span class="borrado-pill ok-note" title="Listo con contraseña y aclaración">Eliminada · clave · nota</span>';
+    }
+    if (extra.clave) {
+      return '<span class="borrado-pill ok" title="Listo con contraseña">Eliminada · clave</span>';
+    }
+    if (extra.nota) {
+      return '<span class="borrado-pill ok-note" title="Eliminada con aclaración">Eliminada · nota</span>';
     }
     return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada</span>';
   }
@@ -1661,7 +1688,7 @@ function formatResultadoHtml(resultado) {
   if (/^Listo\b/i.test(raw)) {
     return `<span class="borrado-aclaracion-full borrado-aclaracion-listo">${escapeHtml(raw)}</span>`;
   }
-  if (/^Incorrecto\b/i.test(raw)) {
+  if (/^(Rechazado|Incorrecto)\b/i.test(raw)) {
     return `<span class="borrado-aclaracion-full borrado-aclaracion-incorrecto">${escapeHtml(raw)}</span>`;
   }
   return `<span class="borrado-aclaracion-full">${escapeHtml(raw)}</span>`;
@@ -1672,7 +1699,7 @@ function shouldAclaracionUsePill(text) {
   if (!raw) return false;
   if (/[✓✗]/.test(raw)) return false;
   if (/^Listo\b/i.test(raw) && raw.length < 60) return false;
-  if (/^Incorrecto\b/i.test(raw) && raw.length < 60) return false;
+  if (/^(Rechazado|Incorrecto)\b/i.test(raw) && raw.length < 60) return false;
   return raw.length > 36 || raw.includes("\n");
 }
 
@@ -1943,7 +1970,7 @@ async function saveNoteModal() {
     try {
       await patchItem(selectedId, { listo: false, aclaracion: INCORRECTO_LABEL });
       hideNoteModal();
-      setStatus("Marcado como incorrecto.");
+      setStatus("Marcado como rechazado.");
       await reloadList();
       notifyBorradoChanged();
     } catch (err) {

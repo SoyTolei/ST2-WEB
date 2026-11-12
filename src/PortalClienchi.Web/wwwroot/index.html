@@ -178,7 +178,7 @@
       color: #fdba74 !important;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20261112f"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20261112i"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20261112g"/>
@@ -187,7 +187,7 @@
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20261112g"/>
-  <link rel="stylesheet" href="/css/borrado-bases.css?v=20261110k"/>
+  <link rel="stylesheet" href="/css/borrado-bases.css?v=20261112i"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
   <link rel="stylesheet" href="/css/st2-gooey-nav.css?v=20261111e"/>
@@ -197,9 +197,9 @@
   <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260915b"/>
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20261110g"/>
-  <link rel="stylesheet" href="/css/st2-sonner.css?v=20261112h"/>
+  <link rel="stylesheet" href="/css/st2-sonner.css?v=20261112i"/>
   <link rel="stylesheet" href="/css/st2-refresh.css?v=20261023n"/>
-  <link rel="stylesheet" href="/css/st2-components.css?v=20261112h"/>
+  <link rel="stylesheet" href="/css/st2-components.css?v=20261112i"/>
   <link rel="stylesheet" href="/css/plan-pill-nav.css?v=20261112h"/>
   <link rel="modulepreload" href="/js/st2-silk.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-gradient-ascii.js?v=20261023c"/>
@@ -265,6 +265,9 @@
         <div id="st2-session-menu" class="st2-session-menu st2-session-menu--branched hidden" role="menu" hidden>
           <span class="st2-session-menu-glow" aria-hidden="true"></span>
           <nav id="st2-session-branched" aria-label="Menú de usuario"></nav>
+          <div id="st2-session-notif-foot" class="st2-session-notif-foot" role="none">
+            <span id="st2-notif-bell" class="st2-notif-bell-host st2-notif-bell-host--menu"></span>
+          </div>
         </div>
       </span>
       <span id="st2-blobatar-greet" class="st2-blobatar-greet hidden" role="status" aria-live="polite" hidden>
@@ -273,6 +276,7 @@
           <button type="button" id="st2-blobatar-cryptic" class="st2-blobatar-greet-link hidden" hidden>¿Ya hiciste el Críptico de hoy?</button>
         </span>
       </span>
+      <span id="st2-greet-bell" class="st2-greet-bell-host hidden" hidden title="Avisos de actualización y descargas" aria-label="Avisos"></span>
       </span>
     </div>
     <div class="app-header-right">
@@ -1058,15 +1062,43 @@
               </div>
 
               <div id="borrado-ctx" class="plan-gestor-ctx borrado-ctx hidden" role="menu">
-                <button type="button" class="borrado-ctx-listo" data-borrado-ctx="listo">Marcar listo</button>
-                <button type="button" data-borrado-ctx="unlisto">Quitar listo</button>
+                <p class="borrado-ctx-kicker" aria-hidden="true">Gestión</p>
+                <button type="button" class="borrado-ctx-listo" data-borrado-ctx="listo">
+                  <span class="borrado-ctx-ico" aria-hidden="true">✓</span>
+                  <span class="borrado-ctx-copy">
+                    <strong>Listo</strong>
+                    <small>Contraseña y/o aclaración</small>
+                  </span>
+                </button>
+                <button type="button" class="borrado-ctx-rechazado" data-borrado-ctx="aclaracion-incorrecto">
+                  <span class="borrado-ctx-ico" aria-hidden="true">✕</span>
+                  <span class="borrado-ctx-copy">
+                    <strong>Rechazado</strong>
+                    <small>Explicá por qué</small>
+                  </span>
+                </button>
+                <button type="button" class="borrado-ctx-muted" data-borrado-ctx="unlisto">
+                  <span class="borrado-ctx-ico" aria-hidden="true">↺</span>
+                  <span class="borrado-ctx-copy"><strong>Quitar listo</strong></span>
+                </button>
                 <hr/>
-                <button type="button" data-borrado-ctx="aclaracion-incorrecto">Incorrecto</button>
-                <button type="button" data-borrado-ctx="aclaracion-manual">Agregar observación</button>
-                <button type="button" data-borrado-ctx="clear-aclaracion">Quitar observación</button>
+                <button type="button" data-borrado-ctx="aclaracion-manual">
+                  <span class="borrado-ctx-ico" aria-hidden="true">✎</span>
+                  <span class="borrado-ctx-copy"><strong>Agregar aclaración</strong></span>
+                </button>
+                <button type="button" class="borrado-ctx-muted" data-borrado-ctx="clear-aclaracion">
+                  <span class="borrado-ctx-ico" aria-hidden="true">⌀</span>
+                  <span class="borrado-ctx-copy"><strong>Quitar aclaración</strong></span>
+                </button>
                 <hr/>
-                <button type="button" data-borrado-ctx="editar">Editar</button>
-                <button type="button" data-borrado-ctx="eliminar">Eliminar</button>
+                <button type="button" data-borrado-ctx="editar">
+                  <span class="borrado-ctx-ico" aria-hidden="true">✎</span>
+                  <span class="borrado-ctx-copy"><strong>Editar</strong></span>
+                </button>
+                <button type="button" class="borrado-ctx-danger" data-borrado-ctx="eliminar">
+                  <span class="borrado-ctx-ico" aria-hidden="true">⌫</span>
+                  <span class="borrado-ctx-copy"><strong>Eliminar</strong></span>
+                </button>
               </div>
 
               <div id="borrado-base-pop" class="borrado-base-pop hidden" role="dialog" aria-labelledby="borrado-base-pop-title" aria-hidden="true">
@@ -2292,6 +2324,17 @@
           <p id="st2-about-tools-status" class="st2-about-tools-status hidden" aria-live="polite"></p>
         </section>
 
+        <section class="st2-about-changelog" aria-label="Novedades recientes">
+          <h3 class="st2-about-changelog-title">Novedades recientes</h3>
+          <ul class="st2-about-changelog-list">
+            <li>Referral / Onvio: stepper por obligatorios, adjuntos lite y badge Técnico al lado de Traza SQL.</li>
+            <li>Blanqueo: Listo con contraseña y/o aclaración; menú contextual más claro.</li>
+            <li>Borrado de bases: Listo con aclaración y <strong>Rechazado</strong> con motivo.</li>
+            <li>Avisos: solo actualización de la web y descargas de herramientas; campanita junto al saludo.</li>
+            <li>Menú del blobatar: Apariencia, Sesión y activación de notificaciones de escritorio.</li>
+          </ul>
+        </section>
+
         <div class="st2-about-foot">
           <p id="st2-about-updated" class="st2-about-updated" aria-live="polite">Último update de la web: —</p>
         </div>
@@ -2537,19 +2580,23 @@
 
   <div id="borrado-listo-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-listo-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
-      <h3 id="borrado-listo-title">Confirmar borrado</h3>
-      <p id="borrado-listo-hint" class="plan-user-hint">Marcá las bases que sí se borraron. Las que dejes sin marcar van a la aclaración como "no".</p>
-      <p id="borrado-listo-salesforce-hint" class="plan-user-hint hidden">Marcá qué bases borraste. La observación quedará como "Detalle en Salesforce".</p>
+      <h3 id="borrado-listo-title">Listo</h3>
+      <p id="borrado-listo-hint" class="plan-user-hint">Marcá las bases que sí se borraron. Podés sumar contraseña y/o aclaración.</p>
+      <p id="borrado-listo-salesforce-hint" class="plan-user-hint hidden">Marcá qué bases borraste. La aclaración quedará como "Detalle en Salesforce".</p>
       <div id="borrado-listo-checks" class="borrado-listo-checks">
         <label id="borrado-listo-iva-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-iva" type="checkbox"/> IVA</label>
         <label id="borrado-listo-sueldos-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-sueldos" type="checkbox"/> SJ</label>
         <label id="borrado-listo-contabilidad-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-contabilidad" type="checkbox"/> CG</label>
       </div>
+      <div id="borrado-listo-clave-block" class="borrado-listo-clave-block">
+        <label class="plan-user-label" for="borrado-listo-clave">Contraseña <span class="borrado-optional">(opcional)</span></label>
+        <input id="borrado-listo-clave" type="text" class="plan-user-input" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Si corresponde, la clave que quedó"/>
+      </div>
       <div id="borrado-listo-note-block" class="borrado-listo-note-block">
-        <label class="borrado-check borrado-listo-has-note"><input id="borrado-listo-has-note" type="checkbox"/> ¿Hay observación?</label>
+        <label class="borrado-check borrado-listo-has-note" for="borrado-listo-has-note"><input id="borrado-listo-has-note" type="checkbox"/> Aclaración</label>
         <div id="borrado-listo-note-wrap" class="borrado-listo-note-wrap hidden">
-          <label class="plan-user-label" for="borrado-listo-note">Detalle</label>
-          <textarea id="borrado-listo-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. falta autorización del cliente…"></textarea>
+          <label class="plan-user-label" for="borrado-listo-note">Detalle de la aclaración</label>
+          <textarea id="borrado-listo-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. quedó pendiente SJ por autorización…"></textarea>
         </div>
       </div>
       <div class="plan-user-actions">
@@ -2561,24 +2608,21 @@
 
   <div id="borrado-incorrecto-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-incorrecto-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
-      <h3 id="borrado-incorrecto-title">Marcar como incorrecto</h3>
-      <p id="borrado-incorrecto-hint" class="plan-user-hint">Marcá qué bases o datos están incorrectos. La solicitud no se procesa.</p>
-      <p id="borrado-incorrecto-salesforce-hint" class="plan-user-hint hidden">El detalle está en Salesforce. Podés marcar incorrecto y agregar una observación.</p>
+      <h3 id="borrado-incorrecto-title">Rechazado</h3>
+      <p id="borrado-incorrecto-hint" class="plan-user-hint">Marcá qué está mal y explicá por qué se rechaza. La solicitud no se procesa.</p>
+      <p id="borrado-incorrecto-salesforce-hint" class="plan-user-hint hidden">El detalle está en Salesforce. Explicá por qué se rechaza.</p>
       <div id="borrado-incorrecto-checks" class="borrado-listo-checks">
         <label id="borrado-incorrecto-iva-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-incorrecto-iva" type="checkbox"/> IVA</label>
         <label id="borrado-incorrecto-sueldos-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-incorrecto-sueldos" type="checkbox"/> SJ</label>
         <label id="borrado-incorrecto-contabilidad-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-incorrecto-contabilidad" type="checkbox"/> CG</label>
       </div>
       <div id="borrado-incorrecto-note-block" class="borrado-listo-note-block">
-        <label class="borrado-check"><input id="borrado-incorrecto-has-note" type="checkbox"/> ¿Hay observación?</label>
-        <div id="borrado-incorrecto-note-wrap" class="borrado-listo-note-wrap hidden">
-          <label class="plan-user-label" for="borrado-incorrecto-note">Detalle</label>
-          <textarea id="borrado-incorrecto-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. CUIT erróneo, cliente equivocado…"></textarea>
-        </div>
+        <label class="plan-user-label" for="borrado-incorrecto-note">Aclaración (por qué es rechazado)</label>
+        <textarea id="borrado-incorrecto-note" class="borrado-note-textarea" rows="3" maxlength="280" placeholder="Ej. CUIT erróneo, cliente equivocado, bases que no corresponden…"></textarea>
       </div>
       <div class="plan-user-actions">
         <button type="button" id="borrado-incorrecto-cancel" class="plan-gestor-btn-tool">Cancelar</button>
-        <button type="button" id="borrado-incorrecto-confirm" class="plan-gestor-btn-red">Confirmar incorrecto</button>
+        <button type="button" id="borrado-incorrecto-confirm" class="plan-gestor-btn-red">Confirmar rechazo</button>
       </div>
     </div>
   </div>
@@ -3013,6 +3057,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261112h" type="module"></script>
+  <script src="/js/app.js?v=20261112i" type="module"></script>
 </body>
 </html>

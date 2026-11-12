@@ -4,21 +4,19 @@
  */
 const STORAGE_KEY = "st2-notif-inbox-v1";
 const MAX_ITEMS = 40;
+const ALLOWED_IDS = new Set(["st2-toast-update", "st2-toast-tools"]);
 const TITLE_BY_ID = {
   "st2-toast-update": "Actualización",
-  "st2-toast-tools": "Herramientas",
-  "st2-toast-blanqueo": "Blanqueo",
-  "st2-toast-blanqueo-mine": "Tu blanqueo",
-  "st2-toast-borrado": "Borrado",
-  "st2-toast-borrado-mine": "Tu borrado",
-  "st2-toast-access": "Accesos",
-  "st2-toast-access-owner": "Accesos (owner)",
-  "st2-toast-cryptic": "Críptico",
-  "st2-toast-agua": "Agua",
+  "st2-toast-tools": "Descargas",
 };
 
 /** @type {Array<{ id: string, title: string, body: string, tone: string, at: number, seen: boolean }>} */
 let items = loadItems();
+try {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, MAX_ITEMS)));
+} catch {
+  /* ignore */
+}
 let panelEl = null;
 let listEl = null;
 let emptyEl = null;
@@ -32,7 +30,7 @@ function loadItems() {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .filter((x) => x && typeof x.id === "string" && typeof x.body === "string")
+      .filter((x) => x && typeof x.id === "string" && typeof x.body === "string" && ALLOWED_IDS.has(String(x.id)))
       .slice(0, MAX_ITEMS)
       .map((x) => ({
         id: String(x.id),
@@ -107,7 +105,7 @@ export function listNotifInbox() {
 export function upsertNotifInboxEntry({ id, body, tone = "ok", title } = {}) {
   const key = String(id || "").trim();
   const text = String(body || "").trim();
-  if (!key || !text) return;
+  if (!key || !text || !ALLOWED_IDS.has(key)) return;
   const now = Date.now();
   const prev = items.find((x) => x.id === key);
   const nextTitle = String(title || TITLE_BY_ID[key] || prev?.title || "Aviso");
@@ -190,7 +188,7 @@ function ensurePanel() {
       </div>
       <button type="button" class="st2-notif-inbox__close" aria-label="Cerrar">×</button>
     </div>
-    <p class="st2-notif-inbox__hint">Los avisos en vivo dejan de apilarse acá: hora, leídos y pendientes en un solo lugar.</p>
+    <p class="st2-notif-inbox__hint">Solo actualización de la web y versiones para descargar.</p>
     <div class="st2-notif-inbox__empty" data-empty hidden>No hay avisos todavía.</div>
     <ul class="st2-notif-inbox__list" data-list></ul>
   `;

@@ -1,16 +1,7 @@
 import { setSessionBirthdayMmDd, setFunEggEnabled } from "./planillas-easter-eggs.js?v=20261013d";
 import { mountSessionBlobatar } from "./st2-blobatar.js?v=20261013d";
 import { createBranchedMenu } from "./st2-branched-menu.js?v=20261013a";
-import {
-  desktopNotifSupported,
-  isDesktopNotifActive,
-  setDesktopNotifEnabled,
-} from "./st2-desktop-notif.js?v=20261013c";
-import {
-  getNotifInboxUnreadCount,
-  openNotifInbox,
-} from "./st2-notif-inbox.js?v=20261112a";
-import { showSt2FlashToast } from "./st2-sonner.js?v=20261112h";
+import { mountGreetBell } from "./st2-greet-bell.js?v=20261112b";
 
 let cachedEmail = null;
 let cachedDisplayName = null;
@@ -281,8 +272,6 @@ const MENU_ICONS = {
   dark: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 15.2A8 8 0 1 1 8.8 3.5 6.6 6.6 0 0 0 20.5 15.2z"/></svg>',
   light: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   logout: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/></svg>',
-  bell: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V10a6 6 0 0 1 12 0v6.5l1.6 2.3H4.4L6 16.5z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>',
-  inbox: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/><path d="M4 12h4l2 3h4l2-3h4"/></svg>',
 };
 
 let sessionBranchedMenu = null;
@@ -293,81 +282,11 @@ function currentThemeValue() {
 
 function syncSessionThemeMenuLabel() {
   sessionBranchedMenu?.setActive(currentThemeValue());
-  syncSessionNotifMenuLabels();
-}
-
-function syncSessionNotifMenuLabels() {
-  const host = document.getElementById("st2-session-branched");
-  if (!host) return;
-  const desk = host.querySelector('[data-value="notif-desktop"]');
-  const inbox = host.querySelector('[data-value="notif-inbox"]');
-  const on = isDesktopNotifActive();
-  if (desk) {
-    desk.toggleAttribute("data-on", on);
-    const label = desk.querySelector(".branched-menu__label");
-    if (label) label.textContent = on ? "Notificaciones activas" : "Activar notificaciones";
-  }
-  if (inbox) {
-    const unread = getNotifInboxUnreadCount();
-    const label = inbox.querySelector(".branched-menu__label");
-    if (label) label.textContent = unread > 0 ? `Ver avisos (${unread})` : "Ver avisos";
-    inbox.toggleAttribute("data-badge", unread > 0);
-  }
-}
-
-async function toggleDesktopNotifFromMenu() {
-  if (!desktopNotifSupported()) {
-    showSt2FlashToast({
-      body: "Este navegador no soporta notificaciones de escritorio.",
-      tone: "warn",
-      duration: 4500,
-    });
-    return;
-  }
-  if (isDesktopNotifActive()) {
-    setDesktopNotifEnabled(false);
-    syncSessionNotifMenuLabels();
-    return;
-  }
-  let permission = "default";
-  let granted = false;
-  try {
-    permission = Notification.permission;
-    const res = await Notification.requestPermission();
-    permission = res || Notification.permission;
-    granted = permission === "granted";
-  } catch {
-    granted = false;
-    permission = Notification.permission;
-  }
-  if (!granted) {
-    const blocked = permission === "denied";
-    showSt2FlashToast({
-      body: blocked
-        ? "El navegador ya bloqueó las notificaciones y no vuelve a preguntar. Tocá el candado de la barra de direcciones, entrá a Notificaciones y elegí Permitir. Después apretá de nuevo acá."
-        : "Aceptá la consulta del navegador para activar las notificaciones.",
-      tone: "warn",
-      duration: 7000,
-    });
-    return;
-  }
-  setDesktopNotifEnabled(true);
-  syncSessionNotifMenuLabels();
 }
 
 function mountSessionBranchedMenu() {
   const host = document.getElementById("st2-session-branched");
   if (!host || sessionBranchedMenu) return;
-  const avisosChildren = [
-    { value: "notif-inbox", label: "Ver avisos", icon: MENU_ICONS.inbox },
-  ];
-  if (desktopNotifSupported()) {
-    avisosChildren.unshift({
-      value: "notif-desktop",
-      label: isDesktopNotifActive() ? "Notificaciones activas" : "Activar notificaciones",
-      icon: MENU_ICONS.bell,
-    });
-  }
   sessionBranchedMenu = createBranchedMenu(host, {
     items: [
       {
@@ -378,10 +297,6 @@ function mountSessionBranchedMenu() {
         ],
       },
       {
-        label: "Avisos",
-        children: avisosChildren,
-      },
-      {
         label: "Sesión",
         children: [
           { value: "about", label: "Acerca de", icon: MENU_ICONS.about },
@@ -389,7 +304,7 @@ function mountSessionBranchedMenu() {
         ],
       },
     ],
-    open: [0, 1, 2],
+    open: [0, 1],
     active: currentThemeValue(),
     onSelect: (value) => {
       if (value === "about") {
@@ -402,21 +317,12 @@ function mountSessionBranchedMenu() {
         void clearPlanUserSession();
         return false;
       }
-      if (value === "notif-desktop") {
-        void toggleDesktopNotifFromMenu();
-        return false;
-      }
-      if (value === "notif-inbox") {
-        closeSessionMenu();
-        openNotifInbox();
-        return false;
-      }
       // Sin .click() en #themeToggleBtn: ese click sintético burbujea y cerraba el menú.
       if (value !== currentThemeValue()) document.dispatchEvent(new CustomEvent("st2:toggle-theme"));
       return true;
     },
   });
-  syncSessionNotifMenuLabels();
+  mountGreetBell(document.getElementById("st2-greet-bell"));
 }
 
 function bindSessionLogout() {
@@ -442,10 +348,6 @@ function bindSessionLogout() {
 
   document.addEventListener("st2:theme-changed", () => {
     syncSessionThemeMenuLabel();
-  });
-
-  document.addEventListener("st2:notif-inbox-changed", () => {
-    syncSessionNotifMenuLabels();
   });
 
   syncSessionThemeMenuLabel();

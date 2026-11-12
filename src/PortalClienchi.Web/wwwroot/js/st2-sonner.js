@@ -8,7 +8,7 @@ import {
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
 } from "./st2-toast-greet.js?v=20261027a";
-import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261112a";
+import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261112b";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -25,17 +25,13 @@ export const ST2_TOAST = {
   agua: "st2-toast-agua",
 };
 
-/** Orden del stack (saludo solo en el primero). Agua queda afuera. */
+/** Orden del stack flotante: solo update web y descargas. */
 const GREET_STACK = [
   ST2_TOAST.update,
   ST2_TOAST.tools,
-  ST2_TOAST.blanqueo,
-  ST2_TOAST.blanqueoMine,
-  ST2_TOAST.borrado,
-  ST2_TOAST.borradoMine,
-  ST2_TOAST.access,
-  ST2_TOAST.accessOwner,
 ];
+
+const INBOX_TOAST_IDS = new Set([ST2_TOAST.update, ST2_TOAST.tools]);
 
 const TOASTER_ID = "st2-sonner";
 
@@ -278,17 +274,16 @@ export function setSt2AlertToast({
     onDismiss,
     at: Date.now(),
   });
-  try {
-    upsertNotifInboxEntry({ id, body: text, tone });
-  } catch {
-    /* ignore */
+  if (INBOX_TOAST_IDS.has(id)) {
+    try {
+      upsertNotifInboxEntry({ id, body: text, tone });
+    } catch {
+      /* ignore */
+    }
   }
   if (bodyChanged) floatingSuppressed = false;
   if (floatingSuppressed) return;
-  if (id === ST2_TOAST.cryptic) {
-    paintOne(id, plainTitle(formatToastMessage(text)), tone);
-    return;
-  }
+  if (!GREET_STACK.includes(id) && id !== ST2_TOAST.agua) return;
   paintGreetStack();
 }
 
@@ -308,11 +303,6 @@ export function setSt2AguaToast({ body, onAction }) {
     onAction,
     at: Date.now(),
   });
-  try {
-    upsertNotifInboxEntry({ id: ST2_TOAST.agua, body: text, tone: "agua" });
-  } catch {
-    /* ignore */
-  }
   paintOne(ST2_TOAST.agua, plainTitle(text), "agua");
 }
 
@@ -506,15 +496,8 @@ function paintOne(id, title, tone, { force = false } = {}) {
 /** Re-pinta el stack (p. ej. al volver al home). El saludo va en el globo, no acá. */
 export function syncStackedToastGreetings() {
   syncSessionGreetBubble();
-  if (!registry.size || floatingSuppressed) return;
-  paintGreetStack();
+  if (floatingSuppressed) return;
+  if (registry.has(ST2_TOAST.update) || registry.has(ST2_TOAST.tools)) paintGreetStack();
   const agua = registry.get(ST2_TOAST.agua);
   if (agua) paintOne(ST2_TOAST.agua, plainTitle(agua.body), "agua");
-  const cryptic = registry.get(ST2_TOAST.cryptic);
-  if (cryptic) {
-    paintOne(
-      ST2_TOAST.cryptic,
-      plainTitle(formatToastMessage(cryptic.body)),
-      cryptic.tone || "ok",    );
-  }
 }

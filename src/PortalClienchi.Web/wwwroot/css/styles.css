@@ -698,25 +698,52 @@ body.st2-session-menu-open .st2-blobatar-greet {
   animation: st2-session-menu-in 0.42s var(--st2-menu-ease) both;
 }
 
-.st2-session-notif-slot {
+.st2-session-notif-foot {
   display: block;
-  margin: 8px 10px 10px;
+  margin: 8px 2px 2px;
   padding-top: 8px;
   border-top: 1px solid rgba(251, 146, 60, 0.18);
 }
 
-.st2-session-notif-slot .st2-notif-bell-host,
-.st2-session-notif-slot .bell-toggle {
+.st2-session-notif-foot .st2-notif-bell-host,
+.st2-session-notif-foot .bell-toggle {
   display: block;
   width: 100%;
 }
 
-.st2-session-notif-slot .bell-toggle__button {
+.st2-session-notif-foot .bell-toggle__button {
   width: 100%;
   justify-content: flex-start;
   height: 34px;
   border-radius: 10px;
   font-size: 0.74rem;
+}
+
+.st2-greet-bell-host,
+.st2-greet-bell {
+  flex: none;
+  align-self: center;
+}
+
+.st2-greet-bell.hidden,
+.st2-greet-bell-host.hidden,
+.st2-greet-bell[hidden] {
+  display: none !important;
+}
+
+.st2-greet-bell .st2-greet-bell__button,
+.st2-greet-bell .bell-toggle__button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 999px;
+  gap: 0;
+}
+
+.st2-greet-bell.has-unread .bell-toggle__button {
+  border-color: rgba(251, 146, 60, 0.55);
+  box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.12);
 }
 
 .st2-session-menu-glow {
@@ -3429,6 +3456,45 @@ body.portal-tab-active .main-shell {
 
 .about-tools-badge.hidden {
   display: none;
+}
+
+.st2-about-changelog {
+  margin: 14px 0 0;
+  padding: 12px 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  background: rgba(251, 146, 60, 0.06);
+}
+
+.st2-about-changelog-title {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #c2410c;
+}
+
+.st2-about-changelog-list {
+  margin: 0;
+  padding: 0 0 0 1.1rem;
+  display: grid;
+  gap: 6px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #475569;
+}
+
+html.st2-theme-dark .st2-about-changelog {
+  background: rgba(251, 146, 60, 0.08);
+  border-color: rgba(251, 146, 60, 0.24);
+}
+
+html.st2-theme-dark .st2-about-changelog-title {
+  color: #fdba74;
+}
+
+html.st2-theme-dark .st2-about-changelog-list {
+  color: #d6d3d1;
 }
 
 .st2-about-foot {

@@ -62,18 +62,8 @@ function paintToast(detail = lastDetail) {
     return;
   }
 
-  const body = nudgeCopy(detail);
-  setSt2AlertToast({
-    id: ST2_TOAST.cryptic,
-    body,
-    tone: "ok",
-    actionLabel: "Jugar",
-    onAction: () => {
-      writeSnooze(sig);
-      openCryptic();
-    },
-    onDismiss: () => writeSnooze(sig),
-  });
+  // Sin toast sticky de críptico: solo update web / descargas.
+  clearSt2AlertToast(ST2_TOAST.cryptic);
 }
 
 function onPending(event) {
