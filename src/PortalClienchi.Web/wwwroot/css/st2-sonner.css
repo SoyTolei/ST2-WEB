@@ -2,9 +2,9 @@
 
 #st2-sonner {
   z-index: 3200;
-  --border-radius: 14px;
-  --width: 300px;
-  --gap: 8px;
+  --border-radius: 10px;
+  --width: 280px;
+  --gap: 6px;
   /* Defaults; JS los pisa según blobatar / brand */
   --offset-top: 68px;
   --offset-right: 16px;
@@ -34,23 +34,23 @@ body:not(.st2-sonner-home) #st2-sonner {
  * El host sonner-toast es el box visible; el interior sigue en shadow DOM.
  */
 sonner-toast.st2-sonner-toast {
-  border-radius: 14px !important;
+  border-radius: 10px !important;
   overflow: visible !important;
   isolation: isolate;
-  font-size: 0.8rem !important;
+  font-size: 0.76rem !important;
   /* Cortas = compactas; largas = hasta --width (evita el “vacío” de blanqueo). */
   width: max-content !important;
   max-width: var(--width) !important;
-  min-width: 210px !important;
+  min-width: 190px !important;
   height: auto !important;
 }
 
 sonner-toast.st2-sonner-toast::part(frame) {
-  padding: 12px 14px;
-  gap: 8px;
+  padding: 9px 12px;
+  gap: 6px;
   align-items: center;
   overflow-wrap: break-word;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 sonner-toast.st2-sonner-toast::part(content) {
@@ -71,99 +71,65 @@ sonner-toast.st2-sonner-toast::part(close-button) {
   transform: translate(-18%, -18%);
 }
 
-/* ok → #84CC16 */
+/* Stack más liviano: borde fino + sombra corta (sin glow tosco) */
 sonner-toast.st2-sonner-toast.st2-sonner-ok {
   box-shadow:
-    0 0 0 1px rgba(132, 204, 22, 0.55),
-    0 0 0 3px rgba(132, 204, 22, 0.18),
-    0 10px 28px rgba(15, 23, 42, 0.22),
-    0 0 22px rgba(132, 204, 22, 0.28),
-    0 0 48px rgba(132, 204, 22, 0.16);
+    0 0 0 1px rgba(132, 204, 22, 0.35),
+    0 6px 16px rgba(15, 23, 42, 0.14);
 }
 
-/* warn → #eace7a */
 sonner-toast.st2-sonner-toast.st2-sonner-warn {
   box-shadow:
-    0 0 0 1px rgba(234, 206, 122, 0.55),
-    0 0 0 3px rgba(234, 206, 122, 0.2),
-    0 10px 28px rgba(15, 23, 42, 0.22),
-    0 0 22px rgba(234, 206, 122, 0.3),
-    0 0 48px rgba(234, 206, 122, 0.16);
+    0 0 0 1px rgba(234, 206, 122, 0.4),
+    0 6px 16px rgba(15, 23, 42, 0.14);
 }
 
-/* bad → #F43F5E */
 sonner-toast.st2-sonner-toast.st2-sonner-bad {
   box-shadow:
-    0 0 0 1px rgba(244, 63, 94, 0.55),
-    0 0 0 3px rgba(244, 63, 94, 0.18),
-    0 10px 28px rgba(15, 23, 42, 0.22),
-    0 0 22px rgba(244, 63, 94, 0.28),
-    0 0 48px rgba(244, 63, 94, 0.16);
+    0 0 0 1px rgba(244, 63, 94, 0.35),
+    0 6px 16px rgba(15, 23, 42, 0.14);
 }
 
-/* tools → #3B82F6 */
 sonner-toast.st2-sonner-toast.st2-sonner-tools {
   box-shadow:
-    0 0 0 1px rgba(59, 130, 246, 0.55),
-    0 0 0 3px rgba(59, 130, 246, 0.18),
-    0 10px 28px rgba(15, 23, 42, 0.22),
-    0 0 22px rgba(59, 130, 246, 0.28),
-    0 0 48px rgba(59, 130, 246, 0.16);
+    0 0 0 1px rgba(59, 130, 246, 0.35),
+    0 6px 16px rgba(15, 23, 42, 0.14);
 }
 
-/* agua: celeste cercano a tools (sin hex propio) */
 sonner-toast.st2-sonner-toast.st2-sonner-agua {
   box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.55),
-    0 0 0 3px rgba(56, 189, 248, 0.2),
-    0 10px 28px rgba(15, 23, 42, 0.22),
-    0 0 22px rgba(56, 189, 248, 0.3),
-    0 0 48px rgba(14, 165, 233, 0.16);
+    0 0 0 1px rgba(56, 189, 248, 0.35),
+    0 6px 16px rgba(15, 23, 42, 0.14);
 }
 
 html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-ok {
   box-shadow:
-    0 0 0 1px rgba(163, 230, 53, 0.65),
-    0 0 0 3px rgba(132, 204, 22, 0.22),
-    0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 26px rgba(132, 204, 22, 0.35),
-    0 0 52px rgba(132, 204, 22, 0.2);
+    0 0 0 1px rgba(163, 230, 53, 0.32),
+    0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
 html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-warn {
   box-shadow:
-    0 0 0 1px rgba(244, 222, 150, 0.7),
-    0 0 0 3px rgba(234, 206, 122, 0.24),
-    0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 26px rgba(234, 206, 122, 0.38),
-    0 0 52px rgba(234, 206, 122, 0.2);
+    0 0 0 1px rgba(244, 222, 150, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
 html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-bad {
   box-shadow:
-    0 0 0 1px rgba(251, 113, 133, 0.65),
-    0 0 0 3px rgba(244, 63, 94, 0.22),
-    0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 26px rgba(244, 63, 94, 0.35),
-    0 0 52px rgba(244, 63, 94, 0.2);
+    0 0 0 1px rgba(251, 113, 133, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
 html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-tools {
   box-shadow:
-    0 0 0 1px rgba(96, 165, 250, 0.65),
-    0 0 0 3px rgba(59, 130, 246, 0.22),
-    0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 26px rgba(59, 130, 246, 0.35),
-    0 0 52px rgba(59, 130, 246, 0.2);
+    0 0 0 1px rgba(96, 165, 250, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
 html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-agua {
   box-shadow:
-    0 0 0 1px rgba(125, 211, 252, 0.65),
-    0 0 0 3px rgba(56, 189, 248, 0.22),
-    0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 26px rgba(56, 189, 248, 0.38),
-    0 0 52px rgba(14, 165, 233, 0.2);
+    0 0 0 1px rgba(125, 211, 252, 0.34),
+    0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
 @media (max-width: 600px) {

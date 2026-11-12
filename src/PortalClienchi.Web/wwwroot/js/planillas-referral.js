@@ -12,9 +12,9 @@ import {
   isChileReferralStep2Complete,
 } from "./planillas-referral-chile.js?v=20261112d";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261112e";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261112f";
 import { mountStarBorder } from "./star-border.js?v=20261111g";
-import { syncPillNav } from "./plan-pill-nav.js?v=20261111b";
+import { enhancePillNavTrack, syncPillNav } from "./plan-pill-nav.js?v=20261112f";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
@@ -100,6 +100,11 @@ function syncPerfilUi() {
   trazaCard?.classList.remove("hidden");
   trazaCard?.classList.toggle("is-locked-adj", !esTecnico);
   trazaCard?.classList.add("is-optional-adj");
+  const trazaBadge = document.getElementById("ref-traza-tech-badge");
+  if (trazaBadge) {
+    trazaBadge.classList.toggle("hidden", esTecnico);
+    trazaBadge.hidden = !!esTecnico;
+  }
   if (!esTecnico) {
     if (trazaCheck?.checked) {
       trazaCheck.checked = false;
@@ -233,6 +238,29 @@ function updateReferralPanels() {
   syncReferralStepper();
 }
 
+/** Actualiza pills sin recrear el DOM (evita el “refresh” visual Versión/Módulo). */
+function syncSegmentPillRow(row, items, selected, dataKey) {
+  if (!row || !Array.isArray(items)) return;
+  const attr = dataKey === "modulo" ? "modulo" : "version";
+  const btns = [...row.querySelectorAll(".plan-segment-btn")];
+  const same =
+    btns.length === items.length
+    && btns.every((btn, i) => String(btn.dataset[attr] || "") === String(items[i]));
+
+  if (!same) {
+    const thumb = row.querySelector(":scope > .plan-pill-thumb");
+    row.innerHTML = items.map((v) =>
+      `<button type="button" class="plan-segment-btn${selected === v ? " active" : ""}" data-${attr}="${v}">${v}</button>`
+    ).join("");
+    if (thumb) row.prepend(thumb);
+  } else {
+    btns.forEach((btn) => {
+      btn.classList.toggle("active", String(btn.dataset[attr] || "") === String(selected || ""));
+    });
+  }
+  enhancePillNavTrack(row);
+}
+
 function buildReferralPills() {
   const cfg = ctx.getConfig()?.referral;
   const legalCfg = ctx.getConfig()?.legal;
@@ -246,13 +274,8 @@ function buildReferralPills() {
   const modRow = document.getElementById("ref-modulo-pills");
   if (!verRow || !modRow) return;
 
-  verRow.innerHTML = cfg.versiones.map((v) =>
-    `<button type="button" class="plan-segment-btn${versionSel === v ? " active" : ""}" data-version="${v}">${v}</button>`
-  ).join("");
-  modRow.innerHTML = cfg.modulos.map((m) =>
-    `<button type="button" class="plan-segment-btn${moduloSel === m ? " active" : ""}" data-modulo="${m}">${m}</button>`
-  ).join("");
-  syncPillNav();
+  syncSegmentPillRow(verRow, cfg.versiones || [], versionSel, "version");
+  syncSegmentPillRow(modRow, cfg.modulos || [], moduloSel, "modulo");
   syncReferralStepCompletion();
 
   const col = document.getElementById("ref-collation");

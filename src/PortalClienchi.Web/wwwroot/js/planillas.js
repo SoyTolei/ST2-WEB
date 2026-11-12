@@ -2,7 +2,7 @@ import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261112e";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261112f";
 import { initPlanPillNav, syncPillNav } from "./plan-pill-nav.js?v=20261111b";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261013i";
@@ -1840,7 +1840,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20261112e").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20261112f").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });

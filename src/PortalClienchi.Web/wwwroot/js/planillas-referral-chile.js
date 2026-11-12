@@ -59,8 +59,9 @@ export function resetChileReferral() {
   document.getElementById("ref-card-chile-pantallas")?.classList.remove("selected");
   const mark = document.getElementById("ref-mark-chile-pantallas");
   if (mark) {
-    mark.textContent = "○";
-    mark.style.color = "#94a3b8";
+    mark.textContent = "No";
+    mark.classList.remove("is-on");
+    mark.style.color = "";
   }
   document.getElementById("ref-chile-capturas")?.classList.add("hidden");
 

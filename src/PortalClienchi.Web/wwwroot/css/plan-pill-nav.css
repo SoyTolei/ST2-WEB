@@ -419,6 +419,62 @@ html.st2-theme-dark .plan-bej-config--lite {
   pointer-events: none;
 }
 
+.plan-adj-label .plan-adj-backup-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.plan-adj-label .plan-adj-backup-text strong {
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.plan-adj-label .plan-check-badge.is-locked-badge {
+  margin-top: 1px;
+  font-size: 0.62rem;
+  padding: 0.12rem 0.4rem;
+}
+
+/* Subtítulo Salesforce: solo visible al marcar Sí */
+.plan-adj-sf-hint {
+  display: none;
+  font-size: 0.66rem;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.25;
+  color: #94a3b8;
+  opacity: 0.9;
+  max-width: 22rem;
+}
+
+html.st2-theme-dark .plan-adj-sf-hint {
+  color: #a3a3a3;
+}
+
+.plan-adj-card.selected .plan-adj-sf-hint,
+.plan-capturas-card.selected .plan-adj-sf-hint,
+.plan-onvio-card.selected .plan-adj-sf-hint {
+  display: block;
+}
+
+.plan-backup-sql-hint--soft {
+  font-size: 0.72rem;
+  font-weight: 450;
+  font-style: italic;
+  line-height: 1.35;
+  color: #a3a3a3;
+  opacity: 0.92;
+}
+
+.plan-backup-sql-hint--soft em {
+  font-style: italic;
+  font-weight: 550;
+  color: #d4d4d4;
+}
+
 /* Sí / No unificado (estilo ONVIO) */
 .plan-yn-state,
 .plan-adj-card .card-mark.plan-yn-state,

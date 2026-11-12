@@ -178,12 +178,12 @@
       color: #fdba74 !important;
     }
   </style>
-  <link rel="stylesheet" href="/css/styles.css?v=20261111g"/>
+  <link rel="stylesheet" href="/css/styles.css?v=20261112f"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/theme-dark.css?v=20261111e"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20261111d"/>
-  <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261112e"/>
+  <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261112f"/>
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/blanqueo.css?v=20261110k"/>
@@ -197,10 +197,10 @@
   <link rel="stylesheet" href="/css/st2-decrypted-text.css?v=20260915b"/>
   <link rel="stylesheet" href="/css/st2-click-spark.css?v=20260910a"/>
   <link rel="stylesheet" href="/css/st2-spotlight-card.css?v=20261110g"/>
-  <link rel="stylesheet" href="/css/st2-sonner.css?v=20261027a"/>
+  <link rel="stylesheet" href="/css/st2-sonner.css?v=20261112f"/>
   <link rel="stylesheet" href="/css/st2-refresh.css?v=20261023n"/>
   <link rel="stylesheet" href="/css/st2-components.css?v=20261013j"/>
-  <link rel="stylesheet" href="/css/plan-pill-nav.css?v=20261112e"/>
+  <link rel="stylesheet" href="/css/plan-pill-nav.css?v=20261112f"/>
   <link rel="modulepreload" href="/js/st2-silk.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-gradient-ascii.js?v=20261023c"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260915a"/>
@@ -265,6 +265,9 @@
         <div id="st2-session-menu" class="st2-session-menu st2-session-menu--branched hidden" role="menu" hidden>
           <span class="st2-session-menu-glow" aria-hidden="true"></span>
           <nav id="st2-session-branched" aria-label="Menú de usuario"></nav>
+          <div class="st2-session-notif-slot" role="none">
+            <span id="st2-notif-bell" class="st2-notif-bell-host st2-notif-bell-host--menu"></span>
+          </div>
         </div>
       </span>
       <span id="st2-blobatar-greet" class="st2-blobatar-greet hidden" role="status" aria-live="polite" hidden>
@@ -306,7 +309,6 @@
           <span class="st2-suite-float st2-suite-float--palta3">🥑</span>
         </div>
         <div class="app-header-actions" role="group" aria-label="Ayuda">
-          <span id="st2-notif-bell" class="st2-notif-bell-host"></span>
           <button type="button" id="st2-tour-header-btn" class="st2-tour-header-btn hidden" title="Tutorial" aria-label="Tutorial">
             <span class="st2-tour-header-btn-icon" aria-hidden="true">?</span>
             <span id="st2-tour-header-btn-label">Tutorial</span>
@@ -663,10 +665,13 @@
               </div>
 
               <div class="plan-field">
-                <div id="plan-capturas-card" class="plan-capturas-card plan-yn-card">
+                <div id="plan-capturas-card" class="plan-capturas-card plan-yn-card plan-adj-card tone-orange">
                   <label>
                     <input id="plan-capturas-check" type="checkbox" class="hidden"/>
-                    ¿Hay archivos adjuntos?
+                    <span class="plan-adj-backup-text">
+                      <strong>¿Hay archivos adjuntos?</strong>
+                      <small class="plan-adj-sf-hint">Si no adjuntás, el texto aclara que van en Salesforce</small>
+                    </span>
                   </label>
                   <span class="plan-capturas-mark plan-yn-state" aria-hidden="true">No</span>
                 </div>
@@ -1244,7 +1249,13 @@
               <p class="plan-ref-title">Adjuntos</p>
               <div class="plan-adj-stack">
                 <button type="button" class="plan-adj-card tone-green" id="ref-card-traza" data-adj="traza">
-                  <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>Traza SQL</span>
+                  <span class="plan-adj-label">
+                    <span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>
+                    <span class="plan-adj-backup-text">
+                      <strong>Traza SQL</strong>
+                      <span class="plan-check-badge is-locked-badge hidden" id="ref-traza-tech-badge" hidden>Técnico</span>
+                    </span>
+                  </span>
                   <span class="card-mark plan-yn-state" id="ref-mark-traza">No</span>
                 </button>
                 <input type="checkbox" id="ref-adj-traza" class="hidden"/>
@@ -1264,7 +1275,13 @@
                 </div>
 
                 <button type="button" class="plan-adj-card tone-orange" id="ref-card-pantallas" data-adj="pantallas">
-                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Archivos adjuntos</span>
+                  <span class="plan-adj-label">
+                    <span class="plan-inline-icon orange" data-plan-icon="camera"></span>
+                    <span class="plan-adj-backup-text">
+                      <strong>Archivos adjuntos</strong>
+                      <small class="plan-adj-sf-hint">Si no adjuntás, el texto aclara que van en Salesforce</small>
+                    </span>
+                  </span>
                   <span class="card-mark plan-yn-state" id="ref-mark-pantallas">No</span>
                 </button>
                 <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
@@ -1317,7 +1334,7 @@
                     <span class="plan-sql-compact-title">Entorno SQL</span>
                     <span class="plan-sql-compact-sub">Opcional · para el texto de la planilla</span>
                   </div>
-                  <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si el backup salió de <strong>ST2 → Herramientas SQL</strong>, collation y versión suelen ir en el nombre del <strong>.zip</strong>.</p>
+                  <p id="ref-sql-hint" class="plan-backup-sql-hint plan-backup-sql-hint--soft hidden">Si tomaste el backup con <em>ST2 · Herramientas SQL</em>, la versión y collation suelen figurar en el nombre del <em>.zip</em>.</p>
                   <div class="plan-form-2col plan-form-2col-tight">
                     <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
                     <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
@@ -1370,8 +1387,14 @@
                   </div>
                 </div>
                 <button type="button" class="plan-adj-card tone-orange" id="ref-card-chile-pantallas" data-adj="pantallas">
-                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Archivos adjuntos</span>
-                  <span class="card-mark" id="ref-mark-chile-pantallas">○</span>
+                  <span class="plan-adj-label">
+                    <span class="plan-inline-icon orange" data-plan-icon="camera"></span>
+                    <span class="plan-adj-backup-text">
+                      <strong>Archivos adjuntos</strong>
+                      <small class="plan-adj-sf-hint">Si no adjuntás, el texto aclara que van en Salesforce</small>
+                    </span>
+                  </span>
+                  <span class="card-mark plan-yn-state" id="ref-mark-chile-pantallas">No</span>
                 </button>
                 <input type="checkbox" id="ref-chile-pantallas" class="hidden"/>
                 <div id="ref-chile-capturas" class="plan-capturas-panel hidden">
@@ -1414,7 +1437,13 @@
               <p class="plan-ref-title">Adjuntos</p>
               <div class="plan-adj-stack">
                 <button type="button" class="plan-adj-card tone-orange" id="ref-card-onvio-pantallas" data-onvio="pantallas">
-                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Archivos adjuntos</span>
+                  <span class="plan-adj-label">
+                    <span class="plan-inline-icon orange" data-plan-icon="camera"></span>
+                    <span class="plan-adj-backup-text">
+                      <strong>Archivos adjuntos</strong>
+                      <small class="plan-adj-sf-hint">Si no adjuntás, el texto aclara que van en Salesforce</small>
+                    </span>
+                  </span>
                   <span class="card-mark plan-yn-state" id="ref-mark-onvio-pantallas">No</span>
                 </button>
                 <input type="checkbox" id="ref-onvio-pantallas" class="hidden"/>
@@ -1508,7 +1537,10 @@
                 <button type="button" class="plan-onvio-card tone-orange" id="ref-card-legal-pantallas" data-legal="pantallas">
                   <span class="plan-onvio-body">
                     <span class="plan-inline-icon orange" data-plan-icon="camera"></span>
-                    <span>Archivos adjuntos</span>
+                    <span class="plan-adj-backup-text">
+                      <strong>Archivos adjuntos</strong>
+                      <small class="plan-adj-sf-hint">Si no adjuntás, el texto aclara que van en Salesforce</small>
+                    </span>
                   </span>
                   <span class="card-mark plan-onvio-state">No</span>
                 </button>
@@ -2992,6 +3024,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261112e" type="module"></script>
+  <script src="/js/app.js?v=20261112f" type="module"></script>
 </body>
 </html>

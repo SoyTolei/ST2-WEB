@@ -6,7 +6,7 @@ import { scheduleWelcomeTour, scheduleOrpenFeatureTip, setTourContext, syncHeade
 import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
 import { notifyAccessChanged, getAccessAlertCount } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261027a";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261112f";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js?v=20261027a";
 import { initCrypticNudge } from "./st2-cryptic-nudge.js?v=20261027a";
 import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261013d";
@@ -14,7 +14,7 @@ import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getBlanqueoAlertCount } from "./blanqueo-alerts.js";
 import { getBorradoAlertCount } from "./borrado-alerts.js";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261112e";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261112f";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
@@ -3490,6 +3490,8 @@ async function refreshToolsDiagHint() {
 aboutBtn?.addEventListener("click", showAbout);
 
 const notifBell = mountBellToggle(document.getElementById("st2-notif-bell"), {
+  offLabel: "Activar notificaciones",
+  onLabel: "Notificaciones activas",
   getCount: () => {
     try {
       return (getBlanqueoAlertCount() || 0) + (getBorradoAlertCount() || 0) + (getAccessAlertCount() || 0);
