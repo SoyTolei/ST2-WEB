@@ -1310,19 +1310,14 @@ function buildRow(item) {
     showModPop(btn, mods);
   });
 
-  row.querySelector(".blanqueo-clave-previa-pill")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    selectedId = item.id;
-    const btn = e.currentTarget;
-    showAclaracionPop(btn, btn.getAttribute("data-blanqueo-aclaracion-detail") || "");
-  });
-  row.querySelector(".blanqueo-clave-nota-pill")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    selectedId = item.id;
-    const btn = e.currentTarget;
-    showAclaracionPop(btn, btn.getAttribute("data-blanqueo-aclaracion-detail") || "");
+  row.querySelectorAll(".blanqueo-clave-previa-pill, .blanqueo-clave-nota-pill, .blanqueo-obs-pill").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedId = item.id;
+      const btn = e.currentTarget;
+      showAclaracionPop(btn, btn.getAttribute("data-blanqueo-aclaracion-detail") || "");
+    });
   });
 
   row.querySelector(".blanqueo-col-aclaracion .blanqueo-pill")?.addEventListener("click", (e) => {
@@ -1524,7 +1519,24 @@ function claveDefault() {
 }
 
 function isBlanqueoConClave(item) {
-  return /blanqueo/i.test(String(item?.tipoSolicitud || ""));
+  const t = String(item?.tipoSolicitud || "");
+  // On Balance / ONVIO: Blanqueo (+ MFA). Portal Cliente: Cambio de contraseña.
+  return /blanqueo/i.test(t) || /cambio\s+de\s+contrase[nñ]a/i.test(t);
+}
+
+/** Detalle libre tras "Rechazado --- …" (misma forma que borrado). */
+function rechazoDetalle(aclaracion) {
+  const raw = String(aclaracion || "").trim();
+  if (!raw || !isIncorrecto(raw)) return "";
+  if (raw.includes("---")) return raw.slice(raw.indexOf("---") + 3).trim();
+  return raw.replace(/^(rechazado|incorrecto)\s*[:·-]?\s*/i, "").trim();
+}
+
+function formatObservacionPill(detail) {
+  const text = String(detail || "").trim();
+  if (!text) return "";
+  const tip = "Clic para ver la observación";
+  return `<button type="button" class="blanqueo-obs-pill" title="${escapeAttr(tip)}" aria-label="Ver observación" aria-haspopup="dialog" data-blanqueo-aclaracion-detail="${escapeAttr(text)}"><span class="blanqueo-obs-pill-label">Observación</span><span class="blanqueo-obs-pill-action" aria-hidden="true">ver</span></button>`;
 }
 
 const BLANQUEO_CLAVE_PREVIA = "Sueldo.20261";
@@ -1607,7 +1619,10 @@ function formatClavePreviaPill(aclaracion) {
 function formatAclaracionCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (aclaracion) {
-    if (isRejectedState(aclaracion)) return "—";
+    if (isIncorrecto(aclaracion)) {
+      return formatObservacionPill(rechazoDetalle(aclaracion)) || "—";
+    }
+    if (isNoRegistrado(aclaracion)) return "—";
     if (aclaracionTieneClavePrevia(aclaracion)) {
       return formatClavePreviaPill(aclaracion);
     }
@@ -1980,13 +1995,7 @@ function openRechazadoModal(item) {
   selectedId = item.id;
   const overlay = document.getElementById("blanqueo-rechazado-overlay");
   const nota = document.getElementById("blanqueo-rechazado-nota");
-  const previa = String(item.aclaracion || "").trim();
-  let seed = "";
-  if (isIncorrecto(previa)) {
-    if (previa.includes("---")) seed = previa.slice(previa.indexOf("---") + 3).trim();
-    else seed = previa.replace(/^(rechazado|incorrecto)\s*[:·-]?\s*/i, "").trim();
-  }
-  if (nota) nota.value = seed;
+  if (nota) nota.value = rechazoDetalle(item.aclaracion);
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   nota?.focus();
