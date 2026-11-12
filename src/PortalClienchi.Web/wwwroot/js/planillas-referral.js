@@ -12,7 +12,7 @@ import {
   isChileReferralStep2Complete,
 } from "./planillas-referral-chile.js?v=20261112d";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113b";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113c";
 import { mountStarBorder } from "./star-border.js?v=20261111g";
 import { enhancePillNavTrack, syncPillNav } from "./plan-pill-nav.js?v=20261112f";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";

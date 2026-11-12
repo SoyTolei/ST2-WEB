@@ -128,8 +128,8 @@ function mountTap(el, onCommit, opts = {}) {
   const icon = opts.icon
     || (tone === "blue" ? ICON_EYE : tone === "ghost" ? ICON_TRASH : ICON_CLIPBOARD);
 
-  const host = document.createElement("button");
-  host.type = "button";
+  // Host div (como sling/slide): redefine .disabled sin chocar con HTMLButtonElement.
+  const host = document.createElement("div");
   host.id = el.id;
   host.className = [
     "plan-fx-tap",
@@ -138,6 +138,8 @@ function mountTap(el, onCommit, opts = {}) {
     el.classList.contains("plan-text-preview-copy") ? "plan-text-preview-copy" : "",
   ].filter(Boolean).join(" ");
   host.dataset.planFx = "tap";
+  host.setAttribute("role", "button");
+  host.tabIndex = 0;
   if (el.dataset.planPreviewCopy != null) host.dataset.planPreviewCopy = "";
   host.setAttribute("aria-label", label);
   host.innerHTML = `
@@ -156,8 +158,9 @@ function mountTap(el, onCommit, opts = {}) {
 
   const setDisabled = (on) => {
     disabled = on;
-    host.disabled = on;
     host.setAttribute("aria-disabled", on ? "true" : "false");
+    host.tabIndex = on ? -1 : 0;
+    host.classList.toggle("is-disabled", on);
   };
   proxyDisabled(host, setDisabled);
   if (el instanceof HTMLButtonElement && el.disabled) host.disabled = true;
@@ -197,17 +200,27 @@ function mountTap(el, onCommit, opts = {}) {
     }, 1400);
   };
 
-  host.addEventListener("click", (e) => {
+  const runCommit = (e) => {
     if (disabled || busy) return;
     busy = true;
-    burstSpark(e.clientX, e.clientY);
+    burstSpark(e?.clientX, e?.clientY);
     flashSuccess();
     Promise.resolve()
       .then(() => onCommit?.())
-      .catch?.(() => {})
+      .catch(() => {})
       .finally(() => {
         busy = false;
       });
+  };
+
+  host.addEventListener("click", (e) => {
+    runCommit(e);
+  });
+  host.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      runCommit(e);
+    }
   });
 
   return host;

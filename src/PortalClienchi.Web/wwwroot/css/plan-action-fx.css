@@ -70,10 +70,12 @@
 }
 
 .plan-fx-tap:disabled,
-.plan-fx-tap[aria-disabled="true"] {
+.plan-fx-tap[aria-disabled="true"],
+.plan-fx-tap.is-disabled {
   opacity: 0.55;
   cursor: not-allowed;
   transform: none;
+  pointer-events: none;
 }
 
 .plan-fx-tap--green {

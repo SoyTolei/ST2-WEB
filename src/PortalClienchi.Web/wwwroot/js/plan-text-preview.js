@@ -1,5 +1,5 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { bindPlanActionFx } from "./plan-action-fx.js?v=20261113b";
+import { bindPlanActionFx } from "./plan-action-fx.js?v=20261113c";
 
 /** Por elemento: los formularios Legal se re-renderizan y el panel nuevo tiene que volver a enlazarse. */
 const bound = new WeakSet();
