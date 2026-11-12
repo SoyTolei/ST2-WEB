@@ -78,7 +78,7 @@ export function bindPlanActionFx(btn, type, onCommit, opts = {}) {
   if (!(btn instanceof HTMLElement) || bound.has(btn)) return btn;
   bound.add(btn);
 
-  if (type === "tap" || type === "spark") return mountTap(btn, onCommit, opts);
+  if (type === "tap" || type === "spark" || type === "specular") return mountSpecular(btn, onCommit, opts);
   if (type === "sling") return mountSling(btn, onCommit, opts);
   if (type === "slide") return mountSlide(btn, onCommit, opts);
   if (type === "fuse") return mountFuse(btn, onCommit, opts);
@@ -95,132 +95,55 @@ export function wirePlanActionTrio({
   onClearUndo,
   clearUndoWindow = 900,
 }) {
-  // Clic simple + Click Spark (React Bits): más claro que tirar/deslizar.
-  bindPlanActionFx(copyBtn, "tap", onCopy, {
-    label: "Copiar",
-    successLabel: "¡Copiado!",
-    icon: ICON_CLIPBOARD,
-  });
-  bindPlanActionFx(previewBtn, "tap", onPreview, {
-    label: "Ver planilla",
-    successLabel: "Listo",
-    icon: ICON_EYE,
-  });
+  // Specular Button (React Bits): clic normal, el brillo sigue el cursor. Sin estado "Listo".
+  bindPlanActionFx(copyBtn, "specular", onCopy, { label: "Copiar" });
+  bindPlanActionFx(previewBtn, "specular", onPreview, { label: "Ver planilla" });
   bindPlanActionFx(clearBtn, "fuse", onClear, {
     onUndo: onClearUndo,
     undoWindow: clearUndoWindow,
   });
 }
 
-/* ===================== TAP + CLICK SPARK ===================== */
+/* ===================== SPECULAR BUTTON (React Bits, CSS) ===================== */
 
-function mountTap(el, onCommit, opts = {}) {
+function mountSpecular(el, onCommit, opts = {}) {
   const compact = !!opts.compact;
   const label = opts.label || readLabel(el, "Acción");
-  const successLabel = opts.successLabel || "Listo";
-  const tone = el.classList.contains("green")
-    ? "green"
-    : el.classList.contains("blue")
-      ? "blue"
-      : el.classList.contains("ghost")
-        ? "ghost"
-        : (el.classList.contains("plan-text-preview-copy") ? "green" : "green");
-  const icon = opts.icon
-    || (tone === "blue" ? ICON_EYE : tone === "ghost" ? ICON_TRASH : ICON_CLIPBOARD);
+  const tone = el.classList.contains("blue")
+    ? "blue"
+    : el.classList.contains("ghost")
+      ? "ghost"
+      : "green";
 
-  // Host div (como sling/slide): redefine .disabled sin chocar con HTMLButtonElement.
-  const host = document.createElement("div");
+  const host = document.createElement("button");
+  host.type = "button";
   host.id = el.id;
   host.className = [
-    "plan-fx-tap",
-    `plan-fx-tap--${tone}`,
-    compact ? "plan-fx-tap--compact" : "",
+    "specular-button",
+    compact ? "specular-button--sm" : "specular-button--md",
+    `specular-button--${tone}`,
     el.classList.contains("plan-text-preview-copy") ? "plan-text-preview-copy" : "",
   ].filter(Boolean).join(" ");
-  host.dataset.planFx = "tap";
-  host.setAttribute("role", "button");
-  host.tabIndex = 0;
+  host.dataset.planFx = "specular";
   if (el.dataset.planPreviewCopy != null) host.dataset.planPreviewCopy = "";
   host.setAttribute("aria-label", label);
   host.innerHTML = `
-    <span class="plan-fx-tap__sparks" aria-hidden="true"></span>
-    <span class="plan-fx-tap__icon" data-tap-icon>${icon}</span>
-    <span class="plan-fx-tap__label" data-tap-label>${escapeHtml(label)}</span>
+    <span class="specular-button__sheen" aria-hidden="true"></span>
+    <span class="specular-button__label">${escapeHtml(label)}</span>
   `;
+  if (el instanceof HTMLButtonElement && el.disabled) host.disabled = true;
   el.replaceWith(host);
 
-  const sparks = host.querySelector(".plan-fx-tap__sparks");
-  const iconEl = host.querySelector("[data-tap-icon]");
-  const labelEl = host.querySelector("[data-tap-label]");
-  let busy = false;
-  let successTimer = 0;
-  let disabled = false;
-
-  const setDisabled = (on) => {
-    disabled = on;
-    host.setAttribute("aria-disabled", on ? "true" : "false");
-    host.tabIndex = on ? -1 : 0;
-    host.classList.toggle("is-disabled", on);
-  };
-  proxyDisabled(host, setDisabled);
-  if (el instanceof HTMLButtonElement && el.disabled) host.disabled = true;
-
-  const burstSpark = (clientX, clientY) => {
-    if (!sparks || prefersReducedMotion()) return;
+  const track = (event) => {
     const rect = host.getBoundingClientRect();
-    const ox = (clientX ?? rect.left + rect.width / 2) - rect.left;
-    const oy = (clientY ?? rect.top + rect.height / 2) - rect.top;
-    const count = compact ? 7 : 10;
-    for (let i = 0; i < count; i += 1) {
-      const spark = document.createElement("span");
-      spark.className = "plan-fx-tap__spark";
-      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.35;
-      const dist = (compact ? 18 : 26) + Math.random() * (compact ? 14 : 22);
-      spark.style.left = `${ox}px`;
-      spark.style.top = `${oy}px`;
-      spark.style.setProperty("--sx", `${Math.cos(angle) * dist}px`);
-      spark.style.setProperty("--sy", `${Math.sin(angle) * dist}px`);
-      spark.style.setProperty("--srot", `${Math.round(Math.random() * 120 - 60)}deg`);
-      sparks.appendChild(spark);
-      window.setTimeout(() => spark.remove(), 520);
-    }
+    host.style.setProperty("--sb-x", `${event.clientX - rect.left}px`);
+    host.style.setProperty("--sb-y", `${event.clientY - rect.top}px`);
   };
-
-  const flashSuccess = () => {
-    window.clearTimeout(successTimer);
-    host.dataset.success = "1";
-    if (iconEl) iconEl.innerHTML = ICON_CHECK;
-    if (labelEl) labelEl.textContent = successLabel;
-    host.setAttribute("aria-label", successLabel);
-    successTimer = window.setTimeout(() => {
-      delete host.dataset.success;
-      if (iconEl) iconEl.innerHTML = icon;
-      if (labelEl) labelEl.textContent = label;
-      host.setAttribute("aria-label", label);
-    }, 1400);
-  };
-
-  const runCommit = (e) => {
-    if (disabled || busy) return;
-    busy = true;
-    burstSpark(e?.clientX, e?.clientY);
-    flashSuccess();
-    Promise.resolve()
-      .then(() => onCommit?.())
-      .catch(() => {})
-      .finally(() => {
-        busy = false;
-      });
-  };
-
-  host.addEventListener("click", (e) => {
-    runCommit(e);
-  });
-  host.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      runCommit(e);
-    }
+  host.addEventListener("pointermove", track);
+  host.addEventListener("pointerdown", track);
+  host.addEventListener("click", () => {
+    if (host.disabled) return;
+    void onCommit?.();
   });
 
   return host;

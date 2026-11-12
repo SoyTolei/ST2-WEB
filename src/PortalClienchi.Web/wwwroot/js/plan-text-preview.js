@@ -1,5 +1,5 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { bindPlanActionFx } from "./plan-action-fx.js?v=20261113c";
+import { bindPlanActionFx } from "./plan-action-fx.js?v=20261113d";
 
 /** Por elemento: los formularios Legal se re-renderizan y el panel nuevo tiene que volver a enlazarse. */
 const bound = new WeakSet();
@@ -54,10 +54,9 @@ export function mountPlanTextPreview(panelId) {
 
   const copyBtn = root.querySelector("[data-plan-preview-copy]");
   if (copyBtn) {
-    bindPlanActionFx(copyBtn, "tap", () => copyPlanTextPreview(root.id), {
+    bindPlanActionFx(copyBtn, "specular", () => copyPlanTextPreview(root.id), {
       compact: true,
       label: "Copiar",
-      successLabel: "¡Copiado!",
     });
   }
 
