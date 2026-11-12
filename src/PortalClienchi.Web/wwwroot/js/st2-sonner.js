@@ -8,6 +8,7 @@ import {
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
 } from "./st2-toast-greet.js?v=20261027a";
+import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261112a";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */
@@ -48,6 +49,8 @@ const STICKY_MS = 1000 * 60 * 60 * 24 * 7; // 7 días
 const registry = new Map();
 
 let inited = false;
+/** Tras abrir la bandeja, no re-apilar sticky hasta que llegue un aviso nuevo. */
+let floatingSuppressed = false;
 /**
  * Evita que onDismiss dispare callbacks de “cerré el toast” cuando lo cerramos nosotros
  * (Sonner llama onDismiss ~200ms después del dismiss por la animación).
@@ -195,7 +198,7 @@ export function initSt2Sonner() {
   toaster.setAttribute("position", "top-left");
   toaster.setAttribute("rich-colors", "");
   toaster.setAttribute("close-button", "");
-  toaster.setAttribute("visible-toasts", "8");
+  toaster.setAttribute("visible-toasts", "3");
   toaster.setAttribute("duration", String(STICKY_MS));
   toaster.setAttribute("container-aria-label", "Notificaciones");
   toaster.setAttribute("theme", currentTheme());
@@ -204,6 +207,10 @@ export function initSt2Sonner() {
   syncSonnerTheme();
   syncSonnerPlacement();
   syncSonnerHomeVisibility();
+
+  document.addEventListener("st2:notif-inbox-opened", () => {
+    hideFloatingAlertToasts();
+  });
 
   window.addEventListener("resize", syncSonnerPlacement, { passive: true });
   if (typeof ResizeObserver !== "undefined") {
@@ -260,6 +267,8 @@ export function setSt2AlertToast({
     return;
   }
 
+  const prev = registry.get(id);
+  const bodyChanged = !prev || prev.body !== text;
   registry.set(id, {
     body: text,
     tone,
@@ -267,7 +276,15 @@ export function setSt2AlertToast({
     sticky: !!sticky,
     onAction,
     onDismiss,
+    at: Date.now(),
   });
+  try {
+    upsertNotifInboxEntry({ id, body: text, tone });
+  } catch {
+    /* ignore */
+  }
+  if (bodyChanged) floatingSuppressed = false;
+  if (floatingSuppressed) return;
   if (id === ST2_TOAST.cryptic) {
     paintOne(id, plainTitle(formatToastMessage(text)), tone);
     return;
@@ -289,7 +306,13 @@ export function setSt2AguaToast({ body, onAction }) {
     tone: "agua",
     actionLabel: "¡Sí!",
     onAction,
+    at: Date.now(),
   });
+  try {
+    upsertNotifInboxEntry({ id: ST2_TOAST.agua, body: text, tone: "agua" });
+  } catch {
+    /* ignore */
+  }
   paintOne(ST2_TOAST.agua, plainTitle(text), "agua");
 }
 
@@ -350,15 +373,22 @@ export function showSt2FlashToast({ body, tone = "warn", duration = 4800 } = {})
 /** @type {Map<string, { title: string, tone: string }>} */
 const lastPainted = new Map();
 
+/** En pantalla solo el aviso prioritario; el resto vive en la bandeja. */
+const MAX_FLOATING_STICKY = 1;
+
 function paintGreetStack() {
   const visible = GREET_STACK.filter((id) => registry.has(id));
-  visible.forEach((id, index) => {
+  const onScreen = new Set(visible.slice(0, MAX_FLOATING_STICKY));
+
+  visible.forEach((id) => {
+    if (!onScreen.has(id)) {
+      lastPainted.delete(id);
+      dismissProgrammatically(id);
+      return;
+    }
     const entry = registry.get(id);
     if (!entry) return;
-    const title = plainTitle(
-      formatToastMessage(entry.body),
-    );
-    paintOne(id, title, entry.tone);
+    paintOne(id, plainTitle(formatToastMessage(entry.body)), entry.tone);
   });
 
   for (const id of GREET_STACK) {
@@ -366,6 +396,15 @@ function paintGreetStack() {
       lastPainted.delete(id);
       dismissProgrammatically(id);
     }
+  }
+}
+
+/** Saca los sticky flotantes del DOM (siguen en registry / bandeja). */
+export function hideFloatingAlertToasts() {
+  floatingSuppressed = true;
+  for (const id of [...registry.keys()]) {
+    lastPainted.delete(id);
+    dismissProgrammatically(id);
   }
 }
 
@@ -467,7 +506,7 @@ function paintOne(id, title, tone, { force = false } = {}) {
 /** Re-pinta el stack (p. ej. al volver al home). El saludo va en el globo, no acá. */
 export function syncStackedToastGreetings() {
   syncSessionGreetBubble();
-  if (!registry.size) return;
+  if (!registry.size || floatingSuppressed) return;
   paintGreetStack();
   const agua = registry.get(ST2_TOAST.agua);
   if (agua) paintOne(ST2_TOAST.agua, plainTitle(agua.body), "agua");
@@ -476,7 +515,6 @@ export function syncStackedToastGreetings() {
     paintOne(
       ST2_TOAST.cryptic,
       plainTitle(formatToastMessage(cryptic.body)),
-      cryptic.tone || "ok",
-    );
+      cryptic.tone || "ok",    );
   }
 }

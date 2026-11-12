@@ -180,6 +180,21 @@
   }
 }
 
+.branched-menu__item[data-on] {
+  color: #fb923c;
+}
+
+.branched-menu__item[data-badge] .branched-menu__label::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  vertical-align: middle;
+}
+
 .branched-menu__item[data-active] {
   color: var(--bm-accent);
   font-weight: 600;

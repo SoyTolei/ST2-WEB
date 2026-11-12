@@ -427,6 +427,13 @@ html.st2-theme-dark .plan-bej-config--lite {
   min-width: 0;
 }
 
+.plan-adj-label .plan-adj-backup-text--row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .plan-adj-label .plan-adj-backup-text strong {
   font-weight: 650;
   line-height: 1.15;
@@ -436,6 +443,10 @@ html.st2-theme-dark .plan-bej-config--lite {
   margin-top: 1px;
   font-size: 0.62rem;
   padding: 0.12rem 0.4rem;
+}
+
+.plan-adj-label .plan-adj-backup-text--row .plan-check-badge.is-locked-badge {
+  margin-top: 0;
 }
 
 /* Subtítulo Salesforce: solo visible al marcar Sí */
