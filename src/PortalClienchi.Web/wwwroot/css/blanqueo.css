@@ -1440,13 +1440,13 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
   min-width: 15.5rem;
   padding: 8px;
   border-radius: 14px;
-  border: 1px solid rgba(251, 146, 60, 0.28);
+  border: 1px solid rgba(251, 146, 60, 0.28) !important;
   background:
     radial-gradient(circle at 12% 0%, rgba(251, 146, 60, 0.14), transparent 55%),
-    rgba(17, 17, 17, 0.96);
+    rgba(17, 17, 17, 0.96) !important;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.38);
   backdrop-filter: blur(10px);
-  color: #ffedd5;
+  color: #ffedd5 !important;
 }
 
 html:not(.st2-theme-dark) .st2-ctx-menu {
@@ -1469,10 +1469,10 @@ html:not(.st2-theme-dark) .st2-ctx-menu {
   align-items: center;
   gap: 10px;
   width: 100%;
-  border: 0;
+  border: 0 !important;
   border-radius: 10px;
-  background: transparent;
-  color: #ffedd5;
+  background: transparent !important;
+  color: #ffedd5 !important;
   text-align: left;
   padding: 8px 10px;
   cursor: pointer;
@@ -1480,7 +1480,7 @@ html:not(.st2-theme-dark) .st2-ctx-menu {
 }
 
 .st2-ctx-menu button:hover {
-  background: rgba(251, 146, 60, 0.12);
+  background: rgba(251, 146, 60, 0.12) !important;
 }
 
 .st2-ctx-ico {

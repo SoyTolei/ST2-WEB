@@ -601,15 +601,49 @@ html.st2-theme-dark #planillas-referral input.placeholder-active {
 
 html.st2-theme-dark .plan-onvio-option,
 html.st2-theme-dark .plan-gestor-filter,
-html.st2-theme-dark .plan-gestor-ctx,
-html.st2-theme-dark .plan-gestor-ctx button {
+html.st2-theme-dark .plan-gestor-ctx:not(.st2-ctx-menu),
+html.st2-theme-dark .plan-gestor-ctx:not(.st2-ctx-menu) button {
   background: #1c1c1c !important;
   color: #e5e5e5 !important;
   border-color: #3d4b61 !important;
 }
 
-html.st2-theme-dark .plan-gestor-ctx button:hover {
+html.st2-theme-dark .plan-gestor-ctx:not(.st2-ctx-menu) button:hover {
   background: #2a2a2a !important;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(251, 146, 60, 0.14), transparent 55%),
+    rgba(17, 17, 17, 0.96) !important;
+  border-color: rgba(251, 146, 60, 0.28) !important;
+  color: #ffedd5 !important;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button {
+  background: transparent !important;
+  color: #ffedd5 !important;
+  border-color: transparent !important;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button:hover {
+  background: rgba(251, 146, 60, 0.12) !important;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button.st2-ctx-listo strong {
+  color: #6ee7b7 !important;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button.st2-ctx-listo:hover {
+  background: rgba(16, 185, 129, 0.12) !important;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button.st2-ctx-rechazado strong {
+  color: #fca5a5 !important;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button.st2-ctx-rechazado:hover {
+  background: rgba(248, 113, 113, 0.12) !important;
 }
 
 html.st2-theme-dark #planillas-menu .planillas-section-title {

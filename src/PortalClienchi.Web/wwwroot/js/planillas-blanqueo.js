@@ -1435,13 +1435,34 @@ async function toggleListoByDoubleClick(item) {
       }));
       return;
     }
-    openClaveModal(item);
+    await startListoFlow(item);
   } catch (err) {
     setStatus(err?.message || "No se pudo actualizar.", true);
     document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
       detail: { expression: "mad", ms: 3200 },
     }));
   }
+}
+
+/** Hab. módulos / MFA: listo directo. Blanqueo de claves: pide contraseña (+ aclaración opcional). */
+async function startListoFlow(item) {
+  if (!item) return;
+  if (needsClaveOnListo(item)) {
+    openClaveModal(item);
+    return;
+  }
+  await patchItem(item.id, { listo: true, clearAclaracion: true });
+  setStatus(isHabilitacionTipo(item.tipoSolicitud) ? "Habilitación marcada como lista." : "Marcado como listo.");
+  document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+    detail: { expression: "happy", ms: 2800 },
+  }));
+  await reloadList();
+  notifyBlanqueoChanged();
+}
+
+function needsClaveOnListo(item) {
+  if (isHabilitacionTipo(item?.tipoSolicitud)) return false;
+  return isBlanqueoConClave(item);
 }
 
 function portalLabel(portal) {
@@ -1662,6 +1683,15 @@ function showCtx(x, y, item) {
     return;
   }
 
+  const listoHint = menu.querySelector('[data-blanqueo-ctx="listo"] .st2-ctx-copy small');
+  if (listoHint) {
+    listoHint.textContent = needsClaveOnListo(item)
+      ? "Contraseña y/o aclaración"
+      : isHabilitacionTipo(item?.tipoSolicitud)
+        ? "Marca el proceso listo"
+        : "Confirmar proceso";
+  }
+
   menu.querySelectorAll("[data-blanqueo-ctx]").forEach((btn) => {
     const action = btn.getAttribute("data-blanqueo-ctx");
     let show = false;
@@ -1721,7 +1751,7 @@ async function handleCtxAction(action) {
       return;
     }
     if (action === "listo") {
-      openClaveModal(item);
+      await startListoFlow(item);
       return;
     }
     if (action === "incorrecto") {
