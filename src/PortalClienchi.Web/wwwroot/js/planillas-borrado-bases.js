@@ -1304,8 +1304,7 @@ function openListoModal(item) {
   const chkCg = document.getElementById("borrado-listo-contabilidad");
   const sf = isDetalleSalesforce(item);
   const { nota } = parseAclaracion(isIncorrecto(item.aclaracion) ? "" : item.aclaracion);
-  const packed = unpackListoExtra(nota);
-  const hasNota = !!String(packed.nota || "").trim();
+  const hasNota = !!String(nota || "").trim();
 
   wrapIva?.classList.toggle("hidden", !sf && !item.iva);
   wrapSj?.classList.toggle("hidden", !sf && !item.sueldos);
@@ -1316,20 +1315,17 @@ function openListoModal(item) {
 
   document.getElementById("borrado-listo-hint")?.classList.toggle("hidden", sf);
   document.getElementById("borrado-listo-salesforce-hint")?.classList.toggle("hidden", !sf);
-  document.getElementById("borrado-listo-clave-block")?.classList.toggle("hidden", sf);
   document.getElementById("borrado-listo-note-block")?.classList.toggle("hidden", sf);
-  const claveInput = document.getElementById("borrado-listo-clave");
   const hasNoteChk = document.getElementById("borrado-listo-has-note");
   const noteText = document.getElementById("borrado-listo-note");
-  if (claveInput) claveInput.value = sf ? "" : (packed.clave || "");
   if (hasNoteChk) hasNoteChk.checked = !sf && hasNota;
-  if (noteText) noteText.value = sf ? "" : (packed.nota || "");
+  if (noteText) noteText.value = sf ? "" : (nota || "");
   syncListoNoteVisibility();
 
   overlay?.classList.toggle("is-salesforce", sf);
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
-  (claveInput && !sf ? claveInput : document.getElementById("borrado-listo-confirm"))?.focus();
+  document.getElementById("borrado-listo-confirm")?.focus();
 }
 
 function syncListoNoteVisibility({ focus = false } = {}) {
@@ -1347,12 +1343,9 @@ function hideListoModal() {
   overlay?.setAttribute("aria-hidden", "true");
   document.getElementById("borrado-listo-hint")?.classList.remove("hidden");
   document.getElementById("borrado-listo-salesforce-hint")?.classList.add("hidden");
-  document.getElementById("borrado-listo-clave-block")?.classList.remove("hidden");
   document.getElementById("borrado-listo-note-block")?.classList.remove("hidden");
-  const claveInput = document.getElementById("borrado-listo-clave");
   const hasNoteChk = document.getElementById("borrado-listo-has-note");
   const noteText = document.getElementById("borrado-listo-note");
-  if (claveInput) claveInput.value = "";
   if (hasNoteChk) hasNoteChk.checked = false;
   if (noteText) noteText.value = "";
   document.getElementById("borrado-listo-note-wrap")?.classList.add("hidden");
@@ -1482,7 +1475,6 @@ async function confirmListoModal() {
       contabilidad: !!item.contabilidad && !!document.getElementById("borrado-listo-contabilidad")?.checked,
     };
   const summary = sf ? buildListoSummarySalesforce(done) : buildListoSummary(item, done);
-  const clave = sf ? "" : String(document.getElementById("borrado-listo-clave")?.value || "").trim();
   const wantNote = !sf && !!document.getElementById("borrado-listo-has-note")?.checked;
   const noteFromUi = String(document.getElementById("borrado-listo-note")?.value || "").trim();
   if (wantNote && !noteFromUi) {
@@ -1490,18 +1482,13 @@ async function confirmListoModal() {
     document.getElementById("borrado-listo-note")?.focus();
     return;
   }
-  const notaFinal = sf
-    ? DETALLE_SALESFORCE_NOMBRE
-    : packListoExtra(clave, wantNote ? noteFromUi : "");
+  const notaFinal = sf ? DETALLE_SALESFORCE_NOMBRE : (wantNote ? noteFromUi : "");
   const aclaracion = composeAclaracion(summary, notaFinal);
 
   try {
     await patchItem(pendingListoId, { listo: true, aclaracion });
     hideListoModal();
-    const extras = [];
-    if (clave) extras.push("contraseña");
-    if (wantNote && noteFromUi) extras.push("aclaración");
-    setStatus(extras.length ? `Confirmado: ${summary} · ${extras.join(" y ")}` : `Confirmado: ${summary}`);
+    setStatus(wantNote && noteFromUi ? `Confirmado: ${summary} · aclaración` : `Confirmado: ${summary}`);
     await reloadList();
     notifyBorradoChanged();
     document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
@@ -1540,27 +1527,6 @@ function buildListoSummary(item, done) {
 
 const ACLARACION_SEP = "\n---\n";
 const INCORRECTO_LABEL = "Rechazado";
-const LISTO_CLAVE_MARK = "Clave: ";
-
-function packListoExtra(clave, nota) {
-  const c = String(clave || "").trim();
-  const n = String(nota || "").trim();
-  if (c && n) return `${LISTO_CLAVE_MARK}${c}\n${n}`;
-  if (c) return `${LISTO_CLAVE_MARK}${c}`;
-  return n;
-}
-
-function unpackListoExtra(raw) {
-  const text = String(raw || "").trim();
-  if (!text) return { clave: "", nota: "" };
-  if (text.startsWith(LISTO_CLAVE_MARK)) {
-    const rest = text.slice(LISTO_CLAVE_MARK.length);
-    const nl = rest.indexOf("\n");
-    if (nl < 0) return { clave: rest.trim(), nota: "" };
-    return { clave: rest.slice(0, nl).trim(), nota: rest.slice(nl + 1).trim() };
-  }
-  return { clave: "", nota: text };
-}
 
 function isIncorrectoResultado(text) {
   return /^(Rechazado|Incorrecto)\b/i.test(String(text || "").trim());
@@ -1658,14 +1624,7 @@ function formatEstadoCell(item) {
     if (isPartialListo(item)) {
       return '<span class="borrado-pill partial" title="Algunas bases quedaron pendientes">Parcial</span>';
     }
-    const extra = unpackListoExtra(nota);
-    if (extra.clave && extra.nota) {
-      return '<span class="borrado-pill ok-note" title="Listo con contraseña y aclaración">Eliminada · clave · nota</span>';
-    }
-    if (extra.clave) {
-      return '<span class="borrado-pill ok" title="Listo con contraseña">Eliminada · clave</span>';
-    }
-    if (extra.nota) {
+    if (String(nota || "").trim()) {
       return '<span class="borrado-pill ok-note" title="Eliminada con aclaración">Eliminada · nota</span>';
     }
     return '<span class="borrado-pill ok" title="Bases eliminadas / verificado">Eliminada</span>';
@@ -1729,7 +1688,9 @@ function showCtx(x, y, item) {
   const menu = document.getElementById("borrado-ctx");
   if (!menu) return;
 
-  if (!canConfirm) {
+  const confirm = canConfirm;
+  const canMutate = confirm || isOwner(item);
+  if (!confirm && !canMutate) {
     menu.classList.add("hidden");
     return;
   }
@@ -1737,17 +1698,24 @@ function showCtx(x, y, item) {
   menu.querySelectorAll("[data-borrado-ctx]").forEach((btn) => {
     const action = btn.getAttribute("data-borrado-ctx");
     let show = false;
-    if (action === "listo") show = true;
-    else if (action === "aclaracion-incorrecto") show = !item?.listo;
-    else if (action === "unlisto") show = !!item?.listo;
+    if (action === "listo" || action === "aclaracion-incorrecto" || action === "unlisto") {
+      if (!confirm) show = false;
+      else if (action === "listo") show = true;
+      else if (action === "aclaracion-incorrecto") show = !item?.listo;
+      else if (action === "unlisto") show = !!item?.listo;
+    } else if (action === "editar" || action === "eliminar") {
+      show = canMutate;
+    }
     btn.classList.toggle("hidden", !show);
   });
 
   menu.querySelectorAll("hr").forEach((hr) => {
     if (hr.classList.contains("borrado-ctx-hr-unlisto")) {
-      hr.classList.toggle("hidden", !item?.listo);
+      hr.classList.toggle("hidden", !(confirm && !!item?.listo));
+    } else if (hr.classList.contains("borrado-ctx-hr-mutate")) {
+      hr.classList.toggle("hidden", !(confirm && canMutate));
     } else {
-      hr.classList.toggle("hidden", !!item?.listo);
+      hr.classList.toggle("hidden", !(confirm && !item?.listo));
     }
   });
 
@@ -1772,8 +1740,8 @@ async function handleCtxAction(action) {
 
   try {
     if (action === "editar") {
-      if (!canConfirm && !canOwnerMutate(item)) {
-        setStatus("Solo se puede editar en estado pendiente.", true);
+      if (!canConfirm && !isOwner(item)) {
+        setStatus("No podés editar esta solicitud.", true);
         return;
       }
       openEditModal(item);
@@ -1798,8 +1766,8 @@ async function handleCtxAction(action) {
         await patchItem(selectedId, { clearAclaracion: true });
       }
     } else if (action === "eliminar") {
-      if (!canConfirm && !canOwnerMutate(item)) {
-        setStatus("Solo se puede eliminar en estado pendiente.", true);
+      if (!canConfirm && !isOwner(item)) {
+        setStatus("No podés eliminar esta solicitud.", true);
         return;
       }
       openDeleteModal(item);

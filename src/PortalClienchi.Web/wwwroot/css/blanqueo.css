@@ -1542,6 +1542,15 @@ html:not(.st2-theme-dark) .st2-ctx-menu {
   opacity: 0.78;
 }
 
+.st2-ctx-menu button.st2-ctx-danger .st2-ctx-ico,
+.st2-ctx-menu button.st2-ctx-danger strong {
+  color: #f87171;
+}
+
+html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button.st2-ctx-danger strong {
+  color: #f87171 !important;
+}
+
 .st2-ctx-menu hr {
   margin: 6px;
   border: 0;

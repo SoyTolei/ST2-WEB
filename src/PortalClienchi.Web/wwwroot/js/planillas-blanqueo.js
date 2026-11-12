@@ -1678,7 +1678,8 @@ function showCtx(x, y, item) {
   if (!menu) return;
 
   const confirm = canConfirm;
-  if (!confirm) {
+  const canMutate = confirm || isOwner(item);
+  if (!confirm && !canMutate) {
     menu.classList.add("hidden");
     return;
   }
@@ -1695,17 +1696,27 @@ function showCtx(x, y, item) {
   menu.querySelectorAll("[data-blanqueo-ctx]").forEach((btn) => {
     const action = btn.getAttribute("data-blanqueo-ctx");
     let show = false;
-    if (action === "listo") show = true;
-    else if (action === "incorrecto") show = !item?.listo;
-    else if (action === "unlisto") show = !!item?.listo;
+    if (action === "listo" || action === "incorrecto" || action === "unlisto") {
+      if (!confirm) show = false;
+      else if (action === "listo") show = true;
+      else if (action === "incorrecto") show = !item?.listo;
+      else if (action === "unlisto") show = !!item?.listo;
+    } else if (action === "editar" || action === "eliminar") {
+      show = canMutate;
+    }
     btn.classList.toggle("hidden", !show);
   });
 
+  const showUnlisto = confirm && !!item?.listo;
+  const showReject = confirm && !item?.listo;
+  const showMutate = canMutate;
   menu.querySelectorAll("hr").forEach((hr) => {
     if (hr.classList.contains("blanqueo-ctx-hr-unlisto")) {
-      hr.classList.toggle("hidden", !item?.listo);
+      hr.classList.toggle("hidden", !showUnlisto);
+    } else if (hr.classList.contains("blanqueo-ctx-hr-mutate")) {
+      hr.classList.toggle("hidden", !(confirm && showMutate));
     } else {
-      hr.classList.toggle("hidden", !!item?.listo);
+      hr.classList.toggle("hidden", !showReject);
     }
   });
 
@@ -1731,20 +1742,16 @@ async function handleCtxAction(action) {
   try {
     // Editar/Eliminar: solo desde íconos de fila (pendientes), no desde el menú contextual.
     if (action === "editar") {
-      if (!canConfirm && !canOwnerMutate(item)) {
-        setStatus("Solo se puede editar en estado pendiente.", true);
-        return;
-      }
-      if (!isPendingSolicitud(item) && !canConfirm) {
-        setStatus("Solo se puede editar en estado pendiente.", true);
+      if (!canConfirm && !isOwner(item)) {
+        setStatus("No podés editar esta solicitud.", true);
         return;
       }
       openEditModal(item);
       return;
     }
     if (action === "eliminar") {
-      if (!canConfirm && !canOwnerMutate(item)) {
-        setStatus("Solo se puede eliminar en estado pendiente.", true);
+      if (!canConfirm && !isOwner(item)) {
+        setStatus("No podés eliminar esta solicitud.", true);
         return;
       }
       openDeleteModal(item);

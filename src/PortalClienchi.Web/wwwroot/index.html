@@ -186,7 +186,7 @@
   <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261112f"/>
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20261112k"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20261112l"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20261112j"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
@@ -915,6 +915,15 @@
                   <span class="st2-ctx-ico" aria-hidden="true">↺</span>
                   <span class="st2-ctx-copy"><strong>Quitar listo</strong></span>
                 </button>
+                <hr class="blanqueo-ctx-hr-mutate"/>
+                <button type="button" data-blanqueo-ctx="editar">
+                  <span class="st2-ctx-ico" aria-hidden="true">✎</span>
+                  <span class="st2-ctx-copy"><strong>Editar</strong></span>
+                </button>
+                <button type="button" class="st2-ctx-danger" data-blanqueo-ctx="eliminar">
+                  <span class="st2-ctx-ico" aria-hidden="true">⌫</span>
+                  <span class="st2-ctx-copy"><strong>Eliminar</strong></span>
+                </button>
               </div>
 
               <div id="blanqueo-mod-pop" class="borrado-base-pop blanqueo-mod-pop hidden" role="dialog" aria-labelledby="blanqueo-mod-pop-title" aria-hidden="true">
@@ -1082,7 +1091,7 @@
                   <span class="st2-ctx-ico" aria-hidden="true">✓</span>
                   <span class="st2-ctx-copy">
                     <strong>Listo</strong>
-                    <small>Contraseña y/o aclaración</small>
+                    <small>Bases + aclaración</small>
                   </span>
                 </button>
                 <button type="button" class="st2-ctx-rechazado" data-borrado-ctx="aclaracion-incorrecto">
@@ -1096,6 +1105,15 @@
                 <button type="button" class="st2-ctx-muted" data-borrado-ctx="unlisto">
                   <span class="st2-ctx-ico" aria-hidden="true">↺</span>
                   <span class="st2-ctx-copy"><strong>Quitar listo</strong></span>
+                </button>
+                <hr class="borrado-ctx-hr-mutate"/>
+                <button type="button" data-borrado-ctx="editar">
+                  <span class="st2-ctx-ico" aria-hidden="true">✎</span>
+                  <span class="st2-ctx-copy"><strong>Editar</strong></span>
+                </button>
+                <button type="button" class="st2-ctx-danger" data-borrado-ctx="eliminar">
+                  <span class="st2-ctx-ico" aria-hidden="true">⌫</span>
+                  <span class="st2-ctx-copy"><strong>Eliminar</strong></span>
                 </button>
               </div>
 
@@ -2591,16 +2609,12 @@
   <div id="borrado-listo-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="borrado-listo-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
       <h3 id="borrado-listo-title">Listo</h3>
-      <p id="borrado-listo-hint" class="plan-user-hint">Marcá las bases que sí se borraron. Podés sumar contraseña y/o aclaración.</p>
+      <p id="borrado-listo-hint" class="plan-user-hint">Marcá las bases que sí se borraron. Opcional: aclaración.</p>
       <p id="borrado-listo-salesforce-hint" class="plan-user-hint hidden">Marcá qué bases borraste. La aclaración quedará como "Detalle en Salesforce".</p>
       <div id="borrado-listo-checks" class="borrado-listo-checks">
         <label id="borrado-listo-iva-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-iva" type="checkbox"/> IVA</label>
         <label id="borrado-listo-sueldos-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-sueldos" type="checkbox"/> SJ</label>
         <label id="borrado-listo-contabilidad-wrap" class="borrado-check borrado-listo-check hidden"><input id="borrado-listo-contabilidad" type="checkbox"/> CG</label>
-      </div>
-      <div id="borrado-listo-clave-block" class="borrado-listo-clave-block">
-        <label class="plan-user-label" for="borrado-listo-clave">Contraseña <span class="borrado-optional">(opcional)</span></label>
-        <input id="borrado-listo-clave" type="text" class="plan-user-input" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Si corresponde, la clave que quedó"/>
       </div>
       <div id="borrado-listo-note-block" class="borrado-listo-note-block">
         <label class="borrado-check borrado-listo-has-note" for="borrado-listo-has-note"><input id="borrado-listo-has-note" type="checkbox"/> Aclaración</label>
