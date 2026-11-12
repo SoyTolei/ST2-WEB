@@ -921,7 +921,8 @@ button.blanqueo-clave-sugerida-btn {
 
 .blanqueo-filter-month,
 .blanqueo-filter-portal,
-.blanqueo-filter-search {
+.blanqueo-filter-search,
+.blanqueo-filter-estado {
   display: flex;
   flex-direction: column;
   gap: 4px;

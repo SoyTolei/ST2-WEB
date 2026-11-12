@@ -3,10 +3,10 @@
  * Solo arma texto para copiar y pegar: no crea work items por la API de ADO.
  * Valores fijos del proceso (IDs de backlog, Area, asignado, países) vienen de Legal:Ado en appsettings.
  */
-import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js?v=20261113d";
+import { planTextPreviewHtml, planFormActionsHtml, showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js?v=20261113e";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113d";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113e";
 
 /** Etiquetas de la salida por idioma. Ajustar textos acá, sin tocar la lógica. */
 export const ADO_LABELS = {

@@ -1,6 +1,6 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
-import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261113d";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261113e";
 import { autoTourForReferral } from "./st2-tour-init.js";
 import {
   initChileReferral,
@@ -11,8 +11,8 @@ import {
   isChileReferralStep1Complete,
   isChileReferralStep2Complete,
 } from "./planillas-referral-chile.js?v=20261112d";
-import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js?v=20261113d";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113d";
+import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js?v=20261113e";
+import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113e";
 import { mountStarBorder } from "./star-border.js?v=20261111g";
 import { enhancePillNavTrack, syncPillNav } from "./plan-pill-nav.js?v=20261112f";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";

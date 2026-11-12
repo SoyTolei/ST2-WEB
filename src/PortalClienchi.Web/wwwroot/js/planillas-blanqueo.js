@@ -168,6 +168,7 @@ export function initBlanqueoModule() {
     applyFilters();
   });
   document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
+  document.getElementById("blanqueo-filter-estado")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
   document.getElementById("blanqueo-filter-mine")?.addEventListener("change", (e) => {
     const check = e.target;
@@ -457,6 +458,14 @@ function isOwner(item) {
 /** Pendiente = sin listo y sin aclaración. Ahí el solicitante puede editar/eliminar. */
 function isPendingSolicitud(item) {
   return !item?.listo && !String(item?.aclaracion || "").trim();
+}
+
+function matchesEstadoFilter(item, estado, isUnverified) {
+  const note = String(item?.aclaracion || "").trim();
+  if (estado === "pending") return isUnverified(item);
+  if (estado === "nota") return !!note;
+  if (estado === "empty") return !note;
+  return true;
 }
 
 function canOwnerMutate(item) {
@@ -1130,11 +1139,13 @@ function getFilteredItems() {
   const month = document.getElementById("blanqueo-filter-month")?.value || "all";
   const portal = document.getElementById("blanqueo-filter-portal")?.value || "all";
   const q = String(document.getElementById("blanqueo-search")?.value || "").trim().toLowerCase();
+  const estado = document.getElementById("blanqueo-filter-estado")?.value || "all";
   const onlyMine = !canConfirm && !!document.getElementById("blanqueo-filter-mine")?.checked;
   const me = currentEmail();
 
   const filtered = items.filter((item) => {
     if (onlyMine && String(item.solicitadoPorEmail || "").trim().toLowerCase() !== me) return false;
+    if (!matchesEstadoFilter(item, estado, (row) => !row?.listo && !isRejectedState(row?.aclaracion))) return false;
     if (portal !== "all" && (item.portal || "PortalCliente") !== portal) return false;
     if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) return false;
     if (q) {

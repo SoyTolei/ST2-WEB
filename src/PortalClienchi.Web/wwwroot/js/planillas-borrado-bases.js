@@ -166,6 +166,7 @@ export function initBorradoBasesModule() {
     applyFilters();
   });
   document.getElementById("borrado-search")?.addEventListener("input", () => applyFilters());
+  document.getElementById("borrado-filter-estado")?.addEventListener("change", () => applyFilters());
   document.getElementById("borrado-filter-mine")?.addEventListener("change", (e) => {
     const check = e.target;
     if (check) check.dataset.userTouched = "1";
@@ -612,6 +613,14 @@ function isPendingSolicitud(item) {
   return !item?.listo && !String(item?.aclaracion || "").trim();
 }
 
+function matchesEstadoFilter(item, estado, isUnverified) {
+  const note = String(item?.aclaracion || "").trim();
+  if (estado === "pending") return isUnverified(item);
+  if (estado === "nota") return !!note;
+  if (estado === "empty") return !note;
+  return true;
+}
+
 function canOwnerMutate(item) {
   return isOwner(item) && isPendingSolicitud(item);
 }
@@ -832,11 +841,13 @@ function normalizeItem(raw) {
 function getFilteredItems() {
   const month = document.getElementById("borrado-filter-month")?.value || "all";
   const q = String(document.getElementById("borrado-search")?.value || "").trim().toLowerCase();
+  const estado = document.getElementById("borrado-filter-estado")?.value || "all";
   const onlyMine = !canConfirm && !!document.getElementById("borrado-filter-mine")?.checked;
   const me = currentEmail();
 
   const filtered = items.filter((item) => {
     if (onlyMine && String(item.solicitadoPorEmail || "").trim().toLowerCase() !== me) return false;
+    if (!matchesEstadoFilter(item, estado, (row) => !row?.listo && !isIncorrecto(row?.aclaracion))) return false;
     if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) return false;
     if (q) {
       const hay = [

@@ -368,7 +368,8 @@
 }
 
 .borrado-filter-month,
-.borrado-filter-search {
+.borrado-filter-search,
+.borrado-filter-estado {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;

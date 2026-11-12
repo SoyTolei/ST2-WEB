@@ -1,5 +1,5 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
-import { bindPlanActionFx } from "./plan-action-fx.js?v=20261113d";
+import { bindPlanActionFx } from "./plan-action-fx.js?v=20261113e";
 
 /** Por elemento: los formularios Legal se re-renderizan y el panel nuevo tiene que volver a enlazarse. */
 const bound = new WeakSet();
@@ -15,8 +15,8 @@ export function planFormActionsHtml({
       <button type="button" id="${copyId}" class="plan-action-btn green" data-plan-fx="tap" aria-label="Copiar">
         <span class="plan-action-btn-main">Copiar</span>
       </button>
-      <button type="button" id="${previewId}" class="plan-action-btn blue" data-plan-fx="tap" aria-label="Ver planilla">
-        <span class="plan-action-btn-main">Ver planilla</span>
+      <button type="button" id="${previewId}" class="plan-action-btn blue" data-plan-fx="solid" aria-label="Vista previa">
+        <span class="plan-action-btn-main">Vista previa</span>
       </button>
       <button type="button" id="${clearId}" class="plan-action-btn ghost" data-plan-fx="fuse" aria-label="${clearLabel.replace(/^🗑\s*/, "")}">
         <span class="plan-action-btn-main">${clearLabel.replace(/^🗑\s*/, "")}</span>
@@ -54,9 +54,10 @@ export function mountPlanTextPreview(panelId) {
 
   const copyBtn = root.querySelector("[data-plan-preview-copy]");
   if (copyBtn) {
-    bindPlanActionFx(copyBtn, "specular", () => copyPlanTextPreview(root.id), {
+    bindPlanActionFx(copyBtn, "solid", () => copyPlanTextPreview(root.id), {
       compact: true,
       label: "Copiar",
+      tone: "copy",
     });
   }
 

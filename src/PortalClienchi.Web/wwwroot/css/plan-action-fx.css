@@ -1,6 +1,6 @@
 /* Ports visuales de React Bits: Tap+ClickSpark / Sling / SlideCommit / Fuse — paleta ST² */
 
-.plan-ref-actions:has(.specular-button),
+.plan-ref-actions:has(.plan-solid-btn),
 .plan-ref-actions:has(.plan-fx-tap),
 .plan-ref-actions:has(.sling-button),
 .plan-ref-actions:has(.slide-commit),
@@ -14,7 +14,7 @@
 }
 
 @media (max-width: 720px) {
-  .plan-ref-actions:has(.specular-button),
+  .plan-ref-actions:has(.plan-solid-btn),
 .plan-ref-actions:has(.plan-fx-tap),
   .plan-ref-actions:has(.sling-button),
   .plan-ref-actions:has(.slide-commit),
@@ -40,101 +40,70 @@
   }
 }
 
-/* ========== SPECULAR BUTTON (React Bits, sin WebGL) ========== */
-.specular-button {
-  --sb-radius: 18px;
-  --sb-x: 30%;
-  --sb-y: 0px;
-  position: relative;
-  isolation: isolate;
+/* Botones de planilla: mismo naranja sólido que el resto de ST². */
+.plan-solid-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 42px;
   margin: 0;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: var(--sb-radius);
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
   font: inherit;
-  font-weight: 650;
-  line-height: 1;
-  letter-spacing: 0.01em;
-  color: #f8fafc;
-  cursor: pointer;
-  overflow: hidden;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.55);
-  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.15s ease;
-}
-
-.specular-button--sm {
-  padding: 8px 14px;
-  font-size: 0.78rem;
-  --sb-radius: 12px;
-}
-
-.specular-button--md {
-  padding: 12px 22px;
   font-size: 0.92rem;
+  font-weight: 650;
+  letter-spacing: 0.005em;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
-.specular-button--green {
-  background: linear-gradient(180deg, rgba(34, 197, 94, 0.42), rgba(21, 128, 61, 0.72));
+.plan-solid-btn--compact {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
 }
 
-.specular-button--blue {
-  background: linear-gradient(180deg, rgba(96, 165, 250, 0.42), rgba(37, 99, 235, 0.74));
+.plan-solid-btn--copy {
+  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  border-color: rgba(255, 190, 140, 0.35);
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset, 0 10px 24px -10px rgba(234, 88, 12, 0.7);
 }
 
-.specular-button--ghost {
-  color: #e2e8f0;
-  background: linear-gradient(180deg, rgba(148, 163, 184, 0.18), rgba(15, 23, 42, 0.55));
+.plan-solid-btn--preview {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #9a3412;
 }
 
-.specular-button:hover:not(:disabled) {
-  filter: brightness(1.06);
+.plan-solid-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
 }
 
-.specular-button:active:not(:disabled) {
-  transform: scale(0.97);
+.plan-solid-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
 }
 
-.specular-button:focus-visible {
-  outline: 2px solid rgba(248, 250, 252, 0.55);
-  outline-offset: 3px;
+.plan-solid-btn:focus-visible {
+  outline: 2px solid #fb923c;
+  outline-offset: 2px;
 }
 
-.specular-button:disabled {
-  opacity: 0.5;
+.plan-solid-btn:disabled {
+  opacity: 0.55;
   cursor: default;
+  transform: none;
 }
 
-.specular-button__sheen,
-.specular-button::after {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-}
-
-.specular-button__sheen {
-  background: radial-gradient(90px circle at var(--sb-x) var(--sb-y), rgba(255, 255, 255, 0.42), transparent 62%);
-  z-index: 1;
-}
-
-.specular-button::after {
-  content: "";
-  padding: 1px;
-  background: radial-gradient(70px circle at var(--sb-x) var(--sb-y), rgba(255, 255, 255, 0.95), transparent 68%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  z-index: 2;
-}
-
-.specular-button__label {
-  position: relative;
-  z-index: 3;
+html.st2-theme-dark .plan-solid-btn--preview {
+  background: #1c1410;
+  border-color: rgba(251, 146, 60, 0.5);
+  color: #fdba74;
 }
 
 /* ========== TAP + CLICK SPARK (legacy) ========== */

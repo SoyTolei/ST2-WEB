@@ -78,7 +78,7 @@ export function bindPlanActionFx(btn, type, onCommit, opts = {}) {
   if (!(btn instanceof HTMLElement) || bound.has(btn)) return btn;
   bound.add(btn);
 
-  if (type === "tap" || type === "spark" || type === "specular") return mountSpecular(btn, onCommit, opts);
+  if (type === "tap" || type === "spark" || type === "specular" || type === "solid") return mountSolid(btn, onCommit, opts);
   if (type === "sling") return mountSling(btn, onCommit, opts);
   if (type === "slide") return mountSlide(btn, onCommit, opts);
   if (type === "fuse") return mountFuse(btn, onCommit, opts);
@@ -95,52 +95,39 @@ export function wirePlanActionTrio({
   onClearUndo,
   clearUndoWindow = 900,
 }) {
-  // Specular Button (React Bits): clic normal, el brillo sigue el cursor. Sin estado "Listo".
-  bindPlanActionFx(copyBtn, "specular", onCopy, { label: "Copiar" });
-  bindPlanActionFx(previewBtn, "specular", onPreview, { label: "Ver planilla" });
+  // Botón sólido de la suite (naranja / borde cálido). Clic directo, sin estado falso.
+  bindPlanActionFx(copyBtn, "solid", onCopy, { label: "Copiar", tone: "copy" });
+  bindPlanActionFx(previewBtn, "solid", onPreview, { label: "Vista previa", tone: "preview" });
   bindPlanActionFx(clearBtn, "fuse", onClear, {
     onUndo: onClearUndo,
     undoWindow: clearUndoWindow,
   });
 }
 
-/* ===================== SPECULAR BUTTON (React Bits, CSS) ===================== */
+/* ===================== BOTÓN SÓLIDO (paleta ST²) ===================== */
 
-function mountSpecular(el, onCommit, opts = {}) {
+function mountSolid(el, onCommit, opts = {}) {
   const compact = !!opts.compact;
   const label = opts.label || readLabel(el, "Acción");
-  const tone = el.classList.contains("blue")
-    ? "blue"
-    : el.classList.contains("ghost")
-      ? "ghost"
-      : "green";
+  const tone = opts.tone
+    || (el.classList.contains("blue") ? "preview" : "copy");
 
   const host = document.createElement("button");
   host.type = "button";
   host.id = el.id;
   host.className = [
-    "specular-button",
-    compact ? "specular-button--sm" : "specular-button--md",
-    `specular-button--${tone}`,
+    "plan-solid-btn",
+    `plan-solid-btn--${tone}`,
+    compact ? "plan-solid-btn--compact" : "",
     el.classList.contains("plan-text-preview-copy") ? "plan-text-preview-copy" : "",
   ].filter(Boolean).join(" ");
-  host.dataset.planFx = "specular";
+  host.dataset.planFx = "solid";
   if (el.dataset.planPreviewCopy != null) host.dataset.planPreviewCopy = "";
   host.setAttribute("aria-label", label);
-  host.innerHTML = `
-    <span class="specular-button__sheen" aria-hidden="true"></span>
-    <span class="specular-button__label">${escapeHtml(label)}</span>
-  `;
+  host.textContent = label;
   if (el instanceof HTMLButtonElement && el.disabled) host.disabled = true;
   el.replaceWith(host);
 
-  const track = (event) => {
-    const rect = host.getBoundingClientRect();
-    host.style.setProperty("--sb-x", `${event.clientX - rect.left}px`);
-    host.style.setProperty("--sb-y", `${event.clientY - rect.top}px`);
-  };
-  host.addEventListener("pointermove", track);
-  host.addEventListener("pointerdown", track);
   host.addEventListener("click", () => {
     if (host.disabled) return;
     void onCommit?.();
