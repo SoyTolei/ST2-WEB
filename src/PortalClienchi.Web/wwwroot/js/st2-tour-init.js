@@ -12,7 +12,7 @@ import {
   resolveCurrentTourId,
   tourIdForReferralView,
   tourLabelForId,
-} from "./st2-tour-catalog.js?v=20261110m";
+} from "./st2-tour-catalog.js?v=20261112a";
 
 let tourContext = {};
 let headerBound = false;

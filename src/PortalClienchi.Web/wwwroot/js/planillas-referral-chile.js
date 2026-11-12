@@ -85,6 +85,37 @@ export function buildChileReferralPayload() {
   };
 }
 
+/** Campos de producto/año/RUT del paso Datos (ReferralIdValidator). */
+export function isChileReferralStep1Complete() {
+  if (!productoSel) return false;
+  if (productoSel === "HYPERRENTA") {
+    if (!hyperrentaVersionSel || hyperrentaModulos.size === 0) return false;
+  } else if (!document.getElementById("ref-chile-version")?.value.trim()) {
+    return false;
+  }
+  if (!document.getElementById("ref-chile-anio")?.value.trim()) return false;
+  if (!document.getElementById("ref-chile-rut")?.value.trim()) return false;
+  return true;
+}
+
+/** Ingreso + tipo/base cuando el panel está visible. */
+export function isChileReferralStep2Complete() {
+  if (!document.getElementById("ref-chile-usuario")?.value.trim()) return false;
+  if (!document.getElementById("ref-chile-clave")?.value.trim()) return false;
+  if (!document.getElementById("ref-chile-so")?.value.trim()) return false;
+
+  const basesVisible = !document.getElementById("ref-chile-adj-bases-wrap")?.classList.contains("hidden");
+  if (basesVisible || (productoSel && productoSel !== "HYPERRENTA"
+    && (productoSel === "CONTABILIDAD" || productoSel === "REMUNERACIONES"))) {
+    if (!tipoBaseSel) return false;
+    if (baseAdjuntaSel === null || baseAdjuntaSel === undefined) return false;
+    if (tipoBaseSel === "SQL" && !document.getElementById("ref-chile-motor-sql")?.value.trim()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function syncChileReferralCards() {
   const basesCheck = document.getElementById("ref-chile-bases-check");
   const basesCard = document.getElementById("ref-card-chile-bases");

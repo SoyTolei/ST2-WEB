@@ -8,10 +8,13 @@ import {
   resetChileReferral,
   buildChileReferralPayload,
   syncChileReferralCards,
-} from "./planillas-referral-chile.js";
+  isChileReferralStep1Complete,
+  isChileReferralStep2Complete,
+} from "./planillas-referral-chile.js?v=20261112d";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111h";
 import { mountStarBorder } from "./star-border.js?v=20261111g";
+import { syncPillNav } from "./plan-pill-nav.js?v=20261111b";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
 import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
 
@@ -38,6 +41,8 @@ let referralIaUndo = null;
 let referralDialogsPromise = null;
 const REF_PERFIL_KEY = "st2-ref-perfil-tecnico";
 let esTecnico = loadEsTecnico();
+let maxStepReached = 1;
+let planillaStepDone = false;
 
 function loadEsTecnico() {
   try {
@@ -75,23 +80,26 @@ function syncPerfilUi() {
   otra?.classList.toggle("active", !esTecnico);
   tecnico?.classList.toggle("active", esTecnico);
 
-  const hint = document.getElementById("ref-perfil-hint");
-  if (hint) {
-    hint.textContent = esTecnico
-      ? "Perfil técnico: planilla + MAM, SDK y traza SQL (opcionales)."
-      : "Otra mesa: completá la planilla técnica. MAM/SDK/traza quedan ocultos.";
-  }
-
-  // MAM, SDK y Traza SQL solo aplican a mesa técnica.
-  document.getElementById("ref-wrap-mam")?.classList.toggle("hidden", !esTecnico);
-  document.getElementById("ref-wrap-sdk")?.classList.toggle("hidden", !esTecnico);
-  document.getElementById("ref-wrap-mam")?.classList.add("is-optional-card");
-  document.getElementById("ref-wrap-sdk")?.classList.add("is-optional-card");
+  // MAM / SDK / Traza siempre visibles; si no es técnico quedan grisados (no spawnean).
+  const mamWrap = document.getElementById("ref-wrap-mam");
+  const sdkWrap = document.getElementById("ref-wrap-sdk");
+  const techLabel = document.getElementById("ref-tech-group-label");
+  mamWrap?.classList.remove("hidden");
+  sdkWrap?.classList.remove("hidden");
+  mamWrap?.classList.add("is-optional-card");
+  sdkWrap?.classList.add("is-optional-card");
+  mamWrap?.classList.toggle("is-locked", !esTecnico);
+  sdkWrap?.classList.toggle("is-locked", !esTecnico);
+  techLabel?.classList.toggle("is-locked-label", !esTecnico);
+  document.getElementById("ref-btn-mam")?.toggleAttribute("disabled", !esTecnico);
+  document.getElementById("ref-btn-sdk")?.toggleAttribute("disabled", !esTecnico);
 
   const trazaCard = document.getElementById("ref-card-traza");
   const trazaPanel = document.getElementById("ref-traza-panel");
   const trazaCheck = document.getElementById("ref-adj-traza");
-  trazaCard?.classList.toggle("hidden", !esTecnico);
+  trazaCard?.classList.remove("hidden");
+  trazaCard?.classList.toggle("is-locked-adj", !esTecnico);
+  trazaCard?.classList.add("is-optional-adj");
   if (!esTecnico) {
     if (trazaCheck?.checked) {
       trazaCheck.checked = false;
@@ -101,11 +109,12 @@ function syncPerfilUi() {
     } else {
       trazaPanel?.classList.add("hidden");
     }
-    trazaCard?.classList.remove("is-optional-adj", "selected");
+    trazaCard?.classList.remove("selected");
   }
 
   updateSqlHint();
   updateCheckStatuses();
+  syncPillNav();
 }
 
 function updateSqlHint() {
@@ -134,6 +143,7 @@ export function initReferralModule(context) {
 export async function openReferral({ legalProductId = null } = {}) {
   if (!ctx) return;
   refStep = 1;
+  maxStepReached = 1;
   if (ctx.getSistema() === "BejermanSql") {
     saveEsTecnico(false);
   }
@@ -174,6 +184,10 @@ function isChile() {
 
 function isBejerman() {
   return ctx.getSistema() === "BejermanSql";
+}
+
+function isOnvio() {
+  return ctx.getSistema() === "OnvioWeb";
 }
 
 function isLegal() {
@@ -238,6 +252,8 @@ function buildReferralPills() {
   modRow.innerHTML = cfg.modulos.map((m) =>
     `<button type="button" class="plan-segment-btn${moduloSel === m ? " active" : ""}" data-modulo="${m}">${m}</button>`
   ).join("");
+  syncPillNav();
+  syncReferralStepCompletion();
 
   const col = document.getElementById("ref-collation");
   const sql = document.getElementById("ref-sql-server");
@@ -270,9 +286,18 @@ function updateCheckStatuses() {
   setStatus("ref-sdk-status", sdkOk);
   setStatus("ref-planilla-status", planOk);
 
-  setCheckBadge("ref-planilla-badge", planOk ? "Hecho" : "Pendiente", planOk ? "is-done" : "is-auto");
-  setCheckBadge("ref-mam-badge", mamOk ? "Hecho" : "Opcional", mamOk ? "is-done" : "is-optional");
-  setCheckBadge("ref-sdk-badge", sdkOk ? "Hecho" : "Opcional", sdkOk ? "is-done" : "is-optional");
+  setCheckBadge("ref-planilla-badge", planOk ? "Hecho" : "Opcional", planOk ? "is-done" : "is-optional");
+  setCheckBadge(
+    "ref-mam-badge",
+    !esTecnico ? "Técnico" : mamOk ? "Hecho" : "Opcional",
+    !esTecnico ? "is-locked-badge" : mamOk ? "is-done" : "is-optional"
+  );
+  setCheckBadge(
+    "ref-sdk-badge",
+    !esTecnico ? "Técnico" : sdkOk ? "Hecho" : "Opcional",
+    !esTecnico ? "is-locked-badge" : sdkOk ? "is-done" : "is-optional"
+  );
+  syncReferralStepCompletion();
 }
 
 function setCheckBadge(id, text, className) {
@@ -297,10 +322,12 @@ function bindAdjCard(cardId, checkId, markId, onChange) {
   const mark = markId ? document.getElementById(markId) : card?.querySelector(".card-mark");
   if (!card || !check) return;
   const sync = () => {
+    if (card.classList.contains("is-locked-adj")) return;
     check.checked = !check.checked;
     card.classList.toggle("selected", check.checked);
     if (mark) applyCardMark(mark, check.checked);
     onChange?.();
+    syncReferralStepCompletion();
   };
   card.addEventListener("click", sync);
 }
@@ -316,9 +343,13 @@ function syncCardVisual(cardId, checkId, markId, markEl) {
 
 function applyCardMark(mark, checked) {
   if (!mark) return;
-  const isOnvioState = mark.classList.contains("plan-onvio-state")
-    || mark.closest(".plan-onvio-card");
-  if (isOnvioState) {
+  const useYn = mark.classList.contains("plan-onvio-state")
+    || mark.classList.contains("plan-yn-state")
+    || mark.closest(".plan-onvio-card")
+    || mark.closest(".plan-adj-card")
+    || mark.closest(".plan-backup-base-card")
+    || mark.classList.contains("plan-capturas-mark");
+  if (useYn) {
     mark.textContent = checked ? "Sí" : "No";
     mark.classList.toggle("is-on", !!checked);
     mark.style.color = "";
@@ -453,6 +484,7 @@ function bindReferralEvents() {
       const val = v.dataset.version;
       versionSel = versionSel === val ? null : val;
       buildReferralPills();
+      syncReferralStepCompletion();
     }
     if (m) {
       const val = m.dataset.modulo;
@@ -472,6 +504,7 @@ function bindReferralEvents() {
         }
       }
       buildReferralPills();
+      syncReferralStepCompletion();
     }
   });
 
@@ -486,12 +519,17 @@ function bindReferralEvents() {
     document.getElementById("ref-backup-panel")?.classList.toggle("hidden", !on);
     if (!on) clearBackupBases();
     updateSqlPanel();
+    syncReferralStepCompletion();
   });
 
-  bindAdjCard("ref-card-backup-manager", "ref-backup-manager", "ref-mark-backup-manager", updateSqlPanel);
-  bindAdjCard("ref-card-backup-sbda", "ref-backup-sbda", "ref-mark-backup-sbda", updateSqlPanel);
-  bindAdjCard("ref-card-backup-cg", "ref-backup-cg", "ref-mark-backup-cg", updateSqlPanel);
-  bindAdjCard("ref-card-backup-sj", "ref-backup-sj", "ref-mark-backup-sj", updateSqlPanel);
+  const syncBackupStep = () => {
+    updateSqlPanel();
+    syncReferralStepCompletion();
+  };
+  bindAdjCard("ref-card-backup-manager", "ref-backup-manager", "ref-mark-backup-manager", syncBackupStep);
+  bindAdjCard("ref-card-backup-sbda", "ref-backup-sbda", "ref-mark-backup-sbda", syncBackupStep);
+  bindAdjCard("ref-card-backup-cg", "ref-backup-cg", "ref-mark-backup-cg", syncBackupStep);
+  bindAdjCard("ref-card-backup-sj", "ref-backup-sj", "ref-mark-backup-sj", syncBackupStep);
   setupBackupOnedrivePaste();
 
   bindOnvioCard("ref-card-onvio-proceso", "ref-onvio-proceso");
@@ -503,6 +541,7 @@ function bindReferralEvents() {
     const on = document.getElementById("ref-onvio-ticket")?.checked;
     document.getElementById("ref-onvio-ticket-panel")?.classList.toggle("hidden", !on);
     if (!on) clearOnvioTicketFields();
+    syncReferralStepCompletion();
   });
   bindOnvioCard("ref-card-onvio-rep-ticket", "ref-onvio-rep-ticket");
   bindOnvioCard("ref-card-onvio-rep-prueba", "ref-onvio-rep-prueba");
@@ -530,8 +569,14 @@ function bindReferralEvents() {
     syncChileReferralCards();
   });
 
-  document.getElementById("ref-btn-mam")?.addEventListener("click", () => openMamModal());
-  document.getElementById("ref-btn-sdk")?.addEventListener("click", () => openSdkModal());
+  document.getElementById("ref-btn-mam")?.addEventListener("click", () => {
+    if (!esTecnico) return;
+    openMamModal();
+  });
+  document.getElementById("ref-btn-sdk")?.addEventListener("click", () => {
+    if (!esTecnico) return;
+    openSdkModal();
+  });
   document.getElementById("ref-btn-planilla")?.addEventListener("click", () => openPlanillaModalAsync());
   document.getElementById("ref-perfil-otra")?.addEventListener("click", () => {
     saveEsTecnico(false);
@@ -567,6 +612,32 @@ function bindReferralEvents() {
   });
   document.getElementById("ref-btn-ia-undo")?.addEventListener("click", () => referralIaUndo.undo());
 
+  [
+    "ref-asunto",
+    "ref-descripcion",
+    "ref-paso",
+    "ref-collation",
+    "ref-sql-server",
+    "ref-onvio-empresa",
+    "ref-onvio-usuario",
+    "ref-onvio-ticket-num",
+    "ref-chile-usuario",
+    "ref-chile-clave",
+    "ref-chile-so",
+    "ref-chile-motor-sql",
+  ].forEach((id) => {
+    document.getElementById(id)?.addEventListener("input", () => syncReferralStepCompletion());
+    document.getElementById(id)?.addEventListener("change", () => syncReferralStepCompletion());
+  });
+
+  ["ref-chile-panel", "ref-chile-post"].forEach((id) => {
+    const root = document.getElementById(id);
+    if (!root) return;
+    root.addEventListener("click", () => syncReferralStepCompletion());
+    root.addEventListener("input", () => syncReferralStepCompletion());
+    root.addEventListener("change", () => syncReferralStepCompletion());
+  });
+
   document.querySelectorAll("[data-ref-step]").forEach((btn) => {
     btn.addEventListener("click", () => setReferralStep(Number(btn.dataset.refStep) || 1));
   });
@@ -598,7 +669,117 @@ function plainValue(id) {
 
 function setReferralStep(step) {
   refStep = Math.min(3, Math.max(1, Number(step) || 1));
+  maxStepReached = Math.max(maxStepReached, refStep);
   syncReferralStepper();
+}
+
+function isFilled(id) {
+  return Boolean(plainValue(id));
+}
+
+function isBackupSelectionValid() {
+  const backupOn = !!document.getElementById("ref-adj-backup")?.checked;
+  if (!backupOn) return true;
+  return ["ref-backup-manager", "ref-backup-sbda", "ref-backup-cg", "ref-backup-sj"]
+    .some((id) => !!document.getElementById(id)?.checked);
+}
+
+/** Alineado a ReferralIdValidator. */
+function isReferralStep1Complete() {
+  const common = isFilled("ref-asunto") && isFilled("ref-descripcion") && isFilled("ref-paso");
+  if (isBejerman()) return !!versionSel && !!moduloSel && common;
+  if (isChile()) return isChileReferralStep1Complete() && common;
+  return common;
+}
+
+/**
+ * Paso 2:
+ * - Bejerman: sin fijos; si backup → bases. ✓ al visitar el paso.
+ * - Onvio: Empresa + Usuario (+ N° ticket si marcó ticket).
+ * - Chile: Usuario + Clave + SO (+ tipo/base si aplica).
+ */
+function isReferralStep2Complete() {
+  if (isBejerman()) {
+    if (!isBackupSelectionValid()) return false;
+    return maxStepReached >= 2;
+  }
+  if (isOnvio()) {
+    if (!(isFilled("ref-onvio-empresa") && isFilled("ref-onvio-usuario"))) return false;
+    const ticketOn = !!document.getElementById("ref-onvio-ticket")?.checked;
+    if (ticketOn && !isFilled("ref-onvio-ticket-num")) return false;
+    return true;
+  }
+  if (isChile()) return isChileReferralStep2Complete();
+  return true;
+}
+
+function isReferralStep3Complete() {
+  return planillaStepDone;
+}
+
+function stepWarnMessage(n) {
+  if (n === 1) {
+    if (isBejerman()) return "Falta versión, módulo, asunto, descripción o paso a paso";
+    if (isChile()) return "Falta producto/versión, año, RUT, asunto, descripción o paso a paso";
+    return "Falta asunto, descripción o paso a paso";
+  }
+  if (n === 2) {
+    if (isBejerman()) return "Si marcaste backup, elegí al menos una base";
+    if (isOnvio()) {
+      const ticketOn = !!document.getElementById("ref-onvio-ticket")?.checked;
+      if (ticketOn && !isFilled("ref-onvio-ticket-num")) return "Falta el N° de Ticket";
+      return "Falta Empresa o Usuario/Contador";
+    }
+    if (isChile()) return "Falta usuario, clave, SO o datos de base";
+    return "Faltan datos del paso 2";
+  }
+  if (n === 3) {
+    if (!isReferralStep1Complete() || !isReferralStep2Complete()) {
+      return "Completá los pasos anteriores antes de generar";
+    }
+    return "Generá o copiá la planilla para marcar este paso";
+  }
+  return `Paso ${n}`;
+}
+
+function syncReferralStepCompletion() {
+  const complete = {
+    1: isReferralStep1Complete(),
+    2: isReferralStep2Complete(),
+    3: isReferralStep3Complete(),
+  };
+  const warn = {
+    1: !complete[1] && maxStepReached > 1,
+    2: !complete[2] && maxStepReached > 2,
+    3: !complete[3] && maxStepReached >= 3,
+  };
+  document.querySelectorAll("#ref-stepper [data-ref-step]").forEach((btn) => {
+    const n = Number(btn.dataset.refStep) || 0;
+    if (!n) return;
+    const done = !!complete[n];
+    const alert = !!warn[n] && !done;
+    btn.classList.toggle("is-complete", done);
+    btn.classList.toggle("is-incomplete", alert);
+    btn.dataset.stepStatus = done ? "ok" : alert ? "warn" : "idle";
+    btn.title = done
+      ? `Paso ${n}: completo`
+      : alert
+        ? `Paso ${n}: ${stepWarnMessage(n)}`
+        : `Paso ${n}`;
+    const num = btn.querySelector(".plan-ref-step-num");
+    if (!num) return;
+    num.dataset.stepNum = String(n);
+    if (done) {
+      num.textContent = "✓";
+      num.setAttribute("aria-label", `Paso ${n} completo`);
+    } else if (alert) {
+      num.textContent = "!";
+      num.setAttribute("aria-label", `Paso ${n}: ${stepWarnMessage(n)}`);
+    } else {
+      num.textContent = String(n);
+      num.removeAttribute("aria-label");
+    }
+  });
 }
 
 function syncReferralStepper() {
@@ -634,6 +815,7 @@ function syncReferralStepper() {
   document.getElementById("ref-step-next")?.classList.toggle("hidden", refStep >= 3);
   const next = document.getElementById("ref-step-next");
   if (next) next.textContent = refStep === 2 ? "Ir a Generar Planilla →" : "Siguiente →";
+  syncReferralStepCompletion();
 }
 
 function setReferralPantallasUi(checked) {
@@ -1217,6 +1399,8 @@ async function generarReferral(copiar) {
       showPlanTextPreview("ref-text-preview", texto);
       status.textContent = `Planilla lista.${capturasMsg}${trazasMsg} Podés copiar desde el panel de vista previa.`;
     }
+    planillaStepDone = true;
+    syncReferralStepCompletion();
   } catch (ex) {
     status.textContent = ex.message || "Error";
     void errorSt2(status.textContent);
@@ -1325,6 +1509,8 @@ function resetReferralForm({ keepLegalHub = false } = {}) {
   sdkApp = "";
   planillaState = { relevada: false, procesoFuncionaba: false, reproduceError: false, ultimaActualizOk: false };
   refStep = 1;
+  maxStepReached = 1;
+  planillaStepDone = false;
   document.getElementById("ref-asunto").value = "";
   ["ref-descripcion", "ref-paso"].forEach((id) => {
     const el = document.getElementById(id);

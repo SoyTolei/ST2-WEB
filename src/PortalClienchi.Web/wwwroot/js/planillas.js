@@ -3,6 +3,7 @@ import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notify
 import { updatePlanBuildBadge } from "./plan-build.js";
 import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
 import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261111h";
+import { initPlanPillNav, syncPillNav } from "./plan-pill-nav.js?v=20261111b";
 import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
 import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261013i";
 import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261110k";
@@ -675,6 +676,7 @@ function buildLegalTransPills() {
   ambRow.innerHTML = (cfg.ambientes || []).map((a) =>
     `<button type="button" class="plan-segment-btn${legalAmbienteSel === a ? " active" : ""}" data-legal-ambiente="${a}">${a}</button>`
   ).join("");
+  syncPillNav();
 }
 
 function getStandardMesas() {
@@ -701,6 +703,7 @@ function buildStandardMesas() {
   row.innerHTML = getStandardMesas().map((m) =>
     `<button type="button" class="plan-segment-btn${mesaActual === m.id ? " active" : ""}" data-mesa="${m.id}">${m.label}</button>`
   ).join("");
+  syncPillNav(row.parentElement || row);
 }
 
 function buildLegalMesas() {
@@ -711,6 +714,7 @@ function buildLegalMesas() {
   row.innerHTML = cfg.mesas.map((m) =>
     `<button type="button" class="plan-segment-btn${mesaActual === m.id ? " active" : ""}" data-legal-mesa="${m.id}">${m.label}</button>`
   ).join("");
+  syncPillNav(row.parentElement || row);
 }
 
 function updateTransferenciaPanels() {
@@ -746,7 +750,7 @@ function styleTicketCard(selected) {
   const mark = document.getElementById("plan-ticket-mark");
   card?.classList.toggle("selected", selected);
   if (mark) {
-    mark.textContent = selected ? "✓" : "○";
+    mark.textContent = selected ? "Sí" : "No";
     mark.classList.toggle("is-on", !!selected);
     mark.style.color = "";
   }
@@ -800,7 +804,8 @@ function styleCapturasCard(selected) {
   const mark = card?.querySelector(".plan-capturas-mark");
   if (!card || !mark) return;
   card.classList.toggle("selected", selected);
-  mark.textContent = selected ? "✓" : "○";
+  mark.textContent = selected ? "Sí" : "No";
+  mark.classList.toggle("is-on", !!selected);
 }
 
 function revokeCapturaThumbUrls(container) {
@@ -1835,7 +1840,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20261111a").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js?v=20261112d").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });
@@ -2077,6 +2082,7 @@ export function initPlanillas() {
   initSt2Tours();
 
   injectModuleHeaders();
+  initPlanPillNav();
   initTransferenciaIaUi();
   initDailyCryptic();
   bindEvents();

@@ -364,10 +364,57 @@ export function isAppAccessGranted() {
   return appUnlocked && !!cachedEmail;
 }
 
+/** Host local: bypass de splash/login (solo UI de desarrollo; productivo intacto). */
+function isLocalDevHost() {
+  try {
+    const h = String(location.hostname || "").toLowerCase();
+    return h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h === "::1";
+  } catch {
+    return false;
+  }
+}
+
+async function tryLocalDevBypass() {
+  if (!isLocalDevHost()) return null;
+  try {
+    const response = await fetch("/api/planillas/session/local-dev", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) return null;
+    applySessionIdentity(data);
+    try {
+      localStorage.setItem("st2_plan_user_hint", cachedEmail || "local.dev@thomsonreuters.com");
+      localStorage.setItem("st2-modules-force-all", "1");
+    } catch {
+      /* ignore */
+    }
+    updatePlanUserBadge();
+    return cachedEmail;
+  } catch {
+    return null;
+  }
+}
+
 export async function ensureAppAccess() {
   if (accessPromise) return accessPromise;
 
   accessPromise = (async () => {
+    if (isLocalDevHost()) {
+      document.body.classList.add("st2-access-ok", "st2-local-dev");
+      document.body.classList.remove("st2-access-pending", "st2-access-restoring", "show-access-gate");
+      document.getElementById("st2-access-gate")?.classList.add("hidden");
+      const local = await tryLocalDevBypass();
+      if (local) {
+        unlockAppShell();
+        document.body.classList.add("st2-local-dev");
+        return local;
+      }
+    }
+
     // Si ya hubo login en este navegador, no mostrar el formulario mientras se revalida.
     const hasHint = !!localStorage.getItem("st2_plan_user_hint");
     if (hasHint) {

@@ -477,6 +477,71 @@ app.MapMethods("/embed/{site}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE",
         await proxy.HandleAsync(ctx, site, "", ct));
 
 app.MapPlanillasEndpoints();
+
+// Bypass de splash/login SOLO en Development + host local (no existe en producción).
+if (app.Environment.IsDevelopment())
+{
+    app.MapPost("/api/planillas/session/local-dev", (
+        HttpContext ctx,
+        AppAccessRepository accessRepo,
+        ModuleAccessRepository modules,
+        BlanqueoRepository blanqueoRepo) =>
+    {
+        if (!St2LocalDevAccess.IsLocalHost(ctx))
+        {
+            return Results.Json(new { error = "Solo localhost." }, statusCode: StatusCodes.Status403Forbidden);
+        }
+
+        var email = St2LocalDevAccess.DevEmail;
+        accessRepo.EnsureApproved(email);
+        modules.Upsert(new ModuleAccessUpdateRequest
+        {
+            Email = email,
+            Oportunidad = true,
+            PdfPortal = true,
+            Blanqueo = true,
+            BlanqueoConfirm = true,
+            BlanqueoLoad = true,
+            BorradoBases = true,
+            BorradoBasesConfirm = true,
+            BorradoBasesLoad = true,
+            PlanillasSqlOnvio = true,
+            PlanillasTransferencia = true,
+            PlanillasReferral = true,
+            PlanillasLeia = true,
+            PlanillasBukowski = true,
+            PlanillasLegal = true,
+            LegalFirm = true,
+            LegalHighq = true,
+            LegalWestlaw = true,
+            LegalCocounsel = true,
+            PlanillasChile = true,
+            ChileTransferencia = true,
+            ChileReferral = true,
+            ChileSaad = true,
+            ChileHr = true,
+            ChileWiki = true,
+            ChileLp = true,
+            ChilePowerapps = true,
+        });
+        PlanUserIdentity.SetCookie(ctx, email);
+        accessRepo.RecordAccess(email);
+        blanqueoRepo.AssociatePendingRequester(email);
+        accessRepo.UpdateClientPresence(email, ctx, "local-dev", "localdev");
+        var rec = accessRepo.Find(email);
+        return Results.Ok(new
+        {
+            email,
+            status = "ok",
+            displayName = string.IsNullOrWhiteSpace(rec?.DisplayName) ? "Local Dev" : rec!.DisplayName!.Trim(),
+            birthdayMmDd = rec?.BirthdayMmDd,
+            birthdayDisplay = AppAccessRepository.FormatBirthdayDisplay(rec?.BirthdayMmDd),
+            funEggEnabled = rec?.FunEggEnabled ?? true,
+            localDev = true,
+        });
+    });
+}
+
 app.MapDailyCrypticEndpoints();
 app.MapBlanqueoEndpoints();
 app.MapBorradoBasesEndpoints();

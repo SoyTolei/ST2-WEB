@@ -550,7 +550,7 @@ export function buildReferralStandardTour(ctx, sistema) {
   steps.push({
     selector: "#ref-stepper",
     title: "Pasos del referral",
-    body: "El armado va en 3 pasos: Datos → Chequeos → Generar Planilla. Podés avanzar con Siguiente o saltar tocando el paso.",
+    body: "El armado va en 3 pasos: Datos → Chequeos y adjuntos → Generar Planilla. El ✓ del stepper marca lo completo; podés avanzar con Siguiente o saltar tocando el paso.",
     placement: "bottom",
     when: () => visible("#ref-stepper"),
   });

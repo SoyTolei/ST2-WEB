@@ -141,6 +141,18 @@
     body.st2-access-ok .st2-boot-splash {
       display: none !important;
     }
+    body.st2-access-ok #st2-access-gate,
+    body.st2-local-dev #st2-access-gate {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+    body.st2-access-ok #st2-app-root,
+    body.st2-local-dev #st2-app-root {
+      visibility: visible !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
     body.st2-access-pending #st2-app-root,
     body.st2-access-restoring #st2-app-root {
       visibility: hidden !important;
@@ -188,6 +200,7 @@
   <link rel="stylesheet" href="/css/st2-sonner.css?v=20261027a"/>
   <link rel="stylesheet" href="/css/st2-refresh.css?v=20261023n"/>
   <link rel="stylesheet" href="/css/st2-components.css?v=20261013j"/>
+  <link rel="stylesheet" href="/css/plan-pill-nav.css?v=20261112d"/>
   <link rel="modulepreload" href="/js/st2-silk.js?v=20260915a"/>
   <link rel="modulepreload" href="/js/st2-gradient-ascii.js?v=20261023c"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js?v=20260915a"/>
@@ -199,8 +212,16 @@
 <body class="st2-access-pending">
 <script>
   try {
-    // Siempre splash al boot; el gate solo aparece si hace falta login.
-    document.body.classList.add("st2-access-restoring");
+    var h = String(location.hostname || "").toLowerCase();
+    var localDev = h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h === "::1";
+    if (localDev) {
+      // Solo local: saltear splash/login para poder probar UI sin pelear con el gate.
+      document.body.classList.add("st2-access-ok", "st2-local-dev");
+      document.body.classList.remove("st2-access-pending");
+    } else {
+      // Productivo: siempre splash al boot; el gate solo aparece si hace falta login.
+      document.body.classList.add("st2-access-restoring");
+    }
   } catch (e) { /* ignore */ }
 </script>
   <script type="module" src="/js/st2-login-boot.js?v=20261111g"></script>
@@ -642,21 +663,20 @@
               </div>
 
               <div class="plan-field">
-                <div id="plan-capturas-card" class="plan-capturas-card">
+                <div id="plan-capturas-card" class="plan-capturas-card plan-yn-card">
                   <label>
                     <input id="plan-capturas-check" type="checkbox" class="hidden"/>
                     ¿Hay archivos adjuntos?
                   </label>
-                  <span class="plan-capturas-mark" aria-hidden="true">○</span>
+                  <span class="plan-capturas-mark plan-yn-state" aria-hidden="true">No</span>
                 </div>
-                <div id="plan-capturas-panel" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Imágenes, videos cortos, PDF, TXT, Excel o XML. Si no cargás nada, el texto indica que van en comentarios.</p>
+                <div id="plan-capturas-panel" class="plan-capturas-panel plan-capturas-panel--lite hidden">
                   <div class="plan-capturas-actions">
-                    <button type="button" id="plan-capturas-agregar" class="plan-capturas-browse">
-                      <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
+                    <button type="button" id="plan-capturas-agregar" class="plan-capturas-browse plan-capturas-browse--lite">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">＋</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes, video, PDF, TXT, Excel o XML</strong>
-                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM · PDF · TXT · Excel / Word / PowerPoint / CSV · XML</small>
+                        <strong>Agregar archivos</strong>
+                        <small>Imágenes, video, PDF, TXT, Office, XML</small>
                       </span>
                     </button>
                     <input id="plan-capturas-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xlsm,.xlsb,.xls,.csv,.ods,.docx,.docm,.dotx,.doc,.dot,.rtf,.odt,.pptx,.pptm,.ppsx,.ppt,.pps,.odp,.xml,application/xml,text/xml" multiple class="hidden"/>
@@ -667,9 +687,9 @@
               </div>
 
               <div id="plan-ticket-wrap" class="plan-field hidden">
-                <button type="button" id="plan-ticket-card" class="plan-adj-card plan-ticket-card">
+                <button type="button" id="plan-ticket-card" class="plan-adj-card plan-ticket-card plan-yn-card">
                   <span>¿Se solicitó ticket de servicio?</span>
-                  <span class="card-mark" id="plan-ticket-mark">○</span>
+                  <span class="card-mark plan-yn-state" id="plan-ticket-mark">No</span>
                 </button>
                 <input type="checkbox" id="plan-ticket-check" class="hidden"/>
                 <div id="plan-ticket-panel" class="plan-ticket-detail hidden">
@@ -1101,7 +1121,7 @@
               </button>
               <button type="button" class="plan-ref-step" data-ref-step="2">
                 <span class="plan-ref-step-num">2</span>
-                <span class="plan-ref-step-label">Chequeos</span>
+                <span class="plan-ref-step-label">Chequeos y adjuntos</span>
               </button>
               <button type="button" class="plan-ref-step" data-ref-step="3">
                 <span class="plan-ref-step-num">3</span>
@@ -1109,8 +1129,8 @@
               </button>
             </nav>
 
-            <div id="ref-bejerman-panel" class="plan-bej-toolbar hidden">
-              <div class="plan-bej-config">
+            <div id="ref-bejerman-panel" class="plan-bej-toolbar hidden" data-ref-step-panel="1">
+              <div class="plan-bej-config plan-bej-config--lite">
                 <div class="plan-bej-field">
                   <span class="plan-bej-label">Versión</span>
                   <div class="plan-segment-track" id="ref-version-pills"></div>
@@ -1177,7 +1197,6 @@
                     <button type="button" class="plan-segment-btn active" id="ref-perfil-otra" data-perfil="otra">Otra mesa</button>
                     <button type="button" class="plan-segment-btn" id="ref-perfil-tecnico" data-perfil="tecnico">Técnico</button>
                   </div>
-                  <p id="ref-perfil-hint" class="plan-ref-hint">Otra mesa: planilla técnica a completar. Técnico: también MAM, SDK y traza SQL.</p>
                 </div>
               </div>
               <div class="plan-check-cards">
@@ -1188,13 +1207,14 @@
                     <span class="plan-check-btn-copy">
                       <span class="plan-check-btn-head">
                         <strong>Planilla Técnica</strong>
-                        <span class="plan-check-badge is-auto" id="ref-planilla-badge">A completar</span>
+                        <span class="plan-check-badge is-optional" id="ref-planilla-badge">Opcional</span>
                       </span>
-                      <small>Chequeos del caso, a completar</small>
+                      <small>Chequeos del caso</small>
                     </span>
                   </button>
                 </div>
-                <div class="plan-check-wrap mam hidden" id="ref-wrap-mam">
+                <p class="plan-tech-group-label" id="ref-tech-group-label">Comprobaciones de perfil técnico</p>
+                <div class="plan-check-wrap mam is-optional-card" id="ref-wrap-mam">
                   <span class="plan-check-mark" id="ref-mam-status">○</span>
                   <button type="button" class="plan-check-btn mam" id="ref-btn-mam">
                     <span class="plan-check-btn-icon" data-plan-icon="mam"></span>
@@ -1207,7 +1227,7 @@
                     </span>
                   </button>
                 </div>
-                <div class="plan-check-wrap sdk hidden" id="ref-wrap-sdk">
+                <div class="plan-check-wrap sdk is-optional-card" id="ref-wrap-sdk">
                   <span class="plan-check-mark" id="ref-sdk-status">○</span>
                   <button type="button" class="plan-check-btn sdk" id="ref-btn-sdk">
                     <span class="plan-check-btn-icon" data-plan-icon="sdk"></span>
@@ -1223,54 +1243,44 @@
               </div>
               <p class="plan-ref-title">Adjuntos</p>
               <div class="plan-adj-stack">
-                <div id="ref-sql-panel" class="plan-backup-sql">
-                  <p class="plan-backup-detail-title">Collation y SQL Server</p>
-                  <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si tomaste el backup con <strong>ST2 → Herramientas SQL</strong>, podés ver la collation y la versión en el nombre del archivo <strong>.zip</strong>.</p>
-                  <div class="plan-form-2col plan-form-2col-tight">
-                    <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
-                    <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
-                  </div>
-                </div>
-                <button type="button" class="plan-adj-card tone-orange" id="ref-card-pantallas" data-adj="pantallas">
-                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Archivos adjuntos</span>
-                  <span class="card-mark" id="ref-mark-pantallas">○</span>
-                </button>
-                <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
-                <div id="ref-capturas-panel" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Imágenes, videos cortos, PDF, TXT, Excel o XML. Si no cargás nada, el texto indica que van en comentarios.</p>
-                  <div class="plan-capturas-actions">
-                    <button type="button" id="ref-capturas-agregar" class="plan-capturas-browse">
-                      <span class="plan-capturas-browse-icon" aria-hidden="true">🖼</span>
-                      <span class="plan-capturas-browse-text">
-                        <strong>Examinar imágenes, video, PDF, TXT, Excel o XML</strong>
-                        <small>PNG, JPG, GIF, WEBP · MP4 / WEBM · PDF · TXT · Excel / Word / PowerPoint / CSV · XML</small>
-                      </span>
-                    </button>
-                    <input id="ref-capturas-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xlsm,.xlsb,.xls,.csv,.ods,.docx,.docm,.dotx,.doc,.dot,.rtf,.odt,.pptx,.pptm,.ppsx,.ppt,.pps,.odp,.xml,application/xml,text/xml" multiple class="hidden"/>
-                  </div>
-                  <div id="ref-capturas-chips" class="plan-capturas-thumbs"></div>
-                  <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
-                </div>
-
-                <button type="button" class="plan-adj-card tone-green hidden" id="ref-card-traza" data-adj="traza">
+                <button type="button" class="plan-adj-card tone-green" id="ref-card-traza" data-adj="traza">
                   <span class="plan-adj-label"><span class="plan-inline-icon green" data-plan-icon="sqlTrace"></span>Traza SQL</span>
-                  <span class="card-mark" id="ref-mark-traza">○</span>
+                  <span class="card-mark plan-yn-state" id="ref-mark-traza">No</span>
                 </button>
                 <input type="checkbox" id="ref-adj-traza" class="hidden"/>
-                <div id="ref-traza-panel" class="plan-capturas-panel hidden">
-                  <p class="plan-capturas-hint">Si la cargás acá, el texto incluye el link de descarga. Si no, el TXT indica que va en comentarios.</p>
+                <div id="ref-traza-panel" class="plan-capturas-panel plan-capturas-panel--lite hidden">
                   <div class="plan-capturas-actions">
-                    <button type="button" id="ref-traza-agregar" class="plan-capturas-browse">
-                      <span class="plan-capturas-browse-icon" aria-hidden="true">📄</span>
+                    <button type="button" id="ref-traza-agregar" class="plan-capturas-browse plan-capturas-browse--lite">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">＋</span>
                       <span class="plan-capturas-browse-text">
-                        <strong>Examinar traza</strong>
-                        <small>TRC, CSV o TXT · podés elegir varias</small>
+                        <strong>Agregar traza</strong>
+                        <small>TRC, CSV o TXT</small>
                       </span>
                     </button>
                     <input id="ref-traza-input" type="file" accept=".trc,.csv,.txt,text/csv,text/plain" multiple class="hidden"/>
                   </div>
                   <div id="ref-traza-chips" class="plan-capturas-thumbs"></div>
                   <p id="ref-traza-estado" class="plan-capturas-estado"></p>
+                </div>
+
+                <button type="button" class="plan-adj-card tone-orange" id="ref-card-pantallas" data-adj="pantallas">
+                  <span class="plan-adj-label"><span class="plan-inline-icon orange" data-plan-icon="camera"></span>Archivos adjuntos</span>
+                  <span class="card-mark plan-yn-state" id="ref-mark-pantallas">No</span>
+                </button>
+                <input type="checkbox" id="ref-adj-pantallas" class="hidden"/>
+                <div id="ref-capturas-panel" class="plan-capturas-panel plan-capturas-panel--lite hidden">
+                  <div class="plan-capturas-actions">
+                    <button type="button" id="ref-capturas-agregar" class="plan-capturas-browse plan-capturas-browse--lite">
+                      <span class="plan-capturas-browse-icon" aria-hidden="true">＋</span>
+                      <span class="plan-capturas-browse-text">
+                        <strong>Agregar archivos</strong>
+                        <small>Imágenes, video, PDF, TXT, Office, XML</small>
+                      </span>
+                    </button>
+                    <input id="ref-capturas-input" type="file" accept="image/*,.mp4,.webm,video/mp4,video/webm,.pdf,application/pdf,.txt,text/plain,.xlsx,.xlsm,.xlsb,.xls,.csv,.ods,.docx,.docm,.dotx,.doc,.dot,.rtf,.odt,.pptx,.pptm,.ppsx,.ppt,.pps,.odp,.xml,application/xml,text/xml" multiple class="hidden"/>
+                  </div>
+                  <div id="ref-capturas-chips" class="plan-capturas-thumbs"></div>
+                  <p id="ref-capturas-estado" class="plan-capturas-estado"></p>
                 </div>
 
                 <button type="button" class="plan-adj-card plan-adj-backup tone-blue" id="ref-card-backup" data-adj="backup">
@@ -1281,16 +1291,16 @@
                       <small>Tocá para elegir las bases</small>
                     </span>
                   </span>
-                  <span class="card-mark" id="ref-mark-backup">○</span>
+                  <span class="card-mark plan-yn-state" id="ref-mark-backup">No</span>
                 </button>
                 <input type="checkbox" id="ref-adj-backup" class="hidden"/>
-                <div id="ref-backup-panel" class="plan-backup-detail hidden">
-                  <p class="plan-backup-detail-title">Bases incluidas en el backup</p>
+                <div id="ref-backup-panel" class="plan-backup-detail plan-backup-detail--lite hidden">
+                  <p class="plan-backup-detail-title">Bases</p>
                   <div class="plan-backup-bases-grid">
-                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-manager"><span>Manager</span><span class="card-mark" id="ref-mark-backup-manager">○</span></button>
-                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-sbda"><span>SBDA</span><span class="card-mark" id="ref-mark-backup-sbda">○</span></button>
-                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-cg"><span>CG</span><span class="card-mark" id="ref-mark-backup-cg">○</span></button>
-                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-sj"><span>SJ</span><span class="card-mark" id="ref-mark-backup-sj">○</span></button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-manager"><span class="plan-backup-base-copy"><strong>MANAGER</strong></span><span class="card-mark plan-yn-state" id="ref-mark-backup-manager">No</span></button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-sbda"><span class="plan-backup-base-copy"><strong>SBDA</strong><small>Gestión</small></span><span class="card-mark plan-yn-state" id="ref-mark-backup-sbda">No</span></button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-cg"><span class="plan-backup-base-copy"><strong>CG</strong><small>Contabilidad General</small></span><span class="card-mark plan-yn-state" id="ref-mark-backup-cg">No</span></button>
+                    <button type="button" class="plan-backup-base-card" id="ref-card-backup-sj"><span class="plan-backup-base-copy"><strong>SJ</strong><small>Sueldos y Jornales</small></span><span class="card-mark plan-yn-state" id="ref-mark-backup-sj">No</span></button>
                   </div>
                   <input type="checkbox" id="ref-backup-manager" class="hidden"/>
                   <input type="checkbox" id="ref-backup-sbda" class="hidden"/>
@@ -1298,7 +1308,19 @@
                   <input type="checkbox" id="ref-backup-sj" class="hidden"/>
                   <div class="plan-backup-onedrive">
                     <label for="ref-backup-onedrive">OneDrive</label>
-                    <input id="ref-backup-onedrive" type="url" placeholder="Si subiste las bases a una carpeta de OneDrive, pegá el link acá" autocomplete="off"/>
+                    <input id="ref-backup-onedrive" type="url" placeholder="Link de carpeta OneDrive (opcional)" autocomplete="off"/>
+                  </div>
+                </div>
+
+                <div id="ref-sql-panel" class="plan-backup-sql plan-backup-sql--compact">
+                  <div class="plan-sql-compact-head">
+                    <span class="plan-sql-compact-title">Entorno SQL</span>
+                    <span class="plan-sql-compact-sub">Opcional · para el texto de la planilla</span>
+                  </div>
+                  <p id="ref-sql-hint" class="plan-backup-sql-hint hidden">Si el backup salió de <strong>ST2 → Herramientas SQL</strong>, collation y versión suelen ir en el nombre del <strong>.zip</strong>.</p>
+                  <div class="plan-form-2col plan-form-2col-tight">
+                    <div><label for="ref-collation">Collation</label><select id="ref-collation" class="plan-select"></select></div>
+                    <div><label for="ref-sql-server">SQL Server</label><select id="ref-sql-server" class="plan-select"></select></div>
                   </div>
                 </div>
               </div>
@@ -2971,6 +2993,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261111g" type="module"></script>
+  <script src="/js/app.js?v=20261112d" type="module"></script>
 </body>
 </html>

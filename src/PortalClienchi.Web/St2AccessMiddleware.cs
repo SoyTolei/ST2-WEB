@@ -13,6 +13,13 @@ public static class St2AccessMiddleware
                 || HttpMethods.IsDelete(method);
         }
 
+        // Solo registrado en Development; debe ser público para poder crear la cookie local.
+        if (path.Equals("/api/planillas/session/local-dev", StringComparison.OrdinalIgnoreCase)
+            && HttpMethods.IsPost(method))
+        {
+            return true;
+        }
+
         if (path.Equals("/api/access/admin/session", StringComparison.OrdinalIgnoreCase))
         {
             return HttpMethods.IsGet(method)
