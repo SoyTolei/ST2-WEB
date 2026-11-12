@@ -207,14 +207,6 @@ export function initBlanqueoModule() {
     if (e.target === e.currentTarget) hideDeleteModal();
   });
 
-  document.getElementById("blanqueo-note-cancel")?.addEventListener("click", () => hideNoteModal());
-  document.getElementById("blanqueo-note-save")?.addEventListener("click", () => {
-    void saveNoteModal();
-  });
-  document.getElementById("blanqueo-note-overlay")?.addEventListener("click", (e) => {
-    if (e.target === e.currentTarget) hideNoteModal();
-  });
-
   document.getElementById("blanqueo-clave-cancel")?.addEventListener("click", () => hideClaveModal());
   document.getElementById("blanqueo-clave-save")?.addEventListener("click", () => {
     void saveClaveModal();
@@ -225,8 +217,13 @@ export function initBlanqueoModule() {
   document.getElementById("blanqueo-clave-input")?.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      void saveClaveModal();
+      const hasNota = !!document.getElementById("blanqueo-clave-has-nota")?.checked;
+      if (hasNota) document.getElementById("blanqueo-clave-nota")?.focus();
+      else void saveClaveModal();
     }
+  });
+  document.getElementById("blanqueo-clave-has-nota")?.addEventListener("change", () => {
+    syncClaveNotaField();
   });
 
   document.getElementById("blanqueo-mod-pop-close")?.addEventListener("click", (e) => {
@@ -243,7 +240,11 @@ export function initBlanqueoModule() {
   });
   document.addEventListener("click", (e) => {
     if (e.target?.closest?.("#blanqueo-mod-pop") || e.target?.closest?.(".blanqueo-hab-pill")) return;
-    if (e.target?.closest?.("#blanqueo-aclaracion-pop") || e.target?.closest?.(".blanqueo-clave-previa-pill")) return;
+    if (
+      e.target?.closest?.("#blanqueo-aclaracion-pop")
+      || e.target?.closest?.(".blanqueo-clave-previa-pill")
+      || e.target?.closest?.(".blanqueo-clave-nota-pill")
+    ) return;
     hideModPop();
     hideAclaracionPop();
   });
@@ -296,7 +297,7 @@ export function initBlanqueoModule() {
     hideCtx();
     hideEditModal();
     hideDeleteModal();
-    hideNoteModal();
+    hideClaveModal();
     const status = document.getElementById("blanqueo-status");
     if (status) {
       status.classList.add("hidden");
@@ -1182,7 +1183,7 @@ function syncMonthStat(filtered) {
   const prefix = monthSel === "all" ? "Todos los meses" : monthLabelFromKey(monthSel);
   const n = list.length;
   const listos = list.filter((item) => item.listo).length;
-  const noReg = list.filter((item) => isNoRegistrado(item.aclaracion)).length;
+  const noReg = list.filter((item) => isRejectedState(item.aclaracion)).length;
   const total = n === 1 ? `${prefix}: 1 blanqueo` : `${prefix}: ${n} blanqueos`;
   const listosTxt = listos === 1 ? "1 listo" : `${listos} listos`;
   const noRegTxt = noReg === 1 ? "1 no registrado" : `${noReg} no registrados`;
@@ -1227,14 +1228,14 @@ function renderTable(filtered) {
   }
 }
 
-const ROW_INTERACTIVE_SELECTOR = "[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-caso], [data-blanqueo-copy-clave], [data-blanqueo-owner], .blanqueo-hab-pill, .blanqueo-clave-previa-pill";
+const ROW_INTERACTIVE_SELECTOR = "[data-blanqueo-copy-mail], [data-blanqueo-copy-cliente], [data-blanqueo-copy-caso], [data-blanqueo-copy-clave], [data-blanqueo-owner], .blanqueo-hab-pill, .blanqueo-clave-previa-pill, .blanqueo-clave-nota-pill";
 
 function buildRow(item) {
   const row = document.createElement("tr");
   if (selectedId === item.id) row.classList.add("selected");
   row.classList.add(portalRowClass(item.portal));
   const hasAclaracion = !!String(item.aclaracion || "").trim();
-  const noReg = isNoRegistrado(item.aclaracion) && !item.listo;
+  const noReg = isRejectedState(item.aclaracion) && !item.listo;
   if (noReg) row.classList.add("blanqueo-row-noreg");
   else if (item.listo && hasAclaracion && !isActivacionAutoNote(item.aclaracion)) row.classList.add("blanqueo-row-listo-nota");
   else if (item.listo) row.classList.add("blanqueo-row-listo");
@@ -1302,6 +1303,13 @@ function buildRow(item) {
   });
 
   row.querySelector(".blanqueo-clave-previa-pill")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    selectedId = item.id;
+    const btn = e.currentTarget;
+    showAclaracionPop(btn, btn.getAttribute("data-blanqueo-aclaracion-detail") || "");
+  });
+  row.querySelector(".blanqueo-clave-nota-pill")?.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     selectedId = item.id;
@@ -1492,13 +1500,37 @@ function isBlanqueoConClave(item) {
 
 const BLANQUEO_CLAVE_PREVIA = "Sueldo.20261";
 
+/** Separador interno clave + aclaración (un solo campo en API). */
+const BLANQUEO_NOTA_SEP = "\n---nota---\n";
+
+function packClaveAclaracion(clave, nota) {
+  const c = String(clave || "").trim();
+  const n = String(nota || "").trim();
+  if (!c) return n;
+  if (!n) return c;
+  return `${c}${BLANQUEO_NOTA_SEP}${n}`;
+}
+
+function unpackClaveAclaracion(raw) {
+  const t = String(raw || "").trim();
+  if (!t) return { clave: "", nota: "" };
+  if (isRejectedState(t) || isActivacionAutoNote(t)) return { clave: "", nota: t };
+  const i = t.indexOf(BLANQUEO_NOTA_SEP);
+  if (i >= 0) {
+    return { clave: t.slice(0, i).trim(), nota: t.slice(i + BLANQUEO_NOTA_SEP.length).trim() };
+  }
+  if (aclaracionTieneClavePrevia(t)) return { clave: t, nota: "" };
+  if (looksLikeClaveOnly(t)) return { clave: t, nota: "" };
+  return { clave: "", nota: t };
+}
+
 /** Pastilla con la clave: punteada, “Copiar” al hover, clic copia. */
-function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custom = false, bubble = false } = {}) {
+function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custom = false, bubble = false, soft = false } = {}) {
   const value = String(clave || "").trim();
   if (!value) return "";
   const isCustom = custom || value.toLowerCase() !== claveDefault().toLowerCase();
   const cls = bubble
-    ? "blanqueo-clave-pill blanqueo-clave-bubble"
+    ? `blanqueo-clave-pill blanqueo-clave-bubble${soft ? " blanqueo-clave-bubble--soft" : ""}`
     : isCustom
       ? "blanqueo-clave-pill blanqueo-clave-pill--custom"
       : "blanqueo-clave-pill";
@@ -1506,6 +1538,14 @@ function formatClaveCopyPill(clave, title = "Clic para copiar la clave", { custo
     <code class="blanqueo-clave-pill-label">${escapeHtml(value)}</code>
     <span class="blanqueo-clave-pill-action" aria-hidden="true">Copiar</span>
   </button>`;
+}
+
+/** Clave + aclaración: estilo Hab. módulos (remarcado + nº + ver). */
+function formatClaveConNotaPill(clave, nota) {
+  const pass = String(clave || "").trim();
+  const detail = String(nota || "").trim();
+  if (!pass || !detail) return "";
+  return `<span class="blanqueo-hab-wrap blanqueo-clave-nota-wrap"><button type="button" class="blanqueo-hab-pill blanqueo-clave-nota-pill" title="Clic para ver la aclaración" aria-label="Ver aclaración de ${escapeAttr(pass)}" aria-haspopup="dialog" data-blanqueo-aclaracion-detail="${escapeAttr(detail)}"><span class="blanqueo-hab-pill-label"><code>${escapeHtml(pass)}</code></span><span class="blanqueo-hab-pill-action" aria-hidden="true">ver</span></button><span class="blanqueo-hab-count" aria-hidden="true" title="Tiene aclaración">1</span></span>`;
 }
 
 /** Clave “sola” (Sueldo.07612) vs aclaración libre (“ya estaba aceptado”, “Sueldo.2027 Sin MFA”). */
@@ -1538,23 +1578,28 @@ function formatClavePreviaPill(aclaracion) {
 function formatAclaracionCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (aclaracion) {
+    if (isRejectedState(aclaracion)) return "—";
     if (aclaracionTieneClavePrevia(aclaracion)) {
       return formatClavePreviaPill(aclaracion);
     }
-    if (isNoRegistrado(aclaracion)) return "—";
     if (isActivacionAutoNote(aclaracion)) {
       return `<span class="blanqueo-pill blanqueo-pill-clave-style" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
     }
-    // Contraseña sola → globito; aclaración libre → recuadro amarillo.
-    if (looksLikeClaveOnly(aclaracion)) {
-      return formatClaveCopyPill(aclaracion, "Clic para copiar la contraseña", { bubble: true }) || "—";
+    const packed = unpackClaveAclaracion(aclaracion);
+    if (packed.clave && packed.nota) {
+      return formatClaveConNotaPill(packed.clave, packed.nota) || "—";
     }
-    return formatClaveCopyPill(aclaracion, "Clic para copiar la aclaración", { custom: true })
-      || `<span class="blanqueo-pill note" title="${escapeHtml(aclaracion)}">${escapeHtml(aclaracion)}</span>`;
+    if (packed.clave) {
+      return formatClaveCopyPill(packed.clave, "Clic para copiar la contraseña", { bubble: true, soft: true }) || "—";
+    }
+    if (packed.nota) {
+      return formatClaveCopyPill(packed.nota, "Clic para copiar la aclaración", { custom: true })
+        || `<span class="blanqueo-pill note" title="${escapeHtml(packed.nota)}">${escapeHtml(packed.nota)}</span>`;
+    }
   }
   // Histórico: listo sin texto → seguimos mostrando la clave por defecto (no se borró del servidor).
   if (item?.listo && isBlanqueoConClave(item)) {
-    return formatClaveCopyPill(claveDefault(), "Clave histórica por defecto · clic para copiar", { bubble: true }) || "—";
+    return formatClaveCopyPill(claveDefault(), "Clave histórica por defecto · clic para copiar", { bubble: true, soft: true }) || "—";
   }
   return "—";
 }
@@ -1569,23 +1614,31 @@ function formatGestionadoPorCell(item) {
 function formatEstadoCell(item) {
   const aclaracion = String(item.aclaracion || "").trim();
   if (item.listo) {
-    if (aclaracion && !isActivacionAutoNote(aclaracion) && !looksLikeClaveOnly(aclaracion)) {
+    const packed = unpackClaveAclaracion(aclaracion);
+    if (packed.clave && packed.nota) {
+      return '<span class="blanqueo-pill ok-note" title="Listo con aclaración">Listo · nota</span>';
+    }
+    if (packed.clave || (aclaracion && looksLikeClaveOnly(aclaracion))) {
+      return '<span class="blanqueo-pill ok" title="Listo con contraseña">Listo · clave</span>';
+    }
+    if (aclaracion && !isActivacionAutoNote(aclaracion) && !looksLikeClaveOnly(aclaracion) && !packed.clave) {
       return '<span class="blanqueo-pill ok-note" title="Listo + Aclaración">Listo · nota</span>';
     }
-    if (aclaracion && looksLikeClaveOnly(aclaracion)) {
-      return '<span class="blanqueo-pill ok" title="Listo - Indicar Contraseña">Listo · clave</span>';
-    }
     return '<span class="blanqueo-pill ok">Listo</span>';
+  }
+  if (isIncorrecto(aclaracion)) {
+    return '<span class="blanqueo-pill bad" title="Incorrecto">Incorrecto</span>';
   }
   if (isNoRegistrado(aclaracion)) {
     return '<span class="blanqueo-pill bad" title="No registrado">No registrado</span>';
   }
   if (!aclaracion) {
     const pending = '<span class="blanqueo-estado-pending" title="Pendiente de confirmación" aria-label="Pendiente">⏳</span>';
-    if (!canOwnerMutate(item)) return pending;
+    // Editar/Eliminar fuera del menú contextual: íconos en pendientes (dueño o confirmador).
+    if (!(canOwnerMutate(item) || (canConfirm && isPendingSolicitud(item)))) return pending;
     return `<span class="blanqueo-owner-actions">${pending}
-      <button type="button" class="blanqueo-owner-btn" data-blanqueo-owner="editar" title="Editar mi solicitud (todavía no fue confirmada)" aria-label="Editar solicitud">✏️</button>
-      <button type="button" class="blanqueo-owner-btn blanqueo-owner-btn--del" data-blanqueo-owner="eliminar" title="Eliminar mi solicitud (todavía no fue confirmada)" aria-label="Eliminar solicitud">🗑️</button>
+      <button type="button" class="blanqueo-owner-btn" data-blanqueo-owner="editar" title="Editar solicitud pendiente" aria-label="Editar solicitud">✏️</button>
+      <button type="button" class="blanqueo-owner-btn blanqueo-owner-btn--del" data-blanqueo-owner="eliminar" title="Eliminar solicitud pendiente" aria-label="Eliminar solicitud">🗑️</button>
     </span>`;
   }
   return '<span class="blanqueo-pill note" title="Con aclaración">Nota</span>';
@@ -1596,19 +1649,27 @@ function showCtx(x, y, item) {
   if (!menu) return;
 
   const confirm = canConfirm;
+  if (!confirm) {
+    menu.classList.add("hidden");
+    return;
+  }
 
   menu.querySelectorAll("[data-blanqueo-ctx]").forEach((btn) => {
     const action = btn.getAttribute("data-blanqueo-ctx");
     let show = false;
-    if (action === "editar" || action === "eliminar") show = confirm || canOwnerMutate(item);
-    else if (["listo", "listo-obs", "unlisto", "aclaracion-no-registrado"].includes(action || "")) {
-      show = confirm;
-    }
+    if (action === "listo") show = true;
+    else if (action === "incorrecto") show = !item?.listo;
+    else if (action === "unlisto") show = !!item?.listo;
     btn.classList.toggle("hidden", !show);
   });
 
-  const hrs = menu.querySelectorAll("hr");
-  hrs.forEach((hr) => hr.classList.toggle("hidden", !confirm));
+  menu.querySelectorAll("hr").forEach((hr) => {
+    if (hr.classList.contains("blanqueo-ctx-hr-unlisto")) {
+      hr.classList.toggle("hidden", !item?.listo);
+    } else {
+      hr.classList.toggle("hidden", !!item?.listo);
+    }
+  });
 
   const anyVisible = [...menu.querySelectorAll("[data-blanqueo-ctx]")].some((b) => !b.classList.contains("hidden"));
   if (!anyVisible) {
@@ -1630,36 +1691,42 @@ async function handleCtxAction(action) {
   if (!item) return;
 
   try {
+    // Editar/Eliminar: solo desde íconos de fila (pendientes), no desde el menú contextual.
     if (action === "editar") {
       if (!canConfirm && !canOwnerMutate(item)) {
+        setStatus("Solo se puede editar en estado pendiente.", true);
+        return;
+      }
+      if (!isPendingSolicitud(item) && !canConfirm) {
         setStatus("Solo se puede editar en estado pendiente.", true);
         return;
       }
       openEditModal(item);
       return;
     }
-    if (action === "listo") {
-      openClaveModal(item);
-      return;
-    } else if (action === "unlisto") {
-      await patchItem(selectedId, { listo: false });
-      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
-        detail: { expression: "thinking", ms: 2400 },
-      }));
-    } else if (action === "aclaracion-no-registrado") {
-      await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
-      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
-        detail: { expression: "mad", ms: 3200 },
-      }));
-    } else if (action === "listo-obs") {
-      openNoteModal(item);
-      return;
-    } else if (action === "eliminar") {
+    if (action === "eliminar") {
       if (!canConfirm && !canOwnerMutate(item)) {
         setStatus("Solo se puede eliminar en estado pendiente.", true);
         return;
       }
       openDeleteModal(item);
+      return;
+    }
+    if (action === "listo") {
+      openClaveModal(item);
+      return;
+    }
+    if (action === "unlisto") {
+      await patchItem(selectedId, { listo: false, clearAclaracion: true });
+      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+        detail: { expression: "thinking", ms: 2400 },
+      }));
+    } else if (action === "incorrecto") {
+      await patchItem(selectedId, { listo: false, aclaracion: "Incorrecto" });
+      document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
+        detail: { expression: "mad", ms: 3200 },
+      }));
+    } else {
       return;
     }
     setStatus("Actualizado.");
@@ -1774,41 +1841,35 @@ async function confirmDeleteModal() {
   }
 }
 
-function openNoteModal(item) {
-  selectedId = item.id;
-  const overlay = document.getElementById("blanqueo-note-overlay");
-  const text = document.getElementById("blanqueo-note-text");
-  const previa = String(item.aclaracion || "").trim();
-  const editable = previa && !isNoRegistrado(previa) && !isActivacionAutoNote(previa);
-  if (text) text.value = editable ? previa : "";
-  overlay?.classList.remove("hidden");
-  overlay?.setAttribute("aria-hidden", "false");
-  text?.focus();
-  void markBlanqueoObservationOpened(item.id);
-}
-
-function hideNoteModal() {
-  const overlay = document.getElementById("blanqueo-note-overlay");
-  overlay?.classList.add("hidden");
-  overlay?.setAttribute("aria-hidden", "true");
+function syncClaveNotaField() {
+  const on = !!document.getElementById("blanqueo-clave-has-nota")?.checked;
+  const wrap = document.getElementById("blanqueo-clave-nota-wrap");
+  wrap?.classList.toggle("hidden", !on);
+  if (wrap) wrap.hidden = !on;
+  if (on) document.getElementById("blanqueo-clave-nota")?.focus();
 }
 
 function openClaveModal(item) {
   selectedId = item.id;
   const overlay = document.getElementById("blanqueo-clave-overlay");
   const input = document.getElementById("blanqueo-clave-input");
+  const notaInput = document.getElementById("blanqueo-clave-nota");
+  const hasNota = document.getElementById("blanqueo-clave-has-nota");
   const previa = String(item.aclaracion || "").trim();
-  const seed = previa && !isNoRegistrado(previa) && !isActivacionAutoNote(previa)
-    ? previa
-    : "";
+  const packed = unpackClaveAclaracion(previa);
+  const usable = previa && !isRejectedState(previa) && !isActivacionAutoNote(previa);
   if (input) {
-    input.value = seed;
+    input.value = usable ? (packed.clave || (looksLikeClaveOnly(previa) ? previa : "")) : "";
     input.placeholder = `Ej: ${claveDefault()}`;
   }
+  if (notaInput) notaInput.value = usable ? packed.nota : "";
+  if (hasNota) hasNota.checked = !!(usable && packed.nota);
+  syncClaveNotaField();
   overlay?.classList.remove("hidden");
   overlay?.setAttribute("aria-hidden", "false");
   input?.focus();
   input?.select?.();
+  void markBlanqueoObservationOpened(item.id);
 }
 
 function hideClaveModal() {
@@ -1820,15 +1881,25 @@ function hideClaveModal() {
 async function saveClaveModal() {
   if (!selectedId) return;
   const clave = String(document.getElementById("blanqueo-clave-input")?.value || "").trim();
+  const withNota = !!document.getElementById("blanqueo-clave-has-nota")?.checked;
+  const nota = withNota
+    ? String(document.getElementById("blanqueo-clave-nota")?.value || "").trim()
+    : "";
   if (!clave) {
     setStatus("Indicá la contraseña que colocaste.", true);
     document.getElementById("blanqueo-clave-input")?.focus();
     return;
   }
+  if (withNota && !nota) {
+    setStatus("Escribí la aclaración o desmarcá el check.", true);
+    document.getElementById("blanqueo-clave-nota")?.focus();
+    return;
+  }
   try {
-    await patchItem(selectedId, { listo: true, aclaracion: clave });
+    const packed = packClaveAclaracion(clave, nota);
+    await patchItem(selectedId, { listo: true, aclaracion: packed });
     hideClaveModal();
-    setStatus("Marcado como listo con la contraseña en aclaración.");
+    setStatus(nota ? "Listo con contraseña y aclaración." : "Marcado como listo con la contraseña.");
     document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
       detail: { expression: "happy", ms: 2800 },
     }));
@@ -1836,29 +1907,6 @@ async function saveClaveModal() {
     notifyBlanqueoChanged();
   } catch (err) {
     setStatus(err?.message || "No se pudo confirmar el blanqueo.", true);
-  }
-}
-
-async function saveNoteModal() {
-  if (!selectedId) return;
-  const text = String(document.getElementById("blanqueo-note-text")?.value || "").trim();
-  try {
-    if (!text) {
-      await patchItem(selectedId, { listo: true, clearAclaracion: true });
-    } else if (isNoRegistrado(text)) {
-      await patchItem(selectedId, { listo: false, aclaracion: "No registrado" });
-    } else {
-      await patchItem(selectedId, { listo: true, aclaracion: text });
-    }
-    hideNoteModal();
-    setStatus(text && !isNoRegistrado(text) ? "Listo con observación." : "Marcado como listo.");
-    document.dispatchEvent(new CustomEvent("st2:blobatar-flash", {
-      detail: { expression: "happy", ms: 2800 },
-    }));
-    await reloadList();
-    notifyBlanqueoChanged();
-  } catch (err) {
-    setStatus(err?.message || "No se pudo guardar la aclaración.", true);
   }
 }
 
@@ -1875,6 +1923,14 @@ async function patchItem(id, body) {
 
 function isNoRegistrado(value) {
   return String(value || "").trim().toLowerCase() === "no registrado";
+}
+
+function isIncorrecto(value) {
+  return String(value || "").trim().toLowerCase() === "incorrecto";
+}
+
+function isRejectedState(value) {
+  return isNoRegistrado(value) || isIncorrecto(value);
 }
 
 function escapeHtml(value) {

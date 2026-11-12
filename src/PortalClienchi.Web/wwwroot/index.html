@@ -181,12 +181,12 @@
   <link rel="stylesheet" href="/css/styles.css?v=20261112f"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20261111e"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20261112g"/>
   <link rel="stylesheet" href="/css/planillas.css?v=20261111d"/>
   <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261112f"/>
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
-  <link rel="stylesheet" href="/css/blanqueo.css?v=20261110k"/>
+  <link rel="stylesheet" href="/css/blanqueo.css?v=20261112g"/>
   <link rel="stylesheet" href="/css/borrado-bases.css?v=20261110k"/>
   <link rel="stylesheet" href="/css/st2-tour.css?v=20260907a"/>
   <link rel="stylesheet" href="/css/st2-light-rays.css?v=20260907e"/>
@@ -894,14 +894,11 @@
               </div>
 
               <div id="blanqueo-ctx" class="plan-gestor-ctx blanqueo-ctx hidden" role="menu">
-                <button type="button" class="blanqueo-ctx-listo" data-blanqueo-ctx="listo">Listo - Indicar Contraseña</button>
-                <button type="button" class="blanqueo-ctx-listo" data-blanqueo-ctx="listo-obs">Listo + Aclaración</button>
+                <button type="button" class="blanqueo-ctx-listo" data-blanqueo-ctx="listo">Listo</button>
+                <hr/>
+                <button type="button" data-blanqueo-ctx="incorrecto">Incorrecto</button>
+                <hr class="blanqueo-ctx-hr-unlisto"/>
                 <button type="button" data-blanqueo-ctx="unlisto">Quitar listo</button>
-                <hr/>
-                <button type="button" data-blanqueo-ctx="aclaracion-no-registrado">No registrado</button>
-                <hr/>
-                <button type="button" data-blanqueo-ctx="editar">Editar</button>
-                <button type="button" data-blanqueo-ctx="eliminar">Eliminar</button>
               </div>
 
               <div id="blanqueo-mod-pop" class="borrado-base-pop blanqueo-mod-pop hidden" role="dialog" aria-labelledby="blanqueo-mod-pop-title" aria-hidden="true">
@@ -2449,25 +2446,20 @@
     </div>
   </div>
 
-  <div id="blanqueo-note-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-note-title" aria-modal="true">
-    <div class="plan-user-dialog blanqueo-dialog">
-      <h3 id="blanqueo-note-title">Listo + Aclaración</h3>
-      <p class="plan-user-hint">Se marca como listo y queda esta aclaración en la columna (recuadro amarillo). Si dejás el texto vacío, queda listo sin nota.</p>
-      <label class="plan-user-label" for="blanqueo-note-text">Aclaración</label>
-      <textarea id="blanqueo-note-text" class="blanqueo-note-textarea" rows="4" maxlength="280" placeholder="Detalle de la aclaración…"></textarea>
-      <div class="plan-user-actions">
-        <button type="button" id="blanqueo-note-cancel" class="plan-gestor-btn-tool">Cancelar</button>
-        <button type="button" id="blanqueo-note-save" class="plan-gestor-btn-add">Guardar</button>
-      </div>
-    </div>
-  </div>
-
   <div id="blanqueo-clave-overlay" class="plan-user-overlay hidden" role="dialog" aria-labelledby="blanqueo-clave-title" aria-modal="true">
     <div class="plan-user-dialog blanqueo-dialog">
-      <h3 id="blanqueo-clave-title">Listo - Indicar Contraseña</h3>
-      <p class="plan-user-hint">¿Qué contraseña colocaste? Queda como globito en Aclaración (copiable).</p>
+      <h3 id="blanqueo-clave-title">Listo</h3>
+      <p class="plan-user-hint">Indicá la contraseña. Si hace falta, marcá aclaración.</p>
       <label class="plan-user-label" for="blanqueo-clave-input">Contraseña</label>
       <input id="blanqueo-clave-input" type="text" class="plan-user-input" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Ej: Sueldo.2026"/>
+      <label class="blanqueo-clave-nota-check" for="blanqueo-clave-has-nota">
+        <input id="blanqueo-clave-has-nota" type="checkbox"/>
+        <span>Aclaración</span>
+      </label>
+      <div id="blanqueo-clave-nota-wrap" class="blanqueo-clave-nota-wrap hidden" hidden>
+        <label class="plan-user-label" for="blanqueo-clave-nota">Detalle de la aclaración</label>
+        <textarea id="blanqueo-clave-nota" class="blanqueo-note-textarea" rows="3" maxlength="280" placeholder="Ej: sin MFA, ya estaba aceptado…"></textarea>
+      </div>
       <div class="plan-user-actions">
         <button type="button" id="blanqueo-clave-cancel" class="plan-gestor-btn-tool">Cancelar</button>
         <button type="button" id="blanqueo-clave-save" class="plan-gestor-btn-add">Confirmar listo</button>
@@ -3024,6 +3016,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261112f" type="module"></script>
+  <script src="/js/app.js?v=20261112g" type="module"></script>
 </body>
 </html>

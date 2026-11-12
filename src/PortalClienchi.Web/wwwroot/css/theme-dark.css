@@ -1761,6 +1761,22 @@ html.st2-theme-dark .blanqueo-clave-pill.blanqueo-clave-bubble:focus-visible {
   border-color: #fdba74;
   color: #ffedd5;
 }
+html.st2-theme-dark .blanqueo-clave-pill.blanqueo-clave-bubble--soft {
+  background: rgba(42, 26, 14, 0.55);
+  border-color: rgba(251, 146, 60, 0.32);
+  color: #fdba74;
+  box-shadow: none;
+}
+html.st2-theme-dark .blanqueo-clave-pill.blanqueo-clave-bubble--soft:hover,
+html.st2-theme-dark .blanqueo-clave-pill.blanqueo-clave-bubble--soft:focus-visible {
+  background: rgba(59, 36, 18, 0.8);
+  border-color: rgba(253, 186, 116, 0.55);
+  color: #ffedd5;
+}
+html.st2-theme-dark .blanqueo-clave-nota-wrap .blanqueo-hab-count {
+  background: #f59e0b;
+  color: #1c1917;
+}
 html.st2-theme-dark .blanqueo-clave-pill--custom {
   background: #3b2a14;
   border-color: #f59e0b;
