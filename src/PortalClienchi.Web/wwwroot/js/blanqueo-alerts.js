@@ -52,6 +52,19 @@ export function getBlanqueoAlerts() {
   return cachedAlerts.slice();
 }
 
+/** Filas que alimentan el numerito de la card (pendientes + avisos personales). */
+export function getBlanqueoAlertTargets() {
+  const pending = alertMode === "confirm" ? cachedAlerts : [];
+  const personal = personalAlerts();
+  const byId = new Map();
+  for (const alert of [...pending, ...personal]) {
+    const id = Number(alert?.solicitudId || alert?.id) || 0;
+    if (!id || byId.has(id)) continue;
+    byId.set(id, alert);
+  }
+  return [...byId.values()];
+}
+
 export function notifyBlanqueoChanged() {
   void refreshBlanqueoAlerts({ force: true });
 }
@@ -112,6 +125,7 @@ export async function refreshBlanqueoAlerts({ force = false } = {}) {
     }
 
     renderBlanqueoAlertUi();
+    document.dispatchEvent(new CustomEvent("st2:blanqueo-alerts-changed"));
     return cachedAlerts;
   })();
 

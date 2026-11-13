@@ -2657,6 +2657,11 @@ html.st2-theme-dark .borrado-table tbody tr.borrado-row-listo-nota td {
   color: inherit !important;
 }
 
+html.st2-theme-dark tr.blanqueo-row-alert td {
+  background: #3b2412 !important;
+  box-shadow: inset 3px 0 0 #fb923c;
+}
+
 html.st2-theme-dark .plan-gestor-table tbody tr.blanqueo-row-listo td,
 html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-listo td {
   background: rgba(16, 185, 129, 0.14) !important;

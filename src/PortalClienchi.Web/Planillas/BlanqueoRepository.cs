@@ -421,11 +421,21 @@ public sealed class BlanqueoRepository
         var list = new List<BlanqueoAlertDto>();
         using var conn = Open();
         using var cmd = conn.CreateCommand();
+        using (var purge = conn.CreateCommand())
+        {
+            purge.CommandText = """
+                DELETE FROM blanqueo_alerts
+                WHERE solicitud_id NOT IN (SELECT id FROM blanqueo_solicitudes)
+                """;
+            purge.ExecuteNonQuery();
+        }
+
         cmd.CommandText = """
-            SELECT id, solicitud_id, portal, nro_caso, correo, tipo_solicitud, created_at, kind
-            FROM blanqueo_alerts
-            WHERE lower(email) = lower($email) AND seen = 0
-            ORDER BY id DESC
+            SELECT a.id, a.solicitud_id, a.portal, a.nro_caso, a.correo, a.tipo_solicitud, a.created_at, a.kind
+            FROM blanqueo_alerts a
+            INNER JOIN blanqueo_solicitudes s ON s.id = a.solicitud_id
+            WHERE lower(a.email) = lower($email) AND a.seen = 0
+            ORDER BY a.id DESC
             """;
         cmd.Parameters.AddWithValue("$email", normalized);
         using var r = cmd.ExecuteReader();

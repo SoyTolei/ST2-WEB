@@ -911,6 +911,11 @@ button.blanqueo-clave-sugerida-btn {
   color: #ecfdf5;
 }
 
+tr.blanqueo-row-alert td {
+  box-shadow: inset 3px 0 0 #f97316;
+  background: #fff7ed;
+}
+
 .blanqueo-filter-bar {
   display: flex;
   flex-wrap: wrap;

@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBlanqueoChanged, markBlanqueoAlertsSeenOnEnter, markBlanqueoObservationOpened } from "./blanqueo-alerts.js";
+import { notifyBlanqueoChanged, markBlanqueoAlertsSeenOnEnter, markBlanqueoObservationOpened, getBlanqueoAlertTargets } from "./blanqueo-alerts.js?v=20261114b";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**
@@ -169,6 +169,10 @@ export function initBlanqueoModule() {
   });
   document.getElementById("blanqueo-filter-portal")?.addEventListener("change", () => applyFilters());
   document.getElementById("blanqueo-filter-estado")?.addEventListener("change", () => applyFilters());
+  document.addEventListener("st2:blanqueo-alerts-changed", () => {
+    if (document.getElementById("planillas-blanqueo")?.classList.contains("hidden")) return;
+    applyFilters();
+  });
   document.getElementById("blanqueo-search")?.addEventListener("input", () => applyFilters());
   document.getElementById("blanqueo-filter-mine")?.addEventListener("change", (e) => {
     const check = e.target;
@@ -1135,6 +1139,10 @@ function normalizeBlanqueoItem(raw) {
   };
 }
 
+function alertTargetIdSet() {
+  return new Set(getBlanqueoAlertTargets().map((alert) => Number(alert.solicitudId || alert.id) || 0));
+}
+
 function getFilteredItems() {
   const month = document.getElementById("blanqueo-filter-month")?.value || "all";
   const portal = document.getElementById("blanqueo-filter-portal")?.value || "all";
@@ -1142,12 +1150,18 @@ function getFilteredItems() {
   const estado = document.getElementById("blanqueo-filter-estado")?.value || "all";
   const onlyMine = !canConfirm && !!document.getElementById("blanqueo-filter-mine")?.checked;
   const me = currentEmail();
+  const pinned = alertTargetIdSet();
+  const outsideMonth = [];
 
   const filtered = items.filter((item) => {
-    if (onlyMine && String(item.solicitadoPorEmail || "").trim().toLowerCase() !== me) return false;
-    if (!matchesEstadoFilter(item, estado, (row) => !row?.listo && !isRejectedState(row?.aclaracion))) return false;
-    if (portal !== "all" && (item.portal || "PortalCliente") !== portal) return false;
-    if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) return false;
+    const isAlert = pinned.has(Number(item.id));
+    if (!isAlert && onlyMine && String(item.solicitadoPorEmail || "").trim().toLowerCase() !== me) return false;
+    if (!isAlert && !matchesEstadoFilter(item, estado, (row) => !row?.listo && !isRejectedState(row?.aclaracion))) return false;
+    if (!isAlert && portal !== "all" && (item.portal || "PortalCliente") !== portal) return false;
+    if (month !== "all" && monthKeyFromIso(item.fechaSolicitud) !== month) {
+      if (isAlert) outsideMonth.push(item);
+      return false;
+    }
     if (q) {
       const hay = [
         item.correo,
@@ -1164,8 +1178,14 @@ function getFilteredItems() {
     return true;
   });
 
+  filtered.outsideMonth = outsideMonth;
+  if (outsideMonth.length) filtered.unshift(...outsideMonth);
+
   const dir = fechaSortDir === "asc" ? 1 : -1;
   filtered.sort((a, b) => {
+    const pa = pinned.has(Number(a.id)) ? 0 : 1;
+    const pb = pinned.has(Number(b.id)) ? 0 : 1;
+    if (pa !== pb) return pa - pb;
     const fa = String(a.fechaSolicitud || "");
     const fb = String(b.fechaSolicitud || "");
     if (fa !== fb) return fa < fb ? -dir : dir;
@@ -1192,13 +1212,20 @@ function syncFechaSortHeader() {
 
 function applyFilters() {
   const filtered = getFilteredItems();
+  const outside = filtered.outsideMonth || [];
   renderTable(filtered);
   const count = document.getElementById("blanqueo-count");
   if (count) count.textContent = filtered.length ? `(${filtered.length})` : "";
   syncMonthStat(filtered);
   const statusEl = document.getElementById("blanqueo-status");
   if (statusEl && !statusEl.classList.contains("is-error")) {
-    setStatus(filtered.length ? `${filtered.length} solicitud(es).` : "Sin solicitudes con ese filtro.");
+    const base = filtered.length ? `${filtered.length} solicitud(es).` : "Sin solicitudes con ese filtro.";
+    const extra = outside.length === 1
+      ? " El aviso está arriba: es de otro mes."
+      : outside.length > 1
+        ? ` ${outside.length} avisos están arriba: son de otro mes.`
+        : "";
+    setStatus(`${base}${extra}`);
   }
 }
 
@@ -1260,6 +1287,10 @@ const ROW_INTERACTIVE_SELECTOR = "[data-blanqueo-copy-mail], [data-blanqueo-copy
 function buildRow(item) {
   const row = document.createElement("tr");
   if (selectedId === item.id) row.classList.add("selected");
+  if (alertTargetIdSet().has(Number(item.id))) {
+    row.classList.add("blanqueo-row-alert");
+    row.title = "Este es el aviso del numerito";
+  }
   row.classList.add(portalRowClass(item.portal));
   const hasAclaracion = !!String(item.aclaracion || "").trim();
   const noReg = isRejectedState(item.aclaracion) && !item.listo;
