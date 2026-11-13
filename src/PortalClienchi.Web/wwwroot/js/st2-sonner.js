@@ -7,7 +7,7 @@ import {
   foodForToast,
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
-} from "./st2-toast-greet.js?v=20261114c";
+} from "./st2-toast-greet.js?v=20261114d";
 import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261114c";
 
 export const ST2_TOAST = {

@@ -3,17 +3,17 @@ import { initLightRays } from "./st2-light-rays.js?v=20260907e";
 import { initGooeyNav, playGooeyNav, syncGooeyNav } from "./st2-gooey-nav.js?v=20260907c";
 import { initSpotlightCards } from "./st2-spotlight-card.js?v=20261110g";
 import { scheduleWelcomeTour, scheduleOrpenFeatureTip, setTourContext, syncHeaderTourButton } from "./st2-tour-init.js?v=20261110m";
-import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js?v=20261114c";
+import { ensureAppAccess, getPlanUserEmail, buildPlanClientHint, getOrCreateDeviceId } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, startViewAsProfile, clearViewAsProfile, getViewAsProfile, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeOportunidadModule, canSeeBlanqueoModule, canSeeBorradoBasesModule, canSeeLegalFirm, canSeeLegalHighq, canSeeLegalWestlaw, canSeeLegalCocounsel, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, canSeeProfilePortal, listVisibleProfilePortals, hasAnyProfilePortalAccess, refreshModuleFlags, getPortalClientTabLabel } from "./module-access.js";
-import { notifyAccessChanged } from "./access-alerts.js";
-import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261114c";
+import { notifyAccessChanged } from "./access-alerts.js?v=20261114d";
+import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261114d";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js?v=20261027a";
-import { initCrypticNudge } from "./st2-cryptic-nudge.js?v=20261114c";
+import { initCrypticNudge } from "./st2-cryptic-nudge.js?v=20261114d";
 import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261013d";
 import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getNotifInboxUnreadCount } from "./st2-notif-inbox.js?v=20261114c";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261114b";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261114d";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,

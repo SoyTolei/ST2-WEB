@@ -2,7 +2,7 @@
  * Aviso del Críptico: toast en Planillas, globo del blobatar y notif de escritorio.
  * Se repite hasta que jueguen la ronda abierta; si lo cierran, vuelve a los 40 min.
  */
-import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js?v=20261114c";
+import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js?v=20261114d";
 import { notifyCrypticDesktop } from "./st2-desktop-notif.js?v=20261027a";
 import { upsertNotifInboxEntry, removeNotifInboxEntry } from "./st2-notif-inbox.js?v=20261114c";
 

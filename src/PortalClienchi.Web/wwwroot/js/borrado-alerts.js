@@ -6,7 +6,7 @@ import {
 } from "./module-access.js";
 import { setPlanillasTabAlertPart } from "./planillas-tab-badge.js";
 import { notifyBorradoDesktop } from "./st2-desktop-notif.js";
-import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
+import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js?v=20261114d";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;

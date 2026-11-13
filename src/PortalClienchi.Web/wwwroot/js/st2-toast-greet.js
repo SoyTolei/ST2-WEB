@@ -232,7 +232,7 @@ function syncCrypticGreet(_pending = false) {
       openCrypticFromGreet(event);
     });
   }
-  if (link.dataset.crypticBound !== "1") {
+  if (link && link.dataset.crypticBound !== "1") {
     link.dataset.crypticBound = "1";
     link.addEventListener("click", openCrypticFromGreet);
   }

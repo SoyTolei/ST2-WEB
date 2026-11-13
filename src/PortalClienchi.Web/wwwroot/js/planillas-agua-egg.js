@@ -6,7 +6,7 @@
  */
 import { getPlanUserEmail, getPlanUserDisplayName } from "./plan-user.js";
 import { getViewAsProfile } from "./module-access.js";
-import { setSt2AguaToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
+import { setSt2AguaToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js?v=20261114d";
 
 const TARGET_EMAIL = "jorgeeduardo.teti@thomsonreuters.com";
 const LEVELS = [

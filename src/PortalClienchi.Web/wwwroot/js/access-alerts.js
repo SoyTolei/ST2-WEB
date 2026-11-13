@@ -1,7 +1,7 @@
 import { getPlanUserEmail, planUserFetch } from "./plan-user.js";
 import { isSt2SuperAdmin, isPrimarySuperAdmin, isViewingAsProfile } from "./module-access.js";
 import { notifyOwnerPresetDesktop } from "./st2-desktop-notif.js";
-import { clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
+import { clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js?v=20261114d";
 
 const POLL_MS_VISIBLE = 5000;
 const POLL_MS_HIDDEN = 30000;

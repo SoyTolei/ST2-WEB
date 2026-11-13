@@ -14,17 +14,17 @@ import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
   renderBlanqueoAlertUi,
-} from "./blanqueo-alerts.js?v=20261114b";
+} from "./blanqueo-alerts.js?v=20261114d";
 import {
   startBorradoAlertsPolling,
   renderBorradoAlertUi,
-} from "./borrado-alerts.js";
+} from "./borrado-alerts.js?v=20261114d";
 import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
-} from "./access-alerts.js";
+} from "./access-alerts.js?v=20261114d";
 import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js?v=20261013d";
-import { syncAguaEgg } from "./planillas-agua-egg.js";
+import { syncAguaEgg } from "./planillas-agua-egg.js?v=20261114d";
 import {
   initSt2Tours,
   setTourContext,
