@@ -1537,6 +1537,9 @@ function claveDefault() {
   return String(defaultClaveBlanqueo || "Sueldo.2027").trim() || "Sueldo.2027";
 }
 
+/** Lo que se usaba antes de pasar la sugerida a Sueldo.2027. Los listos viejos no guardaban la clave. */
+const CLAVE_HISTORICA = "Sueldo.2026";
+
 function isBlanqueoConClave(item) {
   const t = String(item?.tipoSolicitud || "");
   // On Balance / ONVIO: Blanqueo (+ MFA). Portal Cliente: Cambio de contraseña.
@@ -1663,9 +1666,9 @@ function formatAclaracionCell(item) {
         || `<span class="blanqueo-pill note" title="${escapeHtml(packed.nota)}">${escapeHtml(packed.nota)}</span>`;
     }
   }
-  // Histórico: listo sin texto → seguimos mostrando la clave por defecto (no se borró del servidor).
+  // Histórico: listo sin texto guardado. Esas filas son anteriores a la sugerida vigente.
   if (item?.listo && isBlanqueoConClave(item)) {
-    return formatClaveCopyPill(claveDefault(), "Clave histórica por defecto · clic para copiar", { bubble: true, soft: true }) || "—";
+    return formatClaveCopyPill(CLAVE_HISTORICA, "Clave histórica · clic para copiar", { bubble: true, soft: true }) || "—";
   }
   return "—";
 }
