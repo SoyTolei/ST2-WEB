@@ -10,6 +10,8 @@ const ALLOWED_IDS = new Set([
   "st2-toast-blanqueo-mine",
   "st2-toast-borrado",
   "st2-toast-borrado-mine",
+  "st2-toast-cryptic-am",
+  "st2-toast-cryptic-pm",
 ]);
 const TITLE_BY_ID = {
   "st2-toast-update": "Actualización",
@@ -18,6 +20,8 @@ const TITLE_BY_ID = {
   "st2-toast-blanqueo-mine": "Tu blanqueo",
   "st2-toast-borrado": "Borrado",
   "st2-toast-borrado-mine": "Tu borrado",
+  "st2-toast-cryptic-am": "Críptico",
+  "st2-toast-cryptic-pm": "Críptico",
 };
 
 /** @type {Array<{ id: string, title: string, body: string, tone: string, at: number, seen: boolean }>} */
@@ -187,6 +191,10 @@ function navigateFromNotif(id) {
   if (key === "st2-toast-borrado" || key === "st2-toast-borrado-mine") {
     document.querySelector('.tab-btn[data-tab="planillas"]')?.click();
     document.dispatchEvent(new CustomEvent("st2:open-borrado-from-alert"));
+    return;
+  }
+  if (key === "st2-toast-cryptic-am" || key === "st2-toast-cryptic-pm") {
+    document.dispatchEvent(new CustomEvent("st2:open-cryptic"));
   }
 }
 
@@ -197,16 +205,16 @@ function ensurePanel() {
   el.className = "st2-notif-inbox hidden";
   el.setAttribute("hidden", "");
   el.setAttribute("role", "dialog");
-  el.setAttribute("aria-label", "Bandeja de avisos");
+  el.setAttribute("aria-label", "Notificaciones");
   el.innerHTML = `
     <div class="st2-notif-inbox__head">
       <div class="st2-notif-inbox__titles">
-        <strong>Avisos</strong>
+        <strong>Notificaciones</strong>
         <span class="st2-notif-inbox__unread" data-unread hidden></span>
       </div>
       <button type="button" class="st2-notif-inbox__close" aria-label="Cerrar">×</button>
     </div>
-    <div class="st2-notif-inbox__empty" data-empty hidden>No hay avisos todavía.</div>
+    <div class="st2-notif-inbox__empty" data-empty hidden>No hay notificaciones.</div>
     <ul class="st2-notif-inbox__list" data-list></ul>
   `;
   document.body.appendChild(el);
@@ -264,7 +272,6 @@ function paintList() {
               <time class="st2-notif-inbox__time" datetime="${new Date(item.at).toISOString()}">${escapeHtml(when)}</time>
             </span>
             <span class="st2-notif-inbox__body">${escapeHtml(item.body)}</span>
-            <span class="st2-notif-inbox__ago">${item.seen ? "Visto · clic para abrir" : "Sin ver · clic para abrir"}</span>
           </span>
         </li>`;
     })

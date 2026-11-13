@@ -2,7 +2,7 @@
  * Campanita junto al saludo del blobatar (React Bits BellToggle, compacta).
  * Abre la bandeja de avisos de update web / descargas.
  */
-import { getNotifInboxUnreadCount, openNotifInbox, toggleNotifInbox } from "./st2-notif-inbox.js?v=20261112m";
+import { getNotifInboxUnreadCount, openNotifInbox, toggleNotifInbox } from "./st2-notif-inbox.js?v=20261114c";
 
 const BELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V10a6 6 0 0 1 12 0v6.5l1.6 2.3H4.4L6 16.5z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>';
 
@@ -29,7 +29,7 @@ export function mountGreetBell(host) {
   host.dataset.greetBellReady = "1";
   host.classList.add("st2-greet-bell", "bell-toggle");
   host.innerHTML = `
-    <button type="button" class="st2-greet-bell__button bell-toggle__button" aria-label="Avisos" title="Avisos">
+    <button type="button" class="st2-greet-bell__button bell-toggle__button" aria-label="Notificaciones" title="Notificaciones">
       <span class="bell-toggle__bell" aria-hidden="true">
         <span class="bell-toggle__glyph">${BELL_SVG}</span>
         <svg class="bell-toggle__wave bell-toggle__wave--left" viewBox="0 0 14 14"><path d="M14 8a6 6 0 0 0-6 6"/><path d="M14 4A10 10 0 0 0 4 14"/></svg>

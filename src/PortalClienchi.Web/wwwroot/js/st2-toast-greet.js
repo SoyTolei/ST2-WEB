@@ -214,18 +214,16 @@ function syncCrypticPopTimer(on) {
   crypticPopTimer = window.setInterval(popCrypticBubble, CRYPTIC_POP_MS);
 }
 
-function syncCrypticGreet(pending = crypticPending) {
+function syncCrypticGreet(_pending = false) {
   const link = document.getElementById("st2-blobatar-cryptic");
   const bubble = document.getElementById("st2-blobatar-greet");
   const avatar = document.getElementById("st2-session-avatar-host");
-  if (!link) return;
-  const show = pending && bubble && !bubble.classList.contains("hidden");
-  link.textContent = crypticLinkCopy();
-  link.classList.toggle("hidden", !show);
-  if (show) link.removeAttribute("hidden");
-  else link.setAttribute("hidden", "");
-  bubble?.classList.toggle("st2-blobatar-greet--cryptic", !!show);
-  avatar?.classList.toggle("st2-blobatar-cryptic-dot", !!show);
+  if (link) {
+    link.classList.add("hidden");
+    link.setAttribute("hidden", "");
+  }
+  bubble?.classList.remove("st2-blobatar-greet--cryptic");
+  avatar?.classList.remove("st2-blobatar-cryptic-dot");
   if (!crypticBubbleBound && bubble) {
     crypticBubbleBound = true;
     bubble.addEventListener("click", (event) => {
@@ -240,17 +238,11 @@ function syncCrypticGreet(pending = crypticPending) {
   }
 }
 
-document.addEventListener("st2:cryptic-pending", (event) => {
-  const next = Boolean(event.detail?.pending);
-  const afternoon = Boolean(event.detail?.afternoon);
-  const becamePending = next && !crypticPending;
-  crypticPending = next;
-  crypticAfternoon = afternoon;
-  syncCrypticGreet();
-  syncCrypticPopTimer(next);
-  if (becamePending) {
-    window.setTimeout(popCrypticBubble, 280);
-  }
+document.addEventListener("st2:cryptic-pending", () => {
+  crypticPending = false;
+  crypticAfternoon = false;
+  syncCrypticGreet(false);
+  syncCrypticPopTimer(false);
 });
 
 document.addEventListener("visibilitychange", () => {

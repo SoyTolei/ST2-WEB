@@ -2,8 +2,9 @@
  * Aviso del Críptico: toast en Planillas, globo del blobatar y notif de escritorio.
  * Se repite hasta que jueguen la ronda abierta; si lo cierran, vuelve a los 40 min.
  */
-import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js?v=20261027a";
+import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js?v=20261114c";
 import { notifyCrypticDesktop } from "./st2-desktop-notif.js?v=20261027a";
+import { upsertNotifInboxEntry, removeNotifInboxEntry } from "./st2-notif-inbox.js?v=20261114c";
 
 const DISMISS_KEY = "st2-cryptic-nudge-v1";
 const SNOOZE_MS = 40 * 60 * 1000;
@@ -50,20 +51,38 @@ function openCryptic() {
   document.dispatchEvent(new CustomEvent("st2:open-cryptic"));
 }
 
-function paintToast(detail = lastDetail) {
-  const pending = Boolean(detail?.pending);
-  const sig = pendingSignature(detail);
-  if (!pending || !sig) {
-    clearSt2AlertToast(ST2_TOAST.cryptic);
-    return;
-  }
-  if (isSnoozed(sig)) {
-    clearSt2AlertToast(ST2_TOAST.cryptic);
-    return;
-  }
+const MORNING_ID = "st2-toast-cryptic-am";
+const AFTERNOON_ID = "st2-toast-cryptic-pm";
 
-  // Sin toast sticky de críptico: solo update web / descargas.
+function syncCrypticInbox(detail = lastDetail) {
+  const slots = (detail?.slots || []).map(Number).filter(Number.isFinite);
+  const morning = slots.some((slot) => slot <= 12 * 60);
+  const afternoon = slots.some((slot) => slot > 12 * 60);
+  if (morning) {
+    upsertNotifInboxEntry({
+      id: MORNING_ID,
+      title: "Críptico",
+      body: "Ya está el Críptico de la mañana.",
+      tone: "warn",
+    });
+  } else {
+    removeNotifInboxEntry(MORNING_ID);
+  }
+  if (afternoon) {
+    upsertNotifInboxEntry({
+      id: AFTERNOON_ID,
+      title: "Críptico",
+      body: "Ya está el Críptico de la tarde.",
+      tone: "warn",
+    });
+  } else {
+    removeNotifInboxEntry(AFTERNOON_ID);
+  }
+}
+
+function paintToast(detail = lastDetail) {
   clearSt2AlertToast(ST2_TOAST.cryptic);
+  syncCrypticInbox(detail);
 }
 
 function onPending(event) {

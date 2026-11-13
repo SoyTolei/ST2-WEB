@@ -733,12 +733,31 @@ body.st2-session-menu-open .st2-blobatar-greet {
 
 .st2-greet-bell .st2-greet-bell__button,
 .st2-greet-bell .bell-toggle__button {
+  position: relative;
   width: 34px;
   height: 34px;
   padding: 0;
   justify-content: center;
   border-radius: 999px;
   gap: 0;
+  overflow: visible;
+}
+
+.st2-greet-bell .bell-toggle__bell {
+  overflow: visible;
+}
+
+.st2-greet-bell .bell-toggle__badge {
+  top: auto;
+  right: auto;
+  left: 18px;
+  bottom: 16px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 10px;
+  z-index: 2;
 }
 
 .st2-greet-bell.has-unread .bell-toggle__button {
