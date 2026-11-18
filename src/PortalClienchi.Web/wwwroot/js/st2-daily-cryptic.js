@@ -150,16 +150,19 @@ function render() {
   const ranking = snapshot.ranking || [];
   const ranked = snapshot.ranked !== false;
   const stage = document.body.classList.contains("st2-cryptic-public");
-  const weekend = snapshot.phase === "weekend";
+  const holiday = snapshot.phase === "holiday";
+  const weekend = snapshot.phase === "weekend" || holiday;
   const weekday = new Date(`${snapshot.date}T12:00:00-03:00`).getDay();
   const dateLabel = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
     day: "numeric",
     month: "long",
   }).format(new Date(`${snapshot.date}T12:00:00-03:00`));
-  const weekendCopy = weekday === 0 || weekday === 6
-    ? "El Críptico es de lunes a viernes. Vuelve el lunes a las 09:00."
-    : "Hoy arranca a las 09:00.";
+  const weekendCopy = holiday
+    ? `Hoy es feriado${snapshot.closure ? `: ${snapshot.closure}` : ""}. No hay críptico. Vuelve el próximo día hábil a las 09:00.`
+    : weekday === 0 || weekday === 6
+      ? "El Críptico es de lunes a viernes. Vuelve el lunes a las 09:00."
+      : "Hoy arranca a las 09:00.";
 
   activeSlots?.destroy();
   activeSlots = null;
@@ -188,7 +191,7 @@ function render() {
       `).join("")}
     </div>`}
     <div class="st2-cryptic-body">
-      ${weekend ? renderNotice("Fin de semana", weekendCopy) : renderRound(round)}
+      ${weekend ? renderNotice(holiday ? "Feriado" : "Fin de semana", weekendCopy) : renderRound(round)}
     </div>
     ${stage ? `<p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras.</p>` : ""}
     ${!stage && ranked ? `

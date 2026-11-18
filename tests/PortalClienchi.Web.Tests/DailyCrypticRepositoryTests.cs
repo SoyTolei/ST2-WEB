@@ -93,7 +93,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var overnight = _repository.GetStatus(Email, earlyMorning);
         Assert.Equal("2026-10-23", overnight.Date);
         Assert.Equal("available", overnight.Rounds[0].State);
-        Assert.Equal("blocked", overnight.Rounds[1].State);
+        Assert.Equal("available", overnight.Rounds[1].State);
 
         var answer = ScheduledAnswer(overnight.Date, DailyCrypticRepository.MorningSlot);
         var solved = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, earlyMorning);
@@ -199,7 +199,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Equal("active", preview.Phase);
         Assert.Equal("2026-10-26", preview.Date);
         Assert.Equal("available", preview.Rounds[0].State);
-        Assert.Equal("blocked", preview.Rounds[1].State);
+        Assert.Equal("available", preview.Rounds[1].State);
 
         var answer = ScheduledAnswer(preview.Date, DailyCrypticRepository.MorningSlot);
         var ownerSolve = _repository.Submit(owner, DailyCrypticRepository.MorningSlot, answer, sunday);
@@ -241,7 +241,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Progressive_queue_starts_after_today_and_keeps_the_afternoon_locked()
+    public void Progressive_queue_starts_after_today_and_the_afternoon_opens_on_its_own()
     {
         var monday = AtArgentina(2026, 10, 26, 10, 0);
         var today = _repository.GetStatus(Email, monday);
@@ -253,17 +253,15 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Equal("upcoming", next.Rounds[1].State);
         Assert.Null(next.Rounds[1].Clue);
 
-        var afternoonLocked = AtArgentina(2026, 10, 27, 13, 30);
-        var locked = _repository.GetStatus(Email, afternoonLocked);
-        Assert.Equal("blocked", locked.Rounds[1].State);
-        Assert.Null(locked.Rounds[1].Clue);
+        var afternoonOpen = AtArgentina(2026, 10, 27, 13, 30);
+        var opened = _repository.GetStatus(Email, afternoonOpen);
+        Assert.Equal("available", opened.Rounds[1].State);
+        Assert.Equal("Donde vivís: el lodo se traga el uno (6)", opened.Rounds[1].Clue);
 
-        var first = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "CARTA", tuesday);
-        Assert.True(first.Correct);
-
-        var unlocked = _repository.GetStatus(Email, afternoonLocked);
-        Assert.Equal("Donde vivís: el lodo se traga el uno (6)", unlocked.Rounds[1].Clue);
-        Assert.Equal("available", unlocked.Rounds[1].State);
+        var holiday = _repository.GetStatus(Email, AtArgentina(2026, 11, 23, 10, 0));
+        Assert.Equal("holiday", holiday.Phase);
+        Assert.Equal("Día de la Soberanía Nacional", holiday.Closure);
+        Assert.Empty(holiday.Rounds);
     }
 
     private string ScheduledAnswer(string date, int slot)

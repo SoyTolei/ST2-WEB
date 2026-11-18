@@ -52,20 +52,22 @@ public sealed class DailyCrypticRepository
         var quarterStart = new DateOnly(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1);
         var season = $"Q{(date.Month - 1) / 3 + 1} {date.Year}";
         var seasonRanking = ranked
-            ? LoadRanking(conn, quarterStart, quarterStart.AddMonths(3))
+            ? LoadRanking(conn, quarterStart, quarterStart.AddMonths(3), includeBonus: true)
             : [];
         if (window.Closed)
         {
+            var holiday = ArgentinaHolidays.TryGetName(date, out var holidayName);
             return new DailyCrypticStatusDto(
                 date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 "America/Argentina/Buenos_Aires",
-                "weekend",
+                holiday ? "holiday" : "weekend",
                 NextOpen(localNow, window, []).ToString("O"),
                 [],
                 [],
                 season,
                 seasonRanking,
-                ranked);
+                ranked,
+                holiday ? holidayName : null);
         }
 
         var daySlots = ReadScheduledSlots(conn, null, date);
@@ -104,12 +106,6 @@ public sealed class DailyCrypticRepository
         using var tx = conn.BeginTransaction(deferred: false);
         if (LoadSolve(conn, tx, normalizedEmail, date, slot) is not null)
             throw new InvalidOperationException("Esta ronda ya está resuelta.");
-
-        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
-        {
-            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
-        }
 
         var bit = NormalizeHintKind(kind);
         var mask = LoadHintMask(conn, tx, normalizedEmail, date, slot);
@@ -173,12 +169,6 @@ public sealed class DailyCrypticRepository
                 "Esta ronda ya estaba resuelta.",
                 Math.Max(0, MaxAttempts - solved.AttemptCount),
                 GetStatus(normalizedEmail, nowUtc));
-        }
-
-        foreach (var priorSlot in daySlots.Where(item => SlotMinute(item) < SlotMinute(slot)))
-        {
-            if (LoadSolve(conn, tx, normalizedEmail, date, priorSlot) is null)
-                throw new InvalidOperationException($"Primero resolvé la ronda de las {SlotLabel(priorSlot)}.");
         }
 
         var attemptsUsed = CountAttempts(conn, tx, normalizedEmail, date, slot);
@@ -399,7 +389,8 @@ public sealed class DailyCrypticRepository
     }
 
     private static bool IsPlayDay(DateOnly date) =>
-        date.DayOfWeek is >= DayOfWeek.Monday and <= DayOfWeek.Friday;
+        date.DayOfWeek is >= DayOfWeek.Monday and <= DayOfWeek.Friday
+        && !ArgentinaHolidays.IsHoliday(date);
 
     private static CompetitionWindow ResolveCompetition(DateTimeOffset localNow)
     {
@@ -450,7 +441,6 @@ public sealed class DailyCrypticRepository
         bool forceOpen = false)
     {
         var rounds = new List<DailyCrypticRoundDto>(daySlots.Count);
-        var priorSolved = true;
         var minute = MinuteOf(localNow);
         foreach (var slot in daySlots)
         {
@@ -458,16 +448,14 @@ public sealed class DailyCrypticRepository
                 ?? throw new InvalidOperationException("Falta la pista programada.");
             var solve = LoadSolve(conn, null, email, date, slot);
             var attempts = CountAttempts(conn, null, email, date, slot);
-            var opened = overnight || minute >= SlotMinute(slot);
+            var opened = forceOpen || overnight || minute >= SlotMinute(slot);
             var state = solve is not null
                 ? "solved"
                 : !opened
                     ? "upcoming"
-                    : !priorSolved
-                        ? "blocked"
-                        : attempts >= MaxAttempts
-                            ? "failed"
-                            : "available";
+                    : attempts >= MaxAttempts
+                        ? "failed"
+                        : "available";
 
             var revealClue = state is "available" or "solved" or "failed";
             var revealSolution = state == "solved";
@@ -496,13 +484,15 @@ public sealed class DailyCrypticRepository
                 revealSolution ? clue.Parse : null,
                 PopCount(hintMask),
                 hintMask));
-
-            priorSolved = priorSolved && solve is not null;
         }
         return rounds;
     }
 
-    private IReadOnlyList<DailyCrypticRankingDto> LoadRanking(SqliteConnection conn, DateOnly from, DateOnly to)
+    private IReadOnlyList<DailyCrypticRankingDto> LoadRanking(
+        SqliteConnection conn,
+        DateOnly from,
+        DateOnly to,
+        bool includeBonus = false)
     {
         using var cmd = conn.CreateCommand();
         cmd.CommandText = """
@@ -521,20 +511,66 @@ public sealed class DailyCrypticRepository
         cmd.Parameters.AddWithValue("$to", DateKey(to));
         cmd.Parameters.AddWithValue("$owner", St2SuperAdmin.PrimaryEmail);
         using var reader = cmd.ExecuteReader();
-        var ranking = new List<DailyCrypticRankingDto>();
-        var rank = 0;
+        var rows = new List<(string Email, int Points, int Solved, int Wins, string First)>();
         while (reader.Read())
         {
-            rank++;
-            var email = reader.GetString(0);
-            ranking.Add(new DailyCrypticRankingDto(
-                rank,
-                ResolvePlayerName(email),
+            rows.Add((
+                reader.GetString(0),
                 reader.GetInt32(1),
                 reader.GetInt32(2),
-                reader.GetInt32(3)));
+                reader.GetInt32(3),
+                reader.IsDBNull(4) ? "" : reader.GetString(4)));
+        }
+
+        if (includeBonus)
+            ApplyRankingBonus(conn, rows);
+
+        rows.Sort(static (a, b) =>
+        {
+            var points = b.Points.CompareTo(a.Points);
+            if (points != 0) return points;
+            var wins = b.Wins.CompareTo(a.Wins);
+            if (wins != 0) return wins;
+            var solved = b.Solved.CompareTo(a.Solved);
+            if (solved != 0) return solved;
+            return string.Compare(a.First, b.First, StringComparison.Ordinal);
+        });
+
+        var ranking = new List<DailyCrypticRankingDto>(Math.Min(50, rows.Count));
+        for (var i = 0; i < rows.Count && ranking.Count < 50; i++)
+        {
+            var row = rows[i];
+            ranking.Add(new DailyCrypticRankingDto(
+                ranking.Count + 1,
+                ResolvePlayerName(row.Email),
+                row.Points,
+                row.Solved,
+                row.Wins));
         }
         return ranking;
+    }
+
+    private void ApplyRankingBonus(
+        SqliteConnection conn,
+        List<(string Email, int Points, int Solved, int Wins, string First)> rows)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT email, points FROM daily_cryptic_bonus";
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var email = reader.GetString(0);
+            var extra = reader.GetInt32(1);
+            var index = rows.FindIndex(row => string.Equals(row.Email, email, StringComparison.OrdinalIgnoreCase));
+            if (index >= 0)
+            {
+                var row = rows[index];
+                rows[index] = (row.Email, row.Points + extra, row.Solved, row.Wins, row.First);
+                continue;
+            }
+
+            rows.Add((email, extra, 0, 0, ""));
+        }
     }
 
     private string ResolvePlayerName(string email)
@@ -982,6 +1018,26 @@ public sealed class DailyCrypticRepository
             """;
         cmd.ExecuteNonQuery();
         EnsureHintKindsColumn(conn);
+        EnsureRankingBonus(conn);
+    }
+
+    private static void EnsureRankingBonus(SqliteConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS daily_cryptic_bonus (
+                email TEXT PRIMARY KEY,
+                points INTEGER NOT NULL,
+                note TEXT NOT NULL
+            );
+            INSERT OR IGNORE INTO daily_cryptic_bonus (email, points, note)
+            VALUES (
+                'yohanaelizabeth.orellana@thomsonreuters.com',
+                15,
+                'Ajuste del ranking general'
+            );
+            """;
+        cmd.ExecuteNonQuery();
     }
 
     private static void EnsureHintKindsColumn(SqliteConnection conn)
