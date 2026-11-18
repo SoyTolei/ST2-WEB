@@ -14,6 +14,7 @@ const SETTLE = 0.3;
 const BOUNCE = 0.2;
 const RISE = 8;
 const CASCADE = 20;
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function playSpring(from, to, delayMs, onUpdate) {
   const zeta = 1 - BOUNCE;
@@ -39,20 +40,71 @@ function playSpring(from, to, delayMs, onUpdate) {
   });
 }
 
+function normalizeLocked(locked) {
+  if (Array.isArray(locked)) {
+    return new Set(locked.map((index) => Number(index)).filter((index) => Number.isInteger(index) && index >= 0));
+  }
+  const count = Math.max(0, Number(locked) || 0);
+  return new Set(Array.from({ length: count }, (_, index) => index));
+}
+
+function seedSlots(length, initial) {
+  const slots = Array.from({ length }, () => "");
+  if (Array.isArray(initial)) {
+    for (let index = 0; index < length; index += 1) {
+      const char = lettersOf(initial[index] || "")[0] || "";
+      if (char) slots[index] = char;
+    }
+    return slots;
+  }
+  const text = String(initial ?? "");
+  if (text.includes("_") || text.includes(".")) {
+    for (let index = 0; index < Math.min(length, text.length); index += 1) {
+      const char = lettersOf(text[index])[0] || "";
+      if (char) slots[index] = char;
+    }
+    return slots;
+  }
+  const chars = lettersOf(text);
+  for (let index = 0; index < Math.min(length, chars.length); index += 1) {
+    slots[index] = chars[index];
+  }
+  return slots;
+}
+
 export function createCodeSlots(container, {
   groups,
   initial = "",
   locked = 0,
+  animateIndices = [],
   onChange,
   autoFocus = false,
 } = {}) {
   const layout = (groups?.length ? groups : [4]).filter((count) => count > 0);
   const length = layout.reduce((sum, count) => sum + count, 0);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const slots = Array.from({ length }, (_, index) => lettersOf(initial)[index] || "");
+  const lockedSet = normalizeLocked(locked);
+  const animateSet = new Set(
+    (Array.isArray(animateIndices) ? animateIndices : [])
+      .map((index) => Number(index))
+      .filter((index) => Number.isInteger(index) && index >= 0 && index < length),
+  );
+  const slots = seedSlots(length, initial);
+  for (const index of lockedSet) {
+    if (index < length && !slots[index]) lockedSet.delete(index);
+  }
   let armed = !slots.every(Boolean);
   const slotEls = [];
-  let active = Math.max(0, slots.findIndex((slot) => !slot) === -1 ? length - 1 : slots.findIndex((slot) => !slot));
+  const firstWritable = () => {
+    for (let index = 0; index < length; index += 1) {
+      if (!lockedSet.has(index) && !slots[index]) return index;
+    }
+    for (let index = 0; index < length; index += 1) {
+      if (!lockedSet.has(index)) return index;
+    }
+    return 0;
+  };
+  let active = firstWritable();
   let focused = false;
   let busy = false;
   let destroyed = false;
@@ -61,7 +113,9 @@ export function createCodeSlots(container, {
   container.classList.add("code-slots");
   container.style.setProperty("--cs-accent", "#ec4899");
   container.style.setProperty("--cs-danger", "#ff3b30");
-  const progress = Array.from({ length }, (_, index) => (slots[index] ? 1 : 0));
+  const progress = Array.from({ length }, (_, index) => (
+    slots[index] && !animateSet.has(index) ? 1 : 0
+  ));
   const motionGen = Array.from({ length }, () => 0);
   container.innerHTML = `
     <div class="code-slots__row" data-status="idle">
@@ -124,11 +178,13 @@ export function createCodeSlots(container, {
     });
   };
 
+  const snapshot = () => slots.map((char) => char || "");
+
   const paint = () => {
     slotEls.forEach((el, index) => {
       const char = slots[index];
-      el.classList.toggle("is-hint", index < locked && !!char);
-      el.classList.toggle("is-active", focused && index === active && !busy && index >= locked);
+      el.classList.toggle("is-hint", lockedSet.has(index) && !!char);
+      el.classList.toggle("is-active", focused && index === active && !busy && !lockedSet.has(index));
       el.classList.toggle("is-caret", focused && index === active && !char && !busy && row.dataset.status !== "success");
       const digit = el.querySelector(".code-slots__digit");
       if (char) digit.textContent = char;
@@ -138,34 +194,49 @@ export function createCodeSlots(container, {
     else delete row.dataset.focused;
   };
 
-  const emit = () => onChange?.(slots.join(""));
+  const emit = () => onChange?.(slots.join(""), snapshot());
+
+  const nextEmptyWritable = (from = 0) => {
+    for (let index = Math.max(0, from); index < length; index += 1) {
+      if (!lockedSet.has(index) && !slots[index]) return index;
+    }
+    return -1;
+  };
 
   const insert = (raw, from = active) => {
     if (busy || row.dataset.status === "success") return;
     if (slots.every(Boolean) && !armed) return;
     const chars = lettersOf(raw);
     if (!chars) return;
-    if (from < locked) from = locked;
+    let index = lockedSet.has(from) ? nextEmptyWritable(0) : from;
+    if (index < 0) index = firstWritable();
+    if (lockedSet.has(index)) {
+      index = nextEmptyWritable(index + 1);
+      if (index < 0) return;
+    }
     const step = reduceMotion ? 0 : CASCADE;
     const replacing = slots.every(Boolean);
-    let index = from;
     const letters = replacing ? chars.slice(0, 1) : chars;
+    let order = 0;
     for (const char of letters) {
+      while (index < length && lockedSet.has(index)) index += 1;
       if (index >= length) break;
       const el = slotEls[index];
       slots[index] = char;
       el.querySelector(".code-slots__digit").textContent = char;
-      void drive(index, 1, (index - from) * step);
+      void drive(index, 1, order * step);
+      order += 1;
       index += 1;
     }
-    active = Math.min(index, length - 1);
+    const next = nextEmptyWritable(0);
+    active = next >= 0 ? next : Math.min(Math.max(index - 1, 0), length - 1);
     armed = !slots.every(Boolean);
     paint();
     emit();
   };
 
   const clearSlot = (index, stepBack = false) => {
-    if (busy || index < locked) return;
+    if (busy || lockedSet.has(index)) return;
     if (!slots[index]) {
       if (stepBack) active = index;
       paint();
@@ -182,6 +253,13 @@ export function createCodeSlots(container, {
     emit();
   };
 
+  const prevWritable = (from) => {
+    for (let index = from; index >= 0; index -= 1) {
+      if (!lockedSet.has(index)) return index;
+    }
+    return firstWritable();
+  };
+
   const onKeyDown = (event) => {
     if (busy || event.metaKey || event.ctrlKey || event.altKey) return;
     const key = event.key;
@@ -193,32 +271,37 @@ export function createCodeSlots(container, {
       insert(key);
     } else if (key === "Backspace") {
       event.preventDefault();
-      if (active < locked) {
-        active = locked;
+      if (lockedSet.has(active)) {
+        active = firstWritable();
         paint();
       } else if (slots[active]) clearSlot(active);
-      else if (active > locked) clearSlot(active - 1, true);
+      else {
+        const previous = prevWritable(active - 1);
+        if (previous < active) clearSlot(previous, true);
+      }
     } else if (key === "Delete") {
       event.preventDefault();
       clearSlot(active);
     } else if (key === "ArrowLeft") {
       event.preventDefault();
-      active = Math.max(active - 1, 0);
+      active = prevWritable(active - 1);
       armed = true;
       paint();
     } else if (key === "ArrowRight") {
       event.preventDefault();
-      active = Math.min(active + 1, length - 1);
+      let next = active + 1;
+      while (next < length && lockedSet.has(next)) next += 1;
+      if (next < length) active = next;
       armed = true;
       paint();
     } else if (key === "Home") {
       event.preventDefault();
-      active = 0;
+      active = firstWritable();
       armed = true;
       paint();
     } else if (key === "End") {
       event.preventDefault();
-      active = length - 1;
+      active = prevWritable(length - 1);
       armed = true;
       paint();
     }
@@ -230,9 +313,13 @@ export function createCodeSlots(container, {
     event.preventDefault();
     if (slot) {
       const index = slotEls.indexOf(slot);
-      const firstEmpty = slots.indexOf("");
-      const limit = firstEmpty === -1 ? length - 1 : firstEmpty;
-      active = Math.max(0, Math.min(index, limit));
+      if (lockedSet.has(index)) {
+        active = firstWritable();
+      } else {
+        const firstEmpty = nextEmptyWritable(0);
+        const limit = firstEmpty === -1 ? length - 1 : firstEmpty;
+        active = Math.max(0, Math.min(index, limit));
+      }
       armed = true;
       paint();
     }
@@ -253,7 +340,7 @@ export function createCodeSlots(container, {
       return;
     }
     if (!chars) return;
-    insert(chars, chars.length === 1 ? active : 0);
+    insert(chars, chars.length === 1 ? active : firstWritable());
   });
   input.addEventListener("focus", () => {
     focused = true;
@@ -269,11 +356,20 @@ export function createCodeSlots(container, {
   observer.observe(container);
   fit();
   paint();
+  for (const index of animateSet) {
+    if (!slots[index]) continue;
+    const el = slotEls[index];
+    el.querySelector(".code-slots__digit").textContent = slots[index];
+    applyProgress(index, 0);
+    void drive(index, 1);
+  }
   if (autoFocus) input.focus();
 
   return {
     length,
     value: () => slots.join(""),
+    complete: () => slots.every(Boolean),
+    snapshot,
     focus: () => input.focus(),
     setBusy(next) {
       busy = next;
@@ -285,18 +381,20 @@ export function createCodeSlots(container, {
     async fail() {
       if (destroyed) return;
       row.dataset.status = "error";
-      const filled = slots.map((char, index) => (char ? index : -1)).filter((index) => index >= 0).reverse();
+      const filled = slots
+        .map((char, index) => (char && !lockedSet.has(index) ? index : -1))
+        .filter((index) => index >= 0)
+        .reverse();
       const step = reduceMotion ? 0 : CASCADE;
       filled.forEach((index) => {
         slots[index] = "";
       });
       await Promise.all(filled.map((index, order) => drive(index, 0, order * step)));
       if (destroyed) return;
-      slotEls.forEach((el) => {
-        el.querySelector(".code-slots__digit").textContent = "";
+      filled.forEach((index) => {
+        slotEls[index].querySelector(".code-slots__digit").textContent = "";
       });
-      slots.fill("");
-      active = 0;
+      active = firstWritable();
       armed = true;
       row.dataset.status = "idle";
       paint();

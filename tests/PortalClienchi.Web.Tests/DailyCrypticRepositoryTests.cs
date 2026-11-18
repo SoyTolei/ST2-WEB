@@ -241,6 +241,34 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     }
 
     [Fact]
+    public void Letter_hints_fill_random_slots_and_leave_one_hidden()
+    {
+        var at0900 = AtArgentina(2026, 10, 23, 9, 0);
+        var date = _repository.GetStatus(Email, at0900).Date;
+        var answer = new string(ScheduledAnswer(date, DailyCrypticRepository.MorningSlot)
+            .Where(ch => !char.IsWhiteSpace(ch))
+            .ToArray());
+        Assert.True(answer.Length > 2);
+
+        for (var i = 0; i < answer.Length - 1; i++)
+            Assert.Equal(i + 1, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, "letters", at0900));
+
+        var almost = _repository.GetStatus(Email, at0900).Rounds[0].Almost;
+        Assert.NotNull(almost);
+        Assert.Equal(answer.Length, almost!.Length);
+        Assert.Equal(answer.Length - 1, almost.Count(ch => ch != '_'));
+        Assert.Contains('_', almost);
+        for (var i = 0; i < answer.Length; i++)
+        {
+            if (almost[i] == '_') continue;
+            Assert.Equal(answer[i], almost[i]);
+        }
+
+        Assert.Equal(answer.Length - 1, _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, "letters", at0900));
+        Assert.Equal(almost, _repository.GetStatus(Email, at0900).Rounds[0].Almost);
+    }
+
+    [Fact]
     public void Progressive_queue_starts_after_today_and_the_afternoon_opens_on_its_own()
     {
         var monday = AtArgentina(2026, 10, 26, 10, 0);

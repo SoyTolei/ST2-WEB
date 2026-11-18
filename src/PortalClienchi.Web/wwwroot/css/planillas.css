@@ -6546,8 +6546,12 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   will-change: transform, opacity;
 }
 
+.code-slots__slot.is-hint .code-slots__fill {
+  background: #f97316;
+}
+
 .code-slots__slot.is-hint .code-slots__digit {
-  color: #fb923c;
+  color: #111;
 }
 
 .code-slots__slot.is-caret::after {

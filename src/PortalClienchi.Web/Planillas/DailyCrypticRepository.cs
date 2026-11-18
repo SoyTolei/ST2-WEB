@@ -498,7 +498,10 @@ public sealed class DailyCrypticRepository
                 revealSolution ? clue.Parse : null,
                 PopCount(hintMask),
                 hintMask,
-                RevealedLetters(clue.Answer, RevealedLetterCount(hintMask))));
+                RevealedLetters(
+                    clue.Answer,
+                    RevealedLetterCount(hintMask),
+                    $"{DateKey(date)}|{slot}|{email}")));
         }
         return rounds;
     }
@@ -976,13 +979,42 @@ public sealed class DailyCrypticRepository
 
     private static int RevealedLetterCount(int mask) => (mask >> 5) & 31;
 
-    private static string? RevealedLetters(string? answer, int count)
+    private static string? RevealedLetters(string? answer, int count, string seed)
     {
         if (count <= 0)
             return null;
         var letters = new string((answer ?? "").Where(ch => !char.IsWhiteSpace(ch)).ToArray());
         var take = Math.Min(count, Math.Max(0, letters.Length - 1));
-        return take == 0 ? null : letters[..take];
+        if (take <= 0)
+            return null;
+
+        var order = Enumerable.Range(0, letters.Length).ToArray();
+        var rng = new Random(StableSeed(seed));
+        for (var i = order.Length - 1; i > 0; i--)
+        {
+            var j = rng.Next(i + 1);
+            (order[i], order[j]) = (order[j], order[i]);
+        }
+
+        var chars = new char[letters.Length];
+        Array.Fill(chars, '_');
+        for (var i = 0; i < take; i++)
+            chars[order[i]] = letters[order[i]];
+        return new string(chars);
+    }
+
+    private static int StableSeed(string text)
+    {
+        unchecked
+        {
+            var hash = 2166136261u;
+            foreach (var ch in text)
+            {
+                hash ^= ch;
+                hash *= 16777619u;
+            }
+            return (int)hash;
+        }
     }
 
     private static int HintCost(int mask) =>

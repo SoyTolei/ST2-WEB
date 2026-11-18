@@ -1,4 +1,4 @@
-import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261118d";
+import { createCodeSlots, groupsFromEnumeration, lettersOf } from "./st2-code-slots.js?v=20261118e";
 
 const API = "/api/cryptic";
 const STATE_LABELS = {
@@ -29,6 +29,7 @@ let pendingFocus = false;
 let statusNote = "";
 let statusTone = "";
 const draftBySlot = new Map();
+const almostBySlot = new Map();
 let activeSlots = null;
 
 const escapeHtml = (value) => String(value ?? "")
@@ -303,11 +304,45 @@ function nextHintKind(round) {
   return "";
 }
 
-function hintedDraft(round) {
-  const revealed = String(round?.almost || "");
-  const draft = String(draftBySlot.get(round?.slot) || "");
-  if (draft.length >= revealed.length) return draft;
-  return revealed;
+function parseAlmost(almost) {
+  const raw = String(almost || "");
+  const hints = new Map();
+  for (let index = 0; index < raw.length; index += 1) {
+    const char = lettersOf(raw[index])[0] || "";
+    if (char) hints.set(index, char);
+  }
+  return hints;
+}
+
+function mergeSlotDraft(round, length) {
+  const hints = parseAlmost(round?.almost);
+  const draft = draftBySlot.get(round?.slot);
+  const slots = Array.from({ length }, () => "");
+  for (const [index, char] of hints) {
+    if (index < length) slots[index] = char;
+  }
+  if (Array.isArray(draft)) {
+    for (let index = 0; index < length; index += 1) {
+      if (slots[index] || hints.has(index)) continue;
+      const char = lettersOf(draft[index] || "")[0] || "";
+      if (char) slots[index] = char;
+    }
+  }
+  return { slots, hints };
+}
+
+function animatedHintIndices(round, hints) {
+  const slot = round?.slot;
+  const next = String(round?.almost || "");
+  const hadPrev = almostBySlot.has(slot);
+  const prev = parseAlmost(almostBySlot.get(slot) || "");
+  almostBySlot.set(slot, next);
+  if (!hadPrev) return [];
+  const fresh = [];
+  for (const index of hints.keys()) {
+    if (!prev.has(index)) fresh.push(index);
+  }
+  return fresh;
 }
 
 function popcount(mask) {
@@ -427,21 +462,26 @@ function mountAnswerSlots(round) {
   const container = host?.querySelector("[data-code-slots]");
   if (!container || !round || round.state === "solved" || round.state === "failed") return;
   const groups = groupsFromEnumeration(round.enumeration);
+  const layout = groups.length ? groups : [8];
+  const length = layout.reduce((sum, count) => sum + count, 0);
+  const { slots, hints } = mergeSlotDraft(round, length);
+  const animateIndices = animatedHintIndices(round, hints);
   const shouldFocus = pendingFocus;
   pendingFocus = false;
   const check = host?.querySelector("[data-cryptic-check]");
-  const syncCheck = (code) => {
+  const syncCheck = () => {
     if (!check || !activeSlots) return;
-    check.disabled = String(code || "").length !== activeSlots.length;
+    check.disabled = !activeSlots.complete();
   };
   activeSlots = createCodeSlots(container, {
-    groups: groups.length ? groups : [8],
-    initial: hintedDraft(round),
-    locked: String(round.almost || "").length,
+    groups: layout,
+    initial: slots,
+    locked: [...hints.keys()],
+    animateIndices,
     autoFocus: shouldFocus,
-    onChange: (code) => {
-      draftBySlot.set(round.slot, code);
-      syncCheck(code);
+    onChange: (_code, snapshot) => {
+      draftBySlot.set(round.slot, snapshot);
+      syncCheck();
       if (!statusNote) return;
       statusNote = "";
       statusTone = "";
@@ -452,14 +492,14 @@ function mountAnswerSlots(round) {
       status.className = "st2-cryptic-status";
     },
   });
-  syncCheck(activeSlots.value());
+  syncCheck();
 }
 
 async function submitAttempt(form) {
   const round = getSelectedRound();
   const status = form.querySelector("[data-cryptic-status]");
   const answer = activeSlots?.value()?.trim() || "";
-  if (!round || !activeSlots || answer.length !== activeSlots.length || submitting) return;
+  if (!round || !activeSlots || !activeSlots.complete() || submitting) return;
 
   submitting = true;
   activeSlots.setBusy(true);
@@ -590,6 +630,8 @@ export function initDailyCryptic() {
     snapshot = null;
     selectedSlot = null;
     rankingOpen = false;
+    draftBySlot.clear();
+    almostBySlot.clear();
     void loadStatus();
   });
   void loadStatus();
