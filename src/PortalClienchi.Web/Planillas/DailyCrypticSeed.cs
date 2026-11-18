@@ -19,7 +19,9 @@ internal sealed record DailyCrypticSeedEntry(
 internal static class DailyCrypticSeed
 {
     internal const int ProgressiveFrom = 97;
+    internal const int FreshCount = 31;
     internal static readonly DateOnly ProgressiveStartsOn = new(2026, 10, 27);
+    internal static readonly DateOnly FreshStartsOn = new(2026, 11, 19);
 
     internal static IReadOnlyList<DailyCrypticSeedEntry> Items { get; } =
     [
@@ -178,6 +180,39 @@ internal static class DailyCrypticSeed
         S("En occidente un destello caótico sin romanos. (5)", "OESTE", "En occidente", "Anagrama", "caótico", "ESTEO", "DESTELLO-DLL*", 3),
         S("Es terco y loco el misterio. (7)", "SECRETO", "El misterio", "Anagrama", "loco", "ES TERCO", "ESTERCO*", 1),
         S("Césped con rey cuida el rebaño. (6)", "PASTOR", "Cuida el rebaño", "Charada", "con", "PASTO + R", "PASTO+R", 1),
+
+        // Lote nuevo, desde el 19/11/2026, intercalado con la cola que quedaba.
+        S("¡Oye! Estoy muerto por dentro. (2)", "EY", "¡Oye!", "Vaciado", "muerto por dentro", "ESTOY", "E+Y", 1),
+        S("¿Alguna duda? Argentino, eres peludo, deja atrás el juego. ¡No entran perros en la cancha! (8)", "SOSPECHA", "¿Alguna duda?", "Charada", "deja atrás / no entran", "SOS + PE + CHA", "SOS+PE+CHA", 3),
+        S("\"Dildo a 50 de descuento\" Entró la puta que acostumbra a aparecer en cámara. (8)", "DIPUTADO", "Que acostumbra a aparecer en cámara", "Contenedor", "entró", "DIDO + PUTA", "DI(PUTA)DO", 3),
+        S("Un beso al catalán y conquistó al primer amor para seguir al norte como caminador. (6)", "PEATÓN", "Caminador", "Charada", "primer / al norte", "PETÓ + A + N", "PE(A)TÓ+N", 2),
+        S("Fiel centinela, objeción que recibe el primer rey. (5)", "PERRO", "Fiel centinela", "Contenedor", "recibe el primer", "PERO + R", "PE(R)RO", 2),
+        S("Escucha y di: \"Hablo de la personificación del mal\". (6)", "DIABLO", "La personificación del mal", "Homófono", "escucha y di", "DI + HABLO", "DI+HABLO~", 2),
+        S("¡¿TU AMOR DEL PASADO irrita!? (6)", "EXALTA", "Irrita", "Charada", "caja alta", "EX + ALTA", "EX+ALTA", 3),
+        S("Característica secreta de Facebook que se usa para atraer. (4)", "CEBO", "Que se usa para atraer", "Oculta", "secreta de", "FACEBOOK", "Fa[CEBO]ok", 1),
+        S("Es tajante irrumpir las carcajadas del inglés con el hueso de un melocotón. (5)", "HACHA", "Es tajante", "Contenedor", "irrumpir", "HA HA + C", "HA(C)HA", 3),
+        S("El set estaba patas arriba antes de quitarme la cabeza de loro y todo el mundo lo estaba buscando. (6)", "TESORO", "Todo el mundo lo estaba buscando", "Charada", "patas arriba / sin cabeza", "TES + ORO", "SET<+LORO-L", 2),
+        S("Promedio y satélite, lo que mojás en el cortado (9)", "MEDIALUNA", "Lo que mojás en el cortado", "Charada", "y", "MEDIA + LUNA", "MEDIA+LUNA", 1),
+        S("La suerte se dio vuelta: dogo argentino, por ejemplo (4)", "RAZA", "Dogo argentino, por ejemplo", "Reverso", "se dio vuelta", "AZAR", "AZAR<", 1),
+        S("Se ve en el horizonte de Córdoba y corta madera en el taller (6)", "SIERRA", "Horizonte de Córdoba / corta madera", "Doble definición", "y", "sierras; herramienta", "SIERRA / SIERRA", 1),
+        S("¿La comisión directiva regala un plan con amigos? (7)", "JUNTADA", "Un plan con amigos", "Charada", "regala", "JUNTA + DA", "JUNTA+DA", 2),
+        S("Poeta celta en un lío bárbaro (5)", "BARDO", "Poeta celta / lío", "Doble definición", "en", "poeta; lío", "BARDO / BARDO", 2),
+        S("Estamos orgullosos: ahí adentro vuelve el que la rompe (5)", "GROSO", "El que la rompe", "Oculta + reverso", "ahí adentro vuelve", "ESTAMOSORGULLOSOS", "[OSORG]<", 2),
+        S("El que afana en el colectivo: cachorro sin calcio (6)", "CHORRO", "El que afana", "Sustracción", "sin calcio", "CACHORRO - CA", "CACHORRO-CA", 2),
+        S("«Quiero ir bajando» lo esconde al revés: inauguró (5)", "ABRIÓ", "Inauguró", "Oculta + reverso", "lo esconde al revés", "QUIEROIRBAJANDO", "[OIRBA]<", 2),
+        S("La torta rota, baraja tu destino. (5)", "TAROT", "Baraja tu destino", "Anagrama", "rota", "TORTA", "TORTA*", 1),
+        S("Ella corre, yo rara vez lo intento (5)", "TROTA", "Ella corre", "Anagrama", "rara vez", "TRATO", "TRATO*", 2),
+        S("La anguila agitada persigue la nota dos veces al año. (9)", "AGUINALDO", "Dos veces al año", "Anagrama", "agitada", "ANGUILA DO", "ANGUILADO*", 2),
+        S("La planta se puso violenta (4)", "RUDA", "Planta / violenta", "Doble definición", "se puso", "planta; brusca", "RUDA / RUDA", 1),
+        S("El panda se quebró, Aquiles tuvo que cambiarse el jean. (8)", "PANTALÓN", "El jean", "Charada", "cambiarse", "PAN + TALÓN", "PAN+TALÓN", 3),
+        S("Selena y Jacobo se casan en la iglesia, llevan hermosas flores patrias rojas. (5)", "CEIBO", "Flores patrias rojas", "Charada", "se casan", "SE + I + BO", "SE+I+BO", 2, "SEIBO"),
+        S("Sábado y domingo para quinientos metidos en la multa inglesa (5)", "FINDE", "Sábado y domingo", "Contenedor", "metidos en", "FINE + D", "FIN(D)E", 2),
+        S("Con trofeo y primera nota andás entusiasmado (6)", "COPADO", "Andás entusiasmado", "Charada", "y", "COPA + DO", "COPA+DO", 1),
+        S("En la tarde, toma oxígeno para empezar el juicio (5)", "OCASO", "En la tarde", "Charada", "para empezar", "O + CASO", "O+CASO", 2),
+        S("Para viajar encubierto, ¡qué quilombo le toca! (6)", "BOLETO", "Para viajar", "Oculta", "encubierto", "QUILOMBOLETOCA", "quilom[BO LE TO]ca", 2),
+        S("Vegetal que recibe al este, un cuerpo celeste (7)", "PLANETA", "Un cuerpo celeste", "Contenedor", "recibe", "PLANTA + E", "PLAN(E)TA", 2),
+        S("El pelado con su corazón alborotado, recibe golpes secos. (5)", "CLAVO", "Recibe golpes secos", "Anagrama", "alborotado", "CALVO", "CALVO*", 2),
+        S("Finca ganadera: cineasta bailando (8)", "ESTANCIA", "Finca ganadera", "Anagrama", "bailando", "CINEASTA", "CINEASTA*", 2),
 
     ];
 

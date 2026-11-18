@@ -42,6 +42,7 @@ function playSpring(from, to, delayMs, onUpdate) {
 export function createCodeSlots(container, {
   groups,
   initial = "",
+  locked = 0,
   onChange,
   autoFocus = false,
 } = {}) {
@@ -126,7 +127,8 @@ export function createCodeSlots(container, {
   const paint = () => {
     slotEls.forEach((el, index) => {
       const char = slots[index];
-      el.classList.toggle("is-active", focused && index === active && !busy);
+      el.classList.toggle("is-hint", index < locked && !!char);
+      el.classList.toggle("is-active", focused && index === active && !busy && index >= locked);
       el.classList.toggle("is-caret", focused && index === active && !char && !busy && row.dataset.status !== "success");
       const digit = el.querySelector(".code-slots__digit");
       if (char) digit.textContent = char;
@@ -143,6 +145,7 @@ export function createCodeSlots(container, {
     if (slots.every(Boolean) && !armed) return;
     const chars = lettersOf(raw);
     if (!chars) return;
+    if (from < locked) from = locked;
     const step = reduceMotion ? 0 : CASCADE;
     const replacing = slots.every(Boolean);
     let index = from;
@@ -162,7 +165,7 @@ export function createCodeSlots(container, {
   };
 
   const clearSlot = (index, stepBack = false) => {
-    if (busy) return;
+    if (busy || index < locked) return;
     if (!slots[index]) {
       if (stepBack) active = index;
       paint();
@@ -190,8 +193,11 @@ export function createCodeSlots(container, {
       insert(key);
     } else if (key === "Backspace") {
       event.preventDefault();
-      if (slots[active]) clearSlot(active);
-      else if (active > 0) clearSlot(active - 1, true);
+      if (active < locked) {
+        active = locked;
+        paint();
+      } else if (slots[active]) clearSlot(active);
+      else if (active > locked) clearSlot(active - 1, true);
     } else if (key === "Delete") {
       event.preventDefault();
       clearSlot(active);

@@ -146,10 +146,10 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
 
         var solved = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, answer, at0900);
 
-        Assert.Equal(6, solved.Status.Rounds[0].Points);
+        Assert.Equal(8, solved.Status.Rounds[0].Points);
         Assert.Equal(2, solved.Status.Rounds[0].HintsUsed);
         Assert.Equal(DailyCrypticRepository.HintDefinition | DailyCrypticRepository.HintIndicator, solved.Status.Rounds[0].HintMask);
-        Assert.Equal(6, solved.Status.Ranking[0].Points);
+        Assert.Equal(8, solved.Status.Ranking[0].Points);
     }
 
     [Fact]
@@ -162,14 +162,14 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
 
         Assert.Equal(1, _repository.RevealHint(Email, morning, "definition", at0900));
         var first = _repository.Submit(Email, morning, ScheduledAnswer(date, morning), at0900);
-        Assert.Equal(8, first.Status.Rounds[0].Points);
+        Assert.Equal(9, first.Status.Rounds[0].Points);
 
         var at1330 = AtArgentina(2026, 10, 23, 13, 30);
         var second = _repository.Submit(Email, afternoon, ScheduledAnswer(date, afternoon), at1330);
 
         Assert.True(second.Correct);
         Assert.Equal(10, second.Status.Rounds[1].Points);
-        Assert.Equal(18, second.Status.Ranking.Single().Points);
+        Assert.Equal(19, second.Status.Ranking.Single().Points);
     }
 
     [Fact]

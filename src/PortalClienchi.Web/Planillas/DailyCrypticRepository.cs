@@ -110,10 +110,21 @@ public sealed class DailyCrypticRepository
 
         var bit = NormalizeHintKind(kind);
         var mask = LoadHintMask(conn, tx, normalizedEmail, date, slot);
-        if ((mask & bit) == 0 && PopCount(mask) < 4)
+        if (bit == HintAlmost)
+        {
+            var scheduled = LoadScheduledClue(conn, tx, date, slot)
+                ?? throw new InvalidOperationException("No se pudo cargar la pista de esta ronda.");
+            var maxLetters = Math.Max(0, LetterCountOf(scheduled.Answer) - 1);
+            var shown = RevealedLetterCount(mask);
+            if (shown < maxLetters)
+                mask = (mask & 31) | ((shown + 1) << 5);
+        }
+        else if ((mask & bit) == 0)
+        {
             mask |= bit;
+        }
 
-        var next = PopCount(mask);
+        var next = HintCost(mask);
         using var cmd = conn.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = """
@@ -208,7 +219,7 @@ public sealed class DailyCrypticRepository
         {
             var position = CountSolves(conn, tx, date, slot) + 1;
             var hints = CountHints(conn, tx, normalizedEmail, date, slot);
-            var roundPoints = Math.Max(1, 10 - hints * 2);
+            var roundPoints = Math.Max(1, 10 - hints);
             var alreadySolved = CountPlayerSolves(conn, tx, normalizedEmail, date);
             var completesDay = daySlots.Count == 2 && alreadySolved + 1 == 2;
             var cleanDay = completesDay
@@ -240,10 +251,9 @@ public sealed class DailyCrypticRepository
             }
             else if (hints > 0)
             {
-                var deducted = Math.Min(9, hints * 2);
                 message = points == 1
-                    ? "¡Correcto! Sumaste 1 punto, el mínimo: usaste todas las pistas."
-                    : $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {deducted} por {(hints == 1 ? "la pista" : "las pistas")}).";
+                    ? "¡Correcto! Sumaste 1 punto, el mínimo."
+                    : $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {hints} por {(hints == 1 ? "la pista" : "las pistas")}).";
             }
             else if (daySlots.Count == 2)
             {
@@ -487,7 +497,7 @@ public sealed class DailyCrypticRepository
                 revealSolution ? clue.Parse : null,
                 PopCount(hintMask),
                 hintMask,
-                !revealSolution && (hintMask & HintAlmost) != 0 ? AlmostLetters(clue.Answer) : null));
+                RevealedLetters(clue.Answer, RevealedLetterCount(hintMask))));
         }
         return rounds;
     }
@@ -710,7 +720,36 @@ public sealed class DailyCrypticRepository
         while (reader.Read())
             byKey[reader.GetString(0)] = reader.GetInt64(1);
 
-        return keys.Select(key => byKey.TryGetValue(key, out var id) ? id : 0L).Where(id => id > 0).ToList();
+        var ordered = keys.Select(key => byKey.TryGetValue(key, out var id) ? id : 0L).Where(id => id > 0).ToList();
+        return MixFreshClues(ordered);
+    }
+
+    /// <summary>
+    /// Las pistas nuevas entran desde el 19/11/2026, intercaladas con las que ya quedaban en la cola.
+    /// Lo ya sorteado antes de esa fecha no se mueve.
+    /// </summary>
+    private static List<long> MixFreshClues(List<long> ordered)
+    {
+        var freshCount = DailyCrypticSeed.FreshCount;
+        if (ordered.Count <= freshCount)
+            return ordered;
+
+        var prior = ordered.Take(ordered.Count - freshCount).ToList();
+        var fresh = ordered.Skip(ordered.Count - freshCount).ToList();
+        var reserved = PlayDaysBetween(DailyCrypticSeed.ProgressiveStartsOn, DailyCrypticSeed.FreshStartsOn) * 2;
+        var cut = Math.Min(reserved, prior.Count);
+        var mixed = prior.Take(cut).ToList();
+        var tail = prior.Skip(cut).ToList();
+        var index = 0;
+        while (index < fresh.Count || index < tail.Count)
+        {
+            if (index < fresh.Count)
+                mixed.Add(fresh[index]);
+            if (index < tail.Count)
+                mixed.Add(tail[index]);
+            index++;
+        }
+        return mixed;
     }
 
     private static int PlayDaysBetween(DateOnly from, DateOnly to)
@@ -885,7 +924,7 @@ public sealed class DailyCrypticRepository
         string email,
         DateOnly date,
         int slot) =>
-        PopCount(LoadHintMask(conn, tx, email, date, slot));
+        HintCost(LoadHintMask(conn, tx, email, date, slot));
 
     private static int LoadHintMask(
         SqliteConnection conn,
@@ -931,13 +970,22 @@ public sealed class DailyCrypticRepository
         _ => throw new ArgumentException("Elegí un tipo de pista."),
     };
 
-    private static string? AlmostLetters(string? answer)
+    private static int LetterCountOf(string? answer) =>
+        (answer ?? "").Count(ch => !char.IsWhiteSpace(ch));
+
+    private static int RevealedLetterCount(int mask) => (mask >> 5) & 31;
+
+    private static string? RevealedLetters(string? answer, int count)
     {
-        var letters = new string((answer ?? "").Where(ch => !char.IsWhiteSpace(ch)).ToArray());
-        if (letters.Length < 2)
+        if (count <= 0)
             return null;
-        return letters[..^1];
+        var letters = new string((answer ?? "").Where(ch => !char.IsWhiteSpace(ch)).ToArray());
+        var take = Math.Min(count, Math.Max(0, letters.Length - 1));
+        return take == 0 ? null : letters[..take];
     }
+
+    private static int HintCost(int mask) =>
+        PopCount(mask & 15) + RevealedLetterCount(mask);
 
     private static int PopCount(int mask)
     {

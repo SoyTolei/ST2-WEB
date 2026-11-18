@@ -1,4 +1,4 @@
-import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261023i";
+import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261118c";
 
 const API = "/api/cryptic";
 const STATE_LABELS = {
@@ -19,7 +19,6 @@ const HINT_ORDER = [
   { bit: 2, kind: "mechanism" },
   { bit: 4, kind: "indicator" },
   { bit: 8, kind: "fodder" },
-  { bit: 16, kind: "letters" },
 ];
 let rankingOpen = false;
 let rankingTab = "today";
@@ -176,7 +175,7 @@ function render() {
         ${stage && snapshot.nextAt ? `<p class="st2-cryptic-next">Siguiente críptico: ${escapeHtml(formatNext(snapshot.nextAt))}</p>` : ""}
       </div>
     </div>
-    ${stage ? "" : `<p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras. Cada pista resta 2 puntos.</p>`}
+    ${stage ? "" : ""}
     ${weekend ? "" : `
     <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico" style="grid-template-columns: repeat(${Math.max(rounds.length, 1)}, minmax(0, 1fr))">
       ${rounds.map((item) => `
@@ -194,7 +193,7 @@ function render() {
     <div class="st2-cryptic-body">
       ${weekend ? renderNotice(holiday ? "Feriado" : "Fin de semana", weekendCopy) : renderRound(round)}
     </div>
-    ${stage ? `<p class="st2-cryptic-about">La frase no dice la respuesta: la arma. Una parte define y la otra esconde las letras.</p>` : ""}
+    ${stage ? "" : ""}
     ${!stage && ranked ? `
     <div class="st2-cryptic-foot">
       <button type="button" class="st2-cryptic-rank-link" data-cryptic-action="ranking" aria-expanded="${rankingOpen ? "true" : "false"}">
@@ -250,13 +249,7 @@ function renderRound(round) {
   const attempts = round.attemptsRemaining;
   const missed = Number(round.attemptsUsed || 0) > 0 && attempts > 0;
   const tone = statusNote ? statusTone : "";
-  const mask = Number(round.hintMask || 0);
-  const nextKind = HINT_ORDER.find((item) => (mask & item.bit) === 0)?.kind;
-  const hintLabel = nextKind === "letters"
-    ? "Casi la respuesta"
-    : nextKind
-      ? (mask ? "Otra pista" : "Necesito una pista")
-      : "Pistas listas";
+  const nextKind = nextHintKind(round);
   return `
     <blockquote class="st2-cryptic-clue">${renderMarkedClue(clueText, round)} <b>${escapeHtml(round.enumeration || "")}</b></blockquote>
     ${solved ? renderSolution(round) : failed ? `
@@ -268,8 +261,8 @@ function renderRound(round) {
       <form class="st2-cryptic-form" data-cryptic-form>
         <div data-code-slots></div>
         <div class="st2-cryptic-actions">
-          <button type="button" data-cryptic-action="hint" data-hint-kind="${nextKind || ""}" ${nextKind ? "" : "disabled"}>
-            💡 ${hintLabel}
+          <button type="button" data-cryptic-action="hint" ${nextKind ? "" : "disabled"}>
+            Dame una pista
           </button>
           <button type="submit" class="st2-cryptic-check" data-cryptic-check disabled>Comprobar</button>
         </div>
@@ -297,6 +290,24 @@ function renderNotice(title, body) {
   `;
 }
 
+function nextHintKind(round) {
+  if (!round) return "";
+  const mask = Number(round.hintMask || 0);
+  const structural = HINT_ORDER.find((item) => (mask & item.bit) === 0);
+  if (structural) return structural.kind;
+  const shown = (mask >> 5) & 31;
+  const total = groupsFromEnumeration(round.enumeration).reduce((sum, count) => sum + count, 0);
+  if (total > 1 && shown < total - 1) return "letters";
+  return "";
+}
+
+function hintedDraft(round) {
+  const revealed = String(round?.almost || "");
+  const draft = String(draftBySlot.get(round?.slot) || "");
+  if (draft.length >= revealed.length) return draft;
+  return revealed;
+}
+
 function popcount(mask) {
   let count = 0;
   let bits = Number(mask) || 0;
@@ -314,14 +325,8 @@ function renderHintList(round) {
   if (mask & 2 && round.mechanism) rows.push(`<li><b>Mecanismo:</b> ${escapeHtml(round.mechanism)}</li>`);
   if (mask & 4 && round.indicator) rows.push(`<li><b>Indicador:</b> ${escapeHtml(round.indicator)}</li>`);
   if (mask & 8 && round.fodder) rows.push(`<li><b>Material:</b> ${escapeHtml(round.fodder)}</li>`);
-  if (mask & 16 && round.almost) rows.push(`<li><b>Casi toda:</b> ${escapeHtml(round.almost)}<span class="st2-cryptic-almost-blank">_</span></li>`);
   if (!rows.length) return "";
-  const used = popcount(mask);
-  const left = Math.max(1, 10 - used * 2);
-  return `
-    <ul class="st2-cryptic-hint-list">${rows.join("")}</ul>
-    ${document.body.classList.contains("st2-cryptic-public") ? "" : `<p class="st2-cryptic-hint-note">Cada pista resta 2. Si resolvés ahora sumás ${left} ${left === 1 ? "punto" : "puntos"}.</p>`}
-  `;
+  return `<ul class="st2-cryptic-hint-list">${rows.join("")}</ul>`;
 }
 
 function renderMarkedClue(text, round) {
@@ -429,7 +434,8 @@ function mountAnswerSlots(round) {
   };
   activeSlots = createCodeSlots(container, {
     groups: groups.length ? groups : [8],
-    initial: draftBySlot.get(round.slot) || round.almost || "",
+    initial: hintedDraft(round),
+    locked: String(round.almost || "").length,
     autoFocus: shouldFocus,
     onChange: (code) => {
       draftBySlot.set(round.slot, code);
@@ -545,7 +551,7 @@ function bindHostEvents() {
 
     const action = event.target.closest("[data-cryptic-action]")?.dataset.crypticAction;
     if (action === "hint") {
-      void revealHint(event.target.closest("[data-hint-kind]")?.dataset.hintKind);
+      void revealHint(nextHintKind(getSelectedRound()));
     } else if (action === "ranking") {
       rankingOpen = !rankingOpen;
       render();

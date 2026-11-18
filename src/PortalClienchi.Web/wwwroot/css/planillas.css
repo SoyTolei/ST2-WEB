@@ -6546,6 +6546,10 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   will-change: transform, opacity;
 }
 
+.code-slots__slot.is-hint .code-slots__digit {
+  color: #fb923c;
+}
+
 .code-slots__slot.is-caret::after {
   content: "";
   position: absolute;
