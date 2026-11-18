@@ -19,6 +19,7 @@ const HINT_ORDER = [
   { bit: 2, kind: "mechanism" },
   { bit: 4, kind: "indicator" },
   { bit: 8, kind: "fodder" },
+  { bit: 16, kind: "letters" },
 ];
 let rankingOpen = false;
 let rankingTab = "today";
@@ -251,7 +252,11 @@ function renderRound(round) {
   const tone = statusNote ? statusTone : "";
   const mask = Number(round.hintMask || 0);
   const nextKind = HINT_ORDER.find((item) => (mask & item.bit) === 0)?.kind;
-  const hintLabel = nextKind ? (mask ? "Otra pista" : "Necesito una pista") : "Pistas listas";
+  const hintLabel = nextKind === "letters"
+    ? "Casi la respuesta"
+    : nextKind
+      ? (mask ? "Otra pista" : "Necesito una pista")
+      : "Pistas listas";
   return `
     <blockquote class="st2-cryptic-clue">${renderMarkedClue(clueText, round)} <b>${escapeHtml(round.enumeration || "")}</b></blockquote>
     ${solved ? renderSolution(round) : failed ? `
@@ -309,10 +314,13 @@ function renderHintList(round) {
   if (mask & 2 && round.mechanism) rows.push(`<li><b>Mecanismo:</b> ${escapeHtml(round.mechanism)}</li>`);
   if (mask & 4 && round.indicator) rows.push(`<li><b>Indicador:</b> ${escapeHtml(round.indicator)}</li>`);
   if (mask & 8 && round.fodder) rows.push(`<li><b>Material:</b> ${escapeHtml(round.fodder)}</li>`);
+  if (mask & 16 && round.almost) rows.push(`<li><b>Casi toda:</b> ${escapeHtml(round.almost)}<span class="st2-cryptic-almost-blank">_</span></li>`);
   if (!rows.length) return "";
+  const used = popcount(mask);
+  const left = Math.max(1, 10 - used * 2);
   return `
     <ul class="st2-cryptic-hint-list">${rows.join("")}</ul>
-    ${document.body.classList.contains("st2-cryptic-public") ? "" : `<p class="st2-cryptic-hint-note">Estas pistas restan ${popcount(mask) * 2} puntos de los 10 de esta ronda.</p>`}
+    ${document.body.classList.contains("st2-cryptic-public") ? "" : `<p class="st2-cryptic-hint-note">Cada pista resta 2. Si resolvés ahora sumás ${left} ${left === 1 ? "punto" : "puntos"}.</p>`}
   `;
 }
 
@@ -421,7 +429,7 @@ function mountAnswerSlots(round) {
   };
   activeSlots = createCodeSlots(container, {
     groups: groups.length ? groups : [8],
-    initial: draftBySlot.get(round.slot) || "",
+    initial: draftBySlot.get(round.slot) || round.almost || "",
     autoFocus: shouldFocus,
     onChange: (code) => {
       draftBySlot.set(round.slot, code);

@@ -78,7 +78,8 @@ public sealed record DailyCrypticRoundDto(
     string? Fodder,
     string? Parse,
     int HintsUsed,
-    int HintMask);
+    int HintMask,
+    string? Almost = null);
 
 public sealed record DailyCrypticStatusDto(
     string Date,

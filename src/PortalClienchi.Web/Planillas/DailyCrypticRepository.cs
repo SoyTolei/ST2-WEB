@@ -16,6 +16,7 @@ public sealed class DailyCrypticRepository
     public const int HintMechanism = 2;
     public const int HintIndicator = 4;
     public const int HintFodder = 8;
+    public const int HintAlmost = 16;
 
     private readonly string _dbPath;
     private readonly AppAccessRepository _accessRepo;
@@ -207,7 +208,7 @@ public sealed class DailyCrypticRepository
         {
             var position = CountSolves(conn, tx, date, slot) + 1;
             var hints = CountHints(conn, tx, normalizedEmail, date, slot);
-            var roundPoints = Math.Max(0, 10 - hints * 2);
+            var roundPoints = Math.Max(1, 10 - hints * 2);
             var alreadySolved = CountPlayerSolves(conn, tx, normalizedEmail, date);
             var completesDay = daySlots.Count == 2 && alreadySolved + 1 == 2;
             var cleanDay = completesDay
@@ -239,8 +240,10 @@ public sealed class DailyCrypticRepository
             }
             else if (hints > 0)
             {
-                var deducted = hints * 2;
-                message = $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {deducted} por {(hints == 1 ? "la pista" : "las pistas")}).";
+                var deducted = Math.Min(9, hints * 2);
+                message = points == 1
+                    ? "¡Correcto! Sumaste 1 punto, el mínimo: usaste todas las pistas."
+                    : $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {deducted} por {(hints == 1 ? "la pista" : "las pistas")}).";
             }
             else if (daySlots.Count == 2)
             {
@@ -483,7 +486,8 @@ public sealed class DailyCrypticRepository
                 showFodder ? clue.Fodder : null,
                 revealSolution ? clue.Parse : null,
                 PopCount(hintMask),
-                hintMask));
+                hintMask,
+                !revealSolution && (hintMask & HintAlmost) != 0 ? AlmostLetters(clue.Answer) : null));
         }
         return rounds;
     }
@@ -923,8 +927,17 @@ public sealed class DailyCrypticRepository
         "mechanism" or "mecanismo" => HintMechanism,
         "indicator" or "indicador" => HintIndicator,
         "fodder" or "material" => HintFodder,
+        "letters" or "letras" or "almost" => HintAlmost,
         _ => throw new ArgumentException("Elegí un tipo de pista."),
     };
+
+    private static string? AlmostLetters(string? answer)
+    {
+        var letters = new string((answer ?? "").Where(ch => !char.IsWhiteSpace(ch)).ToArray());
+        if (letters.Length < 2)
+            return null;
+        return letters[..^1];
+    }
 
     private static int PopCount(int mask)
     {

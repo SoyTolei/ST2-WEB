@@ -1,3 +1,3 @@
-import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261118a";
+import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261118b";
 
 initDailyCryptic();
