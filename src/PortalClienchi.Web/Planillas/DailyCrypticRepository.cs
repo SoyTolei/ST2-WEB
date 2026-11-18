@@ -50,10 +50,11 @@ public sealed class DailyCrypticRepository
             EnsureSchedule(date);
 
         using var conn = Open();
-        var quarterStart = new DateOnly(date.Year, ((date.Month - 1) / 3) * 3 + 1, 1);
-        var season = $"Q{(date.Month - 1) / 3 + 1} {date.Year}";
+        var yearStart = new DateOnly(date.Year, 1, 1);
+        var yearEnd = new DateOnly(date.Year + 1, 1, 1);
+        var season = date.Year.ToString(CultureInfo.InvariantCulture);
         var seasonRanking = ranked
-            ? LoadRanking(conn, quarterStart, quarterStart.AddMonths(3), includeBonus: true)
+            ? LoadRanking(conn, yearStart, yearEnd, includeBonus: true)
             : [];
         if (window.Closed)
         {
@@ -1117,8 +1118,8 @@ public sealed class DailyCrypticRepository
             return;
 
         var now = ToLocal(DateTimeOffset.UtcNow);
-        var quarterStart = new DateOnly(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1);
-        var quarterEnd = quarterStart.AddMonths(3);
+        var yearStart = new DateOnly(now.Year, 1, 1);
+        var yearEnd = new DateOnly(now.Year + 1, 1, 1);
         using var earnedCmd = conn.CreateCommand();
         earnedCmd.CommandText = """
             SELECT COALESCE(SUM(points), 0)
@@ -1127,8 +1128,8 @@ public sealed class DailyCrypticRepository
               AND play_date >= $from AND play_date < $to
             """;
         earnedCmd.Parameters.AddWithValue("$email", email);
-        earnedCmd.Parameters.AddWithValue("$from", DateKey(quarterStart));
-        earnedCmd.Parameters.AddWithValue("$to", DateKey(quarterEnd));
+        earnedCmd.Parameters.AddWithValue("$from", DateKey(yearStart));
+        earnedCmd.Parameters.AddWithValue("$to", DateKey(yearEnd));
         var earned = Convert.ToInt32(earnedCmd.ExecuteScalar(), CultureInfo.InvariantCulture);
 
         using var upsert = conn.CreateCommand();
@@ -1144,8 +1145,8 @@ public sealed class DailyCrypticRepository
         upsert.Parameters.AddWithValue("$email", email);
         upsert.Parameters.AddWithValue("$points", 392 - earned);
         upsert.Parameters.AddWithValue("$note", fixedNote);
-        upsert.Parameters.AddWithValue("$from", DateKey(quarterStart));
-        upsert.Parameters.AddWithValue("$to", DateKey(quarterEnd));
+        upsert.Parameters.AddWithValue("$from", DateKey(yearStart));
+        upsert.Parameters.AddWithValue("$to", DateKey(yearEnd));
         upsert.ExecuteNonQuery();
     }
 

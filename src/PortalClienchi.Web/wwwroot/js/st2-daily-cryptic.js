@@ -1,4 +1,4 @@
-import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261118c";
+import { createCodeSlots, groupsFromEnumeration } from "./st2-code-slots.js?v=20261118d";
 
 const API = "/api/cryptic";
 const STATE_LABELS = {
@@ -203,11 +203,13 @@ function render() {
     <div class="st2-cryptic-ranking ${rankingOpen ? "" : "hidden"}" data-cryptic-ranking ${rankingOpen ? "" : "hidden"}>
       <div class="st2-cryptic-rank-tabs" role="tablist" aria-label="Rankings">
         <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="today" class="${rankingTab === "general" ? "" : "is-active"}" aria-selected="${rankingTab === "general" ? "false" : "true"}">Hoy</button>
-        <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="general" class="${rankingTab === "general" ? "is-active" : ""}" aria-selected="${rankingTab === "general" ? "true" : "false"}">General</button>
+        <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="general" class="${rankingTab === "general" ? "is-active" : ""}" aria-selected="${rankingTab === "general" ? "true" : "false"}">General${snapshot.season ? ` · ${escapeHtml(snapshot.season)}` : ""}</button>
       </div>
       ${renderRankingList(
         rankingTab === "general" ? (snapshot.seasonRanking || []) : ranking,
-        rankingTab === "general" ? "Todavía no hay puntos en el ranking general." : "Todavía nadie sumó puntos.",
+        rankingTab === "general"
+          ? `Todavía no hay puntos en el ranking ${snapshot.season || "general"}.`
+          : "Todavía nadie sumó puntos.",
       )}
     </div>` : ""}
   `;
@@ -262,7 +264,7 @@ function renderRound(round) {
         <div data-code-slots></div>
         <div class="st2-cryptic-actions">
           <button type="button" data-cryptic-action="hint" ${nextKind ? "" : "disabled"}>
-            Dame una pista
+            💡 Dame una pista
           </button>
           <button type="submit" class="st2-cryptic-check" data-cryptic-check disabled>Comprobar</button>
         </div>
@@ -504,9 +506,12 @@ async function submitAttempt(form) {
 
 async function revealHint(kind) {
   const round = getSelectedRound();
-  const choice = HINT_ORDER.find((item) => item.kind === kind);
-  if (!round || !choice || hintPending) return;
-  if ((Number(round.hintMask || 0) & choice.bit) !== 0) return;
+  if (!round || !kind || hintPending) return;
+  if (kind !== "letters") {
+    const choice = HINT_ORDER.find((item) => item.kind === kind);
+    if (!choice) return;
+    if ((Number(round.hintMask || 0) & choice.bit) !== 0) return;
+  }
   hintPending = true;
   try {
     const response = await fetch(`${API}/hint`, {
