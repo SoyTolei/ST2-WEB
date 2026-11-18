@@ -523,7 +523,7 @@ public sealed class DailyCrypticRepository
         }
 
         if (includeBonus)
-            ApplyRankingBonus(conn, rows);
+            ApplyRankingBonus(conn, rows, from, to);
 
         rows.Sort(static (a, b) =>
         {
@@ -552,13 +552,21 @@ public sealed class DailyCrypticRepository
 
     private void ApplyRankingBonus(
         SqliteConnection conn,
-        List<(string Email, int Points, int Solved, int Wins, string First)> rows)
+        List<(string Email, int Points, int Solved, int Wins, string First)> rows,
+        DateOnly from,
+        DateOnly to)
     {
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT email, points FROM daily_cryptic_bonus";
+        cmd.CommandText = "SELECT email, points, season_from, season_to FROM daily_cryptic_bonus";
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
+            var seasonFrom = reader.IsDBNull(2) ? "" : reader.GetString(2);
+            var seasonTo = reader.IsDBNull(3) ? "" : reader.GetString(3);
+            if (!string.Equals(seasonFrom, DateKey(from), StringComparison.Ordinal)
+                || !string.Equals(seasonTo, DateKey(to), StringComparison.Ordinal))
+                continue;
+
             var email = reader.GetString(0);
             var extra = reader.GetInt32(1);
             var index = rows.FindIndex(row => string.Equals(row.Email, email, StringComparison.OrdinalIgnoreCase));
@@ -1021,23 +1029,79 @@ public sealed class DailyCrypticRepository
         EnsureRankingBonus(conn);
     }
 
-    private static void EnsureRankingBonus(SqliteConnection conn)
+    private void EnsureRankingBonus(SqliteConnection conn)
     {
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = """
-            CREATE TABLE IF NOT EXISTS daily_cryptic_bonus (
-                email TEXT PRIMARY KEY,
-                points INTEGER NOT NULL,
-                note TEXT NOT NULL
-            );
-            INSERT OR IGNORE INTO daily_cryptic_bonus (email, points, note)
-            VALUES (
-                'yohanaelizabeth.orellana@thomsonreuters.com',
-                15,
-                'Ajuste del ranking general'
-            );
+        using (var cmd = conn.CreateCommand())
+        {
+            cmd.CommandText = """
+                CREATE TABLE IF NOT EXISTS daily_cryptic_bonus (
+                    email TEXT PRIMARY KEY,
+                    points INTEGER NOT NULL,
+                    note TEXT NOT NULL
+                );
+                """;
+            cmd.ExecuteNonQuery();
+        }
+
+        EnsureBonusColumn(conn, "season_from", "TEXT NOT NULL DEFAULT ''");
+        EnsureBonusColumn(conn, "season_to", "TEXT NOT NULL DEFAULT ''");
+
+        const string email = "yohanaelizabeth.orellana@thomsonreuters.com";
+        const string fixedNote = "Fijado 392";
+        using var existing = conn.CreateCommand();
+        existing.CommandText = "SELECT note FROM daily_cryptic_bonus WHERE email = $email";
+        existing.Parameters.AddWithValue("$email", email);
+        var note = existing.ExecuteScalar() as string;
+        if (string.Equals(note, fixedNote, StringComparison.Ordinal))
+            return;
+
+        var now = ToLocal(DateTimeOffset.UtcNow);
+        var quarterStart = new DateOnly(now.Year, ((now.Month - 1) / 3) * 3 + 1, 1);
+        var quarterEnd = quarterStart.AddMonths(3);
+        using var earnedCmd = conn.CreateCommand();
+        earnedCmd.CommandText = """
+            SELECT COALESCE(SUM(points), 0)
+            FROM daily_cryptic_solves
+            WHERE lower(email) = lower($email)
+              AND play_date >= $from AND play_date < $to
             """;
-        cmd.ExecuteNonQuery();
+        earnedCmd.Parameters.AddWithValue("$email", email);
+        earnedCmd.Parameters.AddWithValue("$from", DateKey(quarterStart));
+        earnedCmd.Parameters.AddWithValue("$to", DateKey(quarterEnd));
+        var earned = Convert.ToInt32(earnedCmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+
+        using var upsert = conn.CreateCommand();
+        upsert.CommandText = """
+            INSERT INTO daily_cryptic_bonus (email, points, note, season_from, season_to)
+            VALUES ($email, $points, $note, $from, $to)
+            ON CONFLICT(email) DO UPDATE SET
+                points = excluded.points,
+                note = excluded.note,
+                season_from = excluded.season_from,
+                season_to = excluded.season_to
+            """;
+        upsert.Parameters.AddWithValue("$email", email);
+        upsert.Parameters.AddWithValue("$points", 392 - earned);
+        upsert.Parameters.AddWithValue("$note", fixedNote);
+        upsert.Parameters.AddWithValue("$from", DateKey(quarterStart));
+        upsert.Parameters.AddWithValue("$to", DateKey(quarterEnd));
+        upsert.ExecuteNonQuery();
+    }
+
+    private static void EnsureBonusColumn(SqliteConnection conn, string column, string definition)
+    {
+        using var info = conn.CreateCommand();
+        info.CommandText = "PRAGMA table_info(daily_cryptic_bonus)";
+        using var reader = info.ExecuteReader();
+        while (reader.Read())
+        {
+            if (string.Equals(reader.GetString(1), column, StringComparison.OrdinalIgnoreCase))
+                return;
+        }
+
+        using var alter = conn.CreateCommand();
+        alter.CommandText = $"ALTER TABLE daily_cryptic_bonus ADD COLUMN {column} {definition}";
+        alter.ExecuteNonQuery();
     }
 
     private static void EnsureHintKindsColumn(SqliteConnection conn)
