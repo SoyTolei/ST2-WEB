@@ -310,18 +310,27 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Yohana_stays_at_392_in_the_yearly_ranking_after_solving()
+    public void Yohana_starts_at_417_and_keeps_counting_after_solving()
     {
         const string yohana = "yohanaelizabeth.orellana@thomsonreuters.com";
         new AppAccessRepository(NullLogger<AppAccessRepository>.Instance).EnsureApproved(yohana);
 
         var at = AtArgentina(2026, 10, 23, 10, 0);
         var before = _repository.GetStatus(yohana, at);
-        Assert.Equal(392, before.SeasonRanking.Single(item => item.Player.Contains("Yohana", StringComparison.OrdinalIgnoreCase)).Points);
+        Assert.Equal(417, before.SeasonRanking.Single(item => item.Player.Contains("Yohana", StringComparison.OrdinalIgnoreCase)).Points);
 
         var answer = ScheduledAnswer(before.Date, DailyCrypticRepository.MorningSlot);
         var after = _repository.Submit(yohana, DailyCrypticRepository.MorningSlot, answer, at).Status;
-        Assert.Equal(392, after.SeasonRanking.Single(item => item.Player.Contains("Yohana", StringComparison.OrdinalIgnoreCase)).Points);
+        var points = after.SeasonRanking.Single(item => item.Player.Contains("Yohana", StringComparison.OrdinalIgnoreCase)).Points;
+        Assert.Equal(417 + after.Rounds[0].Points, points);
+    }
+
+    [Fact]
+    public void Fresh_mix_starts_on_november_19()
+    {
+        var fresh = _repository.GetStatus(Email, AtArgentina(2026, 11, 19, 13, 30));
+        Assert.Equal("¡Oye! Estoy muerto por dentro. (2)", fresh.Rounds[0].Clue);
+        Assert.NotEqual(fresh.Rounds[0].Clue, fresh.Rounds[1].Clue);
     }
 
     private string ScheduledAnswer(string date, int slot)

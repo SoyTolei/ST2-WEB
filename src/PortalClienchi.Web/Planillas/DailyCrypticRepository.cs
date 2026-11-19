@@ -696,7 +696,9 @@ public sealed class DailyCrypticRepository
 
         // Siguiente par libre de la cola (no el índice por día): si entra un feriado
         // a mitad de camino, no reusa las pistas ya jugadas.
-        var available = NextUnusedProgressive(conn, tx, queue, excludeDate: null);
+        // Desde FreshStartsOn salta al tramo intercalado (nuevas + sobrante), aunque
+        // un día repetido haya dejado huecos en el prefijo previo.
+        var available = NextUnusedProgressive(conn, tx, queue, excludeDate: null, date);
         if (available.Count < 2)
             return false;
 
@@ -725,7 +727,7 @@ public sealed class DailyCrypticRepository
                 continue;
 
             // Incluye la otra ronda de hoy para no clonar el mismo par en el día.
-            var available = NextUnusedProgressive(conn, tx, queue, excludeDate: null)
+            var available = NextUnusedProgressive(conn, tx, queue, excludeDate: null, date)
                 .Where(id => id != clueId.Value)
                 .ToList();
             if (available.Count == 0)
@@ -739,10 +741,22 @@ public sealed class DailyCrypticRepository
         SqliteConnection conn,
         SqliteTransaction tx,
         IReadOnlyList<long> queue,
-        DateOnly? excludeDate)
+        DateOnly? excludeDate,
+        DateOnly? playDate = null)
     {
         var taken = LoadScheduledClueIds(conn, tx, excludeDate);
-        return queue.Where(id => !taken.Contains(id)).ToList();
+        IEnumerable<long> source = queue;
+        if (playDate is { } day && day >= DailyCrypticSeed.FreshStartsOn)
+        {
+            var cut = Math.Min(
+                PlayDaysBetween(DailyCrypticSeed.ProgressiveStartsOn, DailyCrypticSeed.FreshStartsOn) * 2,
+                queue.Count);
+            var mixed = queue.Skip(cut).Where(id => !taken.Contains(id)).ToList();
+            if (mixed.Count >= 2)
+                return mixed;
+        }
+
+        return source.Where(id => !taken.Contains(id)).ToList();
     }
 
     private static HashSet<long> LoadScheduledClueIds(
@@ -1280,12 +1294,52 @@ public sealed class DailyCrypticRepository
         EnsureBonusColumn(conn, "season_to", "TEXT NOT NULL DEFAULT ''");
 
         const string email = "yohanaelizabeth.orellana@thomsonreuters.com";
-        const string fixedNote = "Fijado 392";
-        const int fixedTotal = 392;
+        const string baseNote = "Base 417";
+        const int baseTotal = 417;
 
         var now = ToLocal(DateTimeOffset.UtcNow);
         var yearStart = new DateOnly(now.Year, 1, 1);
         var yearEnd = new DateOnly(now.Year + 1, 1, 1);
+        var fromKey = DateKey(yearStart);
+        var toKey = DateKey(yearEnd);
+
+        using var existing = conn.CreateCommand();
+        existing.CommandText = """
+            SELECT points, note, season_from, season_to
+            FROM daily_cryptic_bonus
+            WHERE lower(email) = lower($email)
+            """;
+        existing.Parameters.AddWithValue("$email", email);
+        using (var reader = existing.ExecuteReader())
+        {
+            if (reader.Read())
+            {
+                var note = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                var seasonFrom = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                var seasonTo = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                if (string.Equals(note, baseNote, StringComparison.Ordinal))
+                {
+                    // Piso ya fijado: no se recalcula; lo que juegue de acá en más suma arriba.
+                    if (!string.Equals(seasonFrom, fromKey, StringComparison.Ordinal)
+                        || !string.Equals(seasonTo, toKey, StringComparison.Ordinal))
+                    {
+                        reader.Close();
+                        using var fixSeason = conn.CreateCommand();
+                        fixSeason.CommandText = """
+                            UPDATE daily_cryptic_bonus
+                            SET season_from = $from, season_to = $to
+                            WHERE lower(email) = lower($email)
+                            """;
+                        fixSeason.Parameters.AddWithValue("$from", fromKey);
+                        fixSeason.Parameters.AddWithValue("$to", toKey);
+                        fixSeason.Parameters.AddWithValue("$email", email);
+                        fixSeason.ExecuteNonQuery();
+                    }
+                    return;
+                }
+            }
+        }
+
         using var earnedCmd = conn.CreateCommand();
         earnedCmd.CommandText = """
             SELECT COALESCE(SUM(points), 0)
@@ -1294,11 +1348,11 @@ public sealed class DailyCrypticRepository
               AND play_date >= $from AND play_date < $to
             """;
         earnedCmd.Parameters.AddWithValue("$email", email);
-        earnedCmd.Parameters.AddWithValue("$from", DateKey(yearStart));
-        earnedCmd.Parameters.AddWithValue("$to", DateKey(yearEnd));
+        earnedCmd.Parameters.AddWithValue("$from", fromKey);
+        earnedCmd.Parameters.AddWithValue("$to", toKey);
         var earned = Convert.ToInt32(earnedCmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-        // Bonus = tope fijo menos lo ya ganado en el año, para que el total no se mueva al jugar.
-        var bonus = Math.Max(0, fixedTotal - earned);
+        // Una sola vez: bonus = 417 - ganado hasta ahora. Después el bonus queda fijo.
+        var bonus = Math.Max(0, baseTotal - earned);
 
         using var upsert = conn.CreateCommand();
         upsert.CommandText = """
@@ -1312,9 +1366,9 @@ public sealed class DailyCrypticRepository
             """;
         upsert.Parameters.AddWithValue("$email", email);
         upsert.Parameters.AddWithValue("$points", bonus);
-        upsert.Parameters.AddWithValue("$note", fixedNote);
-        upsert.Parameters.AddWithValue("$from", DateKey(yearStart));
-        upsert.Parameters.AddWithValue("$to", DateKey(yearEnd));
+        upsert.Parameters.AddWithValue("$note", baseNote);
+        upsert.Parameters.AddWithValue("$from", fromKey);
+        upsert.Parameters.AddWithValue("$to", toKey);
         upsert.ExecuteNonQuery();
     }
 
