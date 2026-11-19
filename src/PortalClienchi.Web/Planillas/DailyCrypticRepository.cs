@@ -50,6 +50,7 @@ public sealed class DailyCrypticRepository
             EnsureSchedule(date);
 
         using var conn = Open();
+        EnsureRankingBonus(conn);
         var yearStart = new DateOnly(date.Year, 1, 1);
         var yearEnd = new DateOnly(date.Year + 1, 1, 1);
         var season = date.Year.ToString(CultureInfo.InvariantCulture);
@@ -640,7 +641,10 @@ public sealed class DailyCrypticRepository
         if (slots.Count == 0)
             return false;
         if (slots.Count == Slots.Length && Slots.All(slots.Contains))
+        {
+            RepairReusedProgressiveSlots(conn, tx, date);
             return true;
+        }
         if (slots.Any(slot => slot >= 24))
             return true;
 
@@ -690,13 +694,148 @@ public sealed class DailyCrypticRepository
         if (queue.Count == 0)
             return false;
 
-        var used = PlayDaysBetween(DailyCrypticSeed.ProgressiveStartsOn, date) * 2;
-        if (used + 2 > queue.Count)
+        // Siguiente par libre de la cola (no el índice por día): si entra un feriado
+        // a mitad de camino, no reusa las pistas ya jugadas.
+        var available = NextUnusedProgressive(conn, tx, queue, excludeDate: null);
+        if (available.Count < 2)
             return false;
 
-        InsertFixedClue(conn, tx, date, MorningSlot, queue[used]);
-        InsertFixedClue(conn, tx, date, AfternoonSlot, queue[used + 1]);
+        InsertFixedClue(conn, tx, date, MorningSlot, available[0]);
+        InsertFixedClue(conn, tx, date, AfternoonSlot, available[1]);
         return true;
+    }
+
+    private static void RepairReusedProgressiveSlots(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date)
+    {
+        var queue = LoadProgressiveQueue(conn, tx);
+        if (queue.Count == 0)
+            return;
+
+        foreach (var slot in Slots)
+        {
+            var clueId = LoadScheduledClueId(conn, tx, date, slot);
+            if (clueId is null)
+                continue;
+            if (!ClueScheduledBefore(conn, tx, date, clueId.Value))
+                continue;
+            if (CountSolvesForSlot(conn, tx, date, slot) > 0)
+                continue;
+
+            // Incluye la otra ronda de hoy para no clonar el mismo par en el día.
+            var available = NextUnusedProgressive(conn, tx, queue, excludeDate: null)
+                .Where(id => id != clueId.Value)
+                .ToList();
+            if (available.Count == 0)
+                return;
+
+            UpdateScheduledClue(conn, tx, date, slot, available[0]);
+        }
+    }
+
+    private static List<long> NextUnusedProgressive(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        IReadOnlyList<long> queue,
+        DateOnly? excludeDate)
+    {
+        var taken = LoadScheduledClueIds(conn, tx, excludeDate);
+        return queue.Where(id => !taken.Contains(id)).ToList();
+    }
+
+    private static HashSet<long> LoadScheduledClueIds(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly? excludeDate)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = excludeDate is null
+            ? "SELECT clue_id FROM daily_cryptic_schedule"
+            : "SELECT clue_id FROM daily_cryptic_schedule WHERE play_date != $date";
+        if (excludeDate is not null)
+            cmd.Parameters.AddWithValue("$date", DateKey(excludeDate.Value));
+
+        var ids = new HashSet<long>();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+            ids.Add(reader.GetInt64(0));
+        return ids;
+    }
+
+    private static long? LoadScheduledClueId(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date,
+        int slot)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT clue_id FROM daily_cryptic_schedule
+            WHERE play_date = $date AND slot_hour = $slot
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        var value = cmd.ExecuteScalar();
+        return value is long id ? id : value is int small ? small : null;
+    }
+
+    private static bool ClueScheduledBefore(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date,
+        long clueId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT 1 FROM daily_cryptic_schedule
+            WHERE clue_id = $clue AND play_date < $date
+            LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("$clue", clueId);
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        return cmd.ExecuteScalar() is not null;
+    }
+
+    private static int CountSolvesForSlot(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date,
+        int slot)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT COUNT(*) FROM daily_cryptic_solves
+            WHERE play_date = $date AND slot_hour = $slot
+            """;
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+    }
+
+    private static void UpdateScheduledClue(
+        SqliteConnection conn,
+        SqliteTransaction tx,
+        DateOnly date,
+        int slot,
+        long clueId)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            UPDATE daily_cryptic_schedule
+            SET clue_id = $clue
+            WHERE play_date = $date AND slot_hour = $slot
+            """;
+        cmd.Parameters.AddWithValue("$clue", clueId);
+        cmd.Parameters.AddWithValue("$date", DateKey(date));
+        cmd.Parameters.AddWithValue("$slot", slot);
+        cmd.ExecuteNonQuery();
     }
 
     private static List<long> LoadProgressiveQueue(SqliteConnection conn, SqliteTransaction tx)
@@ -1142,12 +1281,7 @@ public sealed class DailyCrypticRepository
 
         const string email = "yohanaelizabeth.orellana@thomsonreuters.com";
         const string fixedNote = "Fijado 392";
-        using var existing = conn.CreateCommand();
-        existing.CommandText = "SELECT note FROM daily_cryptic_bonus WHERE email = $email";
-        existing.Parameters.AddWithValue("$email", email);
-        var note = existing.ExecuteScalar() as string;
-        if (string.Equals(note, fixedNote, StringComparison.Ordinal))
-            return;
+        const int fixedTotal = 392;
 
         var now = ToLocal(DateTimeOffset.UtcNow);
         var yearStart = new DateOnly(now.Year, 1, 1);
@@ -1163,6 +1297,8 @@ public sealed class DailyCrypticRepository
         earnedCmd.Parameters.AddWithValue("$from", DateKey(yearStart));
         earnedCmd.Parameters.AddWithValue("$to", DateKey(yearEnd));
         var earned = Convert.ToInt32(earnedCmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+        // Bonus = tope fijo menos lo ya ganado en el año, para que el total no se mueva al jugar.
+        var bonus = Math.Max(0, fixedTotal - earned);
 
         using var upsert = conn.CreateCommand();
         upsert.CommandText = """
@@ -1175,7 +1311,7 @@ public sealed class DailyCrypticRepository
                 season_to = excluded.season_to
             """;
         upsert.Parameters.AddWithValue("$email", email);
-        upsert.Parameters.AddWithValue("$points", 392 - earned);
+        upsert.Parameters.AddWithValue("$points", bonus);
         upsert.Parameters.AddWithValue("$note", fixedNote);
         upsert.Parameters.AddWithValue("$from", DateKey(yearStart));
         upsert.Parameters.AddWithValue("$to", DateKey(yearEnd));

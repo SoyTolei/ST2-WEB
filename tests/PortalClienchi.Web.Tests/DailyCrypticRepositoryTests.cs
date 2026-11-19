@@ -292,6 +292,38 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Empty(holiday.Rounds);
     }
 
+    [Fact]
+    public void Progressive_days_do_not_reuse_clues_even_after_a_midstream_holiday()
+    {
+        var monday = _repository.GetStatus(Email, AtArgentina(2026, 11, 16, 13, 30));
+        var tuesday = _repository.GetStatus(Email, AtArgentina(2026, 11, 17, 13, 30));
+        Assert.NotNull(monday.Rounds[0].Clue);
+        Assert.NotNull(monday.Rounds[1].Clue);
+        Assert.NotEqual(monday.Rounds[0].Clue, tuesday.Rounds[0].Clue);
+        Assert.NotEqual(monday.Rounds[1].Clue, tuesday.Rounds[1].Clue);
+
+        // Simula el bug del 18/11: el feriado del 9 corrió el índice y clonó el día anterior.
+        CloneSchedule(monday.Date, tuesday.Date);
+        var repaired = _repository.GetStatus(Email, AtArgentina(2026, 11, 17, 13, 30));
+        Assert.NotEqual(monday.Rounds[0].Clue, repaired.Rounds[0].Clue);
+        Assert.NotEqual(monday.Rounds[1].Clue, repaired.Rounds[1].Clue);
+    }
+
+    [Fact]
+    public void Yohana_stays_at_392_in_the_yearly_ranking_after_solving()
+    {
+        const string yohana = "yohanaelizabeth.orellana@thomsonreuters.com";
+        new AppAccessRepository(NullLogger<AppAccessRepository>.Instance).EnsureApproved(yohana);
+
+        var at = AtArgentina(2026, 10, 23, 10, 0);
+        var before = _repository.GetStatus(yohana, at);
+        Assert.Equal(392, before.SeasonRanking.Single(item => item.Player.Contains("Yohana", StringComparison.OrdinalIgnoreCase)).Points);
+
+        var answer = ScheduledAnswer(before.Date, DailyCrypticRepository.MorningSlot);
+        var after = _repository.Submit(yohana, DailyCrypticRepository.MorningSlot, answer, at).Status;
+        Assert.Equal(392, after.SeasonRanking.Single(item => item.Player.Contains("Yohana", StringComparison.OrdinalIgnoreCase)).Points);
+    }
+
     private string ScheduledAnswer(string date, int slot)
     {
         using var conn = new SqliteConnection($"Data Source={Path.Combine(_dataDir, "daily_cryptic.db")}");
@@ -306,6 +338,27 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         cmd.Parameters.AddWithValue("$date", date);
         cmd.Parameters.AddWithValue("$slot", slot);
         return Assert.IsType<string>(cmd.ExecuteScalar());
+    }
+
+    private void CloneSchedule(string fromDate, string toDate)
+    {
+        using var conn = new SqliteConnection($"Data Source={Path.Combine(_dataDir, "daily_cryptic.db")}");
+        conn.Open();
+        using var wipe = conn.CreateCommand();
+        wipe.CommandText = "DELETE FROM daily_cryptic_schedule WHERE play_date = $date";
+        wipe.Parameters.AddWithValue("$date", toDate);
+        wipe.ExecuteNonQuery();
+
+        using var copy = conn.CreateCommand();
+        copy.CommandText = """
+            INSERT INTO daily_cryptic_schedule (play_date, slot_hour, clue_id, created_at)
+            SELECT $to, slot_hour, clue_id, created_at
+            FROM daily_cryptic_schedule
+            WHERE play_date = $from
+            """;
+        copy.Parameters.AddWithValue("$to", toDate);
+        copy.Parameters.AddWithValue("$from", fromDate);
+        copy.ExecuteNonQuery();
     }
 
     private static DateTimeOffset AtArgentina(
