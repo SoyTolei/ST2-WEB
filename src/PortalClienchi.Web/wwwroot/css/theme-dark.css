@@ -813,6 +813,16 @@ html.st2-theme-dark .planillas-back:hover {
   color: #fdba74 !important;
 }
 
+html.st2-theme-dark .planillas-back--exit {
+  color: #7c8aa0 !important;
+}
+
+html.st2-theme-dark .planillas-back--exit:hover {
+  color: #cbd5e1 !important;
+  background: rgba(148, 163, 184, 0.08) !important;
+  border-color: #3d4b61 !important;
+}
+
 html.st2-theme-dark .planillas-back:hover .planillas-back-icon {
   background: rgba(249, 115, 22, 0.12) !important;
   border-color: #ea580c !important;

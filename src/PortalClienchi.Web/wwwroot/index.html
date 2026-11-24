@@ -181,8 +181,8 @@
   <link rel="stylesheet" href="/css/styles.css?v=20261114c"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-motion.css?v=2.7.0"/>
   <link rel="stylesheet" href="/css/vendor/blobatar-gaze.css?v=2.7.0"/>
-  <link rel="stylesheet" href="/css/theme-dark.css?v=20261114b"/>
-  <link rel="stylesheet" href="/css/planillas.css?v=20261118e"/>
+  <link rel="stylesheet" href="/css/theme-dark.css?v=20261118f"/>
+  <link rel="stylesheet" href="/css/planillas.css?v=20261118f"/>
   <link rel="stylesheet" href="/css/plan-action-fx.css?v=20261113e"/>
   <link rel="stylesheet" href="/css/star-border.css?v=20261111g"/>
   <link rel="stylesheet" href="/css/pdf-portal.css?v=20260907a"/>
@@ -1167,7 +1167,14 @@
             </div>
             <div class="plan-module-sticky-head">
               <div class="plan-module-header-bar">
-                <button type="button" class="planillas-back" data-plan-back-referral>← Volver al menú</button>
+                <div class="plan-ref-header-nav">
+                  <button type="button" class="planillas-back hidden" id="ref-header-step-back" data-ref-header-step-back>
+                    ← Anterior
+                  </button>
+                  <button type="button" class="planillas-back planillas-back--exit" data-plan-back-referral>
+                    Salir al menú
+                  </button>
+                </div>
                 <div class="plan-module-title-row">
                   <span class="plan-module-icon-badge referral" data-plan-icon="referral"></span>
                   <h2 class="plan-module-title" id="plan-referral-module-title">Referral I+D</h2>
@@ -3098,6 +3105,6 @@
     <p class="st2-agua-overlay-caption">¡Glup!</p>
   </div>
 
-  <script src="/js/app.js?v=20261118e" type="module"></script>
+  <script src="/js/app.js?v=20261118f" type="module"></script>
 </body>
 </html>

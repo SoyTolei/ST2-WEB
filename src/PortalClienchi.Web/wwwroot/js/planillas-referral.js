@@ -492,10 +492,13 @@ function bindOnvioCard(cardId, checkId, onChange) {
 }
 
 function bindReferralEvents() {
+  document.querySelector("[data-ref-header-step-back]")?.addEventListener("click", () => {
+    if (isLegal()) return;
+    setReferralStep(refStep - 1);
+  });
+
   document.querySelector("[data-plan-back-referral]")?.addEventListener("click", () => {
-    if (isLegal() && handleLegalReferralBack()) return;
-    if (ctx.goPlanillasMenu) ctx.goPlanillasMenu();
-    else ctx.showView("menu");
+    void leaveReferralToMenu();
   });
 
   document.getElementById("ref-bejerman-panel")?.addEventListener("click", (e) => {
@@ -664,6 +667,8 @@ function bindReferralEvents() {
   document.getElementById("ref-step-prev")?.addEventListener("click", () => setReferralStep(refStep - 1));
   document.getElementById("ref-step-next")?.addEventListener("click", () => setReferralStep(refStep + 1));
 
+  // labels del header/nav se refrescan en syncReferralStepper
+
   mountStarBorder(document.getElementById("ref-stepper"), {
     color: "#fdba74",
     trailColor: "#fb923c",
@@ -691,6 +696,47 @@ function setReferralStep(step) {
   refStep = Math.min(3, Math.max(1, Number(step) || 1));
   maxStepReached = Math.max(maxStepReached, refStep);
   syncReferralStepper();
+}
+
+function referralStepBackLabel() {
+  if (refStep <= 1) return "← Anterior";
+  if (refStep === 2) return "← Datos";
+  return "← Chequeos y adjuntos";
+}
+
+function referralHasDraft() {
+  if (versionSel || moduloSel) return true;
+  if (capturaFiles.length || trazaFiles.length || onvioCapturaFiles.length || chileCapturaFiles.length) {
+    return true;
+  }
+  const ids = [
+    "ref-asunto",
+    "ref-descripcion",
+    "ref-paso",
+    "ref-onvio-empresa",
+    "ref-onvio-usuario",
+    "ref-onvio-ticket-num",
+  ];
+  if (ids.some((id) => isFilled(id))) return true;
+  return ["ref-adj-backup", "ref-adj-pantallas", "ref-adj-traza", "ref-onvio-ticket"]
+    .some((id) => !!document.getElementById(id)?.checked);
+}
+
+async function leaveReferralToMenu() {
+  if (isLegal() && handleLegalReferralBack()) return;
+  if (referralHasDraft()) {
+    const ok = await askSt2(
+      "Si salís al menú se borra lo cargado en esta planilla. ¿Salís igual?",
+      {
+        title: "Salir al menú",
+        okLabel: "Salir y borrar",
+        cancelLabel: "Seguir acá",
+      },
+    );
+    if (!ok) return;
+  }
+  if (ctx.goPlanillasMenu) ctx.goPlanillasMenu();
+  else ctx.showView("menu");
 }
 
 function isFilled(id) {
@@ -816,6 +862,7 @@ function syncReferralStepper() {
     document.querySelectorAll("[data-ref-step-panel]").forEach((panel) => {
       panel.classList.remove("ref-step-hidden");
     });
+    document.getElementById("ref-header-step-back")?.classList.add("hidden");
     return;
   }
 
@@ -836,6 +883,15 @@ function syncReferralStepper() {
   document.getElementById("ref-step-next")?.classList.toggle("hidden", refStep >= 3);
   const next = document.getElementById("ref-step-next");
   if (next) next.textContent = refStep === 2 ? "Ir a Generar Planilla →" : "Siguiente →";
+  const prev = document.getElementById("ref-step-prev");
+  if (prev) prev.textContent = referralStepBackLabel();
+
+  const headerBack = document.getElementById("ref-header-step-back");
+  if (headerBack) {
+    const showStepBack = !legal && refStep > 1;
+    headerBack.classList.toggle("hidden", !showStepBack);
+    headerBack.textContent = referralStepBackLabel();
+  }
   syncReferralStepCompletion();
 }
 

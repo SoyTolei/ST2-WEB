@@ -1839,6 +1839,29 @@ body.st2-chile-embed-active #panel-planillas.active {
     transform 0.15s ease;
 }
 
+.plan-ref-header-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px 8px;
+  flex-wrap: wrap;
+  justify-self: start;
+  min-width: 0;
+}
+
+.planillas-back--exit {
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+}
+
+.planillas-back--exit:hover {
+  color: #64748b;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
 .planillas-back-icon {
   display: inline-flex;
   align-items: center;
@@ -1942,6 +1965,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-module-sticky-head .plan-module-header-bar > .planillas-back,
+.plan-module-sticky-head .plan-module-header-bar > .plan-ref-header-nav,
 .plan-module-sticky-head .plan-module-header-bar > .plan-chile-embed-nav,
 .plan-module-sticky-head > .planillas-toolbar > .planillas-back {
   grid-column: 1;
@@ -2028,6 +2052,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-module-header-bar > .planillas-back,
+.plan-module-header-bar > .plan-ref-header-nav,
 .plan-module-header-bar > .plan-chile-embed-nav {
   grid-column: 1;
   justify-self: start;
