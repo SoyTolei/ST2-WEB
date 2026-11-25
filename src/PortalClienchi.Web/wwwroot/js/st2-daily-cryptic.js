@@ -1,4 +1,4 @@
-import { createCodeSlots, groupsFromEnumeration, lettersOf } from "./st2-code-slots.js?v=20261118e";
+import { createCodeSlots, groupsFromEnumeration, lettersOf } from "./st2-code-slots.js";
 
 const API = "/api/cryptic";
 const STATE_LABELS = {

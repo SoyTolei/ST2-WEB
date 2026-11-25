@@ -1,12 +1,12 @@
 /**
  * Boot temprano: Gradient ASCII en login y Silk en splash de carga (no espera a app.js).
  */
-import { startLoginSilk, stopLoginSilk, startSplashSilk, stopSplashSilk, initLoginSilk } from "./st2-silk.js?v=20260915a";
-import { initLoginGradientAscii, startLoginGradientAscii } from "./st2-gradient-ascii.js?v=20261023a";
-import { initBorderGlowCards } from "./st2-border-glow.js?v=20260915a";
-import { initSuiteGlitchText } from "./st2-glitch-text.js?v=20260907d";
-import { initSplashDecryptedText } from "./st2-decrypted-text.js?v=20260915b";
-import { initClickSpark } from "./st2-click-spark.js?v=20261111e";
+import { startLoginSilk, stopLoginSilk, startSplashSilk, stopSplashSilk, initLoginSilk } from "./st2-silk.js";
+import { initLoginGradientAscii, startLoginGradientAscii } from "./st2-gradient-ascii.js";
+import { initBorderGlowCards } from "./st2-border-glow.js";
+import { initSuiteGlitchText } from "./st2-glitch-text.js";
+import { initSplashDecryptedText } from "./st2-decrypted-text.js";
+import { initClickSpark } from "./st2-click-spark.js";
 
 const bootSplash =
   document.body.classList.contains("st2-access-restoring")

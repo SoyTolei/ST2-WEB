@@ -8,7 +8,7 @@ import {
   getViewAsProfile,
   isViewingAsProfile,
 } from "./module-access.js";
-import { notifyBlanqueoChanged, markBlanqueoAlertsSeenOnEnter, markBlanqueoObservationOpened, getBlanqueoAlertTargets } from "./blanqueo-alerts.js?v=20261114b";
+import { notifyBlanqueoChanged, markBlanqueoAlertsSeenOnEnter, markBlanqueoObservationOpened, getBlanqueoAlertTargets } from "./blanqueo-alerts.js";
 import { createPlanillasLiveList } from "./planillas-live-list.js";
 
 /**

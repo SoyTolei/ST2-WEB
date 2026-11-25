@@ -2,7 +2,7 @@
  * BellToggle (vanilla) — campana que activa / desactiva los avisos de escritorio de ST2.
  * Al activarse la campana se balancea y emite ondas; el badge muestra pendientes.
  */
-import { desktopNotifSupported, isDesktopNotifActive, setDesktopNotifEnabled } from "./st2-desktop-notif.js?v=20261013c";
+import { desktopNotifSupported, isDesktopNotifActive, setDesktopNotifEnabled } from "./st2-desktop-notif.js";
 
 const SEG_EASE = "cubic-bezier(0.77, 0, 0.175, 1)";
 const WARP = 0.6;

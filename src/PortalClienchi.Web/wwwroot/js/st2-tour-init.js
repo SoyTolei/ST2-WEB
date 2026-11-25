@@ -6,13 +6,13 @@ import {
   isTourCompleted,
   isTourSeen,
   shouldAutoStartTours,
-} from "./st2-tour-engine.js?v=20261110j";
+} from "./st2-tour-engine.js";
 import {
   resolveTour,
   resolveCurrentTourId,
   tourIdForReferralView,
   tourLabelForId,
-} from "./st2-tour-catalog.js?v=20261112a";
+} from "./st2-tour-catalog.js";
 
 let tourContext = {};
 let headerBound = false;

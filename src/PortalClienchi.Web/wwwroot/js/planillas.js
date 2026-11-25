@@ -1,38 +1,38 @@
 import { injectModuleHeaders } from "./planillas-icons.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { updatePlanBuildBadge } from "./plan-build.js";
-import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js?v=20261113e";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113e";
-import { initPlanPillNav, syncPillNav } from "./plan-pill-nav.js?v=20261111b";
-import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js?v=20261012a";
-import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js?v=20261113e";
-import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js?v=20261114b";
+import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { wirePlanActionTrio } from "./plan-action-fx.js";
+import { initPlanPillNav, syncPillNav } from "./plan-pill-nav.js";
+import { initPdfPortalGenerator, syncPdfPortalModuleVisibility, canSeePdfPortalModule, openPdfPortalModal } from "./pdf-portal.js";
+import { initBorradoBasesModule, syncBorradoBasesModuleVisibility, canSeeBorradoBasesModule, openBorradoBasesModule, stopBorradoLiveRefresh } from "./planillas-borrado-bases.js";
+import { initBlanqueoModule, syncBlanqueoModuleVisibility, canSeeBlanqueoModule, openBlanqueoModule, stopBlanqueoLiveRefresh } from "./planillas-blanqueo.js";
 import { refreshModuleFlags, canSeeOportunidadModule, canSeePlanillasSqlOnvio, canSeePlanillasLegal, canSeePlanillasChile, canSeePlanillasTransferencia, canSeePlanillasReferral, canSeePlanillasLeia, canSeePlanillasBukowski, canSeeAnyLegalProduct, canSeeChileTransferencia, canSeeChileReferral, canSeeChileSaad, canSeeChileHr, canSeeChileWiki, canSeeChileLp, canSeeChilePowerapps, startModuleAccessPolling, getViewAsProfile, canSeeLegalProduct } from "./module-access.js";
 import { syncAllPlanModulosGrids, syncPlanModulosGridLayout } from "./plan-grid-layout.js";
-import { syncLegalMenuProducts } from "./planillas-legal-menu.js?v=20261012d";
+import { syncLegalMenuProducts } from "./planillas-legal-menu.js";
 import { getPlanUserEmail } from "./plan-user.js";
 import {
   startBlanqueoAlertsPolling,
   renderBlanqueoAlertUi,
-} from "./blanqueo-alerts.js?v=20261114d";
+} from "./blanqueo-alerts.js";
 import {
   startBorradoAlertsPolling,
   renderBorradoAlertUi,
-} from "./borrado-alerts.js?v=20261114d";
+} from "./borrado-alerts.js";
 import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
-} from "./access-alerts.js?v=20261114d";
-import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js?v=20261125a";
-import { syncAguaEgg } from "./planillas-agua-egg.js?v=20261114d";
+} from "./access-alerts.js";
+import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js";
+import { syncAguaEgg } from "./planillas-agua-egg.js";
 import {
   initSt2Tours,
   setTourContext,
   autoTour,
   syncHeaderTourButton,
-} from "./st2-tour-init.js?v=20261110j";
-import { alertSt2, errorSt2 } from "./st2-dialog.js?v=20260909a";
-import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261125c";
+} from "./st2-tour-init.js";
+import { alertSt2, errorSt2 } from "./st2-dialog.js";
+import { initDailyCryptic } from "./st2-daily-cryptic.js";
 
 
 const MESA_LABELS = {
@@ -1840,7 +1840,7 @@ let oportunidadModulePromise = null;
 
 function loadReferralModule() {
   if (!referralModulePromise) {
-    referralModulePromise = import("./planillas-referral.js?v=20261118f").then((mod) => {
+    referralModulePromise = import("./planillas-referral.js").then((mod) => {
       mod.initReferralModule(planillasContext);
       return mod;
     });
@@ -1850,7 +1850,7 @@ function loadReferralModule() {
 
 function loadOportunidadModule() {
   if (!oportunidadModulePromise) {
-    oportunidadModulePromise = import("./planillas-oportunidad.js?v=20261110k").then((mod) => {
+    oportunidadModulePromise = import("./planillas-oportunidad.js").then((mod) => {
       mod.initOportunidadModule(planillasContext);
       return mod;
     });

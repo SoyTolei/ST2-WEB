@@ -7,8 +7,8 @@ import {
   foodForToast,
   TOAST_FOOD_MARK,
   syncSessionGreetBubble,
-} from "./st2-toast-greet.js?v=20261125a";
-import { upsertNotifInboxEntry } from "./st2-notif-inbox.js?v=20261114c";
+} from "./st2-toast-greet.js";
+import { upsertNotifInboxEntry } from "./st2-notif-inbox.js";
 
 export const ST2_TOAST = {
   /** Versión web / módulos nuevos: siempre arriba del stack. */

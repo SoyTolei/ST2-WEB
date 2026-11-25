@@ -6,7 +6,7 @@ import {
   syncPlanUserSession,
 } from "./plan-user.js";
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
-import { alertSt2, errorSt2 } from "./st2-dialog.js?v=20260909a";
+import { alertSt2, errorSt2 } from "./st2-dialog.js";
 
 let ctx = null;
 let metodoContacto = null;

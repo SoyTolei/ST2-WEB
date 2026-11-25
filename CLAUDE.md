@@ -16,7 +16,7 @@ Al terminar trabajo usable:
 
 - ASP.NET + wwwroot (JS/CSS vanilla)
 - Datos en `ST2_DATA_DIR` / SQLite
-- Cache bust de `?v=` en index/app al tocar JS/CSS
+- JS/CSS sin `?v=` a mano: el servidor versiona por deploy (import map en `St2IndexHtml`). Un `?v=` manual en un import carga el módulo dos veces; hay un test que lo frena. Las imágenes sí llevan `?v=` manual.
 
 ## Notas de producto
 

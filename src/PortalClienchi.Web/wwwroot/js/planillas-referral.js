@@ -1,6 +1,6 @@
 import { snapshotFields, restoreFields, bindIaUndoButtons, syncIaUndoBar, notifyIaUndoHint } from "./plan-ia-undo.js";
 import { enhancePlanSelect, syncPlanCustomSelect } from "./plan-custom-select.js";
-import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js?v=20261113e";
+import { initLegalReferralHub, openLegalReferralHub, openLegalProduct, resetLegalReferralHub, syncLegalMenuProducts, prefetchLegalCatalog, handleLegalReferralBack } from "./planillas-referral-legal.js";
 import { autoTourForReferral } from "./st2-tour-init.js";
 import {
   initChileReferral,
@@ -10,13 +10,13 @@ import {
   syncChileReferralCards,
   isChileReferralStep1Complete,
   isChileReferralStep2Complete,
-} from "./planillas-referral-chile.js?v=20261112d";
-import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js?v=20261113e";
-import { wirePlanActionTrio } from "./plan-action-fx.js?v=20261113e";
-import { mountStarBorder } from "./star-border.js?v=20261111g";
-import { enhancePillNavTrack, syncPillNav } from "./plan-pill-nav.js?v=20261112f";
+} from "./planillas-referral-chile.js";
+import { showPlanTextPreview, clearPlanTextPreview, mountPlanTextPreview } from "./plan-text-preview.js";
+import { wirePlanActionTrio } from "./plan-action-fx.js";
+import { mountStarBorder } from "./star-border.js";
+import { enhancePillNavTrack, syncPillNav } from "./plan-pill-nav.js";
 import { setupOnedrivePasteInput } from "./plan-onedrive-paste.js";
-import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js?v=20260909a";
+import { alertSt2, errorSt2, askSt2 } from "./st2-dialog.js";
 
 let ctx = null;
 let refStep = 1;
@@ -129,7 +129,7 @@ function updateSqlHint() {
 
 function loadReferralDialogs() {
   if (!referralDialogsPromise) {
-    referralDialogsPromise = import("./planillas-referral-dialogs.js?v=20261027b").then((mod) => {
+    referralDialogsPromise = import("./planillas-referral-dialogs.js").then((mod) => {
       mod.initReferralDialogs();
       return mod;
     });
