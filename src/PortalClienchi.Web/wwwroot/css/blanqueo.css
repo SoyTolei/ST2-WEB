@@ -1054,7 +1054,7 @@ tr.blanqueo-row-alert td {
 }
 
 .blanqueo-table tbody tr + tr td {
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid var(--c-slate-100);
 }
 
 .blanqueo-table .blanqueo-th-fecha,

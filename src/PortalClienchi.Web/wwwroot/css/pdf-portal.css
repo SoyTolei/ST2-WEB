@@ -323,13 +323,13 @@
 /* Hoja oscura cuando se activa explícitamente o en dark mode */
 .pdf-portal-preview.sheet-dark {
   background: #141414 !important;
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
   border-color: var(--c-slate-700) !important;
   box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.85) !important;
 }
 
 .pdf-portal-preview.sheet-dark .pdf-portal-preview-brand {
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
   border-bottom: 3px solid var(--c-brand-500) !important;
 }
 
@@ -338,7 +338,7 @@
 }
 
 .pdf-portal-preview.sheet-dark .pdf-portal-preview-body {
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
 }
 
 .pdf-portal-preview.sheet-dark .pdf-portal-preview-body:empty::before {
@@ -351,7 +351,7 @@
 }
 
 .pdf-portal-preview.sheet-dark h3 {
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
 }
 
 .pdf-portal-preview.sheet-dark a {
@@ -366,7 +366,7 @@
 
 .pdf-portal-preview.sheet-dark td {
   background: var(--c-neutral-800) !important;
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
   border: 1px solid #3b465c !important;
 }
 

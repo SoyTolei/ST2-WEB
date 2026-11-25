@@ -950,7 +950,7 @@ html.st2-theme-dark .blanqueo-table td {
 }
 
 html.st2-theme-dark .plan-gestor-table:not(.borrado-table):not(.blanqueo-table) tr:hover td {
-  background: #1e2a3c !important;
+  background: var(--c-slate-800) !important;
 }
 
 html.st2-theme-dark .plan-onvio-card.tone-slate,
@@ -1729,7 +1729,7 @@ html.st2-theme-dark .plan-gestor-field-label,
 html.st2-theme-dark .plan-gestor-panel-title,
 html.st2-theme-dark .plan-ref-title,
 html.st2-theme-dark .plan-ref-hint {
-  color: #d8d8d8 !important;
+  color: var(--c-neutral-300) !important;
 }
 
 html.st2-theme-dark .st2-about-tabs-list {
@@ -2940,14 +2940,14 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich:focus {
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview,
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark {
   background: #141414 !important;
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
   border-color: var(--c-slate-700) !important;
   box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.85) !important;
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview .pdf-portal-preview-brand,
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-brand {
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
   border-bottom: 3px solid var(--c-brand-500) !important;
 }
 
@@ -2961,19 +2961,19 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body p,
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body div,
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .pdf-portal-preview-body li {
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
 }
 
 html.st2-theme-dark .pdf-portal-modal-container #pdf-portal-editor,
 html.st2-theme-dark #pdf-portal-editor {
   background: #141414 !important;
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
 }
 
 html.st2-theme-dark #pdf-portal-editor p,
 html.st2-theme-dark #pdf-portal-editor div,
 html.st2-theme-dark #pdf-portal-editor li {
-  color: #f2f2f2;
+  color: var(--c-neutral-100);
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview h1,
@@ -2985,7 +2985,7 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark h
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview h3,
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark h3 {
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview a,
@@ -3001,7 +3001,7 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview td,
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark td {
   background: var(--c-neutral-800) !important;
-  color: #f2f2f2 !important;
+  color: var(--c-neutral-100) !important;
   border-color: #3b465c !important;
 }
 

@@ -15,9 +15,9 @@
   --portal-sub: #3d4a5c;
   --portal-sub-hover: #4e5d72;
   --portal-sub-glow: rgba(38, 47, 62, 0.22);
-  --portal-sub-soft: #eef1f5;
+  --portal-sub-soft: var(--c-slate-100);
   --st2-suite-surface: linear-gradient(155deg, var(--c-white) 0%, #fff9f5 45%, #ffefe4 100%);
-  --st2-suite-surface-soft: linear-gradient(180deg, #fdfcfb 0%, #faf6f3 100%);
+  --st2-suite-surface-soft: linear-gradient(180deg, var(--c-stone-50) 0%, #faf6f3 100%);
   --st2-suite-border: rgba(251, 146, 60, 0.24);
   --st2-suite-glow: 0 8px 28px rgba(214, 64, 0, 0.08);
 }
@@ -1342,7 +1342,7 @@ body.portal-tab-active.portal-context-active .tab-bar {
   padding: 0 0.35rem;
   border-radius: 999px;
   background: #e53935;
-  border: 1px solid #b71c1c;
+  border: 1px solid var(--c-red-700);
   color: var(--c-white);
   font-size: 0.65rem;
   font-weight: 700;
@@ -2634,7 +2634,7 @@ body.portal-tab-active .main-shell {
   overflow: auto;
   background:
     radial-gradient(120% 70% at 100% 0%, rgba(214, 64, 0, 0.06) 0%, transparent 52%),
-    linear-gradient(180deg, var(--c-white) 0%, #fbfcfe 100%);
+    linear-gradient(180deg, var(--c-white) 0%, var(--c-slate-50) 100%);
   border-radius: 16px;
   padding: 32px 34px 24px;
   box-shadow:
@@ -2708,7 +2708,7 @@ body.portal-tab-active .main-shell {
   padding: 16px 16px 14px;
   border-radius: 12px;
   border: 1px solid #f3d5b8;
-  background: linear-gradient(180deg, #fffdf9 0%, #fff6ec 100%);
+  background: linear-gradient(180deg, #fffdf9 0%, var(--c-orange-50) 100%);
   box-shadow: inset 3px 0 0 #e07a2f;
 }
 
@@ -4842,7 +4842,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-admin-table td {
   padding: 10px 12px;
   text-align: left;
-  border-bottom: 1px solid #eef2f7;
+  border-bottom: 1px solid var(--c-slate-100);
   vertical-align: middle;
 }
 
@@ -4850,7 +4850,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #eef2f7;
+  background: var(--c-slate-100);
   color: var(--c-slate-700);
   font-size: 0.7rem;
   font-weight: 700;
@@ -6046,7 +6046,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #eef2f7;
+  background: var(--c-slate-100);
   font-weight: 700;
   color: var(--c-slate-700);
   font-size: 0.7rem;
@@ -6842,7 +6842,7 @@ body.st2-access-ok .st2-boot-splash {
   font-size: 1.08rem;
   font-weight: 700;
   color: var(--c-white);
-  background: linear-gradient(180deg, #e85a12 0%, var(--c-brand-600) 100%);
+  background: linear-gradient(180deg, var(--c-orange-600) 0%, var(--c-brand-600) 100%);
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(214, 64, 0, 0.28);
   transition: filter 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
