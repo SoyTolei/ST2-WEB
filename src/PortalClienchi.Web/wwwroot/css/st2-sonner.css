@@ -153,7 +153,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action {
   letter-spacing: 0.01em;
   line-height: 1.15;
   cursor: pointer;
-  color: #fff;
+  color: var(--c-white);
   transition: background 0.15s ease, border-color 0.15s ease, filter 0.15s ease, transform 0.12s ease;
 }
 
@@ -168,57 +168,57 @@ sonner-toast.st2-sonner-toast .st2-sonner-action:active {
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--ok {
-  background: #84cc16;
+  background: var(--c-lime-500);
   border-color: rgba(190, 242, 100, 0.5);
   box-shadow: 0 0 12px rgba(132, 204, 22, 0.4);
-  color: #14532d;
+  color: var(--c-green-900);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--ok:hover {
-  background: #65a30d;
-  color: #fff;
+  background: var(--c-lime-600);
+  color: var(--c-white);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--warn {
   background: #eace7a;
   border-color: rgba(253, 230, 138, 0.55);
   box-shadow: 0 0 12px rgba(234, 206, 122, 0.4);
-  color: #713f12;
+  color: var(--c-yellow-900);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--warn:hover {
   background: #d4b45e;
-  color: #422006;
+  color: var(--c-yellow-950);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--bad {
-  background: #f43f5e;
+  background: var(--c-rose-500);
   border-color: rgba(253, 164, 175, 0.5);
   box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--bad:hover {
-  background: #e11d48;
+  background: var(--c-rose-600);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--tools {
-  background: #3b82f6;
+  background: var(--c-blue-500);
   border-color: rgba(147, 197, 253, 0.5);
   box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--tools:hover {
-  background: #2563eb;
+  background: var(--c-blue-600);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--agua {
-  background: #0ea5e9;
+  background: var(--c-sky-500);
   border-color: rgba(186, 230, 253, 0.5);
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
 }
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--agua:hover {
-  background: #0284c7;
+  background: var(--c-sky-600);
 }
 
 /* Bandeja de avisos (menú blobatar → Ver avisos) */
@@ -235,7 +235,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action--agua:hover {
   border: 1px solid rgba(251, 146, 60, 0.35);
   background: #1c1410;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-  color: #ffedd5;
+  color: var(--c-orange-100);
   font-family: "Sora", "Segoe UI", system-ui, sans-serif;
 }
 
@@ -273,13 +273,13 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 .st2-notif-inbox__unread {
   font-size: 0.66rem;
   font-weight: 600;
-  color: #fb923c;
+  color: var(--c-orange-400);
 }
 
 .st2-notif-inbox__close {
   border: 0;
   background: transparent;
-  color: #fdba74;
+  color: var(--c-orange-300);
   width: 28px;
   height: 28px;
   border-radius: 8px;
@@ -290,7 +290,7 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 
 .st2-notif-inbox__close:hover {
   background: rgba(251, 146, 60, 0.12);
-  color: #fff7ed;
+  color: var(--c-orange-50);
 }
 
 .st2-notif-inbox__empty {
@@ -342,16 +342,16 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
   height: 8px;
   margin-top: 5px;
   border-radius: 50%;
-  background: #fb923c;
+  background: var(--c-orange-400);
   box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
 }
 
 .st2-notif-inbox__item.is-unread .st2-notif-inbox__dot {
-  background: #fb923c;
+  background: var(--c-orange-400);
 }
 
 .st2-notif-inbox__item.is-seen .st2-notif-inbox__dot {
-  background: #78716c;
+  background: var(--c-stone-500);
   box-shadow: none;
   animation: none;
 }
@@ -385,7 +385,7 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
   font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #fdba74;
+  color: var(--c-orange-300);
 }
 
 .st2-notif-inbox__time {
@@ -397,7 +397,7 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 .st2-notif-inbox__body {
   font-size: 0.72rem;
   line-height: 1.35;
-  color: #ffedd5;
+  color: var(--c-orange-100);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;

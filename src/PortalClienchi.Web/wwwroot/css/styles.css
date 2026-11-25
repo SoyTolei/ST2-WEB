@@ -1,5 +1,5 @@
 :root {
-  --primary: #d64000;
+  --primary: var(--c-brand-600);
   --primary-glow: rgba(214, 64, 0, 0.45);
   --dark: #1a1f2e;
   --header-top: #1a1410;
@@ -8,15 +8,15 @@
   --header-accent: rgba(249, 115, 22, 0.7);
   --panel: #f4f6fa;
   --border: #e2e6ef;
-  --text-muted: #6b7280;
+  --text-muted: var(--c-gray-500);
   --nav-well: #eef1f6;
   --nav-hover: #e1e6f0;
-  --white: #ffffff;
+  --white: var(--c-white);
   --portal-sub: #3d4a5c;
   --portal-sub-hover: #4e5d72;
   --portal-sub-glow: rgba(38, 47, 62, 0.22);
   --portal-sub-soft: #eef1f5;
-  --st2-suite-surface: linear-gradient(155deg, #ffffff 0%, #fff9f5 45%, #ffefe4 100%);
+  --st2-suite-surface: linear-gradient(155deg, var(--c-white) 0%, #fff9f5 45%, #ffefe4 100%);
   --st2-suite-surface-soft: linear-gradient(180deg, #fdfcfb 0%, #faf6f3 100%);
   --st2-suite-border: rgba(251, 146, 60, 0.24);
   --st2-suite-glow: 0 8px 28px rgba(214, 64, 0, 0.08);
@@ -384,7 +384,7 @@ html, body {
   padding: 0;
   border: 0;
   background: none;
-  color: #fb923c;
+  color: var(--c-orange-400);
   font: inherit;
   font-size: 0.74rem;
   font-weight: 800;
@@ -398,7 +398,7 @@ html, body {
 }
 
 .st2-blobatar-greet-link:hover {
-  color: #fdba74;
+  color: var(--c-orange-300);
 }
 
 .st2-blobatar-greet-link.hidden {
@@ -424,7 +424,7 @@ html, body {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #f97316;
+  background: var(--c-orange-500);
   box-shadow: 0 0 0 2px #120c08, 0 0 10px rgba(249, 115, 22, 0.85);
   animation: st2-cryptic-dot-pulse 1.7s ease-in-out infinite;
   z-index: 3;
@@ -491,7 +491,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
   right: 10px;
   height: 2px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #c2410c 0%, #f97316 48%, #fdba74 100%);
+  background: linear-gradient(90deg, var(--c-orange-700) 0%, var(--c-orange-500) 48%, var(--c-orange-300) 100%);
   opacity: 0.9;
   pointer-events: none;
   z-index: 1;
@@ -641,7 +641,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #ffedd5;
+  color: var(--c-orange-100);
   line-height: 1.2;
   cursor: inherit;
   user-select: none;
@@ -805,7 +805,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: #ffedd5;
+  color: var(--c-orange-100);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -886,7 +886,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
 
 .st2-session-menu-item:hover {
   background: rgba(249, 115, 22, 0.16);
-  color: #fff7ed;
+  color: var(--c-orange-50);
   transform: translateX(2px);
   box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.14);
 }
@@ -902,7 +902,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
 
 .st2-session-menu-item--soft:hover {
   background: rgba(248, 113, 113, 0.12);
-  color: #fecaca;
+  color: var(--c-red-200);
   box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.16);
 }
 
@@ -928,8 +928,8 @@ body.st2-session-menu-open .st2-blobatar-greet {
   flex-wrap: wrap;
   min-height: 62px;
   padding: 14px 20px;
-  background: linear-gradient(90deg, #115e59 0%, #0f766e 55%, #14b8a6 100%);
-  color: #f0fdfa;
+  background: linear-gradient(90deg, var(--c-teal-800) 0%, var(--c-teal-700) 55%, var(--c-teal-500) 100%);
+  color: var(--c-teal-50);
   box-shadow: 0 8px 22px rgba(15, 118, 110, 0.32);
   text-align: center;
 }
@@ -954,8 +954,8 @@ body.portal-tab-active .st2-modules-banner {
   border: 0;
   border-radius: 999px;
   padding: 8px 18px;
-  background: #fff;
-  color: #115e59;
+  background: var(--c-white);
+  color: var(--c-teal-800);
   font-size: 0.84rem;
   font-weight: 700;
   cursor: pointer;
@@ -963,7 +963,7 @@ body.portal-tab-active .st2-modules-banner {
 }
 
 .st2-modules-banner-reload:hover {
-  background: #ccfbf1;
+  background: var(--c-teal-100);
 }
 
 @keyframes st2-tools-dot-pulse {
@@ -985,8 +985,8 @@ body.portal-tab-active .st2-modules-banner {
   flex-wrap: wrap;
   min-height: 62px;
   padding: 14px 20px;
-  background: linear-gradient(90deg, #312e81 0%, #4f46e5 55%, #6366f1 100%);
-  color: #eef2ff;
+  background: linear-gradient(90deg, var(--c-indigo-900) 0%, var(--c-indigo-600) 55%, var(--c-indigo-500) 100%);
+  color: var(--c-indigo-50);
   box-shadow: 0 8px 22px rgba(79, 70, 229, 0.32);
   text-align: center;
 }
@@ -995,7 +995,7 @@ body.portal-tab-active .st2-modules-banner {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #c7d2fe;
+  background: var(--c-indigo-200);
   box-shadow: 0 0 0 3px rgba(199, 210, 254, 0.28);
   animation: st2-tools-dot-pulse 1.35s step-end infinite;
   flex-shrink: 0;
@@ -1045,17 +1045,17 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
 }
 
 .st2-tools-banner-open {
-  background: #fff;
-  color: #3730a3;
+  background: var(--c-white);
+  color: var(--c-indigo-800);
 }
 
 .st2-tools-banner-open:hover {
-  background: #e0e7ff;
+  background: var(--c-indigo-100);
 }
 
 .st2-tools-banner-dismiss {
   background: transparent;
-  color: #fff7ed;
+  color: var(--c-orange-50);
   box-shadow: inset 0 0 0 1px rgba(255, 247, 237, 0.55);
 }
 
@@ -1070,9 +1070,9 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
   gap: 0.85rem;
   flex-wrap: wrap;
   padding: 0.55rem 1rem;
-  background: #0f172a;
-  color: #f8fafc;
-  border-bottom: 1px solid #1e293b;
+  background: var(--c-slate-900);
+  color: var(--c-slate-50);
+  border-bottom: 1px solid var(--c-slate-800);
   z-index: 40;
 }
 
@@ -1090,8 +1090,8 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
   border: 0;
   border-radius: 6px;
   padding: 0.35rem 0.75rem;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--c-slate-50);
+  color: var(--c-slate-900);
   font: inherit;
   font-size: 0.8rem;
   font-weight: 700;
@@ -1099,7 +1099,7 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
 }
 
 .st2-view-as-exit:hover {
-  background: #e2e8f0;
+  background: var(--c-slate-200);
 }
 
 .btn-ghost {
@@ -1142,7 +1142,7 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--c-white);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
   display: grid;
   place-items: center;
@@ -1155,12 +1155,12 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
 }
 
 .theme-switch-sun {
-  color: #c2410c;
+  color: var(--c-orange-700);
   opacity: 1;
 }
 
 .theme-switch-moon {
-  color: #1e293b;
+  color: var(--c-slate-800);
   opacity: 0;
 }
 
@@ -1184,7 +1184,7 @@ html.st2-theme-dark .theme-switch-knob {
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.16);
-  color: #fff;
+  color: var(--c-white);
 }
 
 body.st2-has-modules-update .main-shell {
@@ -1240,7 +1240,7 @@ body.portal-tab-active.st2-has-modules-update.st2-has-tools-update .main-shell {
   padding: 5px 8px;
   min-height: 44px;
   margin: 0 auto 10px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--c-white) 0%, var(--c-slate-50) 100%);
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow:
@@ -1290,7 +1290,7 @@ body.portal-tab-active.portal-context-active .tab-bar {
 }
 
 .tab-btn:hover:not(.active) {
-  background: #fff;
+  background: var(--c-white);
   border-color: rgba(226, 230, 239, 0.95);
   color: var(--dark);
   box-shadow: 0 2px 10px rgba(26, 31, 46, 0.07);
@@ -1304,7 +1304,7 @@ body.portal-tab-active.portal-context-active .tab-bar {
 .tab-btn.active {
   background: linear-gradient(180deg, #e24808 0%, var(--primary) 100%);
   border-color: #b83800;
-  color: #fff;
+  color: var(--c-white);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
     0 4px 14px rgba(214, 64, 0, 0.24);
@@ -1343,7 +1343,7 @@ body.portal-tab-active.portal-context-active .tab-bar {
   border-radius: 999px;
   background: #e53935;
   border: 1px solid #b71c1c;
-  color: #fff;
+  color: var(--c-white);
   font-size: 0.65rem;
   font-weight: 700;
   line-height: 1;
@@ -1421,7 +1421,7 @@ body.portal-tab-active.portal-context-active .tab-bar {
   flex: none;
   margin: 0 auto;
   overflow: visible;
-  background: #f8fafc;
+  background: var(--c-slate-50);
   box-shadow: 0 8px 28px rgba(15, 23, 42, 0.1);
 }
 
@@ -1473,9 +1473,9 @@ body.portal-tab-active.portal-context-active .tab-bar {
   min-height: 0;
   max-height: none;
   overflow: visible;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
   border-radius: 10px;
-  background: #fff;
+  background: var(--c-white);
 }
 
 #panel-admin .st2-access-admin-table th,
@@ -1513,35 +1513,35 @@ body.admin-tab-active {
 }
 
 .tab-btn-admin:not(.active) {
-  color: #334155;
+  color: var(--c-slate-700);
   border-color: rgba(71, 85, 105, 0.28);
-  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-  box-shadow: inset 3px 0 0 #d64000;
+  background: linear-gradient(180deg, var(--c-slate-50) 0%, var(--c-slate-200) 100%);
+  box-shadow: inset 3px 0 0 var(--c-brand-600);
 }
 
 .tab-btn-admin:not(.active):hover {
-  color: #0f172a;
+  color: var(--c-slate-900);
   border-color: rgba(214, 64, 0, 0.35);
-  background: linear-gradient(180deg, #fff 0%, #f1f5f9 100%);
+  background: linear-gradient(180deg, var(--c-white) 0%, var(--c-slate-100) 100%);
   box-shadow:
-    inset 3px 0 0 #ea580c,
+    inset 3px 0 0 var(--c-orange-600),
     0 2px 10px rgba(26, 31, 46, 0.08);
 }
 
 .tab-btn-admin.active {
-  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-  border-color: #0f172a;
-  color: #fff;
+  background: linear-gradient(180deg, var(--c-slate-700) 0%, var(--c-slate-800) 100%);
+  border-color: var(--c-slate-900);
+  color: var(--c-white);
   box-shadow:
-    inset 3px 0 0 #f97316,
+    inset 3px 0 0 var(--c-orange-500),
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 4px 14px rgba(15, 23, 42, 0.28);
 }
 
 .tab-btn-admin.active:hover {
-  background: linear-gradient(180deg, #475569 0%, #334155 100%);
+  background: linear-gradient(180deg, var(--c-slate-600) 0%, var(--c-slate-700) 100%);
   box-shadow:
-    inset 3px 0 0 #fb923c,
+    inset 3px 0 0 var(--c-orange-400),
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     0 6px 16px rgba(15, 23, 42, 0.32);
 }
@@ -1618,7 +1618,7 @@ body.admin-tab-active {
   position: relative;
   border: 1px solid transparent;
   background: transparent;
-  color: #9a3412;
+  color: var(--c-orange-800);
   font: inherit;
   font-size: 0.76rem;
   font-weight: 650;
@@ -1639,14 +1639,14 @@ body.admin-tab-active {
 .st2-context-btn:hover:not(.active) {
   background: rgba(249, 115, 22, 0.1);
   border-color: transparent;
-  color: #9a3412;
+  color: var(--c-orange-800);
   box-shadow: none;
 }
 
 .st2-context-btn.active {
   border-color: rgba(234, 88, 12, 0.88);
   background: rgba(249, 115, 22, 0.2);
-  color: #9a3412;
+  color: var(--c-orange-800);
   font-weight: 750;
   box-shadow:
     inset 0 1px 0 rgba(255, 247, 237, 0.35),
@@ -1670,7 +1670,7 @@ body.admin-tab-active {
 .search-column,
 .preview-column {
   background:
-    linear-gradient(180deg, #ffffff 0%, #fffaf6 100%);
+    linear-gradient(180deg, var(--c-white) 0%, #fffaf6 100%);
   border: 1px solid rgba(214, 64, 0, 0.2);
   border-radius: 14px;
   min-height: 0;
@@ -1765,7 +1765,7 @@ body.portal-tab-active .combo-box {
   font-size: 15px;
   border: 1px solid rgba(214, 64, 0, 0.16);
   border-radius: 11px;
-  background: #fff;
+  background: var(--c-white);
   margin-bottom: 8px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -1796,7 +1796,7 @@ body.portal-tab-active .combo-box {
 
 .year-btn {
   border: 1px solid rgba(214, 64, 0, 0.14);
-  background: #fff;
+  background: var(--c-white);
   color: #9a4a28;
   border-radius: 999px;
   padding: 5px 12px;
@@ -1810,7 +1810,7 @@ body.portal-tab-active .combo-box {
 .year-btn.active {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--c-white);
 }
 
 .results-panel {
@@ -1916,7 +1916,7 @@ body.portal-tab-active .combo-box {
 .portal-suggest-chip {
   appearance: none;
   border: 1px solid rgba(214, 64, 0, 0.28);
-  background: #fff;
+  background: var(--c-white);
   color: #a33a0a;
   font: inherit;
   font-size: 11.5px;
@@ -2013,7 +2013,7 @@ body.portal-tab-active .combo-box {
   padding: 10px 10px;
   margin: 4px 0;
   cursor: pointer;
-  background: #fff;
+  background: var(--c-white);
   border: 1px solid rgba(180, 188, 204, 0.85);
   box-shadow: 0 1px 3px rgba(26, 31, 46, 0.05);
   transition:
@@ -2031,7 +2031,7 @@ body.portal-tab-active .combo-box {
 
 .result-item.selected {
   border-color: var(--primary);
-  background: linear-gradient(180deg, #fff3eb 0%, #fff 100%);
+  background: linear-gradient(180deg, #fff3eb 0%, var(--c-white) 100%);
   box-shadow:
     0 0 0 1px rgba(214, 64, 0, 0.18),
     0 8px 18px rgba(214, 64, 0, 0.14);
@@ -2039,7 +2039,7 @@ body.portal-tab-active .combo-box {
 
 .result-item.indented {
   margin-left: 14px;
-  background: #fafafa;
+  background: var(--c-neutral-50);
   border: 1px solid var(--border);
 }
 
@@ -2052,7 +2052,7 @@ body.portal-tab-active .combo-box {
 
 .tag-date {
   background: var(--dark);
-  color: #fff;
+  color: var(--c-white);
   font-size: 11px;
   font-weight: 700;
   padding: 2px 6px;
@@ -2222,7 +2222,7 @@ body.portal-tab-active .combo-box {
 .preview-loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid #e5e7eb;
+  border: 3px solid var(--c-gray-200);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: previewSpin 0.85s linear infinite;
@@ -2240,7 +2240,7 @@ body.portal-tab-active .combo-box {
   width: 100%;
   height: 100%;
   border: none;
-  background: #fff;
+  background: var(--c-white);
 }
 
 .preview-actions {
@@ -2272,11 +2272,11 @@ body.portal-tab-active .combo-box {
 
 .btn-primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--c-white);
 }
 
 .btn-secondary {
-  background: #fff;
+  background: var(--c-white);
   color: var(--dark);
   border: 1px solid var(--border);
 }
@@ -2321,7 +2321,7 @@ body.portal-tab-active .combo-box {
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--c-white);
 }
 
 /* Densidad ~90% en THOM/Portal: entra más contenido sin achicar las pestañas ST2.
@@ -2455,7 +2455,7 @@ body.embed-active #panel-orpen .embed-frame-wrap > .embed-frame {
   padding: 10px 18px;
   font-size: 13px;
   font-weight: 600;
-  background: #fff;
+  background: var(--c-white);
   color: var(--dark);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -2507,7 +2507,7 @@ body.embed-active.thom-tab-active.thom-context-active .tab-bar {
 }
 
 .embed-direct-gate.embed-panel-active {
-  background: linear-gradient(180deg, #fff8f4 0%, #ffffff 55%);
+  background: linear-gradient(180deg, #fff8f4 0%, var(--c-white) 55%);
   border: 1px dashed rgba(214, 64, 0, 0.35);
 }
 
@@ -2519,7 +2519,7 @@ body.embed-active.thom-tab-active.thom-context-active .tab-bar {
   border-radius: 999px;
   background: rgba(21, 128, 61, 0.08);
   border: 1px solid rgba(21, 128, 61, 0.22);
-  color: #15803d;
+  color: var(--c-green-700);
   font-size: 12.5px;
   font-weight: 600;
 }
@@ -2532,7 +2532,7 @@ body.embed-active.thom-tab-active.thom-context-active .tab-bar {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #16a34a;
+  background: var(--c-green-600);
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
 }
 
@@ -2552,7 +2552,7 @@ body.embed-active.thom-tab-active.thom-context-active .tab-bar {
   height: 100%;
   min-height: 520px;
   border: none;
-  background: #fff;
+  background: var(--c-white);
 }
 
 #panel-thom.active,
@@ -2581,7 +2581,7 @@ body.portal-tab-active .main-shell {
 .status-bar {
   height: 36px;
   padding: 4px 16px;
-  background: #fff;
+  background: var(--c-white);
   border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -2634,7 +2634,7 @@ body.portal-tab-active .main-shell {
   overflow: auto;
   background:
     radial-gradient(120% 70% at 100% 0%, rgba(214, 64, 0, 0.06) 0%, transparent 52%),
-    linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+    linear-gradient(180deg, var(--c-white) 0%, #fbfcfe 100%);
   border-radius: 16px;
   padding: 32px 34px 24px;
   box-shadow:
@@ -2740,7 +2740,7 @@ body.portal-tab-active .main-shell {
 .st2-about-abbr-t,
 .st2-about-abbr-2 {
   font-weight: 800;
-  color: #d64000;
+  color: var(--c-brand-600);
 }
 
 .st2-about-abbr-2 {
@@ -2751,7 +2751,7 @@ body.portal-tab-active .main-shell {
   margin: 0 0 10px;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: #4b5563;
+  color: var(--c-gray-600);
 }
 
 .st2-about-tabs-list {
@@ -2759,7 +2759,7 @@ body.portal-tab-active .main-shell {
   padding: 0 0 0 1.1rem;
   font-size: 0.82rem;
   line-height: 1.5;
-  color: #4b5563;
+  color: var(--c-gray-600);
 }
 
 .st2-about-tabs-list li {
@@ -2781,7 +2781,7 @@ body.portal-tab-active .main-shell {
   font-size: 0.76rem;
   font-style: italic;
   line-height: 1.45;
-  color: #6b7280;
+  color: var(--c-gray-500);
 }
 
 .st2-about-notice-copy > .st2-about-signature {
@@ -2846,8 +2846,8 @@ body.portal-tab-active .main-shell {
   display: inline-block;
   width: 28px;
   height: 28px;
-  border: 3px solid #fed7aa;
-  border-top-color: #ea580c;
+  border: 3px solid var(--c-orange-200);
+  border-top-color: var(--c-orange-600);
   border-radius: 50%;
   animation: st2AboutSpin 0.75s linear infinite;
 }
@@ -2860,13 +2860,13 @@ body.portal-tab-active .main-shell {
   margin: 12px 0 10px;
   font-size: 0.86rem;
   font-weight: 650;
-  color: #9a3412;
+  color: var(--c-orange-800);
 }
 
 .st2-about-busy-bar {
   height: 6px;
   border-radius: 999px;
-  background: #ffedd5;
+  background: var(--c-orange-100);
   overflow: hidden;
 }
 
@@ -2875,7 +2875,7 @@ body.portal-tab-active .main-shell {
   height: 100%;
   width: 8%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #fb923c, #ea580c);
+  background: linear-gradient(90deg, var(--c-orange-400), var(--c-orange-600));
   transition: width 0.15s ease;
 }
 
@@ -2898,14 +2898,14 @@ body.portal-tab-active .main-shell {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-about-tools-hint {
   margin: -4px 0 10px;
   font-size: 0.78rem;
   line-height: 1.4;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-about-tools-hint code {
@@ -2931,7 +2931,7 @@ body.portal-tab-active .main-shell {
   padding: 11px 13px;
   border-radius: 11px;
   border: 1px solid var(--border);
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--c-white) 0%, var(--c-slate-50) 100%);
 }
 
 .st2-about-tool.is-current {
@@ -2955,7 +2955,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-tool-desc {
   font-size: 0.78rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   line-height: 1.35;
 }
 
@@ -2967,7 +2967,7 @@ body.portal-tab-active .main-shell {
   font-style: italic;
   letter-spacing: normal;
   text-transform: none;
-  color: #7c3aed;
+  color: var(--c-violet-600);
 }
 
 .st2-about-tool-meta {
@@ -2976,11 +2976,11 @@ body.portal-tab-active .main-shell {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #c2410c;
+  color: var(--c-orange-700);
 }
 
 .st2-about-tool-meta-web {
-  color: #0f766e;
+  color: var(--c-teal-700);
   text-transform: none;
   letter-spacing: 0.01em;
   font-weight: 600;
@@ -2999,7 +2999,7 @@ body.portal-tab-active .main-shell {
   margin-top: 0;
   font-size: 0.68rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-slate-900);
   letter-spacing: 0.01em;
   line-height: 1.2;
   text-align: right;
@@ -3014,8 +3014,8 @@ body.portal-tab-active .main-shell {
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #fff;
-  background: #c2410c;
+  color: var(--c-white);
+  background: var(--c-orange-700);
   border-radius: 999px;
   padding: 2px 7px;
   line-height: 1.35;
@@ -3031,10 +3031,10 @@ body.portal-tab-active .main-shell {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--c-slate-100);
+  color: var(--c-slate-500);
   font: inherit;
   font-size: 0.78rem;
   font-weight: 700;
@@ -3067,19 +3067,19 @@ body.portal-tab-active .main-shell {
 
 .st2-about-tool-dl:not(:disabled) {
   border-color: transparent;
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--c-orange-600) 0%, var(--c-orange-500) 100%);
+  color: var(--c-white);
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.28);
 }
 
 .st2-about-tool-dl:not(:disabled) .st2-about-tool-dl-icon {
   background: rgba(255, 255, 255, 0.22);
-  color: #fff;
+  color: var(--c-white);
 }
 
 .st2-about-tool-dl:not(:disabled):hover {
-  background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+  background: linear-gradient(135deg, var(--c-orange-700) 0%, var(--c-orange-600) 100%);
   border-color: transparent;
   box-shadow: 0 6px 18px rgba(234, 88, 12, 0.36);
   transform: translateY(-1px);
@@ -3092,10 +3092,10 @@ body.portal-tab-active .main-shell {
 
 .st2-about-tool-url {
   flex-shrink: 0;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 8px;
-  background: #fff;
-  color: #475569;
+  background: var(--c-white);
+  color: var(--c-slate-600);
   font: inherit;
   font-size: 0.72rem;
   font-weight: 700;
@@ -3108,8 +3108,8 @@ body.portal-tab-active .main-shell {
 }
 
 .st2-about-tool-url:hover {
-  border-color: #64748b;
-  color: #0f172a;
+  border-color: var(--c-slate-500);
+  color: var(--c-slate-900);
 }
 
 .st2-about-tool-upload {
@@ -3117,10 +3117,10 @@ body.portal-tab-active .main-shell {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px dashed #94a3b8;
+  border: 1px dashed var(--c-slate-400);
   border-radius: 8px;
-  background: #fff;
-  color: #475569;
+  background: var(--c-white);
+  color: var(--c-slate-600);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 6px 10px;
@@ -3132,8 +3132,8 @@ body.portal-tab-active .main-shell {
 }
 
 .st2-about-tool-upload:hover {
-  border-color: #64748b;
-  color: #0f172a;
+  border-color: var(--c-slate-500);
+  color: var(--c-slate-900);
 }
 
 .st2-about-tool-file {
@@ -3146,7 +3146,7 @@ body.portal-tab-active .main-shell {
 .st2-about-tools-status {
   margin: 10px 0 0;
   font-size: 0.78rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   white-space: pre-wrap;
   word-break: break-word;
   max-height: 9rem;
@@ -3154,7 +3154,7 @@ body.portal-tab-active .main-shell {
 }
 
 .st2-about-tools-status.is-error {
-  color: #b91c1c;
+  color: var(--c-red-700);
 }
 
 .st2-about-tools-status.hidden {
@@ -3179,11 +3179,11 @@ body.portal-tab-active .main-shell {
 
 .st2-tool-url-dialog {
   width: min(100%, 420px);
-  background: #fff;
+  background: var(--c-white);
   border-radius: 14px;
   padding: 22px 22px 18px;
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
 }
 
 .st2-tool-url-dialog h3 {
@@ -3198,7 +3198,7 @@ body.portal-tab-active .main-shell {
   margin: 0 0 14px;
   font-size: 0.84rem;
   line-height: 1.45;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-msg-body {
@@ -3228,8 +3228,8 @@ body.portal-tab-active .main-shell {
   height: 30px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
-  color: #64748b;
+  background: var(--c-white);
+  color: var(--c-slate-500);
   font-size: 1.2rem;
   line-height: 1;
   cursor: pointer;
@@ -3275,31 +3275,31 @@ body.portal-tab-active .main-shell {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-tool-url-input {
   width: 100%;
   box-sizing: border-box;
   margin: 0 0 12px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 10px;
   padding: 10px 12px;
   font: inherit;
   font-size: 0.9rem;
   color: var(--dark);
-  background: #fff;
+  background: var(--c-white);
 }
 
 .st2-tool-url-input:focus {
   outline: 2px solid rgba(214, 64, 0, 0.35);
-  border-color: #ea580c;
+  border-color: var(--c-orange-600);
 }
 
 .st2-tool-url-error {
   margin: 0 0 12px;
   font-size: 0.8rem;
-  color: #b91c1c;
+  color: var(--c-red-700);
 }
 
 .st2-tool-url-error.hidden {
@@ -3324,33 +3324,33 @@ body.portal-tab-active .main-shell {
 }
 
 .st2-tool-url-btn--ghost {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #475569;
+  background: var(--c-slate-50);
+  border-color: var(--c-slate-300);
+  color: var(--c-slate-600);
 }
 
 .st2-tool-url-btn--ghost:hover {
-  background: #f1f5f9;
+  background: var(--c-slate-100);
 }
 
 .st2-tool-url-btn--primary {
-  background: #c2410c;
-  border-color: #c2410c;
-  color: #fff;
+  background: var(--c-orange-700);
+  border-color: var(--c-orange-700);
+  color: var(--c-white);
 }
 
 .st2-tool-url-btn--primary:hover {
-  background: #9a3412;
+  background: var(--c-orange-800);
 }
 
 .st2-tool-url-btn--danger {
-  background: #dc2626;
-  border-color: #b91c1c;
-  color: #fff;
+  background: var(--c-red-600);
+  border-color: var(--c-red-700);
+  color: var(--c-white);
 }
 
 .st2-tool-url-btn--danger:hover {
-  background: #b91c1c;
+  background: var(--c-red-700);
 }
 
 .st2-confirm-overlay {
@@ -3361,11 +3361,11 @@ body.portal-tab-active .main-shell {
   margin: -6px 0 16px;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px dashed #fdba74;
-  background: #fff7ed;
+  border: 1px dashed var(--c-orange-300);
+  background: var(--c-orange-50);
   font-size: 0.82rem;
   font-weight: 650;
-  color: #9a3412;
+  color: var(--c-orange-800);
   word-break: break-all;
 }
 
@@ -3385,7 +3385,7 @@ body.portal-tab-active .main-shell {
 }
 
 #st2-notice-overlay.is-warn .st2-notice-dialog {
-  border-top: 3px solid #d64000;
+  border-top: 3px solid var(--c-brand-600);
 }
 
 #st2-notice-overlay.is-warn #st2-notice-title::before {
@@ -3396,8 +3396,8 @@ body.portal-tab-active .main-shell {
   width: 1.15rem;
   height: 1.15rem;
   border-radius: 50%;
-  background: #d64000;
-  color: #fff;
+  background: var(--c-brand-600);
+  color: var(--c-white);
   font-size: 0.78rem;
   font-weight: 900;
   line-height: 1;
@@ -3408,11 +3408,11 @@ body.portal-tab-active .main-shell {
   margin: -6px 0 16px;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px dashed #fdba74;
-  background: #fff7ed;
+  border: 1px dashed var(--c-orange-300);
+  background: var(--c-orange-50);
   font-size: 0.82rem;
   font-weight: 650;
-  color: #9a3412;
+  color: var(--c-orange-800);
   word-break: break-word;
 }
 
@@ -3435,7 +3435,7 @@ body.portal-tab-active .main-shell {
 .about-btn:hover {
   border-color: rgba(255, 166, 87, 0.7);
   background: rgba(48, 32, 22, 0.96);
-  color: #fff;
+  color: var(--c-white);
 }
 
 .about-btn-icon {
@@ -3445,8 +3445,8 @@ body.portal-tab-active .main-shell {
   width: 1.25rem;
   height: 1.25rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ea580c, #fb923c);
-  color: #fff;
+  background: linear-gradient(135deg, var(--c-orange-600), var(--c-orange-400));
+  color: var(--c-white);
   font-size: 0.72rem;
   font-weight: 800;
   font-style: italic;
@@ -3467,15 +3467,15 @@ body.portal-tab-active .main-shell {
   height: 16px;
   padding: 0 6px;
   border-radius: 999px;
-  background: #dc2626;
-  color: #fff;
+  background: var(--c-red-600);
+  color: var(--c-white);
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   line-height: 16px;
   text-align: center;
-  box-shadow: 0 0 0 2px #fff;
+  box-shadow: 0 0 0 2px var(--c-white);
   white-space: nowrap;
 }
 
@@ -3496,7 +3496,7 @@ body.portal-tab-active .main-shell {
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #c2410c;
+  color: var(--c-orange-700);
 }
 
 .st2-about-changelog-list {
@@ -3506,7 +3506,7 @@ body.portal-tab-active .main-shell {
   gap: 6px;
   font-size: 0.72rem;
   line-height: 1.4;
-  color: #475569;
+  color: var(--c-slate-600);
 }
 
 html.st2-theme-dark .st2-about-changelog {
@@ -3515,11 +3515,11 @@ html.st2-theme-dark .st2-about-changelog {
 }
 
 html.st2-theme-dark .st2-about-changelog-title {
-  color: #fdba74;
+  color: var(--c-orange-300);
 }
 
 html.st2-theme-dark .st2-about-changelog-list {
-  color: #d6d3d1;
+  color: var(--c-stone-300);
 }
 
 .st2-about-foot {
@@ -3536,7 +3536,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   margin: 0;
   font-size: 0.68rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--c-slate-500);
   line-height: 1.35;
   text-align: left;
   min-width: 0;
@@ -3566,7 +3566,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background: var(--c-slate-50);
   border-radius: 16px;
   padding: 0;
   box-shadow: 0 22px 56px rgba(15, 23, 42, 0.3);
@@ -3577,7 +3577,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   content: "";
   display: block;
   height: 3px;
-  background: linear-gradient(90deg, var(--primary) 0%, #f97316 55%, #fb923c 100%);
+  background: linear-gradient(90deg, var(--primary) 0%, var(--c-orange-500) 55%, var(--c-orange-400) 100%);
   flex-shrink: 0;
 }
 
@@ -3599,13 +3599,13 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--c-slate-400);
 }
 
 .st2-access-admin-login-hint {
   margin: -6px 0 14px;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   line-height: 1.35;
 }
 
@@ -3621,7 +3621,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   margin: 0 0 6px;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--c-slate-600);
 }
 
 .st2-access-birthday-label {
@@ -3634,7 +3634,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-birthday-note {
   font-size: 0.68rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--c-slate-400);
 }
 
 .st2-birthday-field {
@@ -3659,8 +3659,8 @@ html.st2-theme-dark .st2-about-changelog-list {
   width: 42px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
-  color: #475569;
+  background: var(--c-white);
+  color: var(--c-slate-600);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -3681,7 +3681,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--c-white);
   box-shadow: 0 12px 32px rgba(15, 18, 28, 0.18);
 }
 
@@ -3702,7 +3702,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   text-align: center;
   font-size: 0.86rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-birthday-picker-nav {
@@ -3710,8 +3710,8 @@ html.st2-theme-dark .st2-about-changelog-list {
   height: 30px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fff;
-  color: #334155;
+  background: var(--c-white);
+  color: var(--c-slate-700);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
@@ -3734,7 +3734,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   padding: 7px 0;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--c-slate-900);
   cursor: pointer;
 }
 
@@ -3744,7 +3744,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-birthday-picker-day.is-selected {
   background: var(--primary);
-  color: #fff;
+  color: var(--c-white);
 }
 
 .st2-birthday-picker-clear {
@@ -3752,7 +3752,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   width: 100%;
   border: none;
   background: transparent;
-  color: #64748b;
+  color: var(--c-slate-500);
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
@@ -3760,7 +3760,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-birthday-picker-clear:hover {
-  color: #334155;
+  color: var(--c-slate-700);
 }
 
 .st2-access-admin-input {
@@ -3772,7 +3772,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-size: 0.92rem;
   color: var(--dark);
   margin-bottom: 12px;
-  background: #fff;
+  background: var(--c-white);
 }
 
 .st2-access-admin-input:focus {
@@ -3784,7 +3784,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-height: 1.2em;
   margin: 0 0 8px;
   font-size: 0.8rem;
-  color: #dc2626;
+  color: var(--c-red-600);
 }
 
 .st2-access-admin-submit {
@@ -3794,7 +3794,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   padding: 10px 16px;
   font-size: 0.92rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--c-white);
   background: var(--primary);
   cursor: pointer;
 }
@@ -3822,13 +3822,13 @@ html.st2-theme-dark .st2-about-changelog-list {
   padding: 10px 16px;
   font-size: 0.92rem;
   font-weight: 600;
-  color: #475569;
-  background: #fff;
+  color: var(--c-slate-600);
+  background: var(--c-white);
   cursor: pointer;
 }
 
 .st2-access-admin-cancel:hover {
-  background: #f1f5f9;
+  background: var(--c-slate-100);
 }
 
 .st2-access-admin-submit:disabled {
@@ -3843,7 +3843,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-admin-panel-top {
   margin-bottom: 10px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--c-slate-200);
 }
 
 .st2-access-admin-panel-head {
@@ -3865,7 +3865,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-admin-updated {
   margin: 0;
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   line-height: 1.25;
   text-align: right;
   max-width: min(280px, 48vw);
@@ -3881,10 +3881,10 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-admin-refresh {
   width: 32px;
   height: 32px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 8px;
-  background: #fff;
-  color: #475569;
+  background: var(--c-white);
+  color: var(--c-slate-600);
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
@@ -3896,7 +3896,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-refresh:hover {
-  background: #f1f5f9;
+  background: var(--c-slate-100);
 }
 
 .st2-access-admin-refresh.is-loading {
@@ -3922,28 +3922,28 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-kpi {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: var(--c-white);
+  border: 1px solid var(--c-slate-200);
   border-radius: 10px;
   padding: 8px 10px 7px;
   min-width: 0;
 }
 
 .st2-access-admin-kpi.is-pending {
-  border-color: #fdba74;
-  background: #fff7ed;
+  border-color: var(--c-orange-300);
+  background: var(--c-orange-50);
 }
 
 .st2-access-admin-kpi.is-warn {
-  border-color: #fcd34d;
-  background: #fffbeb;
+  border-color: var(--c-amber-300);
+  background: var(--c-amber-50);
 }
 
 .st2-access-admin-kpi-n {
   display: block;
   font-size: 1.15rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--c-slate-900);
   line-height: 1.1;
 }
 
@@ -3954,7 +3954,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 @media (max-width: 720px) {
@@ -3965,8 +3965,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-inbox {
   margin: 0 0 10px;
-  border: 1px solid #fdba74;
-  background: #fff7ed;
+  border: 1px solid var(--c-orange-300);
+  background: var(--c-orange-50);
   border-radius: 10px;
   padding: 8px 10px;
 }
@@ -3982,7 +3982,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   gap: 8px;
   margin-bottom: 8px;
   font-size: 0.78rem;
-  color: #9a3412;
+  color: var(--c-orange-800);
 }
 
 .st2-access-admin-inbox-row {
@@ -3991,20 +3991,20 @@ html.st2-theme-dark .st2-about-changelog-list {
   justify-content: space-between;
   gap: 10px;
   padding: 8px 0;
-  border-top: 1px solid #fed7aa;
+  border-top: 1px solid var(--c-orange-200);
 }
 
 .st2-access-admin-inbox-name {
   margin: 0;
   font-size: 0.84rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-access-admin-inbox-mail {
   margin: 2px 0 0;
   font-size: 0.72rem;
-  color: #9a3412;
+  color: var(--c-orange-800);
 }
 
 .st2-access-admin-inbox-actions {
@@ -4024,14 +4024,14 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-approve {
   border: 0;
-  background: #0f766e;
-  color: #fff;
+  background: var(--c-teal-700);
+  color: var(--c-white);
 }
 
 .st2-access-admin-reject {
-  border: 1px solid #fda4af;
-  background: #fff;
-  color: #be123c;
+  border: 1px solid var(--c-rose-300);
+  background: var(--c-white);
+  color: var(--c-rose-700);
 }
 
 .st2-access-admin-pending-tag {
@@ -4047,12 +4047,12 @@ html.st2-theme-dark .st2-about-changelog-list {
   line-height: 1.2;
   min-height: 18px;
   box-sizing: border-box;
-  background: #ffedd5;
-  color: #c2410c;
+  background: var(--c-orange-100);
+  color: var(--c-orange-700);
 }
 
 .st2-access-admin-table tr.is-pending {
-  background: #fff7ed;
+  background: var(--c-orange-50);
 }
 
 .st2-access-admin-updated.hidden {
@@ -4073,8 +4073,8 @@ html.st2-theme-dark .st2-about-changelog-list {
   gap: 8px 10px;
   margin: 0 0 10px;
   padding: 10px 12px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--c-slate-50);
+  border: 1px solid var(--c-slate-200);
   border-radius: 10px;
 }
 
@@ -4089,9 +4089,9 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-quick-filter {
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: #64748b;
+  border: 1px solid var(--c-slate-300);
+  background: var(--c-white);
+  color: var(--c-slate-500);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 5px 9px;
@@ -4101,15 +4101,15 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-quick-filter.is-on {
-  border-color: #fb923c;
-  background: #fff7ed;
-  color: #9a3412;
+  border-color: var(--c-orange-400);
+  background: var(--c-orange-50);
+  color: var(--c-orange-800);
 }
 
 .st2-access-admin-export {
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: #334155;
+  border: 1px solid var(--c-slate-300);
+  background: var(--c-white);
+  color: var(--c-slate-700);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -4120,14 +4120,14 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-export:hover {
-  border-color: #94a3b8;
-  background: #f1f5f9;
+  border-color: var(--c-slate-400);
+  background: var(--c-slate-100);
 }
 
 .st2-access-admin-day-summary {
   margin: 0 0 8px;
   font-size: 0.78rem;
-  color: #475569;
+  color: var(--c-slate-600);
   line-height: 1.35;
 }
 
@@ -4137,8 +4137,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-audit {
   margin: 0 0 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+  border: 1px solid var(--c-slate-200);
+  background: var(--c-white);
   border-radius: 10px;
   padding: 8px 10px;
 }
@@ -4176,13 +4176,13 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-admin-subnav-hint {
   font-size: 0.7rem;
   font-weight: 550;
-  color: #94a3b8;
+  color: var(--c-slate-400);
 }
 
 .st2-admin-subnav-cards {
@@ -4202,9 +4202,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   border-radius: 14px;
   padding: 13px 14px;
   background:
-    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    linear-gradient(180deg, var(--c-white) 0%, var(--c-slate-50) 100%);
   font: inherit;
-  color: #334155;
+  color: var(--c-slate-700);
   cursor: pointer;
   transition:
     background 0.18s ease,
@@ -4217,7 +4217,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-admin-subtab:hover {
   border-color: rgba(249, 115, 22, 0.42);
-  color: #0f172a;
+  color: var(--c-slate-900);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
@@ -4231,7 +4231,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   background:
     linear-gradient(155deg, rgba(255, 247, 237, 0.98) 0%, rgba(255, 237, 213, 0.55) 100%);
   border-color: rgba(249, 115, 22, 0.55);
-  color: #9a3412;
+  color: var(--c-orange-800);
   box-shadow:
     0 0 0 1px rgba(249, 115, 22, 0.12),
     0 8px 18px rgba(234, 88, 12, 0.12),
@@ -4246,7 +4246,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   height: 2.35rem;
   border-radius: 12px;
   background: rgba(15, 23, 42, 0.05);
-  color: #64748b;
+  color: var(--c-slate-500);
   margin-top: 1px;
 }
 
@@ -4256,8 +4256,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-admin-subtab.is-on .st2-admin-subtab-icon {
-  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-  color: #fff;
+  background: linear-gradient(135deg, var(--c-orange-600) 0%, var(--c-orange-500) 100%);
+  color: var(--c-white);
   box-shadow: 0 4px 10px rgba(234, 88, 12, 0.28);
 }
 
@@ -4273,7 +4273,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 750;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--c-slate-400);
   line-height: 1.2;
 }
 
@@ -4292,7 +4292,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-size: 0.72rem;
   font-weight: 550;
   line-height: 1.35;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-admin-subtab.is-on .st2-admin-subtab-sub {
@@ -4331,13 +4331,13 @@ html.st2-theme-dark .st2-about-changelog-list {
   margin: 0;
   font-size: 1.02rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-admin-usage-sub {
   margin: 3px 0 0;
   font-size: 0.76rem;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-admin-usage-tools {
@@ -4353,9 +4353,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   justify-content: flex-end;
   gap: 4px;
   padding: 3px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
   border-radius: 999px;
-  background: #f8fafc;
+  background: var(--c-slate-50);
 }
 
 .st2-admin-usage-sort {
@@ -4364,13 +4364,13 @@ html.st2-theme-dark .st2-about-changelog-list {
   padding: 4px 10px;
   background: transparent;
   font: 600 0.72rem/1.2 inherit;
-  color: #64748b;
+  color: var(--c-slate-500);
   cursor: pointer;
 }
 
 .st2-admin-usage-sort.is-on {
-  background: #fff;
-  color: #d64000;
+  background: var(--c-white);
+  color: var(--c-brand-600);
   font-weight: 700;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
 }
@@ -4380,7 +4380,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   padding: 18px 0;
   text-align: center;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-admin-usage-empty.hidden {
@@ -4414,9 +4414,9 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-admin-usage-block {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
   border-radius: 10px;
-  background: #fff;
+  background: var(--c-white);
   padding: 10px 12px 4px;
   min-width: 0;
 }
@@ -4428,7 +4428,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-admin-usage-table {
@@ -4444,15 +4444,15 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #94a3b8;
-  border-bottom: 1px solid #e2e8f0;
+  color: var(--c-slate-400);
+  border-bottom: 1px solid var(--c-slate-200);
   white-space: nowrap;
 }
 
 .st2-admin-usage-table td {
   padding: 6px;
-  color: #334155;
-  border-bottom: 1px solid #f1f5f9;
+  color: var(--c-slate-700);
+  border-bottom: 1px solid var(--c-slate-100);
   vertical-align: top;
 }
 
@@ -4467,12 +4467,12 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-admin-usage-mod {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-admin-usage-person {
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-slate-900);
   white-space: nowrap;
 }
 
@@ -4481,12 +4481,12 @@ html.st2-theme-dark .st2-about-changelog-list {
   margin-top: 1px;
   font-size: 0.68rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--c-slate-400);
 }
 
 .st2-admin-usage-hits {
   font-weight: 800;
-  color: #d64000;
+  color: var(--c-brand-600);
 }
 
 .st2-admin-usage-chips {
@@ -4500,17 +4500,17 @@ html.st2-theme-dark .st2-about-changelog-list {
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
   border-radius: 999px;
-  background: #f8fafc;
+  background: var(--c-slate-50);
   font-size: 0.7rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-admin-usage-chip-n {
   font-weight: 800;
-  color: #d64000;
+  color: var(--c-brand-600);
 }
 
 .st2-admin-usage-bar {
@@ -4518,7 +4518,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   height: 3px;
   margin-top: 4px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #d64000, #fb923c);
+  background: linear-gradient(90deg, var(--c-brand-600), var(--c-orange-400));
   opacity: 0.75;
 }
 
@@ -4543,7 +4543,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   padding: 12px 14px;
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: 14px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--c-white) 0%, var(--c-slate-50) 100%);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
@@ -4557,18 +4557,18 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-admin-usage-month-title {
   font-size: 0.88rem;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-admin-usage-month-meta {
   font-size: 0.72rem;
   font-weight: 550;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-admin-usage-month-empty {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--c-slate-400);
 }
 
 .st2-access-admin-audit.hidden {
@@ -4582,7 +4582,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   gap: 8px;
   margin-bottom: 6px;
   font-size: 0.78rem;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-access-admin-audit-head strong {
@@ -4591,7 +4591,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-audit-head span {
-  color: #64748b;
+  color: var(--c-slate-500);
   font-weight: 600;
 }
 
@@ -4605,14 +4605,14 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-audit-list li {
   font-size: 0.72rem;
-  color: #475569;
+  color: var(--c-slate-600);
   padding: 3px 0;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--c-slate-100);
   line-height: 1.35;
 }
 
 .st2-access-admin-audit-list li strong {
-  color: #0f172a;
+  color: var(--c-slate-900);
   font-weight: 700;
 }
 
@@ -4635,8 +4635,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-admin-audit-actor {
   width: 100%;
   text-align: left;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border: 1px solid var(--c-slate-200);
+  background: var(--c-slate-50);
   border-radius: 8px;
   padding: 6px 8px;
   cursor: pointer;
@@ -4646,24 +4646,24 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-audit-actor:hover,
 .st2-access-admin-audit-actor.is-open {
-  border-color: #fb923c;
-  background: #fff7ed;
+  border-color: var(--c-orange-400);
+  background: var(--c-orange-50);
 }
 
 .st2-access-admin-audit-actor-main {
   font-size: 0.74rem;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-access-admin-audit-actor-last {
   font-size: 0.68rem;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-admin-audit-detail {
   margin: 0 0 8px;
-  border: 1px solid #fdba74;
-  background: #fff7ed;
+  border: 1px solid var(--c-orange-300);
+  background: var(--c-orange-50);
   border-radius: 8px;
   padding: 6px 8px;
 }
@@ -4680,13 +4680,13 @@ html.st2-theme-dark .st2-about-changelog-list {
   gap: 8px;
   margin-bottom: 4px;
   font-size: 0.74rem;
-  color: #9a3412;
+  color: var(--c-orange-800);
 }
 
 .st2-access-admin-audit-detail-close {
   border: 0;
   background: transparent;
-  color: #9a3412;
+  color: var(--c-orange-800);
   font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
@@ -4699,14 +4699,14 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--c-slate-400);
 }
 
 .st2-access-admin-audit-more {
   margin-top: 6px;
   border: 0;
   background: transparent;
-  color: #c2410c;
+  color: var(--c-orange-700);
   font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
@@ -4726,12 +4726,12 @@ html.st2-theme-dark .st2-about-changelog-list {
   display: block;
   margin-top: 2px;
   font-size: 0.65rem;
-  color: #94a3b8;
+  color: var(--c-slate-400);
   font-weight: 600;
 }
 
 .st2-access-admin-host-concurrent {
-  color: #b45309;
+  color: var(--c-amber-700);
 }
 
 .st2-access-admin-mod-filters {
@@ -4741,9 +4741,9 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-mod-filter {
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: #64748b;
+  border: 1px solid var(--c-slate-300);
+  background: var(--c-white);
+  color: var(--c-slate-500);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -4762,38 +4762,38 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-mod-filter:hover {
-  background: #f8fafc;
-  color: #334155;
+  background: var(--c-slate-50);
+  color: var(--c-slate-700);
 }
 
 .st2-access-admin-mod-filter.is-active {
-  border-color: #0f766e;
-  background: #ccfbf1;
-  color: #0f766e;
+  border-color: var(--c-teal-700);
+  background: var(--c-teal-100);
+  color: var(--c-teal-700);
 }
 
 .st2-access-admin-mod-filter[data-mod-filter="sql"].is-active {
-  border-color: #2563eb;
-  background: #dbeafe;
-  color: #1d4ed8;
+  border-color: var(--c-blue-600);
+  background: var(--c-blue-100);
+  color: var(--c-blue-700);
 }
 
 .st2-access-admin-mod-filter[data-mod-filter="leg"].is-active {
-  border-color: #7c3aed;
-  background: #ede9fe;
-  color: #6d28d9;
+  border-color: var(--c-violet-600);
+  background: var(--c-violet-100);
+  color: var(--c-violet-700);
 }
 
 .st2-access-admin-mod-filter[data-mod-filter="cl"].is-active {
-  border-color: #dc2626;
-  background: #fee2e2;
-  color: #b91c1c;
+  border-color: var(--c-red-600);
+  background: var(--c-red-100);
+  color: var(--c-red-700);
 }
 
 .st2-access-admin-mod-filter[data-mod-filter="adm"].is-active {
-  border-color: #d97706;
-  background: #fef3c7;
-  color: #b45309;
+  border-color: var(--c-amber-600);
+  background: var(--c-amber-100);
+  color: var(--c-amber-700);
 }
 
 .st2-access-admin-search {
@@ -4801,18 +4801,18 @@ html.st2-theme-dark .st2-about-changelog-list {
   flex: 1 1 180px;
   min-width: 140px;
   width: auto;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 8px;
   padding: 8px 12px;
   font-size: 0.8rem;
   color: var(--dark);
-  background: #fff;
+  background: var(--c-white);
 }
 
 .st2-access-admin-search:focus {
   outline: none;
   border-color: var(--primary);
-  background: #fff;
+  background: var(--c-white);
   box-shadow: 0 0 0 2px rgba(214, 64, 0, 0.18);
 }
 
@@ -4821,9 +4821,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-height: 0;
   max-height: none;
   overflow: auto;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
   border-radius: 10px;
-  background: #fff;
+  background: var(--c-white);
 }
 
 .st2-access-admin-table-wrap.hidden {
@@ -4851,7 +4851,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   top: 0;
   z-index: 1;
   background: #eef2f7;
-  color: #334155;
+  color: var(--c-slate-700);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -4880,7 +4880,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-width: 0;
   text-align: left;
   font-size: 0.72rem;
-  color: #475569;
+  color: var(--c-slate-600);
   word-break: break-word;
 }
 
@@ -4942,18 +4942,18 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-host {
   font-size: 0.72rem;
-  color: #475569;
+  color: var(--c-slate-600);
   word-break: break-word;
 }
 
 .st2-access-admin-host.is-client-attn {
   font-weight: 700;
-  color: #b45309;
+  color: var(--c-amber-700);
 }
 
 .st2-access-admin-host-attn,
 .st2-access-admin-host-attn-th {
-  color: #d97706;
+  color: var(--c-amber-600);
   font-weight: 800;
 }
 
@@ -4971,7 +4971,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   content: "⚠";
   margin-left: 4px;
   font-size: 0.85em;
-  color: #f59e0b;
+  color: var(--c-amber-500);
   animation: st2-admin-attn-blink 1.35s step-end infinite;
 }
 
@@ -4986,7 +4986,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   border: 1px solid #b83800;
   border-radius: 8px;
   background: linear-gradient(180deg, #e24808 0%, var(--primary) 100%);
-  color: #fff;
+  color: var(--c-white);
   font-size: 0.78rem;
   font-weight: 650;
   padding: 7px 13px;
@@ -5038,12 +5038,12 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-th-sort:hover,
 .st2-access-admin-th-sort:focus-visible {
-  color: #0c4a6e;
+  color: var(--c-sky-900);
   outline: none;
 }
 
 .st2-access-admin-th-sort.is-sorted {
-  color: #0c4a6e;
+  color: var(--c-sky-900);
 }
 
 .st2-access-admin-th-perms {
@@ -5077,19 +5077,19 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-th-perms-btn:hover,
 .st2-access-admin-th-perms-btn:focus-visible {
-  color: #0c4a6e;
+  color: var(--c-sky-900);
   outline: none;
 }
 
 .st2-access-admin-th-perms-btn.is-filtering {
-  color: #0c4a6e;
+  color: var(--c-sky-900);
 }
 
 .st2-access-admin-th-perms-mark {
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.03em;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-admin-th-perms-caret {
@@ -5102,9 +5102,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-width: 0;
   max-width: min(320px, calc(100vw - 24px));
   padding: 5px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--c-slate-50);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
 }
 
@@ -5125,26 +5125,26 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="sql"].active {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--c-blue-100);
+  color: var(--c-blue-700);
   box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.28);
 }
 
 .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="leg"].active {
-  background: #ede9fe;
-  color: #6d28d9;
+  background: var(--c-violet-100);
+  color: var(--c-violet-700);
   box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.28);
 }
 
 .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="cl"].active {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--c-red-100);
+  color: var(--c-red-700);
   box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.28);
 }
 
 .st2-access-admin-perms-filter-track .plan-segment-btn[data-mod-filter="adm"].active {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--c-amber-100);
+  color: var(--c-amber-700);
   box-shadow: inset 0 0 0 1px rgba(217, 119, 6, 0.32);
 }
 
@@ -5221,9 +5221,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #64748b;
+  border: 1px solid var(--c-slate-200);
+  background: var(--c-slate-50);
+  color: var(--c-slate-500);
   font-size: 0.62rem;
   font-weight: 700;
   line-height: 1;
@@ -5233,9 +5233,9 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-perm-detail[open] .st2-access-admin-perm-more-btn,
 .st2-access-admin-perm-more-btn:hover {
-  background: #fff7ed;
-  border-color: #fdba74;
-  color: #c2410c;
+  background: var(--c-orange-50);
+  border-color: var(--c-orange-300);
+  color: var(--c-orange-700);
 }
 
 .st2-access-admin-perm-pop {
@@ -5247,8 +5247,8 @@ html.st2-theme-dark .st2-about-changelog-list {
   max-width: 220px;
   padding: 8px;
   border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+  border: 1px solid var(--c-slate-200);
+  background: var(--c-white);
   box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
   display: flex;
   flex-direction: column;
@@ -5269,12 +5269,12 @@ html.st2-theme-dark .st2-about-changelog-list {
   line-height: 1.35;
   padding: 6px 8px;
   border-radius: 7px;
-  background: #f8fafc;
-  color: #334155;
+  background: var(--c-slate-50);
+  color: var(--c-slate-700);
 }
 
 .st2-access-admin-perm-empty {
-  color: #cbd5e1;
+  color: var(--c-slate-300);
   font-size: 0.78rem;
 }
 
@@ -5290,7 +5290,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   display: inline-block;
   margin-top: 4px;
   font-size: 0.72rem;
-  color: #cbd5e1;
+  color: var(--c-slate-300);
 }
 
 .st2-access-admin-perm-more {
@@ -5301,9 +5301,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #64748b;
+  border: 1px solid var(--c-slate-200);
+  background: var(--c-slate-50);
+  color: var(--c-slate-500);
   font-size: 0.62rem;
   font-weight: 700;
   line-height: 1;
@@ -5318,9 +5318,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   height: 14px;
   padding: 0 3px;
   border-radius: 999px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #64748b;
+  border: 1px solid var(--c-slate-200);
+  background: var(--c-slate-50);
+  color: var(--c-slate-500);
   font-size: 0.62rem;
   font-weight: 700;
   vertical-align: middle;
@@ -5348,57 +5348,57 @@ html.st2-theme-dark .st2-about-changelog-list {
   border-radius: 4px;
   border: 1px solid transparent;
   background: transparent;
-  color: #94a3b8;
+  color: var(--c-slate-400);
   opacity: 0.45;
 }
 
 .st2-access-admin-perm-sys.is-off {
-  border-color: #e2e8f0;
-  background: #f8fafc;
-  color: #94a3b8;
+  border-color: var(--c-slate-200);
+  background: var(--c-slate-50);
+  color: var(--c-slate-400);
   opacity: 0.55;
 }
 
 .st2-access-admin-perm-sys--sql.is-on {
-  border-color: #3b82f6;
-  background: #dbeafe;
-  color: #1d4ed8;
+  border-color: var(--c-blue-500);
+  background: var(--c-blue-100);
+  color: var(--c-blue-700);
   opacity: 1;
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.25);
 }
 
 .st2-access-admin-perm-sys--leg.is-on {
-  border-color: #8b5cf6;
-  background: #ede9fe;
-  color: #6d28d9;
+  border-color: var(--c-violet-500);
+  background: var(--c-violet-100);
+  color: var(--c-violet-700);
   opacity: 1;
   box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.25);
 }
 
 .st2-access-admin-perm-sys--cl.is-on {
-  border-color: #ef4444;
-  background: #fee2e2;
-  color: #b91c1c;
+  border-color: var(--c-red-500);
+  background: var(--c-red-100);
+  color: var(--c-red-700);
   opacity: 1;
   box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
 }
 
 .st2-access-admin-perm-sys--adm.is-on {
-  border-color: #f59e0b;
-  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
-  color: #b45309;
+  border-color: var(--c-amber-500);
+  background: linear-gradient(180deg, var(--c-amber-50) 0%, var(--c-amber-100) 100%);
+  color: var(--c-amber-700);
   opacity: 1;
   box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35);
   font-weight: 800;
 }
 
 .st2-access-admin-perm-extra.role-sadm {
-  color: #c2410c;
+  color: var(--c-orange-700);
   font-weight: 700;
 }
 
 .st2-access-admin-perm-extra.role-adm {
-  color: #0f766e;
+  color: var(--c-teal-700);
   font-weight: 700;
 }
 
@@ -5408,7 +5408,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   align-items: center;
   gap: 2px;
   font-size: 0.66rem;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-admin-perm-extra {
@@ -5417,7 +5417,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-perm-sep {
-  color: #cbd5e1;
+  color: var(--c-slate-300);
   padding: 0 1px;
 }
 
@@ -5426,12 +5426,12 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 @keyframes st2-access-client-flash {
-  0% { background: #fff7ed; }
+  0% { background: var(--c-orange-50); }
   100% { background: transparent; }
 }
 
 .st2-access-admin-mod-empty {
-  color: #94a3b8;
+  color: var(--c-slate-400);
   font-size: 0.85rem;
 }
 
@@ -5443,20 +5443,20 @@ html.st2-theme-dark .st2-about-changelog-list {
   gap: 10px 16px;
   margin-top: 12px;
   padding-top: 10px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--c-slate-200);
 }
 
 .st2-access-admin-legend {
   margin: 0;
   flex: 1 1 220px;
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   line-height: 1.35;
 }
 
-.st2-access-admin-legend-sql { color: #2563eb; font-weight: 700; }
-.st2-access-admin-legend-leg { color: #7c3aed; font-weight: 700; }
-.st2-access-admin-legend-cl { color: #dc2626; font-weight: 700; }
+.st2-access-admin-legend-sql { color: var(--c-blue-600); font-weight: 700; }
+.st2-access-admin-legend-leg { color: var(--c-violet-600); font-weight: 700; }
+.st2-access-admin-legend-cl { color: var(--c-red-600); font-weight: 700; }
 .st2-access-admin-edit {
   width: 32px;
   height: 32px;
@@ -5464,7 +5464,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-height: 32px;
   border: 0;
   background: transparent;
-  color: #64748b;
+  color: var(--c-slate-500);
   padding: 0;
   cursor: pointer;
   border-radius: 6px;
@@ -5483,7 +5483,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-height: 32px;
   border: 0;
   background: transparent;
-  color: #64748b;
+  color: var(--c-slate-500);
   padding: 0;
   cursor: pointer;
   border-radius: 6px;
@@ -5498,8 +5498,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-modules:hover {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--c-slate-200);
+  color: var(--c-slate-900);
   opacity: 1;
 }
 
@@ -5510,7 +5510,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-height: 32px;
   border: 0;
   background: transparent;
-  color: #64748b;
+  color: var(--c-slate-500);
   padding: 0;
   cursor: pointer;
   border-radius: 6px;
@@ -5523,8 +5523,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-preview:hover {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: var(--c-sky-100);
+  color: var(--c-sky-700);
   opacity: 1;
 }
 
@@ -5538,7 +5538,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-modules-check-admin {
   margin-top: 0.65rem;
   padding-top: 0.55rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--c-slate-200);
 }
 
 .st2-access-modules-check-admin.is-primary-locked {
@@ -5559,33 +5559,33 @@ html.st2-theme-dark .st2-about-changelog-list {
   letter-spacing: 0.02em;
   padding: 2px 7px;
   border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--c-slate-200);
+  color: var(--c-slate-700);
 }
 
 .st2-access-admin-mod.mod-opor {
-  background: #a21caf;
-  color: #fff;
+  background: var(--c-fuchsia-700);
+  color: var(--c-white);
 }
 
 .st2-access-admin-mod.mod-pdf {
-  background: #0e7490;
-  color: #fff;
+  background: var(--c-cyan-700);
+  color: var(--c-white);
 }
 
 .st2-access-admin-mod.mod-blanqueo {
-  background: #1d4ed8;
-  color: #fff;
+  background: var(--c-blue-700);
+  color: var(--c-white);
 }
 
 .st2-access-admin-mod.mod-bases {
-  background: #be123c;
-  color: #fff;
+  background: var(--c-rose-700);
+  color: var(--c-white);
 }
 
 .st2-access-admin-mod.mod-admin {
-  background: #c2410c;
-  color: #fff;
+  background: var(--c-orange-700);
+  color: var(--c-white);
 }
 
 .st2-access-modules-dialog {
@@ -5616,7 +5616,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-modules-systems {
@@ -5627,22 +5627,22 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-modules-sys-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--c-slate-200);
   border-radius: 12px;
-  background: #fff;
+  background: var(--c-white);
   overflow: hidden;
 }
 
 .st2-access-modules-sys-card--sql {
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid var(--c-blue-500);
 }
 
 .st2-access-modules-sys-card--legal {
-  border-left: 3px solid #9333ea;
+  border-left: 3px solid var(--c-purple-600);
 }
 
 .st2-access-modules-sys-card--chile {
-  border-left: 3px solid #dc2626;
+  border-left: 3px solid var(--c-red-600);
 }
 
 .st2-access-modules-sys-card.is-disabled {
@@ -5655,7 +5655,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   justify-content: space-between;
   gap: 8px;
   padding: 8px 10px 8px 12px;
-  background: #f8fafc;
+  background: var(--c-slate-50);
 }
 
 .st2-access-modules-sys-toggle {
@@ -5669,11 +5669,11 @@ html.st2-theme-dark .st2-about-changelog-list {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 999px;
   padding: 5px 10px;
-  background: #fff;
-  color: #475569;
+  background: var(--c-white);
+  color: var(--c-slate-600);
   font: inherit;
   font-size: 0.72rem;
   font-weight: 700;
@@ -5683,9 +5683,9 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-modules-sys-expand:hover:not(:disabled) {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-  color: #0f172a;
+  background: var(--c-slate-100);
+  border-color: var(--c-slate-400);
+  color: var(--c-slate-900);
 }
 
 .st2-access-modules-sys-expand:disabled {
@@ -5694,21 +5694,21 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-modules-sys-expand.is-open {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  color: #1d4ed8;
+  background: var(--c-blue-50);
+  border-color: var(--c-blue-300);
+  color: var(--c-blue-700);
 }
 
 .st2-access-modules-sys-card--legal .st2-access-modules-sys-expand.is-open {
-  background: #faf5ff;
-  border-color: #d8b4fe;
-  color: #7e22ce;
+  background: var(--c-purple-50);
+  border-color: var(--c-purple-300);
+  color: var(--c-purple-700);
 }
 
 .st2-access-modules-sys-card--chile .st2-access-modules-sys-expand.is-open {
-  background: #fef2f2;
-  border-color: #fca5a5;
-  color: #b91c1c;
+  background: var(--c-red-50);
+  border-color: var(--c-red-300);
+  color: var(--c-red-700);
 }
 
 .st2-access-modules-sys-expand-icon {
@@ -5723,8 +5723,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-modules-sys-body {
   padding: 8px 12px 4px;
-  border-top: 1px solid #e2e8f0;
-  background: linear-gradient(180deg, #f8fbff 0%, #fff 100%);
+  border-top: 1px solid var(--c-slate-200);
+  background: linear-gradient(180deg, #f8fbff 0%, var(--c-white) 100%);
 }
 
 .st2-access-modules-sys-body.hidden {
@@ -5732,11 +5732,11 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-modules-sys-card--legal .st2-access-modules-sys-body {
-  background: linear-gradient(180deg, #faf5ff 0%, #fff 100%);
+  background: linear-gradient(180deg, var(--c-purple-50) 0%, var(--c-white) 100%);
 }
 
 .st2-access-modules-sys-card--chile .st2-access-modules-sys-body {
-  background: linear-gradient(180deg, #fff7f7 0%, #fff 100%);
+  background: linear-gradient(180deg, #fff7f7 0%, var(--c-white) 100%);
 }
 
 .st2-access-modules-sys-body.is-disabled {
@@ -5751,9 +5751,9 @@ html.st2-theme-dark .st2-about-changelog-list {
   margin: 0 0 16px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-left: 3px solid #f97316;
+  background: var(--c-slate-100);
+  border: 1px solid var(--c-slate-200);
+  border-left: 3px solid var(--c-orange-500);
 }
 
 .st2-access-modules-profile-top {
@@ -5769,7 +5769,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-modules-preview {
@@ -5779,19 +5779,19 @@ html.st2-theme-dark .st2-about-changelog-list {
   border: 0;
   border-radius: 999px;
   padding: 4px 10px;
-  background: #fff;
-  color: #0369a1;
+  background: var(--c-white);
+  color: var(--c-sky-700);
   font: inherit;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px #bae6fd;
+  box-shadow: inset 0 0 0 1px var(--c-sky-200);
 }
 
 .st2-access-modules-preview:hover {
-  background: #e0f2fe;
-  color: #0c4a6e;
+  background: var(--c-sky-100);
+  color: var(--c-sky-900);
 }
 
 .st2-access-modules-preview-icon {
@@ -5805,7 +5805,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-modules-name-input {
   font-size: 1rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--c-slate-900);
   line-height: 1.25;
 }
 
@@ -5813,29 +5813,29 @@ html.st2-theme-dark .st2-about-changelog-list {
   width: 100%;
   margin: 2px 0 0;
   padding: 6px 8px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 8px;
-  background: #fff;
+  background: var(--c-white);
   box-sizing: border-box;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--c-slate-900);
 }
 
 .st2-access-modules-name-input::placeholder {
-  color: #94a3b8;
+  color: var(--c-slate-400);
   font-weight: 400;
 }
 
 .st2-access-modules-name-input:focus {
   outline: none;
-  border-color: #ea580c;
+  border-color: var(--c-orange-600);
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18);
 }
 
 .st2-access-modules-email {
   font-size: 0.82rem;
-  color: #475569;
+  color: var(--c-slate-600);
   word-break: break-all;
   line-height: 1.35;
   margin: 2px 0 8px;
@@ -5848,7 +5848,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   gap: 10px;
   margin: 0 0 10px;
   font-size: 0.9rem;
-  color: #0f172a;
+  color: var(--c-slate-900);
   cursor: pointer;
 }
 
@@ -5880,7 +5880,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-modules-check-icon-sql {
-  color: #2563eb;
+  color: var(--c-blue-600);
 }
 
 .st2-access-modules-check-icon-leg {
@@ -5911,41 +5911,41 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-modules-sql-group.is-disabled,
 .st2-access-modules-sub-group.is-disabled {
   opacity: 0.48;
-  border-color: #e2e8f0;
-  border-left-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: var(--c-slate-200);
+  border-left-color: var(--c-slate-300);
+  background: var(--c-slate-50);
 }
 
 .st2-access-modules-legal-group {
-  border-color: #e9d5ff;
-  border-left-color: #9333ea;
-  background: linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%);
+  border-color: var(--c-purple-200);
+  border-left-color: var(--c-purple-600);
+  background: linear-gradient(180deg, var(--c-purple-50) 0%, var(--c-violet-50) 100%);
 }
 
 .st2-access-modules-legal-group.is-disabled {
-  border-color: #e2e8f0;
-  border-left-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: var(--c-slate-200);
+  border-left-color: var(--c-slate-300);
+  background: var(--c-slate-50);
 }
 
 .st2-access-modules-legal-group .st2-access-modules-group-kicker {
-  color: #7e22ce;
+  color: var(--c-purple-700);
 }
 
 .st2-access-modules-chile-group {
-  border-color: #fecaca;
-  border-left-color: #dc2626;
-  background: linear-gradient(180deg, #fff7f7 0%, #fef2f2 100%);
+  border-color: var(--c-red-200);
+  border-left-color: var(--c-red-600);
+  background: linear-gradient(180deg, #fff7f7 0%, var(--c-red-50) 100%);
 }
 
 .st2-access-modules-chile-group.is-disabled {
-  border-color: #e2e8f0;
-  border-left-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: var(--c-slate-200);
+  border-left-color: var(--c-slate-300);
+  background: var(--c-slate-50);
 }
 
 .st2-access-modules-chile-group .st2-access-modules-group-kicker {
-  color: #b91c1c;
+  color: var(--c-red-700);
 }
 
 .st2-access-modules-group-subtitle {
@@ -5954,7 +5954,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-modules-group-kicker {
@@ -5966,20 +5966,20 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #1d4ed8;
+  color: var(--c-blue-700);
 }
 
 .st2-access-modules-group-hint {
   margin: 0 0 10px;
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   line-height: 1.35;
 }
 
 .st2-access-modules-role-note {
   font-size: 0.76rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-modules-check-role.is-primary-locked {
@@ -5989,7 +5989,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-modules-check-sub {
   margin-left: 22px;
   font-size: 0.84rem;
-  color: #475569;
+  color: var(--c-slate-600);
 }
 
 .st2-access-modules-check-sub > span {
@@ -6000,7 +6000,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-modules-actions {
   margin-top: 10px;
   padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--c-slate-200);
   display: flex;
   justify-content: flex-end;
   gap: 8px;
@@ -6016,8 +6016,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-admin-edit:hover,
 .st2-access-admin-edit.is-custom {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: var(--c-slate-200);
+  color: var(--c-slate-900);
   opacity: 1;
 }
 
@@ -6028,7 +6028,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   min-height: 32px;
   border: 0;
   background: transparent;
-  color: #94a3b8;
+  color: var(--c-slate-400);
   font-size: 1.15rem;
   font-weight: 500;
   line-height: 1;
@@ -6048,7 +6048,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   z-index: 1;
   background: #eef2f7;
   font-weight: 700;
-  color: #334155;
+  color: var(--c-slate-700);
   font-size: 0.7rem;
 }
 
@@ -6057,15 +6057,15 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-admin-table tr.is-active {
-  background: #f0fdf4;
+  background: var(--c-green-50);
 }
 
 .st2-access-admin-table tr.is-new {
-  background: #eff6ff;
+  background: var(--c-blue-50);
 }
 
 .st2-access-admin-table tr.is-new.is-active {
-  background: linear-gradient(90deg, #eff6ff, #f0fdf4);
+  background: linear-gradient(90deg, var(--c-blue-50), var(--c-green-50));
 }
 
 .st2-access-admin-email-cell {
@@ -6112,7 +6112,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #22c55e;
+  background: var(--c-green-500);
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22);
   animation: st2AccessAdminPulse 1.1s ease-in-out infinite;
   flex-shrink: 0;
@@ -6134,8 +6134,8 @@ html.st2-theme-dark .st2-about-changelog-list {
   align-items: center;
   font-size: 0.62rem;
   font-weight: 700;
-  color: #1d4ed8;
-  background: #dbeafe;
+  color: var(--c-blue-700);
+  background: var(--c-blue-100);
   border-radius: 999px;
   padding: 1px 5px;
   line-height: 1.2;
@@ -6144,18 +6144,18 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-admin-date {
   white-space: nowrap;
   font-size: 0.68rem;
-  color: #475569;
+  color: var(--c-slate-600);
 }
 
 .st2-access-admin-num {
   text-align: center;
   font-variant-numeric: tabular-nums;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-access-admin-delete:hover {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--c-red-50);
+  color: var(--c-red-700);
   opacity: 1;
 }
 
@@ -6185,7 +6185,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-name-edit-dialog {
   width: min(420px, 94vw);
   margin: auto;
-  background: #fff;
+  background: var(--c-white);
   border-radius: 14px;
   padding: 18px 20px 16px;
   border: 1px solid rgba(148, 163, 184, 0.35);
@@ -6219,21 +6219,21 @@ html.st2-theme-dark .st2-about-changelog-list {
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #94a3b8;
+  color: var(--c-slate-400);
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
 }
 
 .st2-access-name-edit-x:hover {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--c-slate-100);
+  color: var(--c-slate-700);
 }
 
 .st2-access-name-edit-email {
   margin: 0 0 14px;
   font-size: 0.78rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   word-break: break-all;
 }
 
@@ -6244,7 +6244,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 .st2-access-name-edit-hint {
   margin: 0 0 10px;
   font-size: 0.74rem;
-  color: #64748b;
+  color: var(--c-slate-500);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -6253,8 +6253,8 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-access-name-edit-suggest {
   border: 0;
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--c-slate-100);
+  color: var(--c-slate-700);
   font: inherit;
   font-weight: 600;
   padding: 2px 8px;
@@ -6263,7 +6263,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 }
 
 .st2-access-name-edit-suggest:hover {
-  background: #e2e8f0;
+  background: var(--c-slate-200);
 }
 
 .st2-access-name-edit-actions {
@@ -6310,7 +6310,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   letter-spacing: 0.03em;
   line-height: 1;
   transform: translateY(-1px);
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-about-signature-at {
@@ -6320,7 +6320,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-style: normal;
   letter-spacing: 0.02em;
   line-height: 1;
-  color: #64748b;
+  color: var(--c-slate-500);
 }
 
 .st2-about-signature-handle {
@@ -6355,7 +6355,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-family: "Sora", system-ui, sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--c-slate-900);
   line-height: 1.35;
 }
 
@@ -6370,7 +6370,7 @@ html.st2-theme-dark .st2-about-changelog-list {
   font-family: "Sora", system-ui, sans-serif;
   font-size: 0.76rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--c-white);
   text-decoration: none;
   transition: filter 0.15s ease, transform 0.15s ease;
 }
@@ -6506,7 +6506,7 @@ body.st2-access-restoring #st2-access-gate {
     radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.2) 0%, transparent 58%),
     radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
     linear-gradient(180deg, #222222 0%, #161616 100%);
-  color: #e5e5e5;
+  color: var(--c-neutral-200);
 }
 
 body.st2-access-pending:not(.show-access-gate) .st2-boot-splash,
@@ -6547,7 +6547,7 @@ body.st2-access-ok .st2-boot-splash {
   line-height: 1;
   transform-origin: 50% 60%;
   user-select: none;
-  color: #f3f4f6;
+  color: var(--c-gray-100);
   animation: st2-boot-st2-float 3.4s ease-in-out infinite;
   filter: drop-shadow(0 4px 14px rgba(214, 64, 0, 0.36));
 }
@@ -6585,12 +6585,12 @@ body.st2-access-ok .st2-boot-splash {
 }
 
 .st2-boot-splash-sup {
-  color: #f97316;
+  color: var(--c-orange-500);
   animation: st2-boot-st2-sup-float 3.4s ease-in-out infinite 0.12s;
 }
 
 .st2-access-title-sup {
-  color: #d64000;
+  color: var(--c-brand-600);
   animation: st2-boot-st2-sup-float 3.4s ease-in-out infinite 0.12s;
 }
 
@@ -6602,7 +6602,7 @@ body.st2-access-ok .st2-boot-splash {
   letter-spacing: 0.01em;
   line-height: 1.1;
   white-space: nowrap;
-  color: #f3f4f6;
+  color: var(--c-gray-100);
 }
 
 .st2-access-suite-sep {
@@ -6612,7 +6612,7 @@ body.st2-access-ok .st2-boot-splash {
   font-size: 1.7rem;
   font-weight: 500;
   line-height: 1;
-  color: #94a3b8;
+  color: var(--c-slate-400);
   user-select: none;
 }
 
@@ -6634,7 +6634,7 @@ body.st2-access-ok .st2-boot-splash {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #9ca3af;
+  color: var(--c-gray-400);
 }
 
 .st2-boot-splash-dots {
@@ -6739,7 +6739,7 @@ body.st2-access-ok .st2-boot-splash {
     var(--st2-suite-glow),
     0 0 0 1px rgba(214, 64, 0, 0.1),
     0 28px 64px rgba(15, 23, 42, 0.18),
-    inset 0 3px 0 #d64000;
+    inset 0 3px 0 var(--c-brand-600);
 }
 
 .st2-access-card::before {
@@ -6777,7 +6777,7 @@ body.st2-access-ok .st2-boot-splash {
 }
 
 .st2-access-title-two {
-  color: #d64000;
+  color: var(--c-brand-600);
   font-weight: 800;
   font-size: 0.58em;
   line-height: 1;
@@ -6789,7 +6789,7 @@ body.st2-access-ok .st2-boot-splash {
   margin: 0 0 14px;
   font-size: 1.02rem;
   line-height: 1.45;
-  color: #64748b;
+  color: var(--c-slate-500);
   text-align: center;
 }
 
@@ -6798,28 +6798,28 @@ body.st2-access-ok .st2-boot-splash {
   margin-bottom: 6px;
   font-size: 0.8rem;
   font-weight: 650;
-  color: #334155;
+  color: var(--c-slate-700);
 }
 
 .st2-access-input {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--c-slate-300);
   border-radius: 12px;
   padding: 14px 15px;
   font-size: 1.06rem;
-  color: #0f172a;
-  background: #fff;
-  caret-color: #d64000;
+  color: var(--c-slate-900);
+  background: var(--c-white);
+  caret-color: var(--c-brand-600);
 }
 
 .st2-access-input::placeholder {
-  color: #94a3b8;
+  color: var(--c-slate-400);
 }
 
 .st2-access-input:focus {
   outline: 2px solid rgba(214, 64, 0, 0.35);
-  border-color: #d64000;
+  border-color: var(--c-brand-600);
 }
 
 .st2-access-pass-wrap {
@@ -6830,7 +6830,7 @@ body.st2-access-ok .st2-boot-splash {
   min-height: 1.2em;
   margin: 8px 0 0;
   font-size: 0.8rem;
-  color: #dc2626;
+  color: var(--c-red-600);
 }
 
 .st2-access-submit {
@@ -6841,8 +6841,8 @@ body.st2-access-ok .st2-boot-splash {
   padding: 14px 18px;
   font-size: 1.08rem;
   font-weight: 700;
-  color: #fff;
-  background: linear-gradient(180deg, #e85a12 0%, #d64000 100%);
+  color: var(--c-white);
+  background: linear-gradient(180deg, #e85a12 0%, var(--c-brand-600) 100%);
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(214, 64, 0, 0.28);
   transition: filter 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
@@ -6868,7 +6868,7 @@ body.st2-access-ok .st2-boot-splash {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #c2410c;
+  color: var(--c-orange-700);
 }
 
 .st2-access-pending-email {
@@ -6878,11 +6878,11 @@ body.st2-access-ok .st2-boot-splash {
   margin: 0 0 14px;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px dashed #fdba74;
-  background: #fff7ed;
+  border: 1px dashed var(--c-orange-300);
+  background: var(--c-orange-50);
   font-size: 0.82rem;
   font-weight: 650;
-  color: #9a3412;
+  color: var(--c-orange-800);
   word-break: break-all;
 }
 
@@ -6890,7 +6890,7 @@ body.st2-access-ok .st2-boot-splash {
   margin: 0 0 16px;
   font-size: 0.9rem;
   line-height: 1.5;
-  color: #334155;
+  color: var(--c-slate-700);
 }
 
 .st2-access-pending .st2-access-submit {
@@ -6901,13 +6901,13 @@ body.st2-access-ok .st2-boot-splash {
   margin: 12px 0 0;
   font-size: 0.76rem;
   line-height: 1.4;
-  color: #64748b;
+  color: var(--c-slate-500);
   text-align: center;
 }
 
 .st2-access-foot {
   margin: 14px 0 0;
   font-size: 0.76rem;
-  color: #94a3b8;
+  color: var(--c-slate-400);
   text-align: center;
 }

@@ -4,7 +4,7 @@
 
 .branched-menu {
   --bm-ink: #f7f1eb;
-  --bm-accent: #fb923c;
+  --bm-accent: var(--c-orange-400);
   --bm-line: rgba(255, 228, 204, 0.16);
   --bm-font: 13.5px;
   --bm-row: 34px;
@@ -175,13 +175,13 @@
   }
 
   .branched-menu__item--danger:hover {
-    color: #fda4af;
+    color: var(--c-rose-300);
     background: rgba(244, 63, 94, 0.1);
   }
 }
 
 .branched-menu__item[data-on] {
-  color: #fb923c;
+  color: var(--c-orange-400);
 }
 
 .branched-menu__item[data-badge] .branched-menu__label::after {
@@ -191,7 +191,7 @@
   height: 6px;
   margin-left: 6px;
   border-radius: 50%;
-  background: #ef4444;
+  background: var(--c-red-500);
   vertical-align: middle;
 }
 
@@ -216,7 +216,7 @@
 }
 
 html:not(.st2-theme-dark) .st2-session-menu--branched .branched-menu {
-  --bm-ink: #fff7ed;
+  --bm-ink: var(--c-orange-50);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -235,9 +235,9 @@ html:not(.st2-theme-dark) .st2-session-menu--branched .branched-menu {
 .bell-toggle {
   --bt-color: #f5efe9;
   --bt-bg: rgba(28, 22, 18, 0.92);
-  --bt-on-color: #ffffff;
-  --bt-on-bg: #f97316;
-  --bt-badge: #ef4444;
+  --bt-on-color: var(--c-white);
+  --bt-on-bg: var(--c-orange-500);
+  --bt-badge: var(--c-red-500);
   --bt-radius: 999px;
   --bt-fade: 200ms;
   --bt-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -285,7 +285,7 @@ html:not(.st2-theme-dark) .st2-session-menu--branched .branched-menu {
 }
 
 .bell-toggle[data-on="true"] .bell-toggle__button {
-  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   border-color: rgba(255, 190, 140, 0.4);
   color: var(--bt-on-color);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 8px 20px -10px rgba(234, 88, 12, 0.8);
@@ -355,7 +355,7 @@ html:not(.st2-theme-dark) .st2-session-menu--branched .branched-menu {
   box-sizing: border-box;
   border-radius: 7px;
   background: var(--bt-badge);
-  color: #fff;
+  color: var(--c-white);
   font-size: 9.5px;
   font-weight: 700;
   line-height: 1;
@@ -403,9 +403,9 @@ html:not(.st2-theme-dark) .st2-session-menu--branched .branched-menu {
 }
 
 html:not(.st2-theme-dark) .bell-toggle[data-on="false"] .bell-toggle__button {
-  background: #fff;
-  color: #9a3412;
-  border-color: #fed7aa;
+  background: var(--c-white);
+  color: var(--c-orange-800);
+  border-color: var(--c-orange-200);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -428,7 +428,7 @@ html:not(.st2-theme-dark) .bell-toggle[data-on="false"] .bell-toggle__button {
 :is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
   input[type="checkbox"]:not(.hidden):not(.plan-opt-check *) {
   --sc-ink: rgba(255, 237, 220, 0.85);
-  --sc-fill: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  --sc-fill: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   --sc-check: #1a0d05;
 
   appearance: none;
@@ -515,8 +515,8 @@ html:not(.st2-theme-dark) .bell-toggle[data-on="false"] .bell-toggle__button {
 html:not(.st2-theme-dark)
   :is(.planillas-app, #panel-admin, .plan-user-dialog, .st2-access-modules-dialog, .st2-access-name-edit-dialog, .plan-user-overlay)
   input[type="checkbox"]:not(.hidden):not(.plan-opt-check *) {
-  --sc-ink: #44403c;
-  --sc-check: #ffffff;
+  --sc-ink: var(--c-stone-700);
+  --sc-check: var(--c-white);
 }
 
 @keyframes sc-swell {
@@ -530,7 +530,7 @@ html:not(.st2-theme-dark)
 #ref-mam-status,
 #ref-sdk-status {
   --sc-ink: rgba(255, 237, 220, 0.85);
-  --sc-fill: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  --sc-fill: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   --sc-check: #1a0d05;
   position: relative;
   display: inline-grid;
@@ -594,8 +594,8 @@ html:not(.st2-theme-dark)
 }
 
 html:not(.st2-theme-dark) :is(#ref-planilla-status, #ref-mam-status, #ref-sdk-status) {
-  --sc-ink: #44403c;
-  --sc-check: #ffffff;
+  --sc-ink: var(--c-stone-700);
+  --sc-check: var(--c-white);
 }
 
 /* Casillas de Planilla técnica, MAM y SDK (el input real está oculto). */
@@ -606,7 +606,7 @@ html:not(.st2-theme-dark) :is(#ref-planilla-status, #ref-mam-status, #ref-sdk-st
   border: 0 !important;
   border-radius: 6px;
   background: transparent !important;
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sc-ink, #44403c) 32%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--sc-ink, var(--c-stone-700)) 32%, transparent);
   overflow: hidden;
   transition: box-shadow 120ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -616,7 +616,7 @@ html:not(.st2-theme-dark) :is(#ref-planilla-status, #ref-mam-status, #ref-sdk-st
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   transform: scale(0);
   transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -651,8 +651,8 @@ html.st2-theme-dark .plan-opt-check-ui {
 }
 
 html:not(.st2-theme-dark) .plan-opt-check input:checked + .plan-opt-check-ui::after {
-  border-left-color: #fff;
-  border-bottom-color: #fff;
+  border-left-color: var(--c-white);
+  border-bottom-color: var(--c-white);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -694,7 +694,7 @@ html:not(.st2-theme-dark) .plan-opt-check input:checked + .plan-opt-check-ui::af
 }
 
 html:not(.st2-theme-dark) .st2-profile-egg-toggle {
-  background: #fff;
-  color: #44403c;
+  background: var(--c-white);
+  color: var(--c-stone-700);
   border-color: rgba(234, 88, 12, 0.35);
 }

@@ -12,10 +12,10 @@
   --r-radius-sm: 10px;
   --r-radius: 14px;
   --r-radius-lg: 20px;
-  --r-accent: #f97316;
-  --r-accent-2: #fb923c;
-  --r-accent-3: #fdba74;
-  --r-accent-deep: #c2410c;
+  --r-accent: var(--c-orange-500);
+  --r-accent-2: var(--c-orange-400);
+  --r-accent-3: var(--c-orange-300);
+  --r-accent-deep: var(--c-orange-700);
 }
 
 html.st2-theme-dark {
@@ -58,7 +58,7 @@ html.st2-theme-dark body {
 
 html.st2-theme-dark ::selection {
   background: rgba(249, 115, 22, 0.35);
-  color: #fff;
+  color: var(--c-white);
 }
 
 html.st2-theme-dark * {
@@ -160,7 +160,7 @@ html.st2-theme-dark .planillas-hero-title-main {
   font-family: var(--r-font-display);
   font-weight: 700;
   letter-spacing: -0.02em;
-  background: linear-gradient(180deg, #ffffff 0%, #f5d9c4 100%);
+  background: linear-gradient(180deg, var(--c-white) 0%, #f5d9c4 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
@@ -197,7 +197,7 @@ html.st2-theme-dark .plan-sistema-well {
 
 html.st2-theme-dark .plan-sistema-indicator {
   border-radius: 999px;
-  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.25) inset,
     0 6px 18px -4px rgba(249, 115, 22, 0.6);
@@ -244,22 +244,22 @@ html.st2-theme-dark #planillas-menu .planillas-section-title::after {
 
 /* ── Módulos del menú: tarjetas neutras, color solo en ícono y detalle ─ */
 
-.plan-modulo-btn { --mod: #fb923c; }
-.plan-modulo-btn.transfer { --mod: #34d399; }
-.plan-modulo-btn.referral { --mod: #fb923c; }
-.plan-modulo-btn.oportunidad { --mod: #e879f9; }
-.plan-modulo-btn.pdf-portal { --mod: #22d3ee; }
-.plan-modulo-btn.blanqueo { --mod: #60a5fa; }
-.plan-modulo-btn.borrado-bases { --mod: #fb7185; }
-.plan-modulo-btn.chile-saad { --mod: #22d3ee; }
-.plan-modulo-btn.chile-hr { --mod: #a78bfa; }
-.plan-modulo-btn.chile-wiki { --mod: #fbbf24; }
-.plan-modulo-btn.chile-lp { --mod: #34d399; }
-.plan-modulo-btn.chile-powerapps { --mod: #d946ef; }
-.plan-modulo-btn.legal-one { --mod: #818cf8; }
-.plan-modulo-btn.highq { --mod: #2dd4bf; }
-.plan-modulo-btn.westlaw { --mod: #fb923c; }
-.plan-modulo-btn.cocounsel { --mod: #a78bfa; }
+.plan-modulo-btn { --mod: var(--c-orange-400); }
+.plan-modulo-btn.transfer { --mod: var(--c-emerald-400); }
+.plan-modulo-btn.referral { --mod: var(--c-orange-400); }
+.plan-modulo-btn.oportunidad { --mod: var(--c-fuchsia-400); }
+.plan-modulo-btn.pdf-portal { --mod: var(--c-cyan-400); }
+.plan-modulo-btn.blanqueo { --mod: var(--c-blue-400); }
+.plan-modulo-btn.borrado-bases { --mod: var(--c-rose-400); }
+.plan-modulo-btn.chile-saad { --mod: var(--c-cyan-400); }
+.plan-modulo-btn.chile-hr { --mod: var(--c-violet-400); }
+.plan-modulo-btn.chile-wiki { --mod: var(--c-amber-400); }
+.plan-modulo-btn.chile-lp { --mod: var(--c-emerald-400); }
+.plan-modulo-btn.chile-powerapps { --mod: var(--c-fuchsia-500); }
+.plan-modulo-btn.legal-one { --mod: var(--c-indigo-400); }
+.plan-modulo-btn.highq { --mod: var(--c-teal-400); }
+.plan-modulo-btn.westlaw { --mod: var(--c-orange-400); }
+.plan-modulo-btn.cocounsel { --mod: var(--c-violet-400); }
 
 html.st2-theme-dark .plan-modulos-well {
   background: transparent !important;
@@ -456,9 +456,9 @@ html.st2-theme-dark .borrado-field label {
 /* ── Botones ──────────────────────────────────────────────────────── */
 
 html.st2-theme-dark .btn-primary {
-  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%) !important;
+  background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%) !important;
   border: 1px solid rgba(255, 190, 140, 0.35) !important;
-  color: #fff !important;
+  color: var(--c-white) !important;
   border-radius: 12px;
   font-weight: 650;
   letter-spacing: 0.005em;
@@ -647,7 +647,7 @@ html.st2-theme-dark #st2-access-gate .st2-access-card.border-glow-card {
 }
 
 html.st2-theme-dark #st2-access-gate .st2-access-suite {
-  background: linear-gradient(180deg, #ffffff 0%, #f5d9c4 100%);
+  background: linear-gradient(180deg, var(--c-white) 0%, #f5d9c4 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
@@ -678,7 +678,7 @@ html.st2-theme-dark #st2-access-gate .st2-access-input:focus {
 
 html.st2-theme-dark #st2-access-gate .st2-access-submit {
   border-radius: 14px;
-  background: linear-gradient(180deg, #fb8a3c 0%, #ea580c 100%);
+  background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   border: 1px solid rgba(255, 190, 140, 0.35);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.3) inset,
@@ -949,26 +949,26 @@ html.st2-theme-dark .portal-search-head {
 /* ── Modo claro: misma lógica de módulos, sobre superficies blancas ─ */
 
 html:not(.st2-theme-dark) .plan-modulo-btn {
-  background: linear-gradient(180deg, #ffffff 0%, #fbf8f6 100%) !important;
+  background: linear-gradient(180deg, var(--c-white) 0%, #fbf8f6 100%) !important;
   border: 1px solid #ece4dd !important;
-  color: #1c1917 !important;
+  color: var(--c-stone-900) !important;
   box-shadow: 0 1px 2px rgba(28, 25, 23, 0.06), 0 12px 24px -18px rgba(28, 25, 23, 0.3) !important;
 }
 
 html:not(.st2-theme-dark) .plan-modulo-btn .plan-modulo-icon {
-  background: color-mix(in srgb, var(--mod) 14%, #fff);
+  background: color-mix(in srgb, var(--mod) 14%, var(--c-white));
 }
 
 html:not(.st2-theme-dark) .plan-modulo-btn .plan-modulo-icon svg {
-  stroke: color-mix(in srgb, var(--mod) 70%, #1c1917);
+  stroke: color-mix(in srgb, var(--mod) 70%, var(--c-stone-900));
 }
 
 html:not(.st2-theme-dark) .plan-modulo-btn .plan-modulo-sub {
-  color: #78716c;
+  color: var(--c-stone-500);
 }
 
 html:not(.st2-theme-dark) .plan-modulo-btn:hover:not(:disabled) {
   filter: none;
-  border-color: color-mix(in srgb, var(--mod) 45%, #fff) !important;
+  border-color: color-mix(in srgb, var(--mod) 45%, var(--c-white)) !important;
   box-shadow: 0 18px 36px -20px color-mix(in srgb, var(--mod) 60%, transparent) !important;
 }

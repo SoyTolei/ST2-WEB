@@ -93,7 +93,7 @@
 
 /* Contextos: fondo de capas ≈ superficie detrás del título */
 .st2-access-suite.st2-glitch {
-  --st2-glitch-bg: #ffffff;
+  --st2-glitch-bg: var(--c-white);
 }
 
 html.st2-theme-dark .st2-access-suite.st2-glitch {
@@ -113,5 +113,5 @@ html.st2-theme-dark .planillas-hero-title-main.st2-glitch {
 }
 
 html:not(.st2-theme-dark) .planillas-hero-title-main.st2-glitch {
-  --st2-glitch-bg: #ffffff;
+  --st2-glitch-bg: var(--c-white);
 }

@@ -8,19 +8,19 @@
 .st2-gooey-host {
   position: relative;
   overflow: visible;
-  --st2-gooey-color-1: #ea580c;
-  --st2-gooey-color-2: #f97316;
-  --st2-gooey-color-3: #fb923c;
-  --st2-gooey-color-4: #fdba74;
+  --st2-gooey-color-1: var(--c-orange-600);
+  --st2-gooey-color-2: var(--c-orange-500);
+  --st2-gooey-color-3: var(--c-orange-400);
+  --st2-gooey-color-4: var(--c-orange-300);
   --st2-gooey-pill: rgba(249, 115, 22, 0.16);
   --st2-gooey-pill-border: rgba(249, 115, 22, 0.78);
-  --st2-gooey-pill-text: #9a3412;
+  --st2-gooey-pill-text: var(--c-orange-800);
 }
 
 html.st2-theme-dark .st2-gooey-host {
   --st2-gooey-pill: rgba(249, 115, 22, 0.18);
   --st2-gooey-pill-border: rgba(251, 146, 60, 0.85);
-  --st2-gooey-pill-text: #ffedd5;
+  --st2-gooey-pill-text: var(--c-orange-100);
 }
 
 .tab-bar.st2-gooey-host .tab-btn,
@@ -44,7 +44,7 @@ html.st2-theme-dark .st2-gooey-host {
 .tab-bar.st2-gooey-host .tab-btn.active:hover {
   background: rgba(249, 115, 22, 0.2) !important;
   border-color: rgba(234, 88, 12, 0.88) !important;
-  color: #9a3412 !important;
+  color: var(--c-orange-800) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 247, 237, 0.35),
     0 2px 10px rgba(234, 88, 12, 0.18) !important;
@@ -55,7 +55,7 @@ html.st2-theme-dark .tab-bar.st2-gooey-host .tab-btn.active,
 html.st2-theme-dark .tab-bar.st2-gooey-host .tab-btn.active:hover {
   background: rgba(249, 115, 22, 0.22) !important;
   border-color: rgba(251, 146, 60, 0.92) !important;
-  color: #ffedd5 !important;
+  color: var(--c-orange-100) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 247, 237, 0.12),
     0 2px 12px rgba(234, 88, 12, 0.22) !important;
@@ -77,7 +77,7 @@ html.st2-theme-dark .st2-context-seg.st2-gooey-host .st2-context-btn.active,
 html.st2-theme-dark .st2-context-seg.st2-gooey-host .st2-context-btn.active:hover {
   background: rgba(249, 115, 22, 0.22) !important;
   border-color: rgba(251, 146, 60, 0.92) !important;
-  color: #ffedd5 !important;
+  color: var(--c-orange-100) !important;
 }
 
 .st2-context-seg.st2-gooey-host > .st2-gooey-filter {
