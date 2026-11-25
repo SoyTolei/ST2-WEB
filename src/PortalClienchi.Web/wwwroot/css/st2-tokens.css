@@ -217,3 +217,39 @@
   --c-lime-500: #84cc16;
   --c-lime-600: #65a30d;
 }
+
+/*
+ * Tipografías.
+ */
+:root {
+  --font-display: "Sora", "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-system: "Segoe UI", system-ui, sans-serif;
+  --font-mono: Consolas, "Courier New", monospace;
+}
+
+/*
+ * Capas (z-index), de abajo hacia arriba. JS usa además 4500 inline para
+ * paneles flotantes de blanqueo/borrado/oportunidad (por encima del menú de sesión).
+ */
+:root {
+  --z-floating: 120; /* Popovers chicos (agua, selector de cumpleaños) */
+  --z-modal: 1000; /* Modal de planillas */
+  --z-context-menu: 1100; /* Menú contextual del gestor */
+  --z-user-overlay: 1200; /* Panel de usuario (también lo usa app.js inline) */
+  --z-about: 1300; /* Acerca de */
+  --z-pdf-modal: 1350; /* Generador de PDF */
+  --z-tool-url: 1400; /* Diálogo de URL de herramientas */
+  --z-login-rays: 2400; /* Fondo animado del login */
+  --z-access-gate: 2500; /* Pantalla de acceso */
+  --z-admin: 2600; /* Panel ADMIN */
+  --z-dialog: 2700; /* Confirmaciones y edición de nombre */
+  --z-banner-tools: 2785; /* Banner de herramientas */
+  --z-banner-modules: 2790; /* Banner de módulos */
+  --z-click-spark: 3000; /* Chispas al hacer clic */
+  --z-toast: 3200; /* Avisos (sonner) */
+  --z-inbox: 3400; /* Bandeja de notificaciones */
+  --z-session-menu: 4000; /* Menú de sesión */
+  --z-boot-splash: 10000; /* Splash de arranque */
+  --z-tour: 12000; /* Tour guiado */
+}

@@ -1,7 +1,7 @@
 /* Sonner ST2: anclado bajo el blobatar / ícono ST2 + glow suave por tipo. */
 
 #st2-sonner {
-  z-index: 3200;
+  z-index: var(--z-toast);
   --border-radius: 10px;
   --width: 280px;
   --gap: 6px;
@@ -224,7 +224,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action--agua:hover {
 /* Bandeja de avisos (menú blobatar → Ver avisos) */
 .st2-notif-inbox {
   position: fixed;
-  z-index: 3400;
+  z-index: var(--z-inbox);
   width: min(340px, calc(100vw - 24px));
   max-height: min(420px, calc(100vh - 80px));
   display: flex;
@@ -236,7 +236,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action--agua:hover {
   background: #1c1410;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   color: var(--c-orange-100);
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
 }
 
 .st2-notif-inbox.hidden,

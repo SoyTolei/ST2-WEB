@@ -2,7 +2,7 @@
 .st2-click-spark {
   position: fixed;
   inset: 0;
-  z-index: 3000;
+  z-index: var(--z-click-spark);
   display: block;
   pointer-events: none;
   user-select: none;

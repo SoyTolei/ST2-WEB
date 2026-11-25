@@ -1113,7 +1113,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .planillas-section-title {
   text-align: center;
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -1156,7 +1156,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   background: transparent;
   padding: 8px 6px;
   border-radius: 8px;
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--dark);
@@ -1290,7 +1290,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-modulo-label {
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: -0.015em;
@@ -1299,7 +1299,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-modulo-sub {
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -1478,7 +1478,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 }
 
 .plan-asistente-chip-label {
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: -0.015em;
@@ -1826,7 +1826,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: transparent;
   border-radius: 10px;
   padding: 8px 12px 8px 8px;
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.9rem;
   font-weight: 650;
   letter-spacing: 0.01em;
@@ -2241,7 +2241,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.35;
@@ -2655,7 +2655,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   width: min(250px, max(180px, 22vw));
   padding: 11px 13px;
   border-radius: 14px;
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 650;
   line-height: 1.35;
@@ -2727,7 +2727,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-module-title {
   margin: 0;
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(0.94rem, 1.05rem + 0.35vw, 1.14rem);
   font-weight: 700;
   letter-spacing: -0.028em;
@@ -3203,7 +3203,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: 1px solid var(--c-orange-300);
   background: linear-gradient(180deg, #fffaf5 0%, var(--c-orange-50) 100%);
   color: var(--c-orange-700);
-  font-family: "Sora", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.8rem;
   font-weight: 600;
   display: inline-flex;
@@ -4671,7 +4671,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-user-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1200;
+  z-index: var(--z-user-overlay);
   background: rgba(26, 31, 46, 0.5);
   display: flex;
   align-items: center;
@@ -4846,7 +4846,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-gestor-ctx {
   position: fixed;
-  z-index: 1100;
+  z-index: var(--z-context-menu);
   background: var(--c-white);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -4887,7 +4887,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal);
   padding: 16px 24px;
 }
 .plan-ref-modal {
@@ -5190,7 +5190,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-sql-code {
   width: 100%;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: 1.45;
   border: 1px solid var(--border);
@@ -5717,7 +5717,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   background: var(--panel);
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.82rem;
   line-height: 1.5;
   color: var(--dark);
@@ -5884,7 +5884,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 .st2-agua-overlay {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: var(--z-floating);
   display: flex;
   flex-direction: column;
   align-items: center;

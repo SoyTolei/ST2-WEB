@@ -21,7 +21,7 @@
   min-width: 196px;
   padding-left: 14px;
   color: var(--bm-ink);
-  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-ui);
   font-size: var(--bm-font);
   line-height: 1.2;
 }
@@ -269,7 +269,7 @@ html:not(.st2-theme-dark) .st2-session-menu--branched .branched-menu {
   background: var(--bt-bg);
   color: var(--bt-color);
   font: inherit;
-  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.76rem;
   font-weight: 600;
   line-height: 1;

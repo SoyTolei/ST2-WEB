@@ -546,7 +546,7 @@
 .pdf-portal-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 1350;
+  z-index: var(--z-pdf-modal);
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);

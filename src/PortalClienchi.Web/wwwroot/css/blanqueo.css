@@ -242,7 +242,7 @@
 
 .blanqueo-clave-pill-label {
   display: inline-block;
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -343,7 +343,7 @@
 }
 
 .blanqueo-clave-nota-pill .blanqueo-hab-pill-label code {
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -451,7 +451,7 @@ button.blanqueo-clave-previa-pill:focus-visible {
 }
 
 .blanqueo-clave-previa-pill-label {
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -857,7 +857,7 @@ button.blanqueo-clave-sugerida-btn {
   border: 1px dashed var(--c-slate-400);
   background: var(--c-slate-50);
   color: var(--c-slate-900);
-  font-family: Consolas, "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.86rem;
   font-weight: 700;
   padding: 3px 8px;
