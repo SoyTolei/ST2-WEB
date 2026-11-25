@@ -13,6 +13,8 @@ const STATE_LABELS = {
 let host = null;
 let snapshot = null;
 let selectedSlot = null;
+/** Día anterior elegido (yyyy-MM-dd). null = el Críptico vigente. */
+let viewDate = null;
 let hintPending = false;
 const HINT_ORDER = [
   { bit: 1, kind: "definition" },
@@ -49,12 +51,15 @@ async function loadStatus({ quiet = false } = {}) {
   if (document.hidden && !quiet) return;
   if (!quiet) host.setAttribute("aria-busy", "true");
   try {
-    const response = await fetch(`${API}/status`, {
+    const query = viewDate ? `?date=${encodeURIComponent(viewDate)}` : "";
+    const response = await fetch(`${API}/status${query}`, {
       credentials: "include",
       cache: "no-store",
     });
     if (!response.ok) throw new Error(await readProblem(response));
     snapshot = await response.json();
+    // Si el día pedido ya venció, el servidor devuelve el vigente.
+    if (snapshot?.phase !== "archive") viewDate = null;
     if (submitting) {
       scheduleRefresh();
       return;
@@ -68,7 +73,8 @@ async function loadStatus({ quiet = false } = {}) {
     }
     if (rounds.some((round) => round.state === "available" && round.slot !== selectedSlot)) {
       const selected = rounds.find((round) => round.slot === selectedSlot);
-      if (!selected || selected.state === "upcoming" || selected.state === "blocked") {
+      // Perder una ronda no frena la siguiente: si hay otra abierta, se pasa a esa.
+      if (!selected || selected.state === "upcoming" || selected.state === "blocked" || selected.state === "failed") {
         selectedSlot = rounds.find((round) => round.state === "available")?.slot ?? selectedSlot;
       }
     }
@@ -83,6 +89,8 @@ async function loadStatus({ quiet = false } = {}) {
 }
 
 function publishPending() {
+  // Mirando un día anterior: el aviso sigue reflejando el Críptico vigente.
+  if (snapshot?.phase === "archive") return;
   const publicPage = document.body.classList.contains("st2-cryptic-public");
   const rounds = snapshot?.rounds || [];
   const available = publicPage ? [] : rounds.filter((round) => round.state === "available");
@@ -144,6 +152,53 @@ function roundIcon(state) {
   return "○";
 }
 
+function slotKey(slot) {
+  return `${snapshot?.date || ""}|${slot}`;
+}
+
+const shortDay = new Intl.DateTimeFormat("es-AR", {
+  weekday: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+function dayChipLabel(isoDate) {
+  const label = shortDay.format(new Date(`${isoDate}T12:00:00Z`)).replace(".", "");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function archiveDayState(day) {
+  const total = Number(day.total || 0);
+  const solved = Number(day.solved || 0);
+  const failed = Number(day.failed || 0);
+  if (total > 0 && solved === total) return { tone: "is-done", text: "✓ Completo" };
+  if (total > 0 && solved + failed === total) return { tone: "is-closed", text: solved ? `${solved}/${total}` : "Sin intentos" };
+  if (solved > 0) return { tone: "is-pending", text: `${solved}/${total}` };
+  return { tone: "is-pending", text: "Por jugar" };
+}
+
+const ARCHIVE_HINT = "Día anterior: hasta 10 puntos por ronda, sin bonus del día.";
+
+function renderDayPicker() {
+  const archive = snapshot?.archive || [];
+  if (!archive.length) return "";
+  const archived = snapshot.phase === "archive";
+  return `
+    <nav class="st2-cryptic-days" aria-label="Críptico de días anteriores">
+      <button type="button" class="st2-cryptic-day ${archived ? "" : "is-active"}" data-cryptic-day="" aria-pressed="${archived ? "false" : "true"}">Hoy</button>
+      ${archive.map((day) => {
+        const state = archiveDayState(day);
+        const active = archived && day.date === snapshot.date;
+        return `
+        <button type="button" class="st2-cryptic-day ${state.tone} ${active ? "is-active" : ""}" data-cryptic-day="${escapeHtml(day.date)}" aria-pressed="${active ? "true" : "false"}" title="${ARCHIVE_HINT}">
+          ${escapeHtml(dayChipLabel(day.date))}
+          <small>${escapeHtml(state.text)}</small>
+        </button>`;
+      }).join("")}
+    </nav>
+  `;
+}
+
 function render() {
   if (!host || !snapshot || submitting) return;
   const round = getSelectedRound();
@@ -151,31 +206,37 @@ function render() {
   const ranking = snapshot.ranking || [];
   const ranked = snapshot.ranked !== false;
   const stage = document.body.classList.contains("st2-cryptic-public");
+  const archived = snapshot.phase === "archive";
   const holiday = snapshot.phase === "holiday";
   const weekend = snapshot.phase === "weekend" || holiday;
+  const pendingPast = (snapshot.archive || []).some((day) => archiveDayState(day).tone === "is-pending");
   const weekday = new Date(`${snapshot.date}T12:00:00-03:00`).getDay();
   const dateLabel = new Intl.DateTimeFormat("es-AR", {
     weekday: "long",
     day: "numeric",
     month: "long",
   }).format(new Date(`${snapshot.date}T12:00:00-03:00`));
-  const weekendCopy = holiday
+  const weekendBase = holiday
     ? `Hoy es feriado${snapshot.closure ? `: ${snapshot.closure}` : ""}. No hay críptico. Vuelve el próximo día hábil a las 09:00.`
     : weekday === 0 || weekday === 6
       ? "El Críptico es de lunes a viernes. Vuelve el lunes a las 09:00."
       : "Hoy arranca a las 09:00.";
+  const weekendCopy = pendingPast
+    ? `${weekendBase} Mientras tanto, podés jugar los días anteriores.`
+    : weekendBase;
 
   activeSlots?.destroy();
   activeSlots = null;
   host.innerHTML = `
     <div class="st2-cryptic-head">
       <div>
-        <span class="st2-cryptic-kicker">Desafío del día</span>
+        <span class="st2-cryptic-kicker">${archived ? "Día anterior" : "Desafío del día"}</span>
         <h2 id="st2-cryptic-title">Críptico ST²</h2>
         <p>${escapeHtml(dateLabel)}</p>
-        ${stage && snapshot.nextAt ? `<p class="st2-cryptic-next">Siguiente críptico: ${escapeHtml(formatNext(snapshot.nextAt))}</p>` : ""}
+        ${stage && snapshot.nextAt && !archived ? `<p class="st2-cryptic-next">Siguiente críptico: ${escapeHtml(formatNext(snapshot.nextAt))}</p>` : ""}
       </div>
     </div>
+    ${renderDayPicker()}
     ${stage ? "" : ""}
     ${weekend ? "" : `
     <div class="st2-cryptic-rounds" role="tablist" aria-label="Rondas del Críptico" style="grid-template-columns: repeat(${Math.max(rounds.length, 1)}, minmax(0, 1fr))">
@@ -203,14 +264,14 @@ function render() {
     </div>
     <div class="st2-cryptic-ranking ${rankingOpen ? "" : "hidden"}" data-cryptic-ranking ${rankingOpen ? "" : "hidden"}>
       <div class="st2-cryptic-rank-tabs" role="tablist" aria-label="Rankings">
-        <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="today" class="${rankingTab === "general" ? "" : "is-active"}" aria-selected="${rankingTab === "general" ? "false" : "true"}">Hoy</button>
+        <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="today" class="${rankingTab === "general" ? "" : "is-active"}" aria-selected="${rankingTab === "general" ? "false" : "true"}">${archived ? "Ese día" : "Hoy"}</button>
         <button type="button" role="tab" data-cryptic-action="rank-tab" data-rank-tab="general" class="${rankingTab === "general" ? "is-active" : ""}" aria-selected="${rankingTab === "general" ? "true" : "false"}">General${snapshot.season ? ` · ${escapeHtml(snapshot.season)}` : ""}</button>
       </div>
       ${renderRankingList(
         rankingTab === "general" ? (snapshot.seasonRanking || []) : ranking,
         rankingTab === "general"
           ? `Todavía no hay puntos en el ranking ${snapshot.season || "general"}.`
-          : "Todavía nadie sumó puntos.",
+          : archived ? "Ese día nadie sumó puntos." : "Todavía nadie sumó puntos.",
       )}
     </div>` : ""}
   `;
@@ -255,12 +316,7 @@ function renderRound(round) {
   const nextKind = nextHintKind(round);
   return `
     <blockquote class="st2-cryptic-clue">${renderMarkedClue(clueText, round)} <b>${escapeHtml(round.enumeration || "")}</b></blockquote>
-    ${solved ? renderSolution(round) : failed ? `
-      <div class="st2-cryptic-notice is-failed">
-        <strong>Se terminaron los intentos</strong>
-        <p>La explicación se revela sólo al resolver. El próximo día hábil hay revancha.</p>
-      </div>
-    ` : `
+    ${solved ? renderSolution(round) : failed ? renderFailed(round) : `
       <form class="st2-cryptic-form" data-cryptic-form>
         <div data-code-slots></div>
         <div class="st2-cryptic-actions">
@@ -274,6 +330,23 @@ function renderRound(round) {
       </form>
       ${renderHintList(round)}
     `}
+  `;
+}
+
+function renderFailed(round) {
+  const rounds = snapshot?.rounds || [];
+  const open = rounds.find((item) => item.slot !== round.slot && item.state === "available");
+  const later = rounds.find((item) => item.slot > round.slot && item.state === "upcoming");
+  let body = "La explicación se revela sólo al resolver.";
+  if (open) body += ` La de las ${open.label} sigue en juego.`;
+  else if (later) body += ` La de las ${later.label} se juega igual cuando abra.`;
+  else if (snapshot?.phase !== "archive") body += " El próximo día hábil hay revancha.";
+  return `
+    <div class="st2-cryptic-notice is-failed">
+      <strong>Se terminaron los intentos</strong>
+      <p>${escapeHtml(body)}</p>
+      ${open ? `<button type="button" class="st2-cryptic-go" data-cryptic-slot="${open.slot}">Ir a la de las ${escapeHtml(open.label)}</button>` : ""}
+    </div>
   `;
 }
 
@@ -316,7 +389,7 @@ function parseAlmost(almost) {
 
 function mergeSlotDraft(round, length) {
   const hints = parseAlmost(round?.almost);
-  const draft = draftBySlot.get(round?.slot);
+  const draft = draftBySlot.get(slotKey(round?.slot));
   const slots = Array.from({ length }, () => "");
   for (const [index, char] of hints) {
     if (index < length) slots[index] = char;
@@ -332,7 +405,7 @@ function mergeSlotDraft(round, length) {
 }
 
 function animatedHintIndices(round, hints) {
-  const slot = round?.slot;
+  const slot = slotKey(round?.slot);
   const next = String(round?.almost || "");
   const hadPrev = almostBySlot.has(slot);
   const prev = parseAlmost(almostBySlot.get(slot) || "");
@@ -480,7 +553,7 @@ function mountAnswerSlots(round) {
     animateIndices,
     autoFocus: shouldFocus,
     onChange: (_code, snapshot) => {
-      draftBySlot.set(round.slot, snapshot);
+      draftBySlot.set(slotKey(round.slot), snapshot);
       syncCheck();
       if (!statusNote) return;
       statusNote = "";
@@ -516,12 +589,12 @@ async function submitAttempt(form) {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slot: round.slot, answer }),
+      body: JSON.stringify({ slot: round.slot, answer, date: viewDate || undefined }),
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body?.error || `Error ${response.status}`);
+    draftBySlot.delete(slotKey(round.slot));
     snapshot = body.status || snapshot;
-    draftBySlot.delete(round.slot);
     if (!body.correct) {
       await activeSlots.fail();
       statusNote = body.message || "Esa no es.";
@@ -558,7 +631,7 @@ async function revealHint(kind) {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slot: round.slot, kind }),
+      body: JSON.stringify({ slot: round.slot, kind, date: viewDate || undefined }),
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(body?.error || `Error ${response.status}`);
@@ -585,6 +658,19 @@ function renderError(message) {
 
 function bindHostEvents() {
   host?.addEventListener("click", (event) => {
+    const dayButton = event.target.closest("[data-cryptic-day]");
+    if (dayButton) {
+      const next = dayButton.dataset.crypticDay || null;
+      if (next === viewDate) return;
+      viewDate = next;
+      selectedSlot = null;
+      statusNote = "";
+      statusTone = "";
+      rankingTab = "today";
+      void loadStatus();
+      return;
+    }
+
     const roundButton = event.target.closest("[data-cryptic-slot]");
     if (roundButton) {
       selectedSlot = Number(roundButton.dataset.crypticSlot);
@@ -629,6 +715,7 @@ export function initDailyCryptic() {
   document.addEventListener("st2:session-changed", () => {
     snapshot = null;
     selectedSlot = null;
+    viewDate = null;
     rankingOpen = false;
     draftBySlot.clear();
     almostBySlot.clear();

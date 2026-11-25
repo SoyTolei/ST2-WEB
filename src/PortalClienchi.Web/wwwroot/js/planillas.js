@@ -32,7 +32,7 @@ import {
   syncHeaderTourButton,
 } from "./st2-tour-init.js?v=20261110j";
 import { alertSt2, errorSt2 } from "./st2-dialog.js?v=20260909a";
-import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261118e";
+import { initDailyCryptic } from "./st2-daily-cryptic.js?v=20261125b";
 
 
 const MESA_LABELS = {

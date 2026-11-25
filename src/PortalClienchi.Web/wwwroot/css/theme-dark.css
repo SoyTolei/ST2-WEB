@@ -3266,3 +3266,19 @@ html.st2-theme-dark.orpen-popup-active #panel-orpen .embed-frame-wrap,
 html.st2-theme-dark body.orpen-popup-active #panel-orpen .embed-frame-wrap {
   background: transparent;
 }
+
+/* Críptico: casillas de respuesta con el look oscuro original. */
+html.st2-theme-dark .code-slots {
+  --cs-accent: #ec4899;
+  --cs-ink: #f97316;
+  --cs-slot: #27272a;
+  --cs-ring: transparent;
+  --cs-fill: #ec4899;
+  --cs-fill-ring: transparent;
+  --cs-digit: #000;
+  --cs-hint: #f97316;
+  --cs-hint-digit: #111;
+  --cs-wash-ink: #000;
+  --cs-danger: #ff3b30;
+  --cs-danger-fill: #ff3b30;
+}

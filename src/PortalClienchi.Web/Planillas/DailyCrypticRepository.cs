@@ -12,6 +12,8 @@ public sealed class DailyCrypticRepository
     public const int AfternoonSlot = 13 * 60 + 30;
     public static readonly int[] Slots = [MorningSlot, AfternoonSlot];
     public const int MaxAttempts = 5;
+    /// <summary>Extra por cerrar las dos rondas del día sin pistas (10 + 10 + 10 = 30). No aplica a días anteriores.</summary>
+    public const int CleanDayBonus = 10;
     public const int HintDefinition = 1;
     public const int HintMechanism = 2;
     public const int HintIndicator = 4;
@@ -39,7 +41,10 @@ public sealed class DailyCrypticRepository
         _logger.LogInformation("Críptico diario SQLite en {DbPath}", _dbPath);
     }
 
-    public DailyCrypticStatusDto GetStatus(string email, DateTimeOffset? nowUtc = null)
+    public DailyCrypticStatusDto GetStatus(
+        string email,
+        DateTimeOffset? nowUtc = null,
+        string? requestedDate = null)
     {
         var normalizedEmail = NormalizePlayer(email);
         var ranked = !CrypticGuestIdentity.IsPlayer(normalizedEmail);
@@ -57,6 +62,40 @@ public sealed class DailyCrypticRepository
         var seasonRanking = ranked
             ? LoadRanking(conn, yearStart, yearEnd, includeBonus: true)
             : [];
+        var archiveDates = ArchiveDates(conn, window);
+        var archive = BuildArchive(conn, normalizedEmail, archiveDates);
+        var current = DateKey(window.Date);
+        PlayTarget target;
+        try
+        {
+            target = ResolveTarget(window, archiveDates, requestedDate);
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            // Día vencido o inválido: se muestra el vigente.
+            target = new PlayTarget(window.Date, false);
+        }
+        if (target.Archive)
+        {
+            var pastSlots = ReadScheduledSlots(conn, null, target.Date);
+            var pastRounds = LoadRounds(conn, normalizedEmail, target.Date, localNow, overnight: false, pastSlots, forceOpen: true);
+            var pastRanking = ranked ? LoadRanking(conn, target.Date, target.Date.AddDays(1)) : [];
+            var liveSlots = window.Closed ? [] : ReadScheduledSlots(conn, null, window.Date);
+            return new DailyCrypticStatusDto(
+                DateKey(target.Date),
+                "America/Argentina/Buenos_Aires",
+                "archive",
+                NextOpen(localNow, window, liveSlots).ToString("O"),
+                pastRounds,
+                pastRanking,
+                season,
+                seasonRanking,
+                ranked,
+                null,
+                current,
+                archive);
+        }
+
         if (window.Closed)
         {
             var holiday = ArgentinaHolidays.TryGetName(date, out var holidayName);
@@ -70,7 +109,9 @@ public sealed class DailyCrypticRepository
                 season,
                 seasonRanking,
                 ranked,
-                holiday ? holidayName : null);
+                holiday ? holidayName : null,
+                current,
+                archive);
         }
 
         var daySlots = ReadScheduledSlots(conn, null, date);
@@ -87,24 +128,23 @@ public sealed class DailyCrypticRepository
             ranking,
             season,
             seasonRanking,
-            ranked);
+            ranked,
+            null,
+            current,
+            archive);
     }
 
-    public int RevealHint(string email, int slot, string? kind, DateTimeOffset? nowUtc = null)
+    public int RevealHint(
+        string email,
+        int slot,
+        string? kind,
+        DateTimeOffset? nowUtc = null,
+        string? requestedDate = null)
     {
         var normalizedEmail = NormalizePlayer(email);
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var window = ResolveForPlayer(localNow, normalizedEmail);
-        if (window.Closed)
-            throw new InvalidOperationException("El Críptico es de lunes a viernes.");
-        var date = window.Date;
-        EnsureSchedule(date);
-        using var conn = Open();
-        var daySlots = ReadScheduledSlots(conn, null, date);
-        if (!daySlots.Contains(slot))
-            throw new ArgumentException("Ronda inválida.", nameof(slot));
-        if (!window.ForceOpen && !window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
-            throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
+        var (conn, date, _, daySlots) = OpenPlayableDay(normalizedEmail, localNow, slot, requestedDate);
+        using var _conn = conn;
 
         using var tx = conn.BeginTransaction(deferred: false);
         if (LoadSolve(conn, tx, normalizedEmail, date, slot) is not null)
@@ -150,24 +190,17 @@ public sealed class DailyCrypticRepository
         string email,
         int slot,
         string? submittedAnswer,
-        DateTimeOffset? nowUtc = null)
+        DateTimeOffset? nowUtc = null,
+        string? requestedDate = null)
     {
         var normalizedEmail = NormalizePlayer(email);
         var normalizedAnswer = NormalizeAnswer(submittedAnswer);
         if (normalizedAnswer.Length == 0)
             throw new ArgumentException("Escribí una respuesta.");
         var localNow = ToLocal(nowUtc ?? DateTimeOffset.UtcNow);
-        var window = ResolveForPlayer(localNow, normalizedEmail);
-        if (window.Closed)
-            throw new InvalidOperationException("El Críptico es de lunes a viernes.");
-        var date = window.Date;
-        EnsureSchedule(date);
-        using var conn = Open();
-        var daySlots = ReadScheduledSlots(conn, null, date);
-        if (!daySlots.Contains(slot))
-            throw new ArgumentException("Ronda inválida.", nameof(slot));
-        if (!window.ForceOpen && !window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
-            throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
+        var (conn, date, isArchive, daySlots) = OpenPlayableDay(normalizedEmail, localNow, slot, requestedDate);
+        using var _conn = conn;
+        var statusDate = isArchive ? DateKey(date) : null;
 
         using var tx = conn.BeginTransaction(deferred: false);
 
@@ -182,7 +215,7 @@ public sealed class DailyCrypticRepository
                 true,
                 "Esta ronda ya estaba resuelta.",
                 Math.Max(0, MaxAttempts - solved.AttemptCount),
-                GetStatus(normalizedEmail, nowUtc));
+                GetStatus(normalizedEmail, nowUtc, statusDate));
         }
 
         var attemptsUsed = CountAttempts(conn, tx, normalizedEmail, date, slot);
@@ -219,15 +252,17 @@ public sealed class DailyCrypticRepository
 
         if (correct)
         {
-            var position = CountSolves(conn, tx, date, slot) + 1;
+            // Día anterior: hasta 10 por ronda, sin bonus del día y sin competir por el primer puesto.
+            var position = isArchive ? 0 : CountSolves(conn, tx, date, slot) + 1;
             var hints = CountHints(conn, tx, normalizedEmail, date, slot);
             var roundPoints = Math.Max(1, 10 - hints);
             var alreadySolved = CountPlayerSolves(conn, tx, normalizedEmail, date);
             var completesDay = daySlots.Count == 2 && alreadySolved + 1 == 2;
             var cleanDay = completesDay
+                && !isArchive
                 && hints == 0
                 && daySlots.Where(item => item != slot).All(item => CountHints(conn, tx, normalizedEmail, date, item) == 0);
-            var points = roundPoints + (cleanDay ? 5 : 0);
+            var points = roundPoints + (cleanDay ? CleanDayBonus : 0);
             var solvedAt = DateTimeOffset.UtcNow.ToString("O");
             using var insertSolve = conn.CreateCommand();
             insertSolve.Transaction = tx;
@@ -257,9 +292,10 @@ public sealed class DailyCrypticRepository
                     ? "¡Correcto! Sumaste 1 punto, el mínimo."
                     : $"¡Correcto! Sumaste {points} {pointsLabel} (10 menos {hints} por {(hints == 1 ? "la pista" : "las pistas")}).";
             }
-            else if (daySlots.Count == 2)
+            else if (daySlots.Count == 2 && !isArchive)
             {
-                message = $"¡Correcto! Sumaste {points} puntos. Si cerrás la otra sin pistas, el día suma 25.";
+                var full = 10 * daySlots.Count + CleanDayBonus;
+                message = $"¡Correcto! Sumaste {points} puntos. Si cerrás la otra sin pistas, el día suma {full}.";
             }
             else
             {
@@ -272,7 +308,7 @@ public sealed class DailyCrypticRepository
             correct,
             message,
             remaining,
-            GetStatus(normalizedEmail, nowUtc));
+            GetStatus(normalizedEmail, nowUtc, statusDate));
     }
 
     public IReadOnlyList<object> ListAdminClues()
@@ -401,6 +437,107 @@ public sealed class DailyCrypticRepository
         while (!IsPlayDay(next))
             next = next.AddDays(1);
         return new PlayerWindow(next, Overnight: false, Closed: false, ForceOpen: true);
+    }
+
+    /// <summary>Cuántos días hábiles anteriores quedan para jugar (ventana móvil: el más viejo se va cayendo).</summary>
+    public const int ArchiveDays = 5;
+
+    private readonly record struct PlayTarget(DateOnly Date, bool Archive);
+
+    /// <summary>
+    /// Días hábiles anteriores al vigente que ya tuvieron Críptico programado.
+    /// Solo días con programación previa: nunca se sortea una pista nueva para el pasado.
+    /// </summary>
+    private static List<DateOnly> ArchiveDates(SqliteConnection conn, PlayerWindow window)
+    {
+        var dates = new List<DateOnly>(ArchiveDays);
+        var day = window.Date.AddDays(-1);
+        var playDays = 0;
+        for (var guard = 0; guard < 21 && playDays < ArchiveDays; guard++, day = day.AddDays(-1))
+        {
+            if (!IsPlayDay(day))
+                continue;
+            playDays++;
+            if (ReadScheduledSlots(conn, null, day).Count > 0)
+                dates.Add(day);
+        }
+        return dates;
+    }
+
+    private static List<DailyCrypticArchiveDayDto> BuildArchive(
+        SqliteConnection conn,
+        string email,
+        IReadOnlyList<DateOnly> dates)
+    {
+        var days = new List<DailyCrypticArchiveDayDto>(dates.Count);
+        foreach (var day in dates)
+        {
+            var slots = ReadScheduledSlots(conn, null, day);
+            var solved = 0;
+            var failed = 0;
+            foreach (var slot in slots)
+            {
+                if (LoadSolve(conn, null, email, day, slot) is not null)
+                    solved++;
+                else if (CountAttempts(conn, null, email, day, slot) >= MaxAttempts)
+                    failed++;
+            }
+            days.Add(new DailyCrypticArchiveDayDto(DateKey(day), slots.Count, solved, failed));
+        }
+        return days;
+    }
+
+    private static PlayTarget ResolveTarget(
+        PlayerWindow window,
+        IReadOnlyList<DateOnly> archiveDates,
+        string? requestedDate)
+    {
+        if (string.IsNullOrWhiteSpace(requestedDate))
+            return new PlayTarget(window.Date, false);
+        if (!DateOnly.TryParseExact(
+                requestedDate.Trim(),
+                "yyyy-MM-dd",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var date))
+        {
+            throw new ArgumentException("Fecha inválida.");
+        }
+        if (date == window.Date)
+            return new PlayTarget(date, false);
+        if (!archiveDates.Contains(date))
+            throw new InvalidOperationException("Ese Críptico ya no se puede jugar.");
+        return new PlayTarget(date, true);
+    }
+
+    /// <summary>Valida día y ronda para jugar o pedir pista. Devuelve la conexión abierta.</summary>
+    private (SqliteConnection Conn, DateOnly Date, bool Archive, List<int> Slots) OpenPlayableDay(
+        string email,
+        DateTimeOffset localNow,
+        int slot,
+        string? requestedDate)
+    {
+        var window = ResolveForPlayer(localNow, email);
+        if (!window.Closed)
+            EnsureSchedule(window.Date);
+        var conn = Open();
+        try
+        {
+            var target = ResolveTarget(window, ArchiveDates(conn, window), requestedDate);
+            if (!target.Archive && window.Closed)
+                throw new InvalidOperationException("El Críptico es de lunes a viernes.");
+            var daySlots = ReadScheduledSlots(conn, null, target.Date);
+            if (!daySlots.Contains(slot))
+                throw new ArgumentException("Ronda inválida.", nameof(slot));
+            if (!target.Archive && !window.ForceOpen && !window.Overnight && MinuteOf(localNow) < SlotMinute(slot))
+                throw new InvalidOperationException($"La ronda de las {SlotLabel(slot)} todavía no abrió.");
+            return (conn, target.Date, target.Archive, daySlots);
+        }
+        catch
+        {
+            conn.Dispose();
+            throw;
+        }
     }
 
     private static bool IsPlayDay(DateOnly date) =>

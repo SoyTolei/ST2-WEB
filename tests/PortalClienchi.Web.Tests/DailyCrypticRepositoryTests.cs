@@ -51,7 +51,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
 
         var second = _repository.Submit(Email, afternoon, ScheduledAnswer(initial.Date, afternoon), at1330);
         Assert.True(second.Correct);
-        Assert.Equal(25, second.Status.Ranking.Single().Points);
+        Assert.Equal(30, second.Status.Ranking.Single().Points);
         Assert.Equal(2, second.Status.Ranking.Single().Solved);
     }
 
@@ -331,6 +331,96 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         var fresh = _repository.GetStatus(Email, AtArgentina(2026, 11, 19, 13, 30));
         Assert.Equal("¡Oye! Estoy muerto por dentro. (2)", fresh.Rounds[0].Clue);
         Assert.NotEqual(fresh.Rounds[0].Clue, fresh.Rounds[1].Clue);
+    }
+
+    [Fact]
+    public void Losing_the_morning_round_keeps_the_afternoon_playable()
+    {
+        var at0900 = AtArgentina(2026, 10, 23, 9, 0);
+        for (var attempt = 0; attempt < DailyCrypticRepository.MaxAttempts; attempt++)
+            _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "respuesta-imposible-xyz", at0900);
+
+        var at1330 = AtArgentina(2026, 10, 23, 13, 30);
+        var status = _repository.GetStatus(Email, at1330);
+        Assert.Equal("failed", status.Rounds[0].State);
+        Assert.Equal("available", status.Rounds[1].State);
+
+        var answer = ScheduledAnswer(status.Date, DailyCrypticRepository.AfternoonSlot);
+        Assert.True(_repository.Submit(Email, DailyCrypticRepository.AfternoonSlot, answer, at1330).Correct);
+    }
+
+    [Fact]
+    public void Previous_days_stay_playable_for_five_weekdays_and_show_what_was_solved()
+    {
+        // Programa los días como si la suite hubiera estado abierta cada día hábil.
+        foreach (var day in new[] { 12, 13, 16, 17, 18, 19, 20 })
+            _repository.GetStatus(Email, AtArgentina(2026, 11, day, 13, 30));
+
+        // 23/11 es feriado: el martes 24 ofrece los 5 días hábiles anteriores.
+        var tuesday = AtArgentina(2026, 11, 24, 10, 0);
+        var today = _repository.GetStatus(Email, tuesday);
+        Assert.Equal("2026-11-24", today.Current);
+        Assert.Equal(
+            ["2026-11-20", "2026-11-19", "2026-11-18", "2026-11-17", "2026-11-16"],
+            today.Archive!.Select(day => day.Date).ToArray());
+        Assert.All(today.Archive!, day => Assert.Equal(0, day.Solved));
+
+        // Un día anterior se juega entero, incluida la ronda de la tarde, aunque sean las 10.
+        var friday = _repository.GetStatus(Email, tuesday, "2026-11-20");
+        Assert.Equal("archive", friday.Phase);
+        Assert.Equal("2026-11-20", friday.Date);
+        Assert.All(friday.Rounds, round => Assert.Equal("available", round.State));
+
+        var answer = ScheduledAnswer("2026-11-20", DailyCrypticRepository.AfternoonSlot);
+        var solved = _repository.Submit(Email, DailyCrypticRepository.AfternoonSlot, answer, tuesday, "2026-11-20");
+        Assert.True(solved.Correct);
+        Assert.Equal("archive", solved.Status.Phase);
+        Assert.Equal("solved", solved.Status.Rounds[1].State);
+        Assert.Equal(10, solved.Status.Rounds[1].Points);
+        Assert.Equal(0, solved.Status.Ranking.Single().Wins);
+        Assert.Equal(1, solved.Status.Archive!.Single(day => day.Date == "2026-11-20").Solved);
+
+        // Resuelto queda resuelto: no se vuelve a sumar.
+        var again = _repository.Submit(Email, DailyCrypticRepository.AfternoonSlot, answer, tuesday, "2026-11-20");
+        Assert.Equal(10, again.Status.Ranking.Single().Points);
+
+        // Las dos rondas sin pistas en un día anterior: 10 + 10, sin el bonus del día.
+        var morningAnswer = ScheduledAnswer("2026-11-20", DailyCrypticRepository.MorningSlot);
+        var both = _repository.Submit(Email, DailyCrypticRepository.MorningSlot, morningAnswer, tuesday, "2026-11-20");
+        Assert.Equal(10, both.Status.Rounds[0].Points);
+        Assert.Equal(20, both.Status.Ranking.Single().Points);
+        Assert.Equal(2, both.Status.Archive!.Single(day => day.Date == "2026-11-20").Solved);
+
+        // El 13 ya quedó afuera de la ventana: no se juega y el estado vuelve al día vigente.
+        Assert.Throws<InvalidOperationException>(
+            () => _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "algo", tuesday, "2026-11-13"));
+        Assert.Equal("active", _repository.GetStatus(Email, tuesday, "2026-11-13").Phase);
+        Assert.Throws<ArgumentException>(
+            () => _repository.RevealHint(Email, DailyCrypticRepository.MorningSlot, "definition", tuesday, "no-es-fecha"));
+    }
+
+    [Fact]
+    public void Weekend_still_offers_the_previous_days()
+    {
+        foreach (var day in new[] { 19, 20 })
+            _repository.GetStatus(Email, AtArgentina(2026, 11, day, 13, 30));
+
+        var saturday = _repository.GetStatus(Email, AtArgentina(2026, 11, 21, 15, 0));
+        Assert.Equal("weekend", saturday.Phase);
+        Assert.Equal("2026-11-20", saturday.Archive![0].Date);
+
+        var past = _repository.GetStatus(Email, AtArgentina(2026, 11, 21, 15, 0), "2026-11-20");
+        Assert.Equal("archive", past.Phase);
+        Assert.Equal(2, past.Rounds.Count);
+    }
+
+    [Fact]
+    public void Days_without_a_cryptic_do_not_stretch_the_window_further_back()
+    {
+        // Solo hubo Críptico el 11/11; dos semanas después ya no entra en los 5 días hábiles.
+        _repository.GetStatus(Email, AtArgentina(2026, 11, 11, 13, 30));
+        var later = _repository.GetStatus(Email, AtArgentina(2026, 11, 25, 10, 0));
+        Assert.Empty(later.Archive!);
     }
 
     private string ScheduledAnswer(string date, int slot)

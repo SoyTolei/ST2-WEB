@@ -12,6 +12,10 @@ public sealed class DailyCrypticAttemptRequest
 
     [JsonPropertyName("kind")]
     public string Kind { get; set; } = "";
+
+    /// <summary>Día a jugar (yyyy-MM-dd). Vacío = el Críptico vigente.</summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
 }
 
 public sealed class DailyCrypticAdminRequest
@@ -91,7 +95,16 @@ public sealed record DailyCrypticStatusDto(
     string Season,
     IReadOnlyList<DailyCrypticRankingDto> SeasonRanking,
     bool Ranked,
-    string? Closure = null);
+    string? Closure = null,
+    string? Current = null,
+    IReadOnlyList<DailyCrypticArchiveDayDto>? Archive = null);
+
+/// <summary>Un día anterior que todavía se puede jugar (o ver resuelto).</summary>
+public sealed record DailyCrypticArchiveDayDto(
+    string Date,
+    int Total,
+    int Solved,
+    int Failed);
 
 public sealed record DailyCrypticRankingDto(
     int Rank,

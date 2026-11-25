@@ -6,13 +6,14 @@ public static class DailyCrypticEndpoints
     {
         app.MapGet("/api/cryptic/status", (
             HttpContext ctx,
-            DailyCrypticRepository repository) =>
+            DailyCrypticRepository repository,
+            string? date) =>
         {
             var email = ResolvePlayer(ctx);
             St2HttpCache.NoStore(ctx);
             try
             {
-                return Results.Ok(repository.GetStatus(email));
+                return Results.Ok(repository.GetStatus(email, requestedDate: date));
             }
             catch (Exception ex)
             {
@@ -32,7 +33,7 @@ public static class DailyCrypticEndpoints
             St2HttpCache.NoStore(ctx);
             try
             {
-                return Results.Ok(repository.Submit(email, body.Slot, body.Answer));
+                return Results.Ok(repository.Submit(email, body.Slot, body.Answer, requestedDate: body.Date));
             }
             catch (ArgumentException ex)
             {
@@ -62,7 +63,7 @@ public static class DailyCrypticEndpoints
             St2HttpCache.NoStore(ctx);
             try
             {
-                var level = repository.RevealHint(email, body.Slot, body.Kind);
+                var level = repository.RevealHint(email, body.Slot, body.Kind, requestedDate: body.Date);
                 return Results.Ok(new { level });
             }
             catch (ArgumentException ex)
