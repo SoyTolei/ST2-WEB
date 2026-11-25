@@ -139,3 +139,184 @@ export function isAccessKnownNamePart(folded) {
     || isAccessGivenName(folded)
     || isAccessSurname(folded);
 }
+
+// ---- Nombre legible a partir del email (antes en app.js) ----
+
+/**
+ * Parte tokens pegados sin separador: vanesageorgina → vanesa + georgina,
+ * velasquezmunoz → velasquez + munoz.
+ * Acepta corte si ambos son conocidos, o si uno es conocido y el otro parece nombre.
+ */
+function splitGluedAccessNamePart(raw, depth = 0) {
+  const token = String(raw || "").trim();
+  if (!token || depth > 2) return token ? [token] : [];
+  const folded = foldAccessName(token).replace(/^\d+|\d+$/g, "");
+  if (folded.length < 8) return [token];
+  if (isAccessKnownNamePart(folded)) return [token];
+
+  let best = null;
+  let bestScore = -1;
+
+  for (let i = 3; i <= folded.length - 3; i++) {
+    const left = folded.slice(0, i);
+    const right = folded.slice(i);
+    const leftGiven = isAccessGivenName(left);
+    const rightGiven = isAccessGivenName(right);
+    const leftSur = isAccessSurname(left);
+    const rightSur = isAccessSurname(right);
+    const leftOk = leftGiven || leftSur;
+    const rightOk = rightGiven || rightSur;
+    const leftLooks = leftOk || (left.length >= 4 && /^[a-z]+$/.test(left));
+    const rightLooks = rightOk || (right.length >= 4 && /^[a-z]+$/.test(right));
+
+    if (!leftOk && !rightOk) continue;
+    if (!leftLooks || !rightLooks) continue;
+
+    let score = 0;
+    if (leftGiven) score += 4;
+    if (rightGiven) score += 4;
+    if (leftSur) score += 3;
+    if (rightSur) score += 3;
+    if (leftOk && rightOk) score += 5;
+    if (leftGiven && rightGiven) score += 3;
+    if (leftSur && rightSur) score += 3;
+    if (leftGiven && rightSur) score += 2;
+    score += 1 - Math.abs(left.length - right.length) / folded.length;
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = [token.slice(0, i), token.slice(i)];
+    }
+  }
+
+  if (!best) return [token];
+
+  return best.flatMap((piece) => {
+    const f = foldAccessName(piece);
+    if (piece.length >= 8 && !isAccessKnownNamePart(f)) {
+      return splitGluedAccessNamePart(piece, depth + 1);
+    }
+    return [piece];
+  });
+}
+
+function titleAccessNameToken(raw) {
+  const token = String(raw || "").replace(/^\d+|\d+$/g, "").trim();
+  if (!token) return "";
+
+  const lower = foldAccessName(token);
+  if (ACCESS_NAME_ALIASES[lower]) return ACCESS_NAME_ALIASES[lower];
+
+  if (token.includes("-")) {
+    return token
+      .split("-")
+      .filter(Boolean)
+      .map((piece) => titleAccessNameToken(piece))
+      .filter(Boolean)
+      .join("-");
+  }
+
+  if (ACCESS_NAME_PARTICLES.has(lower)) return lower;
+  if (lower.length === 1) return lower.toUpperCase();
+
+  if (/^mc[a-z]/i.test(lower)) {
+    return `Mc${lower.slice(2, 3).toUpperCase()}${lower.slice(3)}`;
+  }
+  if (/^mac[a-z]{2,}/i.test(lower)) {
+    return `Mac${lower.slice(3, 4).toUpperCase()}${lower.slice(4)}`;
+  }
+  if (/^o'[a-z]/i.test(lower)) {
+    return `O'${lower.slice(2, 3).toUpperCase()}${lower.slice(3)}`;
+  }
+
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+function tokenizeAccessEmailLocal(local) {
+  return String(local || "")
+    .split(/[._+]+/)
+    .map((part) => part.replace(/^\d+|\d+$/g, "").trim())
+    .filter(Boolean)
+    .filter((part) => !/^(ext|tr|temp|test|usr|user)$/i.test(part))
+    .flatMap((part) => splitGluedAccessNamePart(part));
+}
+
+export function parseAccessNameFromEmail(email) {
+  const local = String(email || "").split("@")[0].trim();
+  const rawParts = tokenizeAccessEmailLocal(local);
+  const parts = rawParts.map(titleAccessNameToken).filter(Boolean);
+  if (!parts.length) {
+    return { firstName: "", secondName: "", lastName: "", secondLastName: "", display: email || "—" };
+  }
+
+  let firstName = "";
+  let secondName = "";
+  let lastName = "";
+  let secondLastName = "";
+
+  if (parts.length === 1) {
+    firstName = parts[0];
+  } else if (parts.length === 2) {
+    firstName = parts[0];
+    lastName = parts[1];
+  } else if (parts.length === 3) {
+    const middleRaw = foldAccessName(rawParts[1] || "");
+    const middleIsGiven = ACCESS_NAME_PARTICLES.has(middleRaw) || isAccessGivenName(middleRaw);
+    if (middleIsGiven) {
+      firstName = parts[0];
+      secondName = parts[1];
+      lastName = parts[2];
+    } else {
+      firstName = parts[0];
+      lastName = parts[1];
+      secondLastName = parts[2];
+    }
+  } else {
+    firstName = parts[0];
+    secondName = parts.slice(1, -2).join(" ");
+    lastName = parts[parts.length - 2];
+    secondLastName = parts[parts.length - 1];
+  }
+
+  const ordered = [firstName, secondName, lastName, secondLastName].filter(Boolean);
+  const merged = [];
+  for (let i = 0; i < ordered.length; i++) {
+    const cur = ordered[i];
+    const bits = cur.split(/\s+/);
+    let j = 0;
+    while (j < bits.length) {
+      if (ACCESS_NAME_PARTICLES.has(foldAccessName(bits[j]))) {
+        const particleRun = [];
+        while (j < bits.length && ACCESS_NAME_PARTICLES.has(foldAccessName(bits[j]))) {
+          particleRun.push(foldAccessName(bits[j]));
+          j++;
+        }
+        if (j < bits.length) {
+          merged.push(`${particleRun.join(" ")} ${bits[j]}`);
+          j++;
+        } else if (i + 1 < ordered.length) {
+          ordered[i + 1] = `${particleRun.join(" ")} ${ordered[i + 1]}`;
+        } else {
+          merged.push(particleRun.join(" "));
+        }
+      } else {
+        merged.push(bits[j]);
+        j++;
+      }
+    }
+  }
+
+  return {
+    firstName,
+    secondName,
+    lastName,
+    secondLastName,
+    display: merged.join(" ").replace(/\s+/g, " ").trim() || email || "—",
+  };
+}
+
+export function formatAccessDisplayName(email, override) {
+  const custom = String(override || "").trim();
+  if (custom) return custom;
+  return parseAccessNameFromEmail(email).display;
+}
