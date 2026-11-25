@@ -6,8 +6,8 @@
   gap: 2px;
   padding: 3px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--border, var(--c-gray-200)) 35%, transparent);
-  border: 1px solid color-mix(in srgb, var(--border, var(--c-gray-200)) 70%, transparent);
+  background: color-mix(in srgb, var(--border, var(--c-slate-200)) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border, var(--c-slate-200)) 70%, transparent);
   box-shadow: none;
 }
 
@@ -393,7 +393,7 @@ html.st2-theme-dark .plan-bej-config--lite {
 }
 
 .plan-tech-group-label.is-locked-label {
-  color: var(--c-neutral-500);
+  color: var(--c-slate-500);
 }
 
 .plan-check-wrap.is-locked {
@@ -407,9 +407,9 @@ html.st2-theme-dark .plan-bej-config--lite {
 }
 
 .plan-check-badge.is-locked-badge {
-  background: var(--c-zinc-700) !important;
-  color: var(--c-zinc-400) !important;
-  border-color: var(--c-zinc-600) !important;
+  background: var(--c-slate-700) !important;
+  color: var(--c-slate-400) !important;
+  border-color: var(--c-slate-600) !important;
 }
 
 .plan-adj-card.is-locked-adj {
@@ -476,14 +476,14 @@ html.st2-theme-dark .plan-adj-sf-hint {
   font-weight: 450;
   font-style: italic;
   line-height: 1.35;
-  color: var(--c-neutral-400);
+  color: var(--c-slate-400);
   opacity: 0.92;
 }
 
 .plan-backup-sql-hint--soft em {
   font-style: italic;
   font-weight: 550;
-  color: var(--c-neutral-300);
+  color: var(--c-slate-300);
 }
 
 /* Sí / No unificado (estilo ONVIO) */
@@ -527,7 +527,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
 
 .plan-backup-detail--lite .plan-backup-detail-title {
   font-size: 0.68rem !important;
-  color: var(--c-neutral-400) !important;
+  color: var(--c-slate-400) !important;
   margin: 0 0 8px !important;
 }
 
@@ -582,7 +582,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
 .plan-backup-base-copy small {
   font-size: 0.6rem;
   font-weight: 500;
-  color: var(--c-neutral-400);
+  color: var(--c-slate-400);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -593,21 +593,21 @@ html.st2-theme-dark .plan-adj-sf-hint {
 }
 
 .plan-backup-detail--lite .plan-backup-onedrive label {
-  color: var(--c-neutral-300) !important;
+  color: var(--c-slate-300) !important;
   font-size: 0.72rem !important;
   font-weight: 650 !important;
 }
 
 .plan-backup-detail--lite .plan-backup-onedrive input {
-  background: var(--c-neutral-900) !important;
-  border: 1px solid var(--c-neutral-600) !important;
-  color: var(--c-neutral-100) !important;
+  background: var(--c-slate-900) !important;
+  border: 1px solid var(--c-slate-600) !important;
+  color: var(--c-slate-100) !important;
   min-height: 36px;
   font-size: 0.78rem !important;
 }
 
 .plan-backup-detail--lite .plan-backup-onedrive input::placeholder {
-  color: var(--c-neutral-500) !important;
+  color: var(--c-slate-500) !important;
 }
 
 /* Collation / SQL más compactos + aire respecto al bloque de arriba */
@@ -698,7 +698,7 @@ html.st2-theme-dark .plan-capturas-browse--lite {
 
 .plan-backup-sql--compact {
   border: none !important;
-  border-top: 1px dashed var(--c-neutral-700) !important;
+  border-top: 1px dashed var(--c-slate-700) !important;
 }
 
 .plan-sql-compact-head {
@@ -712,12 +712,12 @@ html.st2-theme-dark .plan-capturas-browse--lite {
 .plan-sql-compact-title {
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--c-neutral-200);
+  color: var(--c-slate-200);
 }
 
 .plan-sql-compact-sub {
   font-size: 0.68rem;
-  color: var(--c-neutral-400);
+  color: var(--c-slate-400);
 }
 
 html.st2-theme-dark .plan-backup-sql--compact .plan-backup-sql-hint {

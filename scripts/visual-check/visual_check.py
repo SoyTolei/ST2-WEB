@@ -7,7 +7,10 @@ Requisitos: app corriendo en local (dotnet run) y Playwright para Python
 
 Uso:
   python scripts/visual-check/visual_check.py capture <carpeta>
-  python scripts/visual-check/visual_check.py compare <referencia> <nueva> [<salida-diffs>]
+  python scripts/visual-check/visual_check.py compare <referencia> <nueva> [<salida-diffs>] [--threshold N]
+
+--threshold: diferencia mínima por canal para contar un píxel (24 por defecto, ignora
+antialiasing). Para revisar cambios de color sutiles a propósito, usar 4.
 
 Flujo típico:
   1. capture antes   -> referencia
@@ -94,7 +97,7 @@ def capture(out_dir: Path) -> None:
     print(f"Listo: {out_dir} ({len(errors)} errores de JS, ver errores.txt)")
 
 
-def compare(base_dir: Path, new_dir: Path, diff_dir: Path | None) -> int:
+def compare(base_dir: Path, new_dir: Path, diff_dir: Path | None, threshold: int = 24) -> int:
     from PIL import Image, ImageChops
 
     if diff_dir:
@@ -112,7 +115,7 @@ def compare(base_dir: Path, new_dir: Path, diff_dir: Path | None) -> int:
             print(f"TAMANO    {base.name}: {a.size} -> {b.size}")
             changed += 1
             continue
-        diff = ImageChops.difference(a, b).convert("L").point(lambda v: 255 if v > 24 else 0)
+        diff = ImageChops.difference(a, b).convert("L").point(lambda v: 255 if v > threshold else 0)
         box = diff.getbbox()
         if not box:
             print(f"igual     {base.name}")
@@ -135,8 +138,13 @@ def main(argv: list[str]) -> int:
         capture(Path(argv[1]))
         return 0
     if len(argv) >= 3 and argv[0] == "compare":
+        threshold = 24
+        if "--threshold" in argv:
+            i = argv.index("--threshold")
+            threshold = int(argv[i + 1])
+            argv = argv[:i] + argv[i + 2:]
         diff_dir = Path(argv[3]) if len(argv) >= 4 else None
-        return 1 if compare(Path(argv[1]), Path(argv[2]), diff_dir) else 0
+        return 1 if compare(Path(argv[1]), Path(argv[2]), diff_dir, threshold) else 0
     print(__doc__)
     return 2
 

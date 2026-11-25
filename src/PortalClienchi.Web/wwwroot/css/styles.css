@@ -8,7 +8,7 @@
   --header-accent: rgba(249, 115, 22, 0.7);
   --panel: #f4f6fa;
   --border: #e2e6ef;
-  --text-muted: var(--c-gray-500);
+  --text-muted: var(--c-slate-500);
   --nav-well: #eef1f6;
   --nav-hover: #e1e6f0;
   --white: var(--c-white);
@@ -2039,7 +2039,7 @@ body.portal-tab-active .combo-box {
 
 .result-item.indented {
   margin-left: 14px;
-  background: var(--c-neutral-50);
+  background: var(--c-slate-50);
   border: 1px solid var(--border);
 }
 
@@ -2222,7 +2222,7 @@ body.portal-tab-active .combo-box {
 .preview-loading-spinner {
   width: 32px;
   height: 32px;
-  border: 3px solid var(--c-gray-200);
+  border: 3px solid var(--c-slate-200);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: previewSpin 0.85s linear infinite;
@@ -2751,7 +2751,7 @@ body.portal-tab-active .main-shell {
   margin: 0 0 10px;
   font-size: 0.84rem;
   line-height: 1.55;
-  color: var(--c-gray-600);
+  color: var(--c-slate-600);
 }
 
 .st2-about-tabs-list {
@@ -2759,7 +2759,7 @@ body.portal-tab-active .main-shell {
   padding: 0 0 0 1.1rem;
   font-size: 0.82rem;
   line-height: 1.5;
-  color: var(--c-gray-600);
+  color: var(--c-slate-600);
 }
 
 .st2-about-tabs-list li {
@@ -2781,7 +2781,7 @@ body.portal-tab-active .main-shell {
   font-size: 0.76rem;
   font-style: italic;
   line-height: 1.45;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
 }
 
 .st2-about-notice-copy > .st2-about-signature {
@@ -6506,7 +6506,7 @@ body.st2-access-restoring #st2-access-gate {
     radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.2) 0%, transparent 58%),
     radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
     linear-gradient(180deg, #222222 0%, #161616 100%);
-  color: var(--c-neutral-200);
+  color: var(--c-slate-200);
 }
 
 body.st2-access-pending:not(.show-access-gate) .st2-boot-splash,
@@ -6547,7 +6547,7 @@ body.st2-access-ok .st2-boot-splash {
   line-height: 1;
   transform-origin: 50% 60%;
   user-select: none;
-  color: var(--c-gray-100);
+  color: var(--c-slate-100);
   animation: st2-boot-st2-float 3.4s ease-in-out infinite;
   filter: drop-shadow(0 4px 14px rgba(214, 64, 0, 0.36));
 }
@@ -6602,7 +6602,7 @@ body.st2-access-ok .st2-boot-splash {
   letter-spacing: 0.01em;
   line-height: 1.1;
   white-space: nowrap;
-  color: var(--c-gray-100);
+  color: var(--c-slate-100);
 }
 
 .st2-access-suite-sep {
@@ -6634,7 +6634,7 @@ body.st2-access-ok .st2-boot-splash {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--c-gray-400);
+  color: var(--c-slate-400);
 }
 
 .st2-boot-splash-dots {

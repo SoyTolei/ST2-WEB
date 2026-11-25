@@ -2277,7 +2277,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-capturas-panel {
-  background: var(--st2-suite-surface-soft, var(--c-neutral-50));
+  background: var(--st2-suite-surface-soft, var(--c-slate-50));
   border: 1px solid var(--st2-suite-border, var(--border));
   border-radius: 10px;
   padding: 12px 14px;
@@ -3024,7 +3024,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 
 .plan-segment-track {
-  background: var(--c-neutral-50);
+  background: var(--c-slate-50);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 3px;
@@ -3048,7 +3048,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   font-size: 0.8125rem;
   font-weight: 600;
   font-family: inherit;
@@ -3374,7 +3374,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   color: var(--c-blue-700);
 }
 .plan-well-box {
-  background: var(--c-neutral-50);
+  background: var(--c-slate-50);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px 14px;
@@ -3690,7 +3690,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: block;
   font-size: 0.65rem;
   font-weight: 500;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   margin-top: 1px;
 }
 /* SÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ­/No: estado claro sin pelear con el color del card */
@@ -3943,7 +3943,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: block;
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   margin-bottom: 4px;
 }
 .plan-backup-onedrive input {
@@ -3970,7 +3970,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: block;
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   margin-bottom: 4px;
 }
 .plan-legal-onedrive-rows {
@@ -4112,7 +4112,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: block;
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   margin-bottom: 4px;
 }
 
@@ -4193,7 +4193,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: 12px;
   background: color-mix(in srgb, var(--panel, #f4f6fa) 90%, transparent);
   backdrop-filter: blur(4px);
-  color: var(--text-muted, var(--c-gray-500));
+  color: var(--text-muted, var(--c-slate-500));
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -4209,7 +4209,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-module-loading-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid var(--border, var(--c-gray-200));
+  border: 3px solid var(--border, var(--c-slate-200));
   border-top-color: var(--primary, var(--c-brand-600));
   border-radius: 50%;
   animation: planGestorSpin 0.85s linear infinite;
@@ -4227,7 +4227,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(2px);
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   font-size: 0.88rem;
   font-weight: 600;
 }
@@ -4243,7 +4243,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-gestor-add-spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid var(--c-gray-200);
+  border: 3px solid var(--c-slate-200);
   border-top-color: var(--c-violet-600);
   border-radius: 50%;
   animation: planGestorSpin 0.85s linear infinite;
@@ -4454,7 +4454,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 20px;
-  background: var(--c-neutral-50);
+  background: var(--c-slate-50);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px 14px;
@@ -4646,14 +4646,14 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 #op-gestor-pagina-label {
   font-size: 0.8125rem;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   white-space: nowrap;
 }
 
 .plan-gestor-hint {
   margin: 4px 0 0;
   font-size: 0.72rem;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   line-height: 1.45;
   text-align: left;
 }
@@ -4719,7 +4719,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-user-hint {
   margin: 0 0 16px;
   font-size: 0.82rem;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   line-height: 1.45;
   text-align: center;
 }
@@ -4876,7 +4876,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-gestor-empty-row td {
   text-align: center;
-  color: var(--c-gray-500);
+  color: var(--c-slate-500);
   padding: 48px 12px !important;
 }
 
@@ -5014,7 +5014,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   color: var(--dark);
 }
 .plan-option-well {
-  background: var(--c-neutral-50);
+  background: var(--c-slate-50);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px 18px;
@@ -5130,7 +5130,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-tool-arrow { font-size: 1.5rem; font-weight: 600; color: var(--c-blue-600); flex-shrink: 0; }
 
 .plan-sql-card {
-  background: var(--c-neutral-50);
+  background: var(--c-slate-50);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px 16px;
@@ -5339,7 +5339,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   gap: 12px;
   padding: 12px 14px;
   border: none;
-  background: var(--c-neutral-50);
+  background: var(--c-slate-50);
   color: var(--dark);
   cursor: pointer;
   font: inherit;

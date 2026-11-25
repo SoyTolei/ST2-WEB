@@ -323,13 +323,13 @@
 /* Hoja oscura cuando se activa explícitamente o en dark mode */
 .pdf-portal-preview.sheet-dark {
   background: #141414 !important;
-  color: var(--c-neutral-100) !important;
+  color: var(--c-slate-100) !important;
   border-color: var(--c-slate-700) !important;
   box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.85) !important;
 }
 
 .pdf-portal-preview.sheet-dark .pdf-portal-preview-brand {
-  color: var(--c-neutral-100) !important;
+  color: var(--c-slate-100) !important;
   border-bottom: 3px solid var(--c-brand-500) !important;
 }
 
@@ -338,7 +338,7 @@
 }
 
 .pdf-portal-preview.sheet-dark .pdf-portal-preview-body {
-  color: var(--c-neutral-100) !important;
+  color: var(--c-slate-100) !important;
 }
 
 .pdf-portal-preview.sheet-dark .pdf-portal-preview-body:empty::before {
@@ -351,7 +351,7 @@
 }
 
 .pdf-portal-preview.sheet-dark h3 {
-  color: var(--c-neutral-100) !important;
+  color: var(--c-slate-100) !important;
 }
 
 .pdf-portal-preview.sheet-dark a {
@@ -359,14 +359,14 @@
 }
 
 .pdf-portal-preview.sheet-dark th {
-  background: var(--c-gray-700) !important;
+  background: var(--c-slate-700) !important;
   color: var(--c-white) !important;
-  border: 1px solid var(--c-gray-600) !important;
+  border: 1px solid var(--c-slate-600) !important;
 }
 
 .pdf-portal-preview.sheet-dark td {
-  background: var(--c-neutral-800) !important;
-  color: var(--c-neutral-100) !important;
+  background: var(--c-slate-800) !important;
+  color: var(--c-slate-100) !important;
   border: 1px solid #3b465c !important;
 }
 
@@ -498,18 +498,18 @@
 
 .pdf-portal-preview th,
 .pdf-portal-rich th {
-  background: var(--c-neutral-500) !important;
+  background: var(--c-slate-500) !important;
   color: var(--c-white) !important;
   font-weight: 700;
   padding: 8px 12px;
-  border: 1px solid var(--c-neutral-600);
+  border: 1px solid var(--c-slate-600);
   text-align: left;
 }
 
 .pdf-portal-preview td,
 .pdf-portal-rich td {
   padding: 7px 12px;
-  border: 1px solid var(--c-gray-300);
+  border: 1px solid var(--c-slate-300);
   color: var(--c-slate-800);
   background: var(--c-white);
 }
