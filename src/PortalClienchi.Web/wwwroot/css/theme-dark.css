@@ -1116,14 +1116,14 @@ html.st2-theme-dark .plan-modulo-btn:active:not(:disabled) {
 /* ── Portal Cliente ── */
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
-  background: linear-gradient(180deg, #1a1a1a 0%, #161616 100%) !important;
-  border-color: rgba(234, 88, 12, 0.55) !important;
+  background: linear-gradient(180deg, #1a1a1a 0%, #161616 100%);
+  border-color: rgba(234, 88, 12, 0.55);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
 html.st2-theme-dark .portal-search-head {
-  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, rgba(26, 33, 48, 0.92) 55%) !important;
-  border-color: rgba(234, 88, 12, 0.45) !important;
+  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, rgba(26, 33, 48, 0.92) 55%);
+  border-color: rgba(234, 88, 12, 0.45);
 }
 
 html.st2-theme-dark .portal-kicker {
@@ -1132,41 +1132,41 @@ html.st2-theme-dark .portal-kicker {
 
 html.st2-theme-dark .search-box,
 html.st2-theme-dark .combo-box {
-  background: #1c1c1c !important;
-  color: var(--c-neutral-200) !important;
-  border-color: rgba(234, 88, 12, 0.45) !important;
-  box-shadow: none !important;
+  background: #1c1c1c;
+  color: var(--c-neutral-200);
+  border-color: rgba(234, 88, 12, 0.45);
+  box-shadow: none;
 }
 
 html.st2-theme-dark .year-btn {
-  background: #1c1c1c !important;
-  color: var(--c-orange-300) !important;
-  border-color: var(--c-orange-900) !important;
+  background: #1c1c1c;
+  color: var(--c-orange-300);
+  border-color: var(--c-orange-900);
 }
 
 html.st2-theme-dark .year-btn:hover {
-  background: var(--c-orange-950) !important;
+  background: var(--c-orange-950);
 }
 
 html.st2-theme-dark .year-btn.active {
-  background: var(--primary) !important;
-  color: var(--c-white) !important;
+  background: var(--primary);
+  color: var(--c-white);
 }
 
 html.st2-theme-dark .result-item {
-  background: #1c1c1c !important;
-  border-color: var(--c-slate-700) !important;
+  background: #1c1c1c;
+  border-color: var(--c-slate-700);
   color: var(--c-neutral-200);
 }
 
 html.st2-theme-dark .result-item:hover {
-  background: #2a2a2a !important;
-  border-color: rgba(214, 64, 0, 0.45) !important;
+  background: #2a2a2a;
+  border-color: rgba(214, 64, 0, 0.45);
 }
 
 html.st2-theme-dark .result-item.selected {
-  background: linear-gradient(180deg, #3a1d12 0%, #1a1a1a 100%) !important;
-  border-color: var(--primary) !important;
+  background: linear-gradient(180deg, #3a1d12 0%, #1a1a1a 100%);
+  border-color: var(--primary);
 }
 
 html.st2-theme-dark .result-group-header {
@@ -1175,8 +1175,8 @@ html.st2-theme-dark .result-group-header {
 }
 
 html.st2-theme-dark .preview-frame-wrap {
-  background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%) !important;
-  border-color: rgba(234, 88, 12, 0.45) !important;
+  background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+  border-color: rgba(234, 88, 12, 0.45);
   box-shadow: none;
 }
 
@@ -1389,7 +1389,7 @@ html.st2-theme-dark .plan-sql-copy {
 }
 
 html.st2-theme-dark .plan-mam-sql-section {
-  border-color: var(--c-blue-900) !important;
+  border-color: var(--c-blue-900);
 }
 
 html.st2-theme-dark .plan-ref-modal,
@@ -1406,7 +1406,7 @@ html.st2-theme-dark .plan-adj-card.plan-legal-pick {
 
 html.st2-theme-dark .plan-legal-product-head:hover,
 html.st2-theme-dark .plan-adj-card.plan-legal-pick:hover {
-  background: #2a2a2a !important;
+  background: #2a2a2a;
 }
 
 html.st2-theme-dark .plan-chile-embed-menu-btn {
@@ -1566,21 +1566,21 @@ html.st2-theme-dark .blanqueo-preview-confirm {
 
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
-  background: #161616 !important;
-  border-color: rgba(234, 88, 12, 0.55) !important;
+  background: #161616;
+  border-color: rgba(234, 88, 12, 0.55);
 }
 
 html.st2-theme-dark .portal-search-head {
-  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, #1a1a1a 55%) !important;
-  border-color: rgba(234, 88, 12, 0.45) !important;
+  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, #1a1a1a 55%);
+  border-color: rgba(234, 88, 12, 0.45);
 }
 
 html.st2-theme-dark .search-box,
 html.st2-theme-dark .combo-box {
-  background: #1c1c1c !important;
-  color: var(--c-neutral-200) !important;
-  border-color: rgba(234, 88, 12, 0.45) !important;
-  box-shadow: none !important;
+  background: #1c1c1c;
+  color: var(--c-neutral-200);
+  border-color: rgba(234, 88, 12, 0.45);
+  box-shadow: none;
 }
 
 html.st2-theme-dark .results-empty {
@@ -1654,15 +1654,15 @@ html.st2-theme-dark .plan-ref-perfil {
 }
 
 html.st2-theme-dark .plan-ref-perfil-hint.is-otra {
-  background: var(--c-slate-800) !important;
-  border-color: var(--c-slate-600) !important;
-  color: var(--c-slate-300) !important;
+  background: var(--c-slate-800);
+  border-color: var(--c-slate-600);
+  color: var(--c-slate-300);
 }
 
 html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico {
-  background: var(--c-blue-950) !important;
-  border-color: var(--c-blue-500) !important;
-  color: var(--c-blue-300) !important;
+  background: var(--c-blue-950);
+  border-color: var(--c-blue-500);
+  color: var(--c-blue-300);
 }
 
 html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico strong,
@@ -1944,7 +1944,7 @@ html.st2-theme-dark .st2-access-modules-name-input {
 }
 
 html.st2-theme-dark .st2-access-modules-name-input::placeholder {
-  color: #7d8ba0 !important;
+  color: #7d8ba0;
 }
 
 html.st2-theme-dark .st2-access-modules-sys-card {
@@ -1996,20 +1996,20 @@ html.st2-theme-dark .st2-access-modules-sub-group.is-disabled {
 }
 
 html.st2-theme-dark .st2-access-modules-legal-group .st2-access-modules-group-kicker {
-  color: var(--c-purple-300) !important;
+  color: var(--c-purple-300);
 }
 
 html.st2-theme-dark .st2-access-modules-chile-group .st2-access-modules-group-kicker {
-  color: var(--c-red-300) !important;
+  color: var(--c-red-300);
 }
 
 html.st2-theme-dark .st2-access-modules-group-kicker {
-  color: var(--c-blue-300) !important;
+  color: var(--c-blue-300);
 }
 
 html.st2-theme-dark .st2-access-modules-group-hint,
 html.st2-theme-dark .st2-access-modules-role-note {
-  color: var(--c-slate-400) !important;
+  color: var(--c-slate-400);
 }
 
 html.st2-theme-dark .st2-access-modules-check-icon-sql {
@@ -2017,14 +2017,14 @@ html.st2-theme-dark .st2-access-modules-check-icon-sql {
 }
 
 html.st2-theme-dark .st2-access-modules-preview {
-  background: var(--c-slate-800) !important;
-  color: var(--c-sky-300) !important;
-  box-shadow: inset 0 0 0 1px var(--c-sky-700) !important;
+  background: var(--c-slate-800);
+  color: var(--c-sky-300);
+  box-shadow: inset 0 0 0 1px var(--c-sky-700);
 }
 
 html.st2-theme-dark .st2-access-modules-preview:hover {
-  background: var(--c-sky-900) !important;
-  color: var(--c-sky-100) !important;
+  background: var(--c-sky-900);
+  color: var(--c-sky-100);
 }
 
 html.st2-theme-dark .st2-access-admin-input,
@@ -2209,22 +2209,22 @@ html.st2-theme-dark .st2-access-admin-audit-list li {
 
 html.st2-theme-dark .st2-access-admin-audit-actor,
 html.st2-theme-dark .st2-access-admin-audit-detail {
-  background: #1c1c1c !important;
-  border-color: #3d4b61 !important;
-  color: var(--c-neutral-200) !important;
+  background: #1c1c1c;
+  border-color: #3d4b61;
+  color: var(--c-neutral-200);
 }
 
 html.st2-theme-dark .st2-access-admin-audit-actor.is-open,
 html.st2-theme-dark .st2-access-admin-audit-actor:hover,
 html.st2-theme-dark .st2-access-admin-audit-detail {
-  background: #3a1d12 !important;
-  border-color: var(--c-orange-900) !important;
+  background: #3a1d12;
+  border-color: var(--c-orange-900);
 }
 
 html.st2-theme-dark .st2-access-admin-audit-detail-head,
 html.st2-theme-dark .st2-access-admin-audit-detail-close,
 html.st2-theme-dark .st2-access-admin-audit-more {
-  color: var(--c-orange-300) !important;
+  color: var(--c-orange-300);
 }
 
 html.st2-theme-dark .st2-access-admin-quick-filter.is-on {
@@ -2275,7 +2275,7 @@ html.st2-theme-dark .st2-access-name-edit-x:hover {
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filters {
-  border-left-color: transparent !important;
+  border-left-color: transparent;
 }
 
 html.st2-theme-dark .st2-access-admin-perms-filter-pop {
@@ -2328,44 +2328,44 @@ html.st2-theme-dark .st2-access-admin-th-perms-mark {
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter {
-  background: #1a2230 !important;
-  border-color: var(--c-slate-700) !important;
-  color: var(--c-slate-400) !important;
+  background: #1a2230;
+  border-color: var(--c-slate-700);
+  color: var(--c-slate-400);
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter:hover {
-  background: #2a2a2a !important;
-  color: var(--c-slate-200) !important;
+  background: #2a2a2a;
+  color: var(--c-slate-200);
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter.is-active {
-  border-color: var(--c-teal-600) !important;
-  background: var(--c-teal-900) !important;
-  color: var(--c-teal-300) !important;
+  border-color: var(--c-teal-600);
+  background: var(--c-teal-900);
+  color: var(--c-teal-300);
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="sql"].is-active {
-  border-color: var(--c-blue-500) !important;
-  background: var(--c-blue-950) !important;
-  color: var(--c-blue-300) !important;
+  border-color: var(--c-blue-500);
+  background: var(--c-blue-950);
+  color: var(--c-blue-300);
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="leg"].is-active {
-  border-color: var(--c-violet-500) !important;
-  background: var(--c-violet-950) !important;
-  color: var(--c-violet-300) !important;
+  border-color: var(--c-violet-500);
+  background: var(--c-violet-950);
+  color: var(--c-violet-300);
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="cl"].is-active {
-  border-color: var(--c-red-500) !important;
-  background: var(--c-red-950) !important;
-  color: var(--c-red-300) !important;
+  border-color: var(--c-red-500);
+  background: var(--c-red-950);
+  color: var(--c-red-300);
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter[data-mod-filter="adm"].is-active {
-  border-color: var(--c-amber-500) !important;
-  background: var(--c-amber-900) !important;
-  color: var(--c-amber-300) !important;
+  border-color: var(--c-amber-500);
+  background: var(--c-amber-900);
+  color: var(--c-amber-300);
 }
 
 html.st2-theme-dark .st2-access-admin-panel-top,
@@ -2374,11 +2374,11 @@ html.st2-theme-dark .st2-access-admin-panel-foot {
 }
 
 html.st2-theme-dark .st2-access-admin-search::placeholder {
-  color: #7d8ba0 !important;
+  color: #7d8ba0;
 }
 
 html.st2-theme-dark .st2-access-admin-mod-empty {
-  color: var(--c-neutral-500) !important;
+  color: var(--c-neutral-500);
 }
 
 html.st2-theme-dark .st2-access-admin-perm-sys.is-off {
@@ -2421,15 +2421,15 @@ html.st2-theme-dark .st2-access-admin-perm-sys--adm.is-on {
 }
 
 html.st2-theme-dark .st2-access-admin-perm-extra.role-sadm {
-  color: var(--c-orange-400) !important;
+  color: var(--c-orange-400);
 }
 
 html.st2-theme-dark .st2-access-admin-perm-extra.role-adm {
-  color: var(--c-teal-300) !important;
+  color: var(--c-teal-300);
 }
 
 html.st2-theme-dark .st2-access-admin-perm-extras {
-  color: var(--c-slate-400) !important;
+  color: var(--c-slate-400);
 }
 
 html.st2-theme-dark .st2-access-admin-table tr.is-client-changed {
@@ -2885,13 +2885,13 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn:active {
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn-paste {
-  background: var(--c-slate-800) !important;
+  background: var(--c-slate-800);
   color: var(--c-brand-500) !important;
-  border-color: #3b465c !important;
+  border-color: #3b465c;
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn-paste:hover {
-  background: #2b384e !important;
+  background: #2b384e;
   color: #ff8522 !important;
 }
 
@@ -2925,7 +2925,7 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich {
   background: #0b0f19 !important;
   color: var(--c-slate-50) !important;
   border-color: #2b3648 !important;
-  caret-color: var(--c-slate-50) !important;
+  caret-color: var(--c-slate-50);
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich:empty::before {
