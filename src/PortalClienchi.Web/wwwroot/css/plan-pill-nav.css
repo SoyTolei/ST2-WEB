@@ -279,7 +279,7 @@ html.st2-theme-dark .plan-check-btn.sdk .plan-check-btn-icon {
 html.st2-theme-dark .plan-check-btn.planilla .plan-check-btn-icon svg,
 html.st2-theme-dark .plan-check-btn.mam .plan-check-btn-icon svg,
 html.st2-theme-dark .plan-check-btn.sdk .plan-check-btn-icon svg {
-  stroke: currentColor !important;
+  stroke: currentColor;
 }
 
 html.st2-theme-dark .plan-adj-card,
@@ -316,8 +316,8 @@ html.st2-theme-dark .plan-adj-card.tone-slate.selected {
 
 html.st2-theme-dark .plan-ref-perfil-hint.is-otra,
 html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico {
-  background: transparent !important;
-  border-color: transparent !important;
+  background: transparent;
+  border-color: transparent;
 }
 
 /* —— Pills más chicas + bloque Versión/Módulo sin “caja” —— */
@@ -607,7 +607,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
 }
 
 .plan-backup-detail--lite .plan-backup-onedrive input::placeholder {
-  color: var(--c-slate-500) !important;
+  color: var(--c-slate-500);
 }
 
 /* Collation / SQL más compactos + aire respecto al bloque de arriba */

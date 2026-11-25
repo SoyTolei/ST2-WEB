@@ -933,17 +933,17 @@ html.st2-theme-dark .btn-secondary:not(.pdf-portal-btn-paste):hover:not(:disable
 
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
-  background: linear-gradient(180deg, rgba(28, 23, 20, 0.95) 0%, rgba(18, 15, 13, 0.96) 100%) !important;
-  border: 1px solid var(--r-line-2) !important;
+  background: linear-gradient(180deg, rgba(28, 23, 20, 0.95) 0%, rgba(18, 15, 13, 0.96) 100%);
+  border: 1px solid var(--r-line-2);
   border-radius: var(--r-radius-lg);
-  box-shadow: var(--r-shadow-card) !important;
+  box-shadow: var(--r-shadow-card);
 }
 
 html.st2-theme-dark .portal-search-head {
   background:
     radial-gradient(120% 140% at 0% 0%, rgba(249, 115, 22, 0.16), transparent 60%),
-    rgba(20, 16, 14, 0.6) !important;
-  border-color: var(--r-line) !important;
+    rgba(20, 16, 14, 0.6);
+  border-color: var(--r-line);
 }
 
 /* ── Modo claro: misma lógica de módulos, sobre superficies blancas ─ */
