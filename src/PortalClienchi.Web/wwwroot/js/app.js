@@ -2208,14 +2208,10 @@ async function loadAccessAdminRegistrations({ silent = false, force = false, aut
 }
 
 const TOOLS_SEEN_KEY = "st2-tools-notice-v3";
-const aboutToolsBadge = document.getElementById("about-tools-badge");
 const aboutToolsStatus = document.getElementById("st2-about-tools-status");
-const toolsBanner = document.getElementById("st2-tools-banner");
-const toolsBannerText = document.getElementById("st2-tools-banner-text");
 let cachedTools = [];
 let toolsBound = false;
 let aboutClaveCopyBound = false;
-let toolsBannerBound = false;
 
 function readSeenToolVersions() {
   try {
@@ -2416,22 +2412,24 @@ function toolPackageLabel(id) {
   return toolDisplayName(id);
 }
 
+/** Cómo se nombra cada herramienta en el aviso: por lo que hace, no por el nombre del paquete. */
+function toolNoticeLabel(id) {
+  if (id === "sql") return "la herramienta para backups";
+  if (id === "bat") return "el .BAT para técnicos";
+  if (id === "chile") return "la de backups de Chile";
+  return toolPackageLabel(id);
+}
+
+/** Texto del aviso de la campanita: simple, se lee solo y entra en las 3 líneas de la bandeja. */
 function toolsUpdateMessage(newer) {
   const list = newer || [];
   if (!list.length) return "";
-  const names = list.map((t) => toolPackageLabel(t.id));
-  if (names.length === 1) {
-    return `hay una nueva versión de ${names[0]} para descargar.`;
+  if (list.length === 1) {
+    return `Hay una nueva versión para descargar de ${toolNoticeLabel(list[0].id)}.`.replace("de el ", "del ");
   }
-  const last = names.pop();
-  return `hay nuevas versiones de ${names.join(", ")} y ${last} para descargar.`;
-}
-
-function hideToolsTopBanner() {
-  if (!toolsBanner) return;
-  toolsBanner.classList.add("hidden");
-  toolsBanner.setAttribute("hidden", "");
-  document.body.classList.remove("st2-has-tools-update");
+  const parts = list.map((t) => toolNoticeLabel(t.id));
+  const last = parts.pop();
+  return `Hay nuevas versiones para descargar: ${parts.join(", ")} y ${last}.`;
 }
 
 function renderToolsToast(newer, message) {
@@ -2603,27 +2601,17 @@ function syncAboutToolsVisibility() {
   }
   syncAboutNoticeCopy();
   if (!show) {
-    aboutToolsBadge?.classList.add("hidden");
-    aboutToolsBadge?.setAttribute("aria-hidden", "true");
-    hideToolsTopBanner();
     clearSt2AlertToast(ST2_TOAST.tools);
   }
 }
 
+/** Aviso de descargas nuevas: vive en la campanita (y "Nuevo" en la tarjeta de Descargas). */
 function syncAboutToolsBadge() {
   syncAboutToolsVisibility();
   if (!userCanSeeDesktopToolDownloads()) return;
 
-  // Solo toast/notificación: sin badge "Nuevo" en el botón Acerca de.
-  if (aboutToolsBadge) {
-    aboutToolsBadge.classList.add("hidden");
-    aboutToolsBadge.setAttribute("aria-hidden", "true");
-    aboutToolsBadge.title = "";
-  }
-
   const newer = listNewTools();
   const msg = toolsUpdateMessage(newer);
-  hideToolsTopBanner();
   renderToolsToast(newer, msg);
 }
 
@@ -2719,7 +2707,27 @@ function renderAboutTools() {
       btn.removeAttribute("title");
     }
   }
+  paintAboutToolsNewMarks();
   syncAboutToolsBadge();
+}
+
+/** "Nuevo" en la tarjeta de la herramienta con versión sin descargar (se va al descargar). */
+function paintAboutToolsNewMarks() {
+  for (const id of ["sql", "bat", "chile"]) {
+    const name = document.querySelector(`.st2-about-tool[data-tool="${id}"] .st2-about-tool-name`);
+    if (!name) continue;
+    const isNew = isToolVersionNew(id);
+    let mark = name.querySelector(".st2-about-tool-new");
+    if (isNew && !mark) {
+      mark = document.createElement("span");
+      mark.className = "st2-about-tool-new";
+      mark.textContent = "Nuevo";
+      // Justo después del nombre (antes de la etiqueta en itálica de ST2.BAT).
+      name.insertBefore(mark, name.firstChild?.nextSibling || null);
+    }
+    if (mark) mark.hidden = !isNew;
+    name.closest(".st2-about-tool")?.classList.toggle("is-new", isNew);
+  }
 }
 
 async function refreshAboutTools({ silent = false } = {}) {
@@ -3201,12 +3209,6 @@ function bindAboutToolsUi() {
       if (id) void downloadTool(id);
     });
   });
-  if (!toolsBannerBound) {
-    toolsBannerBound = true;
-    document.getElementById("st2-tools-banner-open")?.addEventListener("click", () => {
-      showAbout();
-    });
-  }
 }
 
 function showAbout({ history = "push" } = {}) {

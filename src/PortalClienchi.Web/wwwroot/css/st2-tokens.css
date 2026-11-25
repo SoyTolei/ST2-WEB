@@ -244,7 +244,6 @@
   --z-access-gate: 2500; /* Pantalla de acceso */
   --z-admin: 2600; /* Panel ADMIN */
   --z-dialog: 2700; /* Confirmaciones y edición de nombre */
-  --z-banner-tools: 2785; /* Banner de herramientas */
   --z-banner-modules: 2790; /* Banner de módulos */
   --z-click-spark: 3000; /* Chispas al hacer clic */
   --z-toast: 3200; /* Avisos (sonner) */

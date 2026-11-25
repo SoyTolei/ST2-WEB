@@ -37,6 +37,19 @@ let emptyEl = null;
 let unreadEl = null;
 let open = false;
 
+// Otra pestaña cambió la bandeja (aviso nuevo o "visto"): tomar su versión en vez de
+// pisarla después con la lista vieja de esta pestaña.
+try {
+  window.addEventListener("storage", (e) => {
+    if (e.key !== STORAGE_KEY) return;
+    items = loadItems();
+    if (open) paintList();
+    emitChange();
+  });
+} catch {
+  /* ignore */
+}
+
 function loadItems() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);

@@ -366,6 +366,44 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
   50% { opacity: 0.35; transform: scale(0.85); }
 }
 
+/* Descargas: otro color (teal) para que resalte entre los avisos naranjas. */
+.st2-notif-inbox__item[data-tone="tools"] {
+  border-color: rgba(45, 212, 191, 0.22);
+}
+
+.st2-notif-inbox__item[data-tone="tools"].is-unread {
+  border-color: rgba(45, 212, 191, 0.6);
+  background: #10261f;
+}
+
+.st2-notif-inbox__item[data-tone="tools"]:hover {
+  background: rgba(45, 212, 191, 0.12);
+  border-color: rgba(45, 212, 191, 0.7);
+}
+
+.st2-notif-inbox__item[data-tone="tools"] .st2-notif-inbox__dot,
+.st2-notif-inbox__item[data-tone="tools"].is-unread .st2-notif-inbox__dot {
+  background: var(--c-teal-400);
+  box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.18);
+}
+
+.st2-notif-inbox__item[data-tone="tools"].is-seen .st2-notif-inbox__dot {
+  background: var(--c-stone-500);
+  box-shadow: none;
+}
+
+.st2-notif-inbox__item[data-tone="tools"] .st2-notif-inbox__kind {
+  color: var(--c-teal-300);
+}
+
+.st2-notif-inbox__item[data-tone="tools"] .st2-notif-inbox__time {
+  color: rgba(153, 246, 228, 0.7);
+}
+
+.st2-notif-inbox__item[data-tone="tools"] .st2-notif-inbox__body {
+  color: var(--c-teal-50);
+}
+
 .st2-notif-inbox__copy {
   display: flex;
   flex-direction: column;

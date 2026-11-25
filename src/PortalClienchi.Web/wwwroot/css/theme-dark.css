@@ -299,10 +299,6 @@ html.st2-theme-dark .st2-about-tool-meta-web {
   color: var(--c-teal-400);
 }
 
-html.st2-theme-dark .about-tools-badge {
-  box-shadow: 0 0 0 2px var(--c-ink-15);
-}
-
 html.st2-theme-dark .st2-about-tool {
   background: var(--c-ink-1a);
   border-color: #2b3445;
@@ -3281,4 +3277,9 @@ html.st2-theme-dark .code-slots {
   --cs-wash-ink: var(--c-black);
   --cs-danger: #ff3b30;
   --cs-danger-fill: #ff3b30;
+}
+
+html.st2-theme-dark .st2-about-tool.is-new {
+  border-color: rgba(249, 115, 22, 0.6);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.14);
 }
