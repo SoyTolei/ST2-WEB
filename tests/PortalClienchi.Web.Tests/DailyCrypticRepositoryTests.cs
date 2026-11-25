@@ -350,18 +350,18 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void Previous_days_stay_playable_for_five_weekdays_and_show_what_was_solved()
+    public void Previous_days_stay_playable_for_two_weekdays_and_show_what_was_solved()
     {
         // Programa los días como si la suite hubiera estado abierta cada día hábil.
         foreach (var day in new[] { 12, 13, 16, 17, 18, 19, 20 })
             _repository.GetStatus(Email, AtArgentina(2026, 11, day, 13, 30));
 
-        // 23/11 es feriado: el martes 24 ofrece los 5 días hábiles anteriores.
+        // 23/11 es feriado: el martes 24 ofrece los 2 días hábiles anteriores (viernes y jueves).
         var tuesday = AtArgentina(2026, 11, 24, 10, 0);
         var today = _repository.GetStatus(Email, tuesday);
         Assert.Equal("2026-11-24", today.Current);
         Assert.Equal(
-            ["2026-11-20", "2026-11-19", "2026-11-18", "2026-11-17", "2026-11-16"],
+            ["2026-11-20", "2026-11-19"],
             today.Archive!.Select(day => day.Date).ToArray());
         Assert.All(today.Archive!, day => Assert.Equal(0, day.Solved));
 
@@ -391,7 +391,9 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
         Assert.Equal(20, both.Status.Ranking.Single().Points);
         Assert.Equal(2, both.Status.Archive!.Single(day => day.Date == "2026-11-20").Solved);
 
-        // El 13 ya quedó afuera de la ventana: no se juega y el estado vuelve al día vigente.
+        // El 18 y el 13 ya quedaron afuera de la ventana: no se juega y el estado vuelve al día vigente.
+        Assert.Throws<InvalidOperationException>(
+            () => _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "algo", tuesday, "2026-11-18"));
         Assert.Throws<InvalidOperationException>(
             () => _repository.Submit(Email, DailyCrypticRepository.MorningSlot, "algo", tuesday, "2026-11-13"));
         Assert.Equal("active", _repository.GetStatus(Email, tuesday, "2026-11-13").Phase);
@@ -417,7 +419,7 @@ public sealed class DailyCrypticRepositoryTests : IDisposable
     [Fact]
     public void Days_without_a_cryptic_do_not_stretch_the_window_further_back()
     {
-        // Solo hubo Críptico el 11/11; dos semanas después ya no entra en los 5 días hábiles.
+        // Solo hubo Críptico el 11/11; dos semanas después ya no entra en los 2 días hábiles.
         _repository.GetStatus(Email, AtArgentina(2026, 11, 11, 13, 30));
         var later = _repository.GetStatus(Email, AtArgentina(2026, 11, 25, 10, 0));
         Assert.Empty(later.Archive!);

@@ -440,7 +440,7 @@ public sealed class DailyCrypticRepository
     }
 
     /// <summary>Cuántos días hábiles anteriores quedan para jugar (ventana móvil: el más viejo se va cayendo).</summary>
-    public const int ArchiveDays = 5;
+    public const int ArchiveDays = 2;
 
     private readonly record struct PlayTarget(DateOnly Date, bool Archive);
 
