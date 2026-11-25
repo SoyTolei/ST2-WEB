@@ -7637,3 +7637,48 @@ html.st2-theme-dark .st2-cryptic-day.is-done small {
 html.st2-theme-dark .st2-cryptic-day.is-pending small {
   color: #fb923c;
 }
+
+/* Críptico: que se note cuál ronda falta y cuál estás mirando (claro y oscuro). */
+.st2-cryptic-round.is-available {
+  border-color: color-mix(in srgb, #f97316 55%, var(--border));
+}
+
+.st2-cryptic-round.is-available small {
+  color: #ea580c;
+  font-weight: 700;
+}
+
+.st2-cryptic-round.is-available > span {
+  animation: st2-cryptic-pending 1.6s ease-in-out infinite;
+}
+
+.st2-cryptic-round.is-active {
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.3);
+}
+
+html.st2-theme-dark .st2-cryptic-round.is-available {
+  border-color: rgba(249, 115, 22, 0.5);
+}
+
+html.st2-theme-dark .st2-cryptic-round.is-available small {
+  color: #fb923c;
+}
+
+html.st2-theme-dark .st2-cryptic-round.is-active {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(249, 115, 22, 0.24), transparent 70%),
+    linear-gradient(180deg, var(--r-surface-2) 0%, var(--r-surface-1) 100%);
+  border-color: rgba(249, 115, 22, 0.85);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.45), var(--r-shadow-card);
+}
+
+@keyframes st2-cryptic-pending {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-cryptic-round.is-available > span {
+    animation: none;
+  }
+}

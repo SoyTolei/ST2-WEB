@@ -2,7 +2,7 @@ import { createCodeSlots, groupsFromEnumeration, lettersOf } from "./st2-code-sl
 
 const API = "/api/cryptic";
 const STATE_LABELS = {
-  available: "Disponible",
+  available: "Te falta",
   solved: "Resuelto",
   blocked: "Bloqueado",
   upcoming: "Próximamente",
