@@ -1,125 +1,99 @@
 /**
- * Aviso del Críptico: toast en Planillas, globo del blobatar y notif de escritorio.
- * Se repite hasta que jueguen la ronda abierta; si lo cierran, vuelve a los 40 min.
+ * Recordatorio del Críptico: uno por día, a las 14:00 (Argentina), solo si quedan rondas
+ * por jugar. Va a la campanita y, con la pestaña oculta, como notificación de escritorio.
+ * "Una vez por día" se guarda en localStorage: no se repite al recargar ni entre pestañas.
  */
-import { setSt2AlertToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
+import { clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 import { notifyCrypticDesktop } from "./st2-desktop-notif.js";
-import { upsertNotifInboxEntry, removeNotifInboxEntry } from "./st2-notif-inbox.js";
+import { removeNotifInboxEntry, upsertNotifInboxEntry } from "./st2-notif-inbox.js";
 
-const DISMISS_KEY = "st2-cryptic-nudge-v1";
-const SNOOZE_MS = 40 * 60 * 1000;
-const RETRY_MS = 60 * 1000;
+/** Hora del recordatorio (minutos desde 00:00, hora Argentina): después de que abre la ronda de 13:30. */
+const REMIND_AT_MINUTE = 14 * 60;
+const DAY_ID = "st2-toast-cryptic-day";
+const LAST_DAY_KEY = "st2-cryptic-reminder-day-v1";
+const BODY = "¿Ya jugaste el Críptico de hoy? Todavía tenés rondas por resolver.";
+const TICK_MS = 60 * 1000;
 
 let inited = false;
 let lastDetail = { pending: false };
-let retryTimer = 0;
 
-function pendingSignature(detail) {
-  const date = String(detail?.date || "");
-  const slots = (detail?.slots || []).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
-  if (!date || !slots.length) return "";
-  return `${date}:${slots.join(",")}`;
-}
-
-function nudgeCopy(detail) {
-  if (detail?.afternoon) return "Ya salió el Críptico de la tarde.";
-  return "Falta el Críptico de hoy.";
-}
-
-function readSnooze() {
+function argentinaNow() {
   try {
-    return JSON.parse(localStorage.getItem(DISMISS_KEY) || "null");
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Argentina/Buenos_Aires",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      })
+        .formatToParts(new Date())
+        .map((p) => [p.type, p.value]),
+    );
+    return {
+      date: `${parts.year}-${parts.month}-${parts.day}`,
+      minute: Number(parts.hour) * 60 + Number(parts.minute),
+    };
   } catch {
-    return null;
+    const d = new Date();
+    return { date: d.toISOString().slice(0, 10), minute: d.getHours() * 60 + d.getMinutes() };
   }
 }
 
-function writeSnooze(sig) {
+function readLastDay() {
   try {
-    localStorage.setItem(DISMISS_KEY, JSON.stringify({ sig, until: Date.now() + SNOOZE_MS }));
-  } catch { /* ignore */ }
-}
-
-function isSnoozed(sig) {
-  if (!sig) return false;
-  const row = readSnooze();
-  if (!row || row.sig !== sig) return false;
-  return Number(row.until) > Date.now();
-}
-
-function openCryptic() {
-  document.dispatchEvent(new CustomEvent("st2:open-cryptic"));
-}
-
-const MORNING_ID = "st2-toast-cryptic-am";
-const AFTERNOON_ID = "st2-toast-cryptic-pm";
-
-function syncCrypticInbox(detail = lastDetail) {
-  const slots = (detail?.slots || []).map(Number).filter(Number.isFinite);
-  const morning = slots.some((slot) => slot <= 12 * 60);
-  const afternoon = slots.some((slot) => slot > 12 * 60);
-  if (morning) {
-    upsertNotifInboxEntry({
-      id: MORNING_ID,
-      title: "Críptico",
-      body: "Ya está el Críptico de la mañana.",
-      tone: "warn",
-    });
-  } else {
-    removeNotifInboxEntry(MORNING_ID);
-  }
-  if (afternoon) {
-    upsertNotifInboxEntry({
-      id: AFTERNOON_ID,
-      title: "Críptico",
-      body: "Ya está el Críptico de la tarde.",
-      tone: "warn",
-    });
-  } else {
-    removeNotifInboxEntry(AFTERNOON_ID);
+    return localStorage.getItem(LAST_DAY_KEY) || "";
+  } catch {
+    return "";
   }
 }
 
-function paintToast(detail = lastDetail) {
+function writeLastDay(date) {
+  try {
+    localStorage.setItem(LAST_DAY_KEY, date);
+  } catch {
+    /* ignore */
+  }
+}
+
+function sync(detail = lastDetail) {
   clearSt2AlertToast(ST2_TOAST.cryptic);
-  syncCrypticInbox(detail);
+  const now = argentinaNow();
+  const today = String(detail?.date || "") === now.date;
+  const due = !!detail?.pending && today && now.minute >= REMIND_AT_MINUTE;
+
+  if (!due) {
+    // Ya jugó todo, todavía no son las 14 o no es día de Críptico: sin recordatorio.
+    removeNotifInboxEntry(DAY_ID);
+    return;
+  }
+  if (readLastDay() === now.date) return; // ya se avisó hoy (en esta u otra pestaña)
+
+  writeLastDay(now.date);
+  // Sacar el de ayer antes de agregar: así entra como "sin ver" aunque el texto sea el mismo.
+  removeNotifInboxEntry(DAY_ID);
+  upsertNotifInboxEntry({ id: DAY_ID, title: "Críptico", body: BODY, tone: "warn" });
+  notifyCrypticDesktop(BODY, `day-${now.date}`, { allowWhileVisible: false });
 }
 
-function onPending(event) {
-  const detail = event?.detail && typeof event.detail === "object"
+// Se escucha desde que carga el módulo: el Críptico puede avisar antes de initCrypticNudge().
+document.addEventListener("st2:cryptic-pending", (event) => {
+  lastDetail = event?.detail && typeof event.detail === "object"
     ? event.detail
     : { pending: Boolean(event?.detail?.pending) };
-  const prevSig = pendingSignature(lastDetail);
-  const nextSig = pendingSignature(detail);
-  lastDetail = detail;
-
-  if (nextSig && nextSig !== prevSig) {
-    const row = readSnooze();
-    if (row && row.sig !== nextSig) {
-      try { localStorage.removeItem(DISMISS_KEY); } catch { /* ignore */ }
-    }
-    if (detail.pending) {
-      notifyCrypticDesktop(nudgeCopy(detail), nextSig, { allowWhileVisible: false });
-    }
-  }
-
-  paintToast(detail);
-}
-
-function tickSnooze() {
-  if (!lastDetail?.pending) return;
-  const sig = pendingSignature(lastDetail);
-  if (sig && !isSnoozed(sig)) paintToast(lastDetail);
-}
+  if (inited) sync(lastDetail);
+});
 
 export function initCrypticNudge() {
   if (inited) return;
   inited = true;
-  document.addEventListener("st2:cryptic-pending", onPending);
-  document.addEventListener("st2:planillas-home", () => paintToast(lastDetail));
+  sync(lastDetail);
+  document.addEventListener("st2:planillas-home", () => sync());
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) paintToast(lastDetail);
+    if (!document.hidden) sync();
   });
-  window.clearInterval(retryTimer);
-  retryTimer = window.setInterval(tickSnooze, RETRY_MS);
+  // Por si la pestaña quedó abierta desde la mañana: a las 14 aparece sola.
+  window.setInterval(() => sync(), TICK_MS);
 }

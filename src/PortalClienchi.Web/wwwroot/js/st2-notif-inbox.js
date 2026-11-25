@@ -10,8 +10,7 @@ const ALLOWED_IDS = new Set([
   "st2-toast-blanqueo-mine",
   "st2-toast-borrado",
   "st2-toast-borrado-mine",
-  "st2-toast-cryptic-am",
-  "st2-toast-cryptic-pm",
+  "st2-toast-cryptic-day",
 ]);
 const TITLE_BY_ID = {
   "st2-toast-update": "Actualización",
@@ -20,8 +19,7 @@ const TITLE_BY_ID = {
   "st2-toast-blanqueo-mine": "Tu blanqueo",
   "st2-toast-borrado": "Borrado",
   "st2-toast-borrado-mine": "Tu borrado",
-  "st2-toast-cryptic-am": "Críptico",
-  "st2-toast-cryptic-pm": "Críptico",
+  "st2-toast-cryptic-day": "Críptico",
 };
 
 /** @type {Array<{ id: string, title: string, body: string, tone: string, at: number, seen: boolean }>} */
@@ -206,7 +204,7 @@ function navigateFromNotif(id) {
     document.dispatchEvent(new CustomEvent("st2:open-borrado-from-alert"));
     return;
   }
-  if (key === "st2-toast-cryptic-am" || key === "st2-toast-cryptic-pm") {
+  if (key === "st2-toast-cryptic-day") {
     document.dispatchEvent(new CustomEvent("st2:open-cryptic"));
   }
 }
