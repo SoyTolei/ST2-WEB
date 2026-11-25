@@ -289,3 +289,17 @@
   --c-ink-33: #333333;
   --c-ink-34: #343434;
 }
+
+/*
+ * Tamaños de letra chicos/medios (escala de 8). Para algo nuevo, elegir uno de estos.
+ */
+:root {
+  --text-1: 0.62rem; /* 9.92px */
+  --text-2: 0.68rem; /* 10.88px */
+  --text-3: 0.72rem; /* 11.52px */
+  --text-4: 0.78rem; /* 12.48px */
+  --text-5: 0.82rem; /* 13.12px */
+  --text-6: 0.88rem; /* 14.08px */
+  --text-7: 0.95rem; /* 15.2px */
+  --text-8: 1rem; /* 16px */
+}

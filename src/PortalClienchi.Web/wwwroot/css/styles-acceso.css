@@ -55,7 +55,7 @@
 
 .st2-access-admin-kicker {
   margin: 0 0 2px;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -64,7 +64,7 @@
 
 .st2-access-admin-login-hint {
   margin: -6px 0 14px;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   color: var(--c-slate-500);
   line-height: 1.35;
 }
@@ -79,7 +79,7 @@
 .st2-access-admin-label {
   display: block;
   margin: 0 0 6px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 600;
   color: var(--c-slate-600);
 }
@@ -92,7 +92,7 @@
 }
 
 .st2-access-birthday-note {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 500;
   color: var(--c-slate-400);
 }
@@ -160,7 +160,7 @@
 .st2-birthday-picker-month {
   flex: 1;
   text-align: center;
-  font-size: 0.86rem;
+  font-size: var(--text-6);
   font-weight: 700;
   color: var(--c-slate-900);
 }
@@ -192,7 +192,7 @@
   background: transparent;
   border-radius: var(--radius-md);
   padding: 7px 0;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--c-slate-900);
   cursor: pointer;
@@ -213,7 +213,7 @@
   border: none;
   background: transparent;
   color: var(--c-slate-500);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 600;
   cursor: pointer;
   padding: 6px;
@@ -229,7 +229,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 10px 12px;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   color: var(--dark);
   margin-bottom: 12px;
   background: var(--c-white);
@@ -243,7 +243,7 @@
 .st2-access-admin-error {
   min-height: 1.2em;
   margin: 0 0 8px;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   color: var(--c-red-600);
 }
 
@@ -252,7 +252,7 @@
   border: none;
   border-radius: var(--radius-md);
   padding: 10px 16px;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   font-weight: 600;
   color: var(--c-white);
   background: var(--primary);
@@ -280,7 +280,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 10px 16px;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   font-weight: 600;
   color: var(--c-slate-600);
   background: var(--c-white);
@@ -324,7 +324,7 @@
 
 .st2-access-admin-updated {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-500);
   line-height: 1.25;
   text-align: right;
@@ -345,7 +345,7 @@
   border-radius: var(--radius-md);
   background: var(--c-white);
   color: var(--c-slate-600);
-  font-size: 1rem;
+  font-size: var(--text-8);
   line-height: 1;
   cursor: pointer;
   display: inline-flex;
@@ -410,7 +410,7 @@
 .st2-access-admin-kpi-l {
   display: block;
   margin-top: 2px;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -441,7 +441,7 @@
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 8px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--c-orange-800);
 }
 
@@ -456,14 +456,14 @@
 
 .st2-access-admin-inbox-name {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   font-weight: 700;
   color: var(--c-slate-900);
 }
 
 .st2-access-admin-inbox-mail {
   margin: 2px 0 0;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-orange-800);
 }
 
@@ -477,7 +477,7 @@
 .st2-access-admin-reject {
   border-radius: var(--radius-md);
   padding: 5px 9px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   cursor: pointer;
 }
@@ -500,7 +500,7 @@
   gap: 5px;
   border-radius: var(--radius-pill);
   padding: 1px 7px;
-  font-size: 0.64rem;
+  font-size: var(--text-1);
   font-weight: 800;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -521,7 +521,7 @@
 
 .st2-access-admin-status {
   margin: 0 0 8px;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   color: var(--text-muted);
   min-height: 1.1em;
 }
@@ -552,7 +552,7 @@
   border: 1px solid var(--c-slate-300);
   background: var(--c-white);
   color: var(--c-slate-500);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   padding: 5px 9px;
   border-radius: var(--radius-md);
@@ -570,7 +570,7 @@
   border: 1px solid var(--c-slate-300);
   background: var(--c-white);
   color: var(--c-slate-700);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 800;
   letter-spacing: 0.04em;
   padding: 5px 10px;
@@ -586,7 +586,7 @@
 
 .st2-access-admin-day-summary {
   margin: 0 0 8px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--c-slate-600);
   line-height: 1.35;
 }
@@ -632,7 +632,7 @@
 
 .st2-admin-subnav-label {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -640,7 +640,7 @@
 }
 
 .st2-admin-subnav-hint {
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 550;
   color: var(--c-slate-400);
 }
@@ -729,7 +729,7 @@
 }
 
 .st2-admin-subtab-eyebrow {
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 750;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -742,14 +742,14 @@
 }
 
 .st2-admin-subtab-title {
-  font-size: 1rem;
+  font-size: var(--text-8);
   font-weight: 800;
   letter-spacing: 0.01em;
   line-height: 1.15;
 }
 
 .st2-admin-subtab-sub {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 550;
   line-height: 1.35;
   color: var(--c-slate-500);
@@ -796,7 +796,7 @@
 
 .st2-admin-usage-sub {
   margin: 3px 0 0;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   color: var(--c-slate-500);
 }
 
@@ -839,7 +839,7 @@
   margin: 0;
   padding: 18px 0;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   color: var(--c-slate-500);
 }
 
@@ -883,7 +883,7 @@
 
 .st2-admin-usage-block-title {
   margin: 0 0 6px;
-  font-size: 0.7rem
+  font-size: var(--text-2)
 ;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -894,13 +894,13 @@
 .st2-admin-usage-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
 }
 
 .st2-admin-usage-table th {
   text-align: left;
   padding: 5px 6px;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -939,7 +939,7 @@
 .st2-admin-usage-days {
   display: block;
   margin-top: 1px;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 600;
   color: var(--c-slate-400);
 }
@@ -963,7 +963,7 @@
   border: 1px solid var(--c-slate-200);
   border-radius: var(--radius-pill);
   background: var(--c-slate-50);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 600;
   color: var(--c-slate-900);
 }
@@ -1015,19 +1015,19 @@
 }
 
 .st2-admin-usage-month-title {
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 800;
   color: var(--c-slate-900);
 }
 
 .st2-admin-usage-month-meta {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 550;
   color: var(--c-slate-500);
 }
 
 .st2-admin-usage-month-empty {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-400);
 }
 
@@ -1041,7 +1041,7 @@
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 6px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--c-slate-900);
 }
 
@@ -1064,7 +1064,7 @@
 }
 
 .st2-access-admin-audit-list li {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-600);
   padding: 3px 0;
   border-top: 1px solid var(--c-slate-100);
@@ -1111,12 +1111,12 @@
 }
 
 .st2-access-admin-audit-actor-main {
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   color: var(--c-slate-900);
 }
 
 .st2-access-admin-audit-actor-last {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   color: var(--c-slate-500);
 }
 
@@ -1139,7 +1139,7 @@
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 4px;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   color: var(--c-orange-800);
 }
 
@@ -1155,7 +1155,7 @@
 
 .st2-access-admin-audit-recent-label {
   margin: 0 0 4px;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1167,7 +1167,7 @@
   border: 0;
   background: transparent;
   color: var(--c-orange-700);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   cursor: pointer;
   padding: 0;
@@ -1185,7 +1185,7 @@
 .st2-access-admin-host-meta {
   display: block;
   margin-top: 2px;
-  font-size: 0.65rem;
+  font-size: var(--text-2);
   color: var(--c-slate-400);
   font-weight: 600;
 }
@@ -1204,7 +1204,7 @@
   border: 1px solid var(--c-slate-300);
   background: var(--c-white);
   color: var(--c-slate-500);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.02em;
   padding: 6px 10px;
@@ -1264,7 +1264,7 @@
   border: 1px solid var(--c-slate-300);
   border-radius: var(--radius-md);
   padding: 8px 12px;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   color: var(--dark);
   background: var(--c-white);
 }
@@ -1294,7 +1294,7 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   table-layout: fixed;
 }
 
@@ -1312,7 +1312,7 @@
   z-index: 1;
   background: var(--c-slate-100);
   color: var(--c-slate-700);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -1339,7 +1339,7 @@
   width: 16%;
   min-width: 0;
   text-align: left;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-600);
   word-break: break-word;
 }
@@ -1401,7 +1401,7 @@
 }
 
 .st2-access-admin-host {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-600);
   word-break: break-word;
 }
@@ -1447,7 +1447,7 @@
   border-radius: var(--radius-md);
   background: linear-gradient(180deg, #e24808 0%, var(--primary) 100%);
   color: var(--c-white);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 650;
   padding: 7px 13px;
   cursor: pointer;
@@ -1546,7 +1546,7 @@
 }
 
 .st2-access-admin-th-perms-mark {
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 800;
   letter-spacing: 0.03em;
   color: var(--c-slate-500);
@@ -1580,7 +1580,7 @@
   flex: 1 1 0;
   min-width: 58px;
   min-height: 34px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   text-transform: uppercase;
 }
 
@@ -1684,7 +1684,7 @@
   border: 1px solid var(--c-slate-200);
   background: var(--c-slate-50);
   color: var(--c-slate-500);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 700;
   line-height: 1;
   user-select: none;
@@ -1724,7 +1724,7 @@
 
 .st2-access-admin-perm-pop-item {
   display: block;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 600;
   line-height: 1.35;
   padding: 6px 8px;
@@ -1735,7 +1735,7 @@
 
 .st2-access-admin-perm-empty {
   color: var(--c-slate-300);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
 }
 
 .st2-access-admin-perms-inline {
@@ -1749,7 +1749,7 @@
 .st2-access-admin-perm-empty {
   display: inline-block;
   margin-top: 4px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-300);
 }
 
@@ -1764,7 +1764,7 @@
   border: 1px solid var(--c-slate-200);
   background: var(--c-slate-50);
   color: var(--c-slate-500);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 700;
   line-height: 1;
   cursor: help;
@@ -1781,7 +1781,7 @@
   border: 1px solid var(--c-slate-200);
   background: var(--c-slate-50);
   color: var(--c-slate-500);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 700;
   vertical-align: middle;
 }
@@ -1801,7 +1801,7 @@
 
 .st2-access-admin-perm-sys {
   display: inline-block;
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 700;
   letter-spacing: 0.03em;
   padding: 1px 5px;
@@ -1867,7 +1867,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 2px;
-  font-size: 0.66rem;
+  font-size: var(--text-2);
   color: var(--c-slate-500);
 }
 
@@ -1892,7 +1892,7 @@
 
 .st2-access-admin-mod-empty {
   color: var(--c-slate-400);
-  font-size: 0.85rem;
+  font-size: var(--text-6);
 }
 
 .st2-access-admin-panel-foot {
@@ -1909,7 +1909,7 @@
 .st2-access-admin-legend {
   margin: 0;
   flex: 1 1 220px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-500);
   line-height: 1.35;
 }
@@ -1953,7 +1953,7 @@
   justify-content: center;
   vertical-align: middle;
   opacity: 0.85;
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   line-height: 1;
 }
 
@@ -2014,7 +2014,7 @@
 
 .st2-access-admin-mod {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.02em;
   padding: 2px 7px;
@@ -2072,7 +2072,7 @@
 
 .st2-access-modules-section-title {
   margin: 14px 0 8px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2135,7 +2135,7 @@
   background: var(--c-white);
   color: var(--c-slate-600);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
@@ -2176,7 +2176,7 @@
   align-items: center;
   justify-content: center;
   width: 1rem;
-  font-size: 1rem;
+  font-size: var(--text-8);
   line-height: 1;
   font-weight: 700;
 }
@@ -2225,7 +2225,7 @@
 }
 
 .st2-access-modules-profile-label {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2242,7 +2242,7 @@
   background: var(--c-white);
   color: var(--c-sky-700);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
@@ -2263,7 +2263,7 @@
 
 .st2-access-modules-name,
 .st2-access-modules-name-input {
-  font-size: 1rem;
+  font-size: var(--text-8);
   font-weight: 700;
   color: var(--c-slate-900);
   line-height: 1.25;
@@ -2277,7 +2277,7 @@
   border-radius: var(--radius-md);
   background: var(--c-white);
   box-sizing: border-box;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   font-weight: 500;
   color: var(--c-slate-900);
 }
@@ -2294,7 +2294,7 @@
 }
 
 .st2-access-modules-email {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   color: var(--c-slate-600);
   word-break: break-all;
   line-height: 1.35;
@@ -2307,7 +2307,7 @@
   align-items: flex-start;
   gap: 10px;
   margin: 0 0 10px;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   color: var(--c-slate-900);
   cursor: pointer;
 }
@@ -2329,7 +2329,7 @@
   width: 1.15rem;
   height: 1.15rem;
   flex-shrink: 0;
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   line-height: 1;
 }
 
@@ -2344,7 +2344,7 @@
 }
 
 .st2-access-modules-check-icon-leg {
-  font-size: 0.9rem;
+  font-size: var(--text-6);
 }
 
 .st2-access-modules-check-icon-cl {
@@ -2410,7 +2410,7 @@
 
 .st2-access-modules-group-subtitle {
   margin: 8px 0 6px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2422,7 +2422,7 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 4px;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -2431,13 +2431,13 @@
 
 .st2-access-modules-group-hint {
   margin: 0 0 10px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-500);
   line-height: 1.35;
 }
 
 .st2-access-modules-role-note {
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   font-weight: 500;
   color: var(--c-slate-500);
 }
@@ -2448,7 +2448,7 @@
 
 .st2-access-modules-check-sub {
   margin-left: 22px;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   color: var(--c-slate-600);
 }
 
@@ -2509,7 +2509,7 @@
   background: var(--c-slate-100);
   font-weight: 700;
   color: var(--c-slate-700);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
 }
 
 .st2-access-admin-table tr:last-child td {
@@ -2592,7 +2592,7 @@
 .st2-access-admin-new-user {
   display: inline-flex;
   align-items: center;
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 700;
   color: var(--c-blue-700);
   background: var(--c-blue-100);
@@ -2603,7 +2603,7 @@
 
 .st2-access-admin-date {
   white-space: nowrap;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   color: var(--c-slate-600);
 }
 
@@ -2692,7 +2692,7 @@
 
 .st2-access-name-edit-email {
   margin: 0 0 14px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--c-slate-500);
   word-break: break-all;
 }
@@ -2703,7 +2703,7 @@
 
 .st2-access-name-edit-hint {
   margin: 0 0 10px;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   color: var(--c-slate-500);
   display: flex;
   flex-wrap: wrap;
@@ -2764,7 +2764,7 @@
 
 .st2-about-signature-by {
   font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 500;
   font-style: normal;
   letter-spacing: 0.03em;
@@ -2775,7 +2775,7 @@
 
 .st2-about-signature-at {
   font-family: var(--font-display);
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 550;
   font-style: normal;
   letter-spacing: 0.02em;
@@ -2813,7 +2813,7 @@
 .st2-about-suggest-title {
   margin: 0 0 8px;
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--c-slate-900);
   line-height: 1.35;
@@ -2828,7 +2828,7 @@
   padding: 8px 14px;
   border-radius: var(--radius-md);
   font-family: var(--font-display);
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   font-weight: 600;
   color: var(--c-white);
   text-decoration: none;
@@ -2840,7 +2840,7 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
 }
 
 .st2-about-suggest-btn-icon--teams svg {
@@ -2873,7 +2873,7 @@
 }
 
 .st2-about-signature-bike {
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   display: inline-block;
   animation: st2AboutBikeRide 5s ease-in-out infinite;
   filter: drop-shadow(0 2px 4px rgba(214, 64, 0, 0.28));
@@ -3256,7 +3256,7 @@ body.st2-access-ok .st2-boot-splash {
 .st2-access-label {
   display: block;
   margin-bottom: 6px;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 650;
   color: var(--c-slate-700);
 }
@@ -3289,7 +3289,7 @@ body.st2-access-ok .st2-boot-splash {
 .st2-access-error {
   min-height: 1.2em;
   margin: 8px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   color: var(--c-red-600);
 }
 
@@ -3324,7 +3324,7 @@ body.st2-access-ok .st2-boot-splash {
 
 .st2-access-pending-kicker {
   margin: 0 0 8px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3340,7 +3340,7 @@ body.st2-access-ok .st2-boot-splash {
   border-radius: var(--radius-md);
   border: 1px dashed var(--c-orange-300);
   background: var(--c-orange-50);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 650;
   color: var(--c-orange-800);
   word-break: break-all;
@@ -3348,7 +3348,7 @@ body.st2-access-ok .st2-boot-splash {
 
 .st2-access-pending-text {
   margin: 0 0 16px;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   line-height: 1.5;
   color: var(--c-slate-700);
 }
@@ -3359,7 +3359,7 @@ body.st2-access-ok .st2-boot-splash {
 
 .st2-access-pending-note {
   margin: 12px 0 0;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   line-height: 1.4;
   color: var(--c-slate-500);
   text-align: center;
@@ -3367,7 +3367,7 @@ body.st2-access-ok .st2-boot-splash {
 
 .st2-access-foot {
   margin: 14px 0 0;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   color: var(--c-slate-400);
   text-align: center;
 }

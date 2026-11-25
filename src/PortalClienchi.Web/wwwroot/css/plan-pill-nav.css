@@ -335,7 +335,7 @@ html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico {
 }
 
 .plan-bej-config--lite .plan-bej-label {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   letter-spacing: 0.06em;
   opacity: 0.9;
 }
@@ -349,7 +349,7 @@ html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico {
   min-height: 28px;
   min-width: 0;
   padding: 4px 10px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 
 /* Campos: más contraste label/input en dark */
@@ -385,7 +385,7 @@ html.st2-theme-dark .plan-bej-config--lite {
 /* MAM / SDK / Traza grisados hasta perfil técnico */
 .plan-tech-group-label {
   margin: 10px 2px 2px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-style: italic;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -441,7 +441,7 @@ html.st2-theme-dark .plan-bej-config--lite {
 
 .plan-adj-label .plan-check-badge.is-locked-badge {
   margin-top: 1px;
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   padding: 0.12rem 0.4rem;
 }
 
@@ -452,7 +452,7 @@ html.st2-theme-dark .plan-bej-config--lite {
 /* Subtítulo Salesforce: solo visible al marcar Sí */
 .plan-adj-sf-hint {
   display: none;
-  font-size: 0.66rem;
+  font-size: var(--text-2);
   font-weight: 500;
   font-style: italic;
   line-height: 1.25;
@@ -472,7 +472,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
 }
 
 .plan-backup-sql-hint--soft {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 450;
   font-style: italic;
   line-height: 1.35;
@@ -496,7 +496,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
   min-width: 2.4rem;
   padding: 0.2rem 0.45rem;
   border-radius: var(--radius-pill);
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-align: center;
@@ -526,7 +526,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
 }
 
 .plan-backup-detail--lite .plan-backup-detail-title {
-  font-size: 0.68rem !important;
+  font-size: var(--text-2) !important;
   color: var(--c-slate-400) !important;
   margin: 0 0 8px !important;
 }
@@ -545,7 +545,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
   overflow: visible;
   align-items: center;
   gap: 8px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1.15;
   border-width: 1px !important;
   background: var(--c-ink-12) !important;
@@ -574,13 +574,13 @@ html.st2-theme-dark .plan-adj-sf-hint {
 }
 
 .plan-backup-base-copy strong {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.02em;
 }
 
 .plan-backup-base-copy small {
-  font-size: 0.6rem;
+  font-size: var(--text-1);
   font-weight: 500;
   color: var(--c-slate-400);
   white-space: nowrap;
@@ -594,7 +594,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
 
 .plan-backup-detail--lite .plan-backup-onedrive label {
   color: var(--c-slate-300) !important;
-  font-size: 0.72rem !important;
+  font-size: var(--text-3) !important;
   font-weight: 650 !important;
 }
 
@@ -603,7 +603,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
   border: 1px solid var(--c-slate-600) !important;
   color: var(--c-slate-100) !important;
   min-height: 36px;
-  font-size: 0.78rem !important;
+  font-size: var(--text-4) !important;
 }
 
 .plan-backup-detail--lite .plan-backup-onedrive input::placeholder {
@@ -617,16 +617,16 @@ html.st2-theme-dark .plan-adj-sf-hint {
 }
 
 .plan-backup-sql--compact .plan-sql-compact-title {
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 650;
 }
 
 .plan-backup-sql--compact .plan-sql-compact-sub {
-  font-size: 0.62rem;
+  font-size: var(--text-1);
 }
 
 .plan-backup-sql--compact label {
-  font-size: 0.62rem !important;
+  font-size: var(--text-1) !important;
   margin-bottom: 3px !important;
 }
 
@@ -634,18 +634,18 @@ html.st2-theme-dark .plan-adj-sf-hint {
 .plan-backup-sql--compact select,
 .plan-backup-sql--compact .plan-custom-select-trigger {
   min-height: 32px !important;
-  font-size: 0.74rem !important;
+  font-size: var(--text-3) !important;
   padding: 4px 8px !important;
 }
 
 .plan-backup-sql--compact .plan-custom-select-option {
-  font-size: 0.74rem !important;
+  font-size: var(--text-3) !important;
   padding: 6px 8px !important;
   line-height: 1.25 !important;
 }
 
 .plan-backup-sql--compact .plan-custom-select-menu {
-  font-size: 0.74rem !important;
+  font-size: var(--text-3) !important;
 }
 
 /* Adjuntos / paneles más simples */
@@ -677,16 +677,16 @@ html.st2-theme-dark .plan-adj-sf-hint {
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--c-orange-500) 18%, transparent);
   color: var(--c-orange-400);
-  font-size: 1rem;
+  font-size: var(--text-8);
   font-weight: 700;
 }
 
 .plan-capturas-browse--lite strong {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
 }
 
 .plan-capturas-browse--lite small {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   opacity: 0.75;
 }
 
@@ -710,13 +710,13 @@ html.st2-theme-dark .plan-capturas-browse--lite {
 }
 
 .plan-sql-compact-title {
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   color: var(--c-slate-200);
 }
 
 .plan-sql-compact-sub {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   color: var(--c-slate-400);
 }
 
@@ -801,7 +801,7 @@ html.st2-theme-dark #planillas-transferencia .plan-ticket-detail .plan-opt-field
 html.st2-theme-dark .plan-ticket-detail .plan-opt-field-label,
 html.st2-theme-dark #ref-onvio-ticket-panel .plan-opt-field-label {
   color: var(--c-neutral-300) !important;
-  font-size: 0.72rem !important;
+  font-size: var(--text-3) !important;
 }
 
 html.st2-theme-dark #planillas-transferencia .plan-ticket-detail .plan-opt-input,

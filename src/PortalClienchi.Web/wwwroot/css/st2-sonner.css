@@ -37,7 +37,7 @@ sonner-toast.st2-sonner-toast {
   border-radius: var(--radius-lg) !important;
   overflow: visible !important;
   isolation: isolate;
-  font-size: 0.76rem !important;
+  font-size: var(--text-4) !important;
   /* Cortas = compactas; largas = hasta --width (evita el “vacío” de blanqueo). */
   width: max-content !important;
   max-width: var(--width) !important;
@@ -60,7 +60,7 @@ sonner-toast.st2-sonner-toast::part(content) {
 }
 
 sonner-toast.st2-sonner-toast::part(title) {
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 650;
   line-height: 1.35;
   overflow-wrap: break-word;
@@ -148,7 +148,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action {
   border-radius: var(--radius-pill);
   padding: 6px 12px;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1.15;
@@ -265,13 +265,13 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 }
 
 .st2-notif-inbox__titles strong {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 650;
   letter-spacing: 0.02em;
 }
 
 .st2-notif-inbox__unread {
-  font-size: 0.66rem;
+  font-size: var(--text-2);
   font-weight: 600;
   color: var(--c-orange-400);
 }
@@ -295,7 +295,7 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 
 .st2-notif-inbox__empty {
   margin: 8px 0 4px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: rgba(253, 186, 116, 0.55);
   text-align: center;
 }
@@ -381,7 +381,7 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 }
 
 .st2-notif-inbox__kind {
-  font-size: 0.66rem;
+  font-size: var(--text-2);
   font-weight: 650;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -389,13 +389,13 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 }
 
 .st2-notif-inbox__time {
-  font-size: 0.64rem;
+  font-size: var(--text-1);
   font-variant-numeric: tabular-nums;
   color: rgba(253, 186, 116, 0.7);
 }
 
 .st2-notif-inbox__body {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1.35;
   color: var(--c-orange-100);
   display: -webkit-box;
@@ -405,6 +405,6 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
 }
 
 .st2-notif-inbox__ago {
-  font-size: 0.6rem;
+  font-size: var(--text-1);
   color: rgba(214, 211, 209, 0.55);
 }

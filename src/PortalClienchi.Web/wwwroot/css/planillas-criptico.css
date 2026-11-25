@@ -34,7 +34,7 @@
   display: grid;
   place-items: center;
   color: var(--text-muted);
-  font-size: 0.84rem;
+  font-size: var(--text-5);
 }
 
 .st2-cryptic-head,
@@ -56,14 +56,14 @@
 .st2-cryptic-head p {
   margin: 3px 0 0;
   color: var(--text-muted);
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   text-transform: capitalize;
 }
 
 .st2-cryptic-about {
   margin: 12px 0 0;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1.55;
 }
 
@@ -73,7 +73,7 @@
 
 .st2-cryptic-kicker {
   color: var(--c-orange-500);
-  font-size: 0.67rem;
+  font-size: var(--text-2);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -90,7 +90,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 72%, var(--c-orange-500) 28%);
   border-radius: var(--radius-pill);
   font: inherit;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   font-weight: 700;
   cursor: pointer;
 }
@@ -104,7 +104,7 @@
   color: var(--c-white);
   background: var(--c-orange-500);
   border-radius: var(--radius-pill);
-  font-size: 0.66rem;
+  font-size: var(--text-2);
 }
 
 .st2-cryptic-rounds {
@@ -134,17 +134,17 @@
 .st2-cryptic-round > span {
   grid-row: 1 / 3;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-round strong {
-  font-size: 0.76rem;
+  font-size: var(--text-4);
 }
 
 .st2-cryptic-round small {
   overflow: hidden;
   color: var(--text-muted);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -183,7 +183,7 @@
   background: color-mix(in srgb, var(--panel) 80%, #3a3391 12%);
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  font-size: 0.64rem;
+  font-size: var(--text-1);
   font-weight: 700;
 }
 
@@ -224,7 +224,7 @@
   min-width: 36px;
   padding: 0;
   border-radius: var(--radius-lg);
-  font-size: 0.95rem;
+  font-size: var(--text-7);
 }
 
 .st2-cryptic-attempt-row {
@@ -233,7 +233,7 @@
   gap: 8px;
   margin-top: 10px;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-pips {
@@ -264,7 +264,7 @@
   min-height: 46px;
   padding: 6px 4px;
   border-radius: var(--radius-lg);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   line-height: 1.2;
   white-space: normal;
 }
@@ -314,13 +314,13 @@
 .st2-cryptic-hint-sheet strong {
   display: block;
   margin-bottom: 4px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
 }
 
 .st2-cryptic-hint-sheet p {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1.45;
 }
 
@@ -353,7 +353,7 @@
 
 .st2-cryptic-guide-card p {
   margin: 0 0 10px;
-  font-size: 0.86rem;
+  font-size: var(--text-6);
   line-height: 1.5;
 }
 
@@ -380,7 +380,7 @@
 .st2-cryptic-guide-label {
   margin: 14px 0 8px;
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -403,7 +403,7 @@
 .st2-cryptic-guide-anatomy dt,
 .st2-cryptic-guide-types h4 {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
 }
 
 .st2-cryptic-guide-anatomy dd,
@@ -411,7 +411,7 @@
 .st2-cryptic-guide-types span {
   margin: 3px 0 0;
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: var(--text-4);
   line-height: 1.4;
 }
 
@@ -615,7 +615,7 @@
   min-height: 18px;
   margin: 6px 0 0;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
 }
 
 .st2-cryptic-status.is-error {
@@ -644,7 +644,7 @@
   border: 0;
   border-radius: var(--radius-pill);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   cursor: pointer;
 }
@@ -658,7 +658,7 @@
 .st2-cryptic-actions button {
   min-height: 32px;
   padding-inline: 12px;
-  font-size: 0.7rem;
+  font-size: var(--text-2);
 }
 
 .st2-cryptic-actions .st2-cryptic-check {
@@ -682,19 +682,19 @@
 .st2-cryptic-attempts {
   margin: 8px 0 0;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-hint-note {
   margin: 6px 0 0;
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: var(--text-2);
 }
 
 .st2-cryptic-guest-note {
   margin: 14px 0 0;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1.5;
 }
 
@@ -714,7 +714,7 @@ body.st2-cryptic-public {
   margin: 0 auto;
   padding: 18px 4px 0;
   color: var(--text-muted, var(--c-zinc-400));
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 700;
 }
 
@@ -779,7 +779,7 @@ body.st2-cryptic-public .st2-cryptic-next {
   margin-left: auto;
   margin-right: auto;
   text-align: center;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
 }
 
 body.st2-cryptic-public .st2-cryptic-body + .st2-cryptic-about {
@@ -825,7 +825,7 @@ body.st2-cryptic-public .st2-cryptic-actions {
 body.st2-cryptic-public .st2-cryptic-actions button {
   min-height: 44px;
   padding-inline: 18px;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
 }
 
 body.st2-cryptic-public .st2-cryptic-hint-list,
@@ -858,7 +858,7 @@ body.st2-cryptic-public .st2-cryptic-status {
   background: transparent;
   border: 0;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -875,7 +875,7 @@ body.st2-cryptic-public .st2-cryptic-status {
   color: var(--text-muted);
   background: color-mix(in srgb, var(--panel) 72%, #3a3391 8%);
   border-radius: var(--radius-lg);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1.55;
 }
 
@@ -890,12 +890,12 @@ body.st2-cryptic-public .st2-cryptic-status {
 
 .st2-cryptic-notice strong {
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: var(--text-6);
 }
 
 .st2-cryptic-notice p {
   margin: 0;
-  font-size: 0.73rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-notice button {
@@ -918,12 +918,12 @@ body.st2-cryptic-public .st2-cryptic-status {
 .st2-cryptic-answer span,
 .st2-cryptic-answer small {
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: var(--text-2);
 }
 
 .st2-cryptic-answer strong {
   color: var(--text);
-  font-size: 1rem;
+  font-size: var(--text-8);
 }
 
 .st2-cryptic-solution dl {
@@ -942,7 +942,7 @@ body.st2-cryptic-public .st2-cryptic-status {
 
 .st2-cryptic-solution dt {
   color: var(--text-muted);
-  font-size: 0.61rem;
+  font-size: var(--text-1);
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -950,7 +950,7 @@ body.st2-cryptic-public .st2-cryptic-status {
 .st2-cryptic-solution dd {
   margin: 3px 0 0;
   color: var(--text);
-  font-size: 0.73rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-parse {
@@ -960,7 +960,7 @@ body.st2-cryptic-public .st2-cryptic-status {
   background: color-mix(in srgb, var(--c-orange-500) 7%, var(--panel));
   border-left: 3px solid var(--c-orange-500);
   border-radius: 4px 8px 8px 4px;
-  font-size: 0.73rem;
+  font-size: var(--text-3);
   line-height: 1.5;
 }
 
@@ -971,12 +971,12 @@ body.st2-cryptic-public .st2-cryptic-status {
 }
 
 .st2-cryptic-ranking-head strong {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
 }
 
 .st2-cryptic-ranking-head small {
   color: var(--text-muted);
-  font-size: 0.64rem;
+  font-size: var(--text-1);
 }
 
 .st2-cryptic-ranking ol {
@@ -995,7 +995,7 @@ body.st2-cryptic-public .st2-cryptic-status {
   min-height: 35px;
   padding: 5px 8px;
   border-radius: var(--radius-md);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
 }
 
 .st2-cryptic-ranking li:nth-child(odd) {
@@ -1010,7 +1010,7 @@ body.st2-cryptic-public .st2-cryptic-status {
   color: var(--text-muted);
   background: color-mix(in srgb, var(--panel) 76%, var(--c-orange-500) 8%);
   border-radius: var(--radius-pill);
-  font-size: 0.63rem;
+  font-size: var(--text-1);
   font-weight: 800;
 }
 
@@ -1024,7 +1024,7 @@ body.st2-cryptic-public .st2-cryptic-status {
 .st2-cryptic-rank-meta,
 .st2-cryptic-empty {
   color: var(--text-muted);
-  font-size: 0.65rem;
+  font-size: var(--text-2);
 }
 
 .st2-cryptic-empty {
@@ -1135,13 +1135,13 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
 .st2-cryptic-admin-head h4 {
   margin: 0;
   color: var(--text);
-  font-size: 1rem;
+  font-size: var(--text-8);
 }
 
 .st2-cryptic-admin-head p {
   margin: 4px 0 0;
   color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-admin-form {
@@ -1161,7 +1161,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   display: grid;
   gap: 5px;
   color: var(--text-muted);
-  font-size: 0.69rem;
+  font-size: var(--text-2);
   font-weight: 700;
 }
 
@@ -1181,7 +1181,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   font: inherit;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
 }
 
 .st2-cryptic-admin-grid textarea {
@@ -1193,7 +1193,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   justify-content: flex-start;
   margin-top: 12px;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-admin-checks label {
@@ -1206,7 +1206,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   min-height: 18px;
   margin: 8px 0;
   color: var(--c-red-500);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 
 .st2-cryptic-admin-actions {
@@ -1247,14 +1247,14 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   display: block;
   margin-top: 5px;
   color: var(--text);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
 }
 
 .st2-cryptic-admin-item-main > p {
   overflow: hidden;
   margin: 4px 0 0;
   color: var(--text-muted);
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1271,7 +1271,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   background: color-mix(in srgb, var(--panel) 70%, #3a3391 10%);
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  font-size: 0.59rem;
+  font-size: var(--text-1);
   font-weight: 700;
 }
 
@@ -1292,7 +1292,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   cursor: pointer;
 }
@@ -1301,7 +1301,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   padding: 22px;
   color: var(--text-muted);
   text-align: center;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
 }
 
 @media (max-width: 720px) {
@@ -1344,7 +1344,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
   font: inherit;
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
@@ -1352,7 +1352,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
 
 .st2-cryptic-day small {
   color: var(--text-muted);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 600;
 }
 
@@ -1383,7 +1383,7 @@ html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
   border: 0;
   border-radius: var(--radius-pill);
   font: inherit;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   font-weight: 700;
   cursor: pointer;
 }

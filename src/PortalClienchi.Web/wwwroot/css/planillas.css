@@ -28,7 +28,7 @@
   justify-content: center;
   align-items: center;
   padding: 10px 8px 2px;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   color: var(--text-muted);
   border-top: 0;
   margin-top: 4px;
@@ -178,126 +178,126 @@
 .st2-suite-float--bike {
   left: 22%;
   top: 38%;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   animation: st2SuiteDriftR 10s ease-in-out infinite 1.2s;
 }
 
 .st2-suite-float--bike2 {
   right: 14%;
   top: 82%;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   animation: st2SuiteDriftL 11s ease-in-out infinite 4.5s;
 }
 
 .st2-suite-float--bike3 {
   left: 68%;
   top: 12%;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   animation: st2SuiteDriftUp 9.6s ease-in-out infinite 2.4s;
 }
 
 .st2-suite-float--bike4 {
   right: 42%;
   top: 56%;
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   animation: st2SuiteDriftR 10.8s ease-in-out infinite 6.1s;
 }
 
 .st2-suite-float--bike5 {
   left: 36%;
   top: 72%;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   animation: st2SuiteDriftL 9.2s ease-in-out infinite 2.6s;
 }
 
 .st2-suite-float--bike6 {
   right: 54%;
   top: 10%;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   animation: st2SuiteDriftUp 10.4s ease-in-out infinite 5.4s;
 }
 
 .st2-suite-float--bike7 {
   left: 84%;
   top: 34%;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   animation: st2SuiteDriftR 11.4s ease-in-out infinite 7.2s;
 }
 
 .st2-suite-float--web {
   left: 8%;
   top: 52%;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   animation: st2SuiteDriftUp 8.5s ease-in-out infinite 0.6s;
 }
 
 .st2-suite-float--sql {
   right: 6%;
   top: 28%;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   animation: st2SuiteDriftUp 9.5s ease-in-out infinite 2.8s;
 }
 
 .st2-suite-float--bat {
   right: 28%;
   top: 68%;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   animation: st2SuiteDriftL 10.5s ease-in-out infinite 3.4s;
 }
 
 .st2-suite-float--tree {
   left: 42%;
   top: 22%;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   animation: st2SuiteDriftR 9.8s ease-in-out infinite 5.1s;
 }
 
 .st2-suite-float--pine {
   right: 38%;
   top: 48%;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   animation: st2SuiteDriftUp 8.8s ease-in-out infinite 6.2s;
 }
 
 .st2-suite-float--leaf {
   left: 72%;
   top: 74%;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   animation: st2SuiteDriftL 9.2s ease-in-out infinite 7s;
 }
 
 .st2-suite-float--leaf2 {
   right: 48%;
   top: 4%;
-  font-size: 0.66rem;
+  font-size: var(--text-2);
   animation: st2SuiteDriftR 8.6s ease-in-out infinite 3.8s;
 }
 
 .st2-suite-float--seed {
   left: 52%;
   top: 86%;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   animation: st2SuiteDriftR 8.2s ease-in-out infinite 1.8s;
 }
 
 .st2-suite-float--palta {
   left: 10%;
   top: 28%;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   animation: st2SuiteDriftUp 9s ease-in-out infinite 0.9s;
 }
 
 .st2-suite-float--palta2 {
   right: 10%;
   top: 76%;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   animation: st2SuiteDriftL 10.2s ease-in-out infinite 4.8s;
 }
 
 .st2-suite-float--palta3 {
   left: 62%;
   top: 18%;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   animation: st2SuiteDriftR 9.6s ease-in-out infinite 6.4s;
 }
 
@@ -344,7 +344,7 @@
 }
 
 .st2-suite-sig-brand {
-  font-size: 0.98rem;
+  font-size: var(--text-8);
   font-weight: 800;
   letter-spacing: 0.12em;
   color: var(--c-slate-900);
@@ -358,7 +358,7 @@
   position: relative;
   z-index: 2;
   margin: 0;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -380,7 +380,7 @@
   justify-content: center;
   align-items: center;
   gap: 0.35rem 0.45rem;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1038,7 +1038,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .planillas-hero-title-sub {
   margin: 0;
-  font-size: 0.98rem;
+  font-size: var(--text-8);
   font-weight: 600;
   color: var(--c-slate-600);
   line-height: 1.2;
@@ -1048,7 +1048,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .planillas-hero-tagline {
   margin: 10px 0 0;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   line-height: 1.45;
   max-width: 32rem;
   text-align: center;
@@ -1100,7 +1100,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .planillas-hero p {
   margin: 8px 0 0;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-6);
 }
 
 .planillas-hero .accent-bar {
@@ -1114,7 +1114,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 .planillas-section-title {
   text-align: center;
   font-family: var(--font-display);
-  font-size: 0.9375rem;
+  font-size: var(--text-7);
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0 0 12px;
@@ -1157,7 +1157,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   padding: 8px 6px;
   border-radius: var(--radius-md);
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--dark);
   cursor: pointer;
@@ -1202,7 +1202,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   border-radius: var(--radius-pill);
   background: var(--c-amber-100);
   color: var(--c-amber-800);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1216,7 +1216,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   border: 1px solid var(--c-amber-300);
   background: var(--c-amber-50);
   color: var(--c-amber-900);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   line-height: 1.45;
 }
 
@@ -1261,7 +1261,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
   height: 122px;
   padding: 14px 12px 12px;
   color: var(--c-white);
-  font-size: 0.86rem;
+  font-size: var(--text-6);
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -1291,7 +1291,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .plan-modulo-label {
   font-family: var(--font-display);
-  font-size: 0.86rem;
+  font-size: var(--text-6);
   font-weight: 700;
   letter-spacing: -0.015em;
   line-height: 1.2;
@@ -1300,7 +1300,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .plan-modulo-sub {
   font-family: var(--font-display);
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.25;
@@ -1479,7 +1479,7 @@ body.st2-balloons-sides .st2-x-balloon-body {
 
 .plan-asistente-chip-label {
   font-family: var(--font-display);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   letter-spacing: -0.015em;
   line-height: 1.2;
@@ -1629,7 +1629,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: 0 999px 999px 0;
   padding: 0 11px;
   min-width: 34px;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 700;
   cursor: pointer;
   color: var(--c-orange-700);
@@ -1673,7 +1673,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 8px 10px;
   text-align: left;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--dark);
   cursor: pointer;
@@ -1707,7 +1707,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: 1px solid var(--c-amber-500);
   background: rgba(255, 251, 235, 0.96);
   color: var(--c-amber-900);
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1782,13 +1782,13 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-modulo-na-title {
-  font-size: 0.9375rem;
+  font-size: var(--text-7);
   font-weight: 600;
   color: var(--c-slate-400);
 }
 
 .plan-modulo-na-hint {
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 600;
   color: var(--c-slate-500);
   line-height: 1.35;
@@ -1827,7 +1827,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-lg);
   padding: 8px 12px 8px 8px;
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1;
@@ -1851,7 +1851,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .planillas-back--exit {
   color: var(--c-slate-400);
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   padding: 6px 8px;
   border: 1px solid transparent;
 }
@@ -1918,7 +1918,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   background: #fff4ed;
   color: var(--primary);
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   border: 1px solid var(--c-orange-300);
   margin-left: auto;
@@ -2010,7 +2010,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-module-sticky-head .planillas-back {
   padding: 4px 8px 4px 4px;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   gap: 6px;
 }
 
@@ -2027,7 +2027,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-module-sticky-head .plan-sistema-badge {
   padding: 4px 9px;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   border-radius: var(--radius-sm);
 }
 
@@ -2089,7 +2089,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-module-sticky-head .plan-module-header-meta .plan-gestor-user-badge {
   max-width: min(100%, 280px);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   padding: 3px 8px;
   text-align: right;
   white-space: nowrap;
@@ -2144,7 +2144,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-field label {
   display: block;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   margin-bottom: 6px;
   color: var(--c-slate-400);
@@ -2157,7 +2157,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 10px 12px;
   font: inherit;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   background: var(--c-white);
 }
 
@@ -2201,7 +2201,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-mesa-field .plan-segment-btn {
   min-height: 36px;
   padding: 8px 14px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2242,7 +2242,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   min-width: 0;
   margin: 0;
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   line-height: 1.35;
   color: var(--c-slate-700);
@@ -2260,7 +2260,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-capturas-mark {
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   color: var(--c-slate-400);
   width: 1.25rem;
   flex-shrink: 0;
@@ -2287,14 +2287,14 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-capturas-title {
   margin: 0 0 4px;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--dark);
 }
 
 .plan-capturas-hint {
   margin: 0 0 10px;
-  font-size: 0.75rem;
+  font-size: var(--text-4);
   color: var(--text-muted);
 }
 
@@ -2391,13 +2391,13 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-capturas-browse-text strong {
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   font-weight: 700;
   color: var(--c-orange-800);
 }
 
 .plan-capturas-browse-text small {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-stone-500);
 }
 
@@ -2461,7 +2461,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-pill);
   background: rgba(15, 23, 42, 0.72);
   color: var(--c-white);
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   line-height: 1;
   cursor: pointer;
   display: inline-flex;
@@ -2499,7 +2499,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-sm);
   background: var(--c-emerald-600);
   color: var(--c-white);
-  font-size: 0.65rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2507,7 +2507,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-traza-chip-name {
   width: 100%;
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   line-height: 1.2;
   color: var(--c-slate-700);
   text-align: center;
@@ -2527,7 +2527,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: #e8edf5;
   border-radius: var(--radius-pill);
   padding: 4px 6px 4px 10px;
-  font-size: 0.75rem;
+  font-size: var(--text-4);
   color: var(--dark);
 }
 
@@ -2549,7 +2549,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: 50%;
   background: transparent;
   color: var(--c-slate-500);
-  font-size: 1rem;
+  font-size: var(--text-8);
   line-height: 1;
   cursor: pointer;
 }
@@ -2560,7 +2560,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-capturas-estado {
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--text-muted);
   margin-top: 8px;
 }
@@ -2627,7 +2627,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-status-bar {
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--text-muted);
   margin-top: 12px;
   text-align: center;
@@ -2656,7 +2656,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   padding: 11px 13px;
   border-radius: var(--radius-2xl);
   font-family: var(--font-display);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 650;
   line-height: 1.35;
   letter-spacing: 0.01em;
@@ -2761,11 +2761,11 @@ body.st2-chile-embed-active #panel-planillas.active {
   }
 
   .plan-module-title-row .plan-module-title {
-    font-size: 0.92rem;
+    font-size: var(--text-7);
   }
 }
-.plan-section-hint { font-size: 0.75rem; color: var(--text-muted); margin: -8px 0 14px; }
-.plan-section-hint { font-size: 0.75rem; color: var(--text-muted); margin: -8px 0 14px; }
+.plan-section-hint { font-size: var(--text-4); color: var(--text-muted); margin: -8px 0 14px; }
+.plan-section-hint { font-size: var(--text-4); color: var(--text-muted); margin: -8px 0 14px; }
 
 .plan-op-cargar-panel {
   background: var(--st2-suite-surface);
@@ -2794,7 +2794,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   color: var(--dark);
   cursor: pointer;
@@ -2859,7 +2859,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-sm);
   background: #e85d04;
   color: var(--c-white);
-  font-size: 0.875rem;
+  font-size: var(--text-6);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -2879,7 +2879,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-sm);
   background: linear-gradient(180deg, var(--c-white) 0%, #fff5ef 100%);
   color: var(--primary);
-  font-size: 0.875rem;
+  font-size: var(--text-6);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -2913,7 +2913,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   background: transparent;
   color: var(--c-slate-500);
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -3049,7 +3049,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--c-slate-500);
-  font-size: 0.8125rem;
+  font-size: var(--text-5);
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -3128,7 +3128,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-bej-label {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3143,7 +3143,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-bej-config .plan-segment-btn {
   min-height: 36px;
   padding: 8px 14px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3157,7 +3157,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-bej-sql label {
   display: block;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 600;
   color: var(--c-slate-400);
   margin-bottom: 4px;
@@ -3204,7 +3204,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: linear-gradient(180deg, #fffaf5 0%, var(--c-orange-50) 100%);
   color: var(--c-orange-700);
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -3252,7 +3252,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-pill);
   background: linear-gradient(180deg, #fffaf5 0%, var(--c-orange-50) 100%);
   color: var(--c-orange-700);
-  font-size: 1rem;
+  font-size: var(--text-8);
   line-height: 1;
   font-weight: 600;
   cursor: pointer;
@@ -3296,14 +3296,14 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-ref-block { margin-top: 8px; margin-bottom: 20px; }
 .plan-ref-title {
   text-align: left;
-  font-size: 1rem;
+  font-size: var(--text-8);
   font-weight: 600;
   margin: 0 0 6px;
   color: var(--c-slate-400);
 }
 .plan-ref-hint {
   text-align: left;
-  font-size: 0.75rem;
+  font-size: var(--text-4);
   color: var(--text-muted);
   margin: 0 0 14px;
   line-height: 1.45;
@@ -3348,7 +3348,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin: 0 0 14px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   line-height: 1.45;
   color: var(--c-slate-700);
   border: 1px solid transparent;
@@ -3407,7 +3407,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.2;
@@ -3462,7 +3462,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 .plan-check-mark {
   order: 2;
-  font-size: 1rem;
+  font-size: var(--text-8);
   line-height: 1;
   color: var(--c-slate-400);
   flex-shrink: 0;
@@ -3531,12 +3531,12 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex-wrap: wrap;
 }
 .plan-check-btn strong {
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 700;
   line-height: 1.15;
 }
 .plan-check-btn small {
-  font-size: 0.64rem;
+  font-size: var(--text-1);
   font-weight: 500;
   opacity: 0.9;
   line-height: 1.2;
@@ -3608,7 +3608,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   justify-content: space-between;
   gap: 8px;
   text-align: left;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--dark);
   transform: translateZ(0);
@@ -3688,7 +3688,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 .plan-onvio-body small {
   display: block;
-  font-size: 0.65rem;
+  font-size: var(--text-2);
   font-weight: 500;
   color: var(--c-slate-500);
   margin-top: 1px;
@@ -3700,7 +3700,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   min-width: 2.6rem;
   padding: 0.22rem 0.5rem;
   border-radius: var(--radius-pill);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 700;
   letter-spacing: 0.02em;
   text-align: center;
@@ -3766,7 +3766,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   line-height: 1.2;
 }
@@ -3786,7 +3786,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: block;
 }
 .plan-action-btn-sub {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 500;
   opacity: 0.92;
   line-height: 1.2;
@@ -3810,8 +3810,8 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex-direction: column;
   gap: 2px;
 }
-.plan-adj-backup-text strong { font-size: 0.85rem; font-weight: 600; color: var(--dark); }
-.plan-adj-backup-text small { font-size: 0.68rem; font-weight: 500; color: var(--text-muted); }
+.plan-adj-backup-text strong { font-size: var(--text-6); font-weight: 600; color: var(--dark); }
+.plan-adj-backup-text small { font-size: var(--text-2); font-weight: 500; color: var(--text-muted); }
 
 .plan-adj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .plan-adj-stack {
@@ -3834,7 +3834,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 10px 12px;
   min-height: 40px;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   cursor: pointer;
   background: var(--c-white);
@@ -3861,7 +3861,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-adj-card.tone-orange { border-color: var(--c-orange-300); background: var(--c-orange-50); }
 .plan-adj-card.tone-blue { border-color: var(--c-blue-300); background: var(--c-blue-50); }
 .plan-adj-card .card-mark {
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   color: var(--c-slate-400);
   flex-shrink: 0;
   transition:
@@ -3927,7 +3927,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 .plan-backup-detail-title {
   margin: 0 0 10px;
-  font-size: 0.85rem;
+  font-size: var(--text-6);
   font-weight: 600;
   color: var(--dark);
 }
@@ -3941,7 +3941,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 .plan-backup-onedrive label {
   display: block;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 600;
   color: var(--c-slate-500);
   margin-bottom: 4px;
@@ -3953,7 +3953,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 9px 11px;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   color: var(--dark);
   background: var(--c-white);
 }
@@ -3968,7 +3968,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 .plan-legal-onedrive-list label {
   display: block;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 600;
   color: var(--c-slate-500);
   margin-bottom: 4px;
@@ -3990,7 +3990,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 9px 11px;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   color: var(--dark);
   background: var(--c-white);
 }
@@ -4046,7 +4046,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--dark);
   transform: translateZ(0);
@@ -4074,7 +4074,7 @@ body.st2-chile-embed-active #panel-planillas.active {
     0 10px 22px rgba(214, 64, 0, 0.12);
 }
 .plan-backup-base-card .card-mark {
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   color: var(--c-slate-400);
   transition:
     color 0.28s cubic-bezier(0.22, 1.2, 0.36, 1),
@@ -4099,7 +4099,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: var(--c-blue-50);
   border: 1px solid var(--c-blue-200);
   color: #1e3a5f;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   line-height: 1.35;
 }
 
@@ -4110,7 +4110,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-backup-sql label {
   display: block;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 600;
   color: var(--c-slate-500);
   margin-bottom: 4px;
@@ -4150,7 +4150,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-op-icon.orange { background: #fff4ed; color: var(--primary); }
 .plan-op-icon svg { width: 30px; height: 30px; }
 .plan-op-card strong { font-size: 1.25rem; color: var(--dark); }
-.plan-op-card span { font-size: 0.82rem; color: var(--text-muted); max-width: 280px; }
+.plan-op-card span { font-size: var(--text-5); color: var(--text-muted); max-width: 280px; }
 .plan-op-open-btn {
   margin-top: 12px;
   border: none;
@@ -4158,7 +4158,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   padding: 10px 22px;
   color: var(--c-white);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   cursor: pointer;
 }
 .plan-op-open-btn.purple { background: var(--c-violet-600); }
@@ -4194,7 +4194,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: color-mix(in srgb, var(--panel, #f4f6fa) 90%, transparent);
   backdrop-filter: blur(4px);
   color: var(--text-muted, var(--c-slate-500));
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
 }
 
@@ -4228,7 +4228,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(2px);
   color: var(--c-slate-500);
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
 }
 
@@ -4268,7 +4268,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-gestor-panel-title {
   margin: 0 0 16px;
-  font-size: 1rem;
+  font-size: var(--text-8);
   font-weight: 600;
   color: var(--c-slate-400);
   text-align: left;
@@ -4288,7 +4288,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-gestor-field-label {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--c-slate-400);
   padding-top: 8px;
@@ -4344,7 +4344,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: none;
   background: transparent;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   font-weight: 600;
   color: var(--text, var(--dark));
   padding: 10px 0;
@@ -4373,7 +4373,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 10px 12px;
   font: inherit;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   resize: vertical;
   background: linear-gradient(180deg, var(--c-white) 0%, #fffaf7 100%);
 }
@@ -4411,7 +4411,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   background: linear-gradient(180deg, #fff8f3 0%, #ffefe4 100%);
   color: var(--c-orange-800);
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   font-weight: 600;
   padding: 10px 14px;
   min-height: 40px;
@@ -4436,7 +4436,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-sm);
   background: var(--primary);
   color: var(--c-white);
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -4465,7 +4465,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   color: var(--dark);
   cursor: pointer;
@@ -4475,7 +4475,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   color: var(--dark);
 }
@@ -4486,7 +4486,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 8px 12px;
   font: inherit;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   background: linear-gradient(180deg, var(--c-white) 0%, #f4f6fa 100%);
 }
 
@@ -4502,14 +4502,14 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-gestor-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8125rem;
+  font-size: var(--text-5);
 }
 
 .plan-gestor-table thead th {
   background: #e8edf5;
   color: var(--dark);
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   text-align: left;
   padding: 10px 12px;
   border-bottom: 1px solid var(--border);
@@ -4542,7 +4542,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-gestor-table .col-fecha { width: 100px; white-space: nowrap; }
 .plan-gestor-table .col-link { width: 88px; text-align: center; }
-.plan-gestor-table .col-confirm { width: 96px; text-align: center; font-size: 1rem; }
+.plan-gestor-table .col-confirm { width: 96px; text-align: center; font-size: var(--text-8); }
 
 .plan-gestor-link-open {
   border: 1px solid var(--c-blue-200);
@@ -4550,7 +4550,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   color: var(--c-blue-600);
   border-radius: var(--radius-sm);
   padding: 4px 8px;
-  font-size: 0.75rem;
+  font-size: var(--text-4);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -4584,7 +4584,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   background: var(--c-white);
   color: var(--dark);
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -4600,7 +4600,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-sm);
   background: var(--c-red-600);
   color: var(--c-white);
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -4614,7 +4614,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-sm);
   background: var(--c-green-700);
   color: var(--c-white);
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -4636,7 +4636,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   background: var(--c-white);
   color: var(--dark);
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   cursor: pointer;
   font-family: inherit;
 }
@@ -4645,21 +4645,21 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-gestor-page-btn:disabled { opacity: 0.45; cursor: default; }
 
 #op-gestor-pagina-label {
-  font-size: 0.8125rem;
+  font-size: var(--text-5);
   color: var(--c-slate-500);
   white-space: nowrap;
 }
 
 .plan-gestor-hint {
   margin: 4px 0 0;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: var(--c-slate-500);
   line-height: 1.45;
   text-align: left;
 }
 
 .plan-gestor-user-badge {
-  font-size: 0.75rem;
+  font-size: var(--text-4);
   font-weight: 600;
   color: var(--c-violet-800);
   background: var(--c-purple-100);
@@ -4718,7 +4718,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-user-hint {
   margin: 0 0 16px;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   color: var(--c-slate-500);
   line-height: 1.45;
   text-align: center;
@@ -4726,7 +4726,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-user-label {
   display: block;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   margin-bottom: 6px;
   color: var(--dark);
@@ -4738,7 +4738,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 10px 12px;
   font: inherit;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
 }
 
 .plan-user-pass-wrap {
@@ -4752,7 +4752,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-user-error {
   min-height: 1.2em;
   margin: 8px 0 0;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--c-red-600);
 }
 
@@ -4798,7 +4798,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-md);
   padding: 10px 12px;
   font: inherit;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   resize: vertical;
   background: var(--c-white);
 }
@@ -4814,7 +4814,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   align-items: center;
   gap: 8px;
   margin-top: 12px;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   color: var(--dark);
   cursor: pointer;
@@ -4834,7 +4834,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: var(--c-red-50);
   border: 1px solid var(--c-red-200);
   border-radius: var(--radius-md);
-  font-size: 0.86rem;
+  font-size: var(--text-6);
   color: var(--c-red-900);
   line-height: 1.4;
   word-break: break-word;
@@ -4863,7 +4863,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   text-align: left;
   padding: 8px 14px;
   font: inherit;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   cursor: pointer;
 }
 
@@ -4939,7 +4939,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 .plan-ref-modal-subtitle {
   margin: 6px 0 0;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   color: var(--text-muted);
   line-height: 1.4;
 }
@@ -4991,25 +4991,25 @@ body.st2-chile-embed-active #panel-planillas.active {
   padding: 12px 20px;
   color: var(--c-white);
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   cursor: pointer;
 }
 .plan-ref-modal[data-accent="mam"] .plan-ref-modal-save { background: var(--c-blue-600); }
 .plan-ref-modal[data-accent="sdk"] .plan-ref-modal-save { background: var(--c-amber-600); }
 .plan-ref-modal[data-accent="planilla"] .plan-ref-modal-save { background: var(--c-violet-600); }
-.plan-ref-modal[data-accent="planilla"] .plan-modal-section { font-size: 0.88rem; }
-.plan-ref-modal[data-accent="planilla"] .plan-opt-check { font-size: 0.88rem; }
-.plan-ref-modal[data-accent="planilla"] .plan-modal-hint { font-size: 0.72rem; }
+.plan-ref-modal[data-accent="planilla"] .plan-modal-section { font-size: var(--text-6); }
+.plan-ref-modal[data-accent="planilla"] .plan-opt-check { font-size: var(--text-6); }
+.plan-ref-modal[data-accent="planilla"] .plan-modal-hint { font-size: var(--text-3); }
 
 .plan-modal-hint {
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--text-muted);
   line-height: 1.45;
   margin: 0 0 14px;
 }
 .plan-modal-section {
   margin: 0 0 10px;
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   font-weight: 600;
   color: var(--dark);
 }
@@ -5031,7 +5031,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   gap: 12px;
   padding: 8px 4px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   color: var(--dark);
 }
 .plan-opt-check input { position: absolute; opacity: 0; width: 0; height: 0; }
@@ -5067,7 +5067,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-opt-field-indent.disabled { opacity: 0.45; }
 .plan-opt-field-label {
   display: block;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   margin-bottom: 6px;
   color: var(--dark);
@@ -5077,7 +5077,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 10px 12px;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   background: var(--c-white);
 }
 .plan-opt-input:disabled { background: var(--c-slate-100); cursor: not-allowed; }
@@ -5087,7 +5087,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 10px 12px;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   min-height: 100px;
   resize: vertical;
   font-family: inherit;
@@ -5117,7 +5117,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: 1px solid var(--c-blue-600);
   background: var(--c-blue-50);
   color: var(--c-blue-600);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -5125,8 +5125,8 @@ body.st2-chile-embed-active #panel-planillas.active {
   flex-shrink: 0;
 }
 .plan-tool-texts { flex: 1; min-width: 0; }
-.plan-tool-texts strong { display: block; font-size: 0.92rem; color: var(--dark); margin-bottom: 4px; }
-.plan-tool-texts span { font-size: 0.76rem; color: var(--text-muted); line-height: 1.35; }
+.plan-tool-texts strong { display: block; font-size: var(--text-7); color: var(--dark); margin-bottom: 4px; }
+.plan-tool-texts span { font-size: var(--text-4); color: var(--text-muted); line-height: 1.35; }
 .plan-tool-arrow { font-size: 1.5rem; font-weight: 600; color: var(--c-blue-600); flex-shrink: 0; }
 
 .plan-sql-card {
@@ -5148,7 +5148,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: 50%;
   background: var(--c-blue-600);
   color: var(--c-white);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -5182,7 +5182,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   color: var(--c-blue-600);
   border-radius: var(--radius-md);
   padding: 7px 14px;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 600;
   cursor: pointer;
 }
@@ -5191,7 +5191,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-sql-code {
   width: 100%;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   line-height: 1.45;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -5207,7 +5207,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   color: var(--c-blue-600);
   border-radius: var(--radius-md);
   padding: 8px 14px;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   cursor: pointer;
 }
@@ -5292,7 +5292,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 .plan-legal-form-grid .plan-field select.plan-select {
   background: var(--white, var(--c-white));
   color: var(--dark);
-  font-size: 0.92rem;
+  font-size: var(--text-7);
 }
 
 .plan-legal-evid-panel {
@@ -5310,7 +5310,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   gap: 12px;
   min-height: 180px;
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
 }
 
@@ -5360,7 +5360,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 0.95rem;
+  font-size: var(--text-7);
 }
 
 .plan-legal-product-title strong {
@@ -5462,7 +5462,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 }
 
 .plan-legal-cards .plan-op-card.plan-legal-pick-card strong {
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
   color: var(--dark);
 }
@@ -5485,7 +5485,7 @@ body.st2-chile-embed-active #panel-planillas.active {
 
 .plan-legal-detail-breadcrumb {
   margin: 0 0 14px;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   font-weight: 700;
   color: var(--dark);
 }
@@ -5505,12 +5505,12 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin: 0;
   color: var(--text-muted);
   line-height: 1.5;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
 }
 
 .plan-legal-detail-kicker {
   margin: 0 0 6px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -5529,7 +5529,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   margin-left: 6px;
   padding: 1px 7px;
   border-radius: var(--radius-pill);
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -5555,7 +5555,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   background: var(--nav-well, var(--c-slate-50));
-  font-size: 0.78rem;
+  font-size: var(--text-4);
 }
 .plan-captura-chip-name {
   overflow: hidden;
@@ -5568,7 +5568,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: var(--text-8);
   line-height: 1;
   padding: 0 2px;
 }
@@ -5577,7 +5577,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
 }
 
 /* Westlaw · Plantilla ADO */
@@ -5587,7 +5587,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   border-radius: var(--radius-lg);
   border: 1px dashed rgba(154, 52, 18, 0.45);
   background: rgba(251, 146, 60, 0.08);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   line-height: 1.45;
 }
 
@@ -5597,13 +5597,13 @@ body.st2-chile-embed-active #panel-planillas.active {
   border: 1px solid #eace7a;
   background: hsl(49, 100%, 96%);
   color: hsl(31, 80%, 30%);
-  font-size: 0.86rem;
+  font-size: var(--text-6);
   line-height: 1.5;
 }
 
 .plan-legal-ado-title-preview {
   margin: 10px 0 0;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   color: var(--text-muted);
   overflow-wrap: anywhere;
 }
@@ -5617,7 +5617,7 @@ body.st2-chile-embed-active #panel-planillas.active {
   grid-template-columns: max-content 1fr;
   gap: 4px 12px;
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
 }
 
 .plan-legal-ado-defaults dt {
@@ -5674,7 +5674,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   font-weight: 700;
   color: var(--dark);
 }
@@ -5702,7 +5702,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   background: var(--c-green-700);
   color: var(--c-white);
   font: inherit;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -5718,7 +5718,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   white-space: pre-wrap;
   word-break: break-word;
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   line-height: 1.5;
   color: var(--dark);
 }
@@ -5755,14 +5755,14 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   .plan-sistema-indicator { display: none; }
   .plan-mesa-field .plan-segment-btn {
     padding: 8px 12px;
-    font-size: 0.74rem;
+    font-size: var(--text-3);
   }
   .plan-check-cards, .plan-onvio-grid, .plan-adj-grid, .plan-op-submenu, .plan-legal-cards, .plan-form-2col { grid-template-columns: 1fr; }
   .plan-check-wrap.mam, .plan-check-wrap.sdk { margin: 0; }
   .plan-ref-actions { grid-template-columns: 1fr; }
   .plan-action-btn.ghost { min-width: 0; justify-content: center; }
   .plan-bej-row { grid-template-columns: 72px 1fr; gap: 6px; }
-  .plan-segment-btn { min-width: 0; padding: 6px 10px; font-size: 0.75rem; }
+  .plan-segment-btn { min-width: 0; padding: 6px 10px; font-size: var(--text-4); }
   .plan-gestor-form-grid { grid-template-columns: 1fr; gap: 8px; }
   .plan-gestor-field-label { padding-top: 0; }
   .plan-gestor-date-wrap { max-width: none; width: 100%; }
@@ -5839,7 +5839,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   border: 1px solid var(--c-red-200);
   background: var(--c-red-50);
   color: var(--c-red-700);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   line-height: 1.35;
 }
 .plan-field.is-invalid input,
@@ -5882,7 +5882,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   background: transparent;
   color: var(--text-muted, var(--c-slate-600));
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
@@ -5924,7 +5924,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   background: transparent;
   color: var(--text-muted, var(--c-slate-500));
   font: inherit;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
@@ -5938,7 +5938,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   justify-content: center;
   background: color-mix(in srgb, var(--text-muted, var(--c-slate-500)) 22%, transparent);
   color: var(--text-muted, var(--c-slate-600));
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 .plan-ref-step.active {
   background: var(--surface, var(--c-white));
@@ -5972,7 +5972,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
   background: var(--c-white);
   color: var(--c-slate-700);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 700;
   cursor: pointer;
 }
@@ -5988,7 +5988,7 @@ html.st2-theme-dark .plan-legal-ado-reminder {
 }
 #ref-perfil-hint {
   margin: 8px 0 0;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
 }
 #op-gestor-table-body tr {
   animation: plan-gestor-row-in 0.28s ease both;

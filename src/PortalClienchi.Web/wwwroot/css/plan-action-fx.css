@@ -51,7 +51,7 @@
   border-radius: var(--radius-xl);
   border: 1px solid transparent;
   font: inherit;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   font-weight: 650;
   letter-spacing: 0.005em;
   line-height: 1;
@@ -64,7 +64,7 @@
   min-height: 32px;
   padding: 0 12px;
   border-radius: var(--radius-lg);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
 }
 
 .plan-solid-btn--copy {
@@ -118,7 +118,7 @@ html.st2-theme-dark .plan-solid-btn--preview {
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1.15;
@@ -178,7 +178,7 @@ html.st2-theme-dark .plan-solid-btn--preview {
 .plan-fx-tap--compact {
   min-height: 2rem;
   padding: 0.28rem 0.7rem;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   gap: 0.32rem;
 }
 
@@ -264,14 +264,14 @@ html.st2-theme-dark .plan-solid-btn--preview {
 }
 
 .plan-fx-sling-title {
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 700;
   color: var(--dark);
   line-height: 1.2;
 }
 
 .plan-fx-sling-sub {
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 500;
   color: var(--text-muted);
   line-height: 1.2;
@@ -516,13 +516,13 @@ html.st2-theme-dark .plan-solid-btn--preview {
 }
 
 .slide-commit__title {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 700;
   color: color-mix(in srgb, var(--sc-ink) 78%, transparent);
 }
 
 .slide-commit__sub {
-  font-size: 0.66rem;
+  font-size: var(--text-2);
   font-weight: 500;
   letter-spacing: 0.01em;
   color: color-mix(in srgb, var(--sc-ink) 48%, transparent);
@@ -811,7 +811,7 @@ html.st2-theme-dark .plan-solid-btn--preview {
 }
 
 .plan-text-preview-head .plan-fx-sling-title {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 700;
 }
 

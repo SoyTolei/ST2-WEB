@@ -296,14 +296,14 @@ body.st2-tour-active {
 
 .st2-tour-body {
   margin: 0 0 0.75rem;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   line-height: 1.5;
   color: rgba(226, 232, 240, 0.9);
 }
 
 .st2-tour-progress {
   margin: 0 0 0.75rem;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   color: rgba(148, 163, 184, 0.9);
 }
 
@@ -320,7 +320,7 @@ body.st2-tour-active {
   border-radius: var(--radius-pill);
   padding: 0.42rem 0.9rem;
   font: inherit;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
@@ -363,7 +363,7 @@ body.st2-tour-active {
   background: rgba(28, 22, 18, 0.92);
   color: rgba(255, 247, 237, 0.95);
   font: inherit;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -393,7 +393,7 @@ body.st2-tour-active {
   border-radius: 50%;
   background: linear-gradient(135deg, var(--c-orange-600), var(--c-orange-400));
   color: var(--c-white);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 800;
   flex-shrink: 0;
 }

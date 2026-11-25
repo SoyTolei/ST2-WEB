@@ -223,7 +223,7 @@ html.st2-theme-dark #planillas-menu .planillas-section-title {
   align-items: center;
   gap: 14px;
   font-family: var(--r-font-ui);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -532,7 +532,7 @@ html.st2-theme-dark .borrado-table thead th {
   background: rgba(24, 19, 17, 0.96) !important;
   color: var(--r-text-3) !important;
   font-family: var(--r-font-ui);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -541,7 +541,7 @@ html.st2-theme-dark .borrado-table thead th {
 
 html.st2-theme-dark .blanqueo-table thead th,
 html.st2-theme-dark .borrado-table thead th {
-  font-size: 0.64rem;
+  font-size: var(--text-1);
 }
 
 html.st2-theme-dark .plan-gestor-table tbody td,
@@ -655,7 +655,7 @@ html.st2-theme-dark #st2-access-gate .st2-access-suite {
 
 html.st2-theme-dark #st2-access-gate .st2-access-hint {
   color: var(--r-text-2);
-  font-size: 0.95rem;
+  font-size: var(--text-7);
 }
 
 html.st2-theme-dark #st2-access-gate .st2-access-label {
@@ -801,7 +801,7 @@ html.st2-theme-dark .st2-access-admin-audit:hover {
 
 html.st2-theme-dark .st2-access-admin-table th {
   color: var(--r-text-3) !important;
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;

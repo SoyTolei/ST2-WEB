@@ -14,14 +14,14 @@ public sealed class CssTokensTests
     {
         var css = Path.Combine(FindRepoRoot(), "src", "PortalClienchi.Web", "wwwroot", "css");
         var tokensFile = Path.Combine(css, "st2-tokens.css");
-        var defined = Regex.Matches(File.ReadAllText(tokensFile), @"(--(?:c|font|z|radius)-[a-z0-9-]+)\s*:")
+        var defined = Regex.Matches(File.ReadAllText(tokensFile), @"(--(?:c|font|z|radius|text)-[a-z0-9-]+)\s*:")
             .Select(m => m.Groups[1].Value)
             .ToHashSet(StringComparer.Ordinal);
         Assert.NotEmpty(defined);
 
         var missing = Directory.EnumerateFiles(css, "*.css", SearchOption.TopDirectoryOnly)
             .Where(path => path != tokensFile)
-            .SelectMany(path => Regex.Matches(File.ReadAllText(path), @"var\((--(?:c|font|z|radius)-[a-z0-9-]+)")
+            .SelectMany(path => Regex.Matches(File.ReadAllText(path), @"var\((--(?:c|font|z|radius|text)-[a-z0-9-]+)")
                 .Select(m => $"{Path.GetFileName(path)}: {m.Groups[1].Value}"))
             .Where(entry => !defined.Contains(entry[(entry.IndexOf(": ", StringComparison.Ordinal) + 2)..]))
             .Distinct()

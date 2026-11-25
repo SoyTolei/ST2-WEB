@@ -282,7 +282,7 @@ html, body {
   max-width: none;
   overflow: visible;
   white-space: nowrap;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 500;
   color: rgba(248, 250, 252, 0.9);
   padding: 0;
@@ -368,7 +368,7 @@ html, body {
   position: relative;
   z-index: 1;
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: var(--text-2);
   font-weight: 500;
   letter-spacing: 0.01em;
   line-height: 1.35;
@@ -386,7 +386,7 @@ html, body {
   background: none;
   color: var(--c-orange-400);
   font: inherit;
-  font-size: 0.74rem;
+  font-size: var(--text-3);
   font-weight: 800;
   line-height: 1.3;
   text-align: left;
@@ -591,7 +591,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
   content: "z";
   top: -4px;
   right: 8px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   opacity: 0.85;
   animation: st2-blobatar-zzz 2.6s ease-in-out infinite 0.45s;
 }
@@ -638,7 +638,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
 }
 
 .st2-session-name {
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--c-orange-100);
@@ -716,7 +716,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
   justify-content: flex-start;
   height: 34px;
   border-radius: var(--radius-lg);
-  font-size: 0.74rem;
+  font-size: var(--text-3);
 }
 
 .st2-greet-bell-host,
@@ -802,7 +802,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
   padding: 6px 8px 6px 6px;
   text-align: left;
   font-family: var(--font-display);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 500;
   letter-spacing: 0.01em;
   color: var(--c-orange-100);
@@ -825,7 +825,7 @@ body.st2-session-menu-open .st2-blobatar-greet {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1;
   background: rgba(249, 115, 22, 0.1);
   box-shadow: inset 0 0 0 1px rgba(251, 146, 60, 0.2);
@@ -945,7 +945,7 @@ body.portal-tab-active .st2-modules-banner {
 
 .st2-modules-banner-text {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   font-weight: 600;
   line-height: 1.35;
 }
@@ -956,7 +956,7 @@ body.portal-tab-active .st2-modules-banner {
   padding: 8px 18px;
   background: var(--c-white);
   color: var(--c-teal-800);
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
@@ -1028,7 +1028,7 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
 
 .st2-tools-banner-text {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: var(--text-7);
   font-weight: 600;
   line-height: 1.35;
 }
@@ -1038,7 +1038,7 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
   border: 0;
   border-radius: var(--radius-pill);
   padding: 8px 16px;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   font-weight: 700;
   cursor: pointer;
   flex-shrink: 0;
@@ -1082,7 +1082,7 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
 
 .st2-view-as-banner-text {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: var(--text-6);
   font-weight: 600;
 }
 
@@ -1093,7 +1093,7 @@ body.portal-tab-active.st2-has-modules-update .st2-tools-banner {
   background: var(--c-slate-50);
   color: var(--c-slate-900);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   font-weight: 700;
   cursor: pointer;
 }
@@ -1344,7 +1344,7 @@ body.portal-tab-active.portal-context-active .tab-bar {
   background: #e53935;
   border: 1px solid var(--c-red-700);
   color: var(--c-white);
-  font-size: 0.65rem;
+  font-size: var(--text-2);
   font-weight: 700;
   line-height: 1;
   text-align: center;
@@ -1360,7 +1360,7 @@ body.portal-tab-active.portal-context-active .tab-bar {
   min-width: 1rem;
   min-height: 1rem;
   padding: 0 0.28rem;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 800;
   line-height: 1;
 }
@@ -1620,7 +1620,7 @@ body.admin-tab-active {
   background: transparent;
   color: var(--c-orange-800);
   font: inherit;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   font-weight: 650;
   letter-spacing: 0.01em;
   min-height: 30px;
@@ -1700,7 +1700,7 @@ body.admin-tab-active {
 .portal-kicker {
   margin: 0 0 4px;
   font-family: var(--font-display);
-  font-size: 0.64rem;
+  font-size: var(--text-1);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -2188,7 +2188,7 @@ body.portal-tab-active .combo-box {
 .preview-idle-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: var(--text-8);
   font-weight: 700;
   color: var(--dark);
 }
@@ -2725,7 +2725,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-notice-lead {
   margin: 0 0 10px;
-  font-size: 0.95rem;
+  font-size: var(--text-7);
   font-weight: 700;
   color: var(--dark);
   letter-spacing: -0.01em;
@@ -2749,7 +2749,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-notice-text {
   margin: 0 0 10px;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   line-height: 1.55;
   color: var(--c-slate-600);
 }
@@ -2757,7 +2757,7 @@ body.portal-tab-active .main-shell {
 .st2-about-tabs-list {
   margin: 0 0 12px;
   padding: 0 0 0 1.1rem;
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   line-height: 1.5;
   color: var(--c-slate-600);
 }
@@ -2778,7 +2778,7 @@ body.portal-tab-active .main-shell {
 .st2-about-notice-aside {
   display: block;
   margin: 0 0 10px;
-  font-size: 0.76rem;
+  font-size: var(--text-4);
   font-style: italic;
   line-height: 1.45;
   color: var(--c-slate-500);
@@ -2858,7 +2858,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-busy-text {
   margin: 12px 0 10px;
-  font-size: 0.86rem;
+  font-size: var(--text-6);
   font-weight: 650;
   color: var(--c-orange-800);
 }
@@ -2894,7 +2894,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-tools-title {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2903,13 +2903,13 @@ body.portal-tab-active .main-shell {
 
 .st2-about-tools-hint {
   margin: -4px 0 10px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   line-height: 1.4;
   color: var(--c-slate-500);
 }
 
 .st2-about-tools-hint code {
-  font-size: 0.72rem;
+  font-size: var(--text-3);
 }
 
 .st2-about-tools-clave-copy {
@@ -2947,14 +2947,14 @@ body.portal-tab-active .main-shell {
 }
 
 .st2-about-tool-name {
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   font-weight: 700;
   color: var(--dark);
   letter-spacing: 0.01em;
 }
 
 .st2-about-tool-desc {
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--c-slate-500);
   line-height: 1.35;
 }
@@ -2962,7 +2962,7 @@ body.portal-tab-active .main-shell {
 .st2-about-tool-tag {
   display: block;
   margin-top: 2px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 500;
   font-style: italic;
   letter-spacing: normal;
@@ -2972,7 +2972,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-tool-meta {
   flex-shrink: 0;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -2997,7 +2997,7 @@ body.portal-tab-active .main-shell {
 .st2-about-tool-date {
   display: block;
   margin-top: 0;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 700;
   color: var(--c-slate-900);
   letter-spacing: 0.01em;
@@ -3010,7 +3010,7 @@ body.portal-tab-active .main-shell {
 }
 
 .st2-about-tool-new {
-  font-size: 0.62rem;
+  font-size: var(--text-1);
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3036,7 +3036,7 @@ body.portal-tab-active .main-shell {
   background: var(--c-slate-100);
   color: var(--c-slate-500);
   font: inherit;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   padding: 0.48rem 0.95rem 0.48rem 0.72rem;
   cursor: not-allowed;
@@ -3097,7 +3097,7 @@ body.portal-tab-active .main-shell {
   background: var(--c-white);
   color: var(--c-slate-600);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   padding: 6px 10px;
   cursor: pointer;
@@ -3121,7 +3121,7 @@ body.portal-tab-active .main-shell {
   border-radius: var(--radius-md);
   background: var(--c-white);
   color: var(--c-slate-600);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   padding: 6px 10px;
   cursor: pointer;
@@ -3145,7 +3145,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-tools-status {
   margin: 10px 0 0;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   color: var(--c-slate-500);
   white-space: pre-wrap;
   word-break: break-word;
@@ -3196,7 +3196,7 @@ body.portal-tab-active .main-shell {
 
 .st2-tool-url-lead {
   margin: 0 0 14px;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   line-height: 1.45;
   color: var(--c-slate-500);
 }
@@ -3271,7 +3271,7 @@ body.portal-tab-active .main-shell {
 .st2-tool-url-label {
   display: block;
   margin: 0 0 5px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3286,7 +3286,7 @@ body.portal-tab-active .main-shell {
   border-radius: var(--radius-lg);
   padding: 10px 12px;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--text-6);
   color: var(--dark);
   background: var(--c-white);
 }
@@ -3298,7 +3298,7 @@ body.portal-tab-active .main-shell {
 
 .st2-tool-url-error {
   margin: 0 0 12px;
-  font-size: 0.8rem;
+  font-size: var(--text-5);
   color: var(--c-red-700);
 }
 
@@ -3316,7 +3316,7 @@ body.portal-tab-active .main-shell {
 .st2-tool-url-btn {
   border-radius: var(--radius-lg);
   font: inherit;
-  font-size: 0.84rem;
+  font-size: var(--text-5);
   font-weight: 700;
   padding: 9px 14px;
   cursor: pointer;
@@ -3363,7 +3363,7 @@ body.portal-tab-active .main-shell {
   border-radius: var(--radius-md);
   border: 1px dashed var(--c-orange-300);
   background: var(--c-orange-50);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 650;
   color: var(--c-orange-800);
   word-break: break-all;
@@ -3398,7 +3398,7 @@ body.portal-tab-active .main-shell {
   border-radius: 50%;
   background: var(--c-brand-600);
   color: var(--c-white);
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 900;
   line-height: 1;
   flex: 0 0 auto;
@@ -3410,7 +3410,7 @@ body.portal-tab-active .main-shell {
   border-radius: var(--radius-md);
   border: 1px dashed var(--c-orange-300);
   background: var(--c-orange-50);
-  font-size: 0.82rem;
+  font-size: var(--text-5);
   font-weight: 650;
   color: var(--c-orange-800);
   word-break: break-word;
@@ -3447,7 +3447,7 @@ body.portal-tab-active .main-shell {
   border-radius: 50%;
   background: linear-gradient(135deg, var(--c-orange-600), var(--c-orange-400));
   color: var(--c-white);
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   font-weight: 800;
   font-style: italic;
   font-family: Georgia, "Times New Roman", serif;
@@ -3493,7 +3493,7 @@ body.portal-tab-active .main-shell {
 
 .st2-about-changelog-title {
   margin: 0 0 8px;
-  font-size: 0.78rem;
+  font-size: var(--text-4);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--c-orange-700);
@@ -3504,7 +3504,7 @@ body.portal-tab-active .main-shell {
   padding: 0 0 0 1.1rem;
   display: grid;
   gap: 6px;
-  font-size: 0.72rem;
+  font-size: var(--text-3);
   line-height: 1.4;
   color: var(--c-slate-600);
 }
@@ -3534,7 +3534,7 @@ html.st2-theme-dark .st2-about-changelog-list {
 
 .st2-about-updated {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: var(--text-2);
   font-weight: 500;
   color: var(--c-slate-500);
   line-height: 1.35;
