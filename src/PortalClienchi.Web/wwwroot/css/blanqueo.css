@@ -911,9 +911,13 @@ button.blanqueo-clave-sugerida-btn {
   color: var(--c-emerald-50);
 }
 
+/* Filas del aviso de pendientes: tinte en toda la fila, franja naranja solo a la izquierda. */
 tr.blanqueo-row-alert td {
-  box-shadow: inset 3px 0 0 var(--c-orange-500);
   background: var(--c-orange-50);
+}
+
+tr.blanqueo-row-alert td:first-child {
+  box-shadow: inset 3px 0 0 var(--c-orange-500);
 }
 
 .blanqueo-filter-bar {

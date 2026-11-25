@@ -2665,6 +2665,9 @@ html.st2-theme-dark .borrado-table tbody tr.borrado-row-listo-nota td {
 
 html.st2-theme-dark tr.blanqueo-row-alert td {
   background: #3b2412 !important;
+}
+
+html.st2-theme-dark tr.blanqueo-row-alert td:first-child {
   box-shadow: inset 3px 0 0 var(--c-orange-400);
 }
 
