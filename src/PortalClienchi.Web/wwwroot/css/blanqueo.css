@@ -92,7 +92,7 @@
   width: 30px;
   height: 28px;
   border: 1px solid var(--c-green-700);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   padding: 0;
   background: linear-gradient(180deg, var(--c-green-500) 0%, var(--c-green-600) 100%);
   color: var(--c-white);
@@ -118,7 +118,7 @@
   align-items: center;
   margin: 0;
   border: 1px dashed var(--c-slate-300);
-  border-radius: 7px;
+  border-radius: var(--radius-md);
   padding: 4px 9px;
   background: var(--c-slate-50);
   color: var(--c-slate-500);
@@ -162,7 +162,7 @@
   flex-shrink: 0;
   margin-left: 2px;
   padding: 1px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-slate-900);
   color: var(--c-slate-50);
   font-size: 0.62rem;
@@ -210,7 +210,7 @@
   margin: 0;
   padding: 0.2rem 0.55rem;
   border: 1px dashed var(--c-sky-400);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-sky-100);
   color: var(--c-sky-700);
   font: inherit;
@@ -257,7 +257,7 @@
   transform: translateY(-50%) translateX(-4px);
   z-index: 3;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-slate-900);
   color: var(--c-slate-50);
   font-size: 0.62rem;
@@ -286,7 +286,7 @@
 
 /* Globito de contraseña: sólido, redondo, listo para copiar. */
 .blanqueo-clave-pill.blanqueo-clave-bubble {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border-style: solid;
   border-color: var(--c-orange-400);
   background: linear-gradient(180deg, var(--c-orange-50) 0%, var(--c-orange-100) 100%);
@@ -356,7 +356,7 @@
 
 /* Listo + Aclaración: cuadrado ámbar punteado. */
 .blanqueo-clave-pill--custom {
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   border-style: dashed;
   border-color: var(--c-amber-500);
   background: var(--c-amber-50);
@@ -394,7 +394,7 @@ button.blanqueo-obs-pill {
   margin: 0;
   padding: 0.2rem 0.55rem;
   border: 1px solid var(--c-amber-500);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-amber-50);
   color: var(--c-amber-800);
   font: inherit;
@@ -428,7 +428,7 @@ button.blanqueo-clave-previa-pill {
   margin: 0;
   padding: 0.16rem 0.5rem;
   border: 1px dashed var(--c-amber-500);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--c-amber-50);
   color: var(--c-amber-700);
   font: inherit;
@@ -616,7 +616,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   margin: 0;
   padding: 0.16rem 0.5rem;
   border: 1px dashed var(--c-rose-400);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-rose-200);
   color: var(--c-rose-700);
   font: inherit;
@@ -687,7 +687,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   min-width: 0.85rem;
   height: 0.85rem;
   padding: 0 0.2rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-rose-800);
   color: var(--c-white);
   font-size: 0.62rem;
@@ -732,7 +732,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   flex: 0 0 auto;
   width: 36px;
   height: 36px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--c-slate-400);
   background: var(--c-slate-50);
   color: var(--c-slate-900);
@@ -775,7 +775,7 @@ button.blanqueo-clave-previa-pill:focus-visible .blanqueo-clave-previa-pill-acti
   width: 100%;
   box-sizing: border-box;
   border: 1px solid var(--c-slate-300);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 8px 10px;
   font: inherit;
   font-size: 0.9rem;
@@ -824,7 +824,7 @@ button.blanqueo-clave-sugerida-btn {
 .blanqueo-clave-hint {
   margin: 0 0 12px;
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 1px dashed var(--c-blue-300);
   background: linear-gradient(180deg, var(--c-blue-50) 0%, var(--c-slate-50) 100%);
   font-size: 0.8rem;
@@ -861,7 +861,7 @@ button.blanqueo-clave-sugerida-btn {
   font-size: 0.86rem;
   font-weight: 700;
   padding: 3px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
@@ -877,7 +877,7 @@ button.blanqueo-clave-sugerida-btn {
   bottom: calc(100% + 8px);
   transform: translateX(-50%) translateY(4px);
   padding: 5px 9px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: var(--c-slate-900);
   color: var(--c-slate-50);
   font-family: inherit;
@@ -944,7 +944,7 @@ tr.blanqueo-row-alert td {
   margin: 0 0 2px;
   padding: 8px 10px;
   border: 1px solid var(--c-slate-300);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--c-white);
   font-size: 0.8rem;
   font-weight: 600;
@@ -970,7 +970,7 @@ tr.blanqueo-row-alert td {
   margin: 0;
   padding: 8px 12px;
   border: 1px dashed var(--c-sky-300);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--c-sky-50);
   font-size: 0.8rem;
   font-weight: 600;
@@ -998,7 +998,7 @@ tr.blanqueo-row-alert td {
 .blanqueo-filter-portal select,
 .blanqueo-filter-search input {
   border: 1px solid var(--c-slate-300);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 7px 10px;
   font: inherit;
   font-size: 0.88rem;
@@ -1023,7 +1023,7 @@ tr.blanqueo-row-alert td {
   min-height: min(58vh, 560px);
   max-height: min(82vh, 980px);
   border: 1px solid var(--c-slate-200);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .blanqueo-table {
@@ -1100,7 +1100,7 @@ tr.blanqueo-row-alert td {
   gap: 6px;
   max-width: none;
   padding: 3px 9px 3px 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -1116,7 +1116,7 @@ tr.blanqueo-row-alert td {
   min-width: 1.55rem;
   height: 1.25rem;
   padding: 0 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.6rem;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -1379,7 +1379,7 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
 .blanqueo-pill {
   display: inline-block;
   padding: 3px 9px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.35;
@@ -1403,7 +1403,7 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
   background: var(--c-orange-50);
   color: var(--c-orange-800);
   border: 1px dashed var(--c-amber-600);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   text-align: left;
   font-weight: 600;
 }
@@ -1413,7 +1413,7 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
   background: var(--c-amber-50);
   color: var(--c-amber-700);
   border: 1px dashed var(--c-amber-500);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   text-align: left;
   font-weight: 700;
   white-space: normal;
@@ -1438,7 +1438,7 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
   align-items: center;
   justify-content: center;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-slate-100);
   color: var(--c-slate-500);
   font-size: 0.72rem;
@@ -1479,7 +1479,7 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
   width: 100%;
   box-sizing: border-box;
   border: 1px solid var(--c-slate-300);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 10px 12px;
   font: inherit;
   font-size: 0.9rem;
@@ -1503,7 +1503,7 @@ html.st2-theme-dark .blanqueo-table tbody tr.blanqueo-row-noreg:hover td:first-c
 .st2-ctx-menu {
   min-width: 15.5rem;
   padding: 8px;
-  border-radius: 14px;
+  border-radius: var(--radius-2xl);
   border: 1px solid rgba(251, 146, 60, 0.28) !important;
   background:
     radial-gradient(circle at 12% 0%, rgba(251, 146, 60, 0.14), transparent 55%),
@@ -1534,7 +1534,7 @@ html:not(.st2-theme-dark) .st2-ctx-menu {
   gap: 10px;
   width: 100%;
   border: 0 !important;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: transparent !important;
   color: var(--c-orange-100) !important;
   text-align: left;
@@ -1553,7 +1553,7 @@ html:not(.st2-theme-dark) .st2-ctx-menu {
   height: 1.35rem;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.05);
   font-size: 0.78rem;
   color: var(--c-orange-300);
@@ -1652,7 +1652,7 @@ html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button.st2-ctx-danger strong {
   height: 1.6rem;
   padding: 0;
   border: 1px solid var(--c-slate-300);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--c-white);
   font-size: 0.72rem;
   line-height: 1;

@@ -48,7 +48,7 @@
   min-height: 42px;
   margin: 0;
   padding: 0 18px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   border: 1px solid transparent;
   font: inherit;
   font-size: 0.92rem;
@@ -63,7 +63,7 @@
 .plan-solid-btn--compact {
   min-height: 32px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   font-size: 0.78rem;
 }
 
@@ -115,7 +115,7 @@ html.st2-theme-dark .plan-solid-btn--preview {
   gap: 0.45rem;
   min-height: 2.55rem;
   padding: 0.55rem 1.05rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   font: inherit;
   font-size: 0.9rem;
@@ -223,7 +223,7 @@ html.st2-theme-dark .plan-solid-btn--preview {
   width: 7px;
   height: 2.5px;
   margin: -1px 0 0 -3.5px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: currentColor;
   opacity: 0.95;
   transform: translate(0, 0) rotate(var(--srot, 0deg));

@@ -5,7 +5,7 @@
   isolation: isolate;
   gap: 2px;
   padding: 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--border, var(--c-slate-200)) 35%, transparent);
   border: 1px solid color-mix(in srgb, var(--border, var(--c-slate-200)) 70%, transparent);
   box-shadow: none;
@@ -16,7 +16,7 @@
   top: 0;
   left: 0;
   z-index: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   pointer-events: none;
   opacity: 0;
   background: var(--c-white);
@@ -36,7 +36,7 @@
 .plan-segment-track.plan-pill-nav .plan-segment-btn {
   position: relative;
   z-index: 1;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   box-shadow: none;
   transform: none;
@@ -65,7 +65,7 @@
 .plan-check-wrap {
   border-width: 0;
   border-left: 3px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--c-slate-50) 80%, transparent);
   padding: 2px 4px 2px 6px;
   box-shadow: none;
@@ -103,7 +103,7 @@
 .plan-check-btn-icon {
   width: 28px;
   height: 28px;
-  border-radius: 9px;
+  border-radius: var(--radius-lg);
   background: var(--c-slate-100);
 }
 
@@ -133,7 +133,7 @@
 .plan-adj-card {
   border-width: 0;
   border-left: 3px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: color-mix(in srgb, var(--c-slate-50) 70%, transparent);
   box-shadow: none;
   min-height: 38px;
@@ -290,7 +290,7 @@ html.st2-theme-dark .plan-adj-card.tone-slate {
   background: #141414 !important;
   border: 0 !important;
   border-left: 3px solid var(--c-neutral-700) !important;
-  border-radius: 10px !important;
+  border-radius: var(--radius-lg) !important;
   box-shadow: none !important;
 }
 
@@ -342,7 +342,7 @@ html.st2-theme-dark .plan-ref-perfil-hint.is-tecnico {
 
 .plan-segment-track.plan-pill-nav {
   padding: 2px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .plan-segment-track.plan-pill-nav .plan-segment-btn {
@@ -495,7 +495,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
   flex-shrink: 0;
   min-width: 2.4rem;
   padding: 0.2rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -664,7 +664,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
   min-height: 44px;
   padding: 8px 12px;
   border: 1px dashed var(--c-slate-500);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: transparent;
 }
 
@@ -674,7 +674,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--c-orange-500) 18%, transparent);
   color: var(--c-orange-400);
   font-size: 1rem;
@@ -765,7 +765,7 @@ html.st2-theme-dark #ref-onvio-panel .plan-ticket-card {
   background: #141414 !important;
   border: 0 !important;
   border-left: 3px solid var(--c-orange-500) !important;
-  border-radius: 10px !important;
+  border-radius: var(--radius-lg) !important;
   box-shadow: none !important;
   color: var(--c-neutral-200) !important;
 }

@@ -74,7 +74,7 @@ html.st2-theme-dark ::-webkit-scrollbar {
 html.st2-theme-dark ::-webkit-scrollbar-thumb {
   background: rgba(251, 146, 60, 0.22);
   border: 3px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background-clip: padding-box;
 }
 
@@ -180,7 +180,7 @@ html.st2-theme-dark .planillas-hero p {
 html.st2-theme-dark .planillas-hero .accent-bar {
   width: 96px;
   height: 3px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(90deg, transparent, var(--r-accent) 30%, var(--r-accent-3) 70%, transparent);
   box-shadow: 0 0 18px rgba(249, 115, 22, 0.55);
 }
@@ -190,13 +190,13 @@ html.st2-theme-dark .planillas-hero .accent-bar {
 html.st2-theme-dark .plan-sistema-well {
   background: rgba(14, 11, 10, 0.6) !important;
   border: 1px solid var(--r-line-2) !important;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 5px;
   box-shadow: 0 1px 0 rgba(255, 245, 235, 0.03) inset;
 }
 
 html.st2-theme-dark .plan-sistema-indicator {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.25) inset,
@@ -204,7 +204,7 @@ html.st2-theme-dark .plan-sistema-indicator {
 }
 
 html.st2-theme-dark .plan-pill-btn {
-  border-radius: 999px !important;
+  border-radius: var(--radius-pill) !important;
   font-family: var(--r-font-ui);
   font-weight: 600 !important;
   letter-spacing: 0.02em;
@@ -459,7 +459,7 @@ html.st2-theme-dark .btn-primary {
   background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%) !important;
   border: 1px solid rgba(255, 190, 140, 0.35) !important;
   color: var(--c-white) !important;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   font-weight: 650;
   letter-spacing: 0.005em;
   box-shadow:
@@ -490,7 +490,7 @@ html.st2-theme-dark .plan-action-btn:hover:not(:disabled) {
 }
 
 html.st2-theme-dark .planillas-back {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: background 0.18s var(--r-ease), border-color 0.18s var(--r-ease), transform 0.18s var(--r-ease);
 }
 
@@ -666,7 +666,7 @@ html.st2-theme-dark #st2-access-gate .st2-access-input {
   background: rgba(9, 7, 24, 0.72);
   border: 1px solid rgba(191, 184, 255, 0.18);
   color: var(--r-text);
-  border-radius: 14px;
+  border-radius: var(--radius-2xl);
   transition: border-color 0.18s var(--r-ease), box-shadow 0.18s var(--r-ease);
 }
 
@@ -677,7 +677,7 @@ html.st2-theme-dark #st2-access-gate .st2-access-input:focus {
 }
 
 html.st2-theme-dark #st2-access-gate .st2-access-submit {
-  border-radius: 14px;
+  border-radius: var(--radius-2xl);
   background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
   border: 1px solid rgba(255, 190, 140, 0.35);
   box-shadow:
@@ -784,7 +784,7 @@ html.st2-theme-dark .st2-access-admin-export,
 html.st2-theme-dark .st2-access-admin-audit {
   background: rgba(24, 19, 17, 0.9) !important;
   border: 1px solid var(--r-line-2) !important;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   color: var(--r-text-2) !important;
   transition: border-color 0.18s var(--r-ease), color 0.18s var(--r-ease), background 0.18s var(--r-ease);
 }
@@ -900,7 +900,7 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-input:focus {
 }
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-fmt-btn {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border-color: transparent !important;
   background: transparent !important;
 }
@@ -919,7 +919,7 @@ html.st2-theme-dark .btn-secondary:not(.pdf-portal-btn-paste) {
   background: rgba(24, 19, 17, 0.9) !important;
   border: 1px solid var(--r-line-2) !important;
   color: var(--r-text-2) !important;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   transition: border-color 0.18s var(--r-ease), color 0.18s var(--r-ease), background 0.18s var(--r-ease);
 }
 

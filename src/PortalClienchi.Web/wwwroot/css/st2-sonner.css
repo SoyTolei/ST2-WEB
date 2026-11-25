@@ -2,7 +2,7 @@
 
 #st2-sonner {
   z-index: var(--z-toast);
-  --border-radius: 10px;
+  --border-radius: var(--radius-lg);
   --width: 280px;
   --gap: 6px;
   /* Defaults; JS los pisa según blobatar / brand */
@@ -34,7 +34,7 @@ body:not(.st2-sonner-home) #st2-sonner {
  * El host sonner-toast es el box visible; el interior sigue en shadow DOM.
  */
 sonner-toast.st2-sonner-toast {
-  border-radius: 10px !important;
+  border-radius: var(--radius-lg) !important;
   overflow: visible !important;
   isolation: isolate;
   font-size: 0.76rem !important;
@@ -145,7 +145,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action {
   align-self: center;
   margin: 0 0 0 6px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 12px;
   font: inherit;
   font-size: 0.72rem;
@@ -231,7 +231,7 @@ sonner-toast.st2-sonner-toast .st2-sonner-action--agua:hover {
   flex-direction: column;
   gap: 8px;
   padding: 12px 12px 10px;
-  border-radius: 16px;
+  border-radius: var(--radius-3xl);
   border: 1px solid rgba(251, 146, 60, 0.35);
   background: #1c1410;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
@@ -282,7 +282,7 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
   color: var(--c-orange-300);
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
@@ -316,7 +316,7 @@ html:not(.st2-theme-dark) .st2-notif-inbox {
   gap: 8px;
   align-items: start;
   padding: 8px 8px 8px 6px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(251, 146, 60, 0.1);
   cursor: pointer;

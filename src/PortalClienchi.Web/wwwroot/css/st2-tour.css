@@ -75,7 +75,7 @@ body.st2-tour-active {
   height: 1rem;
   border: 3px solid var(--border-color, var(--c-orange-500));
   filter: drop-shadow(0 0 4px var(--border-color, var(--c-orange-500)));
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   pointer-events: none;
   box-sizing: border-box;
 }
@@ -317,7 +317,7 @@ body.st2-tour-active {
 
 .st2-tour-btn {
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.42rem 0.9rem;
   font: inherit;
   font-size: 0.82rem;
@@ -358,7 +358,7 @@ body.st2-tour-active {
   gap: 0.4rem;
   max-width: min(220px, 34vw);
   border: 1px solid rgba(251, 146, 60, 0.35);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 12px 6px 8px;
   background: rgba(28, 22, 18, 0.92);
   color: rgba(255, 247, 237, 0.95);

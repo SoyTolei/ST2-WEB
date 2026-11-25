@@ -1272,7 +1272,7 @@ html.st2-theme-dark .plan-check-btn .plan-check-badge.is-auto {
 html.st2-theme-dark .plan-check-btn-icon {
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: #2a2a2a;
 }
 
@@ -1601,7 +1601,7 @@ html.st2-theme-dark ::-webkit-scrollbar {
 
 html.st2-theme-dark ::-webkit-scrollbar-thumb {
   background: #3b4658;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 html.st2-theme-dark ::-webkit-scrollbar-track {
