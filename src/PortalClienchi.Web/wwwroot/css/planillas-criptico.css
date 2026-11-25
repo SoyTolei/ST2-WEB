@@ -1,0 +1,1461 @@
+/*
+ * ST2 · Críptico del día (Planillas y /criptico).
+ * Se carga después de planillas.css y planillas-agua.css.
+ */
+.st2-cryptic {
+  position: relative;
+  width: min(1200px, 98vw);
+  margin: 14px auto 0;
+  padding: 18px;
+  color: var(--text);
+  background: var(--st2-suite-surface);
+  border: 1px solid var(--st2-suite-border);
+  border-radius: var(--r-radius-lg, 20px);
+  box-shadow: var(--st2-suite-glow);
+}
+
+.st2-cryptic::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(251, 146, 60, 0.45), transparent);
+  pointer-events: none;
+}
+
+.st2-cryptic.is-nudged {
+  outline: 2px solid var(--c-orange-500);
+  outline-offset: 3px;
+}
+
+.st2-cryptic-loading {
+  min-height: 112px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.st2-cryptic-head,
+.st2-cryptic-ranking-head,
+.st2-cryptic-answer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.st2-cryptic-head h2 {
+  margin: 2px 0 0;
+  font-family: var(--r-font-display, inherit);
+  font-size: 1.18rem;
+  letter-spacing: -0.02em;
+}
+
+.st2-cryptic-head p {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  text-transform: capitalize;
+}
+
+.st2-cryptic-about {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.st2-cryptic-about + .st2-cryptic-body {
+  margin-top: 16px;
+}
+
+.st2-cryptic-kicker {
+  color: var(--c-orange-500);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.st2-cryptic-rank-toggle,
+.st2-cryptic-actions button,
+.st2-cryptic-hint-picks button,
+.st2-cryptic-notice button {
+  min-height: 36px;
+  padding: 0 13px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 75%, var(--c-orange-500) 7%);
+  border: 1px solid color-mix(in srgb, var(--border) 72%, var(--c-orange-500) 28%);
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-cryptic-rank-toggle span {
+  display: inline-grid;
+  min-width: 20px;
+  min-height: 20px;
+  margin-left: 5px;
+  place-items: center;
+  color: var(--c-white);
+  background: var(--c-orange-500);
+  border-radius: var(--radius-pill);
+  font-size: 0.66rem;
+}
+
+.st2-cryptic-rounds {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 16px 0 12px;
+}
+
+.st2-cryptic-round {
+  min-width: 0;
+  min-height: 53px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 7px;
+  align-items: center;
+  padding: 8px 10px;
+  text-align: left;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.st2-cryptic-round > span {
+  grid-row: 1 / 3;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-round strong {
+  font-size: 0.76rem;
+}
+
+.st2-cryptic-round small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st2-cryptic-round.is-active {
+  border-color: color-mix(in srgb, var(--c-orange-500) 64%, var(--border));
+  background: color-mix(in srgb, var(--panel) 78%, var(--c-orange-500) 11%);
+}
+
+.st2-cryptic-round.is-solved > span {
+  color: var(--c-green-500);
+}
+
+.st2-cryptic-round.is-available > span,
+.st2-cryptic-round.is-active > span {
+  color: var(--c-orange-500);
+}
+
+.st2-cryptic-body {
+  min-height: 150px;
+  padding: 15px;
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.st2-cryptic-clue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.st2-cryptic-clue-meta span {
+  padding: 3px 8px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 80%, #3a3391 12%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-clue {
+  margin: 14px 0 15px;
+  padding: 0;
+  color: var(--text);
+  border: 0;
+  font-family: var(--r-font-display, inherit);
+  font-size: clamp(1rem, 1.6vw, 1.3rem);
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.st2-cryptic-clue b {
+  color: var(--c-orange-500);
+  font-size: 0.78em;
+  white-space: nowrap;
+}
+
+.st2-cryptic-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.st2-cryptic-actions button {
+  flex: 0 0 auto;
+  width: auto;
+  white-space: nowrap;
+}
+
+.st2-cryptic-help {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+}
+
+.st2-cryptic-attempt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-pips {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.st2-cryptic-pips i {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.st2-cryptic-pips i.is-used {
+  background: var(--c-red-500);
+  border-color: var(--c-red-500);
+}
+
+.st2-cryptic-hint-picks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.st2-cryptic-hint-picks button {
+  min-height: 46px;
+  padding: 6px 4px;
+  border-radius: var(--radius-lg);
+  font-size: 0.62rem;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.st2-cryptic-hint-picks button.is-on,
+.st2-cryptic-hint-picks button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.st2-cryptic-hint-picks button.is-on {
+  color: var(--text);
+  border-color: var(--c-orange-500);
+  box-shadow: inset 0 0 0 1px var(--c-orange-500);
+  background: color-mix(in srgb, var(--panel) 78%, var(--c-orange-500) 14%);
+}
+
+.st2-cryptic-mark.is-definition {
+  text-decoration: underline;
+  text-decoration-color: var(--c-green-500);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.st2-cryptic-mark.is-indicator {
+  text-decoration: underline;
+  text-decoration-color: var(--c-orange-500);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.st2-cryptic-mark.is-fodder {
+  text-decoration: underline;
+  text-decoration-color: var(--c-sky-400);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.st2-cryptic-hint-sheet {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--panel) 86%, var(--c-black) 8%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.st2-cryptic-hint-sheet strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.78rem;
+}
+
+.st2-cryptic-hint-sheet p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.st2-cryptic-guide {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.st2-cryptic-guide-card {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  padding: 22px 22px 18px;
+  color: var(--text);
+  background: var(--panel, var(--c-white));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3xl);
+}
+
+.st2-cryptic-guide-card h3 {
+  margin: 4px 0 10px;
+  font-size: 1.35rem;
+}
+
+.st2-cryptic-guide-card p {
+  margin: 0 0 10px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.st2-cryptic-guide-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.st2-cryptic-guide-rules {
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--c-orange-500) 12%, var(--panel));
+  border-radius: var(--radius-lg);
+}
+
+.st2-cryptic-guide-label {
+  margin: 14px 0 8px;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.st2-cryptic-guide-anatomy,
+.st2-cryptic-guide-types {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.st2-cryptic-guide-anatomy div,
+.st2-cryptic-guide-types article {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.st2-cryptic-guide-anatomy dt,
+.st2-cryptic-guide-types h4 {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.st2-cryptic-guide-anatomy dd,
+.st2-cryptic-guide-types p,
+.st2-cryptic-guide-types span {
+  margin: 3px 0 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.st2-cryptic-actions button:disabled,
+.st2-cryptic-check:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.code-slots {
+  /* Tema claro (base). El oscuro redefine estas variables en theme-dark.css. */
+  --cs-accent: var(--c-orange-500);
+  --cs-ink: var(--c-orange-600);
+  --cs-slot: var(--c-white);
+  --cs-ring: var(--c-slate-300);
+  --cs-fill: var(--c-orange-100);
+  --cs-fill-ring: var(--c-orange-300);
+  --cs-digit: var(--c-slate-900);
+  --cs-hint: var(--c-orange-500);
+  --cs-hint-digit: var(--c-white);
+  --cs-wash-ink: var(--c-white);
+  --cs-danger: var(--c-red-600);
+  --cs-danger-fill: var(--c-red-100);
+  --cs-size: 36px;
+  --cs-gap: 4px;
+  --cs-radius: 12px;
+  --cs-font: 16px;
+  position: relative;
+  width: 100%;
+}
+
+.code-slots__row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: text;
+  touch-action: manipulation;
+}
+
+.code-slots__row[data-disabled] {
+  cursor: progress;
+}
+
+.code-slots__word {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--cs-gap);
+  max-width: 100%;
+}
+
+.code-slots__input {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: 16px;
+  opacity: 0;
+}
+
+.code-slots__slot {
+  position: relative;
+  width: var(--cs-size);
+  height: calc(var(--cs-size) * 1.18);
+  flex: 0 0 var(--cs-size);
+  border-radius: min(var(--cs-radius), calc(var(--cs-size) / 2));
+  overflow: hidden;
+  background: var(--cs-slot);
+  box-shadow: inset 0 0 0 1.5px var(--cs-ring);
+  user-select: none;
+}
+
+.code-slots__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--cs-fill);
+  box-shadow: inset 0 0 0 1.5px var(--cs-fill-ring);
+  transform: scale(0);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.code-slots__slot.is-active {
+  background: color-mix(in srgb, var(--cs-ink) 16%, var(--cs-slot));
+  box-shadow: inset 0 0 0 1.5px var(--cs-ink);
+}
+
+.code-slots__row[data-status="error"] .code-slots__slot {
+  background: color-mix(in srgb, var(--cs-danger) 24%, var(--cs-slot));
+}
+
+.code-slots__row[data-status="error"] .code-slots__slot {
+  box-shadow: inset 0 0 0 1.5px var(--cs-danger);
+}
+
+.code-slots__row[data-status="error"] .code-slots__fill {
+  background: var(--cs-danger-fill);
+  box-shadow: inset 0 0 0 1.5px var(--cs-danger);
+}
+
+.code-slots__digit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: var(--cs-digit);
+  font-size: var(--cs-font);
+  font-weight: 700;
+  line-height: 1;
+  opacity: 0;
+  transform: translateY(8px);
+  will-change: transform, opacity;
+}
+
+.code-slots__slot.is-hint .code-slots__fill {
+  background: var(--cs-hint);
+  box-shadow: none;
+}
+
+.code-slots__slot.is-hint .code-slots__digit {
+  color: var(--cs-hint-digit);
+}
+
+.code-slots__slot.is-caret::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 24%;
+  left: calc(50% - 0.75px);
+  width: 1.5px;
+  height: 52%;
+  background: var(--cs-ink);
+  animation: code-slots-blink 1s linear infinite;
+}
+
+.code-slots__wash {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-xl);
+  background: var(--cs-accent);
+  color: var(--cs-wash-ink);
+  pointer-events: none;
+  opacity: 0;
+  clip-path: inset(0 50% round 12px);
+}
+
+.code-slots__row[data-status="success"] .code-slots__wash {
+  opacity: 1;
+  clip-path: inset(0 0 round 12px);
+  transition: clip-path 0.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s ease;
+}
+
+.code-slots__check {
+  width: calc(var(--cs-size) * 0.7);
+  height: calc(var(--cs-size) * 0.7);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: translateY(6px) scale(0.9);
+  opacity: 0;
+}
+
+.code-slots__row[data-status="success"] .code-slots__check {
+  opacity: 1;
+  transform: none;
+  transition: transform 0.35s cubic-bezier(0.23, 1, 0.32, 1) 0.18s, opacity 0.2s ease 0.18s;
+}
+
+@keyframes code-slots-blink {
+  0%, 49.9% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .code-slots__fill,
+  .code-slots__digit,
+  .code-slots__wash,
+  .code-slots__check,
+  .code-slots__slot.is-caret::after {
+    transition: none;
+    animation: none;
+    transform: none;
+  }
+}
+
+.st2-cryptic-status {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.st2-cryptic-status.is-error {
+  color: var(--c-red-500);
+}
+
+.st2-cryptic-ranking-head.is-season {
+  margin-top: 14px;
+}
+
+.st2-cryptic-rank-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--panel) 70%, transparent);
+  border: 1px solid var(--st2-suite-border, var(--border));
+  border-radius: var(--radius-pill);
+}
+
+.st2-cryptic-rank-tabs button {
+  min-height: 28px;
+  padding: 0 8px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-cryptic-rank-tabs button.is-active {
+  color: var(--c-white);
+  background: linear-gradient(180deg, #fb8a3c 0%, var(--c-orange-600) 100%);
+  box-shadow: 0 6px 16px -6px rgba(249, 115, 22, 0.7);
+}
+
+.st2-cryptic-actions button {
+  min-height: 32px;
+  padding-inline: 12px;
+  font-size: 0.7rem;
+}
+
+.st2-cryptic-actions .st2-cryptic-check {
+  color: var(--c-teal-950);
+  background: linear-gradient(180deg, var(--c-teal-300) 0%, var(--c-teal-600) 100%);
+  border-color: transparent;
+  box-shadow: 0 8px 18px -10px rgba(13, 148, 136, 0.95);
+}
+
+.st2-cryptic-actions .st2-cryptic-check:disabled {
+  color: var(--c-teal-950);
+  box-shadow: none;
+}
+
+.st2-cryptic-hint-cost {
+  margin-left: 4px;
+  color: var(--c-orange-500);
+  font-weight: 800;
+}
+
+.st2-cryptic-attempts {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-hint-note {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.st2-cryptic-guest-note {
+  margin: 14px 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+body.st2-cryptic-public {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 420px at 50% -10%, rgba(249, 115, 22, 0.16), transparent 60%),
+    #0c0c0e;
+}
+
+.st2-cryptic-public-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 4px 0;
+  color: var(--text-muted, var(--c-zinc-400));
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-public-brand {
+  color: var(--c-white);
+  font-family: var(--r-font-display, Sora, sans-serif);
+  font-size: 1.15rem;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.st2-cryptic-public-brand sup {
+  color: var(--c-orange-500);
+  font-size: 0.62em;
+}
+
+.st2-cryptic-public-enter {
+  margin-left: auto;
+  color: inherit;
+  text-decoration: none;
+}
+
+.st2-cryptic-public-enter:hover {
+  color: var(--c-white);
+}
+
+.st2-cryptic-stage {
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 18px 0 40px;
+}
+
+body.st2-cryptic-public .st2-cryptic {
+  width: 100%;
+  min-height: calc(100vh - 120px);
+  margin: 0;
+  padding: 36px 40px 32px;
+}
+
+body.st2-cryptic-public .st2-cryptic-head,
+body.st2-cryptic-public .st2-cryptic-head > div {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+body.st2-cryptic-public .st2-cryptic-head h2 {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+body.st2-cryptic-public .st2-cryptic-head p {
+  text-transform: none;
+}
+
+body.st2-cryptic-public .st2-cryptic-head p::first-letter {
+  text-transform: uppercase;
+}
+
+body.st2-cryptic-public .st2-cryptic-about,
+body.st2-cryptic-public .st2-cryptic-next {
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-size: 0.92rem;
+}
+
+body.st2-cryptic-public .st2-cryptic-body + .st2-cryptic-about {
+  margin-top: 22px;
+}
+
+body.st2-cryptic-public .st2-cryptic-rounds {
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+body.st2-cryptic-public .st2-cryptic-body {
+  margin-top: 22px;
+  padding: 36px 28px 32px;
+}
+
+body.st2-cryptic-public .st2-cryptic-clue {
+  margin: 8px auto 28px;
+  max-width: 18em;
+  font-size: clamp(1.7rem, 3.6vw, 2.7rem);
+  line-height: 1.25;
+  text-align: center;
+}
+
+body.st2-cryptic-public .code-slots {
+  --cs-size: 72px;
+  --cs-font: 30px;
+  --cs-gap: 12px;
+}
+
+body.st2-cryptic-public .code-slots__row,
+body.st2-cryptic-public .st2-cryptic-actions,
+body.st2-cryptic-public .st2-cryptic-foot {
+  align-items: center;
+  justify-content: center;
+}
+
+body.st2-cryptic-public .st2-cryptic-actions {
+  margin-top: 28px;
+}
+
+body.st2-cryptic-public .st2-cryptic-actions button {
+  min-height: 44px;
+  padding-inline: 18px;
+  font-size: 0.9rem;
+}
+
+body.st2-cryptic-public .st2-cryptic-hint-list,
+body.st2-cryptic-public .st2-cryptic-hint-note,
+body.st2-cryptic-public .st2-cryptic-attempts,
+body.st2-cryptic-public .st2-cryptic-status {
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  body.st2-cryptic-public .st2-cryptic {
+    padding: 22px 16px 20px;
+  }
+
+  body.st2-cryptic-public .code-slots {
+    --cs-size: 46px;
+    --cs-font: 20px;
+  }
+}
+
+.st2-cryptic-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.st2-cryptic-rank-link {
+  padding: 0;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.st2-cryptic-rank-link:hover {
+  color: var(--text);
+}
+
+.st2-cryptic-hint-list {
+  margin: 9px 0 0;
+  padding: 10px 12px 10px 27px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 72%, #3a3391 8%);
+  border-radius: var(--radius-lg);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.st2-cryptic-notice {
+  min-height: 116px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.st2-cryptic-notice strong {
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.st2-cryptic-notice p {
+  margin: 0;
+  font-size: 0.73rem;
+}
+
+.st2-cryptic-notice button {
+  width: fit-content;
+  margin: 8px auto 0;
+}
+
+.st2-cryptic-solution {
+  display: grid;
+  gap: 11px;
+}
+
+.st2-cryptic-answer {
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--c-green-500) 11%, var(--panel));
+  border: 1px solid color-mix(in srgb, var(--c-green-500) 42%, var(--border));
+  border-radius: var(--radius-lg);
+}
+
+.st2-cryptic-answer span,
+.st2-cryptic-answer small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.st2-cryptic-answer strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.st2-cryptic-solution dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+
+.st2-cryptic-solution dl > div {
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.st2-cryptic-solution dt {
+  color: var(--text-muted);
+  font-size: 0.61rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.st2-cryptic-solution dd {
+  margin: 3px 0 0;
+  color: var(--text);
+  font-size: 0.73rem;
+}
+
+.st2-cryptic-parse {
+  margin: 0;
+  padding: 9px 11px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--c-orange-500) 7%, var(--panel));
+  border-left: 3px solid var(--c-orange-500);
+  border-radius: 4px 8px 8px 4px;
+  font-size: 0.73rem;
+  line-height: 1.5;
+}
+
+.st2-cryptic-ranking {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.st2-cryptic-ranking-head strong {
+  font-size: 0.82rem;
+}
+
+.st2-cryptic-ranking-head small {
+  color: var(--text-muted);
+  font-size: 0.64rem;
+}
+
+.st2-cryptic-ranking ol {
+  display: grid;
+  gap: 4px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.st2-cryptic-ranking li {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 35px;
+  padding: 5px 8px;
+  border-radius: var(--radius-md);
+  font-size: 0.7rem;
+}
+
+.st2-cryptic-ranking li:nth-child(odd) {
+  background: color-mix(in srgb, var(--panel) 78%, transparent);
+}
+
+.st2-cryptic-rank-pos {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 76%, var(--c-orange-500) 8%);
+  border-radius: var(--radius-pill);
+  font-size: 0.63rem;
+  font-weight: 800;
+}
+
+.st2-cryptic-rank-player {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st2-cryptic-rank-meta,
+.st2-cryptic-empty {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.st2-cryptic-empty {
+  margin: 12px 0 0;
+  text-align: center;
+}
+
+html.st2-theme-dark .st2-cryptic-body,
+html.st2-theme-dark .st2-cryptic-round,
+html.st2-theme-dark .st2-cryptic-solution dl > div {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(249, 115, 22, 0.09), transparent 62%),
+    linear-gradient(180deg, var(--r-surface-2) 0%, var(--r-surface-1) 100%);
+  border-color: var(--r-line);
+  box-shadow: var(--r-shadow-card);
+}
+
+html.st2-theme-dark .st2-cryptic-body,
+html.st2-theme-dark .st2-cryptic-round {
+  border-radius: 18px;
+}
+
+html.st2-theme-dark .st2-cryptic-rank-tabs {
+  background: rgba(14, 11, 10, 0.6);
+  border-color: var(--r-line-2);
+}
+
+html.st2-theme-dark .st2-cryptic-ranking li:nth-child(odd) {
+  background: linear-gradient(180deg, rgba(27, 23, 21, 0.9), rgba(20, 17, 16, 0.9));
+}
+
+@media (min-width: 1850px) {
+  .st2-cryptic {
+    position: fixed;
+    z-index: 25;
+    top: 152px;
+    right: 22px;
+    width: 300px;
+    max-height: calc(100vh - 174px);
+    margin: 0;
+    overflow: auto;
+  }
+
+  .st2-cryptic-ranking ol {
+    max-height: 220px;
+    overflow: auto;
+  }
+
+  .st2-cryptic-round {
+    padding-inline: 7px;
+  }
+
+  .st2-cryptic-round small {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .st2-cryptic {
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: var(--radius-xl);
+  }
+
+  .st2-cryptic-head {
+    align-items: flex-start;
+  }
+
+  .st2-cryptic-rank-toggle {
+    padding-inline: 10px;
+  }
+
+  .st2-cryptic-round {
+    padding-inline: 6px;
+  }
+
+  .st2-cryptic-round small {
+    display: none;
+  }
+
+  .st2-cryptic-solution dl {
+    grid-template-columns: 1fr;
+  }
+
+  .st2-cryptic-ranking li {
+    grid-template-columns: 24px minmax(0, 1fr) auto auto;
+  }
+}
+
+/* ── Editorial de Crípticos en ADMIN ───────────────────────────── */
+
+.st2-cryptic-admin {
+  display: grid;
+  gap: 14px;
+  padding: 18px 0 4px;
+}
+
+.st2-cryptic-admin-head,
+.st2-cryptic-admin-actions,
+.st2-cryptic-admin-checks {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.st2-cryptic-admin-head h4 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.st2-cryptic-admin-head p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
+.st2-cryptic-admin-form {
+  padding: 16px;
+  background: color-mix(in srgb, var(--panel) 88%, #3a3391 5%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.st2-cryptic-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.st2-cryptic-admin-grid label {
+  display: grid;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-admin-grid label.is-wide {
+  grid-column: 1 / -1;
+}
+
+.st2-cryptic-admin-grid input,
+.st2-cryptic-admin-grid textarea,
+.st2-cryptic-admin-grid select,
+.st2-cryptic-admin-toolbar input {
+  width: 100%;
+  min-height: 39px;
+  padding: 8px 10px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 0.76rem;
+}
+
+.st2-cryptic-admin-grid textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.st2-cryptic-admin-checks {
+  justify-content: flex-start;
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-admin-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#st2-cryptic-admin-status {
+  min-height: 18px;
+  margin: 8px 0;
+  color: var(--c-red-500);
+  font-size: 0.72rem;
+}
+
+.st2-cryptic-admin-actions {
+  justify-content: flex-end;
+}
+
+.st2-cryptic-admin-toolbar input {
+  max-width: 440px;
+}
+
+.st2-cryptic-admin-list {
+  display: grid;
+  gap: 7px;
+  max-height: 58vh;
+  overflow: auto;
+}
+
+.st2-cryptic-admin-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 12px;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.st2-cryptic-admin-item.is-inactive {
+  opacity: 0.62;
+}
+
+.st2-cryptic-admin-item-main {
+  min-width: 0;
+}
+
+.st2-cryptic-admin-item-main > strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.st2-cryptic-admin-item-main > p {
+  overflow: hidden;
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.st2-cryptic-admin-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.st2-cryptic-admin-item-badges span {
+  padding: 2px 6px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--panel) 70%, #3a3391 10%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 0.59rem;
+  font-weight: 700;
+}
+
+.st2-cryptic-admin-item-badges span.is-reviewed {
+  color: var(--c-green-600);
+  border-color: color-mix(in srgb, var(--c-green-500) 35%, var(--border));
+}
+
+.st2-cryptic-admin-item-badges span.is-pending {
+  color: var(--c-orange-500);
+}
+
+.st2-cryptic-admin-item > button {
+  min-height: 34px;
+  padding: 0 11px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-cryptic-admin-empty {
+  padding: 22px;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 0.76rem;
+}
+
+@media (max-width: 720px) {
+  .st2-cryptic-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .st2-cryptic-admin-grid label.is-wide {
+    grid-column: auto;
+  }
+
+  .st2-cryptic-admin-checks {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Críptico: días anteriores jugables y salto a la ronda abierta. */
+.st2-cryptic-days {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0 0;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.st2-cryptic-days::-webkit-scrollbar {
+  display: none;
+}
+
+.st2-cryptic-day {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--panel) 82%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.st2-cryptic-day small {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.st2-cryptic-day.is-done small {
+  color: var(--c-green-600);
+}
+
+.st2-cryptic-day.is-pending small {
+  color: var(--c-orange-600);
+}
+
+.st2-cryptic-day.is-active {
+  border-color: color-mix(in srgb, var(--c-orange-500) 64%, var(--border));
+  background: color-mix(in srgb, var(--panel) 78%, var(--c-orange-500) 11%);
+}
+
+.st2-cryptic-day:focus-visible,
+.st2-cryptic-go:focus-visible {
+  outline: 2px solid var(--c-orange-500);
+  outline-offset: 2px;
+}
+
+.st2-cryptic-go {
+  margin-top: 10px;
+  padding: 6px 14px;
+  color: var(--c-white);
+  background: var(--c-orange-500);
+  border: 0;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.st2-cryptic-go:hover {
+  background: var(--c-orange-600);
+}
+
+body.st2-cryptic-public .st2-cryptic-days {
+  justify-content: center;
+  text-align: center;
+}
+
+html.st2-theme-dark .st2-cryptic-day {
+  background: var(--r-surface-2);
+  border-color: var(--r-line);
+}
+
+html.st2-theme-dark .st2-cryptic-day.is-active {
+  border-color: rgba(249, 115, 22, 0.6);
+  background: color-mix(in srgb, var(--r-surface-2) 80%, var(--c-orange-500) 20%);
+}
+
+html.st2-theme-dark .st2-cryptic-day.is-done small {
+  color: var(--c-green-400);
+}
+
+html.st2-theme-dark .st2-cryptic-day.is-pending small {
+  color: var(--c-orange-400);
+}
+
+/* Críptico: que se note cuál ronda falta y cuál estás mirando (claro y oscuro). */
+.st2-cryptic-round.is-available {
+  border-color: color-mix(in srgb, var(--c-orange-500) 55%, var(--border));
+}
+
+.st2-cryptic-round.is-available small {
+  color: var(--c-orange-600);
+  font-weight: 700;
+}
+
+.st2-cryptic-round.is-available > span {
+  animation: st2-cryptic-pending 1.6s ease-in-out infinite;
+}
+
+.st2-cryptic-round.is-active {
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.3);
+}
+
+html.st2-theme-dark .st2-cryptic-round.is-available {
+  border-color: rgba(249, 115, 22, 0.5);
+}
+
+html.st2-theme-dark .st2-cryptic-round.is-available small {
+  color: var(--c-orange-400);
+}
+
+html.st2-theme-dark .st2-cryptic-round.is-active {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(249, 115, 22, 0.24), transparent 70%),
+    linear-gradient(180deg, var(--r-surface-2) 0%, var(--r-surface-1) 100%);
+  border-color: rgba(249, 115, 22, 0.85);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.45), var(--r-shadow-card);
+}
+
+@keyframes st2-cryptic-pending {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-cryptic-round.is-available > span {
+    animation: none;
+  }
+}

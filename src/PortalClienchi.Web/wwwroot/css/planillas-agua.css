@@ -1,0 +1,227 @@
+/*
+ * ST2 · Planillas: easter egg del agua.
+ * Se carga después de planillas.css (mismo orden que antes del corte).
+ */
+/* Contador de agua (easter Jorge) — solo menú principal */
+.planillas-hero:has(#st2-agua-widget:not(.hidden)) {
+  padding-left: 72px;
+}
+
+.st2-agua-widget {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.st2-agua-widget.hidden {
+  display: none !important;
+}
+
+.st2-agua-bottle {
+  width: auto;
+  height: 90px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: default;
+  pointer-events: none;
+  transition: filter 0.18s ease;
+  flex-shrink: 0;
+}
+
+.st2-agua-bottle.is-viewas-test {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.st2-agua-bottle img {
+  display: block;
+  width: auto;
+  height: 90px;
+  max-width: none;
+  image-rendering: pixelated;
+  pointer-events: none;
+  background: transparent;
+}
+
+.st2-agua-bottle.is-full {
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.75));
+}
+
+.st2-agua-widget.is-done .st2-agua-bottle.is-full {
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.7));
+}
+
+.st2-agua-meter {
+  position: relative;
+  width: 8px;
+  height: 90px;
+  margin-bottom: 6px;
+  border-radius: var(--radius-pill);
+  background: rgba(148, 163, 184, 0.28);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.st2-agua-meter-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--c-sky-300) 0%, var(--c-sky-500) 55%, var(--c-sky-600) 100%);
+  transition: height 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.45s ease, box-shadow 0.45s ease;
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.45);
+}
+
+.st2-agua-meter-fill.is-full {
+  background: linear-gradient(180deg, var(--c-green-300) 0%, var(--c-green-500) 45%, var(--c-green-700) 100%);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.7);
+}
+
+.st2-agua-meter-tick {
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  bottom: var(--tick, 50%);
+  height: 1px;
+  background: rgba(255, 255, 255, 0.55);
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.st2-agua-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-floating);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(2, 8, 23, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.st2-agua-overlay.hidden {
+  display: none !important;
+}
+
+.st2-agua-stage {
+  position: relative;
+  width: min(560px, 92vw);
+  height: min(320px, 52vw);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.st2-agua-stage-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+
+.st2-agua-stage-from {
+  opacity: 1;
+  transform: scale(1);
+  z-index: 1;
+}
+
+.st2-agua-stage-to {
+  opacity: 0;
+  transform: scale(0.92) translateY(8px);
+  z-index: 2;
+}
+
+.st2-agua-overlay.is-swap .st2-agua-stage-from {
+  opacity: 0;
+  transform: scale(1.05) translateY(-6px);
+}
+
+.st2-agua-overlay.is-swap .st2-agua-stage-to {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.st2-agua-fill-wave {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 12%;
+  height: 0%;
+  border-radius: 0 0 18px 18px;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.15), rgba(14, 165, 233, 0.45));
+  pointer-events: none;
+  z-index: 3;
+  transition: height 0.7s ease;
+}
+
+.st2-agua-overlay.is-filling .st2-agua-fill-wave {
+  height: 58%;
+}
+
+.st2-agua-overlay.is-done .st2-agua-fill-wave {
+  height: 0%;
+  opacity: 0;
+  transition: height 0.35s ease, opacity 0.35s ease;
+}
+
+.st2-agua-overlay-caption {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--c-sky-100);
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.st2-agua-overlay.is-open .st2-agua-overlay-caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.st2-agua-stage-gif {
+  opacity: 0;
+  z-index: 4;
+  transform: scale(1);
+}
+
+.st2-agua-overlay.has-gif .st2-agua-stage-gif {
+  opacity: 1;
+}
+
+.st2-agua-overlay.has-gif .st2-agua-stage-from,
+.st2-agua-overlay.has-gif .st2-agua-stage-to,
+.st2-agua-overlay.has-gif .st2-agua-fill-wave {
+  opacity: 0;
+}
+
+.st2-agua-overlay.has-gif.is-swap .st2-agua-stage-gif {
+  opacity: 0;
+}
+
+.st2-agua-overlay.has-gif.is-swap .st2-agua-stage-to {
+  opacity: 1;
+  transform: scale(1);
+}
+
