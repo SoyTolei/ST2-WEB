@@ -39,18 +39,18 @@ export const PLANILLAS_EASTER_EGGS = [
   },
   {
     email: "aylen.cristaldo@thomsonreuters.com",
-    src: "/img/aylenglobo-corner.gif?v=3",
+    src: "/img/aylenglobo-corner.gif?v=4",
     motion: "still",
     side: "left",
     size: "md",
   },
   {
     email: "yohanaelizabeth.orellana@thomsonreuters.com",
-    src: "/img/yohannaboca-corner.gif?v=2",
+    src: "/img/yohannaboca-corner.gif?v=3",
     motion: "still",
     side: "left",
     size: "md",
-    peekSrc: "/img/yohana-palermo.gif?v=1",
+    peekSrc: "/img/yohana-palermo.webp?v=1",
     peekHeroTall: true,
   },
   {

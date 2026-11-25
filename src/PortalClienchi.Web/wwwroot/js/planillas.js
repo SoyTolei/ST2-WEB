@@ -23,7 +23,7 @@ import {
   startAccessAlertsPolling,
   renderAccessAlertUi,
 } from "./access-alerts.js?v=20261114d";
-import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js?v=20261013d";
+import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js?v=20261125a";
 import { syncAguaEgg } from "./planillas-agua-egg.js?v=20261114d";
 import {
   initSt2Tours,

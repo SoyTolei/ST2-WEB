@@ -9,11 +9,11 @@ import { notifyAccessChanged } from "./access-alerts.js?v=20261114d";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js?v=20261114d";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js?v=20261027a";
 import { initCrypticNudge } from "./st2-cryptic-nudge.js?v=20261114d";
-import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261013d";
+import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js?v=20261125a";
 import { mountBellToggle } from "./st2-bell-toggle.js?v=20261013c";
 import { getNotifInboxUnreadCount } from "./st2-notif-inbox.js?v=20261114c";
 import { initUsageTracking, trackUsage } from "./st2-usage.js?v=20260909a";
-import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261118f";
+import { initPlanillas, goPlanillasHome } from "./planillas.js?v=20261125a";
 import { initCrypticAdmin, loadCrypticAdminClues } from "./st2-cryptic-admin.js?v=20261023a";
 import {
   ACCESS_NAME_PARTICLES,
