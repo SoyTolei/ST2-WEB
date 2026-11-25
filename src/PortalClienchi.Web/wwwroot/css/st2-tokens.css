@@ -267,3 +267,25 @@
   --radius-3xl: 16px;
   --radius-pill: 999px;
 }
+
+/*
+ * Grises oscuros del tema oscuro (superficies). Nombre = byte hex: --c-ink-1c = #1c1c1c.
+ * Para unificar capas, cambiar acá el valor de un token (ej. --c-ink-1a: var(--c-ink-1c)).
+ */
+:root {
+  --c-ink-0f: #0f0f0f;
+  --c-ink-10: #101010;
+  --c-ink-11: #111111;
+  --c-ink-12: #121212;
+  --c-ink-14: #141414;
+  --c-ink-15: #151515;
+  --c-ink-16: #161616;
+  --c-ink-1a: #1a1a1a;
+  --c-ink-1c: #1c1c1c;
+  --c-ink-1f: #1f1f1f;
+  --c-ink-22: #222222;
+  --c-ink-24: #242424;
+  --c-ink-2a: #2a2a2a;
+  --c-ink-33: #333333;
+  --c-ink-34: #343434;
+}

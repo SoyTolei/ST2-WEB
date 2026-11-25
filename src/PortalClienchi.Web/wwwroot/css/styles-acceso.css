@@ -2929,7 +2929,7 @@
 /* ── Acceso corporativo (gate de entrada) ── */
 body.st2-access-pending,
 body.st2-access-restoring {
-  background: #161616;
+  background: var(--c-ink-16);
 }
 
 /* Hasta que hay sesión OK, la app no se ve (ni borrosa). */
@@ -2965,7 +2965,7 @@ body.st2-access-restoring #st2-access-gate {
   background:
     radial-gradient(ellipse 85% 120% at 0% 0%, rgba(71, 85, 105, 0.2) 0%, transparent 58%),
     radial-gradient(ellipse 70% 110% at 100% 0%, rgba(234, 88, 12, 0.14) 0%, transparent 52%),
-    linear-gradient(180deg, #222222 0%, #161616 100%);
+    linear-gradient(180deg, var(--c-ink-22) 0%, var(--c-ink-16) 100%);
   color: var(--c-slate-200);
 }
 

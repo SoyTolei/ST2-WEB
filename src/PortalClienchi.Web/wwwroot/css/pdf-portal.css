@@ -322,7 +322,7 @@
 
 /* Hoja oscura cuando se activa explícitamente o en dark mode */
 .pdf-portal-preview.sheet-dark {
-  background: #141414 !important;
+  background: var(--c-ink-14) !important;
   color: var(--c-slate-100) !important;
   border-color: var(--c-slate-700) !important;
   box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.85) !important;

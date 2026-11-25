@@ -1,12 +1,12 @@
 html.st2-theme-dark {
   color-scheme: dark;
-  --panel: #0f0f0f;
+  --panel: var(--c-ink-0f);
   --dark: #ececec;
-  --border: #333333;
-  --white: #1a1a1a;
+  --border: var(--c-ink-33);
+  --white: var(--c-ink-1a);
   --text-muted: var(--c-gray-300);
-  --nav-well: #161616;
-  --nav-hover: #2a2a2a;
+  --nav-well: var(--c-ink-16);
+  --nav-hover: var(--c-ink-2a);
   --header-top: #1a1410;
   --header-bottom: #100c0a;
   --header-line: rgba(251, 146, 60, 0.22);
@@ -15,8 +15,8 @@ html.st2-theme-dark {
   --portal-sub-hover: var(--c-gray-100);
   --portal-sub-glow: rgba(0, 0, 0, 0.35);
   --portal-sub-soft: var(--c-neutral-900);
-  --st2-suite-surface: linear-gradient(155deg, #242424 0%, #1a1a1a 42%, #2a1810 100%);
-  --st2-suite-surface-soft: linear-gradient(180deg, #1a1a1a 0%, #1f1820 100%);
+  --st2-suite-surface: linear-gradient(155deg, var(--c-ink-24) 0%, var(--c-ink-1a) 42%, #2a1810 100%);
+  --st2-suite-surface-soft: linear-gradient(180deg, var(--c-ink-1a) 0%, #1f1820 100%);
   --st2-suite-border: rgba(234, 88, 12, 0.32);
   --st2-suite-glow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(251, 146, 60, 0.1);
 }
@@ -191,7 +191,7 @@ html.st2-theme-dark .tab-btn:active:not(.active) {
 html.st2-theme-dark .tab-btn-admin:not(.active) {
   color: var(--c-slate-200);
   border-color: rgba(148, 163, 184, 0.35);
-  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+  background: linear-gradient(180deg, var(--c-ink-2a) 0%, var(--c-ink-1a) 100%);
   box-shadow: inset 3px 0 0 var(--c-orange-600);
 }
 
@@ -206,7 +206,7 @@ html.st2-theme-dark .tab-btn-admin:not(.active):hover {
 
 html.st2-theme-dark .tab-btn-admin.active {
   background: linear-gradient(180deg, var(--c-slate-600) 0%, var(--c-slate-800) 100%);
-  border-color: #121212;
+  border-color: var(--c-ink-12);
   color: var(--c-white);
   box-shadow:
     inset 3px 0 0 var(--c-orange-500),
@@ -217,7 +217,7 @@ html.st2-theme-dark .tab-btn-admin.active {
 html.st2-theme-dark .st2-about-dialog {
   background:
     radial-gradient(120% 70% at 100% 0%, rgba(214, 64, 0, 0.12) 0%, transparent 52%),
-    linear-gradient(180deg, #222222 0%, #161616 100%);
+    linear-gradient(180deg, var(--c-ink-22) 0%, var(--c-ink-16) 100%);
   box-shadow:
     0 24px 48px rgba(0, 0, 0, 0.45),
     0 0 0 1px #2b3445;
@@ -230,7 +230,7 @@ html.st2-theme-dark .st2-about-tool-name {
 }
 
 html.st2-theme-dark .st2-tool-url-dialog {
-  background: #1a1a1a;
+  background: var(--c-ink-1a);
   border-color: #2b3445;
 }
 
@@ -239,24 +239,24 @@ html.st2-theme-dark .st2-tool-url-dialog h3 {
 }
 
 html.st2-theme-dark .st2-msg-close {
-  background: #121212;
+  background: var(--c-ink-12);
   border-color: #2b3445;
   color: var(--c-slate-400);
 }
 
 html.st2-theme-dark .st2-msg-close:hover {
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
   color: var(--text);
 }
 
 html.st2-theme-dark .st2-tool-url-input {
-  background: #121212;
+  background: var(--c-ink-12);
   border-color: #2b3445;
   color: var(--dark);
 }
 
 html.st2-theme-dark .st2-tool-url-btn--ghost {
-  background: #121212;
+  background: var(--c-ink-12);
   border-color: #2b3445;
   color: var(--text-muted);
 }
@@ -300,11 +300,11 @@ html.st2-theme-dark .st2-about-tool-meta-web {
 }
 
 html.st2-theme-dark .about-tools-badge {
-  box-shadow: 0 0 0 2px #151515;
+  box-shadow: 0 0 0 2px var(--c-ink-15);
 }
 
 html.st2-theme-dark .st2-about-tool {
-  background: #1a1a1a;
+  background: var(--c-ink-1a);
   border-color: #2b3445;
 }
 
@@ -339,7 +339,7 @@ html.st2-theme-dark .st2-about-tool-dl:not(:disabled):hover {
 }
 
 html.st2-theme-dark .st2-about-tool-upload {
-  background: #161616;
+  background: var(--c-ink-16);
   border-color: var(--c-slate-600);
   color: var(--c-slate-300);
 }
@@ -375,7 +375,7 @@ html.st2-theme-dark .st2-access-card {
 }
 
 html.st2-theme-dark .st2-access-card.border-glow-card {
-  background: var(--card-bg, #1a1a1a);
+  background: var(--card-bg, var(--c-ink-1a));
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow:
     var(--st2-suite-glow, 0 0 0 transparent),
@@ -384,7 +384,7 @@ html.st2-theme-dark .st2-access-card.border-glow-card {
 }
 
 html.st2-theme-dark .st2-access-admin-dialog {
-  background: linear-gradient(180deg, #242424 0%, #1c1c1c 100%);
+  background: linear-gradient(180deg, var(--c-ink-24) 0%, var(--c-ink-1c) 100%);
   color: var(--dark);
   border-color: var(--c-slate-700);
 }
@@ -440,7 +440,7 @@ html.st2-theme-dark .st2-access-birthday-note {
 html.st2-theme-dark .st2-birthday-open-btn,
 html.st2-theme-dark .st2-birthday-picker,
 html.st2-theme-dark .st2-birthday-picker-nav {
-  background: #1a1a1a;
+  background: var(--c-ink-1a);
   border-color: #2d3748;
   color: var(--text);
 }
@@ -448,7 +448,7 @@ html.st2-theme-dark .st2-birthday-picker-nav {
 html.st2-theme-dark .st2-birthday-open-btn:hover,
 html.st2-theme-dark .st2-birthday-picker-nav:hover,
 html.st2-theme-dark .st2-birthday-picker-day:hover {
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
 }
 
 html.st2-theme-dark .st2-birthday-picker-month,
@@ -479,7 +479,7 @@ html.st2-theme-dark .st2-about-suggest-title {
 
 html.st2-theme-dark .st2-access-admin-kpi,
 html.st2-theme-dark .st2-access-admin-reject {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   border-color: #3d4b61;
   color: var(--c-neutral-200);
 }
@@ -503,7 +503,7 @@ html.st2-theme-dark .st2-access-admin-inbox-mail {
 }
 
 html.st2-theme-dark .status-bar {
-  background: #161616;
+  background: var(--c-ink-16);
   color: var(--text-muted);
   border-color: var(--border);
 }
@@ -575,7 +575,7 @@ html.st2-theme-dark .pdf-portal-input,
 html.st2-theme-dark .pdf-portal-rich,
 html.st2-theme-dark .blanqueo-search,
 html.st2-theme-dark .blanqueo-note-textarea {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-300) !important;
   border-color: #3d4b61 !important;
   box-shadow: none !important;
@@ -603,13 +603,13 @@ html.st2-theme-dark .plan-onvio-option,
 html.st2-theme-dark .plan-gestor-filter,
 html.st2-theme-dark .plan-gestor-ctx:not(.st2-ctx-menu),
 html.st2-theme-dark .plan-gestor-ctx:not(.st2-ctx-menu) button {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border-color: #3d4b61 !important;
 }
 
 html.st2-theme-dark .plan-gestor-ctx:not(.st2-ctx-menu) button:hover {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
 }
 
 html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu {
@@ -720,19 +720,19 @@ html.st2-theme-dark .plan-pill-btn.active {
 }
 
 html.st2-theme-dark .st2-access-admin-perm-pop {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: var(--c-neutral-700) !important;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45) !important;
 }
 
 html.st2-theme-dark .st2-access-admin-perm-pop-item {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   color: var(--c-neutral-200) !important;
 }
 
 html.st2-theme-dark .st2-access-admin-perm-more-btn,
 html.st2-theme-dark .st2-access-admin-legend-plus {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   border-color: var(--c-neutral-700) !important;
   color: var(--c-neutral-400) !important;
 }
@@ -745,7 +745,7 @@ html.st2-theme-dark .st2-access-admin-perm-more-btn:hover {
 }
 
 html.st2-theme-dark .plan-segment-track {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   border-color: var(--c-neutral-700) !important;
 }
 
@@ -763,7 +763,7 @@ html.st2-theme-dark .plan-segment-btn.active {
 }
 
 html.st2-theme-dark .plan-bej-config {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: var(--c-neutral-700) !important;
   box-shadow: none !important;
 }
@@ -775,13 +775,13 @@ html.st2-theme-dark .plan-bej-label {
 html.st2-theme-dark .plan-action-btn.ghost,
 html.st2-theme-dark .plan-op-btn-limpiar,
 html.st2-theme-dark .btn-secondary {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border: 1px solid #3d4b61 !important;
 }
 
 html.st2-theme-dark .plan-fx-tap--ghost {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   border-color: #3d4b61;
   color: var(--c-neutral-200);
 }
@@ -848,14 +848,14 @@ html.st2-theme-dark .plan-chile-embed-menu-btn {
 
 html.st2-theme-dark .plan-action-btn.ghost:hover,
 html.st2-theme-dark .plan-op-btn-limpiar:hover {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
 }
 
 html.st2-theme-dark .plan-capturas-card,
 html.st2-theme-dark .plan-capturas-panel,
 html.st2-theme-dark .plan-ticket-card,
 html.st2-theme-dark .plan-adj-card {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
   color: var(--c-neutral-200) !important;
 }
@@ -875,7 +875,7 @@ html.st2-theme-dark .plan-onvio-ticket-detail {
 }
 
 html.st2-theme-dark .plan-capturas-browse {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: var(--c-slate-600) !important;
   color: var(--c-neutral-200) !important;
 }
@@ -892,21 +892,21 @@ html.st2-theme-dark .plan-capturas-browse-icon {
 }
 
 html.st2-theme-dark .plan-gestor-table-wrap {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: var(--c-slate-700) !important;
 }
 
 html.st2-theme-dark .plan-gestor-table thead th {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   color: var(--c-neutral-200) !important;
 }
 
 html.st2-theme-dark .plan-gestor-table tbody tr {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
 }
 
 html.st2-theme-dark .plan-gestor-table tbody tr:nth-child(even) {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
 }
 
 html.st2-theme-dark .plan-gestor-table tbody tr.selected {
@@ -920,7 +920,7 @@ html.st2-theme-dark .plan-sistema-badge {
 }
 
 html.st2-theme-dark .plan-module-sticky-head {
-  background-color: #1a1a1a !important;
+  background-color: var(--c-ink-1a) !important;
   background-image: none !important;
   border-color: var(--c-slate-700) !important;
   box-shadow: 0 10px 18px -12px rgba(0, 0, 0, 0.55);
@@ -933,7 +933,7 @@ html.st2-theme-dark .plan-module-title {
 }
 
 html.st2-theme-dark .plan-inline-icon {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   color: var(--c-slate-300) !important;
   border-color: var(--c-slate-700) !important;
 }
@@ -944,7 +944,7 @@ html.st2-theme-dark .plan-gestor-table td,
 html.st2-theme-dark .blanqueo-table,
 html.st2-theme-dark .blanqueo-table th,
 html.st2-theme-dark .blanqueo-table td {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border-color: var(--c-slate-700) !important;
 }
@@ -963,7 +963,7 @@ html.st2-theme-dark .plan-onvio-card.tone-purple,
 html.st2-theme-dark .plan-adj-card.tone-purple,
 html.st2-theme-dark .plan-onvio-card.tone-blue,
 html.st2-theme-dark .plan-adj-card.tone-blue {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
 }
 
@@ -1000,7 +1000,7 @@ html.st2-theme-dark .plan-onvio-card .card-mark {
 }
 
 html.st2-theme-dark .plan-onvio-card.selected {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   box-shadow:
     0 0 0 3px rgba(249, 115, 22, 0.18),
     0 10px 24px rgba(0, 0, 0, 0.28) !important;
@@ -1046,7 +1046,7 @@ html.st2-theme-dark .plan-inline-icon.purple {
 }
 
 html.st2-theme-dark .plan-well-box {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border: 1px solid var(--c-neutral-700) !important;
   color: var(--c-neutral-200) !important;
 }
@@ -1054,7 +1054,7 @@ html.st2-theme-dark .plan-well-box {
 html.st2-theme-dark .plan-well-box input,
 html.st2-theme-dark .plan-well-box select,
 html.st2-theme-dark .plan-well-box textarea {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   border-color: #555555 !important;
   color: var(--c-neutral-100) !important;
 }
@@ -1074,7 +1074,7 @@ html.st2-theme-dark .plan-excel-chip,
 html.st2-theme-dark .plan-xml-chip,
 html.st2-theme-dark .plan-traza-chip,
 html.st2-theme-dark .plan-captura-thumb {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
   color: var(--c-neutral-200) !important;
 }
@@ -1116,7 +1116,7 @@ html.st2-theme-dark .plan-modulo-btn:active:not(:disabled) {
 /* ── Portal Cliente ── */
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
-  background: linear-gradient(180deg, #1a1a1a 0%, #161616 100%);
+  background: linear-gradient(180deg, var(--c-ink-1a) 0%, var(--c-ink-16) 100%);
   border-color: rgba(234, 88, 12, 0.55);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
@@ -1132,14 +1132,14 @@ html.st2-theme-dark .portal-kicker {
 
 html.st2-theme-dark .search-box,
 html.st2-theme-dark .combo-box {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--c-neutral-200);
   border-color: rgba(234, 88, 12, 0.45);
   box-shadow: none;
 }
 
 html.st2-theme-dark .year-btn {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--c-orange-300);
   border-color: var(--c-orange-900);
 }
@@ -1154,18 +1154,18 @@ html.st2-theme-dark .year-btn.active {
 }
 
 html.st2-theme-dark .result-item {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   border-color: var(--c-slate-700);
   color: var(--c-neutral-200);
 }
 
 html.st2-theme-dark .result-item:hover {
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
   border-color: rgba(214, 64, 0, 0.45);
 }
 
 html.st2-theme-dark .result-item.selected {
-  background: linear-gradient(180deg, #3a1d12 0%, #1a1a1a 100%);
+  background: linear-gradient(180deg, #3a1d12 0%, var(--c-ink-1a) 100%);
   border-color: var(--primary);
 }
 
@@ -1175,7 +1175,7 @@ html.st2-theme-dark .result-group-header {
 }
 
 html.st2-theme-dark .preview-frame-wrap {
-  background: linear-gradient(180deg, #1a1a1a 0%, #121212 100%);
+  background: linear-gradient(180deg, var(--c-ink-1a) 0%, var(--c-ink-12) 100%);
   border-color: rgba(234, 88, 12, 0.45);
   box-shadow: none;
 }
@@ -1192,7 +1192,7 @@ html.st2-theme-dark .type-badge {
 }
 
 html.st2-theme-dark .portal-suggest-chip {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--c-neutral-200);
   border-color: rgba(234, 88, 12, 0.4);
 }
@@ -1234,7 +1234,7 @@ html.st2-theme-dark .plan-check-cards {
 html.st2-theme-dark .plan-check-wrap.planilla,
 html.st2-theme-dark .plan-check-wrap.mam,
 html.st2-theme-dark .plan-check-wrap.sdk {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
 }
 
 html.st2-theme-dark .plan-check-wrap.planilla {
@@ -1264,7 +1264,7 @@ html.st2-theme-dark .plan-check-btn .plan-check-badge,
 html.st2-theme-dark .plan-check-btn .plan-check-badge.is-required,
 html.st2-theme-dark .plan-check-btn .plan-check-badge.is-optional,
 html.st2-theme-dark .plan-check-btn .plan-check-badge.is-auto {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   color: var(--c-slate-300) !important;
   border-color: #3d4b61 !important;
 }
@@ -1273,7 +1273,7 @@ html.st2-theme-dark .plan-check-btn-icon {
   width: 28px;
   height: 28px;
   border-radius: var(--radius-md);
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
 }
 
 html.st2-theme-dark .plan-check-btn-icon svg {
@@ -1297,7 +1297,7 @@ html.st2-theme-dark .plan-check-mark {
 }
 
 html.st2-theme-dark .plan-backup-detail {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
   color: var(--c-neutral-200) !important;
 }
@@ -1309,13 +1309,13 @@ html.st2-theme-dark .plan-backup-sql {
 }
 
 html.st2-theme-dark .plan-backup-sql-hint {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
   color: var(--c-slate-400) !important;
 }
 
 html.st2-theme-dark .plan-select {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border: 1px solid #3d4b61 !important;
   outline: none !important;
@@ -1325,12 +1325,12 @@ html.st2-theme-dark .plan-select {
 }
 
 html.st2-theme-dark .plan-select option {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--c-neutral-200);
 }
 
 html.st2-theme-dark .plan-custom-select-menu {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
@@ -1368,7 +1368,7 @@ html.st2-theme-dark .plan-select:focus {
 }
 
 html.st2-theme-dark .plan-backup-base-card {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border-color: #3d4b61 !important;
 }
@@ -1383,7 +1383,7 @@ html.st2-theme-dark .plan-legal-onedrive-row input,
 html.st2-theme-dark .plan-sql-code,
 html.st2-theme-dark .plan-sql-expand-btn,
 html.st2-theme-dark .plan-sql-copy {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border-color: #3d4b61 !important;
 }
@@ -1399,24 +1399,24 @@ html.st2-theme-dark .plan-legal-product,
 html.st2-theme-dark .plan-legal-product-head,
 html.st2-theme-dark .plan-legal-product.is-expanded .plan-legal-product-head,
 html.st2-theme-dark .plan-adj-card.plan-legal-pick {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
   color: var(--dark) !important;
   border-color: var(--c-slate-700) !important;
 }
 
 html.st2-theme-dark .plan-legal-product-head:hover,
 html.st2-theme-dark .plan-adj-card.plan-legal-pick:hover {
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
 }
 
 html.st2-theme-dark .plan-chile-embed-menu-btn {
-  background: #1a1a1a;
+  background: var(--c-ink-1a);
   border-color: #2d3748;
   color: var(--text);
 }
 
 html.st2-theme-dark .plan-chile-embed-menu-btn:hover {
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
 }
 
 html.st2-theme-dark .plan-chile-embed-menu-btn--solo {
@@ -1424,7 +1424,7 @@ html.st2-theme-dark .plan-chile-embed-menu-btn--solo {
 }
 
 html.st2-theme-dark .plan-chile-embed-menu {
-  background: #1a1a1a;
+  background: var(--c-ink-1a);
   border-color: #2d3748;
 }
 
@@ -1433,7 +1433,7 @@ html.st2-theme-dark .plan-chile-embed-menu-item {
 }
 
 html.st2-theme-dark .plan-chile-embed-menu-item:hover {
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
 }
 
 html.st2-theme-dark .plan-sistema-well,
@@ -1446,7 +1446,7 @@ html.st2-theme-dark .plan-op-btn-ia,
 html.st2-theme-dark .plan-ia-group .plan-op-btn-ia,
 html.st2-theme-dark .plan-ia-group .plan-ia-btn,
 html.st2-theme-dark #planillas-transferencia .plan-ia-btn {
-  background: linear-gradient(180deg, #2a1810 0%, #1a1a1a 100%) !important;
+  background: linear-gradient(180deg, #2a1810 0%, var(--c-ink-1a) 100%) !important;
   border: 1px solid rgba(234, 88, 12, 0.45) !important;
   color: var(--c-orange-300) !important;
 }
@@ -1455,7 +1455,7 @@ html.st2-theme-dark .plan-op-btn-ia:hover,
 html.st2-theme-dark .plan-ia-group .plan-op-btn-ia:hover,
 html.st2-theme-dark .plan-ia-group .plan-ia-btn:hover,
 html.st2-theme-dark #planillas-transferencia .plan-ia-btn:hover {
-  background: linear-gradient(180deg, #3a2012 0%, #2a2a2a 100%) !important;
+  background: linear-gradient(180deg, #3a2012 0%, var(--c-ink-2a) 100%) !important;
   border-color: var(--c-orange-600) !important;
   color: var(--c-orange-100) !important;
 }
@@ -1477,19 +1477,19 @@ html.st2-theme-dark .plan-gestor-date-wrap,
 html.st2-theme-dark .plan-gestor-link-box,
 html.st2-theme-dark .plan-gestor-month-select,
 html.st2-theme-dark .plan-gestor-panel-list {
-  background: linear-gradient(180deg, #1c1c1c 0%, #1f1820 100%) !important;
+  background: linear-gradient(180deg, var(--c-ink-1c) 0%, #1f1820 100%) !important;
   color: var(--c-neutral-200) !important;
   border-color: rgba(234, 88, 12, 0.35) !important;
 }
 
 html.st2-theme-dark .plan-gestor-form-grid textarea {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   border-color: var(--c-slate-600) !important;
   color: var(--c-neutral-200) !important;
 }
 
 html.st2-theme-dark .plan-gestor-link-input {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   color: var(--c-neutral-200) !important;
   border-color: rgba(234, 88, 12, 0.35) !important;
 }
@@ -1517,20 +1517,20 @@ html.st2-theme-dark .plan-gestor-filter-month {
 }
 
 html.st2-theme-dark .plan-gestor-filter-bar {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
 }
 
 html.st2-theme-dark .plan-gestor-btn-tool,
 html.st2-theme-dark .plan-gestor-page-btn {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
   color: var(--c-neutral-200) !important;
   border-color: #3d4b61 !important;
 }
 
 html.st2-theme-dark .plan-gestor-btn-tool:hover,
 html.st2-theme-dark .plan-gestor-page-btn:hover {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
 }
 
 html.st2-theme-dark #op-gestor-pagina-label,
@@ -1566,18 +1566,18 @@ html.st2-theme-dark .blanqueo-preview-confirm {
 
 html.st2-theme-dark .search-column,
 html.st2-theme-dark .preview-column {
-  background: #161616;
+  background: var(--c-ink-16);
   border-color: rgba(234, 88, 12, 0.55);
 }
 
 html.st2-theme-dark .portal-search-head {
-  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, #1a1a1a 55%);
+  background: linear-gradient(135deg, rgba(214, 64, 0, 0.22) 0%, var(--c-ink-1a) 55%);
   border-color: rgba(234, 88, 12, 0.45);
 }
 
 html.st2-theme-dark .search-box,
 html.st2-theme-dark .combo-box {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--c-neutral-200);
   border-color: rgba(234, 88, 12, 0.45);
   box-shadow: none;
@@ -1589,7 +1589,7 @@ html.st2-theme-dark .results-empty {
 
 html.st2-theme-dark .btn-ghost-dark,
 html.st2-theme-dark .btn-secondary {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--c-neutral-200);
   border-color: var(--c-slate-700);
 }
@@ -1614,7 +1614,7 @@ html.st2-theme-dark .plan-ref-modal-footer,
 html.st2-theme-dark .plan-sql-card,
 html.st2-theme-dark .plan-opt-input,
 html.st2-theme-dark .plan-opt-textarea {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border-color: #3d4b61 !important;
 }
@@ -1800,7 +1800,7 @@ html.st2-theme-dark .blanqueo-clave-sugerida {
 }
 
 html.st2-theme-dark .blanqueo-clave-code {
-  background: #121212;
+  background: var(--c-ink-12);
   border-color: var(--c-slate-400);
   color: var(--c-slate-50);
 }
@@ -1888,7 +1888,7 @@ html.st2-theme-dark .borrado-undo-btn:focus-visible {
 
 html.st2-theme-dark .borrado-filter-month select,
 html.st2-theme-dark .borrado-filter-search input {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--c-neutral-200);
   border-color: #3d4b61;
 }
@@ -1896,7 +1896,7 @@ html.st2-theme-dark .borrado-filter-search input {
 html.st2-theme-dark .st2-access-admin-dialog,
 html.st2-theme-dark .st2-access-name-edit-dialog,
 html.st2-theme-dark .st2-access-modules-dialog {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
   color: var(--c-neutral-200) !important;
   border-color: var(--c-slate-700) !important;
 }
@@ -1924,7 +1924,7 @@ html.st2-theme-dark .st2-access-modules-check-sub {
 }
 
 html.st2-theme-dark .st2-access-modules-profile {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   border-color: #3d4b61 !important;
   border-left-color: var(--c-orange-400) !important;
 }
@@ -1935,7 +1935,7 @@ html.st2-theme-dark .st2-access-modules-name-input {
 }
 
 html.st2-theme-dark .st2-access-modules-name-input {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
   border-color: #3d4b61 !important;
 }
 
@@ -1948,7 +1948,7 @@ html.st2-theme-dark .st2-access-modules-name-input::placeholder {
 }
 
 html.st2-theme-dark .st2-access-modules-sys-card {
-  background: #161616 !important;
+  background: var(--c-ink-16) !important;
   border-color: var(--c-slate-700) !important;
 }
 
@@ -1957,7 +1957,7 @@ html.st2-theme-dark .st2-access-modules-sys-head {
 }
 
 html.st2-theme-dark .st2-access-modules-sys-expand {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   border-color: var(--c-slate-600) !important;
   color: var(--c-slate-300) !important;
 }
@@ -1968,20 +1968,20 @@ html.st2-theme-dark .st2-access-modules-sys-expand:hover:not(:disabled) {
 }
 
 html.st2-theme-dark .st2-access-modules-sys-body {
-  background: #161616 !important;
+  background: var(--c-ink-16) !important;
   border-top-color: var(--c-slate-700) !important;
 }
 
 html.st2-theme-dark .st2-access-modules-sys-card--sql .st2-access-modules-sys-body {
-  background: linear-gradient(180deg, #172033 0%, #161616 100%) !important;
+  background: linear-gradient(180deg, #172033 0%, var(--c-ink-16) 100%) !important;
 }
 
 html.st2-theme-dark .st2-access-modules-sys-card--legal .st2-access-modules-sys-body {
-  background: linear-gradient(180deg, #1a1428 0%, #161616 100%) !important;
+  background: linear-gradient(180deg, #1a1428 0%, var(--c-ink-16) 100%) !important;
 }
 
 html.st2-theme-dark .st2-access-modules-sys-card--chile .st2-access-modules-sys-body {
-  background: linear-gradient(180deg, #1f1414 0%, #161616 100%) !important;
+  background: linear-gradient(180deg, #1f1414 0%, var(--c-ink-16) 100%) !important;
 }
 
 html.st2-theme-dark .st2-access-modules-sql-group,
@@ -2039,7 +2039,7 @@ html.st2-theme-dark .st2-access-admin-table-wrap,
 html.st2-theme-dark .st2-access-admin-table,
 html.st2-theme-dark .st2-access-admin-table th,
 html.st2-theme-dark .st2-access-admin-table td {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   color: var(--c-neutral-200) !important;
   border-color: #3d4b61 !important;
 }
@@ -2116,8 +2116,8 @@ html.st2-theme-dark .st2-admin-subtab.is-on .st2-admin-subtab-sub {
 }
 
 html.st2-theme-dark .st2-admin-usage-ranges {
-  background: #161616;
-  border-color: #333333;
+  background: var(--c-ink-16);
+  border-color: var(--c-ink-33);
 }
 
 html.st2-theme-dark .st2-admin-usage-sort {
@@ -2125,7 +2125,7 @@ html.st2-theme-dark .st2-admin-usage-sort {
 }
 
 html.st2-theme-dark .st2-admin-usage-sort.is-on {
-  background: #242424;
+  background: var(--c-ink-24);
   color: var(--c-orange-400);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
@@ -2154,7 +2154,7 @@ html.st2-theme-dark .st2-admin-usage-block {
 
 html.st2-theme-dark .st2-admin-usage-table th {
   color: var(--c-slate-400);
-  border-bottom-color: #333333;
+  border-bottom-color: var(--c-ink-33);
 }
 
 html.st2-theme-dark .st2-admin-usage-table td {
@@ -2168,8 +2168,8 @@ html.st2-theme-dark .st2-admin-usage-chip-n {
 }
 
 html.st2-theme-dark .st2-admin-usage-chip {
-  background: #1f1f1f;
-  border-color: #333333;
+  background: var(--c-ink-1f);
+  border-color: var(--c-ink-33);
   color: var(--c-neutral-200);
 }
 
@@ -2209,7 +2209,7 @@ html.st2-theme-dark .st2-access-admin-audit-list li {
 
 html.st2-theme-dark .st2-access-admin-audit-actor,
 html.st2-theme-dark .st2-access-admin-audit-detail {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   border-color: #3d4b61;
   color: var(--c-neutral-200);
 }
@@ -2255,7 +2255,7 @@ html.st2-theme-dark .st2-access-modules-actions {
 }
 
 html.st2-theme-dark .st2-access-admin-table th {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   color: var(--c-slate-300) !important;
 }
 
@@ -2270,7 +2270,7 @@ html.st2-theme-dark .st2-access-admin-table tr.is-new {
 html.st2-theme-dark .st2-access-admin-cancel:hover,
 html.st2-theme-dark .st2-access-admin-refresh:hover,
 html.st2-theme-dark .st2-access-name-edit-x:hover {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   color: var(--c-neutral-200) !important;
 }
 
@@ -2279,13 +2279,13 @@ html.st2-theme-dark .st2-access-admin-mod-filters {
 }
 
 html.st2-theme-dark .st2-access-admin-perms-filter-pop {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   border-color: var(--c-neutral-600) !important;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.42) !important;
 }
 
 html.st2-theme-dark .st2-access-admin-perms-filter-track.plan-segment-track {
-  background: #343434 !important;
+  background: var(--c-ink-34) !important;
   border-color: var(--c-neutral-600) !important;
 }
 
@@ -2334,7 +2334,7 @@ html.st2-theme-dark .st2-access-admin-mod-filter {
 }
 
 html.st2-theme-dark .st2-access-admin-mod-filter:hover {
-  background: #2a2a2a;
+  background: var(--c-ink-2a);
   color: var(--c-slate-200);
 }
 
@@ -2445,13 +2445,13 @@ html.st2-theme-dark .st2-access-admin-edit,
 html.st2-theme-dark .st2-access-admin-modules,
 html.st2-theme-dark .st2-access-admin-preview,
 html.st2-theme-dark .st2-access-admin-delete {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   border-color: #3d4b61 !important;
   color: var(--c-neutral-200) !important;
 }
 
 html.st2-theme-dark .borrado-bases-checks {
-  background: #161616;
+  background: var(--c-ink-16);
   border-color: var(--c-slate-700);
 }
 
@@ -2475,7 +2475,7 @@ html.st2-theme-dark .borrado-base-pill {
 }
 
 html.st2-theme-dark .borrado-check {
-  background: #1a1a1a;
+  background: var(--c-ink-1a);
   border-color: #3d4b61;
   color: var(--c-slate-200);
 }
@@ -2533,7 +2533,7 @@ html.st2-theme-dark .blanqueo-hab-pill:focus-visible .blanqueo-hab-pill-action {
 
 html.st2-theme-dark .blanqueo-filter-mine,
 html.st2-theme-dark .borrado-filter-mine {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #4b5a73 !important;
   color: var(--c-neutral-200) !important;
 }
@@ -2562,7 +2562,7 @@ html.st2-theme-dark .blanqueo-correo-remove:hover {
 
 html.st2-theme-dark #planillas-transferencia .plan-capturas-card,
 html.st2-theme-dark #planillas-transferencia .plan-ticket-card {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border: 1px solid #4b5a73 !important;
   color: var(--c-neutral-200) !important;
 }
@@ -2575,13 +2575,13 @@ html.st2-theme-dark #planillas-transferencia .plan-ticket-card.selected {
 
 html.st2-theme-dark #planillas-transferencia input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
 html.st2-theme-dark #planillas-transferencia textarea {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   border-color: var(--c-neutral-500) !important;
   color: var(--c-slate-50) !important;
 }
 
 html.st2-theme-dark #planillas-transferencia .btn-secondary:not(.plan-ia-btn) {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #4b5a73 !important;
   color: var(--c-neutral-200) !important;
 }
@@ -2597,19 +2597,19 @@ html.st2-theme-dark .plan-capturas-card:hover {
 }
 
 html.st2-theme-dark #planillas-transferencia .plan-ia-undo-btn {
-  background: linear-gradient(180deg, #2a1810 0%, #1a1a1a 100%) !important;
+  background: linear-gradient(180deg, #2a1810 0%, var(--c-ink-1a) 100%) !important;
   border-color: rgba(234, 88, 12, 0.45) !important;
   color: var(--c-orange-300) !important;
 }
 
 html.st2-theme-dark .plan-text-preview {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: var(--st2-suite-border) !important;
 }
 
 html.st2-theme-dark .plan-text-preview-head {
   background: rgba(255, 255, 255, 0.04) !important;
-  border-bottom-color: #333 !important;
+  border-bottom-color: var(--c-ink-33) !important;
 }
 
 html.st2-theme-dark .plan-text-preview-title {
@@ -2617,18 +2617,18 @@ html.st2-theme-dark .plan-text-preview-title {
 }
 
 html.st2-theme-dark .plan-text-preview-body {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   color: var(--c-gray-200) !important;
 }
 
 html.st2-theme-dark .plan-module-loading {
-  background: color-mix(in srgb, var(--panel, #0f0f0f) 88%, transparent);
+  background: color-mix(in srgb, var(--panel, var(--c-ink-0f)) 88%, transparent);
   color: var(--text-muted);
 }
 
 html.st2-theme-dark .plan-legal-evid-panel {
-  background: #1c1c1c;
-  border-color: #333;
+  background: var(--c-ink-1c);
+  border-color: var(--c-ink-33);
 }
 
 html.st2-theme-dark .plan-legal-tier-rec {
@@ -2638,9 +2638,9 @@ html.st2-theme-dark .plan-legal-tier-rec {
 }
 
 html.st2-theme-dark .plan-legal-tier-opt {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   color: var(--text-muted);
-  border-color: #333;
+  border-color: var(--c-ink-33);
 }
 
 html.st2-theme-dark .borrado-list-footer,
@@ -2939,7 +2939,7 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-rich:focus {
 
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview,
 html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark {
-  background: #141414 !important;
+  background: var(--c-ink-14) !important;
   color: var(--c-neutral-100) !important;
   border-color: var(--c-slate-700) !important;
   box-shadow: 0 16px 38px -10px rgba(0, 0, 0, 0.85) !important;
@@ -2966,7 +2966,7 @@ html.st2-theme-dark .pdf-portal-modal-container .pdf-portal-preview.sheet-dark .
 
 html.st2-theme-dark .pdf-portal-modal-container #pdf-portal-editor,
 html.st2-theme-dark #pdf-portal-editor {
-  background: #141414 !important;
+  background: var(--c-ink-14) !important;
   color: var(--c-neutral-100) !important;
 }
 
@@ -3155,11 +3155,11 @@ html.st2-theme-dark .portal-generate-pdf-btn:hover {
 
 /* Tabs Oportunidad + stepper Referral (evitar bloque blanco en dark) */
 html.st2-theme-dark .plan-op-tabs {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
 }
 html.st2-theme-dark .plan-ref-stepper {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: rgba(251, 146, 60, 0.34) !important;
   box-shadow:
     0 0 0 1px rgba(251, 146, 60, 0.12),
@@ -3173,13 +3173,13 @@ html.st2-theme-dark .plan-ref-step {
 }
 html.st2-theme-dark .plan-op-tab.active,
 html.st2-theme-dark .plan-ref-step.active {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   color: var(--c-slate-50) !important;
   box-shadow: inset 0 0 0 1px rgba(234, 88, 12, 0.35) !important;
 }
 html.st2-theme-dark .plan-op-tab:hover:not(.active),
 html.st2-theme-dark .plan-ref-step:hover:not(.active) {
-  background: #242424 !important;
+  background: var(--c-ink-24) !important;
   color: var(--c-slate-200) !important;
 }
 html.st2-theme-dark .plan-ref-step-num {
@@ -3191,7 +3191,7 @@ html.st2-theme-dark .plan-ref-step.active .plan-ref-step-num {
   color: var(--c-white) !important;
 }
 html.st2-theme-dark .plan-ref-step-nav-btn {
-  background: #1c1c1c !important;
+  background: var(--c-ink-1c) !important;
   border-color: #3d4b61 !important;
   color: var(--c-slate-200) !important;
 }
@@ -3201,7 +3201,7 @@ html.st2-theme-dark .plan-ref-step-nav-btn--primary {
   color: var(--c-white) !important;
 }
 html.st2-theme-dark .plan-gestor-date-wrap {
-  background: #121212 !important;
+  background: var(--c-ink-12) !important;
   border-color: var(--c-slate-600) !important;
   box-shadow: none !important;
 }
@@ -3213,13 +3213,13 @@ html.st2-theme-dark .plan-gestor-date-wrap:focus-visible {
 
 /* Gates THOM / Orpen: contraste legible en tema oscuro (antes texto claro sobre blanco). */
 html.st2-theme-dark .embed-direct-gate {
-  background: linear-gradient(180deg, #1a1410 0%, #12100e 55%, #0f0f0f 100%);
+  background: linear-gradient(180deg, #1a1410 0%, #12100e 55%, var(--c-ink-0f) 100%);
   color: var(--c-stone-100);
   border: 1px solid rgba(251, 146, 60, 0.22);
 }
 
 html.st2-theme-dark .embed-direct-gate.embed-panel-active {
-  background: linear-gradient(180deg, #221810 0%, #161210 60%, #101010 100%);
+  background: linear-gradient(180deg, #221810 0%, #161210 60%, var(--c-ink-10) 100%);
   border: 1px dashed rgba(251, 146, 60, 0.4);
 }
 
@@ -3258,7 +3258,7 @@ html.st2-theme-dark .embed-loading {
 }
 
 html.st2-theme-dark .embed-frame-wrap {
-  background: #0f0f0f;
+  background: var(--c-ink-0f);
   border-color: rgba(251, 146, 60, 0.22);
 }
 
@@ -3277,7 +3277,7 @@ html.st2-theme-dark .code-slots {
   --cs-fill-ring: transparent;
   --cs-digit: var(--c-black);
   --cs-hint: var(--c-orange-500);
-  --cs-hint-digit: #111;
+  --cs-hint-digit: var(--c-ink-11);
   --cs-wash-ink: var(--c-black);
   --cs-danger: #ff3b30;
   --cs-danger-fill: #ff3b30;

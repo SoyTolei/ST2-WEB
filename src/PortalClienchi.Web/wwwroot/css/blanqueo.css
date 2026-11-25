@@ -1672,7 +1672,7 @@ html.st2-theme-dark .plan-gestor-ctx.st2-ctx-menu button.st2-ctx-danger strong {
 }
 
 html.st2-theme-dark .blanqueo-owner-btn {
-  background: #1c1c1c;
+  background: var(--c-ink-1c);
   border-color: #3d4b61;
 }
 

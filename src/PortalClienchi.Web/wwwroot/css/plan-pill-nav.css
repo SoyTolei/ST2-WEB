@@ -211,11 +211,11 @@
 /* Dark */
 html.st2-theme-dark .plan-segment-track.plan-pill-nav {
   background: var(--c-neutral-900) !important;
-  border-color: #333 !important;
+  border-color: var(--c-ink-33) !important;
 }
 
 html.st2-theme-dark .plan-pill-thumb {
-  background: #2a2a2a !important;
+  background: var(--c-ink-2a) !important;
   box-shadow:
     inset 0 0 0 1px rgba(249, 115, 22, 0.35),
     0 8px 18px rgba(0, 0, 0, 0.35) !important;
@@ -240,7 +240,7 @@ html.st2-theme-dark .plan-segment-track.plan-pill-nav .plan-segment-btn.active {
 html.st2-theme-dark .plan-check-wrap.planilla,
 html.st2-theme-dark .plan-check-wrap.mam,
 html.st2-theme-dark .plan-check-wrap.sdk {
-  background: #141414 !important;
+  background: var(--c-ink-14) !important;
   border-width: 0 !important;
   border-left-width: 3px !important;
   box-shadow: none !important;
@@ -258,7 +258,7 @@ html.st2-theme-dark .plan-check-btn.sdk {
 }
 
 html.st2-theme-dark .plan-check-btn-icon {
-  background: #222 !important;
+  background: var(--c-ink-22) !important;
 }
 
 html.st2-theme-dark .plan-check-btn.planilla .plan-check-btn-icon {
@@ -287,7 +287,7 @@ html.st2-theme-dark .plan-adj-card.tone-green,
 html.st2-theme-dark .plan-adj-card.tone-orange,
 html.st2-theme-dark .plan-adj-card.tone-blue,
 html.st2-theme-dark .plan-adj-card.tone-slate {
-  background: #141414 !important;
+  background: var(--c-ink-14) !important;
   border: 0 !important;
   border-left: 3px solid var(--c-neutral-700) !important;
   border-radius: var(--radius-lg) !important;
@@ -310,7 +310,7 @@ html.st2-theme-dark .plan-adj-card.tone-green.selected,
 html.st2-theme-dark .plan-adj-card.tone-orange.selected,
 html.st2-theme-dark .plan-adj-card.tone-blue.selected,
 html.st2-theme-dark .plan-adj-card.tone-slate.selected {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
   box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.28) !important;
 }
 
@@ -548,8 +548,8 @@ html.st2-theme-dark .plan-adj-sf-hint {
   font-size: 0.72rem;
   line-height: 1.15;
   border-width: 1px !important;
-  background: #121212 !important;
-  border-color: #333 !important;
+  background: var(--c-ink-12) !important;
+  border-color: var(--c-ink-33) !important;
   box-shadow: none !important;
   transform: none !important;
 }
@@ -692,7 +692,7 @@ html.st2-theme-dark .plan-adj-sf-hint {
 
 html.st2-theme-dark .plan-capturas-browse--lite {
   border-color: var(--c-neutral-600) !important;
-  background: #141414 !important;
+  background: var(--c-ink-14) !important;
   color: var(--c-neutral-200) !important;
 }
 
@@ -722,7 +722,7 @@ html.st2-theme-dark .plan-capturas-browse--lite {
 
 html.st2-theme-dark .plan-backup-sql--compact .plan-backup-sql-hint {
   background: var(--c-neutral-900) !important;
-  border-color: #333 !important;
+  border-color: var(--c-ink-33) !important;
   color: var(--c-neutral-400) !important;
 }
 
@@ -742,7 +742,7 @@ html.st2-theme-dark .plan-ref-step.is-incomplete .plan-ref-step-num,
 html.st2-theme-dark .plan-ref-step.is-incomplete.active .plan-ref-step-num,
 html.st2-theme-dark .plan-ref-step[data-step-status="warn"] .plan-ref-step-num {
   background: var(--c-yellow-500) !important;
-  color: #111 !important;
+  color: var(--c-ink-11) !important;
   box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.45) !important;
 }
 
@@ -762,7 +762,7 @@ html.st2-theme-dark .plan-ref-step.is-incomplete:not(.active) {
 html.st2-theme-dark #planillas-transferencia .plan-capturas-card,
 html.st2-theme-dark #planillas-transferencia .plan-ticket-card,
 html.st2-theme-dark #ref-onvio-panel .plan-ticket-card {
-  background: #141414 !important;
+  background: var(--c-ink-14) !important;
   border: 0 !important;
   border-left: 3px solid var(--c-orange-500) !important;
   border-radius: var(--radius-lg) !important;
@@ -776,13 +776,13 @@ html.st2-theme-dark #ref-onvio-panel .plan-ticket-card {
 
 html.st2-theme-dark #planillas-transferencia .plan-capturas-card.selected,
 html.st2-theme-dark #planillas-transferencia .plan-ticket-card.selected {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
   border-left-color: var(--c-orange-600) !important;
   box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.28) !important;
 }
 
 html.st2-theme-dark #ref-onvio-panel .plan-ticket-card.selected {
-  background: #1a1a1a !important;
+  background: var(--c-ink-1a) !important;
   border-left-color: var(--c-blue-600) !important;
   box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.28) !important;
 }

@@ -6,7 +6,7 @@
   margin: 0;
   white-space: nowrap;
   user-select: none;
-  --st2-glitch-bg: #1a1a1a;
+  --st2-glitch-bg: var(--c-ink-1a);
   --after-duration: 3s;
   --before-duration: 2s;
   --after-shadow: -5px 0 red;
@@ -97,7 +97,7 @@
 }
 
 html.st2-theme-dark .st2-access-suite.st2-glitch {
-  --st2-glitch-bg: #1a1a1a;
+  --st2-glitch-bg: var(--c-ink-1a);
 }
 
 /* Login: glitch en hover (offsets suaves a tipografía grande) */
@@ -109,7 +109,7 @@ html.st2-theme-dark .st2-access-suite.st2-glitch {
 }
 
 html.st2-theme-dark .planillas-hero-title-main.st2-glitch {
-  --st2-glitch-bg: #1a1a1a;
+  --st2-glitch-bg: var(--c-ink-1a);
 }
 
 html:not(.st2-theme-dark) .planillas-hero-title-main.st2-glitch {
