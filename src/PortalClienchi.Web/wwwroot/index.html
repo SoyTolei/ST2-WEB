@@ -18,6 +18,26 @@
     } catch (e) {
       document.documentElement.classList.add("st2-theme-dark");
     }
+    try {
+      // Pantalla de carga navideña (tren Roca): 27/11 al 18/12/2026, hora Argentina.
+      // Vista previa: ?splash=tren (también en localhost); ?splash=0 la apaga.
+      var splash = new URLSearchParams(location.search).get("splash");
+      if (splash === "tren") sessionStorage.setItem("st2-splash-preview", "tren");
+      if (splash === "0") sessionStorage.removeItem("st2-splash-preview");
+      var hoy = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit"
+      }).format(new Date());
+      var trenPreview = sessionStorage.getItem("st2-splash-preview") === "tren";
+      if (trenPreview || (hoy >= "2026-11-27" && hoy <= "2026-12-18")) {
+        var rootEl = document.documentElement;
+        rootEl.classList.add("st2-xmas-splash-on");
+        rootEl.dataset.st2Today = hoy;
+        // Entera solo la primera vez del día en este navegador (las demás, lo que tarde en cargar).
+        if (trenPreview || localStorage.getItem("st2-splash-tren-visto") !== hoy) {
+          rootEl.classList.add("st2-xmas-splash-full");
+        }
+      }
+    } catch (e) { /* sin splash navideño */ }
   </script>
   <link rel="icon" href="/img/st2-brand.png" type="image/png"/>
   <link rel="apple-touch-icon" href="/img/st2-brand.png"/>
@@ -166,6 +186,17 @@
     #st2-splash-silk {
       background: #1a0e06;
     }
+    /* Splash navideño: tapa todo desde el primer pintado (el resto en st2-xmas-splash.css). */
+    #st2-xmas-splash {
+      display: none;
+    }
+    html.st2-xmas-splash-on #st2-xmas-splash {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      z-index: 10001;
+      background: #04060f;
+    }
     body.st2-access-pending .st2-boot-splash-brand,
     body.st2-access-restoring .st2-boot-splash-brand {
       display: inline-flex !important;
@@ -209,6 +240,7 @@
   <link rel="stylesheet" href="/css/st2-components.css"/>
   <link rel="stylesheet" href="/css/plan-pill-nav.css"/>
   <link rel="stylesheet" href="/css/st2-snow.css"/>
+  <link rel="stylesheet" href="/css/st2-xmas-splash.css"/>
   <link rel="modulepreload" href="/js/st2-silk.js"/>
   <link rel="modulepreload" href="/js/st2-gradient-ascii.js"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js"/>
@@ -244,6 +276,14 @@
       <span class="st2-boot-splash-suite">Suite Web</span>
     </div>
     <p class="st2-boot-splash-status"><span data-st2-decrypt-target="1">Cargando</span><span class="st2-boot-splash-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></p>
+  </div>
+  <div id="st2-xmas-splash" class="st2-xmas-splash" role="img" aria-label="Cargando ST² Suite Web">
+    <div class="st2-xmas-splash__frame">
+      <div class="st2-xmas-splash__scene"></div>
+      <p class="st2-xmas-splash__brand"><span>ST<sup>2</sup></span><span>Suite Web</span></p>
+      <p class="st2-xmas-splash__status">Cargando<span class="st2-xmas-splash__dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></p>
+    </div>
+    <p class="st2-xmas-splash__skip">Tocá para saltar</p>
   </div>
   <div id="st2-app-root" class="st2-app-root">
   <header class="app-header">

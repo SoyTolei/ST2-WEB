@@ -7,6 +7,9 @@ import { initBorderGlowCards } from "./st2-border-glow.js";
 import { initSuiteGlitchText } from "./st2-glitch-text.js";
 import { initSplashDecryptedText } from "./st2-decrypted-text.js";
 import { initClickSpark } from "./st2-click-spark.js";
+import { initXmasSplash } from "./st2-xmas-splash.js";
+
+initXmasSplash();
 
 const bootSplash =
   document.body.classList.contains("st2-access-restoring")

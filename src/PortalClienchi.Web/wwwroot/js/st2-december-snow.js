@@ -266,31 +266,25 @@ async function toggleSnowGlobeZoom(icon) {
   requestAnimationFrame(() => requestAnimationFrame(() => pop.classList.add("is-open")));
 }
 
-/** Encabezado del módulo de Planillas que se está viendo (transferencia, referral, PDF…). */
-function visibleModuleHead() {
-  return [...document.querySelectorAll(".planillas-view .plan-module-sticky-head")]
-    .find((head) => head.offsetParent !== null) || null;
+const GLOBE_KNOWN_KEY = "st2-bola-agitada";
+
+function globeKnown() {
+  try {
+    return localStorage.getItem(GLOBE_KNOWN_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
-/**
- * Un solo ícono que se mueve: en el menú va a la izquierda del título; en un módulo va arriba
- * a la derecha del encabezado, como los huevos, a la izquierda de la etiqueta del sistema
- * (BEJERMAN SQL…) y del huevo de esa persona si lo tiene.
- */
+/** Solo en el menú, a la izquierda del título. En los módulos no va (se saca y se cierra el zoom). */
 function placeSnowGlobe(host) {
   const hero = document.querySelector("#planillas-menu .planillas-hero");
-  const target = hero && hero.offsetParent !== null ? hero : visibleModuleHead();
-  if (!target) return;
-  if (host.parentElement !== target) target.appendChild(host);
-  host.classList.toggle("is-hero", target === hero);
-  host.classList.toggle("is-module", target !== hero);
-  if (target === hero) return;
-  const head = target.getBoundingClientRect();
-  const blockers = [...target.querySelectorAll(".plan-sistema-badge, .planillas-corner-easter:not(.is-hidden)")]
-    .filter((el) => el.offsetParent !== null)
-    .map((el) => el.getBoundingClientRect().left);
-  const left = Math.min(head.right, ...blockers);
-  host.style.setProperty("--st2-globe-right", `${Math.round(head.right - left + 10)}px`);
+  if (!hero || hero.offsetParent === null) {
+    globeZoom?.close();
+    host.remove();
+    return;
+  }
+  if (host.parentElement !== hero) hero.appendChild(host);
 }
 
 let started = false;
@@ -311,15 +305,27 @@ export async function initDecemberSnow() {
   let bg = null;
   let title = null;
 
-  // Bola de nieve: para todos en diciembre, en el título y en cada módulo. Ícono → zoom en el lugar.
+  // Bola de nieve: para todos en diciembre, a la izquierda del título del menú. Ícono → zoom en el lugar.
   const globeHost = document.createElement("button");
   globeHost.type = "button";
-  globeHost.className = "st2-snowglobe";
+  globeHost.className = "st2-snowglobe is-hero";
   globeHost.title = "Bola de nieve: tocá para agrandarla";
   globeHost.setAttribute("aria-label", "Agrandar la bola de nieve del Obelisco");
   globeHost.setAttribute("aria-expanded", "false");
-  globeHost.innerHTML = GLOBE_ICON;
-  globeHost.addEventListener("click", () => void toggleSnowGlobeZoom(globeHost));
+  globeHost.innerHTML = `${GLOBE_ICON}<span class="st2-snowglobe__tag" aria-hidden="true">¡agitame!</span>`;
+  // Pista (halo + cartelito) hasta que la toquen por primera vez en este navegador.
+  globeHost.classList.toggle("is-known", globeKnown());
+  globeHost.addEventListener("click", () => {
+    if (!globeHost.classList.contains("is-known")) {
+      globeHost.classList.add("is-known");
+      try {
+        localStorage.setItem(GLOBE_KNOWN_KEY, "1");
+      } catch {
+        /* sin storage: la pista vuelve a aparecer al recargar */
+      }
+    }
+    void toggleSnowGlobeZoom(globeHost);
+  });
 
   const mountTitle = () => {
     const hero = document.querySelector("#planillas-menu .planillas-hero");
