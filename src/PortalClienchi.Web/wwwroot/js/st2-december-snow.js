@@ -1,7 +1,7 @@
 /**
- * Nieve de diciembre (1 al 31, hora Argentina) en el menú principal de Planillas:
- * una capa de fondo a pantalla completa (con acumulación abajo) y otra dentro del
- * recuadro del título. Las dos van detrás del contenido: nunca tapan menús ni botones.
+ * Nieve de diciembre (1 al 31, hora Argentina) en Planillas: una capa de fondo a
+ * pantalla completa (con acumulación abajo) en el menú y en todos los módulos, y otra
+ * dentro del recuadro del título del menú. Las dos van detrás del contenido.
  *
  * Vista previa fuera de temporada: agregar ?nieve=1 a la URL (queda guardado en esta
  * pestaña). ?nieve=0 la apaga.
@@ -18,7 +18,7 @@ const THEME = {
 
 const BACKGROUND = {
   variant: "snowflake",
-  density: 0.9,
+  density: 0.55,
   accumulate: true,
   pixelSize: 3,
   speed: 1,
@@ -31,9 +31,12 @@ const BACKGROUND = {
   intro: true,
 };
 
+/** Título: copos más chicos (flakeSize y pixelSize menores) y bastante densidad. */
 const TITLE = {
   ...BACKGROUND,
-  density: 1,
+  density: 0.85,
+  flakeSize: 0.45,
+  pixelSize: 2,
   glow: 0.6,
   opacity: 0.9,
   mouseInteraction: false,
@@ -77,13 +80,12 @@ function currentTheme() {
   return document.documentElement.classList.contains("st2-theme-dark") ? THEME.dark : THEME.light;
 }
 
-function isPlanillasHome() {
+/** Pestaña Planillas activa: menú o cualquier módulo (transferencia, referral, PDF…). */
+function isPlanillasTab() {
   const tab = document.querySelector('.tab-btn[data-tab="planillas"]');
   if (!tab?.classList.contains("active")) return false;
   const panel = document.getElementById("panel-planillas");
-  if (panel && !panel.classList.contains("active")) return false;
-  const menu = document.getElementById("planillas-menu");
-  return !!(menu && !menu.classList.contains("hidden"));
+  return !panel || panel.classList.contains("active");
 }
 
 const BG_PROPS = [
@@ -148,7 +150,7 @@ export async function initDecemberSnow() {
   };
 
   const sync = () => {
-    const show = isPlanillasHome();
+    const show = isPlanillasTab();
     document.body.classList.toggle("st2-snow-on", show);
     if (show !== bodyBgMoved) moveBodyBackground(show);
     if (!show) return;

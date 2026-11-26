@@ -6,6 +6,18 @@
  * También podés cargar el cumpleaños en ADMIN → ficha del usuario (DD/MM):
  * eso activa saludo, gif de torta y globos sin tocar este archivo.
  */
+import { isSnowSeason } from "./st2-december-snow.js";
+
+/** En diciembre (temporada de nieve) solo quedan estos huevos; el resto vuelve en enero. */
+const DECEMBER_KEEP = new Set([
+  "belen.foschiatti@thomsonreuters.com",
+  "gisela.crosenzi@thomsonreuters.com",
+]);
+
+function pausedForDecember(key) {
+  return isSnowSeason() && !DECEMBER_KEEP.has(key);
+}
+
 export const PLANILLAS_BIRTHDAY_RECIPE = {
   motion: "still",
   heroBanner: true,
@@ -96,7 +108,7 @@ function isFunEggOn(email) {
 /** Hay un huevo visual propio (no el de cumpleaños). */
 export function hasProfileEasterEgg(email) {
   const key = String(email || "").trim().toLowerCase();
-  if (!key) return false;
+  if (!key || pausedForDecember(key)) return false;
   return PLANILLAS_EASTER_EGGS.some(
     (item) => item.email === key && !(item.birthdayMonth && item.birthdayDay),
   );
@@ -112,6 +124,7 @@ export function resolvePlanillasEgg(email) {
   const sessionBirthday = sessionBirthdayEgg(key);
   if (sessionBirthday) return sessionBirthday;
   if (!isFunEggOn(key)) return null;
+  if (pausedForDecember(key)) return null;
   if (!matches.length) return null;
   const always = matches.find((e) => !e.birthdayMonth || !e.birthdayDay);
   return always || null;

@@ -6,6 +6,7 @@
  */
 import { getPlanUserEmail, getPlanUserDisplayName } from "./plan-user.js";
 import { getViewAsProfile } from "./module-access.js";
+import { isSnowSeason } from "./st2-december-snow.js";
 import { setSt2AguaToast, clearSt2AlertToast, ST2_TOAST } from "./st2-sonner.js";
 
 const TARGET_EMAIL = "jorgeeduardo.teti@thomsonreuters.com";
@@ -96,8 +97,9 @@ function effectiveEmail() {
   return String(getPlanUserEmail() || "").trim().toLowerCase();
 }
 
+/** En diciembre el contador de agua descansa (solo quedan los huevos de Belén y Gisela). */
 export function isAguaEggUser() {
-  return effectiveEmail() === TARGET_EMAIL;
+  return effectiveEmail() === TARGET_EMAIL && !isSnowSeason();
 }
 
 /** Primer nombre desde el display del admin / ver como; nunca del local del mail. */
