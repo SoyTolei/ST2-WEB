@@ -19,21 +19,30 @@ html.st2-xmas-splash-on .st2-xmas-splash {
   display: flex;
 }
 
+/* El tour de bienvenida espera a que termine el tren (si no, aparece encima). */
+html.st2-xmas-splash-on #st2-tour-root {
+  visibility: hidden !important;
+}
+
 .st2-xmas-splash.is-leaving {
   opacity: 0;
   pointer-events: none;
 }
 
-/* Marca arriba, tren al medio y "Cargando" abajo: el texto nunca tapa la animación. */
+/* Tren a pantalla completa; marca y "Cargando" encima, arriba (lejos del Obelisco). */
 .st2-xmas-splash {
   flex-direction: column;
-  gap: clamp(8px, 2vh, 22px);
+  justify-content: flex-start;
+  gap: clamp(4px, 1.4vh, 14px);
+  padding-top: clamp(16px, 5vh, 56px);
+  overflow: hidden;
 }
 
 /* Misma marca que el splash de siempre (clases st2-boot-splash-*), escalada al alto. */
 .st2-xmas-splash .st2-xmas-splash__brand {
   min-height: 0;
   gap: clamp(14px, 2vw, 24px);
+  filter: drop-shadow(0 2px 14px rgba(4, 6, 15, 0.95));
 }
 
 .st2-xmas-splash .st2-boot-splash-st2-mark {
@@ -46,14 +55,18 @@ html.st2-xmas-splash-on .st2-xmas-splash {
 
 .st2-xmas-splash .st2-xmas-splash__status {
   font-size: clamp(1rem, 2.4vh, 1.35rem);
+  text-shadow: 0 1px 10px rgba(4, 6, 15, 0.95);
 }
 
-/* Cuadro 16:9 entero (sin recortar al reno), lo más grande que entre entre marca y estado. */
+/* Cubre toda la pantalla (16:9 recortado por los lados o arriba/abajo según la pantalla). */
 .st2-xmas-splash__frame {
-  position: relative;
-  flex: 0 0 auto;
-  width: min(96vw, calc((100vh - clamp(150px, 26vh, 250px)) * 16 / 9));
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: max(100vw, calc(100vh * 16 / 9));
   aspect-ratio: 16 / 9;
+  translate: -50% -50%;
 }
 
 .st2-xmas-splash__scene {

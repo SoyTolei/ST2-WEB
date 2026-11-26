@@ -1,12 +1,10 @@
 /**
  * Pantalla de carga navideña: Papá Noel en el tren Roca (st2-trenroca.js, puntos LED).
  * Va del 26/11 al 18/12/2026 (hora Argentina); el script inicial de index.html decide si
- * corresponde y deja html.st2-xmas-splash-on (y .st2-xmas-splash-full la primera vez del día).
+ * corresponde y deja html.st2-xmas-splash-on.
  *
- * - Primera carga del día en este navegador: se ve la animación entera (~6 s, a 1,5×)
- *   aunque la app ya esté lista. Se puede saltar tocando o con Esc.
- * - Las demás cargas del día: el tren queda de fondo y se va apenas la app está lista,
- *   como el splash de siempre.
+ * En cada carga se ve la animación entera (~6 s, a 1,5×) aunque la app ya esté lista.
+ * Se puede saltar tocando o con Esc.
  *
  * Vista previa (también en localhost): ?splash=tren. ?splash=0 la apaga.
  */
@@ -18,7 +16,6 @@ const SPEED = 1.5;
 const END = 9.2;
 /** Tope por si la app nunca termina de cargar: abajo queda el splash de siempre. */
 const MAX_MS = 12000;
-const SEEN_KEY = "st2-splash-tren-visto";
 
 function loadTrenRoca() {
   if (window.TrenRoca) return Promise.resolve(window.TrenRoca);
@@ -46,7 +43,6 @@ export function initXmasSplash() {
     return;
   }
 
-  const full = root.classList.contains("st2-xmas-splash-full");
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const opened = performance.now();
   let animStart = 0;
@@ -59,20 +55,13 @@ export function initXmasSplash() {
   const finish = () => {
     if (closed) return;
     closed = true;
-    if (full) {
-      try {
-        localStorage.setItem(SEEN_KEY, root.dataset.st2Today || "");
-      } catch {
-        /* sin storage: la próxima carga la vuelve a mostrar entera */
-      }
-    }
     document.removeEventListener("keydown", onKey);
     el.classList.add("is-leaving");
     window.setTimeout(() => {
       cancelAnimationFrame(raf);
       player?.destroy();
       el.remove();
-      root.classList.remove("st2-xmas-splash-on", "st2-xmas-splash-full");
+      root.classList.remove("st2-xmas-splash-on");
     }, 450);
   };
 
@@ -87,8 +76,8 @@ export function initXmasSplash() {
     if (player && !reduce) {
       player.renderAt(Math.min(((now - animStart) / 1000) * SPEED, END));
     }
-    // Entera: esperar a que baje el tren y termine; si no carga, como el splash de siempre.
-    const shownEnough = !full || reduce || loadFailed || (player && now - animStart >= minMs);
+    // Esperar a que baje el tren y termine; si no carga, como el splash de siempre.
+    const shownEnough = reduce || loadFailed || (player && now - animStart >= minMs);
     if ((appReady() && shownEnough) || now - opened >= MAX_MS) finish();
   };
 
@@ -108,7 +97,7 @@ export function initXmasSplash() {
       // freeze: monta sin su propio reloj; acá se maneja el tiempo (más rápido que el original).
       player = TrenRoca.mount(el.querySelector(".st2-xmas-splash__scene"), { freeze: reduce ? 3 : 0, timer: false });
       animStart = performance.now();
-      minMs = full && !reduce ? (END / SPEED) * 1000 : 0;
+      minMs = reduce ? 0 : (END / SPEED) * 1000;
       el.classList.add("is-playing");
     })
     .catch(() => {

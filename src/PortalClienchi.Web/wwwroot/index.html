@@ -31,11 +31,6 @@
       if (trenPreview || (hoy >= "2026-11-26" && hoy <= "2026-12-18")) {
         var rootEl = document.documentElement;
         rootEl.classList.add("st2-xmas-splash-on");
-        rootEl.dataset.st2Today = hoy;
-        // Entera solo la primera vez del día en este navegador (las demás, lo que tarde en cargar).
-        if (trenPreview || localStorage.getItem("st2-splash-tren-visto") !== hoy) {
-          rootEl.classList.add("st2-xmas-splash-full");
-        }
       }
     } catch (e) { /* sin splash navideño */ }
   </script>
