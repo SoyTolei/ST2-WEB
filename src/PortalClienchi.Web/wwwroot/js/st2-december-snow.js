@@ -228,7 +228,7 @@ async function toggleSnowGlobeZoom(icon) {
     `--st2-zoom-from:${(r.width / width).toFixed(3)}`;
   pop.innerHTML = `
     <div class="st2-snowglobe-zoom__globe"></div>
-    <p class="st2-snowglobe-zoom__hint">Tocá la bola para agitarla</p>`;
+    <p class="st2-snowglobe-zoom__hint">Tocá para agitar</p>`;
   document.body.appendChild(pop);
   const globe = SnowGlobe.mount(pop.querySelector(".st2-snowglobe-zoom__globe"), { bg: "#02030a" });
   icon.classList.add("is-zoomed");
@@ -312,8 +312,8 @@ export async function initDecemberSnow() {
   globeHost.title = "Bola de nieve: tocá para agrandarla";
   globeHost.setAttribute("aria-label", "Agrandar la bola de nieve del Obelisco");
   globeHost.setAttribute("aria-expanded", "false");
-  globeHost.innerHTML = `${GLOBE_ICON}<span class="st2-snowglobe__tag" aria-hidden="true">¡agitame!</span>`;
-  // Pista (halo + cartelito) hasta que la toquen por primera vez en este navegador.
+  globeHost.innerHTML = GLOBE_ICON;
+  // Pista (halo) hasta que la toquen por primera vez en este navegador; el bamboleo queda siempre.
   globeHost.classList.toggle("is-known", globeKnown());
   globeHost.addEventListener("click", () => {
     if (!globeHost.classList.contains("is-known")) {

@@ -193,8 +193,9 @@ export function mountDecryptedText(el, opts = {}) {
   return { triggerDecrypt, stop };
 }
 
-export function initSplashDecryptedText() {
-  const status = document.querySelector(".st2-boot-splash-status");
+/** root: el splash de siempre (document) o el navideño, que usa las mismas clases. */
+export function initSplashDecryptedText(root = document) {
+  const status = root.querySelector(".st2-boot-splash-status");
   if (status) {
     let target = status.querySelector("[data-st2-decrypt-target]");
     if (!target) {
@@ -222,7 +223,7 @@ export function initSplashDecryptedText() {
     });
   }
 
-  const suite = document.querySelector(".st2-boot-splash-suite");
+  const suite = root.querySelector(".st2-boot-splash-suite");
   if (suite) {
     // Scramble corto + pausa larga: se lee “Suite Web” la mayor parte del tiempo.
     mountDecryptedText(suite, {

@@ -1,6 +1,6 @@
 /*
- * Pantalla de carga navideña (st2-xmas-splash.js): el tren Roca de fondo, la marca arriba
- * en el cielo y "Cargando…" abajo. Lo crítico (mostrarla antes de que llegue este CSS)
+ * Pantalla de carga navideña (st2-xmas-splash.js): marca de siempre arriba, el tren Roca
+ * al medio y "Cargando…" abajo. Lo crítico (mostrarla antes de que llegue este CSS)
  * está inline en index.html.
  */
 .st2-xmas-splash {
@@ -24,10 +24,35 @@ html.st2-xmas-splash-on .st2-xmas-splash {
   pointer-events: none;
 }
 
-/* Cuadro 16:9 entero (sin recortar al reno), centrado; el resto es del mismo azul noche. */
+/* Marca arriba, tren al medio y "Cargando" abajo: el texto nunca tapa la animación. */
+.st2-xmas-splash {
+  flex-direction: column;
+  gap: clamp(8px, 2vh, 22px);
+}
+
+/* Misma marca que el splash de siempre (clases st2-boot-splash-*), escalada al alto. */
+.st2-xmas-splash .st2-xmas-splash__brand {
+  min-height: 0;
+  gap: clamp(14px, 2vw, 24px);
+}
+
+.st2-xmas-splash .st2-boot-splash-st2-mark {
+  font-size: clamp(3rem, 10vh, 6.45rem);
+}
+
+.st2-xmas-splash .st2-boot-splash-suite {
+  font-size: clamp(2.7rem, 9vh, 5.85rem);
+}
+
+.st2-xmas-splash .st2-xmas-splash__status {
+  font-size: clamp(1rem, 2.4vh, 1.35rem);
+}
+
+/* Cuadro 16:9 entero (sin recortar al reno), lo más grande que entre entre marca y estado. */
 .st2-xmas-splash__frame {
   position: relative;
-  width: min(100vw, calc(100vh * 16 / 9));
+  flex: 0 0 auto;
+  width: min(96vw, calc((100vh - clamp(150px, 26vh, 250px)) * 16 / 9));
   aspect-ratio: 16 / 9;
 }
 
@@ -40,53 +65,6 @@ html.st2-xmas-splash-on .st2-xmas-splash {
 
 .st2-xmas-splash.is-playing .st2-xmas-splash__scene {
   opacity: 1;
-}
-
-.st2-xmas-splash__brand {
-  position: absolute;
-  top: 7%;
-  left: 50%;
-  translate: -50% 0;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.45em;
-  margin: 0;
-  color: #ffedd5;
-  font: 800 clamp(1.6rem, 3.4vw, 2.6rem) / 1 "Sora", "Segoe UI", system-ui, sans-serif;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  text-shadow: 0 0 18px rgba(4, 6, 15, 0.9), 0 2px 4px rgba(4, 6, 15, 0.8);
-  pointer-events: none;
-}
-
-.st2-xmas-splash__brand sup {
-  margin-left: 1px;
-  color: #f97316;
-  font-size: 0.55em;
-}
-
-.st2-xmas-splash__status {
-  position: absolute;
-  top: calc(7% + clamp(2.1rem, 4.4vw, 3.3rem));
-  left: 50%;
-  translate: -50% 0;
-  margin: 0;
-  color: #fdba74;
-  font: 600 clamp(0.85rem, 1.2vw, 1rem) / 1.4 "Segoe UI", system-ui, sans-serif;
-  text-shadow: 0 1px 6px rgba(4, 6, 15, 0.9);
-  pointer-events: none;
-}
-
-.st2-xmas-splash__dots span {
-  animation: st2-xmas-dot 1.2s ease-in-out infinite;
-}
-
-.st2-xmas-splash__dots span:nth-child(2) { animation-delay: 0.2s; }
-.st2-xmas-splash__dots span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes st2-xmas-dot {
-  0%, 100% { opacity: 0.25; }
-  50% { opacity: 1; }
 }
 
 .st2-xmas-splash__skip {
@@ -110,9 +88,5 @@ html.st2-xmas-splash-on .st2-xmas-splash {
   .st2-xmas-splash__scene,
   .st2-xmas-splash__skip {
     transition: none;
-  }
-
-  .st2-xmas-splash__dots span {
-    animation: none;
   }
 }

@@ -19,7 +19,7 @@
       document.documentElement.classList.add("st2-theme-dark");
     }
     try {
-      // Pantalla de carga navideña (tren Roca): 27/11 al 18/12/2026, hora Argentina.
+      // Pantalla de carga navideña (tren Roca): 26/11 al 18/12/2026, hora Argentina.
       // Vista previa: ?splash=tren (también en localhost); ?splash=0 la apaga.
       var splash = new URLSearchParams(location.search).get("splash");
       if (splash === "tren") sessionStorage.setItem("st2-splash-preview", "tren");
@@ -28,7 +28,7 @@
         timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "2-digit", day: "2-digit"
       }).format(new Date());
       var trenPreview = sessionStorage.getItem("st2-splash-preview") === "tren";
-      if (trenPreview || (hoy >= "2026-11-27" && hoy <= "2026-12-18")) {
+      if (trenPreview || (hoy >= "2026-11-26" && hoy <= "2026-12-18")) {
         var rootEl = document.documentElement;
         rootEl.classList.add("st2-xmas-splash-on");
         rootEl.dataset.st2Today = hoy;
@@ -278,11 +278,16 @@
     <p class="st2-boot-splash-status"><span data-st2-decrypt-target="1">Cargando</span><span class="st2-boot-splash-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></p>
   </div>
   <div id="st2-xmas-splash" class="st2-xmas-splash" role="img" aria-label="Cargando ST² Suite Web">
+    <div class="st2-boot-splash-brand st2-xmas-splash__brand">
+      <span class="st2-boot-splash-st2-mark" aria-hidden="true">
+        <span class="st2-boot-splash-st">ST</span><sup class="st2-boot-splash-sup">2</sup>
+      </span>
+      <span class="st2-boot-splash-suite">Suite Web</span>
+    </div>
     <div class="st2-xmas-splash__frame">
       <div class="st2-xmas-splash__scene"></div>
-      <p class="st2-xmas-splash__brand"><span>ST<sup>2</sup></span><span>Suite Web</span></p>
-      <p class="st2-xmas-splash__status">Cargando<span class="st2-xmas-splash__dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></p>
     </div>
+    <p class="st2-boot-splash-status st2-xmas-splash__status"><span data-st2-decrypt-target="1">Cargando</span><span class="st2-boot-splash-dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span></p>
     <p class="st2-xmas-splash__skip">Tocá para saltar</p>
   </div>
   <div id="st2-app-root" class="st2-app-root">

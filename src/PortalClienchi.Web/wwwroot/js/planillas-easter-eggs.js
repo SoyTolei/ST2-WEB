@@ -8,14 +8,12 @@
  */
 import { isSnowSeason } from "./st2-december-snow.js";
 
-/** En diciembre (temporada de nieve) solo quedan estos huevos; el resto vuelve en enero. */
-const DECEMBER_KEEP = new Set([
-  "belen.foschiatti@thomsonreuters.com",
-  "gisela.crosenzi@thomsonreuters.com",
-]);
-
-function pausedForDecember(key) {
-  return isSnowSeason() && !DECEMBER_KEEP.has(key);
+/**
+ * En diciembre (temporada de nieve) se pausan todos los huevos: el título es de la bola de
+ * nieve y el arbolito. Vuelven en enero. Los cumpleaños siguen andando.
+ */
+function pausedForDecember() {
+  return isSnowSeason();
 }
 
 export const PLANILLAS_BIRTHDAY_RECIPE = {

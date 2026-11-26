@@ -1,6 +1,6 @@
 /**
  * Pantalla de carga navideña: Papá Noel en el tren Roca (st2-trenroca.js, puntos LED).
- * Va del 27/11 al 18/12/2026 (hora Argentina); el script inicial de index.html decide si
+ * Va del 26/11 al 18/12/2026 (hora Argentina); el script inicial de index.html decide si
  * corresponde y deja html.st2-xmas-splash-on (y .st2-xmas-splash-full la primera vez del día).
  *
  * - Primera carga del día en este navegador: se ve la animación entera (~6 s, a 1,5×)
@@ -10,6 +10,8 @@
  *
  * Vista previa (también en localhost): ?splash=tren. ?splash=0 la apaga.
  */
+
+import { initSplashDecryptedText } from "./st2-decrypted-text.js";
 
 const SPEED = 1.5;
 /** Segundo de la animación en que el tren ya salió de cuadro. */
@@ -90,6 +92,8 @@ export function initXmasSplash() {
     if ((appReady() && shownEnough) || now - opened >= MAX_MS) finish();
   };
 
+  // Misma marca y mismo efecto (texto que se descifra) que el splash de siempre.
+  initSplashDecryptedText(el);
   el.addEventListener("click", finish);
   document.addEventListener("keydown", onKey);
   window.setTimeout(() => el.classList.add("show-skip"), 1500);

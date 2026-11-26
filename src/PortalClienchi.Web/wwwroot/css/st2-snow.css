@@ -66,16 +66,16 @@ body.st2-snow-on .st2-snow {
 
 .st2-snowglobe.is-hero {
   left: 26px;
-  top: calc(50% - 7px);
+  top: 50%;
   width: 66px;
   translate: 0 -50%;
 }
 
-/* Pista sutil de que se toca: cada tanto se bambolea, un halo late alrededor del vidrio
-   y abajo dice "¡agitame!". Halo y cartel se van después del primer toque. */
+/* Pista sutil de que se toca: se bambolea seguido y un halo late alrededor del vidrio.
+   El halo se va después del primer toque. */
 .st2-snowglobe svg {
   transform-origin: 50% 100%;
-  animation: st2-globe-wiggle 6s ease-in-out 2s infinite;
+  animation: st2-globe-wiggle 2.8s ease-in-out 1s infinite;
 }
 
 .st2-snowglobe::before {
@@ -90,38 +90,16 @@ body.st2-snow-on .st2-snow {
   animation: st2-globe-halo 2.8s ease-out infinite;
 }
 
-.st2-snowglobe__tag {
-  position: absolute;
-  top: calc(100% + 3px);
-  left: 50%;
-  translate: -50% 0;
-  padding: 1px 8px 2px;
-  border-radius: var(--radius-pill);
-  background: rgba(59, 130, 196, 0.14);
-  color: #3b82c4;
-  font: 600 10.5px/1.3 var(--font-ui);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  pointer-events: none;
-  animation: st2-globe-tag 6s ease-in-out 2s infinite;
-}
-
-html.st2-theme-dark .st2-snowglobe__tag {
-  background: rgba(142, 200, 255, 0.12);
-  color: #8ec8ff;
-}
-
-.st2-snowglobe.is-known::before,
-.st2-snowglobe.is-known .st2-snowglobe__tag {
+.st2-snowglobe.is-known::before {
   display: none;
 }
 
 @keyframes st2-globe-wiggle {
-  0%, 84%, 100% { transform: none; }
-  87% { transform: rotate(-9deg); }
-  90% { transform: rotate(8deg); }
-  93% { transform: rotate(-5deg); }
-  96% { transform: rotate(3deg); }
+  0%, 72%, 100% { transform: none; }
+  77% { transform: rotate(-9deg); }
+  83% { transform: rotate(8deg); }
+  89% { transform: rotate(-5deg); }
+  95% { transform: rotate(3deg); }
 }
 
 @keyframes st2-globe-halo {
@@ -129,10 +107,6 @@ html.st2-theme-dark .st2-snowglobe__tag {
   75%, 100% { box-shadow: 0 0 0 11px rgba(142, 200, 255, 0); }
 }
 
-@keyframes st2-globe-tag {
-  0%, 80%, 100% { opacity: 0.75; }
-  88% { opacity: 1; }
-}
 
 /* Copitos dentro del vidrio: caen suave. */
 .st2-globe-flakes circle {
@@ -239,8 +213,7 @@ body:not(.st2-snow-on) .st2-xmas-tree {
   .st2-tree-lights circle,
   .st2-tree-star,
   .st2-snowglobe svg,
-  .st2-snowglobe::before,
-  .st2-snowglobe__tag {
+  .st2-snowglobe::before {
     animation: none;
   }
 
