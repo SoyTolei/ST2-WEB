@@ -7,6 +7,10 @@
   <title>ST² · Suite Web</title>
   <script>
     try {
+      // Vista previa de la nieve de diciembre (?nieve=1 / ?nieve=0), antes de que el router limpie la URL.
+      var nieve = new URLSearchParams(location.search).get("nieve");
+      if (nieve === "1") sessionStorage.setItem("st2-nieve-preview", "1");
+      if (nieve === "0") sessionStorage.removeItem("st2-nieve-preview");
       // Oscuro por defecto; solo queda claro si eligieron "light".
       if (localStorage.getItem("st2-theme") !== "light") {
         document.documentElement.classList.add("st2-theme-dark");
@@ -205,6 +209,7 @@
   <link rel="stylesheet" href="/css/st2-refresh.css"/>
   <link rel="stylesheet" href="/css/st2-components.css"/>
   <link rel="stylesheet" href="/css/plan-pill-nav.css"/>
+  <link rel="stylesheet" href="/css/st2-snow.css"/>
   <link rel="modulepreload" href="/js/st2-silk.js"/>
   <link rel="modulepreload" href="/js/st2-gradient-ascii.js"/>
   <link rel="modulepreload" href="/js/st2-border-glow.js"/>

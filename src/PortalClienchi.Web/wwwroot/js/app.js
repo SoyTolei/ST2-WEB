@@ -9,6 +9,7 @@ import { notifyAccessChanged } from "./access-alerts.js";
 import { syncSonnerTheme, syncSonnerPlacement, syncSonnerHomeVisibility, initSt2Sonner, setSt2AlertToast, clearSt2AlertToast, ST2_TOAST, syncStackedToastGreetings, showSt2FlashToast } from "./st2-sonner.js";
 import { notifyWebUpdateDesktop } from "./st2-desktop-notif.js";
 import { initCrypticNudge } from "./st2-cryptic-nudge.js";
+import { initDecemberSnow } from "./st2-december-snow.js";
 import { setFunEggEnabled, hasProfileEasterEgg } from "./planillas-easter-eggs.js";
 import { mountBellToggle } from "./st2-bell-toggle.js";
 import { getNotifInboxUnreadCount } from "./st2-notif-inbox.js";
@@ -5675,6 +5676,7 @@ async function bootstrapApp() {
   bindAboutToolsUi();
   await initPlanillas();
   initCrypticNudge();
+  void initDecemberSnow();
   setTourContext({
     getActiveTab: () => document.querySelector(".tab-btn.active")?.dataset?.tab || "planillas",
     getPortalTabLabel: () => getPortalClientTabLabel(),
