@@ -35,3 +35,32 @@ body.st2-snow-on .st2-snow {
   width: 100%;
   height: 100%;
 }
+
+/* Bola de nieve ASCII (Obelisco): una sola instancia que se mueve entre el título y
+   el encabezado del módulo abierto. Se puede tocar para agitarla. */
+.st2-snowglobe {
+  position: absolute;
+  z-index: 3;
+  cursor: pointer;
+  border-radius: 14px;
+}
+
+.st2-snowglobe.is-hero {
+  left: 18px;
+  top: 50%;
+  width: 104px;
+  transform: translateY(-50%);
+}
+
+.st2-snowglobe.is-module {
+  top: 4px;
+  right: var(--st2-globe-right, 10px);
+  width: 48px;
+}
+
+/* Tema claro: el dibujo es claro, así que va sobre una "pantallita" oscura. */
+html:not(.st2-theme-dark) .st2-snowglobe {
+  padding: 3px;
+  background: #02030a;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}

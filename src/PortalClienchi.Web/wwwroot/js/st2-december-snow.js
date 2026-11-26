@@ -122,6 +122,45 @@ function moveBodyBackground(on) {
   bodyBgMoved = true;
 }
 
+/** Bola de nieve ASCII (Obelisco): script clásico que deja window.SnowGlobe; solo se baja en temporada. */
+function loadSnowGlobe() {
+  if (window.SnowGlobe) return Promise.resolve(window.SnowGlobe);
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "/js/st2-snowglobe.js";
+    script.onload = () => resolve(window.SnowGlobe);
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
+/** Encabezado del módulo de Planillas que se está viendo (transferencia, referral, PDF…). */
+function visibleModuleHead() {
+  return [...document.querySelectorAll(".planillas-view .plan-module-sticky-head")]
+    .find((head) => head.offsetParent !== null) || null;
+}
+
+/**
+ * Una sola bola para todo (el canvas es grande): en el menú va a la izquierda del título;
+ * en un módulo va arriba a la derecha del encabezado, como los huevos, a la izquierda de la
+ * etiqueta del sistema (BEJERMAN SQL…) y del huevo de esa persona si lo tiene.
+ */
+function placeSnowGlobe(host) {
+  const hero = document.querySelector("#planillas-menu .planillas-hero");
+  const target = hero && hero.offsetParent !== null ? hero : visibleModuleHead();
+  if (!target) return;
+  if (host.parentElement !== target) target.appendChild(host);
+  host.classList.toggle("is-hero", target === hero);
+  host.classList.toggle("is-module", target !== hero);
+  if (target === hero) return;
+  const head = target.getBoundingClientRect();
+  const blockers = [...target.querySelectorAll(".plan-sistema-badge, .planillas-corner-easter:not(.is-hidden)")]
+    .filter((el) => el.offsetParent !== null)
+    .map((el) => el.getBoundingClientRect().left);
+  const left = Math.min(head.right, ...blockers);
+  host.style.setProperty("--st2-globe-right", `${Math.round(head.right - left + 10)}px`);
+}
+
 let started = false;
 
 export async function initDecemberSnow() {
@@ -140,6 +179,14 @@ export async function initDecemberSnow() {
   let bg = null;
   let title = null;
 
+  // Bola de nieve: para todos en diciembre, en el título y en cada módulo.
+  const globeHost = document.createElement("div");
+  globeHost.className = "st2-snowglobe";
+  globeHost.title = "Tocá la bola para agitarla";
+  loadSnowGlobe()
+    .then((SnowGlobe) => SnowGlobe?.mount(globeHost, { bg: "transparent" }))
+    .catch(() => globeHost.remove());
+
   const mountTitle = () => {
     const hero = document.querySelector("#planillas-menu .planillas-hero");
     if (!hero || hero.querySelector(".st2-snow--title")) return;
@@ -157,6 +204,7 @@ export async function initDecemberSnow() {
     if (!show) return;
     if (!bg) bg = createPixelSnow(bgHost, { ...BACKGROUND, ...currentTheme() });
     if (!title) mountTitle();
+    placeSnowGlobe(globeHost);
   };
 
   // Tema claro/oscuro: cambiar color sin recrear.
@@ -169,6 +217,7 @@ export async function initDecemberSnow() {
   }).observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
   document.addEventListener("st2:planillas-home", sync);
+  document.addEventListener("st2:planillas-view-changed", () => requestAnimationFrame(sync));
   window.setInterval(sync, CHECK_MS);
   sync();
 }
