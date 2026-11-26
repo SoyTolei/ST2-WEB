@@ -134,6 +134,79 @@ function loadSnowGlobe() {
   });
 }
 
+/** Ícono de bola de nieve (SVG nítido a cualquier tamaño): vidrio, Obelisco, pinitos y base. */
+const GLOBE_ICON = `
+<svg viewBox="0 0 64 72" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="st2-globe-glass" cx="40%" cy="32%" r="70%">
+      <stop offset="0" stop-color="#1e3a6e"/>
+      <stop offset="0.65" stop-color="#0b1730"/>
+      <stop offset="1" stop-color="#02030a"/>
+    </radialGradient>
+    <clipPath id="st2-globe-clip"><circle cx="32" cy="30" r="23"/></clipPath>
+  </defs>
+  <circle cx="32" cy="30" r="24" fill="url(#st2-globe-glass)" stroke="#8ec8ff" stroke-width="2"/>
+  <g clip-path="url(#st2-globe-clip)">
+    <ellipse cx="32" cy="50" rx="26" ry="8" fill="#dbeafe"/>
+    <polygon points="32,10 35,15 35,45 29,45 29,15" fill="#e8f0ff"/>
+    <rect x="31" y="18" width="2" height="3" fill="#1e3a6e"/>
+    <polygon points="14,45 19,33 24,45" fill="#16a34a"/>
+    <polygon points="40,45 45,34 50,45" fill="#16a34a"/>
+    <circle cx="18" cy="41" r="1.2" fill="#ff3c3c"/><circle cx="20" cy="38" r="1.1" fill="#ffd23c"/>
+    <circle cx="45" cy="40" r="1.2" fill="#5096ff"/><circle cx="47" cy="43" r="1.1" fill="#ff6edc"/>
+    <g class="st2-globe-flakes" fill="#ffffff">
+      <circle cx="16" cy="18" r="1.1"/><circle cx="24" cy="10" r="0.9"/><circle cx="42" cy="14" r="1.1"/>
+      <circle cx="49" cy="24" r="0.9"/><circle cx="20" cy="27" r="0.8"/><circle cx="40" cy="28" r="0.9"/>
+      <circle cx="12" cy="31" r="0.8"/><circle cx="52" cy="33" r="0.8"/>
+    </g>
+  </g>
+  <ellipse cx="25" cy="17" rx="7" ry="4" fill="#ffffff" opacity="0.18" transform="rotate(-30 25 17)"/>
+  <path d="M15 52h34l4 12a3 3 0 0 1-3 4H14a3 3 0 0 1-3-4z" fill="#b45309"/>
+  <rect x="13" y="50" width="38" height="5" rx="2" fill="#92400e"/>
+</svg>`;
+
+let globeModal = null;
+
+/** La bola ASCII solo se ve bien grande (~600 px): se abre en una ventana y se libera al cerrar. */
+async function openSnowGlobeModal() {
+  if (globeModal) return;
+  const overlay = document.createElement("div");
+  overlay.className = "st2-snowglobe-modal";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", "Bola de nieve con el Obelisco");
+  overlay.innerHTML = `
+    <div class="st2-snowglobe-modal__box">
+      <button type="button" class="st2-snowglobe-modal__close" aria-label="Cerrar">×</button>
+      <div class="st2-snowglobe-modal__globe"></div>
+      <p class="st2-snowglobe-modal__hint">Tocá la bola para agitarla</p>
+    </div>`;
+  document.body.appendChild(overlay);
+  let globe = null;
+  const close = () => {
+    globe?.destroy();
+    overlay.remove();
+    document.removeEventListener("keydown", onKey);
+    globeModal = null;
+  };
+  const onKey = (e) => {
+    if (e.key === "Escape") close();
+  };
+  globeModal = { close };
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay || e.target.closest(".st2-snowglobe-modal__close")) close();
+  });
+  document.addEventListener("keydown", onKey);
+  try {
+    const SnowGlobe = await loadSnowGlobe();
+    if (globeModal && SnowGlobe) {
+      globe = SnowGlobe.mount(overlay.querySelector(".st2-snowglobe-modal__globe"), { bg: "#02030a" });
+    }
+  } catch {
+    close();
+  }
+}
+
 /** Encabezado del módulo de Planillas que se está viendo (transferencia, referral, PDF…). */
 function visibleModuleHead() {
   return [...document.querySelectorAll(".planillas-view .plan-module-sticky-head")]
@@ -141,9 +214,9 @@ function visibleModuleHead() {
 }
 
 /**
- * Una sola bola para todo (el canvas es grande): en el menú va a la izquierda del título;
- * en un módulo va arriba a la derecha del encabezado, como los huevos, a la izquierda de la
- * etiqueta del sistema (BEJERMAN SQL…) y del huevo de esa persona si lo tiene.
+ * Un solo ícono que se mueve: en el menú va a la izquierda del título; en un módulo va arriba
+ * a la derecha del encabezado, como los huevos, a la izquierda de la etiqueta del sistema
+ * (BEJERMAN SQL…) y del huevo de esa persona si lo tiene.
  */
 function placeSnowGlobe(host) {
   const hero = document.querySelector("#planillas-menu .planillas-hero");
@@ -179,13 +252,14 @@ export async function initDecemberSnow() {
   let bg = null;
   let title = null;
 
-  // Bola de nieve: para todos en diciembre, en el título y en cada módulo.
-  const globeHost = document.createElement("div");
+  // Bola de nieve: para todos en diciembre, en el título y en cada módulo. Ícono → ventana grande.
+  const globeHost = document.createElement("button");
+  globeHost.type = "button";
   globeHost.className = "st2-snowglobe";
-  globeHost.title = "Tocá la bola para agitarla";
-  loadSnowGlobe()
-    .then((SnowGlobe) => SnowGlobe?.mount(globeHost, { bg: "transparent" }))
-    .catch(() => globeHost.remove());
+  globeHost.title = "Bola de nieve: tocá para verla grande";
+  globeHost.setAttribute("aria-label", "Abrir la bola de nieve del Obelisco");
+  globeHost.innerHTML = GLOBE_ICON;
+  globeHost.addEventListener("click", () => void openSnowGlobeModal());
 
   const mountTitle = () => {
     const hero = document.querySelector("#planillas-menu .planillas-hero");

@@ -36,31 +36,114 @@ body.st2-snow-on .st2-snow {
   height: 100%;
 }
 
-/* Bola de nieve ASCII (Obelisco): una sola instancia que se mueve entre el título y
-   el encabezado del módulo abierto. Se puede tocar para agitarla. */
+/* Bola de nieve: ícono SVG (título y módulos) que abre la bola ASCII grande en una ventana.
+   Un solo ícono que se mueve entre el título y el encabezado del módulo abierto. */
 .st2-snowglobe {
   position: absolute;
   z-index: 3;
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
-  border-radius: 14px;
+  filter: drop-shadow(0 3px 6px rgba(2, 3, 10, 0.35));
+  transition: transform 0.18s ease;
+}
+
+.st2-snowglobe svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.st2-snowglobe:hover {
+  transform: translateY(-2px) rotate(-6deg);
+}
+
+.st2-snowglobe:focus-visible {
+  outline: 2px solid var(--c-orange-500);
+  outline-offset: 3px;
+  border-radius: 12px;
 }
 
 .st2-snowglobe.is-hero {
-  left: 18px;
+  left: 24px;
   top: 50%;
-  width: 104px;
-  transform: translateY(-50%);
+  width: 58px;
+  translate: 0 -50%;
 }
 
 .st2-snowglobe.is-module {
-  top: 4px;
+  top: 8px;
   right: var(--st2-globe-right, 10px);
-  width: 48px;
+  width: 34px;
 }
 
-/* Tema claro: el dibujo es claro, así que va sobre una "pantallita" oscura. */
-html:not(.st2-theme-dark) .st2-snowglobe {
-  padding: 3px;
+/* Copitos dentro del vidrio: caen suave. */
+.st2-globe-flakes circle {
+  animation: st2-globe-flake 3.2s linear infinite;
+}
+
+.st2-globe-flakes circle:nth-child(2n) { animation-duration: 4.1s; animation-delay: -1.3s; }
+.st2-globe-flakes circle:nth-child(3n) { animation-duration: 3.6s; animation-delay: -2.2s; }
+
+@keyframes st2-globe-flake {
+  from { transform: translateY(-6px); opacity: 0; }
+  20% { opacity: 1; }
+  to { transform: translateY(16px); opacity: 0; }
+}
+
+/* Ventana con la bola ASCII a tamaño completo (como el original). */
+.st2-snowglobe-modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dialog);
+  display: grid;
+  place-items: center;
+  background: rgba(2, 3, 10, 0.82);
+  backdrop-filter: blur(4px);
+}
+
+.st2-snowglobe-modal__box {
+  position: relative;
+  width: min(92vw, calc(84vh * 0.876));
+}
+
+.st2-snowglobe-modal__close {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(142, 200, 255, 0.4);
+  border-radius: var(--radius-pill);
   background: #02030a;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+  color: #8ec8ff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.st2-snowglobe-modal__close:hover {
+  background: #0b1730;
+}
+
+.st2-snowglobe-modal__hint {
+  margin: 6px 0 0;
+  color: #4a6a96;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st2-globe-flakes circle {
+    animation: none;
+  }
+
+  .st2-snowglobe,
+  .st2-snowglobe:hover {
+    transition: none;
+    transform: none;
+  }
 }
