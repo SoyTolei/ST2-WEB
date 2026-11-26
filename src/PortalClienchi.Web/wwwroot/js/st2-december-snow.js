@@ -165,46 +165,105 @@ const GLOBE_ICON = `
   <rect x="13" y="50" width="38" height="5" rx="2" fill="#92400e"/>
 </svg>`;
 
-let globeModal = null;
+/** Arbolito con estrella, guirnaldas, bolitas que titilan y regalos: del otro lado del título. */
+const TREE_ICON = `
+<svg viewBox="0 0 64 76" aria-hidden="true" focusable="false">
+  <polygon points="32,12 19,30 45,30" fill="#16a34a"/>
+  <polygon points="32,22 14,44 50,44" fill="#15803d"/>
+  <polygon points="32,34 9,60 55,60" fill="#166534"/>
+  <path d="M22 27 Q32 32 42 26" stroke="#fbbf24" stroke-width="1.6" fill="none"/>
+  <path d="M18 41 Q32 48 46 40" stroke="#fbbf24" stroke-width="1.6" fill="none"/>
+  <path d="M13 56 Q32 64 51 55" stroke="#fbbf24" stroke-width="1.6" fill="none"/>
+  <rect x="28" y="60" width="8" height="8" fill="#92400e"/>
+  <g class="st2-tree-lights">
+    <circle cx="27" cy="23" r="1.8" fill="#ff3c3c"/><circle cx="38" cy="21" r="1.6" fill="#5096ff"/>
+    <circle cx="22" cy="37" r="1.9" fill="#ffd23c"/><circle cx="33" cy="34" r="1.6" fill="#ff6edc"/>
+    <circle cx="43" cy="37" r="1.8" fill="#ff3c3c"/><circle cx="17" cy="52" r="1.9" fill="#5096ff"/>
+    <circle cx="28" cy="50" r="1.7" fill="#ff3c3c"/><circle cx="39" cy="51" r="1.9" fill="#ffd23c"/>
+    <circle cx="48" cy="52" r="1.7" fill="#ff6edc"/>
+  </g>
+  <polygon class="st2-tree-star" fill="#fde047" points="32,2 34.1,7.6 40,7.8 35.4,11.4 37,17 32,13.8 27,17 28.6,11.4 24,7.8 29.9,7.6"/>
+  <rect x="7" y="64" width="13" height="11" rx="1" fill="#dc2626"/>
+  <rect x="12.5" y="64" width="2" height="11" fill="#fde047"/>
+  <rect x="44" y="66" width="12" height="9" rx="1" fill="#2563eb"/>
+  <rect x="49" y="66" width="2" height="9" fill="#e8f0ff"/>
+</svg>`;
 
-/** La bola ASCII solo se ve bien grande (~600 px): se abre en una ventana y se libera al cerrar. */
-async function openSnowGlobeModal() {
-  if (globeModal) return;
-  const overlay = document.createElement("div");
-  overlay.className = "st2-snowglobe-modal";
-  overlay.setAttribute("role", "dialog");
-  overlay.setAttribute("aria-modal", "true");
-  overlay.setAttribute("aria-label", "Bola de nieve con el Obelisco");
-  overlay.innerHTML = `
-    <div class="st2-snowglobe-modal__box">
-      <button type="button" class="st2-snowglobe-modal__close" aria-label="Cerrar">×</button>
-      <div class="st2-snowglobe-modal__globe"></div>
-      <p class="st2-snowglobe-modal__hint">Tocá la bola para agitarla</p>
-    </div>`;
-  document.body.appendChild(overlay);
-  let globe = null;
-  const close = () => {
-    globe?.destroy();
-    overlay.remove();
-    document.removeEventListener("keydown", onKey);
-    globeModal = null;
+let globeZoom = null;
+
+/**
+ * La bola ASCII se ve bien a partir de ~450 px: al tocar el ícono crece desde ahí mismo
+ * (sin ventana ni fondo oscuro), se agita al tocarla y vuelve al ícono al tocar afuera,
+ * con Esc o al scrollear. Se libera al cerrarse.
+ */
+async function toggleSnowGlobeZoom(icon) {
+  if (globeZoom) {
+    globeZoom.close();
+    return;
+  }
+  let SnowGlobe;
+  try {
+    SnowGlobe = await loadSnowGlobe();
+  } catch {
+    return;
+  }
+  if (!SnowGlobe || globeZoom) return;
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const width = Math.round(Math.min(480, vw - 32, (vh - 72) * 0.876));
+  const height = Math.round(width / 0.876) + 26;
+  const r = icon.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  const left = Math.round(Math.min(Math.max(16, cx - width / 2), vw - 16 - width));
+  const top = Math.round(Math.min(Math.max(16, r.top - 8), vh - 16 - height));
+
+  const pop = document.createElement("div");
+  pop.className = "st2-snowglobe-zoom";
+  pop.setAttribute("role", "dialog");
+  pop.setAttribute("aria-label", "Bola de nieve con el Obelisco");
+  pop.style.cssText = `left:${left}px;top:${top}px;width:${width}px;` +
+    `transform-origin:${Math.round(cx - left)}px ${Math.round(cy - top)}px;` +
+    `--st2-zoom-from:${(r.width / width).toFixed(3)}`;
+  pop.innerHTML = `
+    <div class="st2-snowglobe-zoom__globe"></div>
+    <p class="st2-snowglobe-zoom__hint">Tocá la bola para agitarla</p>`;
+  document.body.appendChild(pop);
+  const globe = SnowGlobe.mount(pop.querySelector(".st2-snowglobe-zoom__globe"), { bg: "#02030a" });
+  icon.classList.add("is-zoomed");
+  icon.setAttribute("aria-expanded", "true");
+
+  const onPointer = (e) => {
+    if (!pop.contains(e.target) && !icon.contains(e.target)) close();
   };
   const onKey = (e) => {
     if (e.key === "Escape") close();
   };
-  globeModal = { close };
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay || e.target.closest(".st2-snowglobe-modal__close")) close();
-  });
+  const close = () => {
+    if (!globeZoom) return;
+    globeZoom = null;
+    document.removeEventListener("pointerdown", onPointer, true);
+    document.removeEventListener("keydown", onKey);
+    window.removeEventListener("scroll", close, true);
+    window.removeEventListener("resize", close);
+    icon.classList.remove("is-zoomed");
+    icon.setAttribute("aria-expanded", "false");
+    pop.classList.remove("is-open");
+    const done = () => {
+      globe?.destroy();
+      pop.remove();
+    };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) done();
+    else window.setTimeout(done, 240);
+  };
+  globeZoom = { close };
+  document.addEventListener("pointerdown", onPointer, true);
   document.addEventListener("keydown", onKey);
-  try {
-    const SnowGlobe = await loadSnowGlobe();
-    if (globeModal && SnowGlobe) {
-      globe = SnowGlobe.mount(overlay.querySelector(".st2-snowglobe-modal__globe"), { bg: "#02030a" });
-    }
-  } catch {
-    close();
-  }
+  window.addEventListener("scroll", close, true);
+  window.addEventListener("resize", close);
+  // Dos frames: primero se pinta chico sobre el ícono y después crece.
+  requestAnimationFrame(() => requestAnimationFrame(() => pop.classList.add("is-open")));
 }
 
 /** Encabezado del módulo de Planillas que se está viendo (transferencia, referral, PDF…). */
@@ -252,14 +311,15 @@ export async function initDecemberSnow() {
   let bg = null;
   let title = null;
 
-  // Bola de nieve: para todos en diciembre, en el título y en cada módulo. Ícono → ventana grande.
+  // Bola de nieve: para todos en diciembre, en el título y en cada módulo. Ícono → zoom en el lugar.
   const globeHost = document.createElement("button");
   globeHost.type = "button";
   globeHost.className = "st2-snowglobe";
-  globeHost.title = "Bola de nieve: tocá para verla grande";
-  globeHost.setAttribute("aria-label", "Abrir la bola de nieve del Obelisco");
+  globeHost.title = "Bola de nieve: tocá para agrandarla";
+  globeHost.setAttribute("aria-label", "Agrandar la bola de nieve del Obelisco");
+  globeHost.setAttribute("aria-expanded", "false");
   globeHost.innerHTML = GLOBE_ICON;
-  globeHost.addEventListener("click", () => void openSnowGlobeModal());
+  globeHost.addEventListener("click", () => void toggleSnowGlobeZoom(globeHost));
 
   const mountTitle = () => {
     const hero = document.querySelector("#planillas-menu .planillas-hero");
@@ -269,6 +329,11 @@ export async function initDecemberSnow() {
     titleHost.setAttribute("aria-hidden", "true");
     hero.prepend(titleHost);
     title = createPixelSnow(titleHost, { ...TITLE, ...currentTheme() });
+    const tree = document.createElement("div");
+    tree.className = "st2-xmas-tree";
+    tree.setAttribute("aria-hidden", "true");
+    tree.innerHTML = TREE_ICON;
+    hero.appendChild(tree);
   };
 
   const sync = () => {

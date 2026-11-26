@@ -36,7 +36,7 @@ body.st2-snow-on .st2-snow {
   height: 100%;
 }
 
-/* Bola de nieve: ícono SVG (título y módulos) que abre la bola ASCII grande en una ventana.
+/* Bola de nieve: ícono SVG (título y módulos) que agranda la bola ASCII en el lugar.
    Un solo ícono que se mueve entre el título y el encabezado del módulo abierto. */
 .st2-snowglobe {
   position: absolute;
@@ -92,53 +92,97 @@ body.st2-snow-on .st2-snow {
   to { transform: translateY(16px); opacity: 0; }
 }
 
-/* Ventana con la bola ASCII a tamaño completo (como el original). */
-.st2-snowglobe-modal {
+.st2-snowglobe.is-zoomed {
+  opacity: 0.35;
+  transform: none;
+}
+
+/* Bola ASCII agrandada en el lugar: crece desde el ícono y vuelve a él al cerrarse. */
+.st2-snowglobe-zoom {
   position: fixed;
-  inset: 0;
   z-index: var(--z-dialog);
-  display: grid;
-  place-items: center;
-  background: rgba(2, 3, 10, 0.82);
-  backdrop-filter: blur(4px);
-}
-
-.st2-snowglobe-modal__box {
-  position: relative;
-  width: min(92vw, calc(84vh * 0.876));
-}
-
-.st2-snowglobe-modal__close {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  z-index: 1;
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(142, 200, 255, 0.4);
-  border-radius: var(--radius-pill);
+  padding: 0 0 6px;
+  border: 1px solid rgba(142, 200, 255, 0.35);
+  border-radius: 20px;
   background: #02030a;
-  color: #8ec8ff;
-  font-size: 1.3rem;
-  line-height: 1;
+  box-shadow: 0 24px 60px rgba(2, 3, 10, 0.55), 0 0 0 1px rgba(2, 3, 10, 0.4);
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(var(--st2-zoom-from, 0.15));
+  transition: transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1.12), opacity 0.18s ease;
+}
+
+.st2-snowglobe-zoom.is-open {
+  opacity: 1;
+  transform: none;
+}
+
+.st2-snowglobe-zoom__globe {
   cursor: pointer;
 }
 
-.st2-snowglobe-modal__close:hover {
-  background: #0b1730;
-}
-
-.st2-snowglobe-modal__hint {
-  margin: 6px 0 0;
+.st2-snowglobe-zoom__hint {
+  margin: 0;
   color: #4a6a96;
   font-family: ui-monospace, Consolas, monospace;
   font-size: 12px;
   text-align: center;
 }
 
+/* Arbolito decorado: del otro lado del título, haciendo juego con la bola. */
+.st2-xmas-tree {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  z-index: 3;
+  width: 56px;
+  translate: 0 -50%;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 6px rgba(2, 3, 10, 0.35));
+}
+
+body:not(.st2-snow-on) .st2-xmas-tree {
+  display: none;
+}
+
+.st2-xmas-tree svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.st2-tree-lights circle {
+  animation: st2-tree-twinkle 1.8s ease-in-out infinite;
+}
+
+.st2-tree-lights circle:nth-child(2n) { animation-delay: -0.6s; }
+.st2-tree-lights circle:nth-child(3n) { animation-delay: -1.2s; }
+
+.st2-tree-star {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: st2-tree-star 2.4s ease-in-out infinite;
+}
+
+@keyframes st2-tree-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes st2-tree-star {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 #fde047); }
+  50% { transform: scale(1.12); filter: drop-shadow(0 0 3px #fde047); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .st2-globe-flakes circle {
+  .st2-globe-flakes circle,
+  .st2-tree-lights circle,
+  .st2-tree-star {
     animation: none;
+  }
+
+  .st2-snowglobe-zoom {
+    transition: none;
   }
 
   .st2-snowglobe,
