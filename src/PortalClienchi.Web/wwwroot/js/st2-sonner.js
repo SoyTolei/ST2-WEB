@@ -22,7 +22,6 @@ export const ST2_TOAST = {
   access: "st2-toast-access",
   accessOwner: "st2-toast-access-owner",
   cryptic: "st2-toast-cryptic",
-  agua: "st2-toast-agua",
 };
 
 /** Orden del stack flotante (saludo solo en el primero). */
@@ -79,7 +78,7 @@ function dismissProgrammatically(id) {
 function toneToMethod(tone) {
   if (tone === "bad" || tone === "error") return "error";
   if (tone === "warn" || tone === "warning") return "warning";
-  if (tone === "tools" || tone === "info" || tone === "agua") return "info";
+  if (tone === "tools" || tone === "info") return "info";
   return "success";
 }
 
@@ -95,7 +94,6 @@ function currentTheme() {
 function toneClass(tone) {
   if (tone === "bad" || tone === "error") return "st2-sonner-bad";
   if (tone === "warn" || tone === "warning") return "st2-sonner-warn";
-  if (tone === "agua") return "st2-sonner-agua";
   if (tone === "tools" || tone === "info") return "st2-sonner-tools";
   return "st2-sonner-ok";
 }
@@ -301,25 +299,6 @@ export function setSt2AlertToast({
   void bodyChanged;
 }
 
-/** Toast de agua: texto propio, fuera del stack de saludo. */
-export function setSt2AguaToast({ body, onAction }) {
-  initSt2Sonner();
-  const text = String(body || "").trim();
-  if (!text) {
-    clearSt2AlertToast(ST2_TOAST.agua);
-    return;
-  }
-
-  registry.set(ST2_TOAST.agua, {
-    body: text,
-    tone: "agua",
-    actionLabel: "¡Sí!",
-    onAction,
-    at: Date.now(),
-  });
-  paintOne(ST2_TOAST.agua, plainTitle(text), "agua");
-}
-
 export function clearSt2AlertToast(id) {
   if (!id) return;
   const had = registry.delete(id);
@@ -420,9 +399,7 @@ function makeActionButton(id, entry, tone) {
       ? "bad"
       : tone === "warn" || tone === "warning"
         ? "warn"
-        : tone === "agua"
-          ? "agua"
-          : tone === "tools" || tone === "info"
+        : tone === "tools" || tone === "info"
             ? "tools"
             : "ok";
   btn.className = `st2-sonner-action st2-sonner-action--${toneKey}`;

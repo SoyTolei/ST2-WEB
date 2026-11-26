@@ -24,7 +24,6 @@ import {
   renderAccessAlertUi,
 } from "./access-alerts.js";
 import { isEggBirthdayWindow, resolvePlanillasEgg } from "./planillas-easter-eggs.js";
-import { syncAguaEgg } from "./planillas-agua-egg.js";
 import {
   initSt2Tours,
   setTourContext,
@@ -475,7 +474,6 @@ function showView(name, { history = "push" } = {}) {
     renderBlanqueoAlertUi();
     renderBorradoAlertUi();
   }
-  syncAguaEgg();
   currentPlanillasView = name;
   document.dispatchEvent(new CustomEvent("st2:planillas-view-changed", { detail: { view: name } }));
   syncHeaderTourButton();
@@ -1989,7 +1987,6 @@ function syncPlanillasHeroEaster() {
   const peekImage = peek && isTitanPeekImage(egg.peekSrc);
   hero?.classList.toggle("has-titan-peek", peek);
   hero?.classList.toggle("has-titan-peek-img", peekImage);
-  hero?.classList.toggle("is-palermo-hero", !!(peekImage && egg?.peekHeroTall));
   if (titan) {
     const srcEl = document.getElementById("planillas-hero-titan-src");
     titan.muted = true;
@@ -2097,12 +2094,9 @@ export function initPlanillas() {
   syncBorradoBasesModuleVisibility();
   bindChileEmbedUi();
   syncPlanillasHeroEaster();
-  syncAguaEgg();
   document.addEventListener("st2:session-changed", syncPlanillasHeroEaster);
   document.addEventListener("st2:view-as-changed", syncPlanillasHeroEaster);
   document.addEventListener("st2:easter-eggs-changed", syncPlanillasHeroEaster);
-  document.addEventListener("st2:session-changed", syncAguaEgg);
-  document.addEventListener("st2:view-as-changed", syncAguaEgg);
   document.addEventListener("st2:view-as-changed", () => {
     updateSistemaUi();
   });
@@ -2112,7 +2106,6 @@ export function initPlanillas() {
     updatePlanBuildBadge(planillasConfig?.webBuild);
     updateSistemaUi();
     syncPlanillasHeroEaster();
-    syncAguaEgg();
     if (planillasConfig?.webBuild) {
       console.info(`[ST2 Planillas] build: ${planillasConfig.webBuild}`);
     }

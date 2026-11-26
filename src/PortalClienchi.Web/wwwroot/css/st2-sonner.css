@@ -96,12 +96,6 @@ sonner-toast.st2-sonner-toast.st2-sonner-tools {
     0 6px 16px rgba(15, 23, 42, 0.14);
 }
 
-sonner-toast.st2-sonner-toast.st2-sonner-agua {
-  box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.35),
-    0 6px 16px rgba(15, 23, 42, 0.14);
-}
-
 html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-ok {
   box-shadow:
     0 0 0 1px rgba(163, 230, 53, 0.32),
@@ -123,12 +117,6 @@ html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-bad {
 html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-tools {
   box-shadow:
     0 0 0 1px rgba(96, 165, 250, 0.34),
-    0 8px 18px rgba(0, 0, 0, 0.32);
-}
-
-html.st2-theme-dark sonner-toast.st2-sonner-toast.st2-sonner-agua {
-  box-shadow:
-    0 0 0 1px rgba(125, 211, 252, 0.34),
     0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
@@ -209,16 +197,6 @@ sonner-toast.st2-sonner-toast .st2-sonner-action--tools {
 
 sonner-toast.st2-sonner-toast .st2-sonner-action--tools:hover {
   background: var(--c-blue-600);
-}
-
-sonner-toast.st2-sonner-toast .st2-sonner-action--agua {
-  background: var(--c-sky-500);
-  border-color: rgba(186, 230, 253, 0.5);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
-}
-
-sonner-toast.st2-sonner-toast .st2-sonner-action--agua:hover {
-  background: var(--c-sky-600);
 }
 
 /* Bandeja de avisos (menú blobatar → Ver avisos) */

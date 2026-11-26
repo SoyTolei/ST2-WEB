@@ -18,7 +18,8 @@ const THEME = {
 
 const BACKGROUND = {
   variant: "snowflake",
-  density: 0.55,
+  density: 0.45,
+  flakeSize: 0.75,
   accumulate: true,
   pixelSize: 3,
   speed: 1,
@@ -27,19 +28,19 @@ const BACKGROUND = {
   depth: 0.6,
   glow: 0.8,
   twinkle: 0.35,
-  mouseInteraction: true,
+  // Sin interacción con el mouse: la nieve no se aparta al pasar el puntero.
+  mouseInteraction: false,
   intro: true,
 };
 
 /** Título: copos más chicos (flakeSize y pixelSize menores) y bastante densidad. */
 const TITLE = {
   ...BACKGROUND,
-  density: 0.85,
-  flakeSize: 0.45,
+  density: 0.75,
+  flakeSize: 0.35,
   pixelSize: 2,
   glow: 0.6,
   opacity: 0.9,
-  mouseInteraction: false,
 };
 
 function argentinaMonthDay() {

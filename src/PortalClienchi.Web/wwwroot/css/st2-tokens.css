@@ -233,7 +233,7 @@
  * paneles flotantes de blanqueo/borrado/oportunidad (por encima del menú de sesión).
  */
 :root {
-  --z-floating: 120; /* Popovers chicos (agua, selector de cumpleaños) */
+  --z-floating: 120; /* Popovers chicos (selector de cumpleaños) */
   --z-modal: 1000; /* Modal de planillas */
   --z-context-menu: 1100; /* Menú contextual del gestor */
   --z-user-overlay: 1200; /* Panel de usuario (también lo usa app.js inline) */
